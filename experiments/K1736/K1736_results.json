@@ -1,0 +1,6867 @@
+{
+  "experiment_id": "K1736",
+  "title": "Skewness risk premium term structure as a long-horizon tail signal",
+  "research_question": "Does the TERM-STRUCTURE SLOPE of the skewness risk premium predict 6-12 month SPY returns and drawdowns better than the SKEW LEVEL that seven prior experiments already rejected at short horizons?",
+  "differentiation_from_prior_nulls": {
+    "prior_null_experiments": [
+      "K181",
+      "K184",
+      "K210",
+      "K258",
+      "K447",
+      "K535",
+      "K979",
+      "K43"
+    ],
+    "prior_design_cell": "SKEW LEVEL -> short-horizon realized volatility",
+    "this_design_cell": "skew-premium term-structure SLOPE -> 6-12 month return / drawdown",
+    "D1_slope_vs_level": {
+      "question": "Does the term-structure slope carry information the SKEW LEVEL does not?",
+      "evidence_correlation": {
+        "ts_realized": 0.0965,
+        "rn_slope_3m": -0.9266,
+        "rn_slope_6m": -0.944,
+        "srp_slope_6m": -0.9326
+      },
+      "evidence_incremental_t": {
+        "ts_realized|fwd_ret|126": 0.4678,
+        "ts_realized|fwd_ret|252": 0.1074,
+        "ts_realized|fwd_mdd|126": -0.9339,
+        "ts_realized|fwd_mdd|252": -0.872,
+        "rn_slope_3m|fwd_ret|126": -1.5498,
+        "rn_slope_3m|fwd_ret|252": -1.5646,
+        "rn_slope_3m|fwd_mdd|126": 1.6757,
+        "rn_slope_3m|fwd_mdd|252": 2.15,
+        "rn_slope_6m|fwd_ret|126": -1.2474,
+        "rn_slope_6m|fwd_ret|252": -1.3132,
+        "rn_slope_6m|fwd_mdd|126": 1.3689,
+        "rn_slope_6m|fwd_mdd|252": 1.9011,
+        "srp_slope_6m|fwd_ret|126": -0.8899,
+        "srp_slope_6m|fwd_ret|252": -1.1748,
+        "srp_slope_6m|fwd_mdd|126": 1.322,
+        "srp_slope_6m|fwd_mdd|252": 1.324
+      },
+      "verdict": "FAIL_degenerate",
+      "n_incremental_abs_t_gt_3": 0,
+      "n_incremental_tests": 16,
+      "model_extrapolated_slopes_degenerate_vs_level": true,
+      "physical_only_slope_carries_no_risk_neutral_information": true,
+      "degeneracy_detail": {
+        "model_extrapolated": {
+          "rn_slope_3m": {
+            "corr_with_skew_level": -0.9266,
+            "r2_explained_by_level": 0.8585,
+            "residual_variance_share": 0.1415,
+            "n": 4969,
+            "degenerate": true
+          },
+          "rn_slope_6m": {
+            "corr_with_skew_level": -0.944,
+            "r2_explained_by_level": 0.8911,
+            "residual_variance_share": 0.1089,
+            "n": 4601,
+            "degenerate": true
+          },
+          "srp_slope_6m": {
+            "corr_with_skew_level": -0.9326,
+            "r2_explained_by_level": 0.8698,
+            "residual_variance_share": 0.1302,
+            "n": 4601,
+            "degenerate": true
+          }
+        },
+        "physical_only": {
+          "ts_realized": {
+            "corr_with_skew_level": 0.0965,
+            "r2_explained_by_level": 0.0093,
+            "residual_variance_share": 0.9907,
+            "n": 8104,
+            "degenerate": false
+          },
+          "why_it_is_not_a_skew_premium_slope": "Under a common 30-day risk-neutral leg the slope of the premium across horizons is identically the negative slope of realized skewness: the option-implied leg cancels and construction (a) contains no risk-neutral information whatsoever."
+        }
+      }
+    },
+    "D2_long_vs_short_horizon": {
+      "question": "Is the slope signal stronger at long horizons than at short ones?",
+      "abs_t_by_horizon": {
+        "ts_realized|fwd_ret": {
+          "21": 1.121,
+          "63": 0.234,
+          "126": 0.307,
+          "252": 0.01
+        },
+        "ts_realized|fwd_mdd": {
+          "21": 0.496,
+          "63": 0.432,
+          "126": 0.722,
+          "252": 0.739
+        },
+        "rn_slope_3m|fwd_ret": {
+          "21": 0.171,
+          "63": 0.182,
+          "126": 0.319,
+          "252": 0.387
+        },
+        "rn_slope_3m|fwd_mdd": {
+          "21": 3.033,
+          "63": 1.63,
+          "126": 1.093,
+          "252": 0.99
+        },
+        "rn_slope_6m|fwd_ret": {
+          "21": 0.2,
+          "63": 0.267,
+          "126": 0.127,
+          "252": 0.086
+        },
+        "rn_slope_6m|fwd_mdd": {
+          "21": 3.073,
+          "63": 1.677,
+          "126": 1.095,
+          "252": 0.858
+        },
+        "srp_slope_6m|fwd_ret": {
+          "21": 0.077,
+          "63": 0.234,
+          "126": 0.147,
+          "252": 0.091
+        },
+        "srp_slope_6m|fwd_mdd": {
+          "21": 3.116,
+          "63": 1.708,
+          "126": 1.116,
+          "252": 0.91
+        }
+      },
+      "verdict": "MIXED_OR_FAIL",
+      "n_cases_long_gt_short": 3,
+      "n_cases": 8
+    }
+  },
+  "data_diagnostics": {
+    "fetch_window": {
+      "start": "1985-01-01",
+      "end": "2026-07-30"
+    },
+    "source": "yfinance (Yahoo Finance) daily closes; SPY uses split/dividend adjusted close",
+    "frozen_csv_dir": "experiments/K1736/data",
+    "trading_day_reference": "SPY session calendar (NYSE)",
+    "series": {
+      "SKEW": {
+        "yahoo_ticker": "^SKEW",
+        "column": "Close",
+        "start": "1990-01-02",
+        "end": "2026-07-28",
+        "n_obs": 9135,
+        "duplicate_dates": 0,
+        "n_nyse_sessions_within_span": 8430,
+        "missing_within_span": 74,
+        "missing_rate_within_span": 0.008778,
+        "min": 101.2300033569336,
+        "max": 183.1199951171875,
+        "mean": 123.04827036656638
+      },
+      "VIX": {
+        "yahoo_ticker": "^VIX",
+        "column": "Close",
+        "start": "1990-01-02",
+        "end": "2026-07-29",
+        "n_obs": 9211,
+        "duplicate_dates": 0,
+        "n_nyse_sessions_within_span": 8431,
+        "missing_within_span": 0,
+        "missing_rate_within_span": 0.0,
+        "min": 9.140000343322754,
+        "max": 82.69000244140625,
+        "mean": 19.44985778147203
+      },
+      "VIX3M": {
+        "yahoo_ticker": "^VIX3M",
+        "column": "Close",
+        "start": "2006-07-17",
+        "end": "2026-07-29",
+        "n_obs": 5033,
+        "duplicate_dates": 0,
+        "n_nyse_sessions_within_span": 5040,
+        "missing_within_span": 7,
+        "missing_rate_within_span": 0.001389,
+        "min": 11.029999732971191,
+        "max": 72.9800033569336,
+        "mean": 21.23461157167595
+      },
+      "VIX6M": {
+        "yahoo_ticker": "^VIX6M",
+        "column": "Close",
+        "start": "2008-01-02",
+        "end": "2026-07-29",
+        "n_obs": 4665,
+        "duplicate_dates": 0,
+        "n_nyse_sessions_within_span": 4672,
+        "missing_within_span": 7,
+        "missing_rate_within_span": 0.001498,
+        "min": 13.75,
+        "max": 61.470001220703125,
+        "mean": 22.92674383713374
+      },
+      "SPY": {
+        "yahoo_ticker": "SPY",
+        "column": "Adj Close",
+        "start": "1993-01-29",
+        "end": "2026-07-29",
+        "n_obs": 8431,
+        "duplicate_dates": 0,
+        "n_nyse_sessions_within_span": 8431,
+        "missing_within_span": 0,
+        "missing_rate_within_span": 0.0,
+        "min": 23.82170295715332,
+        "max": 757.6182250976562,
+        "mean": 173.2937948222178
+      },
+      "GSPC": {
+        "yahoo_ticker": "^GSPC",
+        "column": "Close",
+        "start": "1985-01-02",
+        "end": "2026-07-29",
+        "n_obs": 10473,
+        "duplicate_dates": 0,
+        "n_nyse_sessions_within_span": 8431,
+        "missing_within_span": 0,
+        "missing_rate_within_span": 0.0,
+        "min": 163.67999267578125,
+        "max": 7609.77978515625,
+        "mean": 1702.7464975112832
+      }
+    },
+    "joint_samples": {
+      "long_SKEW_SPY": {
+        "start": "1993-01-29",
+        "end": "2026-07-28",
+        "n": 8356
+      },
+      "mid_SKEW_VIX3M_SPY": {
+        "start": "2006-07-17",
+        "end": "2026-07-17",
+        "n": 4969
+      },
+      "short_SKEW_VIX6M_SPY": {
+        "start": "2008-01-02",
+        "end": "2026-07-17",
+        "n": 4601
+      }
+    },
+    "risk_neutral_skew_term_structure_available": false,
+    "risk_neutral_skew_term_structure_note": "CBOE publishes ^SKEW at the 30-day maturity only; there is no free SKEW3M/SKEW6M and yfinance carries no historical option chains. A directly OBSERVED risk-neutral skew term structure cannot be built from the free data available to this project. Every horizon-varying construction below is either physical-leg-only (a) or model-extrapolated from the observable implied-VARIANCE term structure (c)."
+  },
+  "construction": {
+    "zeta30": "(100 - SKEW)/10, the CBOE-defined 30-day risk-neutral skewness",
+    "realized_skew_h": "trailing h-day sample skewness of daily log returns / sqrt(h)",
+    "zeta_T": "zeta30 * sqrt(30/T) * (VIX/VIX_T)^3  [constant jump intensity assumption]",
+    "signals": {
+      "skew_level": "level",
+      "srp_30d": "level",
+      "ts_realized": "slope_physical_only",
+      "rn_slope_3m": "slope_model_extrapolated",
+      "rn_slope_6m": "slope_model_extrapolated",
+      "srp_slope_6m": "slope_model_extrapolated",
+      "vts_3m": "variance_term_structure_control",
+      "vts_6m": "variance_term_structure_control"
+    },
+    "signal_families": {
+      "skew_level": "A_long",
+      "srp_30d": "A_long",
+      "ts_realized": "A_long",
+      "rn_slope_3m": "C_mid",
+      "vts_3m": "C_mid",
+      "rn_slope_6m": "B_short",
+      "srp_slope_6m": "B_short",
+      "vts_6m": "B_short"
+    },
+    "why_construction_a_is_degenerate": "Under a common 30-day risk-neutral leg the slope of the premium across horizons is identically the negative slope of realized skewness: the option-implied leg cancels and construction (a) contains no risk-neutral information whatsoever."
+  },
+  "methodology": {
+    "lookahead_policy": "Every regressor is signals[sig].shift(1): value observed at the close of t-1 predicts a target window that opens at the close of t. Forward targets are stamped at origin t and read prices t..t+H. In the OOS loop a training row j enters only when j + H <= forecast origin i, so no training label overlaps the forecast date.",
+    "overlap_handling": "Newey-West HAC with lag = max(H, ceil(H^(1/3) n^(1/3))) - the repo canonical bandwidth floored at the overlap length, never h-1; sensitivity at 1.5H and 2H; Hodrick (1992) 1B standard errors for return targets; all H non-overlapping phase subsamples; effective sample size = span_years / (H/252) reported per cell.",
+    "hodrick_scope": "Hodrick 1B is defined for targets that are sums of one-period returns. Forward maximum drawdown is a path functional, not such a sum, so Hodrick SEs are deliberately NOT reported for fwd_mdd cells.",
+    "multiple_testing": "Romano-Wolf stepdown (circular block bootstrap) within each data-availability family, plus Holm within family and Holm across all cells.",
+    "oos": "Expanding-window, monthly origins, predictive regression vs expanding historical mean, Clark-West (2007) nested MSPE-adjusted test (canonical repo implementation) with HAC lag floored at the overlap length.",
+    "seeds": {
+      "numpy": 42,
+      "bootstrap_replicates": 2000
+    },
+    "lookahead_audit": {
+      "checks": [
+        {
+          "name": "regressor_at_t_equals_raw_signal_at_previous_session_all_signals",
+          "n_signals": 8,
+          "n_rows_probed_each": 200,
+          "per_signal": {
+            "skew_level": true,
+            "srp_30d": true,
+            "ts_realized": true,
+            "rn_slope_3m": true,
+            "rn_slope_6m": true,
+            "srp_slope_6m": true,
+            "vts_3m": true,
+            "vts_6m": true
+          },
+          "passed": true
+        },
+        {
+          "name": "assembled_regression_frames_carry_the_t_minus_1_regressor",
+          "n_frames_probed": 6,
+          "passed": true
+        },
+        {
+          "name": "oos_training_rows_have_target_window_closed_before_origin",
+          "rule": "last training row j satisfies j + H <= i",
+          "passed": true
+        },
+        {
+          "name": "fwd_ret_252_at_t_uses_prices_t_to_t_plus_252_only",
+          "n_rows_probed": 100,
+          "passed": true
+        },
+        {
+          "name": "fwd_mdd_252_at_t_is_the_worst_decline_of_the_path_t_to_t_plus_252",
+          "n_rows_probed": 100,
+          "passed": true
+        }
+      ],
+      "all_passed": true
+    }
+  },
+  "degeneracy_diagnostics": {
+    "common_sample": {
+      "start": "2008-01-02",
+      "end": "2026-07-17",
+      "n": 4601
+    },
+    "correlation_matrix": {
+      "skew_level": {
+        "skew_level": 1.0,
+        "srp_30d": 0.9929,
+        "ts_realized": 0.1027,
+        "rn_slope_3m": -0.9247,
+        "rn_slope_6m": -0.944,
+        "srp_slope_6m": -0.9326,
+        "vts_3m": -0.3378,
+        "vts_6m": -0.3321
+      },
+      "srp_30d": {
+        "skew_level": 0.9929,
+        "srp_30d": 1.0,
+        "ts_realized": -0.0128,
+        "rn_slope_3m": -0.924,
+        "rn_slope_6m": -0.9422,
+        "srp_slope_6m": -0.9451,
+        "vts_3m": -0.3493,
+        "vts_6m": -0.3449
+      },
+      "ts_realized": {
+        "skew_level": 0.1027,
+        "srp_30d": -0.0128,
+        "ts_realized": 1.0,
+        "rn_slope_3m": -0.0525,
+        "rn_slope_6m": -0.0664,
+        "srp_slope_6m": 0.0563,
+        "vts_3m": 0.0719,
+        "vts_6m": 0.0759
+      },
+      "rn_slope_3m": {
+        "skew_level": -0.9247,
+        "srp_30d": -0.924,
+        "ts_realized": -0.0525,
+        "rn_slope_3m": 1.0,
+        "rn_slope_6m": 0.9931,
+        "srp_slope_6m": 0.9864,
+        "vts_3m": 0.6432,
+        "vts_6m": 0.6254
+      },
+      "rn_slope_6m": {
+        "skew_level": -0.944,
+        "srp_30d": -0.9422,
+        "ts_realized": -0.0664,
+        "rn_slope_3m": 0.9931,
+        "rn_slope_6m": 1.0,
+        "srp_slope_6m": 0.9919,
+        "vts_3m": 0.5933,
+        "vts_6m": 0.5946
+      },
+      "srp_slope_6m": {
+        "skew_level": -0.9326,
+        "srp_30d": -0.9451,
+        "ts_realized": 0.0563,
+        "rn_slope_3m": 0.9864,
+        "rn_slope_6m": 0.9919,
+        "srp_slope_6m": 1.0,
+        "vts_3m": 0.6006,
+        "vts_6m": 0.603
+      },
+      "vts_3m": {
+        "skew_level": -0.3378,
+        "srp_30d": -0.3493,
+        "ts_realized": 0.0719,
+        "rn_slope_3m": 0.6432,
+        "rn_slope_6m": 0.5933,
+        "srp_slope_6m": 0.6006,
+        "vts_3m": 1.0,
+        "vts_6m": 0.9734
+      },
+      "vts_6m": {
+        "skew_level": -0.3321,
+        "srp_30d": -0.3449,
+        "ts_realized": 0.0759,
+        "rn_slope_3m": 0.6254,
+        "rn_slope_6m": 0.5946,
+        "srp_slope_6m": 0.603,
+        "vts_3m": 0.9734,
+        "vts_6m": 1.0
+      }
+    },
+    "threshold_abs_corr_vs_level": 0.9,
+    "per_signal": {
+      "ts_realized": {
+        "corr_with_skew_level": 0.0965,
+        "r2_explained_by_level": 0.0093,
+        "residual_variance_share": 0.9907,
+        "n": 8104,
+        "degenerate": false
+      },
+      "rn_slope_3m": {
+        "corr_with_skew_level": -0.9266,
+        "r2_explained_by_level": 0.8585,
+        "residual_variance_share": 0.1415,
+        "n": 4969,
+        "degenerate": true
+      },
+      "rn_slope_6m": {
+        "corr_with_skew_level": -0.944,
+        "r2_explained_by_level": 0.8911,
+        "residual_variance_share": 0.1089,
+        "n": 4601,
+        "degenerate": true
+      },
+      "srp_slope_6m": {
+        "corr_with_skew_level": -0.9326,
+        "r2_explained_by_level": 0.8698,
+        "residual_variance_share": 0.1302,
+        "n": 4601,
+        "degenerate": true
+      }
+    },
+    "analytic_note_iid_only_slope": {
+      "formula": "zeta_T_iid - zeta_30 = zeta_30 * (sqrt(30/T) - 1)",
+      "corr_with_skew_level": 1.0,
+      "degenerate": true,
+      "comment": "A slope built from iid sqrt-scaling alone carries exactly zero information beyond the SKEW level. Only the observed VIX/VIX_T ratio breaks that identity."
+    },
+    "analytic_note_ts_realized": {
+      "formula": "(zeta_30 - RS_252) - (zeta_30 - RS_21) = RS_21 - RS_252",
+      "comment": "Under a common 30-day risk-neutral leg the slope of the premium across horizons is identically the negative slope of realized skewness: the option-implied leg cancels and construction (a) contains no risk-neutral information whatsoever.",
+      "corr_ts_realized_with_RS21": 0.9767
+    }
+  },
+  "univariate_cells": [
+    {
+      "signal": "skew_level",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 21,
+      "sample_start": "1993-02-01",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 8335,
+      "span_years": 33.4,
+      "effective_sample_size": 400.9,
+      "beta": 0.00017406572829612756,
+      "se_hac": 0.0016322607096332165,
+      "r2": 1.9e-05,
+      "hac_lag": 56,
+      "t_hac": 0.1066,
+      "p_hac": 0.915074,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": 0.111,
+          "p": 0.911649
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": 0.1083,
+          "p": 0.913756
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.0019737410875861373,
+        "t": 0.0882,
+        "p": 0.929725,
+        "n_used": 8315,
+        "n_sample_rows": 8335,
+        "n_rows_dropped_for_calendar_gaps": 20,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 397,
+        "t_mean": 0.0873,
+        "t_median": 0.0739,
+        "t_min": -0.3979,
+        "t_max": 0.6009,
+        "beta_mean": 0.00017983119508945146,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.997,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "skew_level",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 63,
+      "sample_start": "1993-02-01",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 8293,
+      "span_years": 33.23,
+      "effective_sample_size": 132.9,
+      "beta": -0.0012296050705523642,
+      "se_hac": 0.004669119423821726,
+      "r2": 0.000362,
+      "hac_lag": 81,
+      "t_hac": -0.2633,
+      "p_hac": 0.792282,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -0.2561,
+          "p": 0.797907
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -0.2459,
+          "p": 0.805783
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.006415112266450918,
+        "t": -0.1917,
+        "p": 0.847998,
+        "n_used": 8231,
+        "n_sample_rows": 8293,
+        "n_rows_dropped_for_calendar_gaps": 62,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 132,
+        "t_mean": -0.2309,
+        "t_median": -0.2357,
+        "t_min": -1.2081,
+        "t_max": 0.8399,
+        "beta_mean": -0.0012159137219780172,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.997,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "skew_level",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 126,
+      "sample_start": "1993-02-01",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 8230,
+      "span_years": 32.99,
+      "effective_sample_size": 66.0,
+      "beta": -0.005738395558382167,
+      "se_hac": 0.008615061050962436,
+      "r2": 0.003676,
+      "hac_lag": 126,
+      "t_hac": -0.6661,
+      "p_hac": 0.505354,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -0.6078,
+          "p": 0.543314
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -0.584,
+          "p": 0.559245
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.01276490555920794,
+        "t": -0.4495,
+        "p": 0.653039,
+        "n_used": 8105,
+        "n_sample_rows": 8230,
+        "n_rows_dropped_for_calendar_gaps": 125,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 65,
+        "t_mean": -0.4978,
+        "t_median": -0.5291,
+        "t_min": -1.2574,
+        "t_max": 0.4696,
+        "beta_mean": -0.005855964684029886,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9885,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "skew_level",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 252,
+      "sample_start": "1993-02-01",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 8104,
+      "span_years": 32.48,
+      "effective_sample_size": 32.5,
+      "beta": -0.010880795907052543,
+      "se_hac": 0.018929760136993004,
+      "r2": 0.005597,
+      "hac_lag": 252,
+      "t_hac": -0.5748,
+      "p_hac": 0.565428,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.5403,
+          "p": 0.588995
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.5305,
+          "p": 0.595778
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.025557170033184563,
+        "t": -0.4257,
+        "p": 0.670295,
+        "n_used": 7853,
+        "n_sample_rows": 8104,
+        "n_rows_dropped_for_calendar_gaps": 251,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 32,
+        "t_mean": -0.4375,
+        "t_median": -0.4402,
+        "t_min": -1.4069,
+        "t_max": 0.3254,
+        "beta_mean": -0.012081078344528949,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.996,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "skew_level",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 21,
+      "sample_start": "1993-02-01",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 8335,
+      "span_years": 33.4,
+      "effective_sample_size": 400.9,
+      "beta": 0.0033502327713876984,
+      "se_hac": 0.0014445736196716096,
+      "r2": 0.012305,
+      "hac_lag": 56,
+      "t_hac": 2.3192,
+      "p_hac": 0.020385,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": 2.6209,
+          "p": 0.008771
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": 2.461,
+          "p": 0.013854
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 397,
+        "t_mean": 2.2172,
+        "t_median": 2.2092,
+        "t_min": 1.8031,
+        "t_max": 2.895,
+        "beta_mean": 0.0033530043128265703,
+        "share_abs_t_gt_1_96": 0.6667,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.234,
+      "p_holm_within_family": 0.468855,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "skew_level",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 63,
+      "sample_start": "1993-02-01",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 8293,
+      "span_years": 33.23,
+      "effective_sample_size": 132.9,
+      "beta": 0.0035728385629753,
+      "se_hac": 0.003878528947218633,
+      "r2": 0.005259,
+      "hac_lag": 81,
+      "t_hac": 0.9212,
+      "p_hac": 0.356954,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": 0.892,
+          "p": 0.372419
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": 0.8498,
+          "p": 0.395417
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 132,
+        "t_mean": 0.833,
+        "t_median": 0.7198,
+        "t_min": -0.1843,
+        "t_max": 1.6211,
+        "beta_mean": 0.0036004364788585256,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.952,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "skew_level",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 126,
+      "sample_start": "1993-02-01",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 8230,
+      "span_years": 32.99,
+      "effective_sample_size": 66.0,
+      "beta": 0.0032871332058906355,
+      "se_hac": 0.006218406719235025,
+      "r2": 0.002531,
+      "hac_lag": 126,
+      "t_hac": 0.5286,
+      "p_hac": 0.597074,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": 0.4891,
+          "p": 0.624789
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": 0.4721,
+          "p": 0.63686
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 65,
+        "t_mean": 0.4131,
+        "t_median": 0.3901,
+        "t_min": -0.5232,
+        "t_max": 1.2921,
+        "beta_mean": 0.0034893158868477057,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9965,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "skew_level",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 252,
+      "sample_start": "1993-02-01",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 8104,
+      "span_years": 32.48,
+      "effective_sample_size": 32.5,
+      "beta": 0.004817369376960701,
+      "se_hac": 0.010453101111195346,
+      "r2": 0.003083,
+      "hac_lag": 252,
+      "t_hac": 0.4609,
+      "p_hac": 0.644902,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": 0.4331,
+          "p": 0.664935
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": 0.4176,
+          "p": 0.676219
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 32,
+        "t_mean": 0.3451,
+        "t_median": 0.2853,
+        "t_min": -0.6529,
+        "t_max": 1.8949,
+        "beta_mean": 0.006178200060634224,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.997,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_30d",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 21,
+      "sample_start": "1993-03-03",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 8314,
+      "span_years": 33.32,
+      "effective_sample_size": 399.9,
+      "beta": 7.070705096605748e-06,
+      "se_hac": 0.0016489954131863416,
+      "r2": 0.0,
+      "hac_lag": 56,
+      "t_hac": 0.0043,
+      "p_hac": 0.996579,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": 0.0044,
+          "p": 0.996453
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": 0.0043,
+          "p": 0.996533
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.001975253176866083,
+        "t": 0.0036,
+        "p": 0.997144,
+        "n_used": 8294,
+        "n_sample_rows": 8314,
+        "n_rows_dropped_for_calendar_gaps": 20,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 396,
+        "t_mean": 0.0032,
+        "t_median": -0.0057,
+        "t_min": -0.4952,
+        "t_max": 0.5908,
+        "beta_mean": 1.5084290435730165e-05,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 1.0,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_30d",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 63,
+      "sample_start": "1993-03-03",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 8272,
+      "span_years": 33.15,
+      "effective_sample_size": 132.6,
+      "beta": -0.0012168989341976022,
+      "se_hac": 0.004656268443432132,
+      "r2": 0.00035,
+      "hac_lag": 81,
+      "t_hac": -0.2613,
+      "p_hac": 0.793825,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -0.2543,
+          "p": 0.799245
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -0.2447,
+          "p": 0.806727
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.006372806341623404,
+        "t": -0.191,
+        "p": 0.848563,
+        "n_used": 8210,
+        "n_sample_rows": 8272,
+        "n_rows_dropped_for_calendar_gaps": 62,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 131,
+        "t_mean": -0.233,
+        "t_median": -0.2168,
+        "t_min": -1.3716,
+        "t_max": 1.0206,
+        "beta_mean": -0.0012169038906398018,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.997,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_30d",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 126,
+      "sample_start": "1993-03-03",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 8209,
+      "span_years": 32.9,
+      "effective_sample_size": 65.8,
+      "beta": -0.00570945086650225,
+      "se_hac": 0.008613002481177145,
+      "r2": 0.003582,
+      "hac_lag": 126,
+      "t_hac": -0.6629,
+      "p_hac": 0.507403,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -0.6059,
+          "p": 0.544581
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -0.5818,
+          "p": 0.560703
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.012710552936065588,
+        "t": -0.4492,
+        "p": 0.653295,
+        "n_used": 8084,
+        "n_sample_rows": 8209,
+        "n_rows_dropped_for_calendar_gaps": 125,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 65,
+        "t_mean": -0.4938,
+        "t_median": -0.5146,
+        "t_min": -1.5022,
+        "t_max": 0.6629,
+        "beta_mean": -0.005883730093510198,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9885,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_30d",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 252,
+      "sample_start": "1993-03-03",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 8083,
+      "span_years": 32.4,
+      "effective_sample_size": 32.4,
+      "beta": -0.010711535804501765,
+      "se_hac": 0.018887997222192754,
+      "r2": 0.005358,
+      "hac_lag": 252,
+      "t_hac": -0.5671,
+      "p_hac": 0.570641,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.53,
+          "p": 0.596118
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.518,
+          "p": 0.60443
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.025333377952431995,
+        "t": -0.4228,
+        "p": 0.672424,
+        "n_used": 7832,
+        "n_sample_rows": 8083,
+        "n_rows_dropped_for_calendar_gaps": 251,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 32,
+        "t_mean": -0.4243,
+        "t_median": -0.4513,
+        "t_min": -1.5615,
+        "t_max": 0.5033,
+        "beta_mean": -0.01172297940811984,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9965,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_30d",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 21,
+      "sample_start": "1993-03-03",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 8314,
+      "span_years": 33.32,
+      "effective_sample_size": 399.9,
+      "beta": 0.0035156144940697714,
+      "se_hac": 0.0014295003307742047,
+      "r2": 0.013346,
+      "hac_lag": 56,
+      "t_hac": 2.4593,
+      "p_hac": 0.01392,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": 2.7519,
+          "p": 0.005926
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": 2.5967,
+          "p": 0.009413
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 396,
+        "t_mean": 2.3062,
+        "t_median": 2.3138,
+        "t_min": 1.9268,
+        "t_max": 2.9928,
+        "beta_mean": 0.0035131115338734725,
+        "share_abs_t_gt_1_96": 0.9524,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.186,
+      "p_holm_within_family": 0.33408,
+      "p_holm_global": 0.79344
+    },
+    {
+      "signal": "srp_30d",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 63,
+      "sample_start": "1993-03-03",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 8272,
+      "span_years": 33.15,
+      "effective_sample_size": 132.6,
+      "beta": 0.003811378839755783,
+      "se_hac": 0.003812830311396827,
+      "r2": 0.005898,
+      "hac_lag": 81,
+      "t_hac": 0.9996,
+      "p_hac": 0.317495,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": 0.9688,
+          "p": 0.332632
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": 0.9244,
+          "p": 0.355274
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 131,
+        "t_mean": 0.8828,
+        "t_median": 0.7982,
+        "t_min": -0.367,
+        "t_max": 1.9033,
+        "beta_mean": 0.003831048217255505,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9275,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_30d",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 126,
+      "sample_start": "1993-03-03",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 8209,
+      "span_years": 32.9,
+      "effective_sample_size": 65.8,
+      "beta": 0.003681387000956604,
+      "se_hac": 0.006162587291886112,
+      "r2": 0.003129,
+      "hac_lag": 126,
+      "t_hac": 0.5974,
+      "p_hac": 0.550256,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": 0.5539,
+          "p": 0.579646
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": 0.5349,
+          "p": 0.592729
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 65,
+        "t_mean": 0.4629,
+        "t_median": 0.509,
+        "t_min": -0.6337,
+        "t_max": 1.4138,
+        "beta_mean": 0.003922942806356454,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9945,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_30d",
+      "signal_kind": "level",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 252,
+      "sample_start": "1993-03-03",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 8083,
+      "span_years": 32.4,
+      "effective_sample_size": 32.4,
+      "beta": 0.005468835661588345,
+      "se_hac": 0.010347887199048257,
+      "r2": 0.003934,
+      "hac_lag": 252,
+      "t_hac": 0.5285,
+      "p_hac": 0.597154,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": 0.4961,
+          "p": 0.619806
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": 0.4781,
+          "p": 0.632559
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 32,
+        "t_mean": 0.3856,
+        "t_median": 0.344,
+        "t_min": -0.6309,
+        "t_max": 1.9227,
+        "beta_mean": 0.006774869405323765,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9965,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "ts_realized",
+      "signal_kind": "slope_physical_only",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 21,
+      "sample_start": "1994-01-28",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 8157,
+      "span_years": 32.42,
+      "effective_sample_size": 389.0,
+      "beta": 0.01259963851871569,
+      "se_hac": 0.011245007184051945,
+      "r2": 0.001354,
+      "hac_lag": 56,
+      "t_hac": 1.1205,
+      "p_hac": 0.262516,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": 1.1492,
+          "p": 0.250467
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": 1.1364,
+          "p": 0.255806
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.013710307093656008,
+        "t": 0.919,
+        "p": 0.358101,
+        "n_used": 8137,
+        "n_sample_rows": 8157,
+        "n_rows_dropped_for_calendar_gaps": 20,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 388,
+        "t_mean": 0.7228,
+        "t_median": 0.6359,
+        "t_min": -0.2691,
+        "t_max": 2.1673,
+        "beta_mean": 0.012645314106068926,
+        "share_abs_t_gt_1_96": 0.0952,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.887,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "ts_realized",
+      "signal_kind": "slope_physical_only",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 63,
+      "sample_start": "1994-01-28",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 8115,
+      "span_years": 32.25,
+      "effective_sample_size": 129.0,
+      "beta": 0.004624672024431293,
+      "se_hac": 0.01974208196877001,
+      "r2": 6.8e-05,
+      "hac_lag": 80,
+      "t_hac": 0.2343,
+      "p_hac": 0.814787,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": 0.2349,
+          "p": 0.814251
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": 0.2429,
+          "p": 0.808117
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.027140561118686353,
+        "t": 0.1704,
+        "p": 0.864698,
+        "n_used": 8053,
+        "n_sample_rows": 8115,
+        "n_rows_dropped_for_calendar_gaps": 62,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 129,
+        "t_mean": 0.0487,
+        "t_median": 0.1181,
+        "t_min": -1.4995,
+        "t_max": 1.6544,
+        "beta_mean": 0.0028552401885914374,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.997,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "ts_realized",
+      "signal_kind": "slope_physical_only",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 126,
+      "sample_start": "1994-01-28",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 8052,
+      "span_years": 32.0,
+      "effective_sample_size": 64.0,
+      "beta": 0.009082519166531466,
+      "se_hac": 0.029598996300659625,
+      "r2": 0.000124,
+      "hac_lag": 126,
+      "t_hac": 0.3069,
+      "p_hac": 0.758956,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": 0.317,
+          "p": 0.751229
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": 0.3297,
+          "p": 0.741653
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.040305055447092876,
+        "t": 0.2253,
+        "p": 0.821711,
+        "n_used": 7927,
+        "n_sample_rows": 8052,
+        "n_rows_dropped_for_calendar_gaps": 125,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 64,
+        "t_mean": 0.0222,
+        "t_median": 0.1124,
+        "t_min": -2.3595,
+        "t_max": 1.749,
+        "beta_mean": 0.004570206032227349,
+        "share_abs_t_gt_1_96": 0.0079,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.997,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "ts_realized",
+      "signal_kind": "slope_physical_only",
+      "family": "A_long",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 252,
+      "sample_start": "1994-01-28",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 7926,
+      "span_years": 31.5,
+      "effective_sample_size": 31.5,
+      "beta": -0.0004970446708480701,
+      "se_hac": 0.05040842853401882,
+      "r2": 0.0,
+      "hac_lag": 252,
+      "t_hac": -0.0099,
+      "p_hac": 0.992133,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.0107,
+          "p": 0.99144
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.0115,
+          "p": 0.990853
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.06841165324625133,
+        "t": -0.0073,
+        "p": 0.994203,
+        "n_used": 7675,
+        "n_sample_rows": 7926,
+        "n_rows_dropped_for_calendar_gaps": 251,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 31,
+        "t_mean": -0.0094,
+        "t_median": -0.0056,
+        "t_min": -1.9305,
+        "t_max": 2.1671,
+        "beta_mean": -0.0034526583163901558,
+        "share_abs_t_gt_1_96": 0.0159,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 1.0,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "ts_realized",
+      "signal_kind": "slope_physical_only",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 21,
+      "sample_start": "1994-01-28",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 8157,
+      "span_years": 32.42,
+      "effective_sample_size": 389.0,
+      "beta": -0.004501687952227589,
+      "se_hac": 0.009081668027574511,
+      "r2": 0.000298,
+      "hac_lag": 56,
+      "t_hac": -0.4957,
+      "p_hac": 0.620113,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -0.4832,
+          "p": 0.628968
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -0.488,
+          "p": 0.625542
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 388,
+        "t_mean": -0.3407,
+        "t_median": -0.4689,
+        "t_min": -1.1341,
+        "t_max": 0.6683,
+        "beta_mean": -0.004578544078577675,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.997,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "ts_realized",
+      "signal_kind": "slope_physical_only",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 63,
+      "sample_start": "1994-01-28",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 8115,
+      "span_years": 32.25,
+      "effective_sample_size": 129.0,
+      "beta": -0.007303504202278321,
+      "se_hac": 0.016915395288175008,
+      "r2": 0.000297,
+      "hac_lag": 80,
+      "t_hac": -0.4318,
+      "p_hac": 0.665911,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -0.428,
+          "p": 0.668627
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -0.4311,
+          "p": 0.666428
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 129,
+        "t_mean": -0.1992,
+        "t_median": -0.099,
+        "t_min": -1.6781,
+        "t_max": 0.8636,
+        "beta_mean": -0.007489230269278362,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.997,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "ts_realized",
+      "signal_kind": "slope_physical_only",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 126,
+      "sample_start": "1994-01-28",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 8052,
+      "span_years": 32.0,
+      "effective_sample_size": 64.0,
+      "beta": -0.015792146429943768,
+      "se_hac": 0.021863402636162526,
+      "r2": 0.000803,
+      "hac_lag": 126,
+      "t_hac": -0.7223,
+      "p_hac": 0.470104,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -0.7449,
+          "p": 0.456344
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -0.7817,
+          "p": 0.434396
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 64,
+        "t_mean": -0.2382,
+        "t_median": -0.171,
+        "t_min": -1.9414,
+        "t_max": 1.7902,
+        "beta_mean": -0.014911762767743973,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9855,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "ts_realized",
+      "signal_kind": "slope_physical_only",
+      "family": "A_long",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 252,
+      "sample_start": "1994-01-28",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 7926,
+      "span_years": 31.5,
+      "effective_sample_size": 31.5,
+      "beta": -0.026124987625673654,
+      "se_hac": 0.035365767774841614,
+      "r2": 0.001282,
+      "hac_lag": 252,
+      "t_hac": -0.7387,
+      "p_hac": 0.460084,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.7646,
+          "p": 0.4445
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.82,
+          "p": 0.412211
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 31,
+        "t_mean": -0.219,
+        "t_median": -0.3601,
+        "t_min": -1.7305,
+        "t_max": 2.2562,
+        "beta_mean": -0.02961910182656088,
+        "share_abs_t_gt_1_96": 0.0079,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.985,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "C_mid",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 21,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 4955,
+      "span_years": 19.95,
+      "effective_sample_size": 239.4,
+      "beta": -0.0006050673177317341,
+      "se_hac": 0.003538988094652864,
+      "r2": 0.000122,
+      "hac_lag": 48,
+      "t_hac": -0.171,
+      "p_hac": 0.864246,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -0.1821,
+          "p": 0.85548
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -0.1741,
+          "p": 0.861801
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.004864824721253679,
+        "t": -0.1244,
+        "p": 0.901018,
+        "n_used": 4935,
+        "n_sample_rows": 4955,
+        "n_rows_dropped_for_calendar_gaps": 20,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 236,
+        "t_mean": -0.159,
+        "t_median": -0.1995,
+        "t_min": -0.9183,
+        "t_max": 0.6724,
+        "beta_mean": -0.0006086721636743613,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9975,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "C_mid",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 63,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4913,
+      "span_years": 19.78,
+      "effective_sample_size": 79.1,
+      "beta": -0.0017433596849960806,
+      "se_hac": 0.009593708693558972,
+      "r2": 0.000378,
+      "hac_lag": 68,
+      "t_hac": -0.1817,
+      "p_hac": 0.855803,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -0.1647,
+          "p": 0.869197
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -0.1548,
+          "p": 0.876974
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.01290090286510197,
+        "t": -0.1351,
+        "p": 0.892505,
+        "n_used": 4851,
+        "n_sample_rows": 4913,
+        "n_rows_dropped_for_calendar_gaps": 62,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 78,
+        "t_mean": -0.1131,
+        "t_median": 0.0248,
+        "t_min": -1.4774,
+        "t_max": 1.0246,
+        "beta_mean": -0.0015088626556785405,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9975,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "C_mid",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 126,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4850,
+      "span_years": 19.53,
+      "effective_sample_size": 39.1,
+      "beta": 0.0057397823142490145,
+      "se_hac": 0.018021307755101825,
+      "r2": 0.001925,
+      "hac_lag": 126,
+      "t_hac": 0.3185,
+      "p_hac": 0.750106,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": 0.2951,
+          "p": 0.767949
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": 0.2878,
+          "p": 0.773507
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.024172804540638363,
+        "t": 0.2374,
+        "p": 0.812309,
+        "n_used": 4725,
+        "n_sample_rows": 4850,
+        "n_rows_dropped_for_calendar_gaps": 125,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 38,
+        "t_mean": 0.3012,
+        "t_median": 0.3719,
+        "t_min": -1.0932,
+        "t_max": 1.329,
+        "beta_mean": 0.006214502067789462,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9915,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "C_mid",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 252,
+      "sample_start": "2006-07-18",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4724,
+      "span_years": 19.03,
+      "effective_sample_size": 19.0,
+      "beta": 0.014217442796522428,
+      "se_hac": 0.03671930990936389,
+      "r2": 0.005467,
+      "hac_lag": 252,
+      "t_hac": 0.3872,
+      "p_hac": 0.698614,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": 0.3729,
+          "p": 0.709207
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": 0.3709,
+          "p": 0.710743
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.049397065338279575,
+        "t": 0.2878,
+        "p": 0.773485,
+        "n_used": 4473,
+        "n_sample_rows": 4724,
+        "n_rows_dropped_for_calendar_gaps": 251,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 19,
+        "t_mean": 0.3468,
+        "t_median": 0.3598,
+        "t_min": -0.9316,
+        "t_max": 1.4953,
+        "beta_mean": 0.017290781858834654,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9875,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "C_mid",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 21,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 4955,
+      "span_years": 19.95,
+      "effective_sample_size": 239.4,
+      "beta": -0.011519237802797483,
+      "se_hac": 0.0037979204629321047,
+      "r2": 0.068315,
+      "hac_lag": 48,
+      "t_hac": -3.033,
+      "p_hac": 0.002421,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -3.3888,
+          "p": 0.000702
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -3.1404,
+          "p": 0.001687
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 236,
+        "t_mean": -4.1549,
+        "t_median": -4.2158,
+        "t_min": -5.3667,
+        "t_max": -2.9123,
+        "beta_mean": -0.011523796708005584,
+        "share_abs_t_gt_1_96": 1.0,
+        "share_abs_t_gt_3": 0.9048,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.0405,
+      "p_holm_within_family": 0.036315,
+      "p_holm_global": 0.142839
+    },
+    {
+      "signal": "rn_slope_3m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "C_mid",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 63,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4913,
+      "span_years": 19.78,
+      "effective_sample_size": 79.1,
+      "beta": -0.01280506721182137,
+      "se_hac": 0.007855990590970295,
+      "r2": 0.032369,
+      "hac_lag": 68,
+      "t_hac": -1.63,
+      "p_hac": 0.103107,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -1.4824,
+          "p": 0.138225
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -1.3892,
+          "p": 0.164773
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 78,
+        "t_mean": -1.6186,
+        "t_median": -1.7128,
+        "t_min": -3.2747,
+        "t_max": -0.1889,
+        "beta_mean": -0.013067649149637211,
+        "share_abs_t_gt_1_96": 0.3175,
+        "share_abs_t_gt_3": 0.0159,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.434,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "C_mid",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 126,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4850,
+      "span_years": 19.53,
+      "effective_sample_size": 39.1,
+      "beta": -0.014322489414224399,
+      "se_hac": 0.01309928177736432,
+      "r2": 0.023956,
+      "hac_lag": 126,
+      "t_hac": -1.0934,
+      "p_hac": 0.274227,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -0.9998,
+          "p": 0.317425
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -0.9624,
+          "p": 0.335836
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 38,
+        "t_mean": -0.9879,
+        "t_median": -0.9903,
+        "t_min": -1.7477,
+        "t_max": 0.312,
+        "beta_mean": -0.015381444176114745,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.7275,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "C_mid",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 252,
+      "sample_start": "2006-07-18",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4724,
+      "span_years": 19.03,
+      "effective_sample_size": 19.0,
+      "beta": -0.022425849829686595,
+      "se_hac": 0.022653280961016736,
+      "r2": 0.033767,
+      "hac_lag": 252,
+      "t_hac": -0.99,
+      "p_hac": 0.322194,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.9333,
+          "p": 0.350683
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.9138,
+          "p": 0.360846
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 19,
+        "t_mean": -0.8986,
+        "t_median": -0.7883,
+        "t_min": -3.0243,
+        "t_max": 0.3386,
+        "beta_mean": -0.02889653608996089,
+        "share_abs_t_gt_1_96": 0.0675,
+        "share_abs_t_gt_3": 0.004,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.772,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 21,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 4587,
+      "span_years": 18.49,
+      "effective_sample_size": 221.8,
+      "beta": -0.0006362175443601487,
+      "se_hac": 0.0031878293389292203,
+      "r2": 0.000198,
+      "hac_lag": 46,
+      "t_hac": -0.1996,
+      "p_hac": 0.841811,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -0.2115,
+          "p": 0.832525
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -0.202,
+          "p": 0.839885
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.0044976406739859,
+        "t": -0.1415,
+        "p": 0.88751,
+        "n_used": 4567,
+        "n_sample_rows": 4587,
+        "n_rows_dropped_for_calendar_gaps": 20,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 218,
+        "t_mean": -0.1967,
+        "t_median": -0.2577,
+        "t_min": -0.9338,
+        "t_max": 0.6853,
+        "beta_mean": -0.0006395396847548513,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.994,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 63,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4545,
+      "span_years": 18.32,
+      "effective_sample_size": 73.3,
+      "beta": -0.0022982046136029027,
+      "se_hac": 0.008599033214240756,
+      "r2": 0.000971,
+      "hac_lag": 66,
+      "t_hac": -0.2673,
+      "p_hac": 0.789267,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -0.2392,
+          "p": 0.81092
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -0.2247,
+          "p": 0.82224
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.011889691960848568,
+        "t": -0.1933,
+        "p": 0.846729,
+        "n_used": 4483,
+        "n_sample_rows": 4545,
+        "n_rows_dropped_for_calendar_gaps": 62,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 72,
+        "t_mean": -0.2078,
+        "t_median": -0.05,
+        "t_min": -1.6223,
+        "t_max": 0.8921,
+        "beta_mean": -0.0021410300962753665,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.991,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 126,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4482,
+      "span_years": 18.07,
+      "effective_sample_size": 36.1,
+      "beta": 0.002057193057801318,
+      "se_hac": 0.016218707240582955,
+      "r2": 0.000364,
+      "hac_lag": 126,
+      "t_hac": 0.1268,
+      "p_hac": 0.899066,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": 0.1195,
+          "p": 0.904884
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": 0.1198,
+          "p": 0.904625
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.022513346957060882,
+        "t": 0.0914,
+        "p": 0.927193,
+        "n_used": 4357,
+        "n_sample_rows": 4482,
+        "n_rows_dropped_for_calendar_gaps": 125,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 36,
+        "t_mean": 0.1363,
+        "t_median": 0.1991,
+        "t_min": -1.0873,
+        "t_max": 1.0421,
+        "beta_mean": 0.0021234931466887434,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9975,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 252,
+      "sample_start": "2008-01-03",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4356,
+      "span_years": 17.57,
+      "effective_sample_size": 17.6,
+      "beta": -0.0022446953783925028,
+      "se_hac": 0.02596218795505014,
+      "r2": 0.00025,
+      "hac_lag": 252,
+      "t_hac": -0.0865,
+      "p_hac": 0.931101,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.087,
+          "p": 0.930701
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.0868,
+          "p": 0.930793
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.0376795299453913,
+        "t": -0.0596,
+        "p": 0.952495,
+        "n_used": 4105,
+        "n_sample_rows": 4356,
+        "n_rows_dropped_for_calendar_gaps": 251,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 17,
+        "t_mean": -0.1972,
+        "t_median": -0.0479,
+        "t_min": -2.7169,
+        "t_max": 1.318,
+        "beta_mean": -0.002321778293628191,
+        "share_abs_t_gt_1_96": 0.0437,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9975,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 21,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 4587,
+      "span_years": 18.49,
+      "effective_sample_size": 221.8,
+      "beta": -0.010356966269178716,
+      "se_hac": 0.0033704619880618866,
+      "r2": 0.080871,
+      "hac_lag": 46,
+      "t_hac": -3.0729,
+      "p_hac": 0.00212,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -3.4018,
+          "p": 0.000669
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -3.1481,
+          "p": 0.001643
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 218,
+        "t_mean": -4.3808,
+        "t_median": -4.4637,
+        "t_min": -5.5401,
+        "t_max": -3.0898,
+        "beta_mean": -0.010361428676173286,
+        "share_abs_t_gt_1_96": 1.0,
+        "share_abs_t_gt_3": 1.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.0385,
+      "p_holm_within_family": 0.04452,
+      "p_holm_global": 0.1272
+    },
+    {
+      "signal": "rn_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 63,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4545,
+      "span_years": 18.32,
+      "effective_sample_size": 73.3,
+      "beta": -0.011737478593818379,
+      "se_hac": 0.0069995208477263956,
+      "r2": 0.039649,
+      "hac_lag": 66,
+      "t_hac": -1.6769,
+      "p_hac": 0.093563,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -1.5061,
+          "p": 0.132052
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -1.4088,
+          "p": 0.158897
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 72,
+        "t_mean": -1.7304,
+        "t_median": -1.7864,
+        "t_min": -3.5965,
+        "t_max": -0.4341,
+        "beta_mean": -0.011954520106506602,
+        "share_abs_t_gt_1_96": 0.3651,
+        "share_abs_t_gt_3": 0.0159,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.4255,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 126,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4482,
+      "span_years": 18.07,
+      "effective_sample_size": 36.1,
+      "beta": -0.012998444803879933,
+      "se_hac": 0.011865098619217878,
+      "r2": 0.028435,
+      "hac_lag": 126,
+      "t_hac": -1.0955,
+      "p_hac": 0.273289,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -1.0043,
+          "p": 0.315244
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -0.9735,
+          "p": 0.330309
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 36,
+        "t_mean": -1.0323,
+        "t_median": -1.0329,
+        "t_min": -2.0085,
+        "t_max": 0.1557,
+        "beta_mean": -0.013873592053452692,
+        "share_abs_t_gt_1_96": 0.0079,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.7245,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 252,
+      "sample_start": "2008-01-03",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4356,
+      "span_years": 17.57,
+      "effective_sample_size": 17.6,
+      "beta": -0.015703221971317405,
+      "se_hac": 0.018313730377647556,
+      "r2": 0.026593,
+      "hac_lag": 252,
+      "t_hac": -0.8575,
+      "p_hac": 0.391193,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.8236,
+          "p": 0.410155
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.8062,
+          "p": 0.420135
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 17,
+        "t_mean": -0.7241,
+        "t_median": -0.5907,
+        "t_min": -2.8479,
+        "t_max": 0.8731,
+        "beta_mean": -0.019209813378210067,
+        "share_abs_t_gt_1_96": 0.0437,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.8375,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 21,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 4587,
+      "span_years": 18.49,
+      "effective_sample_size": 221.8,
+      "beta": -0.0002499951049990366,
+      "se_hac": 0.003226690869767069,
+      "r2": 3.1e-05,
+      "hac_lag": 46,
+      "t_hac": -0.0775,
+      "p_hac": 0.938244,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -0.082,
+          "p": 0.934621
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -0.0784,
+          "p": 0.937495
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.004446543159908443,
+        "t": -0.0562,
+        "p": 0.955165,
+        "n_used": 4567,
+        "n_sample_rows": 4587,
+        "n_rows_dropped_for_calendar_gaps": 20,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 218,
+        "t_mean": -0.0729,
+        "t_median": -0.2083,
+        "t_min": -0.7542,
+        "t_max": 0.7119,
+        "beta_mean": -0.00025711566703780366,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9975,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 63,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4545,
+      "span_years": 18.32,
+      "effective_sample_size": 73.3,
+      "beta": -0.0020177952713449424,
+      "se_hac": 0.008605591746461506,
+      "r2": 0.000753,
+      "hac_lag": 66,
+      "t_hac": -0.2345,
+      "p_hac": 0.814616,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -0.2097,
+          "p": 0.833919
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -0.1968,
+          "p": 0.843964
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.011816124400965822,
+        "t": -0.1708,
+        "p": 0.864408,
+        "n_used": 4483,
+        "n_sample_rows": 4545,
+        "n_rows_dropped_for_calendar_gaps": 62,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 72,
+        "t_mean": -0.1687,
+        "t_median": 0.0042,
+        "t_min": -1.729,
+        "t_max": 1.177,
+        "beta_mean": -0.0017639416316075237,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.993,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 126,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4482,
+      "span_years": 18.07,
+      "effective_sample_size": 36.1,
+      "beta": 0.002400122342863381,
+      "se_hac": 0.016287172513319233,
+      "r2": 0.000498,
+      "hac_lag": 126,
+      "t_hac": 0.1474,
+      "p_hac": 0.882846,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": 0.1392,
+          "p": 0.889314
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": 0.1398,
+          "p": 0.888784
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.022496147880154086,
+        "t": 0.1067,
+        "p": 0.915035,
+        "n_used": 4357,
+        "n_sample_rows": 4482,
+        "n_rows_dropped_for_calendar_gaps": 125,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 36,
+        "t_mean": 0.1606,
+        "t_median": 0.2071,
+        "t_min": -1.1151,
+        "t_max": 1.1849,
+        "beta_mean": 0.0027276073485931196,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9975,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 252,
+      "sample_start": "2008-01-03",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4356,
+      "span_years": 17.57,
+      "effective_sample_size": 17.6,
+      "beta": -0.0023079406051581264,
+      "se_hac": 0.02541087502069993,
+      "r2": 0.000268,
+      "hac_lag": 252,
+      "t_hac": -0.0908,
+      "p_hac": 0.927632,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.0912,
+          "p": 0.927346
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.091,
+          "p": 0.927532
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.03725101731916111,
+        "t": -0.062,
+        "p": 0.950598,
+        "n_used": 4105,
+        "n_sample_rows": 4356,
+        "n_rows_dropped_for_calendar_gaps": 251,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 17,
+        "t_mean": -0.2116,
+        "t_median": -0.0414,
+        "t_min": -2.8225,
+        "t_max": 1.6014,
+        "beta_mean": -0.002548805932807819,
+        "share_abs_t_gt_1_96": 0.0437,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9975,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 21,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 4587,
+      "span_years": 18.49,
+      "effective_sample_size": 221.8,
+      "beta": -0.010515044825960634,
+      "se_hac": 0.003374306277213379,
+      "r2": 0.083741,
+      "hac_lag": 46,
+      "t_hac": -3.1162,
+      "p_hac": 0.001832,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -3.4477,
+          "p": 0.000565
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -3.1921,
+          "p": 0.001413
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 218,
+        "t_mean": -4.4602,
+        "t_median": -4.3906,
+        "t_min": -5.6035,
+        "t_max": -3.3076,
+        "beta_mean": -0.01051032375890203,
+        "share_abs_t_gt_1_96": 1.0,
+        "share_abs_t_gt_3": 1.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.0355,
+      "p_holm_within_family": 0.040304,
+      "p_holm_global": 0.111752
+    },
+    {
+      "signal": "srp_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 63,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4545,
+      "span_years": 18.32,
+      "effective_sample_size": 73.3,
+      "beta": -0.011946846115999388,
+      "se_hac": 0.006993279086871259,
+      "r2": 0.041306,
+      "hac_lag": 66,
+      "t_hac": -1.7083,
+      "p_hac": 0.087575,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -1.5334,
+          "p": 0.125171
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -1.433,
+          "p": 0.151867
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 72,
+        "t_mean": -1.7728,
+        "t_median": -1.8956,
+        "t_min": -3.6342,
+        "t_max": -0.3246,
+        "beta_mean": -0.012235571105837137,
+        "share_abs_t_gt_1_96": 0.4286,
+        "share_abs_t_gt_3": 0.0317,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.412,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 126,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4482,
+      "span_years": 18.07,
+      "effective_sample_size": 36.1,
+      "beta": -0.01327590176395596,
+      "se_hac": 0.011893671472615937,
+      "r2": 0.02981,
+      "hac_lag": 126,
+      "t_hac": -1.1162,
+      "p_hac": 0.26433,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -1.0237,
+          "p": 0.30598
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -0.993,
+          "p": 0.320701
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 36,
+        "t_mean": -1.069,
+        "t_median": -1.0775,
+        "t_min": -2.1497,
+        "t_max": 0.2131,
+        "beta_mean": -0.014414459318031694,
+        "share_abs_t_gt_1_96": 0.0079,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.714,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "signal_kind": "slope_model_extrapolated",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 252,
+      "sample_start": "2008-01-03",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4356,
+      "span_years": 17.57,
+      "effective_sample_size": 17.6,
+      "beta": -0.016385500348548077,
+      "se_hac": 0.018001362224466484,
+      "r2": 0.029379,
+      "hac_lag": 252,
+      "t_hac": -0.9102,
+      "p_hac": 0.362698,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.8751,
+          "p": 0.381515
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.8569,
+          "p": 0.391492
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 17,
+        "t_mean": -0.7581,
+        "t_median": -0.6481,
+        "t_min": -3.0009,
+        "t_max": 0.7711,
+        "beta_mean": -0.01970418564859327,
+        "share_abs_t_gt_1_96": 0.0635,
+        "share_abs_t_gt_3": 0.004,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.8075,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_3m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "C_mid",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 21,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 5018,
+      "span_years": 19.95,
+      "effective_sample_size": 239.4,
+      "beta": -0.01018388725334507,
+      "se_hac": 0.04447158160171115,
+      "r2": 0.000336,
+      "hac_lag": 48,
+      "t_hac": -0.229,
+      "p_hac": 0.818871,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -0.2409,
+          "p": 0.809615
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -0.2318,
+          "p": 0.816689
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.07095970639750217,
+        "t": -0.1435,
+        "p": 0.885882,
+        "n_used": 4998,
+        "n_sample_rows": 5018,
+        "n_rows_dropped_for_calendar_gaps": 20,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 239,
+        "t_mean": -0.2798,
+        "t_median": -0.2808,
+        "t_min": -1.4007,
+        "t_max": 1.0905,
+        "beta_mean": -0.0110050911233569,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9965,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_3m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "C_mid",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 63,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4976,
+      "span_years": 19.78,
+      "effective_sample_size": 79.1,
+      "beta": -0.03403109484113753,
+      "se_hac": 0.0927770961443162,
+      "r2": 0.001406,
+      "hac_lag": 68,
+      "t_hac": -0.3668,
+      "p_hac": 0.713765,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -0.3361,
+          "p": 0.736792
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -0.3221,
+          "p": 0.747415
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.14239781601225418,
+        "t": -0.239,
+        "p": 0.811116,
+        "n_used": 4914,
+        "n_sample_rows": 4976,
+        "n_rows_dropped_for_calendar_gaps": 62,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 79,
+        "t_mean": -0.2851,
+        "t_median": -0.2827,
+        "t_min": -1.796,
+        "t_max": 1.1077,
+        "beta_mean": -0.03340957885952326,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9875,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_3m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "C_mid",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 126,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4913,
+      "span_years": 19.53,
+      "effective_sample_size": 39.1,
+      "beta": -0.02257136103002788,
+      "se_hac": 0.14789281174174188,
+      "r2": 0.000292,
+      "hac_lag": 126,
+      "t_hac": -0.1526,
+      "p_hac": 0.878698,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -0.1452,
+          "p": 0.884541
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -0.1409,
+          "p": 0.88794
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.2217522454837289,
+        "t": -0.1018,
+        "p": 0.918926,
+        "n_used": 4788,
+        "n_sample_rows": 4913,
+        "n_rows_dropped_for_calendar_gaps": 125,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 39,
+        "t_mean": -0.0135,
+        "t_median": -0.1872,
+        "t_min": -1.5085,
+        "t_max": 2.4571,
+        "beta_mean": -0.001166536486940022,
+        "share_abs_t_gt_1_96": 0.0159,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9975,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_3m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "C_mid",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 252,
+      "sample_start": "2006-07-18",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4787,
+      "span_years": 19.03,
+      "effective_sample_size": 19.0,
+      "beta": 0.034366172730485145,
+      "se_hac": 0.2750604750567627,
+      "r2": 0.000332,
+      "hac_lag": 252,
+      "t_hac": 0.1249,
+      "p_hac": 0.900571,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": 0.121,
+          "p": 0.903673
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": 0.1211,
+          "p": 0.903644
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.38152293745667715,
+        "t": 0.0901,
+        "p": 0.928227,
+        "n_used": 4536,
+        "n_sample_rows": 4787,
+        "n_rows_dropped_for_calendar_gaps": 251,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 19,
+        "t_mean": 0.2567,
+        "t_median": 0.1614,
+        "t_min": -2.0242,
+        "t_max": 3.3797,
+        "beta_mean": 0.10191749289280205,
+        "share_abs_t_gt_1_96": 0.0556,
+        "share_abs_t_gt_3": 0.0119,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9975,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_3m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "C_mid",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 21,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 5018,
+      "span_years": 19.95,
+      "effective_sample_size": 239.4,
+      "beta": -0.17089998917115556,
+      "se_hac": 0.04517691983100467,
+      "r2": 0.146383,
+      "hac_lag": 48,
+      "t_hac": -3.7829,
+      "p_hac": 0.000155,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -4.1684,
+          "p": 3.1e-05
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -3.8928,
+          "p": 9.9e-05
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 239,
+        "t_mean": -6.3811,
+        "t_median": -6.3074,
+        "t_min": -7.7745,
+        "t_max": -4.7356,
+        "beta_mean": -0.17049186550663178,
+        "share_abs_t_gt_1_96": 1.0,
+        "share_abs_t_gt_3": 1.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.0115,
+      "p_holm_within_family": 0.00248,
+      "p_holm_global": 0.009765
+    },
+    {
+      "signal": "vts_3m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "C_mid",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 63,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4976,
+      "span_years": 19.78,
+      "effective_sample_size": 79.1,
+      "beta": -0.19578190264631645,
+      "se_hac": 0.0688375268961858,
+      "r2": 0.074036,
+      "hac_lag": 68,
+      "t_hac": -2.8441,
+      "p_hac": 0.004453,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -2.5802,
+          "p": 0.009874
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -2.4179,
+          "p": 0.015611
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 79,
+        "t_mean": -2.5366,
+        "t_median": -2.5611,
+        "t_min": -3.9883,
+        "t_max": -0.7909,
+        "beta_mean": -0.19858969059150797,
+        "share_abs_t_gt_1_96": 0.746,
+        "share_abs_t_gt_3": 0.2857,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.045,
+      "p_holm_within_family": 0.062342,
+      "p_holm_global": 0.258274
+    },
+    {
+      "signal": "vts_3m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "C_mid",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 126,
+      "sample_start": "2006-07-18",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4913,
+      "span_years": 19.53,
+      "effective_sample_size": 39.1,
+      "beta": -0.21074161740678599,
+      "se_hac": 0.10763349819808357,
+      "r2": 0.050961,
+      "hac_lag": 126,
+      "t_hac": -1.958,
+      "p_hac": 0.050235,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -1.811,
+          "p": 0.070148
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -1.74,
+          "p": 0.081853
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 39,
+        "t_mean": -1.4762,
+        "t_median": -1.5246,
+        "t_min": -3.1763,
+        "t_max": 0.0313,
+        "beta_mean": -0.22676835870791603,
+        "share_abs_t_gt_1_96": 0.2143,
+        "share_abs_t_gt_3": 0.0079,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.287,
+      "p_holm_within_family": 0.653055,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_3m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "C_mid",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 252,
+      "sample_start": "2006-07-18",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4787,
+      "span_years": 19.03,
+      "effective_sample_size": 19.0,
+      "beta": -0.2772356251732915,
+      "se_hac": 0.1550583404113727,
+      "r2": 0.053835,
+      "hac_lag": 252,
+      "t_hac": -1.7879,
+      "p_hac": 0.073785,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -1.652,
+          "p": 0.09853
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -1.6044,
+          "p": 0.108624
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 19,
+        "t_mean": -1.1324,
+        "t_median": -0.998,
+        "t_min": -4.6444,
+        "t_max": 1.1569,
+        "beta_mean": -0.32256419555986215,
+        "share_abs_t_gt_1_96": 0.1548,
+        "share_abs_t_gt_3": 0.0397,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.3575,
+      "p_holm_within_family": 0.88542,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_6m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 21,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 4650,
+      "span_years": 18.49,
+      "effective_sample_size": 221.8,
+      "beta": -0.0059060834701729625,
+      "se_hac": 0.03198559164778342,
+      "r2": 0.000273,
+      "hac_lag": 47,
+      "t_hac": -0.1846,
+      "p_hac": 0.853505,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -0.1932,
+          "p": 0.846826
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -0.1864,
+          "p": 0.85217
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.051315576059960795,
+        "t": -0.1151,
+        "p": 0.908371,
+        "n_used": 4630,
+        "n_sample_rows": 4650,
+        "n_rows_dropped_for_calendar_gaps": 20,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 221,
+        "t_mean": -0.2419,
+        "t_median": -0.2591,
+        "t_min": -1.0738,
+        "t_max": 1.0524,
+        "beta_mean": -0.006492141165996249,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9945,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_6m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 63,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4608,
+      "span_years": 18.32,
+      "effective_sample_size": 73.3,
+      "beta": -0.02954140931761995,
+      "se_hac": 0.06950028221888113,
+      "r2": 0.002582,
+      "hac_lag": 67,
+      "t_hac": -0.4251,
+      "p_hac": 0.670797,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -0.3873,
+          "p": 0.698534
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -0.3697,
+          "p": 0.711592
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.10714129125861184,
+        "t": -0.2757,
+        "p": 0.78276,
+        "n_used": 4546,
+        "n_sample_rows": 4608,
+        "n_rows_dropped_for_calendar_gaps": 62,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 73,
+        "t_mean": -0.3726,
+        "t_median": -0.309,
+        "t_min": -1.7071,
+        "t_max": 0.9814,
+        "beta_mean": -0.02744590726949585,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9675,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_6m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 126,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4545,
+      "span_years": 18.07,
+      "effective_sample_size": 36.1,
+      "beta": -0.04836137441107513,
+      "se_hac": 0.10885507515599399,
+      "r2": 0.003264,
+      "hac_lag": 126,
+      "t_hac": -0.4443,
+      "p_hac": 0.656845,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -0.4254,
+          "p": 0.670573
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -0.422,
+          "p": 0.673058
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.16717581895172473,
+        "t": -0.2893,
+        "p": 0.772364,
+        "n_used": 4420,
+        "n_sample_rows": 4545,
+        "n_rows_dropped_for_calendar_gaps": 125,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 36,
+        "t_mean": -0.2506,
+        "t_median": -0.37,
+        "t_min": -1.559,
+        "t_max": 1.6313,
+        "beta_mean": -0.03532152330557151,
+        "share_abs_t_gt_1_96": 0.0,
+        "share_abs_t_gt_3": 0.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.967,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_6m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "B_short",
+      "target": "fwd_ret",
+      "target_kind": "sum_of_one_period_returns",
+      "horizon_days": 252,
+      "sample_start": "2008-01-03",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4419,
+      "span_years": 17.57,
+      "effective_sample_size": 17.6,
+      "beta": -0.09097987867540591,
+      "se_hac": 0.1542035172219461,
+      "r2": 0.007048,
+      "hac_lag": 252,
+      "t_hac": -0.59,
+      "p_hac": 0.555192,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -0.6007,
+          "p": 0.548008
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -0.6001,
+          "p": 0.548423
+        }
+      },
+      "hodrick_1b": {
+        "se": 0.24756472425768747,
+        "t": -0.3675,
+        "p": 0.713247,
+        "n_used": 4168,
+        "n_sample_rows": 4419,
+        "n_rows_dropped_for_calendar_gaps": 251,
+        "ffill_limit_sessions": 10
+      },
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 18,
+        "t_mean": -0.3303,
+        "t_median": -0.3206,
+        "t_min": -3.961,
+        "t_max": 3.4615,
+        "beta_mean": -0.052913122503075186,
+        "share_abs_t_gt_1_96": 0.0794,
+        "share_abs_t_gt_3": 0.0278,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.9385,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_6m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 21,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-06-29",
+      "n_overlapping_obs": 4650,
+      "span_years": 18.49,
+      "effective_sample_size": 221.8,
+      "beta": -0.1277967375154121,
+      "se_hac": 0.028869148564633986,
+      "r2": 0.197364,
+      "hac_lag": 47,
+      "t_hac": -4.4268,
+      "p_hac": 1e-05,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 32,
+          "t": -4.8265,
+          "p": 1e-06
+        },
+        "2H": {
+          "hac_lag": 42,
+          "t": -4.5277,
+          "p": 6e-06
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 21,
+        "obs_per_phase_median": 221,
+        "t_mean": -7.3526,
+        "t_median": -7.4189,
+        "t_min": -8.5905,
+        "t_max": -6.1888,
+        "beta_mean": -0.12773904370807468,
+        "share_abs_t_gt_1_96": 1.0,
+        "share_abs_t_gt_3": 1.0,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.0035,
+      "p_holm_within_family": 0.00024,
+      "p_holm_global": 0.00064
+    },
+    {
+      "signal": "vts_6m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 63,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-04-28",
+      "n_overlapping_obs": 4608,
+      "span_years": 18.32,
+      "effective_sample_size": 73.3,
+      "beta": -0.14935506459671133,
+      "se_hac": 0.04738763497964337,
+      "r2": 0.103462,
+      "hac_lag": 67,
+      "t_hac": -3.1518,
+      "p_hac": 0.001623,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 95,
+          "t": -2.8245,
+          "p": 0.004736
+        },
+        "2H": {
+          "hac_lag": 126,
+          "t": -2.6337,
+          "p": 0.008447
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 63,
+        "obs_per_phase_median": 73,
+        "t_mean": -2.9403,
+        "t_median": -2.9708,
+        "t_min": -4.5548,
+        "t_max": -1.2816,
+        "beta_mean": -0.15186928584910825,
+        "share_abs_t_gt_1_96": 0.8889,
+        "share_abs_t_gt_3": 0.4762,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.035,
+      "p_holm_within_family": 0.037329,
+      "p_holm_global": 0.100626
+    },
+    {
+      "signal": "vts_6m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 126,
+      "sample_start": "2008-01-03",
+      "sample_end": "2026-01-27",
+      "n_overlapping_obs": 4545,
+      "span_years": 18.07,
+      "effective_sample_size": 36.1,
+      "beta": -0.15866626480559143,
+      "se_hac": 0.07513475588411479,
+      "r2": 0.068828,
+      "hac_lag": 126,
+      "t_hac": -2.1118,
+      "p_hac": 0.034707,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 189,
+          "t": -1.9429,
+          "p": 0.052029
+        },
+        "2H": {
+          "hac_lag": 252,
+          "t": -1.8752,
+          "p": 0.060764
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 126,
+        "obs_per_phase_median": 36,
+        "t_mean": -1.6804,
+        "t_median": -1.7023,
+        "t_min": -3.7984,
+        "t_max": -0.4307,
+        "beta_mean": -0.17372410656243276,
+        "share_abs_t_gt_1_96": 0.3095,
+        "share_abs_t_gt_3": 0.0238,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.2335,
+      "p_holm_within_family": 0.69414,
+      "p_holm_global": 1.0
+    },
+    {
+      "signal": "vts_6m",
+      "signal_kind": "variance_term_structure_control",
+      "family": "B_short",
+      "target": "fwd_mdd",
+      "target_kind": "path_functional",
+      "horizon_days": 252,
+      "sample_start": "2008-01-03",
+      "sample_end": "2025-07-28",
+      "n_overlapping_obs": 4419,
+      "span_years": 17.57,
+      "effective_sample_size": 17.6,
+      "beta": -0.18156223236222924,
+      "se_hac": 0.10218645354420393,
+      "r2": 0.061291,
+      "hac_lag": 252,
+      "t_hac": -1.7768,
+      "p_hac": 0.075605,
+      "hac_lag_sensitivity": {
+        "1.5H": {
+          "hac_lag": 378,
+          "t": -1.6799,
+          "p": 0.092967
+        },
+        "2H": {
+          "hac_lag": 504,
+          "t": -1.6363,
+          "p": 0.101768
+        }
+      },
+      "hodrick_1b": null,
+      "nonoverlapping": {
+        "status": "ok",
+        "n_phases": 252,
+        "obs_per_phase_median": 18,
+        "t_mean": -1.1767,
+        "t_median": -1.0008,
+        "t_min": -4.9018,
+        "t_max": 1.2083,
+        "beta_mean": -0.22205089657206153,
+        "share_abs_t_gt_1_96": 0.2063,
+        "share_abs_t_gt_3": 0.0437,
+        "sign_agreement_with_full_sample": true
+      },
+      "p_romano_wolf": 0.38,
+      "p_holm_within_family": 1.0,
+      "p_holm_global": 1.0
+    }
+  ],
+  "multivariate_incremental": [
+    {
+      "signal": "ts_realized",
+      "controls": [
+        "skew_level"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 21,
+      "n": 8083,
+      "hac_lag": 56,
+      "coefficients": {
+        "skew_level": {
+          "beta": 4.6392805686568174e-05,
+          "t_hac": 0.0275,
+          "p_hac": 0.978036
+        },
+        "ts_realized": {
+          "beta": 0.012666159027459215,
+          "t_hac": 1.1105,
+          "p_hac": 0.266781
+        }
+      },
+      "incremental_t_on_slope": 1.1105,
+      "incremental_p_on_slope": 0.266781,
+      "r2_slope_explained_by_controls": 0.0097,
+      "variance_inflation_factor": 1.01,
+      "r2_full": 0.001379
+    },
+    {
+      "signal": "ts_realized",
+      "controls": [
+        "skew_level"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 63,
+      "n": 8041,
+      "hac_lag": 80,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.0011636396885737795,
+          "t_hac": -0.2429,
+          "p_hac": 0.808121
+        },
+        "ts_realized": {
+          "beta": 0.006130559667561547,
+          "t_hac": 0.3137,
+          "p_hac": 0.753719
+        }
+      },
+      "incremental_t_on_slope": 0.3137,
+      "incremental_p_on_slope": 0.753719,
+      "r2_slope_explained_by_controls": 0.0091,
+      "variance_inflation_factor": 1.009,
+      "r2_full": 0.000402
+    },
+    {
+      "signal": "ts_realized",
+      "controls": [
+        "skew_level"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "n": 7978,
+      "hac_lag": 126,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.005577431409576488,
+          "t_hac": -0.6249,
+          "p_hac": 0.532027
+        },
+        "ts_realized": {
+          "beta": 0.013793097903981049,
+          "t_hac": 0.4678,
+          "p_hac": 0.639952
+        }
+      },
+      "incremental_t_on_slope": 0.4678,
+      "incremental_p_on_slope": 0.639952,
+      "r2_slope_explained_by_controls": 0.008,
+      "variance_inflation_factor": 1.008,
+      "r2_full": 0.003532
+    },
+    {
+      "signal": "ts_realized",
+      "controls": [
+        "skew_level"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "n": 7852,
+      "hac_lag": 252,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.009773976518524921,
+          "t_hac": -0.5008,
+          "p_hac": 0.616512
+        },
+        "ts_realized": {
+          "beta": 0.00521439508906071,
+          "t_hac": 0.1074,
+          "p_hac": 0.914451
+        }
+      },
+      "incremental_t_on_slope": 0.1074,
+      "incremental_p_on_slope": 0.914451,
+      "r2_slope_explained_by_controls": 0.0028,
+      "variance_inflation_factor": 1.003,
+      "r2_full": 0.004441
+    },
+    {
+      "signal": "ts_realized",
+      "controls": [
+        "skew_level"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "n": 8083,
+      "hac_lag": 56,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.003931438226638996,
+          "t_hac": 2.6761,
+          "p_hac": 0.00745
+        },
+        "ts_realized": {
+          "beta": -0.008040986452288741,
+          "t_hac": -0.8943,
+          "p_hac": 0.371186
+        }
+      },
+      "incremental_t_on_slope": -0.8943,
+      "incremental_p_on_slope": 0.371186,
+      "r2_slope_explained_by_controls": 0.0097,
+      "variance_inflation_factor": 1.01,
+      "r2_full": 0.016974
+    },
+    {
+      "signal": "ts_realized",
+      "controls": [
+        "skew_level"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 63,
+      "n": 8041,
+      "hac_lag": 80,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.004609074841714907,
+          "t_hac": 1.1768,
+          "p_hac": 0.239289
+        },
+        "ts_realized": {
+          "beta": -0.011737375141894206,
+          "t_hac": -0.7163,
+          "p_hac": 0.47381
+        }
+      },
+      "incremental_t_on_slope": -0.7163,
+      "incremental_p_on_slope": 0.47381,
+      "r2_slope_explained_by_controls": 0.0091,
+      "variance_inflation_factor": 1.009,
+      "r2_full": 0.008998
+    },
+    {
+      "signal": "ts_realized",
+      "controls": [
+        "skew_level"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "n": 7978,
+      "hac_lag": 126,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.004742094766879956,
+          "t_hac": 0.7467,
+          "p_hac": 0.455234
+        },
+        "ts_realized": {
+          "beta": -0.020088178404766656,
+          "t_hac": -0.9339,
+          "p_hac": 0.350374
+        }
+      },
+      "incremental_t_on_slope": -0.9339,
+      "incremental_p_on_slope": 0.350374,
+      "r2_slope_explained_by_controls": 0.008,
+      "variance_inflation_factor": 1.008,
+      "r2_full": 0.006092
+    },
+    {
+      "signal": "ts_realized",
+      "controls": [
+        "skew_level"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "n": 7852,
+      "hac_lag": 252,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.006478362175173476,
+          "t_hac": 0.604,
+          "p_hac": 0.545844
+        },
+        "ts_realized": {
+          "beta": -0.030069695445427924,
+          "t_hac": -0.872,
+          "p_hac": 0.383208
+        }
+      },
+      "incremental_t_on_slope": -0.872,
+      "incremental_p_on_slope": 0.383208,
+      "r2_slope_explained_by_controls": 0.0028,
+      "variance_inflation_factor": 1.003,
+      "r2_full": 0.006923
+    },
+    {
+      "signal": "rn_slope_3m",
+      "controls": [
+        "skew_level",
+        "vts_3m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 21,
+      "n": 4955,
+      "hac_lag": 48,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.00843551932337358,
+          "t_hac": -0.5025,
+          "p_hac": 0.61531
+        },
+        "vts_3m": {
+          "beta": 0.04179982551423578,
+          "t_hac": 0.3354,
+          "p_hac": 0.73731
+        },
+        "rn_slope_3m": {
+          "beta": -0.014030467797599089,
+          "t_hac": -0.5191,
+          "p_hac": 0.603714
+        }
+      },
+      "incremental_t_on_slope": -0.5191,
+      "incremental_p_on_slope": 0.603714,
+      "r2_slope_explained_by_controls": 0.979,
+      "variance_inflation_factor": 47.626,
+      "r2_full": 0.001745
+    },
+    {
+      "signal": "rn_slope_3m",
+      "controls": [
+        "skew_level",
+        "vts_3m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 63,
+      "n": 4913,
+      "hac_lag": 68,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.05587645278422837,
+          "t_hac": -1.8809,
+          "p_hac": 0.059983
+        },
+        "vts_3m": {
+          "beta": 0.30469491225530154,
+          "t_hac": 1.336,
+          "p_hac": 0.181553
+        },
+        "rn_slope_3m": {
+          "beta": -0.09247283415598928,
+          "t_hac": -2.0623,
+          "p_hac": 0.039181
+        }
+      },
+      "incremental_t_on_slope": -2.0623,
+      "incremental_p_on_slope": 0.039181,
+      "r2_slope_explained_by_controls": 0.9789,
+      "variance_inflation_factor": 47.309,
+      "r2_full": 0.025079
+    },
+    {
+      "signal": "rn_slope_3m",
+      "controls": [
+        "skew_level",
+        "vts_3m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "n": 4850,
+      "hac_lag": 126,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.08376763604776505,
+          "t_hac": -1.4726,
+          "p_hac": 0.140864
+        },
+        "vts_3m": {
+          "beta": 0.401500316632065,
+          "t_hac": 1.0543,
+          "p_hac": 0.291756
+        },
+        "rn_slope_3m": {
+          "beta": -0.12652707044071843,
+          "t_hac": -1.5498,
+          "p_hac": 0.121182
+        }
+      },
+      "incremental_t_on_slope": -1.5498,
+      "incremental_p_on_slope": 0.121182,
+      "r2_slope_explained_by_controls": 0.9794,
+      "variance_inflation_factor": 48.444,
+      "r2_full": 0.029673
+    },
+    {
+      "signal": "rn_slope_3m",
+      "controls": [
+        "skew_level",
+        "vts_3m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "n": 4724,
+      "hac_lag": 252,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.17410241619665068,
+          "t_hac": -1.5193,
+          "p_hac": 0.128699
+        },
+        "vts_3m": {
+          "beta": 0.9534977722830824,
+          "t_hac": 1.23,
+          "p_hac": 0.218682
+        },
+        "rn_slope_3m": {
+          "beta": -0.26946487368862826,
+          "t_hac": -1.5646,
+          "p_hac": 0.11768
+        }
+      },
+      "incremental_t_on_slope": -1.5646,
+      "incremental_p_on_slope": 0.11768,
+      "r2_slope_explained_by_controls": 0.9784,
+      "variance_inflation_factor": 46.296,
+      "r2_full": 0.058065
+    },
+    {
+      "signal": "rn_slope_3m",
+      "controls": [
+        "skew_level",
+        "vts_3m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "n": 4955,
+      "hac_lag": 48,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.009060740805007017,
+          "t_hac": 0.6658,
+          "p_hac": 0.505521
+        },
+        "vts_3m": {
+          "beta": -0.22373112006753137,
+          "t_hac": -2.3274,
+          "p_hac": 0.019945
+        },
+        "rn_slope_3m": {
+          "beta": 0.01442094679698147,
+          "t_hac": 0.658,
+          "p_hac": 0.510529
+        }
+      },
+      "incremental_t_on_slope": 0.658,
+      "incremental_p_on_slope": 0.510529,
+      "r2_slope_explained_by_controls": 0.979,
+      "variance_inflation_factor": 47.626,
+      "r2_full": 0.150979
+    },
+    {
+      "signal": "rn_slope_3m",
+      "controls": [
+        "skew_level",
+        "vts_3m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 63,
+      "n": 4913,
+      "hac_lag": 68,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.039914659304243094,
+          "t_hac": 1.7446,
+          "p_hac": 0.081057
+        },
+        "vts_3m": {
+          "beta": -0.4428111365861964,
+          "t_hac": -2.6291,
+          "p_hac": 0.008562
+        },
+        "rn_slope_3m": {
+          "beta": 0.06652484459462382,
+          "t_hac": 1.9189,
+          "p_hac": 0.054997
+        }
+      },
+      "incremental_t_on_slope": 1.9189,
+      "incremental_p_on_slope": 0.054997,
+      "r2_slope_explained_by_controls": 0.9789,
+      "variance_inflation_factor": 47.309,
+      "r2_full": 0.094423
+    },
+    {
+      "signal": "rn_slope_3m",
+      "controls": [
+        "skew_level",
+        "vts_3m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "n": 4850,
+      "hac_lag": 126,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.0536716581894392,
+          "t_hac": 1.4895,
+          "p_hac": 0.136352
+        },
+        "vts_3m": {
+          "beta": -0.5360263021125427,
+          "t_hac": -2.0432,
+          "p_hac": 0.041034
+        },
+        "rn_slope_3m": {
+          "beta": 0.08858966692374493,
+          "t_hac": 1.6757,
+          "p_hac": 0.0938
+        }
+      },
+      "incremental_t_on_slope": 1.6757,
+      "incremental_p_on_slope": 0.0938,
+      "r2_slope_explained_by_controls": 0.9794,
+      "variance_inflation_factor": 48.444,
+      "r2_full": 0.072495
+    },
+    {
+      "signal": "rn_slope_3m",
+      "controls": [
+        "skew_level",
+        "vts_3m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "n": 4724,
+      "hac_lag": 252,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.12338982097258788,
+          "t_hac": 1.9421,
+          "p_hac": 0.052123
+        },
+        "vts_3m": {
+          "beta": -0.985302631573493,
+          "t_hac": -2.4216,
+          "p_hac": 0.015452
+        },
+        "rn_slope_3m": {
+          "beta": 0.19932187988682992,
+          "t_hac": 2.15,
+          "p_hac": 0.031554
+        }
+      },
+      "incremental_t_on_slope": 2.15,
+      "incremental_p_on_slope": 0.031554,
+      "r2_slope_explained_by_controls": 0.9784,
+      "variance_inflation_factor": 46.296,
+      "r2_full": 0.120361
+    },
+    {
+      "signal": "rn_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 21,
+      "n": 4587,
+      "hac_lag": 46,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.001309276466320869,
+          "t_hac": -0.0769,
+          "p_hac": 0.938717
+        },
+        "vts_6m": {
+          "beta": -0.0001976378376755683,
+          "t_hac": -0.0029,
+          "p_hac": 0.997657
+        },
+        "rn_slope_6m": {
+          "beta": -0.002012581764162996,
+          "t_hac": -0.0946,
+          "p_hac": 0.924631
+        }
+      },
+      "incremental_t_on_slope": -0.0946,
+      "incremental_p_on_slope": 0.924631,
+      "r2_slope_explained_by_controls": 0.9798,
+      "variance_inflation_factor": 49.592,
+      "r2_full": 0.000323
+    },
+    {
+      "signal": "rn_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 63,
+      "n": 4545,
+      "hac_lag": 66,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.04294132700104336,
+          "t_hac": -1.4157,
+          "p_hac": 0.15686
+        },
+        "vts_6m": {
+          "beta": 0.10741576617597537,
+          "t_hac": 0.808,
+          "p_hac": 0.419067
+        },
+        "rn_slope_6m": {
+          "beta": -0.05597097006390861,
+          "t_hac": -1.5825,
+          "p_hac": 0.11353
+        }
+      },
+      "incremental_t_on_slope": -1.5825,
+      "incremental_p_on_slope": 0.11353,
+      "r2_slope_explained_by_controls": 0.9797,
+      "variance_inflation_factor": 49.165,
+      "r2_full": 0.014602
+    },
+    {
+      "signal": "rn_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "n": 4482,
+      "hac_lag": 126,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.07472564396116399,
+          "t_hac": -1.1874,
+          "p_hac": 0.235087
+        },
+        "vts_6m": {
+          "beta": 0.1443573401825211,
+          "t_hac": 0.6009,
+          "p_hac": 0.547905
+        },
+        "rn_slope_6m": {
+          "beta": -0.0879880574323747,
+          "t_hac": -1.2474,
+          "p_hac": 0.212262
+        }
+      },
+      "incremental_t_on_slope": -1.2474,
+      "incremental_p_on_slope": 0.212262,
+      "r2_slope_explained_by_controls": 0.9796,
+      "variance_inflation_factor": 49.053,
+      "r2_full": 0.024706
+    },
+    {
+      "signal": "rn_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "n": 4356,
+      "hac_lag": 252,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.13685843251948437,
+          "t_hac": -1.2519,
+          "p_hac": 0.210612
+        },
+        "vts_6m": {
+          "beta": 0.30361322145407055,
+          "t_hac": 0.7441,
+          "p_hac": 0.456846
+        },
+        "rn_slope_6m": {
+          "beta": -0.17031717422576542,
+          "t_hac": -1.3132,
+          "p_hac": 0.189114
+        }
+      },
+      "incremental_t_on_slope": -1.3132,
+      "incremental_p_on_slope": 0.189114,
+      "r2_slope_explained_by_controls": 0.9782,
+      "variance_inflation_factor": 45.942,
+      "r2_full": 0.044397
+    },
+    {
+      "signal": "rn_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "n": 4587,
+      "hac_lag": 46,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.003080477096119527,
+          "t_hac": -0.1985,
+          "p_hac": 0.842641
+        },
+        "vts_6m": {
+          "beta": -0.11440554750834586,
+          "t_hac": -2.2372,
+          "p_hac": 0.025273
+        },
+        "rn_slope_6m": {
+          "beta": -0.0050636286816097,
+          "t_hac": -0.2579,
+          "p_hac": 0.796505
+        }
+      },
+      "incremental_t_on_slope": -0.2579,
+      "incremental_p_on_slope": 0.796505,
+      "r2_slope_explained_by_controls": 0.9798,
+      "variance_inflation_factor": 49.592,
+      "r2_full": 0.200673
+    },
+    {
+      "signal": "rn_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 63,
+      "n": 4545,
+      "hac_lag": 66,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.02909559395356065,
+          "t_hac": 1.2191,
+          "p_hac": 0.222825
+        },
+        "vts_6m": {
+          "beta": -0.24065859135308054,
+          "t_hac": -2.4787,
+          "p_hac": 0.013187
+        },
+        "rn_slope_6m": {
+          "beta": 0.03720878526064553,
+          "t_hac": 1.3103,
+          "p_hac": 0.190085
+        }
+      },
+      "incremental_t_on_slope": 1.3103,
+      "incremental_p_on_slope": 0.190085,
+      "r2_slope_explained_by_controls": 0.9797,
+      "variance_inflation_factor": 49.165,
+      "r2_full": 0.113806
+    },
+    {
+      "signal": "rn_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "n": 4482,
+      "hac_lag": 126,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.045285899100687255,
+          "t_hac": 1.2293,
+          "p_hac": 0.21897
+        },
+        "vts_6m": {
+          "beta": -0.2991774374767271,
+          "t_hac": -1.9603,
+          "p_hac": 0.049963
+        },
+        "rn_slope_6m": {
+          "beta": 0.05768157375845551,
+          "t_hac": 1.3689,
+          "p_hac": 0.171032
+        }
+      },
+      "incremental_t_on_slope": 1.3689,
+      "incremental_p_on_slope": 0.171032,
+      "r2_slope_explained_by_controls": 0.9796,
+      "variance_inflation_factor": 49.053,
+      "r2_full": 0.08312
+    },
+    {
+      "signal": "rn_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "n": 4356,
+      "hac_lag": 252,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.10666231103832802,
+          "t_hac": 1.7219,
+          "p_hac": 0.08508
+        },
+        "vts_6m": {
+          "beta": -0.5100929175127566,
+          "t_hac": -2.1647,
+          "p_hac": 0.030411
+        },
+        "rn_slope_6m": {
+          "beta": 0.13658394611055868,
+          "t_hac": 1.9011,
+          "p_hac": 0.057292
+        }
+      },
+      "incremental_t_on_slope": 1.9011,
+      "incremental_p_on_slope": 0.057292,
+      "r2_slope_explained_by_controls": 0.9782,
+      "variance_inflation_factor": 45.942,
+      "r2_full": 0.109495
+    },
+    {
+      "signal": "srp_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 21,
+      "n": 4587,
+      "hac_lag": 46,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.00774004659330943,
+          "t_hac": 0.7076,
+          "p_hac": 0.479222
+        },
+        "vts_6m": {
+          "beta": -0.03233895372041251,
+          "t_hac": -0.6249,
+          "p_hac": 0.532009
+        },
+        "srp_slope_6m": {
+          "beta": 0.010306189232923688,
+          "t_hac": 0.7546,
+          "p_hac": 0.450477
+        }
+      },
+      "incremental_t_on_slope": 0.7546,
+      "incremental_p_on_slope": 0.450477,
+      "r2_slope_explained_by_controls": 0.9663,
+      "variance_inflation_factor": 29.664,
+      "r2_full": 0.002041
+    },
+    {
+      "signal": "srp_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 63,
+      "n": 4545,
+      "hac_lag": 66,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.018842066278609737,
+          "t_hac": -0.9955,
+          "p_hac": 0.319491
+        },
+        "vts_6m": {
+          "beta": 0.029854008560658007,
+          "t_hac": 0.2872,
+          "p_hac": 0.773959
+        },
+        "srp_slope_6m": {
+          "beta": -0.02400349701901483,
+          "t_hac": -1.1726,
+          "p_hac": 0.240942
+        }
+      },
+      "incremental_t_on_slope": -1.1726,
+      "incremental_p_on_slope": 0.240942,
+      "r2_slope_explained_by_controls": 0.9662,
+      "variance_inflation_factor": 29.61,
+      "r2_full": 0.006482
+    },
+    {
+      "signal": "srp_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "n": 4482,
+      "hac_lag": 126,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.03567507604398529,
+          "t_hac": -0.8942,
+          "p_hac": 0.371238
+        },
+        "vts_6m": {
+          "beta": 0.0196218125558969,
+          "t_hac": 0.1137,
+          "p_hac": 0.909505
+        },
+        "srp_slope_6m": {
+          "beta": -0.03629170198542564,
+          "t_hac": -0.8899,
+          "p_hac": 0.373524
+        }
+      },
+      "incremental_t_on_slope": -0.8899,
+      "incremental_p_on_slope": 0.373524,
+      "r2_slope_explained_by_controls": 0.966,
+      "variance_inflation_factor": 29.395,
+      "r2_full": 0.014996
+    },
+    {
+      "signal": "srp_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "n": 4356,
+      "hac_lag": 252,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.08235548742518406,
+          "t_hac": -1.0762,
+          "p_hac": 0.281836
+        },
+        "vts_6m": {
+          "beta": 0.13587236059471985,
+          "t_hac": 0.442,
+          "p_hac": 0.658478
+        },
+        "srp_slope_6m": {
+          "beta": -0.09816358048888074,
+          "t_hac": -1.1748,
+          "p_hac": 0.24009
+        }
+      },
+      "incremental_t_on_slope": -1.1748,
+      "incremental_p_on_slope": 0.24009,
+      "r2_slope_explained_by_controls": 0.9644,
+      "variance_inflation_factor": 28.069,
+      "r2_full": 0.030347
+    },
+    {
+      "signal": "srp_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "n": 4587,
+      "hac_lag": 46,
+      "coefficients": {
+        "skew_level": {
+          "beta": -0.0027175974884050547,
+          "t_hac": -0.2792,
+          "p_hac": 0.780079
+        },
+        "vts_6m": {
+          "beta": -0.11489584662848618,
+          "t_hac": -3.0308,
+          "p_hac": 0.002439
+        },
+        "srp_slope_6m": {
+          "beta": -0.004654954239322884,
+          "t_hac": -0.3816,
+          "p_hac": 0.70278
+        }
+      },
+      "incremental_t_on_slope": -0.3816,
+      "incremental_p_on_slope": 0.70278,
+      "r2_slope_explained_by_controls": 0.9663,
+      "variance_inflation_factor": 29.664,
+      "r2_full": 0.200836
+    },
+    {
+      "signal": "srp_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 63,
+      "n": 4545,
+      "hac_lag": 66,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.015466510123804567,
+          "t_hac": 1.054,
+          "p_hac": 0.29187
+        },
+        "vts_6m": {
+          "beta": -0.1976653845551266,
+          "t_hac": -2.7547,
+          "p_hac": 0.005875
+        },
+        "srp_slope_6m": {
+          "beta": 0.019220389347677558,
+          "t_hac": 1.1708,
+          "p_hac": 0.24168
+        }
+      },
+      "incremental_t_on_slope": 1.1708,
+      "incremental_p_on_slope": 0.24168,
+      "r2_slope_explained_by_controls": 0.9662,
+      "variance_inflation_factor": 29.61,
+      "r2_full": 0.109312
+    },
+    {
+      "signal": "srp_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "n": 4482,
+      "hac_lag": 126,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.024048963567889103,
+          "t_hac": 1.1022,
+          "p_hac": 0.270374
+        },
+        "vts_6m": {
+          "beta": -0.23301697279803024,
+          "t_hac": -2.1305,
+          "p_hac": 0.033128
+        },
+        "srp_slope_6m": {
+          "beta": 0.029744116139462706,
+          "t_hac": 1.322,
+          "p_hac": 0.186168
+        }
+      },
+      "incremental_t_on_slope": 1.322,
+      "incremental_p_on_slope": 0.186168,
+      "r2_slope_explained_by_controls": 0.966,
+      "variance_inflation_factor": 29.395,
+      "r2_full": 0.076795
+    },
+    {
+      "signal": "srp_slope_6m",
+      "controls": [
+        "skew_level",
+        "vts_6m"
+      ],
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "n": 4356,
+      "hac_lag": 252,
+      "coefficients": {
+        "skew_level": {
+          "beta": 0.0519190864155481,
+          "t_hac": 1.1696,
+          "p_hac": 0.242158
+        },
+        "vts_6m": {
+          "beta": -0.33630479946442904,
+          "t_hac": -1.7657,
+          "p_hac": 0.077441
+        },
+        "srp_slope_6m": {
+          "beta": 0.06369051736403142,
+          "t_hac": 1.324,
+          "p_hac": 0.1855
+        }
+      },
+      "incremental_t_on_slope": 1.324,
+      "incremental_p_on_slope": 0.1855,
+      "r2_slope_explained_by_controls": 0.9644,
+      "variance_inflation_factor": 28.069,
+      "r2_full": 0.081518
+    }
+  ],
+  "multiple_testing": {
+    "families": {
+      "A_long": {
+        "n_cells": 24,
+        "common_sample_start": "1993-02-01",
+        "common_sample_end": "2026-06-29",
+        "n_rows": 8409,
+        "bootstrap_block_length": 252,
+        "n_blocks_per_replicate": 34,
+        "n_cells_unadjusted_p_lt_05": 2,
+        "n_cells_romano_wolf_p_lt_05": 0,
+        "n_cells_holm_p_lt_05": 0
+      },
+      "B_short": {
+        "n_cells": 24,
+        "common_sample_start": "2008-01-03",
+        "common_sample_end": "2026-06-29",
+        "n_rows": 4650,
+        "bootstrap_block_length": 252,
+        "n_blocks_per_replicate": 19,
+        "n_cells_unadjusted_p_lt_05": 5,
+        "n_cells_romano_wolf_p_lt_05": 4,
+        "n_cells_holm_p_lt_05": 4
+      },
+      "C_mid": {
+        "n_cells": 16,
+        "common_sample_start": "2006-07-18",
+        "common_sample_end": "2026-06-29",
+        "n_rows": 5018,
+        "bootstrap_block_length": 252,
+        "n_blocks_per_replicate": 20,
+        "n_cells_unadjusted_p_lt_05": 3,
+        "n_cells_romano_wolf_p_lt_05": 3,
+        "n_cells_holm_p_lt_05": 2
+      }
+    },
+    "family_definition": "One family per data-availability group, so the bootstrap can resample a single common row index across all cells in the family. Cells = signals x {fwd_ret, fwd_mdd} x {21,63,126,252}.",
+    "romano_wolf": {
+      "B": 2000,
+      "seed": 42,
+      "resampling": "circular block bootstrap, block length = max horizon in family (252)",
+      "studentisation": "(beta_b - beta_hat) / se_HAC(original sample); the same constant divides observed and bootstrap statistics, which is what makes the stepdown valid"
+    },
+    "global_holm": {
+      "n_cells": 64,
+      "n_p_lt_05": 2,
+      "note": "Holm across ALL cells regardless of family; the most conservative view."
+    }
+  },
+  "subperiods": [
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "1993-2002_dotcom",
+      "status": "ok",
+      "n": 2248,
+      "effective_sample_size": 17.8,
+      "beta": 0.03912289732974458,
+      "t_hac": 0.5847,
+      "p_hac": 0.558766,
+      "r2": 0.001841
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 2517,
+      "effective_sample_size": 20.0,
+      "beta": 0.022771339625427135,
+      "t_hac": 0.3065,
+      "p_hac": 0.759244,
+      "r2": 0.000453
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1762,
+      "effective_sample_size": 14.0,
+      "beta": -0.0011082983775017007,
+      "t_hac": -0.0391,
+      "p_hac": 0.968844,
+      "r2": 8e-06
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1525,
+      "effective_sample_size": 12.1,
+      "beta": 0.007503570939713641,
+      "t_hac": 0.1452,
+      "p_hac": 0.884526,
+      "r2": 0.000112
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "1993-2002_dotcom",
+      "status": "ok",
+      "n": 2248,
+      "effective_sample_size": 8.9,
+      "beta": 0.10093537915085289,
+      "t_hac": 0.807,
+      "p_hac": 0.419677,
+      "r2": 0.004595
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 2517,
+      "effective_sample_size": 10.0,
+      "beta": -0.03445006304809728,
+      "t_hac": -0.2731,
+      "p_hac": 0.784739,
+      "r2": 0.000535
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1762,
+      "effective_sample_size": 7.0,
+      "beta": -0.021521648301795343,
+      "t_hac": -0.5853,
+      "p_hac": 0.558327,
+      "r2": 0.001849
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1399,
+      "effective_sample_size": 5.6,
+      "beta": -0.025705465016381074,
+      "t_hac": -0.3538,
+      "p_hac": 0.723455,
+      "r2": 0.000508
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "1993-2002_dotcom",
+      "status": "ok",
+      "n": 2248,
+      "effective_sample_size": 17.8,
+      "beta": -0.014778291646658108,
+      "t_hac": -0.2769,
+      "p_hac": 0.781853,
+      "r2": 0.000715
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 2517,
+      "effective_sample_size": 20.0,
+      "beta": -0.022457733721037015,
+      "t_hac": -0.4928,
+      "p_hac": 0.622129,
+      "r2": 0.001011
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1762,
+      "effective_sample_size": 14.0,
+      "beta": -0.014203350134051669,
+      "t_hac": -0.5001,
+      "p_hac": 0.617014,
+      "r2": 0.001082
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1525,
+      "effective_sample_size": 12.1,
+      "beta": -0.02464374195970037,
+      "t_hac": -0.7168,
+      "p_hac": 0.473519,
+      "r2": 0.00278
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "1993-2002_dotcom",
+      "status": "ok",
+      "n": 2248,
+      "effective_sample_size": 8.9,
+      "beta": -0.04277779269913182,
+      "t_hac": -0.6539,
+      "p_hac": 0.513165,
+      "r2": 0.003775
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 2517,
+      "effective_sample_size": 10.0,
+      "beta": 0.025523926463175636,
+      "t_hac": 0.3203,
+      "p_hac": 0.748767,
+      "r2": 0.000697
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1762,
+      "effective_sample_size": 7.0,
+      "beta": -0.05866224591207786,
+      "t_hac": -0.8879,
+      "p_hac": 0.374586,
+      "r2": 0.010798
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1399,
+      "effective_sample_size": 5.6,
+      "beta": -0.04944704044857337,
+      "t_hac": -1.3835,
+      "p_hac": 0.166523,
+      "r2": 0.00906
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1625,
+      "effective_sample_size": 12.9,
+      "beta": 0.06601712794090749,
+      "t_hac": 1.0065,
+      "p_hac": 0.314163,
+      "r2": 0.031578
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 14.0,
+      "beta": -0.02489752828637437,
+      "t_hac": -1.9561,
+      "p_hac": 0.050459,
+      "r2": 0.066556
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1485,
+      "effective_sample_size": 12.1,
+      "beta": -0.027501378563768886,
+      "t_hac": -2.343,
+      "p_hac": 0.019128,
+      "r2": 0.079762
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1625,
+      "effective_sample_size": 6.5,
+      "beta": 0.11837037272431411,
+      "t_hac": 1.068,
+      "p_hac": 0.285535,
+      "r2": 0.05246
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 7.0,
+      "beta": -0.024482875972688,
+      "t_hac": -1.7073,
+      "p_hac": 0.087772,
+      "r2": 0.039336
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1359,
+      "effective_sample_size": 5.6,
+      "beta": -0.053294632840698186,
+      "t_hac": -2.1243,
+      "p_hac": 0.033644,
+      "r2": 0.135442
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1625,
+      "effective_sample_size": 12.9,
+      "beta": -0.09045318099998056,
+      "t_hac": -2.1015,
+      "p_hac": 0.035594,
+      "r2": 0.151584
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 14.0,
+      "beta": 0.013130504931991971,
+      "t_hac": 1.0638,
+      "p_hac": 0.287416,
+      "r2": 0.014996
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1485,
+      "effective_sample_size": 12.1,
+      "beta": -0.0026880023064844716,
+      "t_hac": -0.2688,
+      "p_hac": 0.788052,
+      "r2": 0.001739
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1625,
+      "effective_sample_size": 6.5,
+      "beta": -0.1386096659155449,
+      "t_hac": -2.3408,
+      "p_hac": 0.019245,
+      "r2": 0.203536
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 7.0,
+      "beta": -0.009267011926087365,
+      "t_hac": -0.4176,
+      "p_hac": 0.676254,
+      "r2": 0.004389
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1359,
+      "effective_sample_size": 5.6,
+      "beta": 0.01589461964926059,
+      "t_hac": 2.1121,
+      "p_hac": 0.034676,
+      "r2": 0.057631
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1257,
+      "effective_sample_size": 10.0,
+      "beta": 0.050192731202415394,
+      "t_hac": 0.7518,
+      "p_hac": 0.452165,
+      "r2": 0.024998
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 14.0,
+      "beta": -0.01917990065320191,
+      "t_hac": -1.6937,
+      "p_hac": 0.090325,
+      "r2": 0.054508
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1485,
+      "effective_sample_size": 12.1,
+      "beta": -0.022892410763636767,
+      "t_hac": -2.3236,
+      "p_hac": 0.020145,
+      "r2": 0.083318
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1257,
+      "effective_sample_size": 5.0,
+      "beta": 0.07245991187284945,
+      "t_hac": 0.7797,
+      "p_hac": 0.435541,
+      "r2": 0.036051
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 7.0,
+      "beta": -0.020399994661876197,
+      "t_hac": -1.7003,
+      "p_hac": 0.089068,
+      "r2": 0.037689
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1359,
+      "effective_sample_size": 5.6,
+      "beta": -0.043529790626324116,
+      "t_hac": -2.0798,
+      "p_hac": 0.037545,
+      "r2": 0.1372
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1257,
+      "effective_sample_size": 10.0,
+      "beta": -0.08204557229348719,
+      "t_hac": -2.1182,
+      "p_hac": 0.034154,
+      "r2": 0.175779
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 14.0,
+      "beta": 0.008985881734855539,
+      "t_hac": 0.8348,
+      "p_hac": 0.40385,
+      "r2": 0.009692
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1485,
+      "effective_sample_size": 12.1,
+      "beta": -0.0017896625037102099,
+      "t_hac": -0.2123,
+      "p_hac": 0.831878,
+      "r2": 0.001162
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1257,
+      "effective_sample_size": 5.0,
+      "beta": -0.11414364003471311,
+      "t_hac": -2.2008,
+      "p_hac": 0.027749,
+      "r2": 0.221695
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 7.0,
+      "beta": -0.01065197682670932,
+      "t_hac": -0.5197,
+      "p_hac": 0.603279,
+      "r2": 0.008003
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1359,
+      "effective_sample_size": 5.6,
+      "beta": 0.01305092152898868,
+      "t_hac": 2.0552,
+      "p_hac": 0.039861,
+      "r2": 0.058998
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1257,
+      "effective_sample_size": 10.0,
+      "beta": 0.05334513521137234,
+      "t_hac": 0.8289,
+      "p_hac": 0.407139,
+      "r2": 0.030213
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 14.0,
+      "beta": -0.017414473975903122,
+      "t_hac": -1.6673,
+      "p_hac": 0.095449,
+      "r2": 0.050081
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1485,
+      "effective_sample_size": 12.1,
+      "beta": -0.023318480584684526,
+      "t_hac": -2.3238,
+      "p_hac": 0.020135,
+      "r2": 0.084316
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1257,
+      "effective_sample_size": 5.0,
+      "beta": 0.06924997690853835,
+      "t_hac": 0.8071,
+      "p_hac": 0.419618,
+      "r2": 0.035232
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 7.0,
+      "beta": -0.018502694046996282,
+      "t_hac": -1.6267,
+      "p_hac": 0.103803,
+      "r2": 0.034555
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1359,
+      "effective_sample_size": 5.6,
+      "beta": -0.04439880911885946,
+      "t_hac": -2.107,
+      "p_hac": 0.035119,
+      "r2": 0.140211
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1257,
+      "effective_sample_size": 10.0,
+      "beta": -0.08251593551934006,
+      "t_hac": -2.1735,
+      "p_hac": 0.029745,
+      "r2": 0.190245
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 14.0,
+      "beta": 0.008660325157423487,
+      "t_hac": 0.8724,
+      "p_hac": 0.38297,
+      "r2": 0.010033
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1485,
+      "effective_sample_size": 12.1,
+      "beta": -0.0018568578073905606,
+      "t_hac": -0.2184,
+      "p_hac": 0.827135,
+      "r2": 0.00122
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "1993-2002_dotcom",
+      "status": "insufficient_data",
+      "n": 0
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2003-2012_GFC",
+      "status": "ok",
+      "n": 1257,
+      "effective_sample_size": 5.0,
+      "beta": -0.1110485319502833,
+      "t_hac": -2.3164,
+      "p_hac": 0.020539,
+      "r2": 0.224522
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2013-2019_postGFC",
+      "status": "ok",
+      "n": 1740,
+      "effective_sample_size": 7.0,
+      "beta": -0.01145432061265439,
+      "t_hac": -0.5677,
+      "p_hac": 0.57026,
+      "r2": 0.010313
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "subperiod": "2020-2026_covid_and_after",
+      "status": "ok",
+      "n": 1359,
+      "effective_sample_size": 5.6,
+      "beta": 0.012927016268705849,
+      "t_hac": 2.0191,
+      "p_hac": 0.043475,
+      "r2": 0.05686
+    }
+  ],
+  "subperiod_stability_summary": {
+    "ts_realized|fwd_ret|126": {
+      "n_subperiods_estimable": 4,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "1993-2002_dotcom": 0.5847,
+        "2003-2012_GFC": 0.3065,
+        "2013-2019_postGFC": -0.0391,
+        "2020-2026_covid_and_after": 0.1452
+      }
+    },
+    "ts_realized|fwd_ret|252": {
+      "n_subperiods_estimable": 4,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "1993-2002_dotcom": 0.807,
+        "2003-2012_GFC": -0.2731,
+        "2013-2019_postGFC": -0.5853,
+        "2020-2026_covid_and_after": -0.3538
+      }
+    },
+    "ts_realized|fwd_mdd|126": {
+      "n_subperiods_estimable": 4,
+      "sign_flips": false,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "1993-2002_dotcom": -0.2769,
+        "2003-2012_GFC": -0.4928,
+        "2013-2019_postGFC": -0.5001,
+        "2020-2026_covid_and_after": -0.7168
+      }
+    },
+    "ts_realized|fwd_mdd|252": {
+      "n_subperiods_estimable": 4,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "1993-2002_dotcom": -0.6539,
+        "2003-2012_GFC": 0.3203,
+        "2013-2019_postGFC": -0.8879,
+        "2020-2026_covid_and_after": -1.3835
+      }
+    },
+    "rn_slope_3m|fwd_ret|126": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": 1.0065,
+        "2013-2019_postGFC": -1.9561,
+        "2020-2026_covid_and_after": -2.343
+      }
+    },
+    "rn_slope_3m|fwd_ret|252": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": 1.068,
+        "2013-2019_postGFC": -1.7073,
+        "2020-2026_covid_and_after": -2.1243
+      }
+    },
+    "rn_slope_3m|fwd_mdd|126": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": -2.1015,
+        "2013-2019_postGFC": 1.0638,
+        "2020-2026_covid_and_after": -0.2688
+      }
+    },
+    "rn_slope_3m|fwd_mdd|252": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": -2.3408,
+        "2013-2019_postGFC": -0.4176,
+        "2020-2026_covid_and_after": 2.1121
+      }
+    },
+    "rn_slope_6m|fwd_ret|126": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": 0.7518,
+        "2013-2019_postGFC": -1.6937,
+        "2020-2026_covid_and_after": -2.3236
+      }
+    },
+    "rn_slope_6m|fwd_ret|252": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": 0.7797,
+        "2013-2019_postGFC": -1.7003,
+        "2020-2026_covid_and_after": -2.0798
+      }
+    },
+    "rn_slope_6m|fwd_mdd|126": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": -2.1182,
+        "2013-2019_postGFC": 0.8348,
+        "2020-2026_covid_and_after": -0.2123
+      }
+    },
+    "rn_slope_6m|fwd_mdd|252": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": -2.2008,
+        "2013-2019_postGFC": -0.5197,
+        "2020-2026_covid_and_after": 2.0552
+      }
+    },
+    "srp_slope_6m|fwd_ret|126": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": 0.8289,
+        "2013-2019_postGFC": -1.6673,
+        "2020-2026_covid_and_after": -2.3238
+      }
+    },
+    "srp_slope_6m|fwd_ret|252": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": 0.8071,
+        "2013-2019_postGFC": -1.6267,
+        "2020-2026_covid_and_after": -2.107
+      }
+    },
+    "srp_slope_6m|fwd_mdd|126": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": -2.1735,
+        "2013-2019_postGFC": 0.8724,
+        "2020-2026_covid_and_after": -0.2184
+      }
+    },
+    "srp_slope_6m|fwd_mdd|252": {
+      "n_subperiods_estimable": 3,
+      "sign_flips": true,
+      "n_subperiods_abs_t_gt_3": 0,
+      "t_values": {
+        "2003-2012_GFC": -2.3164,
+        "2013-2019_postGFC": -0.5677,
+        "2020-2026_covid_and_after": 2.0191
+      }
+    }
+  },
+  "out_of_sample": [
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 330,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "1998-07-16",
+      "oos_end": "2026-01-02",
+      "oos_span_years": 27.47,
+      "effective_independent_oos_obs": 54.9,
+      "mse_historical_mean": 0.014725155689290484,
+      "mse_predictive": 0.014753670553652048,
+      "oos_r2_campbell_thompson": -0.001936,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 330,
+        "t_stat": -1.283,
+        "p_value_one_sided": 0.900254,
+        "p_value_two_sided": 0.199492,
+        "mean_adjusted_loss_diff": -2.2e-05,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 318,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "1999-01-14",
+      "oos_end": "2025-07-03",
+      "oos_span_years": 26.47,
+      "effective_independent_oos_obs": 26.5,
+      "mse_historical_mean": 0.03621632802548786,
+      "mse_predictive": 0.036417260323963495,
+      "oos_r2_campbell_thompson": -0.005548,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 318,
+        "t_stat": -1.443295,
+        "p_value_one_sided": 0.925531,
+        "p_value_two_sided": 0.148937,
+        "mean_adjusted_loss_diff": -0.000172,
+        "hac_lag": 16,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 330,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "1998-07-16",
+      "oos_end": "2026-01-02",
+      "oos_span_years": 27.47,
+      "effective_independent_oos_obs": 54.9,
+      "mse_historical_mean": 0.006660779305670074,
+      "mse_predictive": 0.006659067423098455,
+      "oos_r2_campbell_thompson": 0.000257,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 330,
+        "t_stat": 0.403128,
+        "p_value_one_sided": 0.343427,
+        "p_value_two_sided": 0.686854,
+        "mean_adjusted_loss_diff": 5e-06,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 318,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "1999-01-14",
+      "oos_end": "2025-07-03",
+      "oos_span_years": 26.47,
+      "effective_independent_oos_obs": 26.5,
+      "mse_historical_mean": 0.01210636199406306,
+      "mse_predictive": 0.012146762030877093,
+      "oos_r2_campbell_thompson": -0.003337,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 318,
+        "t_stat": -1.783744,
+        "p_value_one_sided": 0.962767,
+        "p_value_two_sided": 0.074465,
+        "mean_adjusted_loss_diff": -3.6e-05,
+        "hac_lag": 16,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "ts_realized",
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "status": "ok",
+      "n_origins": 340,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 1,
+      "oos_start": "1998-02-13",
+      "oos_end": "2026-06-04",
+      "oos_span_years": 28.3,
+      "effective_independent_oos_obs": 339.6,
+      "mse_historical_mean": 0.0013907999808459046,
+      "mse_predictive": 0.0013960160984062362,
+      "oos_r2_campbell_thompson": -0.00375,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 340,
+        "t_stat": -1.042927,
+        "p_value_one_sided": 0.851509,
+        "p_value_two_sided": 0.296982,
+        "mean_adjusted_loss_diff": -4e-06,
+        "hac_lag": 7,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 178,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2011-01-06",
+      "oos_end": "2026-01-16",
+      "oos_span_years": 15.03,
+      "effective_independent_oos_obs": 30.1,
+      "mse_historical_mean": 0.008237728687496133,
+      "mse_predictive": 0.00944446217042332,
+      "oos_r2_campbell_thompson": -0.146489,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 178,
+        "t_stat": -0.559957,
+        "p_value_one_sided": 0.712246,
+        "p_value_two_sided": 0.575509,
+        "mean_adjusted_loss_diff": -0.00036,
+        "hac_lag": 11,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 166,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2011-07-08",
+      "oos_end": "2025-07-18",
+      "oos_span_years": 14.03,
+      "effective_independent_oos_obs": 14.0,
+      "mse_historical_mean": 0.019592103620025905,
+      "mse_predictive": 0.021761274365185348,
+      "oos_r2_campbell_thompson": -0.110717,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 166,
+        "t_stat": 0.342235,
+        "p_value_one_sided": 0.366087,
+        "p_value_two_sided": 0.732174,
+        "mean_adjusted_loss_diff": 0.000712,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 178,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2011-01-06",
+      "oos_end": "2026-01-16",
+      "oos_span_years": 15.03,
+      "effective_independent_oos_obs": 30.1,
+      "mse_historical_mean": 0.005153223466949357,
+      "mse_predictive": 0.005970177246264158,
+      "oos_r2_campbell_thompson": -0.158533,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 178,
+        "t_stat": 1.391113,
+        "p_value_one_sided": 0.082096,
+        "p_value_two_sided": 0.164191,
+        "mean_adjusted_loss_diff": 0.001261,
+        "hac_lag": 11,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 166,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2011-07-08",
+      "oos_end": "2025-07-18",
+      "oos_span_years": 14.03,
+      "effective_independent_oos_obs": 14.0,
+      "mse_historical_mean": 0.009816632934302922,
+      "mse_predictive": 0.01114206263253997,
+      "oos_r2_campbell_thompson": -0.135019,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 166,
+        "t_stat": 1.938202,
+        "p_value_one_sided": 0.026299,
+        "p_value_two_sided": 0.052599,
+        "mean_adjusted_loss_diff": 0.004325,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "status": "ok",
+      "n_origins": 188,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 1,
+      "oos_start": "2010-08-09",
+      "oos_end": "2026-06-18",
+      "oos_span_years": 15.86,
+      "effective_independent_oos_obs": 190.3,
+      "mse_historical_mean": 0.0012450199294818556,
+      "mse_predictive": 0.0012693877521415867,
+      "oos_r2_campbell_thompson": -0.019572,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 188,
+        "t_stat": 4.11326,
+        "p_value_one_sided": 2e-05,
+        "p_value_two_sided": 3.9e-05,
+        "mean_adjusted_loss_diff": 0.000398,
+        "hac_lag": 6,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 160,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2012-06-22",
+      "oos_end": "2026-01-02",
+      "oos_span_years": 13.53,
+      "effective_independent_oos_obs": 27.1,
+      "mse_historical_mean": 0.006841739392159205,
+      "mse_predictive": 0.007392937513178444,
+      "oos_r2_campbell_thompson": -0.080564,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 160,
+        "t_stat": 0.104503,
+        "p_value_one_sided": 0.458385,
+        "p_value_two_sided": 0.91677,
+        "mean_adjusted_loss_diff": 5.2e-05,
+        "hac_lag": 10,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 148,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2012-12-24",
+      "oos_end": "2025-07-03",
+      "oos_span_years": 12.52,
+      "effective_independent_oos_obs": 12.5,
+      "mse_historical_mean": 0.01442550279041193,
+      "mse_predictive": 0.016827203756138477,
+      "oos_r2_campbell_thompson": -0.16649,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 148,
+        "t_stat": -1.235734,
+        "p_value_one_sided": 0.891721,
+        "p_value_two_sided": 0.216557,
+        "mean_adjusted_loss_diff": -0.001195,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 160,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2012-06-22",
+      "oos_end": "2026-01-02",
+      "oos_span_years": 13.53,
+      "effective_independent_oos_obs": 27.1,
+      "mse_historical_mean": 0.00561710941266126,
+      "mse_predictive": 0.005974216014095614,
+      "oos_r2_campbell_thompson": -0.063575,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 160,
+        "t_stat": 2.166251,
+        "p_value_one_sided": 0.015146,
+        "p_value_two_sided": 0.030292,
+        "mean_adjusted_loss_diff": 0.002244,
+        "hac_lag": 10,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 148,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2012-12-24",
+      "oos_end": "2025-07-03",
+      "oos_span_years": 12.52,
+      "effective_independent_oos_obs": 12.5,
+      "mse_historical_mean": 0.00857045590635299,
+      "mse_predictive": 0.010453862053291123,
+      "oos_r2_campbell_thompson": -0.219756,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 148,
+        "t_stat": 1.730953,
+        "p_value_one_sided": 0.04173,
+        "p_value_two_sided": 0.08346,
+        "mean_adjusted_loss_diff": 0.003733,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "rn_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "status": "ok",
+      "n_origins": 170,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 1,
+      "oos_start": "2012-01-24",
+      "oos_end": "2026-06-04",
+      "oos_span_years": 14.36,
+      "effective_independent_oos_obs": 172.3,
+      "mse_historical_mean": 0.0012414031798566683,
+      "mse_predictive": 0.0011004942725261232,
+      "oos_r2_campbell_thompson": 0.113508,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 170,
+        "t_stat": 3.398161,
+        "p_value_one_sided": 0.000339,
+        "p_value_two_sided": 0.000678,
+        "mean_adjusted_loss_diff": 0.000708,
+        "hac_lag": 6,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 160,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2012-06-22",
+      "oos_end": "2026-01-02",
+      "oos_span_years": 13.53,
+      "effective_independent_oos_obs": 27.1,
+      "mse_historical_mean": 0.006841739392159205,
+      "mse_predictive": 0.007479376483733255,
+      "oos_r2_campbell_thompson": -0.093198,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 160,
+        "t_stat": 0.180211,
+        "p_value_one_sided": 0.428493,
+        "p_value_two_sided": 0.856987,
+        "mean_adjusted_loss_diff": 9.5e-05,
+        "hac_lag": 10,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 148,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2012-12-24",
+      "oos_end": "2025-07-03",
+      "oos_span_years": 12.52,
+      "effective_independent_oos_obs": 12.5,
+      "mse_historical_mean": 0.01442550279041193,
+      "mse_predictive": 0.016733982284745083,
+      "oos_r2_campbell_thompson": -0.160028,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 148,
+        "t_stat": -1.220389,
+        "p_value_one_sided": 0.888841,
+        "p_value_two_sided": 0.222317,
+        "mean_adjusted_loss_diff": -0.001144,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 160,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2012-06-22",
+      "oos_end": "2026-01-02",
+      "oos_span_years": 13.53,
+      "effective_independent_oos_obs": 27.1,
+      "mse_historical_mean": 0.00561710941266126,
+      "mse_predictive": 0.00610975202507061,
+      "oos_r2_campbell_thompson": -0.087704,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 160,
+        "t_stat": 2.207198,
+        "p_value_one_sided": 0.01365,
+        "p_value_two_sided": 0.0273,
+        "mean_adjusted_loss_diff": 0.0023,
+        "hac_lag": 10,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 148,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2012-12-24",
+      "oos_end": "2025-07-03",
+      "oos_span_years": 12.52,
+      "effective_independent_oos_obs": 12.5,
+      "mse_historical_mean": 0.00857045590635299,
+      "mse_predictive": 0.010572929688695177,
+      "oos_r2_campbell_thompson": -0.233648,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 148,
+        "t_stat": 1.763933,
+        "p_value_one_sided": 0.038872,
+        "p_value_two_sided": 0.077743,
+        "mean_adjusted_loss_diff": 0.003715,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "srp_slope_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "status": "ok",
+      "n_origins": 170,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 1,
+      "oos_start": "2012-01-24",
+      "oos_end": "2026-06-04",
+      "oos_span_years": 14.36,
+      "effective_independent_oos_obs": 172.3,
+      "mse_historical_mean": 0.0012414031798566683,
+      "mse_predictive": 0.0011369790870065846,
+      "oos_r2_campbell_thompson": 0.084118,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 170,
+        "t_stat": 3.370973,
+        "p_value_one_sided": 0.000375,
+        "p_value_two_sided": 0.000749,
+        "mean_adjusted_loss_diff": 0.000716,
+        "hac_lag": 6,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "skew_level",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 339,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "1997-07-16",
+      "oos_end": "2026-01-20",
+      "oos_span_years": 28.51,
+      "effective_independent_oos_obs": 57.0,
+      "mse_historical_mean": 0.013320853786921659,
+      "mse_predictive": 0.013869573652128939,
+      "oos_r2_campbell_thompson": -0.041193,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 339,
+        "t_stat": -1.358422,
+        "p_value_one_sided": 0.912835,
+        "p_value_two_sided": 0.17433,
+        "mean_adjusted_loss_diff": -0.000271,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "skew_level",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 327,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "1998-01-14",
+      "oos_end": "2025-07-21",
+      "oos_span_years": 27.52,
+      "effective_independent_oos_obs": 27.5,
+      "mse_historical_mean": 0.03229526870401016,
+      "mse_predictive": 0.03364452350277598,
+      "oos_r2_campbell_thompson": -0.041779,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 327,
+        "t_stat": -1.181222,
+        "p_value_one_sided": 0.881243,
+        "p_value_two_sided": 0.237514,
+        "mean_adjusted_loss_diff": -0.000775,
+        "hac_lag": 16,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "skew_level",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 339,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "1997-07-16",
+      "oos_end": "2026-01-20",
+      "oos_span_years": 28.51,
+      "effective_independent_oos_obs": 57.0,
+      "mse_historical_mean": 0.006831979140008198,
+      "mse_predictive": 0.00701131842761978,
+      "oos_r2_campbell_thompson": -0.02625,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 339,
+        "t_stat": 0.330568,
+        "p_value_one_sided": 0.370486,
+        "p_value_two_sided": 0.740971,
+        "mean_adjusted_loss_diff": 8.1e-05,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "skew_level",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 327,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "1998-01-14",
+      "oos_end": "2025-07-21",
+      "oos_span_years": 27.52,
+      "effective_independent_oos_obs": 27.5,
+      "mse_historical_mean": 0.012130156587350328,
+      "mse_predictive": 0.01258239775144958,
+      "oos_r2_campbell_thompson": -0.037282,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 327,
+        "t_stat": 0.476542,
+        "p_value_one_sided": 0.316844,
+        "p_value_two_sided": 0.633688,
+        "mean_adjusted_loss_diff": 0.00024,
+        "hac_lag": 16,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "skew_level",
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "status": "ok",
+      "n_origins": 349,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 1,
+      "oos_start": "1997-02-13",
+      "oos_end": "2026-06-22",
+      "oos_span_years": 29.35,
+      "effective_independent_oos_obs": 352.2,
+      "mse_historical_mean": 0.0014546727063346344,
+      "mse_predictive": 0.001451601927266925,
+      "oos_r2_campbell_thompson": 0.002111,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 349,
+        "t_stat": 1.478412,
+        "p_value_one_sided": 0.069649,
+        "p_value_two_sided": 0.139297,
+        "mean_adjusted_loss_diff": 3.9e-05,
+        "hac_lag": 8,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_3m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 181,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2011-01-05",
+      "oos_end": "2026-01-16",
+      "oos_span_years": 15.03,
+      "effective_independent_oos_obs": 30.1,
+      "mse_historical_mean": 0.008094159203429417,
+      "mse_predictive": 0.008457295289807801,
+      "oos_r2_campbell_thompson": -0.044864,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 181,
+        "t_stat": -0.747234,
+        "p_value_one_sided": 0.772539,
+        "p_value_two_sided": 0.454922,
+        "mean_adjusted_loss_diff": -0.000193,
+        "hac_lag": 11,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_3m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 169,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2011-07-07",
+      "oos_end": "2025-07-18",
+      "oos_span_years": 14.03,
+      "effective_independent_oos_obs": 14.0,
+      "mse_historical_mean": 0.0193176971276345,
+      "mse_predictive": 0.019758379634692062,
+      "oos_r2_campbell_thompson": -0.022812,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 169,
+        "t_stat": 0.162827,
+        "p_value_one_sided": 0.435327,
+        "p_value_two_sided": 0.870655,
+        "mean_adjusted_loss_diff": 0.000126,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 181,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2011-01-05",
+      "oos_end": "2026-01-16",
+      "oos_span_years": 15.03,
+      "effective_independent_oos_obs": 30.1,
+      "mse_historical_mean": 0.005027929760791572,
+      "mse_predictive": 0.005039203499204546,
+      "oos_r2_campbell_thompson": -0.002242,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 181,
+        "t_stat": 1.87891,
+        "p_value_one_sided": 0.030128,
+        "p_value_two_sided": 0.060257,
+        "mean_adjusted_loss_diff": 0.000949,
+        "hac_lag": 11,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 169,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2011-07-07",
+      "oos_end": "2025-07-18",
+      "oos_span_years": 14.03,
+      "effective_independent_oos_obs": 14.0,
+      "mse_historical_mean": 0.009635527712648284,
+      "mse_predictive": 0.0092647787475305,
+      "oos_r2_campbell_thompson": 0.038477,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 169,
+        "t_stat": 1.968925,
+        "p_value_one_sided": 0.024481,
+        "p_value_two_sided": 0.048962,
+        "mean_adjusted_loss_diff": 0.002207,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_3m",
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "status": "ok",
+      "n_origins": 191,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 1,
+      "oos_start": "2010-08-06",
+      "oos_end": "2026-06-18",
+      "oos_span_years": 15.87,
+      "effective_independent_oos_obs": 190.4,
+      "mse_historical_mean": 0.0011654684294098675,
+      "mse_predictive": 0.0010665002556241993,
+      "oos_r2_campbell_thompson": 0.084917,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 191,
+        "t_stat": 3.716312,
+        "p_value_one_sided": 0.000101,
+        "p_value_two_sided": 0.000202,
+        "mean_adjusted_loss_diff": 0.000448,
+        "hac_lag": 6,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_6m",
+      "target": "fwd_ret",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 163,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2012-06-21",
+      "oos_end": "2026-01-02",
+      "oos_span_years": 13.53,
+      "effective_independent_oos_obs": 27.1,
+      "mse_historical_mean": 0.007469337300172204,
+      "mse_predictive": 0.007618983847044998,
+      "oos_r2_campbell_thompson": -0.020035,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 163,
+        "t_stat": -0.265549,
+        "p_value_one_sided": 0.604707,
+        "p_value_two_sided": 0.790587,
+        "mean_adjusted_loss_diff": -5.2e-05,
+        "hac_lag": 10,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_6m",
+      "target": "fwd_ret",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 151,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2012-12-21",
+      "oos_end": "2025-07-03",
+      "oos_span_years": 12.53,
+      "effective_independent_oos_obs": 12.5,
+      "mse_historical_mean": 0.015542710994230664,
+      "mse_predictive": 0.01613471719254371,
+      "oos_r2_campbell_thompson": -0.038089,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 151,
+        "t_stat": -1.224856,
+        "p_value_one_sided": 0.889685,
+        "p_value_two_sided": 0.22063,
+        "mean_adjusted_loss_diff": -0.000462,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 126,
+      "status": "ok",
+      "n_origins": 163,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 6,
+      "oos_start": "2012-06-21",
+      "oos_end": "2026-01-02",
+      "oos_span_years": 13.53,
+      "effective_independent_oos_obs": 27.1,
+      "mse_historical_mean": 0.005617184436211578,
+      "mse_predictive": 0.005226386646031061,
+      "oos_r2_campbell_thompson": 0.069572,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 163,
+        "t_stat": 2.554077,
+        "p_value_one_sided": 0.005323,
+        "p_value_two_sided": 0.010647,
+        "mean_adjusted_loss_diff": 0.001856,
+        "hac_lag": 10,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 252,
+      "status": "ok",
+      "n_origins": 151,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 12,
+      "oos_start": "2012-12-21",
+      "oos_end": "2025-07-03",
+      "oos_span_years": 12.53,
+      "effective_independent_oos_obs": 12.5,
+      "mse_historical_mean": 0.008506355031349163,
+      "mse_predictive": 0.00850414640020149,
+      "oos_r2_campbell_thompson": 0.00026,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 151,
+        "t_stat": 1.882892,
+        "p_value_one_sided": 0.029858,
+        "p_value_two_sided": 0.059715,
+        "mean_adjusted_loss_diff": 0.002244,
+        "hac_lag": 13,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    },
+    {
+      "signal": "vts_6m",
+      "target": "fwd_mdd",
+      "horizon_days": 21,
+      "status": "ok",
+      "n_origins": 173,
+      "origin_step_trading_days": 21,
+      "overlap_in_origin_units": 1,
+      "oos_start": "2012-01-23",
+      "oos_end": "2026-06-04",
+      "oos_span_years": 14.36,
+      "effective_independent_oos_obs": 172.4,
+      "mse_historical_mean": 0.0012935550258017115,
+      "mse_predictive": 0.0011499459745667362,
+      "oos_r2_campbell_thompson": 0.111019,
+      "clark_west": {
+        "test": "Clark-West (2007) nested MSPE-adjusted",
+        "status": "ok",
+        "n_obs": 173,
+        "t_stat": 3.290609,
+        "p_value_one_sided": 0.0005,
+        "p_value_two_sided": 0.001,
+        "mean_adjusted_loss_diff": 0.000744,
+        "hac_lag": 6,
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model"
+      }
+    }
+  ],
+  "verdict_block": {
+    "verdict": "NULL_DEGENERATE",
+    "harvey_threshold": 3.0,
+    "n_cells_tested": 64,
+    "n_cells_abs_t_hac_gt_3": 6,
+    "n_cells_surviving_romano_wolf_and_hodrick": 6,
+    "n_slope_cells_surviving": 3,
+    "n_slope_cells_surviving_at_6_to_12_month_horizons": 0,
+    "surviving_cells": [
+      {
+        "signal": "rn_slope_3m",
+        "target": "fwd_mdd",
+        "horizon_days": 21,
+        "t_hac": -3.033,
+        "p_romano_wolf": 0.0405,
+        "hodrick_t": null
+      },
+      {
+        "signal": "rn_slope_6m",
+        "target": "fwd_mdd",
+        "horizon_days": 21,
+        "t_hac": -3.0729,
+        "p_romano_wolf": 0.0385,
+        "hodrick_t": null
+      },
+      {
+        "signal": "srp_slope_6m",
+        "target": "fwd_mdd",
+        "horizon_days": 21,
+        "t_hac": -3.1162,
+        "p_romano_wolf": 0.0355,
+        "hodrick_t": null
+      },
+      {
+        "signal": "vts_3m",
+        "target": "fwd_mdd",
+        "horizon_days": 21,
+        "t_hac": -3.7829,
+        "p_romano_wolf": 0.0115,
+        "hodrick_t": null
+      },
+      {
+        "signal": "vts_6m",
+        "target": "fwd_mdd",
+        "horizon_days": 21,
+        "t_hac": -4.4268,
+        "p_romano_wolf": 0.0035,
+        "hodrick_t": null
+      },
+      {
+        "signal": "vts_6m",
+        "target": "fwd_mdd",
+        "horizon_days": 63,
+        "t_hac": -3.1518,
+        "p_romano_wolf": 0.035,
+        "hodrick_t": null
+      }
+    ],
+    "n_slope_oos_cells_with_positive_r2_and_cw_p_lt_05": 2,
+    "n_slope_oos_cells_positive_at_6_to_12_month_horizons": 0,
+    "positive_verdict_rule": "POSITIVE requires >=1 single (signal, target, horizon) cell at H in {126,252} that simultaneously (a) survives Romano-Wolf and Hodrick in sample, (b) has OOS R2 > 0 with Clark-West one-sided p < 0.05, and (c) has |incremental t| > 3 against the level and the maturity-matched variance term structure. Evidence from different cells is never combined; a missing OOS or multivariate counterpart fails closed.",
+    "n_joint_survivors": 0,
+    "joint_survivors": [],
+    "differentiation_D1_slope_vs_level": "FAIL_degenerate",
+    "differentiation_D2_long_vs_short_horizon": "MIXED_OR_FAIL",
+    "headline_long_horizon_evidence": {
+      "max_abs_t_hac_over_slope_cells_at_H_126_252": 1.1162,
+      "max_abs_incremental_t_at_H_126_252": 2.15,
+      "best_oos_r2_over_slope_cells_at_H_126_252": 0.000257
+    }
+  },
+  "code_trace": {
+    "path": "experiments/K1736/K1736.py",
+    "sha256": "ab037e14af669be0740dc6c6dc35688aceb4ea64a04606751a186412b39bc210",
+    "size_bytes": 61593
+  },
+  "runtime_seconds": 10.385,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  }
+}

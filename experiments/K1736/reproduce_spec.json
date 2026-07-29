@@ -1,0 +1,99 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1736.py",
+    "args": [],
+    "sha256": "ab037e14af669be0740dc6c6dc35688aceb4ea64a04606751a186412b39bc210",
+    "size_bytes": 61593
+  },
+  "canonical_result": "K1736_results.json",
+  "inputs": [
+    {
+      "path": "experiments/K1736/data/SKEW.csv",
+      "sha256": "e604a469b69fb0b97867e65ff28f6a74f4833ad6ffcebddc28665af4b470dbf7",
+      "size_bytes": 954217
+    },
+    {
+      "path": "experiments/K1736/data/VIX.csv",
+      "sha256": "29e7ab892ff04eef98baf26956df6e8e175924a81077fc8e20ac9b9a3c80dde8",
+      "size_bytes": 954426
+    },
+    {
+      "path": "experiments/K1736/data/VIX3M.csv",
+      "sha256": "e16b6d67b80e872e3e7f83ca1e7f480aea44265c9b87b8914a15f21cde1ecb51",
+      "size_bytes": 522619
+    },
+    {
+      "path": "experiments/K1736/data/VIX6M.csv",
+      "sha256": "78f4ecf07df6d4f46e1238f25cfdd016b716ca34176e231d5108b80b54a19de6",
+      "size_bytes": 481917
+    },
+    {
+      "path": "experiments/K1736/data/SPY.csv",
+      "sha256": "dbda1018ef7c913a90a78d8a2fbc161e763f8ee352abd4f26d11cd6ad2281031",
+      "size_bytes": 847019
+    },
+    {
+      "path": "experiments/K1736/data/GSPC.csv",
+      "sha256": "070fb4e8db6af28919694c44e47146bc50cac00601ebe28b87af0d9822451622",
+      "size_bytes": 1134020
+    }
+  ],
+  "outputs": [
+    "K1736_results.json",
+    "figures/K1736_degeneracy_and_tstats.png",
+    "figures/K1736_slope_level_and_targets.png"
+  ],
+  "timeout_seconds": 91,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 10.385,
+    "recorded_at": "2026-07-29T17:05:24Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1736_results.json",
+    "sha256": "acf1fa3e1b59a1ec4f89fc6e83b309d884738e43a2211473ea3ceec2e0eae537",
+    "size_bytes": 193038
+  }
+}
