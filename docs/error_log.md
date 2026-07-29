@@ -4693,5 +4693,11 @@ bytes／mode／population，沒有驗「已安裝 wrapper 不得引用刻意不�
 helper；manifest gate 新增全 population invariant，任何 installed wrapper 再引用
 `${SCRIPT_DIR}/cron_lib.sh` 都會在 CI 失敗。RED 精確抓出唯一 offender
 `cron_ci_watch.sh`，修後 cron wrapper／owner gate／alert script affected suite
-**51 passed**，bash syntax與diff check通過。仍需 immutable wrapper apply與下一次
-自然 Operations Core fire回讀；在這兩項完成前狀態為 **`contained`**。
+**51 passed**，bash syntax與diff check通過。commit `d4e0a8e07` 從 canonical main
+經 `sync_cron_wrappers.py --apply` 原子安裝，完整 live population read-back
+`ok=true`、drift 0。03:00 CST 自然 Operations Core fire 留下 start marker，CI
+run `30480617870` 回讀 `conclusion=success`、`phase=recovered`、
+`reason=healthy_no_incident`，最後留下 exit 0／duration 2s 與
+`cron_mark_last_run` acknowledgement；同一時點 schedule owner audit仍為 56/56
+Operations Core、legacy 0、conflict 0。本 incident 五步 Gate 已完成，狀態為
+**`root_cause_fixed_and_verified`**。
