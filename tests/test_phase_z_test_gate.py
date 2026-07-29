@@ -567,7 +567,7 @@ def test_phase_z_test_gate_red_records_machine_self_without_a_task(
     (storage / "next_tasks.json").write_text("[]", encoding="utf-8")
     monkeypatch.setattr(
         ops_alerts,
-        "send_alert",
+        "send_routed_alert",
         lambda *args, **kwargs: {
             "sent": False,
             "skipped": True,
