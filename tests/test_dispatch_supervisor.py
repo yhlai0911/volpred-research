@@ -7111,6 +7111,56 @@ def test_workspace_sweep_uses_cutover_drain_for_pre_custody_orphan(
     ) is not None
 
 
+def test_installer_backfills_from_exact_prior_cutover_pair(
+    tmp_path: Path,
+) -> None:
+    from scripts import install_dispatch_supervisor_release as installer
+    from scripts.dispatch_supervisor import custody_receipt
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo, job_id="7" * 32)
+    assert ws is not None
+    ledger = repo / custody_receipt.RECEIPTS_RELPATH
+    ledger.parent.mkdir(parents=True, exist_ok=True)
+    ledger.touch()
+    run_root = tmp_path / "run"
+    receipts = run_root / "cutover_receipts"
+    receipts.mkdir(parents=True)
+    paired = {
+        "schema_version": 1,
+        "request_id": "cutover-prior",
+        "release_sha256": "a" * 64,
+        "release_commit": "b" * 40,
+        "completed_at": "2099-07-29T00:00:00+00:00",
+    }
+    (receipts / "in_progress.json").write_text(
+        json.dumps({**paired, "status": "completed_verified"}),
+        encoding="utf-8",
+    )
+    (receipts / "latest.json").write_text(
+        json.dumps({**paired, "status": "completed"}),
+        encoding="utf-8",
+    )
+
+    migrated = installer._backfill_pre_custody_workspace_drain(
+        repo_root=repo,
+        request_root=run_root,
+    )
+
+    assert migrated == 1
+    assert workspace.legacy_workspace_producer_drain_confirmed(
+        repo,
+        workspace_name=ws["name"],
+        job_id="7" * 32,
+    )
+    assert installer._backfill_pre_custody_workspace_drain(
+        repo_root=repo,
+        request_root=run_root,
+    ) == 0
+
+
 def test_workspace_sweep_fails_closed_when_orphan_evidence_cannot_append(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

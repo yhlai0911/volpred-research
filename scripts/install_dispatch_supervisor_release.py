@@ -71,6 +71,113 @@ class CutoverError(RuntimeError):
         self.rollback_verified = bool(rollback_verified)
 
 
+def _verified_prior_cutover_receipt(
+    request_root: Path,
+) -> dict[str, Any] | None:
+    """Read the two-file completed cutover authority or fail closed."""
+    receipt_root = Path(request_root) / "cutover_receipts"
+    intent_path = receipt_root / "in_progress.json"
+    latest_path = receipt_root / "latest.json"
+    if not intent_path.exists() and not latest_path.exists():
+        return None
+    try:
+        intent = json.loads(intent_path.read_text(encoding="utf-8"))
+        latest = json.loads(latest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise CutoverError(
+            "prior completed cutover receipt pair is unreadable"
+        ) from exc
+    if not isinstance(intent, dict) or not isinstance(latest, dict):
+        raise CutoverError("prior completed cutover receipt pair is invalid")
+    paired_fields = (
+        "request_id",
+        "release_sha256",
+        "release_commit",
+        "completed_at",
+    )
+    try:
+        completed = datetime.fromisoformat(str(intent.get("completed_at") or ""))
+    except ValueError as exc:
+        raise CutoverError(
+            "prior completed cutover timestamp is invalid"
+        ) from exc
+    if (
+        intent.get("status") != "completed_verified"
+        or latest.get("status") != "completed"
+        or any(intent.get(field) != latest.get(field) for field in paired_fields)
+        or not str(intent.get("request_id") or "").strip()
+        or re.fullmatch(
+            r"[0-9a-f]{40}",
+            str(intent.get("release_commit") or ""),
+        )
+        is None
+        or completed.tzinfo is None
+        or completed.utcoffset() is None
+    ):
+        raise CutoverError("prior completed cutover receipt pair did not verify")
+    return intent
+
+
+def _backfill_pre_custody_workspace_drain(
+    *,
+    repo_root: Path,
+    request_root: Path,
+) -> int:
+    """Migrate generations covered by the previous verified first cutover."""
+    root = Path(repo_root)
+    if not (root / custody_receipt.RECEIPTS_RELPATH).exists():
+        return 0
+    uncovered: list[dict[str, str]] = []
+    for generation in workspace_mod.active_allocated_workspace_generations(root):
+        workspace_name = generation["workspace"]
+        job_id = generation["job_id"]
+        if workspace_mod.legacy_workspace_producer_drain_confirmed(
+            root,
+            workspace_name=workspace_name,
+            job_id=job_id,
+        ):
+            continue
+        if workspace_mod.read_bound_producer_custody(
+            root,
+            workspace_name=workspace_name,
+            job_id_prefix=job_id,
+        ) is not None:
+            continue
+        uncovered.append(generation)
+    if not uncovered:
+        return 0
+    prior = _verified_prior_cutover_receipt(Path(request_root))
+    if prior is None:
+        raise CutoverError(
+            "pre-custody workspaces exist without a verified prior cutover"
+        )
+    try:
+        durable = workspace_mod.record_legacy_workspace_producer_drain(
+            root,
+            workspace_generations=uncovered,
+            cutover_request_id=str(prior["request_id"]),
+            cutover_completed_at=str(prior["completed_at"]),
+            complete_coalition_drained=True,
+            release_commit=str(prior["release_commit"]),
+        )
+    except (RuntimeError, TypeError, ValueError) as exc:
+        raise CutoverError(
+            "prior cutover does not cover active pre-custody workspaces"
+        ) from exc
+    if not durable or any(
+        not workspace_mod.legacy_workspace_producer_drain_confirmed(
+            root,
+            workspace_name=generation["workspace"],
+            job_id=generation["job_id"],
+        )
+        for generation in uncovered
+    ):
+        raise CutoverError(
+            "pre-custody workspace migration receipt did not read back"
+        )
+    return len(uncovered)
+
+
 def cutover(
     *,
     repo_root: Path = ROOT,
@@ -173,6 +280,10 @@ def _cutover_quiesced(
             )
         sleep_fn(0.25)
     before = state.read_state(Path(state_path))
+    _backfill_pre_custody_workspace_drain(
+        repo_root=Path(repo_root),
+        request_root=request_root,
+    )
     release = materialize_fn(
         repo_root=Path(repo_root),
         run_root=request_root,
@@ -310,20 +421,6 @@ def _cutover_quiesced(
                 f"members={legacy_members}"
             )
         transaction["legacy_custody_unresolved"] = False
-        drain_confirmed_at = datetime.now(UTC).isoformat()
-        if legacy_workspace_generations and not (
-            workspace_mod.record_legacy_workspace_producer_drain(
-                Path(repo_root),
-                workspace_generations=legacy_workspace_generations,
-                cutover_request_id=str(request["request_id"]),
-                cutover_completed_at=drain_confirmed_at,
-                complete_coalition_drained=True,
-                release_commit=str(request["release_commit"]),
-            )
-        ):
-            raise CutoverError(
-                "legacy workspace coalition-drain receipt was not durable"
-            )
         final_gate = state.cutover_quiesce_snapshot(
             token=quiesce_token,
             path=Path(state_path),
@@ -400,6 +497,19 @@ def _cutover_quiesced(
                 "status": "completed_verified",
             },
         )
+        if legacy_workspace_generations and not (
+            workspace_mod.record_legacy_workspace_producer_drain(
+                Path(repo_root),
+                workspace_generations=legacy_workspace_generations,
+                cutover_request_id=str(request["request_id"]),
+                cutover_completed_at=str(receipt["completed_at"]),
+                complete_coalition_drained=True,
+                release_commit=str(request["release_commit"]),
+            )
+        ):
+            raise CutoverError(
+                "legacy workspace coalition-drain receipt was not durable"
+            )
         return receipt
     except Exception as exc:
         if not transaction["mutation_armed"]:

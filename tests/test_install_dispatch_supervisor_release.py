@@ -253,6 +253,7 @@ def _materializer(source: Path):
 def test_cutover_installs_launchd_job_and_reads_back_exact_release(
     tmp_path: Path,
     _verified_legacy_coalition: dict[str, list[object]],
+    _isolated_legacy_workspace_drain: dict[str, list[object]],
 ) -> None:
     state_path = tmp_path / "dispatch_state.json"
     _state(state_path)
@@ -384,10 +385,12 @@ def test_cutover_installs_launchd_job_and_reads_back_exact_release(
     assert _verified_legacy_coalition["capture"] == [777]
     assert len(_verified_legacy_coalition["members"]) == 1
     assert _verified_legacy_coalition["members"][0]["trusted_unique_ids"] == [1001]
+    assert len(_isolated_legacy_workspace_drain["record"]) == 1
 
 
 def test_cutover_restores_legacy_plist_and_pointer_when_bootstrap_fails(
     tmp_path: Path,
+    _isolated_legacy_workspace_drain: dict[str, list[object]],
 ) -> None:
     state_path = tmp_path / "dispatch_state.json"
     _state(state_path)
@@ -496,6 +499,7 @@ def test_cutover_restores_legacy_plist_and_pointer_when_bootstrap_fails(
     ]
     assert rollback_bootout_observation["pointer"]["activation_state"] == ("candidate")
     assert rollback_bootout_observation["plist"] == immutable
+    assert _isolated_legacy_workspace_drain["record"] == []
 
 
 def test_idempotent_success_requires_live_stage0_launchctl_readback(
