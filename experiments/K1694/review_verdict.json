@@ -1,0 +1,59 @@
+{
+  "kid": "K1694",
+  "round": 5,
+  "verdict": "FAIL",
+  "reviewer": "Codex gpt-5.6-sol with independent Spec and Standards reviewers",
+  "reviewed_at": "2026-07-29T06:33:14Z",
+  "fixed_point": "aad5ce399",
+  "reviewed_commit": "94b81c295b7e9be0f459dce98629bdf9bf1deb0e",
+  "knowledge_promotion_allowed": false,
+  "merge_allowed": false,
+  "blocking_defects": [
+    {
+      "priority": "P1",
+      "id": "product_scoped_calendar_required",
+      "summary": "The universal unscheduled-closure whitelist is contradicted by primary exchange notices and changes the estimation sample.",
+      "detail": "CME_UNSCHEDULED_CLOSURES removes 2012-10-29, 2012-10-30 and 2018-12-05 for every commodity. CME stated that the Sandy closures covered U.S. equity-index futures (and part of the interest-rate complex), while all other futures remained open and NYMEX/COMEX electronic trading remained available. CME likewise stated that the 2018 mourning closure covered U.S. equity and interest-rate products while all other Globex markets remained open. K1694 spans energy, metals, agriculture, livestock and ICE softs. Removing the unsupported universal whitelist changes 2012-10 from 22/22 passing rows to 0/22 and changes the 2018-12 CORN row from passing to failing; the current 3276-row sample and rerun outputs are therefore not admissible.",
+      "required_fix": "Use product- and exchange-scoped official trading calendars with source-backed date fixtures, or remove the unsupported whitelist, explicitly downgrade the completeness claim, and rerun every derived artifact and sensitivity analysis."
+    },
+    {
+      "priority": "P2",
+      "id": "calendar_truth_test_is_tautological",
+      "summary": "The endpoint acceptance test reuses the calendar owner as its expected value and cannot falsify a wrong calendar.",
+      "detail": "test_endpoint_gate_accepts_an_untruncated_dated_cache injects expected_month_endpoints() output and then asks the same implementation to accept it. The test verifies internal consistency, not whether each product was actually open.",
+      "required_fix": "Add independent primary-source fixtures for product/date/open status, including the three disputed dates and both CME and ICE products."
+    }
+  ],
+  "requirements_verified": {
+    "round4_d2_endpoint_truncation": "PASS",
+    "round4_noncalendar_pass_list_regression": "PASS",
+    "null_scope_and_secondary_positive_result": "PASS",
+    "runtime_code_trace_and_reproduce_spec_identity": "PASS",
+    "tests": "42 passed with linearmodels",
+    "artifact_gate": "Only the intentionally deferred K1259 knowledge entry remains"
+  },
+  "reviewed_sha256": {
+    "README.md": "f589f8d245d2973130f59b8076d917a1c3eade4408918110a07b60bdffc9867b",
+    "K1694.py": "a58965545d4e8abfebd6950c62a5d12301b696dd5cbde34cba9ba30a1695fbd7",
+    "K1694_results.json": "eba0f030abb59c4466371443c516625dd9bf2282f4e6f733e6cdc032c0e0cd78",
+    "test_K1694.py": "25a476808162f8f57356839b88095fb3dd85c480d9de2808688a934b25ff91c0",
+    "reproduce_spec.json": "bb19d4a63e9291ca293aa8ed31338aefcd85ef39d1f0507d99be8cdc22c68b9a"
+  },
+  "primary_sources": [
+    {
+      "title": "CME Group Sandy closure notice, 2012-10-28",
+      "url": "https://www.cmegroup.com/media-room/press-releases/2012/10/28/media_alert_cme_grouptocloseusequityindexfuturesandoptionsonfutu.html",
+      "finding": "Only U.S. equity-index futures were closed; all other CME Group futures remained open."
+    },
+    {
+      "title": "CME/CBOT/NYMEX/COMEX CFTC submission 12-363",
+      "url": "https://www.cftc.gov/sites/default/files/stellent/groups/public/%40rulesandproducts/documents/ifdocs/rul102912cmecbotnymexandcomex1.pdf",
+      "finding": "NYMEX/COMEX physical floors closed, but electronic trading remained available for all products on CME Globex."
+    },
+    {
+      "title": "CME Group national day of mourning notice, 2018-12-02",
+      "url": "https://www.cmegroup.com/media-room/press-releases/2018/12/02/cme_group_u_s_equityinterestratemarketstoclosefornationaldayofmo.html",
+      "finding": "Only U.S. equity and interest-rate products closed; all other Globex markets kept regular hours."
+    }
+  ]
+}
