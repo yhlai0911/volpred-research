@@ -1,0 +1,390 @@
+{
+  "schema_version": 1,
+  "title": "K781 懶人包：多裝兩個零件的波動預測法，追平冠軍但超不過去",
+  "evidence": {
+    "results": {
+      "path": "experiments/k781/k781_mvf_results.json",
+      "sha256": "f31b169b109feb6147b9579954a100f62703ef637b69944ace6be46e90497c3e",
+      "label": "experiment K781 results (multiplicative volatility factor vs GJR-GARCH, SPY out-of-sample)"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "新做法想解決什麼：把波動拆成慢的一層乘快的一層",
+      "alt": "概念面板：說明新方法把波動拆成慢速水位線與快速偏離兩層相乘，比舊有的四零件老規則多用一個零件",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "老規則怎麼想",
+          "body": [
+            "今天會晃多大，看昨天晃多大來推；昨天如果是下跌收黑，權重再加重一點。",
+            "這套規則三十幾歲了，至今仍是模型比較時的預設對照組。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "新做法怎麼想",
+          "body": [
+            "慢的那層：用過去一段時間的實際震盪算出一條緩慢移動的水位線，代表市場現在大概是什麼量級。",
+            "快的那層：把每天的震盪除掉水位線，只留下相對偏離，再對偏離跑一次老規則。兩層相乘就是當天預測。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "新做法快速層：昨天震盪幅度的一般影響",
+          "value": {
+            "source": "results",
+            "path": "/full_sample_params/MVF/alpha_g",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "新做法快速層：昨天是否下跌的影響",
+          "value": {
+            "source": "results",
+            "path": "/full_sample_params/MVF/gamma_g",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "一個沒預期的細節",
+          "body": [
+            "新做法快速層負責「昨天震盪幅度一般影響」的零件被估成零，短期反應全由「昨天是不是下跌」承擔。",
+            "多裝的兩個零件，實際上只有一個在動。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "比法：同一批資料、同一套規則、不准偷看未來",
+      "alt": "方法面板：列出標的、資料來源、全期與樣本外評分區間、最短估計視窗、重估頻率與重估次數",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "怎麼跑",
+          "body": [
+            "模型只准用當天以前的資料估參數，估完往後預測一天，然後往前滾。",
+            "評分方式是拿預測值對照當天實際震盪幅度，算出一個誤差分數，分數越低越準。就算標準答案本身是粗糙近似，這種算法也不會偏袒任何一方。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "標的",
+          "value": {
+            "source": "results",
+            "path": "/asset",
+            "format": {
+              "kind": "text"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "資料來源",
+          "value": {
+            "source": "results",
+            "path": "/data_source",
+            "format": {
+              "kind": "text"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "全期資料",
+          "value": {
+            "source": "results",
+            "path": "/data_period",
+            "format": {
+              "kind": "text"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "全期交易日",
+          "value": {
+            "source": "results",
+            "path": "/n_total",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "實際評分區間",
+          "value": {
+            "source": "results",
+            "path": "/oos_period",
+            "format": {
+              "kind": "text"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "評分天數",
+          "value": {
+            "source": "results",
+            "path": "/n_oos",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最短起手視窗",
+          "value": {
+            "source": "results",
+            "path": "/min_window",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "每隔多久重估參數",
+          "value": {
+            "source": "results",
+            "path": "/refit_freq",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "全程重估次數",
+          "value": {
+            "source": "results",
+            "path": "/n_refits",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "成績單：新做法第二名，跟第一名的差距丟銅板都分不出來",
+      "alt": "結果面板：五種做法的樣本外誤差分數排名、新做法與冠軍的比較強度與運氣機率、留在候選名單上的兩個做法",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "冠軍：壞消息加權版（老規則）誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/qlike_ranking/0/QLIKE",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "亞軍：慢快相乘版（新做法）誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/qlike_ranking/1/QLIKE",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "墊底：三段長度平均版誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/qlike_ranking/4/QLIKE",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "新做法對上老規則的訊號強度（要跨過二才站得住）",
+          "value": {
+            "source": "results",
+            "path": "/dm_tests_vs_best/MVF vs GJR-GARCH/Harvey_t",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "兩者其實一樣準、光靠運氣跑出這麼大差距的機率",
+          "value": {
+            "source": "results",
+            "path": "/dm_tests_vs_best/MVF vs GJR-GARCH/p_value",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "候選名單重複抽樣次數",
+          "value": {
+            "source": "results",
+            "path": "/mcs/n_boot",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "留在名單上：老規則",
+          "value": {
+            "source": "results",
+            "path": "/mcs/p_values/GJR-GARCH",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "留在名單上：新做法",
+          "value": {
+            "source": "results",
+            "path": "/mcs/p_values/MVF",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "被清出名單：三段長度平均版",
+          "value": {
+            "source": "results",
+            "path": "/mcs/p_values/HAR-r2",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這張表",
+          "body": [
+            "把五個做法丟進同一個池子重複抽樣，一輪一輪把明顯比別人差的踢掉，最後只剩老規則和新做法並列，誰是冠軍分不出來。",
+            "所以新做法沒有輸，它只是沒贏。真正被淘汰的是三段長度平均版、基本回聲版、平方報酬直接版。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "對做部位的人來說：這次沒有理由換掉老規則",
+      "alt": "結論面板：說明新做法多花的維護成本換不到可量測的預測力，並用另一種量法交叉驗證同一個排序，同時標明研究邊界",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "結論",
+          "body": [
+            "多一個零件要估、多一層要維護、出問題時多一個地方要查。換回來的預測力量不出來。",
+            "手上已經在跑老規則的，這次沒有理由換掉它。想升級得往別的方向找，往拆得更細這條路走已經有人試過了。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "換一種量法（預測排序與實際排序的一致度）：老規則",
+          "value": {
+            "source": "results",
+            "path": "/metrics/GJR-GARCH/Spearman_rho",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "換一種量法：新做法",
+          "value": {
+            "source": "results",
+            "path": "/metrics/MVF/Spearman_rho",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "研究邊界",
+          "body": [
+            "只測一檔標的、只用日頻收盤價，換成別的資產或更高頻的資料，結論不保證照搬。",
+            "此處的「一樣準」是統計上分不出高下，不是兩者完全相同；名次在不同年代之間會晃動。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "整份實驗跑完耗時",
+          "value": {
+            "source": "results",
+            "path": "/runtime_seconds",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 秒"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
