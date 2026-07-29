@@ -89,9 +89,14 @@ def _job() -> dict:
 class _Exit:
     def __init__(self) -> None:
         self.called = 0
+        self.arm_calls: list[dict] = []
 
     def __call__(self) -> None:
         self.called += 1
+
+    def arm(self, **kwargs) -> dict:
+        self.arm_calls.append(kwargs)
+        return {"request_id": "a" * 64}
 
 
 def _run(tmp_path, *, mtimes, boot=BOOT, jobs=(), now=NOW, monkeypatch=None):
@@ -102,7 +107,11 @@ def _run(tmp_path, *, mtimes, boot=BOOT, jobs=(), now=NOW, monkeypatch=None):
     if monkeypatch is not None:
         monkeypatch.setattr(state, "RESTART_MARKER_PATH", marker)
     action = selfreload.maybe_self_reload(
-        state_path=st, src_dir=src, now=now, exit_fn=exit_fn,
+        state_path=st,
+        src_dir=src,
+        now=now,
+        exit_fn=exit_fn,
+        arm_fn=exit_fn.arm,
     )
     return action, exit_fn, marker
 
@@ -114,12 +123,10 @@ def test_reloads_when_code_is_newer_than_boot_and_daemon_is_idle(tmp_path, monke
         mtimes={"phase_z.py": NOW - timedelta(minutes=30)},  # edited well after boot, settled
         monkeypatch=monkeypatch,
     )
-    assert action == "reload"
-    assert exit_fn.called == 1
-    # The marker must exist BEFORE we die, or the fresh boot reports itself as a
-    # crash and emails the owner deploy noise.
-    assert marker.exists()
-    assert "self-reload" in marker.read_text()
+    assert action == "reload_request_armed"
+    assert exit_fn.called == 0
+    assert len(exit_fn.arm_calls) == 1
+    assert not marker.exists()
 
 
 def test_reloads_when_operations_core_dependency_is_newer_than_boot(
@@ -151,11 +158,13 @@ def test_reloads_when_operations_core_dependency_is_newer_than_boot(
         source_roots=(supervisor_src, ops_src),
         now=NOW,
         exit_fn=exit_fn,
+        arm_fn=exit_fn.arm,
     )
 
-    assert action == "reload"
-    assert exit_fn.called == 1
-    assert marker.exists()
+    assert action == "reload_request_armed"
+    assert exit_fn.called == 0
+    assert len(exit_fn.arm_calls) == 1
+    assert not marker.exists()
 
 
 def test_defers_while_a_job_is_in_flight(tmp_path, monkeypatch):
@@ -196,6 +205,7 @@ def test_defers_while_durable_closeout_is_pending(tmp_path, monkeypatch):
     action = selfreload.maybe_self_reload(
         state_path=st, src_dir=src, now=NOW, exit_fn=exit_fn,
         marker_path=tmp_path / "restart_marker.json",
+        arm_fn=exit_fn.arm,
     )
 
     assert action == "deferred_in_flight"
@@ -218,6 +228,7 @@ def test_reload_decision_cannot_fall_between_worker_and_closeout_snapshots(
     action = selfreload.maybe_self_reload(
         state_path=st, src_dir=src, now=NOW, exit_fn=exit_fn,
         marker_path=tmp_path / "restart_marker.json",
+        arm_fn=exit_fn.arm,
     )
 
     assert action == "deferred_in_flight"
@@ -258,19 +269,31 @@ def test_future_dated_source_is_not_stale(tmp_path, monkeypatch):
     assert exit_fn.called == 0
 
 
-def test_reloads_at_most_once_per_process(tmp_path, monkeypatch):
+def test_repeated_stale_scan_rearms_same_durable_intent(tmp_path, monkeypatch):
     src = _src_dir(tmp_path, mtimes={"phase_z.py": NOW - timedelta(minutes=30)})
     st = _state_file(tmp_path, boot=BOOT, jobs=[])
     monkeypatch.setattr(state, "RESTART_MARKER_PATH", tmp_path / "m.json")
     exit_fn = _Exit()
 
-    first = selfreload.maybe_self_reload(state_path=st, src_dir=src, now=NOW, exit_fn=exit_fn)
-    # exit_fn is a stub, so control returns here — in production SIGTERM ends us.
-    second = selfreload.maybe_self_reload(state_path=st, src_dir=src, now=NOW, exit_fn=exit_fn)
+    first = selfreload.maybe_self_reload(
+        state_path=st,
+        src_dir=src,
+        now=NOW,
+        exit_fn=exit_fn,
+        arm_fn=exit_fn.arm,
+    )
+    second = selfreload.maybe_self_reload(
+        state_path=st,
+        src_dir=src,
+        now=NOW,
+        exit_fn=exit_fn,
+        arm_fn=exit_fn.arm,
+    )
 
-    assert first == "reload"
-    assert second == "current"
-    assert exit_fn.called == 1
+    assert first == "reload_request_armed"
+    assert second == "reload_request_armed"
+    assert exit_fn.called == 0
+    assert len(exit_fn.arm_calls) == 2
 
 
 def test_unknown_boot_time_never_reloads(tmp_path, monkeypatch):

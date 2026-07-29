@@ -5059,12 +5059,8 @@ def _parse_series_registry_state(storage_dir: str) -> dict[str, Any]:
     Warn-only — series branding is a content-quality issue, not an outage.
     """
     try:
-        import importlib.util
-        repo_root = Path(__file__).resolve().parents[3]
-        spec = importlib.util.spec_from_file_location(
-            "_series_registry_audit", str(repo_root / "scripts" / "series_registry.py"))
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
+        from scripts import series_registry as mod
+
         # Read the feed through `storage_dir`, not the module's hardcoded production
         # path. `mod._load_feed()` ignored the argument this condition is given, so
         # an isolated fixture still audited the real feed and the breach count moved

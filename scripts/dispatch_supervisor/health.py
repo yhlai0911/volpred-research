@@ -38,6 +38,7 @@ from volpred.ops import termination
 from . import (
     alerts,
     claim_release,
+    deferred_reload,
     identity,  # noqa: F401 — re-exported for callers/tests of health.identity
     isolation,
     procutil,
@@ -48,7 +49,7 @@ from . import (
 # Re-exported: the by-path task_pool_claim loader moved to claim_release when
 # worker.py became a second caller (WS-A2c). Kept importable from here so the
 # module object stays a single cached instance across both call sites.
-from .claim_release import _task_pool_claim  # noqa: F401
+from .claim_release import _task_pool_claim
 
 LOG = logging.getLogger(__name__)
 
@@ -57,6 +58,18 @@ MAX_JOB_AGE_S = 3000  # 50min — matches worker DEFAULT_TIMEOUT_S
 QUARANTINE_PHASES = {
     "kill_failed_orphan", "timeout_unverified", "orphan_unverified_not_killed",
 }
+
+
+def _reload_from_durable_request(request: dict) -> None:
+    request_id = str(request.get("request_id") or "")
+    reason = str(request.get("reason") or "deploy")
+    armed = selfreload.reload_now(
+        reason=f"deferred-request:{request_id[:12]}:{reason}",
+    )
+    if not armed:
+        raise deferred_reload.DeferredReloadError(
+            "deferred request reached idle but this process already armed a reload"
+        )
 
 
 def _force_kill_pgid(
@@ -286,10 +299,10 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
     for job in jobs:
         try:
             action = _check_job(job, state_path=state_path, max_age_s=max_age_s)
-        except Exception as exc:  # noqa: BLE001 — sibling isolation is the point
+        except Exception:
             LOG.exception(
-                "health: check failed job_id=%s slot=%s: %s",
-                job.job_id, job.slot_id, exc,
+                "health: check failed job_id=%s slot=%s",
+                job.job_id, job.slot_id,
             )
             alerts.send_loop_crash(
                 f"health_job:{job.job_id[:8] or job.pid}",
@@ -362,15 +375,21 @@ async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: 
             # Last: a reload SIGTERMs this process, so anything after it in the
             # tick would not run. The heartbeat and the hang check are what keep
             # the platform safe; deploying a fix is what keeps it improving.
+            deferred = deferred_reload.process(
+                state_path=state_path,
+                reload_fn=_reload_from_durable_request,
+            )
+            if deferred["action"] not in {"no_request", "deferred_in_flight"}:
+                LOG.info("deferred reload lifecycle=%s", deferred)
             selfreload.maybe_self_reload(state_path=state_path)
         except asyncio.CancelledError:
             LOG.info("health_loop cancelled")
             raise
-        except Exception as exc:  # noqa: BLE001
+        except Exception:
             # Codex review §10 #7 fix: this used to only LOG.exception — a
             # crash-looping health monitor (the belt-and-suspenders layer
             # behind worker.py's own timeout) would silently stop protecting
             # against hangs with zero visibility to the boss.
-            LOG.exception("health_loop unexpected error: %s", exc)
+            LOG.exception("health_loop unexpected error")
             alerts.send_loop_crash("health_loop", traceback.format_exc(), state_path=state_path)
             # don't die — sleep and continue

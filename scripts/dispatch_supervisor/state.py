@@ -6,6 +6,13 @@ Schema (version 1)::
       "version": 1,
       "supervisor_started_at": "<ISO>",          # supervisor process boot time
       "supervisor_pid": int | null,              # os.getpid() of the live daemon
+      "supervisor_release_id": str | null,        # immutable release request loaded at boot
+      "supervisor_release_sha256": str | null,    # verified release archive digest
+      "supervisor_release_commit": str | null,    # Git commit materialized into the release
+      "supervisor_bootstrap_sha256": str | null,  # installed immutable bootstrap digest
+      "cutover_quiesce": null | {                 # durable new-fire fence for launchd migration
+        "token": str, "reason": str, "requested_at": str, "expires_at": str
+      },
       "last_heartbeat_at": "<ISO>",              # liveness heartbeat (health_loop, every 30s)
       "last_fire_at": "<ISO|null>",              # last time a worker was actually spawned
       "current_jobs": [                          # canonical in-flight workers (one per slot)
@@ -345,6 +352,11 @@ def _empty_state() -> dict[str, Any]:
         "version": SCHEMA_VERSION,
         "supervisor_started_at": None,
         "supervisor_pid": None,
+        "supervisor_release_id": None,
+        "supervisor_release_sha256": None,
+        "supervisor_release_commit": None,
+        "supervisor_bootstrap_sha256": None,
+        "cutover_quiesce": None,
         "last_heartbeat_at": None,
         "last_fire_at": None,
         "current_jobs": [],
@@ -440,6 +452,8 @@ def _normalise_state(data: dict[str, Any]) -> dict[str, Any]:
         data["phase_z_pending"] = []
     if not isinstance(data.get("phase_z_rejections"), list):
         data["phase_z_rejections"] = []
+    if not isinstance(data.get("cutover_quiesce"), dict):
+        data["cutover_quiesce"] = None
     return data
 
 
@@ -674,6 +688,18 @@ def mark_supervisor_started(path: Path = STATE_PATH) -> None:
         data["phase_z_rejections"] = legacy_rejections[-COMPLETIONS_MAX:]
         data["supervisor_started_at"] = _now()
         data["supervisor_pid"] = os.getpid()
+        data["supervisor_release_id"] = os.environ.get(
+            "VOLPRED_SUPERVISOR_RELEASE_ID"
+        )
+        data["supervisor_release_sha256"] = os.environ.get(
+            "VOLPRED_SUPERVISOR_RELEASE_SHA256"
+        )
+        data["supervisor_release_commit"] = os.environ.get(
+            "VOLPRED_SUPERVISOR_RELEASE_COMMIT"
+        )
+        data["supervisor_bootstrap_sha256"] = os.environ.get(
+            "VOLPRED_SUPERVISOR_BOOTSTRAP_SHA256"
+        )
         data["last_heartbeat_at"] = _now()
 
 
@@ -961,6 +987,12 @@ def reserve_fire(
         raise ValueError(f"max_slots must be >= 1, got {max_slots}")
 
     with _locked_state(path) as (_fh, data):
+        quiesce = _active_cutover_quiesce(data)
+        if quiesce is not None:
+            raise RuntimeError(
+                "reserve_fire blocked by supervisor cutover quiesce "
+                f"token={quiesce['token']}"
+            )
         jobs = data.get("current_jobs") or []
         pending = data.get("phase_z_pending") or []
         if pending:
@@ -1023,6 +1055,135 @@ def reserve_fire(
         _sync_projection(data)
     _IMPLICIT_JOB_ID.set(job_id)
     return JobHandle(job_id=job_id, cohort_id=cohort, slot_id=slot_id)
+
+
+def begin_cutover_quiesce(
+    *,
+    reason: str,
+    ttl_s: int = 600,
+    path: Path = STATE_PATH,
+) -> dict[str, Any]:
+    """Atomically fence new fire reservations for a bounded launchd cutover."""
+    ttl_s = max(30, min(int(ttl_s), 3600))
+    with _locked_state(path) as (_fh, data):
+        existing = _active_cutover_quiesce(data)
+        if existing is not None:
+            raise RuntimeError(
+                "another supervisor cutover quiesce is active "
+                f"token={existing['token']}"
+            )
+        now = datetime.now(timezone.utc)
+        legacy_fence_at = now.isoformat()
+        quiesce = {
+            "token": uuid.uuid4().hex,
+            "reason": str(reason)[:200],
+            "requested_at": now.isoformat(),
+            "expires_at": (now + timedelta(seconds=ttl_s)).isoformat(),
+            "previous_auth_blocked": bool(data.get("auth_blocked")),
+            "previous_auth_blocked_at": data.get("auth_blocked_at"),
+            "legacy_fence_at": legacy_fence_at,
+        }
+        data["cutover_quiesce"] = quiesce
+        # Backward-compatible fence: a pre-cutover daemon does not have the
+        # cutover_quiesce-aware reserve_fire in memory, but every old scheduler
+        # decision and worker spawn already fail closed on auth_blocked.
+        data["auth_blocked"] = True
+        data["auth_blocked_at"] = legacy_fence_at
+        _sync_projection(data)
+        return {
+            **quiesce,
+            "active_count": len(data.get("current_jobs") or [])
+            + len(data.get("phase_z_pending") or []),
+            "supervisor_started_at": data.get("supervisor_started_at"),
+        }
+
+
+def cutover_quiesce_snapshot(
+    *,
+    token: str,
+    path: Path = STATE_PATH,
+) -> dict[str, Any]:
+    """CAS-read the drain state while proving this cutover still owns the fence."""
+    with _locked_state(path) as (_fh, data):
+        quiesce = _active_cutover_quiesce(data)
+        if quiesce is None or quiesce.get("token") != token:
+            raise RuntimeError("supervisor cutover quiesce ownership was lost")
+        return {
+            **quiesce,
+            "active_count": len(data.get("current_jobs") or [])
+            + len(data.get("phase_z_pending") or []),
+            "supervisor_started_at": data.get("supervisor_started_at"),
+        }
+
+
+def end_cutover_quiesce(
+    *,
+    token: str,
+    path: Path = STATE_PATH,
+) -> bool:
+    """Release only the caller's exact cutover fence."""
+    with _locked_state(path) as (_fh, data):
+        quiesce = data.get("cutover_quiesce")
+        if not isinstance(quiesce, dict) or quiesce.get("token") != token:
+            return False
+        _clear_cutover_quiesce(data, quiesce)
+        _sync_projection(data)
+        return True
+
+
+def renew_cutover_quiesce(
+    *,
+    token: str,
+    ttl_s: int,
+    path: Path = STATE_PATH,
+) -> str:
+    """Extend the caller-owned fence before another bounded cutover phase."""
+    ttl_s = max(30, min(int(ttl_s), 3600))
+    with _locked_state(path) as (_fh, data):
+        quiesce = _active_cutover_quiesce(data)
+        if quiesce is None or quiesce.get("token") != token:
+            raise RuntimeError("supervisor cutover quiesce ownership was lost")
+        expires_at = (
+            datetime.now(timezone.utc) + timedelta(seconds=ttl_s)
+        ).isoformat()
+        quiesce["expires_at"] = expires_at
+        data["cutover_quiesce"] = quiesce
+        _sync_projection(data)
+        return expires_at
+
+
+def _active_cutover_quiesce(data: dict[str, Any]) -> dict[str, Any] | None:
+    raw = data.get("cutover_quiesce")
+    if not isinstance(raw, dict):
+        data["cutover_quiesce"] = None
+        return None
+    expires_at = raw.get("expires_at")
+    try:
+        expires = datetime.fromisoformat(str(expires_at))
+    except ValueError:
+        LOG.warning(
+            "cutover_quiesce has invalid expires_at=%r; clearing fence",
+            expires_at,
+        )
+        _clear_cutover_quiesce(data, raw)
+        return None
+    if expires.tzinfo is None:
+        _clear_cutover_quiesce(data, raw)
+        return None
+    if expires <= datetime.now(timezone.utc):
+        _clear_cutover_quiesce(data, raw)
+        return None
+    return raw
+
+
+def _clear_cutover_quiesce(
+    data: dict[str, Any],
+    quiesce: dict[str, Any],
+) -> None:
+    if data.get("auth_blocked_at") == quiesce.get("legacy_fence_at"):
+        data["auth_blocked"] = bool(quiesce.get("previous_auth_blocked"))
+        data["auth_blocked_at"] = quiesce.get("previous_auth_blocked_at")
+    data["cutover_quiesce"] = None
 
 
 def begin_attempt(

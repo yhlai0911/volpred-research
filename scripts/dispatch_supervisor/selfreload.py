@@ -54,9 +54,9 @@ from __future__ import annotations
 import logging
 import os
 import signal
-from datetime import datetime, timezone
+from collections.abc import Iterable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterable
 
 from volpred.ops import termination
 
@@ -64,8 +64,11 @@ from . import state
 
 LOG = logging.getLogger(__name__)
 
-SRC_DIR = Path(__file__).resolve().parent
-OPS_CORE_SRC_DIR = SRC_DIR.parents[1] / "src" / "volpred" / "ops"
+CANONICAL_REPO_ROOT = Path(
+    os.environ.get("VOLPRED_CANONICAL_REPO_ROOT", Path.cwd())
+).resolve()
+SRC_DIR = CANONICAL_REPO_ROOT / "scripts" / "dispatch_supervisor"
+OPS_CORE_SRC_DIR = CANONICAL_REPO_ROOT / "src" / "volpred" / "ops"
 SOURCE_ROOTS = (SRC_DIR, OPS_CORE_SRC_DIR)
 
 # An agent editing several modules writes them seconds apart. Reloading on the
@@ -80,6 +83,7 @@ _IN_FLIGHT_DEFER = "deferred_in_flight"
 _QUIESCING_DEFER = "deferred_quiescing"
 _NO_STALE = "current"
 _RELOAD = "reload"
+_RELOAD_REQUESTED = "reload_request_armed"
 
 # One self-reload per process. The boot-time comparison already makes looping
 # impossible; this makes it impossible twice.
@@ -120,7 +124,7 @@ def stale_sources(
 
     for src in sorted(sources):
         try:
-            mtime = datetime.fromtimestamp(src.stat().st_mtime, tz=timezone.utc)
+            mtime = datetime.fromtimestamp(src.stat().st_mtime, tz=UTC)
         except OSError as exc:
             LOG.warning("selfreload: source unreadable during scan path=%s err=%s", src, exc)
             continue
@@ -181,6 +185,7 @@ def maybe_self_reload(
     quiesce_s: float = QUIESCE_S,
     marker_path: Path | None = None,
     exit_fn=None,
+    arm_fn=None,
 ) -> str:
     """Reload this daemon if its own code changed and it is idle. Returns the action.
 
@@ -188,9 +193,7 @@ def maybe_self_reload(
     running the (stale) code it already had. A self-reload that cannot happen is
     a missed improvement; a self-reload that fires mid-fire would destroy work.
     """
-    global _ARMED
-
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
 
     snapshot = state.read_state(state_path)
     boot_raw = snapshot.get("supervisor_started_at")
@@ -225,12 +228,56 @@ def maybe_self_reload(
         LOG.info("selfreload: %s — %s", action, reason)
         return action
 
-    if not _ARMED:
-        LOG.warning("selfreload: already reloaded once this process — not firing again (%s)", reason)
+    # Never signal directly from the mutable authoring checkout.  Arm an
+    # immutable committed release; the health loop consumes it on the next
+    # tick and the stable bootstrap loads only those pinned bytes.
+    if arm_fn is None:
+        from . import deferred_reload
+
+        arm_fn = deferred_reload.arm
+    explicit_roots = _source_roots(
+        src_dir=src_dir,
+        source_roots=source_roots,
+    )
+    production_roots = source_roots is None and Path(src_dir) == SRC_DIR
+    try:
+        request = arm_fn(
+            reason=f"self-reload: {reason}",
+            state_path=state_path,
+            source_roots=None if production_roots else explicit_roots,
+        )
+    except Exception:
+        LOG.exception("selfreload: immutable release request failed")
         return _NO_STALE
+    LOG.warning(
+        "selfreload: immutable release request armed request_id=%s — %s",
+        str(request.get("request_id") or "")[:12],
+        reason,
+    )
+    return _RELOAD_REQUESTED
+
+
+def reload_now(
+    *,
+    reason: str,
+    marker_path: Path | None = None,
+    exit_fn=None,
+) -> bool:
+    """Perform one planned self-termination for this exact process image.
+
+    This is the single reload actuator shared by mtime self-reload and the
+    durable deferred-request owner.  ``False`` means another path already armed
+    this process; callers must not create a second termination intent.
+    """
+    global _ARMED
+    if not _ARMED:
+        LOG.warning(
+            "selfreload: process reload already armed — refusing duplicate (%s)",
+            reason,
+        )
+        return False
     _ARMED = False
 
-    LOG.warning("selfreload: RELOADING — %s", reason)
     # Same order the reload wrapper uses: the marker must exist BEFORE we die, or
     # the fresh boot reports itself as an unexpected crash and emails the owner
     # deploy noise.
@@ -240,7 +287,7 @@ def maybe_self_reload(
         # a test redirecting `state.RESTART_MARKER_PATH` would still write to the
         # LIVE marker — the same trap supervisor.py documents at `mark_supervisor_started`.
         state.write_planned_restart_marker(
-            reason=f"self-reload: {reason}",
+            reason=reason,
             path=marker_path or state.RESTART_MARKER_PATH,
         )
     except OSError as exc:
@@ -250,7 +297,7 @@ def maybe_self_reload(
                     "reloading anyway; expect one restart alert", exc)
 
     (exit_fn or _sigterm_self)()
-    return _RELOAD
+    return True
 
 
 def _sigterm_self() -> None:
@@ -274,4 +321,4 @@ def _parse_iso(raw: object) -> datetime | None:
     except ValueError as exc:
         LOG.warning("selfreload: unparseable supervisor_started_at=%r (%s)", raw, exc)
         return None
-    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)

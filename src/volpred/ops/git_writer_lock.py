@@ -17,6 +17,7 @@ flocked inode would split one lock into two independent locks.
 from __future__ import annotations
 
 import fcntl
+import importlib
 import importlib.util
 import json
 import math
@@ -102,6 +103,12 @@ def _termination_owner():
     global _TERMINATION_OWNER
     if _TERMINATION_OWNER is not None:
         return _TERMINATION_OWNER
+    if os.environ.get("VOLPRED_SUPERVISOR_RELEASE_ID"):
+        # The immutable supervisor bootstrap owns import provenance.  Loading
+        # by canonical path here would bypass its pinned-release finder.
+        module = importlib.import_module("volpred.ops.termination")
+        _TERMINATION_OWNER = module
+        return module
     path = Path(__file__).with_name("termination.py")
     module_name = "_volpred_termination_owner"
     spec = importlib.util.spec_from_file_location(module_name, path)

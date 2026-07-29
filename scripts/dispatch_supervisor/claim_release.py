@@ -18,10 +18,9 @@ own home and imports `identity` for the token vocabulary.
 """
 from __future__ import annotations
 
-import importlib.util
+import importlib
 import logging
 import sys
-from pathlib import Path
 from types import ModuleType
 
 from . import identity
@@ -32,22 +31,18 @@ LOG = logging.getLogger(__name__)
 def _task_pool_claim() -> ModuleType:
     """Import `scripts/task_pool_claim.py` — the canonical next_tasks writer.
 
-    It is a top-level script, not a package member, so it is loaded by path
-    (same pattern as tests/test_task_pool_claim.py) and cached in sys.modules
-    so repeated kills don't re-execute its import side effects.  Loaded lazily:
+    ``scripts`` is a namespace package in the checkout and a real package in
+    immutable release images, so a package import works in both environments
+    without executing a mutable canonical path.  The compatibility alias keeps
+    older tests/callers that cache ``task_pool_claim`` working. Loaded lazily:
     the healthy path must not pay for it, and a broken task pool must not stop
     the supervisor from booting.
     """
     cached = sys.modules.get("task_pool_claim")
     if isinstance(cached, ModuleType):
         return cached
-    module_path = Path(__file__).resolve().parents[1] / "task_pool_claim.py"
-    spec = importlib.util.spec_from_file_location("task_pool_claim", module_path)
-    if spec is None or spec.loader is None:  # pragma: no cover - packaging bug
-        raise ImportError(f"cannot load task_pool_claim from {module_path}")
-    module = importlib.util.module_from_spec(spec)
+    module = importlib.import_module("scripts.task_pool_claim")
     sys.modules["task_pool_claim"] = module
-    spec.loader.exec_module(module)
     return module
 
 

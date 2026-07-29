@@ -18,7 +18,7 @@
 #
 # Usage:  bash scripts/reload_dispatch_supervisor.sh [--force|--defer] [--reason <r>]
 #   --force   reload even if current_jobs is non-empty (kills in-flight workers)
-#   --defer   if a worker is in flight, detach and reload once it finishes
+#   --defer   persist a request; the daemon reloads itself after full drain
 #   --reason  marker reason label (default: deploy)
 #
 # --defer exists because the commonest reloader is an hourly-dispatch fire that
@@ -36,7 +36,6 @@ STATE="${DISPATCH_STATE_PATH:-storage/ops/dispatch_state.json}"
 REASON="deploy"
 FORCE=0
 DEFER=0
-DEFER_POLL_S="${DEFER_POLL_S:-30}"
 DEFER_MAX_WAIT_S="${DEFER_MAX_WAIT_S:-3900}"  # 65min — one hourly cap (50min) + slack
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -52,6 +51,18 @@ if [ "$FORCE" -eq 1 ] && [ "$DEFER" -eq 1 ]; then
   exit 2
 fi
 
+if [ -n "${VOLPRED_UV_BIN:-}" ]; then
+  UV_BIN="$VOLPRED_UV_BIN"
+elif [ -x /opt/homebrew/bin/uv ]; then
+  UV_BIN=/opt/homebrew/bin/uv
+else
+  UV_BIN="$(command -v uv || true)"
+fi
+if [ -z "$UV_BIN" ] || [ "${UV_BIN#/}" = "$UV_BIN" ] || [ ! -x "$UV_BIN" ]; then
+  echo "verified absolute uv executable not found" >&2
+  exit 1
+fi
+
 read_active_count() {
   jq -er '(((.current_jobs // []) as $jobs
       | if ($jobs | length) > 0 then $jobs
@@ -60,37 +71,32 @@ read_active_count() {
     "$STATE" 2>/dev/null || echo "ERR"
 }
 
+arm_durable_release() {
+  REQUEST_JSON="$(
+    "$UV_BIN" run python -m scripts.dispatch_supervisor.deferred_reload arm \
+      --state "$STATE" --reason "$REASON" --max-wait-s "$DEFER_MAX_WAIT_S"
+  )"
+  REQUEST_ID="$(printf '%s' "$REQUEST_JSON" | jq -er '.request_id')"
+  CREATED="$(printf '%s' "$REQUEST_JSON" | jq -er '.created')"
+  echo "DURABLE: immutable release request ${REQUEST_ID} armed (created=${CREATED}, max ${DEFER_MAX_WAIT_S}s)."
+  echo "The dispatch-supervisor health loop owns drain, activation, signal, and fresh-boot receipt."
+}
+
+# Durable ownership transfer: --defer never spawns a child poller.  The active
+# supervisor health loop consumes this mode-0600 request after current_jobs and
+# phase_z_pending drain, so caller/session teardown cannot cancel deployment.
+if [ "$DEFER" -eq 1 ]; then
+  arm_durable_release
+  exit 0
+fi
+
 # 1. In-flight guard — never yank the rug from a running worker.
 ACTIVE_COUNT="$(read_active_count)"
 if [ "$ACTIVE_COUNT" != "0" ] && [ "$FORCE" -ne 1 ]; then
-  if [ "$DEFER" -ne 1 ]; then
-    echo "REFUSED: current_jobs has ${ACTIVE_COUNT} in-flight worker(s):" >&2
-    jq -c '.current_jobs // (if .current_job then [.current_job] else [] end)' "$STATE" >&2 || true
-    echo "Wait for it to finish, --defer to reload when it does, or --force (kills the worker)." >&2
-    exit 1
-  fi
-  # Detached waiter: poll until the worker clears, then re-enter this script.
-  # Re-entering (rather than inlining the reload) keeps the marker + restart
-  # path single-source. `setsid`-equivalent detach so it outlives this fire.
-  echo "DEFERRED: ${ACTIVE_COUNT} workers in flight; reload will fire when current_jobs clears (max ${DEFER_MAX_WAIT_S}s)."
-  DEFER_LOG="${HOME}/.volpred/logs/supervisor_deferred_reload.log"
-  mkdir -p "$(dirname "$DEFER_LOG")"
-  nohup bash -c '
-    deadline=$(( $(date +%s) + '"$DEFER_MAX_WAIT_S"' ))
-    while [ "$(date +%s)" -lt "$deadline" ]; do
-      sleep '"$DEFER_POLL_S"'
-      active=$(jq -er "(((.current_jobs // []) as \$jobs | if (\$jobs | length) > 0 then \$jobs elif .current_job then [.current_job] else [] end) | length) + (if ((.phase_z_pending // []) | length) > 0 then 1 else 0 end)" "'"$REPO/$STATE"'" 2>/dev/null || echo ERR)
-      if [ "$active" = "0" ]; then
-        echo "[$(date "+%F %T")] worker cleared — reloading (reason='"$REASON"')"
-        exec bash "'"$REPO"'/scripts/reload_dispatch_supervisor.sh" --defer --reason "'"$REASON"'"
-      fi
-    done
-    echo "[$(date "+%F %T")] DEFER TIMED OUT after '"$DEFER_MAX_WAIT_S"'s — supervisor still running stale code."
-    echo "[$(date "+%F %T")] The dispatch_supervisor_stale_code alert is the backstop; reload manually."
-  ' >> "$DEFER_LOG" 2>&1 < /dev/null &
-  disown $! 2>/dev/null || true
-  echo "Waiter detached (pid $!). Log: $DEFER_LOG"
-  exit 0
+  echo "REFUSED: current_jobs has ${ACTIVE_COUNT} in-flight worker(s):" >&2
+  jq -c '.current_jobs // (if .current_job then [.current_job] else [] end)' "$STATE" >&2 || true
+  echo "Wait for it to finish, --defer to reload when it does, or --force (kills the worker)." >&2
+  exit 1
 fi
 
 if [ "${VOLPRED_RELOAD_CHECK_ONLY:-0}" = "1" ]; then
@@ -98,17 +104,26 @@ if [ "${VOLPRED_RELOAD_CHECK_ONLY:-0}" = "1" ]; then
   exit 0
 fi
 
-# 2. Drop the planned-restart marker so the imminent restart alert is suppressed.
-uv run python -c "
+# Normal deploys always go through an immutable committed release image.  The
+# direct termination path below is break-glass --force only.
+if [ "$FORCE" -ne 1 ]; then
+  arm_durable_release
+  exit 0
+fi
+
+# 2. Break-glass force: drop the planned-restart marker before termination.
+"$UV_BIN" run python -c '
+import sys
 from scripts.dispatch_supervisor import state
-exp = state.write_planned_restart_marker(reason='${REASON}')
-print(f'planned-restart marker written (reason=${REASON}, expires_at={exp})')
-"
+reason = sys.argv[1]
+exp = state.write_planned_restart_marker(reason=reason)
+print(f"planned-restart marker written (reason={reason}, expires_at={exp})")
+' "$REASON"
 
 # 3. Reload the daemon.
 UID_NUM="$(id -u)"
 echo "durable SIGTERM + KeepAlive restart gui/${UID_NUM}/${LABEL} ..."
-uv run python scripts/termination_launchd_restart.py \
+"$UV_BIN" run python scripts/termination_launchd_restart.py \
   --service "gui/${UID_NUM}/${LABEL}" --reason "dispatch_supervisor_reload:${REASON}"
 echo "Reload requested. Verify: launchctl list | grep dispatch-supervisor"
 echo "The next boot's 'supervisor restart' INFO alert is suppressed (deploy)."
