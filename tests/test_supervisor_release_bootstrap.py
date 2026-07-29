@@ -19,6 +19,29 @@ CLAIM_RELEASE = ROOT / "scripts" / "dispatch_supervisor" / "claim_release.py"
 IDENTITY = ROOT / "scripts" / "dispatch_supervisor" / "identity.py"
 
 
+def test_private_directory_converges_owner_owned_readonly_bits(
+    tmp_path: Path,
+) -> None:
+    directory = tmp_path / "release"
+    directory.mkdir(mode=0o755)
+    directory.chmod(0o755)
+
+    release_image._ensure_private_directory(directory)
+
+    assert directory.stat().st_mode & 0o777 == 0o700
+
+
+def test_private_directory_rejects_group_writable_directory(
+    tmp_path: Path,
+) -> None:
+    directory = tmp_path / "release"
+    directory.mkdir(mode=0o775)
+    directory.chmod(0o775)
+
+    with pytest.raises(release_image.ReleaseImageError, match="not private"):
+        release_image._ensure_private_directory(directory)
+
+
 def _release(tmp_path: Path) -> tuple[Path, Path, dict[str, str]]:
     run_root = tmp_path / "run"
     releases = run_root / "releases"
