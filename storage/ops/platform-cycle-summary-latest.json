@@ -1,6 +1,6 @@
 {
   "workflow_name": "platform_cycle_summary",
-  "generated_at": "2026-07-29T15:40:30.813866+00:00",
+  "generated_at": "2026-07-29T21:20:53.280318+00:00",
   "release_preview": {
     "mode": "auto",
     "settings": {
@@ -10,36 +10,38 @@
       "due_only": true,
       "include_drafts": true,
       "preferred_audiences": [],
-      "last_released_at": "2026-07-29T15:00:22.713989+00:00",
-      "updated_at": "2026-07-29T15:00:34.885363+00:00"
+      "last_released_at": "2026-07-29T19:00:24.504235+00:00",
+      "updated_at": "2026-07-29T19:00:40.096233+00:00"
     },
     "due_now": false,
-    "next_release_at": "2026-07-29T19:00:00+00:00",
+    "next_release_at": "2026-07-29T23:00:00+00:00",
     "pool_counts": {
-      "draft": 3,
+      "draft": 5,
       "scheduled": 0,
-      "eligible_before_dedup": 3,
+      "eligible_before_dedup": 5,
       "dedup_flagged": 0,
       "narrative_cluster_filtered": 0,
       "content_gate_blocked": 0,
-      "eligible": 3
+      "eligible": 5
     },
     "narrative_cluster_pressure": {
       "window": 3,
       "threshold": 2,
       "clusters": [
+        "spy",
         "vix",
         "har"
       ],
       "counts": {
+        "spy": 1,
         "vix": 1,
         "har": 1
       },
       "blocked_clusters": [],
       "recent_ids": [
+        "mile_c53932a1",
         "mile_169bec4e",
-        "mile_6e35e47d",
-        "mile_a87265ab"
+        "mile_6e35e47d"
       ]
     },
     "narrative_cluster_filtered": [],
@@ -56,7 +58,7 @@
     ]
   },
   "question_ranking": {
-    "generated_at": "2026-07-29T15:40:30.813866+00:00",
+    "generated_at": "2026-07-29T21:20:53.280318+00:00",
     "cadence_hint": "每 6 小時檢查 pending_questions，評分後呼叫 question-rerank；既有榜單相對順序不應變動。",
     "table_columns": [
       "排名",

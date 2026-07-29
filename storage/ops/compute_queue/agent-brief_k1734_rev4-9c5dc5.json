@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1734_rev4-9c5dc5",
+  "title": "K1734 rev4: remediate H2 scope/gate mismatch + fig4 QLIKE p-value, then re-certify",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1734_rev4-9c5dc5.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1734/k1734_h2_gate_fix_report.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1734_rev4-9c5dc5.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-29T21:21:03Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1734_rev4-9c5dc5.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1734_rev4-9c5dc5.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1734/k1734_h2_gate_fix_report.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1734_rev4-9c5dc5.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734",
+  "claude_followup": {
+    "brief": "K1734 rev4 collection: read experiments/k1734/k1734_h2_gate_fix_report.json (route choice + BH recomputation) and experiments/k1734/review_verdict.json (rev4 verdict, sha-pinned). Verify: (1) the H2 route decision is justified and the added test is same-caliber, (2) the BH family recomputation is honest about its effect on H3_oos_cw_mse (was BH-adj p=0.0451, a thin margin that may not survive a larger family), (3) fig4 no longer attaches an MSE p to a QLIKE plot, (4) untouched numbers reproduced identically. Then run experiment_gates.py certify. On a genuine rev4 PASS: merge via scripts/merge_worktree.sh and write the knowledge entry (main-thread writes knowledge, never the agent - K1259). On rev4 FAIL: do NOT merge, record the new blocking defects and decide remediate-vs-3-strike-escalate. Codex effort ladder for experiment is at ceiling, so a third failed remediation cycle should escalate to the boss rather than re-run the same review.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1734",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-29T21:21:03Z",
+    "linked_at": "2026-07-29T21:21:03Z",
+    "error": null
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1734_rev4.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1734_rev4-9c5dc5.md"
+}

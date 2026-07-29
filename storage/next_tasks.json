@@ -33401,65 +33401,15 @@
   },
   {
     "id": "asia3_tw_sector_spillover",
-    "title": "[ASIA-3] 台股產業波動溢出網絡（電子/金融/航運/塑化 DY spillover index）",
-    "description": "面向 ASIA 第三棒（台股產業層級 — 用戶點名台股產業）。產業代表股：電子 2330/2317/2454、金融 2881/2891、航運 2603/2609、塑化 1301、光學 3008（yfinance 2026-07-15 smoke test 全數可用）。Diebold-Yilmaz spillover index + Granger 網絡；注意 Cholesky-FEVD 排序假象規則（用 generalized FEVD）。對照 T5a（TAIEX gamma > 0050 > TSMC）結構。產出對產業輪動 TA 的一般讀者文章角度。硬規則：開工先讀 docs/error_log.md + 搜 knowledge.json 相似 K + 至少 3 篇文獻；先做資料期間診斷（smoke test 只驗 2y，實驗要拉最長可得樣本，OOS 必含至少一次空頭）；跨市場假日 alignment 依 methodology.md；signal.shift(1) 明確 lag；DM 用 canonical volpred.stats.model_evaluation.dm_test（HAC bandwidth 規則）；收工跑 experiment_gates.py。",
-    "task_type": "experiment",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "[ASIA-3] 台股產業波動溢出網絡（電子/金融/航運/塑化 DY spillover index）",
+    "priority": 3,
     "source": "user_directive_20260715_market_diversification",
     "created_at": "2026-07-15T07:59:24.440660+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-22T02:58:10.898394+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-cb097ccd75ce42a3965de3f18e6bf512"
-      },
-      {
-        "ts": "2026-07-22T02:58:11.227496+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-cb097ccd75ce42a3965de3f18e6bf512"
-      },
-      {
-        "ts": "2026-07-22T04:00:29.183829+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-cb097ccd75ce42a3965de3f18e6bf512",
-        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 62.3min >= grace 20min"
-      },
-      {
-        "ts": "2026-07-26T12:18:47.348065+00:00",
-        "from": "pending",
-        "to": "pending",
-        "by": "release",
-        "note": "normalize_pending_claim_residue"
-      },
-      {
-        "ts": "2026-07-26T19:23:53.080557+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
-      },
-      {
-        "ts": "2026-07-26T19:23:57.835678+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
-      },
-      {
-        "ts": "2026-07-26T20:37:38.351984+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
-      }
-    ],
-    "last_released_at": "2026-07-26T12:18:47.348063+00:00",
-    "last_release_reason": "normalize_pending_claim_residue",
-    "started_at": "2026-07-26T19:23:57.835658+00:00",
-    "compute_job_id": "agent-brief_asia3_tw_sector_spillover-eb8888",
-    "result": "dispatched to compute job agent-brief_asia3_tw_sector_spillover-eb8888; awaiting PHASE A collection\n\nasia3 TW sector vol spillover: PASS verdict merged to main (commit 26a96747a bytes). GFEVD/DY connectedness. Semis(TSMC)+Financials+Petchem net vol transmitters; EMS/Optical/IC-design net receivers (supports T5a aggregation). Crisis intensification NOT confirmed (bear-calm=-1.16pp). Cross-sector VAR OOS edge marginal (DM t=2.51, not Harvey-robust). knowledge item 6e352de3; reproduce_spec.json added.",
-    "completed_at": "2026-07-26T20:37:38.351952+00:00"
+    "completed_at": "2026-07-26T20:37:38.351952+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-29T21:07:48.081985+00:00"
   },
   {
     "id": "telegram-813",
@@ -36197,7 +36147,7 @@
     "title": "K1734: EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carr",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 625). Original: EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carry 報酬分佈左尾是否在 risk-off 急速放大、unwind 是否領先 EM 股 vol；明確標示 leveraged/crowded position 數據 blocked 用 proxy（來源：BIS/IMF GFSR 2025；EM drawdown 為 EUR 的 3-5 倍）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1734.py with signal.shift(1) + seed=42, (c) K1734_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -36261,14 +36211,35 @@
         "to": "pending",
         "by": "compute-cancel:agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a",
         "note": "worktree collision: slot-1 queued agent-brief_k1734_spec_finalize-2c769e into the same cwd 2min later; two concurrent agents rewriting experiments/k1734 would corrupt it. Nested-DM Clark-West remediation must be re-dispatched after that job settles."
+      },
+      {
+        "ts": "2026-07-29T21:09:46.903560+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-6e081b29c0f74c09af8cbc5ba7922ea2"
+      },
+      {
+        "ts": "2026-07-29T21:09:54.863345+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-6e081b29c0f74c09af8cbc5ba7922ea2"
+      },
+      {
+        "ts": "2026-07-29T21:21:03.502861+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1734_rev4-9c5dc5",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job agent-agent-brief_k1734-205644; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1734_remediation-763606; awaiting PHASE A collection\n\ndispatched to compute job agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-agent-brief_k1734-205644; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1734_remediation-763606; awaiting PHASE A collection\n\ndispatched to compute job agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1734_rev4-9c5dc5; awaiting PHASE A collection",
     "compute_released_at": "2026-07-28T13:25:31Z",
     "compute_release_reason": "worktree collision: slot-1 queued agent-brief_k1734_spec_finalize-2c769e into the same cwd 2min later; two concurrent agents rewriting experiments/k1734 would corrupt it. Nested-DM Clark-West remediation must be re-dispatched after that job settles.",
     "followon_required": "nested-DM misuse gate（primary_raw_dm → Clark-West）remediation 尚未執行：本班已備妥 brief /tmp/rebrief_agent-brief_k1734_remediation-763606.md（原 agent-brief_k1734_remediation-763606 snapshot，model 已改 claude-opus-5），因與 slot-1 的 agent-brief_k1734_spec_finalize-2c769e 撞同一 worktree 而 cancel。待該 job 收件後再以 enqueue-agent 重派，勿新建 worktree、勿重做整個實驗。",
     "triage_20260729_slot1": "本班（hourly-slot-1-e98b43fc）盤點 stale worktree 時查證，未 claim 未執行，僅留證供下班接手。事實：(1) branch wt/dispatch-slot-1-1e5922b4-k1734 有 4 個 commits、落後 main 142 個 commits；(2) experiments/k1734/review_verdict.json 的 verdict 欄位是 null（非 PASS 也非 FAIL）—— 未認證，merge_worktree.sh 的 certify gate 必擋；(3) 該 verdict 的 unresolved 自陳「Codex primary-path RE-review of the remediated artifact has not run。rev2 returned FAIL 且自承因 read-only workspace 只覆蓋了一個 blocking defect 就停止，其餘四個維度仍未涵蓋；certification 不能建立在 rev1 的 fallback PASS 上，因為 rev1 漏掉了這個 defect」；(4) 另記 H1b 是 NULL 而非等價性證明（stress-regime 尾部約 68 obs，amplification gap bootstrap SD 約 0.108，power check 顯示檢定有 power，觀察值距 0 約 0.46 SD），以及 H3_oos_cw_mse 在最保守組合下 BH-adjusted p=0.0451 屬薄邊際。",
-    "triage_20260729_slot1_next": "下一步不是「再跑一次同樣的 Claude 審查」：model_router --task-type experiment --attempt 2 回 at_ceiling=true、exhausted=true。但 rev2 的失敗原因是 read-only workspace 這個環境缺陷、不是模型能力不足，兩者要分開判。建議下班先確認 rev2 當時的 workspace 權限問題是否已排除，再依 3-strike 分支擇一：派 Codex primary-path 二審（覆蓋剩餘四個維度）／拆解成 bounded stages／escalate 老闆。無論走哪條，審查回合的 prompt 與 raw transcript 不可留在被審 worktree 內未 commit（.claude/rules/experiments.md §審查認證，K1715 round-3 教訓）。"
+    "triage_20260729_slot1_next": "下一步不是「再跑一次同樣的 Claude 審查」：model_router --task-type experiment --attempt 2 回 at_ceiling=true、exhausted=true。但 rev2 的失敗原因是 read-only workspace 這個環境缺陷、不是模型能力不足，兩者要分開判。建議下班先確認 rev2 當時的 workspace 權限問題是否已排除，再依 3-strike 分支擇一：派 Codex primary-path 二審（覆蓋剩餘四個維度）／拆解成 bounded stages／escalate 老闆。無論走哪條，審查回合的 prompt 與 raw transcript 不可留在被審 worktree 內未 commit（.claude/rules/experiments.md §審查認證，K1715 round-3 教訓）。",
+    "compute_job_id": "agent-brief_k1734_rev4-9c5dc5",
+    "blocked_reason": "external_compute_job_active"
   },
   {
     "id": "daily_digest_20260718",
@@ -44371,96 +44342,27 @@
   },
   {
     "id": "K1719_article_general_v2",
-    "title": "K1719: write general-audience article [retry-v2] (auto-discovered uncovered K)",
-    "description": "K K1719 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'mixed/non-novel']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [K1719 verdict=MIXED reviewer=Codex GPT-5 primary-path (PASS, no blocking defects) artifact=experiments/k1719 task=ci-red-k1719-unrecorded-knowledge] ASIA-5 conservative daily volatility spillover ladder: does the previous local trading day's upstream information improve a target Canonical evidence: experiments/k1719/k1719_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1719: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_discovered",
-    "audience_correction_rewrite": false,
-    "k_id": "K1719",
-    "evidence_source_paths": [
-      "experiments/k1719/k1719_results.json"
-    ],
-    "evidence_source_kind": "experiment_results",
-    "data_source_note": "Canonical evidence: experiments/k1719/k1719_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
-    "tags": [
-      "auto-discovered",
-      "audience-general",
-      "retry-v2"
-    ],
-    "topic_cluster": null,
     "created_at": "2026-07-26T15:35:56+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
-    "status_history": [
-      {
-        "ts": "2026-07-26T20:13:52.395275+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-35badc1db8f3475da7accc99abf48522"
-      },
-      {
-        "ts": "2026-07-26T20:13:56.834598+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-35badc1db8f3475da7accc99abf48522"
-      },
-      {
-        "ts": "2026-07-26T20:25:14.794225+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-35badc1db8f3475da7accc99abf48522"
-      }
-    ],
-    "started_at": "2026-07-26T20:13:56.834581+00:00",
     "completed_at": "2026-07-26T20:25:14.794197+00:00",
-    "result": "K1719 一般讀者文已發佈 mile_1ef77049（draft，2 張 JSON-bound 圖 + provenance frontmatter）；anti_ai_gate PASS、arc-dedup clean；lazypack async render 已 enqueue (lazypack-mile_1ef77049, 3 panels data-bound, evidence sha256 pinned)，*/15 worker 出圖後 release_pool 自動釋出。誠實 MIXED 故事：日本 +7.67%(訊號 11.6 過關) 為唯一贏家、東南亞 panel 訊號 0.18 不成立。"
+    "tombstone": true,
+    "archived_at": "2026-07-29T21:07:48.081985+00:00"
   },
   {
     "id": "K1420_article_general",
-    "title": "K1420: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1420 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1420 [NULL]（原始 verdict: NULL_RESULT）：測試 3-state HMM regime-weighted conformal VaR（RWC）能否改善 SPY 與 0050.TW 的 next-day 5% VaR/ES。資料 2012-01-01至2025-12-31，OOS 自2023-01-01，rolling refit window=2000、conformal calibration window=500、每63日refit、HMM multistart=20，seed=42。SPY：RWC violation Canonical evidence: experiments/k1420/k1420_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1420: write general-audience article (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_discovered",
-    "audience_correction_rewrite": false,
-    "k_id": "K1420",
-    "evidence_source_paths": [
-      "experiments/k1420/k1420_results.json"
-    ],
-    "evidence_source_kind": "experiment_results",
-    "data_source_note": "Canonical evidence: experiments/k1420/k1420_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "topic_cluster": null,
     "created_at": "2026-07-26T15:36:00+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
-    "status_history": [
-      {
-        "ts": "2026-07-26T20:45:09.621176+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
-      },
-      {
-        "ts": "2026-07-26T20:45:09.851902+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
-      },
-      {
-        "ts": "2026-07-26T20:58:50.769403+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
-      }
-    ],
-    "started_at": "2026-07-26T20:45:09.851887+00:00",
     "completed_at": "2026-07-26T20:58:50.769369+00:00",
-    "result": "general NULL article published as draft mile_a8006dd2 (更聰明的風險模型...反而更常失手). RWC(3-state HMM regime-weighted conformal) over-breaches vs plain GJR: SPY 5.05%→6.12% (38→46 breaches), 0050 4.83%→6.22% (35→45); verdict pass_count=0/2 NULL. anti_ai_gate PASS(exit0); 2 charts (fig_violation_compare + fig_breach_count) uploaded; content-vs-source audit PASS. lazypack render queued lazypack-mile_a8006dd2."
+    "tombstone": true,
+    "archived_at": "2026-07-29T21:07:48.081985+00:00"
   },
   {
     "id": "ci-red-30207277676",
@@ -44528,88 +44430,27 @@
   },
   {
     "id": "K1443_article_general",
-    "title": "K1443: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1443 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1443 [CONDITIONAL_PASS]: BTC-USD/ETH-USD vs SPY 在 SPY 交易日 panel（2018-01-02～2026-04-16，2083 個價格觀測）上，用 log(r²) 波動衝擊 proxy 做 pairwise Granger（lag≤5, BIC選lag）、三變數 conditional VAR、pairwise DCC-GARCH（最近1000個SPY交易日）。主規格結果：BTC→SPY p=0.282、SPY→BTC p=0.160、ETH→SPY p=0.225、SPY→ETH p=0.094（ Canonical evidence: experiments/k1443/k1443_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1443: write general-audience article (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_discovered",
-    "audience_correction_rewrite": false,
-    "k_id": "K1443",
-    "evidence_source_paths": [
-      "experiments/k1443/k1443_results.json"
-    ],
-    "evidence_source_kind": "experiment_results",
-    "data_source_note": "Canonical evidence: experiments/k1443/k1443_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "topic_cluster": null,
     "created_at": "2026-07-26T16:08:56+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
-    "status_history": [
-      {
-        "ts": "2026-07-26T20:45:10.088405+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
-      },
-      {
-        "ts": "2026-07-26T20:45:10.317755+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
-      },
-      {
-        "ts": "2026-07-26T20:54:50.138777+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
-      }
-    ],
-    "started_at": "2026-07-26T20:45:10.317738+00:00",
     "completed_at": "2026-07-26T20:54:50.138750+00:00",
-    "result": "general article published as draft mile_ea920f7f (幣圈一崩...八年日資料). anti_ai_gate PASS(exit0,2WARN,0MUST); content-vs-source audit PASS(5 claims/225 vals); anchors 0.282/0.160/0.225/0.094(pairwise p) + DCC rho 0.361/0.376 verbatim vs JSON; 2 figures uploaded. lazypack render queued lazypack-mile_ea920f7f (release_pool holds flip until section lands)."
+    "tombstone": true,
+    "archived_at": "2026-07-29T21:07:48.081985+00:00"
   },
   {
     "id": "K1439_article_general",
-    "title": "K1439: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1439 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: Codex source-code review of K1439 (USD regime conditioning of cross-asset RV: EEM/GLD/DBC/USO/DBB). VERDICT=CONDITIONAL_PASS, PUBLISHABLE_AS_IS=YES, LOOKAHEAD_RISK=NONE. Welch t-test + Bonferroni statistically correct; lookahead protection confirmed (bucket.shift(1) at k1439.py:1 Canonical evidence: experiments/k1439/k1439_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1439: write general-audience article (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_discovered",
-    "audience_correction_rewrite": false,
-    "k_id": "K1439",
-    "evidence_source_paths": [
-      "experiments/k1439/k1439_results.json"
-    ],
-    "evidence_source_kind": "experiment_results",
-    "data_source_note": "Canonical evidence: experiments/k1439/k1439_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "topic_cluster": null,
     "created_at": "2026-07-26T16:09:20+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
-    "status_history": [
-      {
-        "ts": "2026-07-26T20:44:24.783188+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
-      },
-      {
-        "ts": "2026-07-26T20:44:25.028396+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
-      }
-    ],
     "completed_at": "2026-07-26T20:44:25.028373+00:00",
-    "result": "mile_de666838 arc-covered (階層式配置 arc); check_arc_dedup exit=1 arc_duplicate"
+    "tombstone": true,
+    "archived_at": "2026-07-29T21:07:48.081985+00:00"
   },
   {
     "id": "K1497_article_general",
@@ -50309,7 +50150,7 @@
     "description": "Cron job `dispatch_supervisor` returned a non-zero exit 6× in the window. Investigate the wrapper/script root cause (API death / auth / path). If sustained, open docs/refactor_plan_<job>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：dispatch_supervisor:failure:exit1 ×6 over 0.78d (first 2026-07-26T21:43:29.410615+00:00 → last 2026-07-27T16:22:33.612092+00:00) — clean for 5.0h since last occurrence (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-27T21:25:04.703274+00:00",
     "dreaming": {
@@ -50317,7 +50158,30 @@
       "pattern_type": "repeated_tool_failure",
       "occurrences": 1,
       "governance_target": "docs/error_log.md"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-29T21:12:22.011119+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T21:12:22.355262+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T21:20:10.558327+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-29T21:12:22.355248+00:00",
+    "completed_at": "2026-07-29T21:20:10.558299+00:00",
+    "result": "Fresh detector showed same job_id attempt-1 failure followed by attempt-2 success; loop-health was classifying attempt receipts as terminal failures. Added terminal projection that collapses by job_id and excludes supervisor-owned current jobs; 27 tests, live read-back, and Matt Standards/Spec review passed. contained pending formal origin CI."
   },
   {
     "id": "dreaming_missing_retry_strategy_k709_article_general_v2",
@@ -60950,11 +60814,34 @@
     "description": "## 觀察到的事實（2026-07-29 23:4x CST, fire slot-1 ab61fef0）\n\n`K1716_article_general` 開工前跑 canonical gate：\n\n    uv run python scripts/check_arc_dedup.py --k-id k1716 --audience general --title \"TBD\"\n    -> exit 0, verdict=\"clean\"（✅ no K coverage and no arc duplicate in window）\n\n但主線程照 `.claude/rules/publishing.md` 做層 2（grep live feed）時，命中既有 general 文章：\n\n- `mile_74d12ac6`（2026-06-13）「0DTE 真的把 SPY 的波動搬進日內了嗎？2022 斷點檢定只答對一半」\n- 同一組制度節點：2022-04-18（週二）/ 2022-05-11（週四）SPX 每日到期\n- 同一結論：隔夜/日內占比小幅位移，但週二週四專屬效果證據不足\n- K1716 的 `experiments/k1716/K1716_results.json` → `prior_replication` 自述：\n  \"both K1477 and K1716 find no Tue/Thu-specific post-expansion interaction\"\n\n亦即 gate 判 clean 的那篇，對一般讀者就是既有文章的同一則故事。\n\n## 根因（可機械複驗）\n\n`mile_74d12ac6` 的 `details.experiment_refs` 是 `[]`。K-COVERAGE gate 靠 experiment_refs\n比對 K-id，文章沒帶 refs 就等於不存在。\n\n盤點 `storage/reports/feed.json`（1,907 篇）：\n\n| 範圍 | 篇數 | 無 experiment_refs | 佔比 |\n|---|---:|---:|---:|\n| audience=general | 498 | 225 | 45% |\n| 全部 | 1,907 | 1,134 | 59% |\n\n其中 69 篇「內文/欄位出現 K-id 但 experiment_refs 仍為空」—— 這批是最可回填的。\n\n## 為什麼要緊\n\n`.claude/rules/publishing.md` 的 hard block 在 2026-06-23 已降級為 warn-only\n（dedup-gate-audit.md），寫前這一跑是**唯一防線**。防線對 45% 的 general 文章結構性失明，\n等於 auto-discovery 的「no general article in feed」前提對這批不可信 —— 這正是\n2026-07-11 K1586 / K1605 兩個 writer agent 白做工的同一種失效，當時補的是 `--audience`\n接線，沒補 refs 缺漏這一路。\n\n## 建議處置（未預判，交裁決）\n\n1. 回填：對 69 篇「有 K-id 無 refs」的文章補 `details.experiment_refs`（可機械抽取 + 人工抽驗）。\n2. 或在 gate 加第二比對層：experiment_refs 為空時退回標題/內文的 K-id 正則 + arc signature，\n   不要因為欄位空就判 clean。\n3. 或讓 auto-discovery（產 `K*_article_general` 任務的那支）在 refs 覆蓋率不足時降低信心，\n   不要直接斷言「no general article in feed」。\n\n## 已做的處置\n\n`K1716_article_general` 已 complete --status succeeded，result 記 arc-covered + 本 false negative。\n`K1713_article_general` 另因 verdict=DUPLICATE_CLOSURE_PASS / creates_new_empirical_claim=false\n（evidence gate 不滿足）釋回並 annotate。\n",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "created_at": "2026-07-29T15:27:10.328553+00:00",
     "parent_task_id": "K1716_article_general",
-    "created_by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+    "created_by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "status_history": [
+      {
+        "ts": "2026-07-29T21:01:35.270346+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T21:01:35.598389+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T21:08:25.492008+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-29T21:01:35.598375+00:00",
+    "completed_at": "2026-07-29T21:08:25.491976+00:00",
+    "result": "Commit df09a56fe: exact K coverage no longer claims clean when same-audience live legacy articles expose no extractable refs; warn-only fail-open evidence list + audit added, with 3-token precision ratchet. K1716 live readback now warns and ranks mile_74d12ac6 only. 182 adjacent tests, Ruff/py_compile/diff check, Matt Standards+Spec PASS; contained pending fresh origin CI."
   },
   {
     "id": "K775_article_general",
@@ -61931,13 +61818,36 @@
     "title": "CI red 30473391569 收尾：owned_email RPC egress 未受 VOLPRED_NO_REMOTE_READ 保護（測試打到 production Supabase）",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "created_at": "2026-07-29T17:55:34.371801+00:00",
     "description": "CI run 30473391569 (Test Suite, main) 因 tests/test_phase_z_test_gate.py monkeypatch 錯符號（send_alert，實際呼叫 send_routed_alert）而紅燈；codex 已於 3c14e0a57 修正並推上 origin/main。\n\n本任務收根因第二層：dispatch_email_by_current_owner 會直接建 SupabaseOwnedEmailStore 並打 read RPC。owned_email.py 有自己的 urlopen egress (line ~1167)，不經 scripts/supabase_sync.py::_urlopen chokepoint，因此 VOLPRED_NO_REMOTE_READ 對它完全無效 —— 已實測：四個 guard 全開時該路徑仍完成 live Supabase 讀取。後果：(1) 測試結果依賴線上資料；(2) 同一個 mis-stub 在本機報 'remote writes are disabled'、在 CI 報 'Supabase URL ... required'，把 test bug 偽裝成缺 secret。",
     "repro": "VOLPRED_NO_EMAIL=1 VOLPRED_NO_REMOTE_WRITE=1 VOLPRED_NO_REMOTE_READ=1 VOLPRED_NO_CANONICAL_WRITE=1 uv run python -c \"from volpred.ops import alerts as a; a.send_alert=lambda *x,**k:{}; a.route_internal_remediable_alert(alert_key=\\\"phase_z_test_gate_red\\\",level=\\\"critical\\\",title=\\\"t\\\",body=\\\"b\\\",storage_dir=\\\"/tmp/s\\\",fingerprint=[\\\"f\\\"])\"  # 觀察: read RPC 仍打到線上 Supabase",
     "fix_site": "src/volpred/ops/delivery/owned_email.py::_rpc_value — read-only RPC 分支需比照 scripts/supabase_sync.py::_urlopen 檢查 VOLPRED_NO_REMOTE_READ 並大聲 raise",
-    "ci_run": "https://github.com/yhlai0911/volpred-research/actions/runs/30473391569"
+    "ci_run": "https://github.com/yhlai0911/volpred-research/actions/runs/30473391569",
+    "status_history": [
+      {
+        "ts": "2026-07-29T20:46:11.636637+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T20:46:11.969958+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T21:00:53.188993+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-29T20:46:11.969943+00:00",
+    "completed_at": "2026-07-29T21:00:53.188968+00:00",
+    "result": "Commit 42cfeae9b: Operations Core owned-email/shared RPC read egress now fails before transport under VOLPRED_NO_REMOTE_READ; primary-authority events and future volpred_read_* names covered. 308 adjacent tests + Ruff/py_compile/diff check + dual Matt review PASS; live no-network readback blocked all probes. contained pending fresh origin GitHub CI receipt."
   },
   {
     "id": "assign_44acf82e",
@@ -62308,7 +62218,7 @@
   {
     "id": "assign_cf82928c",
     "title": "PHASE-Z 卡住檔案 incident（e72eebd41371417d）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 21 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- .claude/rules/experiments.md — 21 班\n- experiments/k1630/README.md — 7 班\n- scripts/gen_k1585_general_charts.py — 15 班\n- scripts/gen_k1680_general_charts.py — 15 班\n- scripts/gen_k1705_general_charts.py — 15 班\n- storage/assets/k1585_general_effect_forest.png — 15 班\n- storage/assets/k1585_general_oos_cost.png — 15 班\n- storage/assets/k1609_general_gate_forest.png — 6 班\n- storage/assets/k1609_general_two_rulers.png — 6 班\n- storage/assets/k1623_general_ruler_flip.png — 15 班\n- storage/assets/k1623_general_survivor_funnel.png — 15 班\n- storage/assets/k1680_general_multiplicity.png — 15 班\n- storage/assets/k1680_general_per_firm.png — 15 班\n- storage/assets/k1698_general_rebuild_audit.png — 14 班\n- storage/assets/k1698_general_strength_flip.png — 14 班\n- storage/assets/k1698_general_two_targets.png — 14 班\n- storage/assets/k1705_general_sign_audit.png — 15 班\n- storage/assets/k1705_general_timing_flip.png — 15 班\n- storage/assets/k781_general_ranking.png — 20 班\n- storage/assets/k781_general_subperiod_regime.png — 20 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 17 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 17 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 17 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 17 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 17 班\n- storage/lazypack_plans/k1448_general_plan.json — 7 班\n- storage/lazypack_plans/k1585_general_plan.json — 15 班\n- storage/lazypack_plans/k1623_general_plan.json — 15 班\n- storage/lazypack_plans/k1680_general_plan.json — 15 班\n- storage/lazypack_plans/k1705_general_plan.json — 15 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T192036201708Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T202848179520Z:<路徑>`",
+    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 22 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- .claude/rules/experiments.md — 22 班\n- experiments/k1630/README.md — 8 班\n- scripts/gen_k1585_general_charts.py — 16 班\n- scripts/gen_k1680_general_charts.py — 16 班\n- scripts/gen_k1705_general_charts.py — 16 班\n- storage/assets/k1585_general_effect_forest.png — 16 班\n- storage/assets/k1585_general_oos_cost.png — 16 班\n- storage/assets/k1609_general_gate_forest.png — 7 班\n- storage/assets/k1609_general_two_rulers.png — 7 班\n- storage/assets/k1623_general_ruler_flip.png — 16 班\n- storage/assets/k1623_general_survivor_funnel.png — 16 班\n- storage/assets/k1680_general_multiplicity.png — 16 班\n- storage/assets/k1680_general_per_firm.png — 16 班\n- storage/assets/k1698_general_rebuild_audit.png — 15 班\n- storage/assets/k1698_general_strength_flip.png — 15 班\n- storage/assets/k1698_general_two_targets.png — 15 班\n- storage/assets/k1705_general_sign_audit.png — 16 班\n- storage/assets/k1705_general_timing_flip.png — 16 班\n- storage/assets/k781_general_ranking.png — 21 班\n- storage/assets/k781_general_subperiod_regime.png — 21 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 18 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 18 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 18 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 18 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 18 班\n- storage/lazypack_plans/k1448_general_plan.json — 8 班\n- storage/lazypack_plans/k1585_general_plan.json — 16 班\n- storage/lazypack_plans/k1623_general_plan.json — 16 班\n- storage/lazypack_plans/k1680_general_plan.json — 16 班\n- storage/lazypack_plans/k1705_general_plan.json — 16 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T192036201708Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T202848179520Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T212447807233Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -62351,45 +62261,46 @@
         "storage/lazypack_plans/k775_general_plan.json"
       ],
       "streaks": {
-        ".claude/rules/experiments.md": 21,
-        "experiments/k1630/README.md": 7,
-        "scripts/gen_k1585_general_charts.py": 15,
-        "scripts/gen_k1680_general_charts.py": 15,
-        "scripts/gen_k1705_general_charts.py": 15,
-        "storage/assets/k1585_general_effect_forest.png": 15,
-        "storage/assets/k1585_general_oos_cost.png": 15,
-        "storage/assets/k1609_general_gate_forest.png": 6,
-        "storage/assets/k1609_general_two_rulers.png": 6,
-        "storage/assets/k1623_general_ruler_flip.png": 15,
-        "storage/assets/k1623_general_survivor_funnel.png": 15,
-        "storage/assets/k1680_general_multiplicity.png": 15,
-        "storage/assets/k1680_general_per_firm.png": 15,
-        "storage/assets/k1698_general_rebuild_audit.png": 14,
-        "storage/assets/k1698_general_strength_flip.png": 14,
-        "storage/assets/k1698_general_two_targets.png": 14,
-        "storage/assets/k1705_general_sign_audit.png": 15,
-        "storage/assets/k1705_general_timing_flip.png": 15,
-        "storage/assets/k781_general_ranking.png": 20,
-        "storage/assets/k781_general_subperiod_regime.png": 20,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 17,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 17,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 17,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 17,
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 17,
-        "storage/lazypack_plans/k1448_general_plan.json": 7,
-        "storage/lazypack_plans/k1585_general_plan.json": 15,
-        "storage/lazypack_plans/k1623_general_plan.json": 15,
-        "storage/lazypack_plans/k1680_general_plan.json": 15,
-        "storage/lazypack_plans/k1705_general_plan.json": 15,
-        "storage/lazypack_plans/k775_general_plan.json": 9
+        ".claude/rules/experiments.md": 22,
+        "experiments/k1630/README.md": 8,
+        "scripts/gen_k1585_general_charts.py": 16,
+        "scripts/gen_k1680_general_charts.py": 16,
+        "scripts/gen_k1705_general_charts.py": 16,
+        "storage/assets/k1585_general_effect_forest.png": 16,
+        "storage/assets/k1585_general_oos_cost.png": 16,
+        "storage/assets/k1609_general_gate_forest.png": 7,
+        "storage/assets/k1609_general_two_rulers.png": 7,
+        "storage/assets/k1623_general_ruler_flip.png": 16,
+        "storage/assets/k1623_general_survivor_funnel.png": 16,
+        "storage/assets/k1680_general_multiplicity.png": 16,
+        "storage/assets/k1680_general_per_firm.png": 16,
+        "storage/assets/k1698_general_rebuild_audit.png": 15,
+        "storage/assets/k1698_general_strength_flip.png": 15,
+        "storage/assets/k1698_general_two_targets.png": 15,
+        "storage/assets/k1705_general_sign_audit.png": 16,
+        "storage/assets/k1705_general_timing_flip.png": 16,
+        "storage/assets/k781_general_ranking.png": 21,
+        "storage/assets/k781_general_subperiod_regime.png": 21,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 18,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 18,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 18,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 18,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 18,
+        "storage/lazypack_plans/k1448_general_plan.json": 8,
+        "storage/lazypack_plans/k1585_general_plan.json": 16,
+        "storage/lazypack_plans/k1623_general_plan.json": 16,
+        "storage/lazypack_plans/k1680_general_plan.json": 16,
+        "storage/lazypack_plans/k1705_general_plan.json": 16,
+        "storage/lazypack_plans/k775_general_plan.json": 10
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260729T192036201708Z",
-        "refs/volpred/quarantine/20260729T202848179520Z"
+        "refs/volpred/quarantine/20260729T202848179520Z",
+        "refs/volpred/quarantine/20260729T212447807233Z"
       ],
-      "fires": 2,
+      "fires": 3,
       "first_seen_at": "2026-07-29T19:20:59.027794+00:00",
-      "last_seen_at": "2026-07-29T20:28:48.281137+00:00",
+      "last_seen_at": "2026-07-29T21:24:47.926746+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-29T19:56:44.221774+00:00",
       "deferred": [
@@ -62427,7 +62338,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-29T20:28:48.281137+00:00"
+    "updated_at": "2026-07-29T21:24:47.926746+00:00"
   },
   {
     "id": "assign_d5999f36",
@@ -62526,7 +62437,7 @@
     "description": "Issue #44 bounded root-fix: live handoff reports 13/4 occupied by counting every historical .claude/worktrees directory, while canonical dispatch reports one active producer and dispatch_slot_budget already classifies stale worktrees. Add deterministic RED, make handoff consume the canonical occupancy classifier without duplicating TTL/process logic, preserve stale worktree inventory as non-occupying evidence, regenerate live handoff and verify exact slot count. Complete implement/TDD/Matt dual review/live read-back.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "payload": {
       "task_type": "platform_ops",
@@ -62535,10 +62446,6 @@
     "created_by": "codex-vscode",
     "issue_ref": "#44",
     "created_at": "2026-07-29T20:22:24.551390+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-29T20:22:25.021395+00:00",
-    "claim_expires_at": "2026-07-29T22:22:25.021395+00:00",
-    "claim_session_id": "9ff34bd17461",
     "status_history": [
       {
         "ts": "2026-07-29T20:22:25.021413+00:00",
@@ -62551,8 +62458,48 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T20:32:20.145750+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-29T20:22:28.756007+00:00"
+    "started_at": "2026-07-29T20:22:28.756007+00:00",
+    "completed_at": "2026-07-29T20:32:20.145724+00:00",
+    "result": "Root-fixed handoff slot observer split: generate_handoff now projects canonical dynamic cap/occupancy and immutable agent metadata; stale artifacts remain visible but do not consume slots. RED reproduced raw-directory miscount; 85 tests plus Ruff/compile/diff and Matt Standards/Spec PASS; live build corrected 13/4 to 3/4 with 11 stale.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "assign_cdd58a61",
+    "title": "Bound GitHub CI system dependency install so mirror stalls cannot consume the full test timeout",
+    "description": "Fresh GitHub Test Suite run 30490697153 was cancelled before pytest: apt-get downloaded fonts-noto-cjk from azure.archive.ubuntu.com for 17m29s until the job-level 20m timeout killed the run. Root-fix the CI dependency installation contract with bounded network time/retry and deterministic evidence; preserve real CJK font availability and ripgrep runtime coverage. Acceptance: deterministic test fails on the current unbounded workflow, fixed workflow/helper has bounded retries and leaves enough budget for pytest, targeted tests and Matt dual review pass, then a fresh origin run reaches and completes pytest.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "in_progress",
+    "source": "agent",
+    "created_at": "2026-07-29T21:24:13.070783+00:00",
+    "created_by": "codex-vscode",
+    "priority_capped_from": 1,
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-29T21:24:17.495307+00:00",
+    "claim_expires_at": "2026-07-29T23:24:17.495307+00:00",
+    "claim_session_id": "8ee1b24f9798",
+    "status_history": [
+      {
+        "ts": "2026-07-29T21:24:17.495323+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T21:24:17.843605+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-29T21:24:17.843589+00:00"
   }
 ]
