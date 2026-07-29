@@ -4984,3 +4984,65 @@ attempt-level receipts；loop-health 卻逐筆聚合 failure signature，只用�
 移除；其他獨立 signature 仍照實保留。Matt Standards／Spec 複審均 PASS。此切片目前
 為 **`contained`**：待正式 commit 進 origin 與 GitHub CI 回讀後，才升級為
 **`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-07-30 — PHASE-Z 路徑集合變動讓同一 incident family 重複寄 CRITICAL
+
+**證據化症狀**：外送 ledger 的固定 dedupe key
+`ce0fdba9f1a00af62b4581d40d9d64f8e198ee7dc88b9b83de4be81efb1a35ca`
+（標題 `PHASE-Z 無主或過期檔案達處置門檻`）在 2026-07-23 至 07-28 共被呼叫
+59 次，中央 dedupe 雖跳過大多數，仍依退避規則於 occurrence
+1／6／9／13／26／44 外送六次。這不是 email／Telegram delivery duplication；
+每次 PHASE-Z 卡住路徑集合增減都產生 `created=True` 的 successor incident，caller
+把每張新 row 都當成新的 page 理由。
+
+**根因層級（incident identity / notification ownership contract）**：task row 的
+exact path-set fingerprint 適合追蹤可機械關閉的版本，卻被誤用為 notification
+episode identity。只要新舊 path set 有 lineage（重疊或經其他 open row 連通），
+就已具備同一個 owner、close condition 與 scheduler consequence；集合增減不會增加
+需要 owner 立即知道的資訊。不相交的 set 則可能是另一個根因，不能被舊 row 靜音。
+把 task-row identity 直接當 page identity，使中央 dedupe 只能延後噪音，無法從源頭
+停止同 episode 的呼叫。
+
+**底層修復與制度化**：`upsert_incident()` receipt 新增 canonical
+`page_required`。notification episode 定義為「未關 rows 以 path overlap 形成的
+transitive connected component」：`{A}→{A,B}→{B}` 只 page 一次，不相交的 `{C}`
+仍是新的根因並獨立 page。page lease 在 canonical queue 的 `LOCK_EX` 內持久化，
+同 fingerprint 或不同 fingerprint 的 concurrent creators 都只能有一個 lease；
+successor supersede 時 lease／delivery acknowledgement 也會轉移；若 wider set
+合併兩個已 lease 的 roots，所有 in-flight tokens 會先合併到 live lineage，任一
+predecessor 的成功 receipt 都沿 `superseded_by` 寫到 live successor；只要仍有 token
+未過 10 分鐘，下一班不得再 mint 第三個。只有 alert receipt 證明 sent 或同 episode 的 24h transport
+dedup 後才標 durable delivered；`sent=false` 立即釋放，crash 未 settle 則 10 分鐘
+後自動重試。舊 schema rows lazy migrate 為
+已通知，不因部署重寄。incident 使用 fingerprint + episode generation 衍生
+deterministic id 並繞過 generic semantic matcher，普通 task 不再能吞掉 incident，
+terminal 後同 fingerprint 也能重開。首次 root 的 id 另持久化為
+`family_transport_id`；multi-root merge 同時保留所有 predecessor transport aliases
+與各 lease 原始 key。retry 會把 aliases 一併交給中央 24h ledger，任一 predecessor
+已送達但在 settlement 前 crash，都會以 `dedup_24h` 收斂而非再寄第三封。
+delivery acknowledgement 在同一 queue lock 內投影到整個 open overlap component，
+因此 AB 關閉後 BC 仍保有 family receipt。A→AB crash retry 仍用 A 的 key；
+disjoint family 或 e2 recurrence 才換 key，不會誤用 A/e1 的 delivery receipt。
+schema 0 才做「舊 row 已通知」migration；schema 1 的 scalar lease 會無損正規化成
+schema 2 list，active 繼續等待、expired／released 照常 retry，不會被升級誤標 delivered。
+PHASE-Z 外送 gate 改讀此欄位，
+incident task、quarantine、降載與機械 close condition 完全不變；若 task pool
+無法建立 incident，仍保留 fail-loud legacy backoff。
+
+**回歸與 read-back**：deterministic RED 先重現第二個卡住檔案成熟後同一 episode
+呼叫兩次 CRITICAL；回歸另鎖定 disjoint episode 不得靜音、concurrent overlapping
+creator 只能一個 page、普通 semantic duplicate 不得吞單、failed delivery／crash
+lease 必須重試、dedup receipt 可 settle、successor lease 必須轉移，以及 upsert
+exception 仍 fail-loud；另鎖定 multi-root merge 任一 predecessor success 可
+acknowledge live successor、remaining in-flight token 可阻止第三次 page、
+A→AB crash retry 沿用 root key、merged alias send-before-settle crash 不重寄、
+overlap member 關閉不遺失 delivery、schema 1 active／expired／released migration，
+以及 disjoint family／e2 取得不同 dedup key。
+successor receipt 回讀
+`created=true, page_required=false`。目前狀態為
+**`contained`**：歷史 production ledger 雖已逾 25 小時沒有再外送，新的 sustained-clean
+48 小時計時必須從本修正正式部署後開始；且 commit 尚待 push／GitHub CI read-back。
+兩者完成前不得升級
+為 **`root_cause_fixed_and_verified`**。

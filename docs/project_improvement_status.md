@@ -3008,3 +3008,33 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
 - ✅ Matt Standards／Spec 最終雙軸複審 PASS。
 - ⏳ 狀態 **`contained`**：待正式 push 與 fresh GitHub Test Suite 完整跑到 pytest
   後升級。
+
+## 2026-07-30 — PHASE-Z incident-family notification containment
+
+- ✅ production ledger 證明固定 dedupe key
+  `ce0fdba9f1a00af62b4581d40d9d64f8e198ee7dc88b9b83de4be81efb1a35ca`
+  被呼叫 59 次，中央退避後仍外送六次；不是 transport 重送。
+- ✅ 根因是 exact path-set successor row 的 `created` 被誤當 notification episode；
+  路徑集合增減時 owner／close condition／scheduler consequence 其實都已存在。
+- ✅ canonical receipt 新增 overlap-component `page_required`：有 path lineage 的
+  successor 不再 page；不相交的新 episode 仍通知。10 分鐘 lease 在 queue
+  `LOCK_EX` 取得、alert receipt 後才 durable acknowledge；failed delivery／crash
+  會重試，supersede 會移轉狀態；multi-root merge 的任一 predecessor success
+  receipt 會沿 lineage 寫到 live successor，所有 outstanding tokens 在 live
+  lineage 可見，concurrent creators 也只能一個 page。
+- ✅ fingerprint + episode generation 衍生 deterministic task id，關閉 generic
+  semantic dedupe 黑洞並允許 terminal 後同 fingerprint 重開；普通 task 不再能吞掉
+  incident owner／derate。
+- ✅ root `family_transport_id` 隨 overlap successor 轉移並納入顯示標題／中央 dedup
+  identity；multi-root merge 保留每個 predecessor alias 與 lease transport key，
+  retry 會以全部 aliases 查中央 24h ledger，send-before-settle crash 不再造成第三封。
+  delivery receipt 同鎖投影到完整 open overlap component，member 關閉不會遺失 ack。
+- ✅ schema 0 與 schema 1 migration 分流：只有 pre-feature schema 0 視為既有已通知；
+  schema 1 scalar lease 升級為 schema 2 list，active／expired／released 語意不變。
+- ✅ deterministic RED→GREEN；另鎖定 disjoint episode、concurrent overlap、
+  semantic collision、delivery failure／crash retry、dedup settle、successor lease
+  transfer、multi-root alias crash、overlap-member close、schema 1 migration 與
+  upsert error fail-loud；successor receipt 為
+  `created=true, page_required=false`。
+- ⏳ 狀態 **`contained`**：待正式 push／GitHub CI；production 48 小時零再外送
+  計時從本修正正式部署後開始，read-back 完成後才升級。

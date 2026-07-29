@@ -15,8 +15,9 @@ CRITICAL 信（3/6/12/24… 班退避）。警報有正常送出，78 班零行�
 
 1. **一組卡住路徑 = 一張任務**（``upsert_incident``）。dedup key 是路徑集合的穩定
    fingerprint，不是標題、不是時間。第 2..N 班是**更新**（班數 / quarantine ref /
-   last_seen_at），不是新增，也不再重發同一封 CRITICAL —— 既有 alert 路徑是被
-   *收編*，不是再疊一層通知（反 alert-stacking：多一個提醒管道只會讓兩個都被忽略）。
+   last_seen_at），不是新增。路徑集合真的改變時可建立 successor row，但只要同類
+   incident family 仍有未關 row，``page_required`` 就維持 False：owner、close
+   condition 與 scheduler consequence 都已存在，重寄 CRITICAL 只是在堆疊通知管道。
 2. **未關 → 降載**（``open_incidents``）。唯一 enforcement owner 是
    ``scripts/dispatch_slot_budget.py``，形狀比照既有的 ``auth_blocked → DERATE_CAP``。
    這裡只**提供訊號**，不自己開第二個 gate。
@@ -33,7 +34,8 @@ import fcntl
 import hashlib
 import json
 import subprocess
-from datetime import datetime, timezone
+import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
@@ -42,7 +44,7 @@ from volpred.canonical_write import guard_canonical_write
 from .diagnostics import warn
 from .next_tasks import (
     TERMINAL_COMPACTABLE_STATUSES,
-    append_next_task,
+    append_task_record,
     write_tasks_to_handle,
 )
 
@@ -54,14 +56,13 @@ INCIDENT_KIND = "phase_z_foreign_stuck"
 #: 其中一份被改時無聲分岔，而分岔的後果是「保存了但檢查不到」。
 QUARANTINE_REF_PREFIX = "refs/volpred/quarantine"
 
-#: incident 是 P1：它會壓 cap，壓 cap 的東西不能排在別人後面慢慢等。
-_INCIDENT_LEGACY_PRIORITY = 10  # → P1（next_tasks._legacy_priority_to_p）
-
 #: 終局狀態＝incident 已關。``blocked`` / ``blocked_on_user`` 刻意**不算關閉**：
 #: 檔案還卡著，降載就該繼續生效，否則「先擋著」會變成靜音鍵。
 _CLOSED_STATUSES = TERMINAL_COMPACTABLE_STATUSES
 
 _GIT_TIMEOUT_S = 30
+_FAMILY_PAGE_CLAIM_SCHEMA = 2
+_FAMILY_PAGE_LEASE_TTL = timedelta(minutes=10)
 
 #: 一個**已被覆蓋**的 dirty path 多久沒被動過，才算「沒有人會回來收」。
 #:
@@ -139,6 +140,434 @@ def open_incidents(tasks_path: str | Path) -> list[dict]:
     return [t for t in tasks if _is_incident(t) and _is_open(t)]
 
 
+def _page_leases(payload: dict[str, Any]) -> list[dict[str, str]]:
+    """Read canonical list leases plus the bounded scalar pre-schema shape."""
+    leases: list[dict[str, str]] = []
+    raw = payload.get("family_page_leases")
+    if isinstance(raw, list):
+        for item in raw:
+            if not isinstance(item, dict):
+                continue
+            token = str(item.get("token") or "")
+            leased_at = str(item.get("leased_at") or "")
+            if token and leased_at:
+                leases.append(
+                    {
+                        "token": token,
+                        "leased_at": leased_at,
+                        "by": str(item.get("by") or ""),
+                        "transport_id": str(
+                            item.get("transport_id")
+                            or payload.get("family_transport_id")
+                            or ""
+                        ),
+                    }
+                )
+    scalar_token = str(payload.get("family_page_lease_token") or "")
+    scalar_at = str(payload.get("family_page_lease_at") or "")
+    if scalar_token and scalar_at and not any(
+        lease["token"] == scalar_token for lease in leases
+    ):
+        leases.append(
+            {
+                "token": scalar_token,
+                "leased_at": scalar_at,
+                "by": str(payload.get("family_page_lease_by") or ""),
+                "transport_id": str(
+                    payload.get("family_transport_id") or ""
+                ),
+            }
+        )
+    return leases
+
+
+def _family_transport_ids(
+    payload: dict[str, Any],
+    *,
+    fallback: str = "",
+) -> list[str]:
+    """Return the stable primary id plus every predecessor transport alias."""
+    candidates = [
+        str(payload.get("family_transport_id") or fallback),
+        *[
+            str(value)
+            for value in (payload.get("family_transport_alias_ids") or [])
+            if isinstance(value, str)
+        ],
+        *[
+            str(lease.get("transport_id") or "")
+            for lease in _page_leases(payload)
+        ],
+    ]
+    return list(dict.fromkeys(value for value in candidates if value))
+
+
+def _store_family_transport_ids(
+    payload: dict[str, Any],
+    transport_ids: Sequence[str],
+) -> str:
+    """Persist one primary identity without discarding merged-family aliases."""
+    unique = list(
+        dict.fromkeys(str(value) for value in transport_ids if str(value))
+    )
+    if not unique:
+        payload.pop("family_transport_id", None)
+        payload.pop("family_transport_alias_ids", None)
+        return ""
+    primary = unique[0]
+    payload["family_transport_id"] = primary
+    if len(unique) > 1:
+        payload["family_transport_alias_ids"] = unique[1:]
+    else:
+        payload.pop("family_transport_alias_ids", None)
+    return primary
+
+
+def _store_page_leases(
+    payload: dict[str, Any],
+    leases: Sequence[dict[str, str]],
+) -> None:
+    payload.pop("family_page_lease_token", None)
+    payload.pop("family_page_lease_at", None)
+    payload.pop("family_page_lease_by", None)
+    deduped = {
+        str(lease.get("token") or ""): {
+            "token": str(lease.get("token") or ""),
+            "leased_at": str(lease.get("leased_at") or ""),
+            "by": str(lease.get("by") or ""),
+            "transport_id": str(lease.get("transport_id") or ""),
+        }
+        for lease in leases
+        if str(lease.get("token") or "")
+        and str(lease.get("leased_at") or "")
+    }
+    if deduped:
+        payload["family_page_leases"] = list(deduped.values())
+    else:
+        payload.pop("family_page_leases", None)
+
+
+def _claim_related_family_page(
+    tasks_path: Path,
+    task_id: str,
+    *,
+    now: datetime,
+) -> tuple[bool, bool, str | None, str | None, list[str]]:
+    """Atomically lease one page for the target's overlapping incident component.
+
+    Exact path-set fingerprints identify task rows, not notification episodes.
+    An episode is the transitive connected component of open rows that share at
+    least one path. Thus ``{A}`` → ``{A, B}`` → ``{B}`` stays one page, while a
+    disjoint ``{C}`` remains a genuinely new condition and gets its own page.
+
+    The lease is persisted under the queue's ``LOCK_EX``. This closes both races:
+    concurrent different fingerprints cannot each page one overlapping episode,
+    and two callers deduped to the same task id cannot both page it.
+
+    Rows created before this schema already used ``created=True`` to page. Their
+    missing schema marker is migrated as already delivered, preventing a one-time
+    rollout resend. A new claim is only a ten-minute lease; ``settle_family_page``
+    turns it into a durable delivery acknowledgement after ``alert_fn`` returns.
+    A crash or failed delivery therefore expires/retries instead of silently
+    suppressing the episode forever.
+    """
+    with tasks_path.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            tasks = _load_tasks(handle)
+            rows = [
+                task
+                for task in tasks
+                if _is_incident(task) and _is_open(task)
+            ]
+            target = next(
+                (task for task in rows if str(task.get("id") or "") == task_id),
+                None,
+            )
+            if target is None:
+                return False, False, None, None, []
+
+            component: list[dict] = [target]
+            component_ids = {str(target.get("id") or "")}
+            component_paths = set((target.get("payload") or {}).get("paths") or [])
+            changed = True
+            while changed:
+                changed = False
+                for row in rows:
+                    row_id = str(row.get("id") or "")
+                    if row_id in component_ids:
+                        continue
+                    row_paths = set((row.get("payload") or {}).get("paths") or [])
+                    if component_paths.isdisjoint(row_paths):
+                        continue
+                    component.append(row)
+                    component_ids.add(row_id)
+                    component_paths.update(row_paths)
+                    changed = True
+
+            owner = min(
+                component,
+                key=lambda task: (
+                    str(task.get("created_at") or ""),
+                    str(task.get("id") or ""),
+                ),
+            )
+            owner_payload = owner.setdefault("payload", {})
+            transport_ids = _family_transport_ids(
+                owner_payload,
+                fallback=str(owner.get("id") or task_id),
+            )
+            for row in component:
+                row_payload = row.setdefault("payload", {})
+                for candidate in _family_transport_ids(
+                    row_payload,
+                    fallback=str(row.get("id") or ""),
+                ):
+                    if candidate not in transport_ids:
+                        transport_ids.append(candidate)
+            transport_id = transport_ids[0]
+            for row in component:
+                _store_family_transport_ids(
+                    row.setdefault("payload", {}),
+                    transport_ids,
+                )
+
+            delivered_row = next(
+                (
+                    row
+                    for row in component
+                    if (row.get("payload") or {}).get(
+                        "family_page_delivered_at"
+                    )
+                ),
+                None,
+            )
+            if delivered_row is not None:
+                delivered_payload = delivered_row.get("payload") or {}
+                for row in component:
+                    row_payload = row.setdefault("payload", {})
+                    row_payload["family_page_delivered_at"] = (
+                        delivered_payload["family_page_delivered_at"]
+                    )
+                    row_payload["family_page_delivered_by"] = (
+                        delivered_payload.get("family_page_delivered_by")
+                        or "component_delivery_projection"
+                    )
+                    _store_family_transport_ids(row_payload, transport_ids)
+                write_tasks_to_handle(handle, tasks)
+                return True, False, None, transport_id, transport_ids
+
+            legacy_component = any(
+                int(
+                    (row.get("payload") or {}).get(
+                        "family_page_claim_schema", 0
+                    )
+                    or 0
+                )
+                == 0
+                for row in component
+            )
+            if legacy_component:
+                delivered_at = str(owner.get("created_at") or now.isoformat())
+                for row in component:
+                    row_payload = row.setdefault("payload", {})
+                    row_payload["family_page_claim_schema"] = (
+                        _FAMILY_PAGE_CLAIM_SCHEMA
+                    )
+                    row_payload["family_page_delivered_at"] = delivered_at
+                    row_payload["family_page_delivered_by"] = (
+                        "legacy_created_receipt_migration"
+                    )
+                    _store_family_transport_ids(row_payload, transport_ids)
+                write_tasks_to_handle(handle, tasks)
+                return True, False, None, transport_id, transport_ids
+
+            active_leases: list[dict[str, str]] = []
+            for row in component:
+                row_payload = row.get("payload") or {}
+                row_payload["family_page_claim_schema"] = (
+                    _FAMILY_PAGE_CLAIM_SCHEMA
+                )
+                active_leases.extend(
+                    lease
+                    for lease in _page_leases(row_payload)
+                    if _page_lease_is_active(lease, now=now)
+                )
+                _store_page_leases(row_payload, [])
+
+            # Normalize every in-flight predecessor token onto the component
+            # owner before successor retirement. This makes outstanding leases
+            # visible to the next open-component election and prevents a third
+            # pager while another root's receipt is still in flight.
+            _store_page_leases(owner_payload, active_leases)
+            if active_leases:
+                write_tasks_to_handle(handle, tasks)
+                return True, False, None, transport_id, transport_ids
+
+            token = uuid.uuid4().hex
+            _store_page_leases(
+                owner_payload,
+                [
+                    {
+                        "token": token,
+                        "leased_at": now.isoformat(),
+                        "by": task_id,
+                        "transport_id": transport_id,
+                    }
+                ],
+            )
+            write_tasks_to_handle(handle, tasks)
+            return True, True, token, transport_id, transport_ids
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def _page_lease_is_active(lease: dict[str, str], *, now: datetime) -> bool:
+    token = str(lease.get("token") or "")
+    raw = lease.get("leased_at")
+    if not token or not isinstance(raw, str):
+        return False
+    try:
+        leased_at = datetime.fromisoformat(raw)
+    except ValueError:  # silent-ok: malformed/old lease is stale evidence and must not suppress retry
+        return False
+    if leased_at.tzinfo is None or leased_at.utcoffset() is None:
+        return False
+    age = now - leased_at.astimezone(timezone.utc)
+    # Concurrent callers capture ``now`` before waiting for the queue lock. The
+    # later lock holder can therefore carry a timestamp a few microseconds older
+    # than the lease it observes. Treat bounded negative skew as active; only a
+    # lease implausibly far in the future is corrupt/stale evidence.
+    return -_FAMILY_PAGE_LEASE_TTL < age < _FAMILY_PAGE_LEASE_TTL
+
+
+def settle_family_page(
+    tasks_path: str | Path,
+    *,
+    token: str,
+    delivered: bool,
+    now: datetime | None = None,
+) -> bool:
+    """Acknowledge delivery or release the lease so the next fire can retry."""
+    if not token:
+        return False
+    current = now or datetime.now(timezone.utc)
+    path = Path(tasks_path)
+    guard_canonical_write(path)
+    with path.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            tasks = _load_tasks(handle)
+            owner = next(
+                (
+                    task
+                    for task in tasks
+                    if _is_incident(task)
+                    and any(
+                        lease["token"] == token
+                        for lease in _page_leases(task.get("payload") or {})
+                    )
+                ),
+                None,
+            )
+            if owner is None:
+                return False
+            payload = owner.setdefault("payload", {})
+            _store_page_leases(
+                payload,
+                [
+                    lease
+                    for lease in _page_leases(payload)
+                    if lease["token"] != token
+                ],
+            )
+            if delivered:
+                # A wider set can connect two independently leased components.
+                # One token moves onto the successor; additional tokens remain
+                # on their superseded rows. Follow ``superseded_by`` so success
+                # from *any* predecessor acknowledges the live representative,
+                # rather than disappearing into a terminal audit row.
+                by_id = {
+                    str(task.get("id") or ""): task
+                    for task in tasks
+                    if isinstance(task, dict)
+                }
+                destination = owner
+                seen: set[str] = set()
+                while True:
+                    destination_id = str(destination.get("id") or "")
+                    if destination_id in seen:
+                        break
+                    seen.add(destination_id)
+                    successor_id = str(
+                        destination.get("superseded_by") or ""
+                    )
+                    successor = by_id.get(successor_id)
+                    if successor is None or not _is_incident(successor):
+                        break
+                    destination = successor
+
+                # Delivery belongs to the whole currently-open overlap
+                # component, not merely the row that happened to own the token.
+                # AB and BC are the same notification family even though neither
+                # is a subset; projecting under this same queue lock ensures BC
+                # cannot lose the acknowledgement if AB closes immediately.
+                component = [destination]
+                component_ids = {str(destination.get("id") or "")}
+                component_paths = set(
+                    (destination.get("payload") or {}).get("paths") or []
+                )
+                changed = True
+                while changed:
+                    changed = False
+                    for row in tasks:
+                        if not (
+                            isinstance(row, dict)
+                            and _is_incident(row)
+                            and _is_open(row)
+                        ):
+                            continue
+                        row_id = str(row.get("id") or "")
+                        if row_id in component_ids:
+                            continue
+                        row_paths = set(
+                            (row.get("payload") or {}).get("paths") or []
+                        )
+                        if component_paths.isdisjoint(row_paths):
+                            continue
+                        component.append(row)
+                        component_ids.add(row_id)
+                        component_paths.update(row_paths)
+                        changed = True
+
+                transport_ids = _family_transport_ids(
+                    payload,
+                    fallback=str(owner.get("id") or ""),
+                )
+                for row in component:
+                    for candidate in _family_transport_ids(
+                        row.setdefault("payload", {}),
+                        fallback=str(row.get("id") or ""),
+                    ):
+                        if candidate not in transport_ids:
+                            transport_ids.append(candidate)
+                for row in component:
+                    row_payload = row.setdefault("payload", {})
+                    row_payload["family_page_claim_schema"] = (
+                        _FAMILY_PAGE_CLAIM_SCHEMA
+                    )
+                    row_payload["family_page_delivered_at"] = (
+                        current.isoformat()
+                    )
+                    row_payload["family_page_delivered_by"] = "alert_receipt"
+                    _store_family_transport_ids(row_payload, transport_ids)
+                    _store_page_leases(row_payload, [])
+            write_tasks_to_handle(handle, tasks)
+            return True
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
 def _describe(paths: Sequence[str], streaks: dict[str, int], fires: int,
               quarantine_refs: Sequence[str]) -> str:
     worst = max((streaks.get(p, 0) for p in paths), default=0)
@@ -179,11 +608,18 @@ def upsert_incident(
 ) -> dict[str, Any]:
     """建/更新**一張** incident。回傳 receipt，含 ``created``（是否為新單）。
 
-    ``created`` 是 alert 收編的開關：只有新開的 incident 才配一封 CRITICAL。第
-    2..N 班找到同 fingerprint 的未關單，就只更新班數 / ref / last_seen_at，不新增、
-    不再發信 —— 78 班寄 6 封同樣的信，讀者學到的是把它歸檔，不是去處理它。
+    ``page_required`` 是 alert 收編的開關；為 true 時同時回傳
+    ``page_claim_token``。caller 只有在 alert receipt 證明 delivered／deduped 後，
+    才能用 ``settle_family_page`` 把 lease 轉成 durable acknowledgement。第 2..N 班
+    找到同 fingerprint 的未關單，就只更新班數 / ref / last_seen_at；集合增減而建立
+    successor row 時，也沿用同一個已通知 episode，不再發信。
 
-    建立走 ``next_tasks.append_next_task``（唯一 canonical append gateway），
+    建立走 ``next_tasks.append_task_record``（canonical record append gateway），
+    並以 fingerprint + episode generation 衍生 deterministic id、關閉 generic
+    semantic dedupe：incident 自己的 exact fingerprint 是較強的 identity，generic
+    matcher 把普通 task 當成 duplicate 會造成「沒有 incident、沒有 page、沒有
+    derate」的黑洞。generation 讓 terminal episode 保留 audit row 後，同路徑再次
+    發生仍能重開；concurrent reopen 在同一 snapshot 算出相同 id，由 gateway 去重。
     更新走 ``write_tasks_to_handle``（唯一 canonical serializer）。這裡沒有第二條
     寫入路徑，因為任務池被截斷過一次就夠了（incident 2026-07-05）。
     """
@@ -191,7 +627,9 @@ def upsert_incident(
     ordered = sorted({str(p) for p in paths if str(p)})
     receipt: dict[str, Any] = {
         "fingerprint": None, "task_id": None, "created": False,
-        "updated": False, "reason": "", "fires": 0,
+        "updated": False, "page_required": False, "page_claim_token": None,
+        "page_transport_id": None, "page_transport_alias_ids": [],
+        "reason": "", "fires": 0,
     }
     if not ordered:
         receipt["reason"] = "no_stuck_paths"
@@ -207,14 +645,20 @@ def upsert_incident(
         path.write_text("[]\n", encoding="utf-8")
 
     # Phase 1: 同 fingerprint 的未關單存在 → 就地更新，鎖內完成。
+    existing_task_id: str | None = None
+    episode_generation = 1
     with path.open("r+", encoding="utf-8") as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
             tasks = _load_tasks(handle)
+            same_fingerprint = [
+                task
+                for task in tasks
+                if _is_incident(task)
+                and (task.get("payload") or {}).get("fingerprint") == fp
+            ]
             existing = next(
-                (t for t in tasks
-                 if _is_incident(t) and _is_open(t)
-                 and (t.get("payload") or {}).get("fingerprint") == fp),
+                (task for task in same_fingerprint if _is_open(task)),
                 None,
             )
             if existing is not None:
@@ -236,9 +680,35 @@ def upsert_incident(
                     "task_id": existing.get("id"), "updated": True,
                     "reason": "updated_existing", "fires": payload["fires"],
                 })
-                return receipt
+                existing_task_id = str(existing.get("id") or "")
+            else:
+                generations = [
+                    int((task.get("payload") or {}).get("episode_generation"))
+                    for task in same_fingerprint
+                    if isinstance(
+                        (task.get("payload") or {}).get("episode_generation"),
+                        int,
+                    )
+                ]
+                episode_generation = max(
+                    [len(same_fingerprint), *generations],
+                    default=0,
+                ) + 1
         finally:
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    if existing_task_id is not None:
+        persisted, page_required, page_token, transport_id, transport_ids = (
+            _claim_related_family_page(
+                path, existing_task_id, now=now,
+            )
+        )
+        receipt["page_required"] = persisted and page_required
+        receipt["page_claim_token"] = page_token
+        receipt["page_transport_id"] = transport_id
+        receipt["page_transport_alias_ids"] = [
+            value for value in transport_ids if value != transport_id
+        ]
+        return receipt
 
     # Phase 2: 沒有未關的同 fingerprint 單 → 走 canonical append gateway。
     # 鎖已釋放才呼叫（同一支 flock 在同 process 內重入會鎖死自己）。
@@ -251,24 +721,56 @@ def upsert_incident(
         "fires": 1,
         "first_seen_at": now.isoformat(),
         "last_seen_at": now.isoformat(),
+        "family_page_claim_schema": _FAMILY_PAGE_CLAIM_SCHEMA,
+        "episode_generation": episode_generation,
+        "family_transport_id": (
+            f"phase-z-foreign-{fp}-e{episode_generation}"
+        ),
     }
-    record = append_next_task(
+    record, created = append_task_record(
+        {
+            "id": f"phase-z-foreign-{fp}-e{episode_generation}",
         # 標題刻意不帶班數／檔案數：會浮動的數字進標題，等於每班一個新 dedup key，
         # 那正是舊 CRITICAL 變成連環通知的機制。浮動的東西全放 description。
-        title=f"PHASE-Z 卡住檔案 incident（{fp}）— 未關則 scheduler 降載",
-        description=_describe(ordered, payload["streaks"], 1, payload["quarantine_refs"]),
-        source="phase_z",
-        task_family="ops",
-        legacy_priority=_INCIDENT_LEGACY_PRIORITY,
-        payload=payload,
+            "title": f"PHASE-Z 卡住檔案 incident（{fp}）— 未關則 scheduler 降載",
+            "description": _describe(
+                ordered, payload["streaks"], 1, payload["quarantine_refs"],
+            ),
+            "task_type": "platform_ops",
+            "priority": 1,
+            "status": "pending",
+            "source": "phase_z",
+            "created_at": now.isoformat(),
+            "payload": payload,
+        },
         path=path,
+        if_exists="skip",
+        semantic_dedupe=False,
+    )
+    candidate_id = str(record.get("id") or "")
+    persisted, page_required, page_token, transport_id, transport_ids = (
+        _claim_related_family_page(
+            path, candidate_id, now=now,
+        )
     )
     receipt.update({
-        "task_id": record.get("id"), "created": True,
-        "reason": "created", "fires": 1,
+        "task_id": candidate_id,
+        "created": created and persisted,
+        "page_required": persisted and page_required,
+        "page_claim_token": page_token,
+        "page_transport_id": transport_id,
+        "page_transport_alias_ids": [
+            value for value in transport_ids if value != transport_id
+        ],
+        "reason": "created" if created else "existing_after_append_race",
+        "fires": 1,
     })
-    receipt["superseded"] = _supersede_subsumed(
-        path, keep_id=str(record.get("id")), paths=set(ordered), now=now,
+    receipt["superseded"] = (
+        _supersede_subsumed(
+            path, keep_id=candidate_id, paths=set(ordered), now=now,
+        )
+        if persisted
+        else []
     )
     return receipt
 
@@ -287,6 +789,14 @@ def _supersede_subsumed(path: Path, *, keep_id: str, paths: set[str],
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
             tasks = _load_tasks(handle)
+            keep = next(
+                (
+                    task
+                    for task in tasks
+                    if _is_incident(task) and task.get("id") == keep_id
+                ),
+                None,
+            )
             for task in tasks:
                 if not (_is_incident(task) and _is_open(task)):
                     continue
@@ -295,6 +805,47 @@ def _supersede_subsumed(path: Path, *, keep_id: str, paths: set[str],
                 old = set((task.get("payload") or {}).get("paths") or [])
                 if not old or not old <= paths:
                     continue
+                old_payload = task.get("payload") or {}
+                keep_payload = keep.setdefault("payload", {}) if keep is not None else {}
+                if (
+                    old_payload.get("family_page_delivered_at")
+                    or _page_leases(old_payload)
+                    or old_payload.get("family_transport_id")
+                ):
+                    # The successor remains the live representative of the same
+                    # overlapping episode. Preserve delivery/lease state before
+                    # retiring its predecessor, or the next exact-set update
+                    # would see an unacknowledged singleton and page again.
+                    keep_payload["family_page_claim_schema"] = (
+                        _FAMILY_PAGE_CLAIM_SCHEMA
+                    )
+                    transport_ids = _family_transport_ids(
+                        keep_payload,
+                        fallback=str(keep.get("id") or "")
+                        if keep is not None
+                        else keep_id,
+                    )
+                    for candidate in _family_transport_ids(
+                        old_payload,
+                        fallback=str(task.get("id") or ""),
+                    ):
+                        if candidate not in transport_ids:
+                            transport_ids.append(candidate)
+                    _store_family_transport_ids(keep_payload, transport_ids)
+                    for field in (
+                        "family_page_delivered_at",
+                        "family_page_delivered_by",
+                    ):
+                        if old_payload.get(field) and not keep_payload.get(field):
+                            keep_payload[field] = old_payload[field]
+                    _store_page_leases(
+                        keep_payload,
+                        [
+                            *_page_leases(keep_payload),
+                            *_page_leases(old_payload),
+                        ],
+                    )
+                    _store_page_leases(old_payload, [])
                 task["status"] = "superseded"
                 task["superseded_at"] = now.isoformat()
                 task["superseded_by"] = keep_id

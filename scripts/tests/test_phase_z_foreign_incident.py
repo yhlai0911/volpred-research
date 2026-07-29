@@ -21,6 +21,8 @@ this could be implemented so it looks right in a log and still changes nothing:
 """
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
 import json
 import os
 import subprocess
@@ -30,6 +32,7 @@ from pathlib import Path
 import pytest
 
 from scripts.dispatch_supervisor import phase_z
+from volpred.ops import alerts as ops_alerts
 from volpred.ops import foreign_incident as fi
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -183,6 +186,600 @@ def test_a_widened_stuck_set_supersedes_the_row_it_subsumes(repo: Path):
 
 # ── 2. the alert is subsumed, not stacked ────────────────────────────────────
 
+def test_a_changed_stuck_set_does_not_repage_while_the_incident_family_is_open(
+    repo: Path,
+):
+    """Path-set churn is an incident update, not a new reason to page.
+
+    Production evidence (2026-07-23..29) showed one stable alert title sent six
+    times at occurrences 1/6/9/13/26/44.  The central dedupe was working; PHASE-Z
+    kept presenting each wider path set as a newly created incident.  One open
+    incident family already supplies the owner, close condition, and scheduler
+    consequence, so another page only stacks notification channels.
+    """
+    alerts: list = []
+    _write(repo, THEIRS, "first\n")
+    _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL, alerts=alerts)
+
+    _write(repo, "scripts/another_edit.py", "second\n")
+    created_outcome = _fires(
+        repo, phase_z._FOREIGN_STREAK_CRITICAL, alerts=alerts,
+    )
+    updated_outcome = _fires(repo, 1, alerts=alerts)
+
+    stuck_pages = [
+        alert
+        for alert in alerts
+        if alert[0] == "critical" and "達處置門檻" in alert[1]
+    ]
+    assert len(stuck_pages) == 1, [alert[1] for alert in stuck_pages]
+    assert created_outcome["incident"]["created"] is True
+    assert created_outcome["incident"]["page_required"] is False
+    assert updated_outcome["incident"]["updated"] is True
+    assert updated_outcome["incident"]["page_required"] is False
+
+
+def test_transport_dedup_key_is_bound_to_the_incident_episode():
+    """Disjoint families and terminal recurrences must not consume each other."""
+    a_e1 = {
+        "task_id": "phase-z-foreign-aaa-e1",
+        "page_transport_id": "phase-z-family-a-e1",
+    }
+    a_successor = {
+        "task_id": "phase-z-foreign-aaabbb-e1",
+        "page_transport_id": "phase-z-family-a-e1",
+    }
+    a_e2 = {
+        "task_id": "phase-z-foreign-aaa-e2",
+        "page_transport_id": "phase-z-family-a-e2",
+    }
+    b_e1 = {
+        "task_id": "phase-z-foreign-bbb-e1",
+        "page_transport_id": "phase-z-family-b-e1",
+    }
+
+    titles = [
+        phase_z._stuck_incident_alert_title(incident)
+        for incident in (a_e1, a_successor, a_e2, b_e1)
+    ]
+    keys = [ops_alerts._alert_key("critical", title) for title in titles]
+
+    assert keys[0] == keys[1], "overlapping successor must reuse root transport id"
+    assert len({keys[0], keys[2], keys[3]}) == 3
+    assert a_e1["page_transport_id"] in titles[0]
+    assert a_successor["task_id"] not in titles[1]
+
+
+def test_a_disjoint_stuck_set_is_a_new_notification_episode(tmp_path: Path):
+    """An unrelated new root cause must not be silenced by an old open row."""
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+
+    first = fi.upsert_incident(paths=["a.py"], tasks_path=tasks)
+    second = fi.upsert_incident(paths=["b.py"], tasks_path=tasks)
+
+    assert first["page_required"] is True
+    assert second["page_required"] is True
+
+
+def test_concurrent_overlapping_creators_claim_exactly_one_family_page(
+    tmp_path: Path,
+):
+    """The persisted LOCK_EX claim, not a pre-append snapshot, elects the pager."""
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+
+    def create(paths: list[str]) -> dict:
+        return fi.upsert_incident(paths=paths, tasks_path=tasks)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        receipts = list(pool.map(create, [["a.py"], ["a.py", "b.py"]]))
+
+    assert sum(bool(receipt["page_required"]) for receipt in receipts) == 1
+    open_rows = fi.open_incidents(tasks)
+    assert sum(
+        bool((row.get("payload") or {}).get("family_page_leases"))
+        for row in open_rows
+    ) == 1
+
+
+def test_an_ordinary_semantic_duplicate_cannot_swallow_the_incident(
+    tmp_path: Path,
+):
+    """Incident identity outranks the generic task semantic matcher."""
+    tasks = tmp_path / "next_tasks.json"
+    paths = ["a.py"]
+    fp = fi.fingerprint(paths)
+    tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "ordinary-task",
+                    "title": (
+                        f"PHASE-Z 卡住檔案 incident（{fp}）"
+                        "— 未關則 scheduler 降載"
+                    ),
+                    "description": "ordinary task with deliberately colliding text",
+                    "task_type": "platform_ops",
+                    "priority": 2,
+                    "status": "pending",
+                    "source": "agent",
+                    "created_at": "2026-07-30T00:00:00+00:00",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    receipt = fi.upsert_incident(paths=paths, tasks_path=tasks)
+
+    assert receipt["created"] is True
+    assert receipt["page_required"] is True
+    assert receipt["task_id"] == f"phase-z-foreign-{fp}-e1"
+    assert len(fi.open_incidents(tasks)) == 1
+
+
+def test_terminal_fingerprint_recurrence_opens_a_new_episode(tmp_path: Path):
+    """A terminal audit row must not permanently occupy the deterministic id."""
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    first = fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+    assert fi.settle_family_page(
+        tasks,
+        token=first["page_claim_token"],
+        delivered=True,
+        now=now,
+    )
+    rows = json.loads(tasks.read_text(encoding="utf-8"))
+    rows[0]["status"] = "succeeded"
+    tasks.write_text(json.dumps(rows), encoding="utf-8")
+
+    recurrence = fi.upsert_incident(
+        paths=["a.py"], tasks_path=tasks, now=now + timedelta(days=1),
+    )
+
+    assert recurrence["created"] is True
+    assert recurrence["page_required"] is True
+    assert recurrence["task_id"].endswith("-e2")
+    assert len(fi.open_incidents(tasks)) == 1
+
+
+def test_concurrent_terminal_recurrence_creates_and_leases_one_episode(
+    tmp_path: Path,
+):
+    """Concurrent reopen callers share the next generation's deterministic id."""
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    first = fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+    assert fi.settle_family_page(
+        tasks,
+        token=first["page_claim_token"],
+        delivered=True,
+        now=now,
+    )
+    rows = json.loads(tasks.read_text(encoding="utf-8"))
+    rows[0]["status"] = "succeeded"
+    tasks.write_text(json.dumps(rows), encoding="utf-8")
+
+    def reopen(_index: int) -> dict:
+        return fi.upsert_incident(
+            paths=["a.py"],
+            tasks_path=tasks,
+            now=now + timedelta(days=1),
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        receipts = list(pool.map(reopen, range(2)))
+
+    assert sum(bool(receipt["created"]) for receipt in receipts) == 1
+    assert sum(bool(receipt["page_required"]) for receipt in receipts) == 1
+    open_rows = fi.open_incidents(tasks)
+    assert len(open_rows) == 1
+    assert open_rows[0]["id"].endswith("-e2")
+
+
+def test_an_unacknowledged_page_lease_expires_and_retries(tmp_path: Path):
+    """Crash after queue claim cannot permanently suppress first delivery."""
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+
+    first = fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+    held = fi.upsert_incident(
+        paths=["a.py"], tasks_path=tasks, now=now + timedelta(minutes=5),
+    )
+    retried = fi.upsert_incident(
+        paths=["a.py"], tasks_path=tasks, now=now + timedelta(minutes=11),
+    )
+
+    assert first["page_required"] is True
+    assert first["page_claim_token"]
+    assert held["page_required"] is False
+    assert retried["page_required"] is True
+    assert retried["page_claim_token"] != first["page_claim_token"]
+
+
+def test_schema_one_active_scalar_lease_is_normalized_without_false_delivery(
+    tmp_path: Path,
+):
+    """Deploying schema 2 must not swallow an in-flight schema 1 page."""
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    first = fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+    rows = json.loads(tasks.read_text(encoding="utf-8"))
+    payload = rows[0]["payload"]
+    lease = payload.pop("family_page_leases")[0]
+    payload["family_page_claim_schema"] = 1
+    payload["family_page_lease_token"] = lease["token"]
+    payload["family_page_lease_at"] = lease["leased_at"]
+    payload["family_page_lease_by"] = lease["by"]
+    tasks.write_text(json.dumps(rows), encoding="utf-8")
+
+    held = fi.upsert_incident(
+        paths=["a.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=5),
+    )
+    migrated = json.loads(tasks.read_text(encoding="utf-8"))[0]["payload"]
+    assert held["page_required"] is False
+    assert migrated["family_page_claim_schema"] == 2
+    assert migrated["family_page_leases"][0]["token"] == first["page_claim_token"]
+    assert "family_page_delivered_at" not in migrated
+    assert "family_page_lease_token" not in migrated
+
+
+def test_schema_one_expired_scalar_lease_retries_instead_of_false_delivery(
+    tmp_path: Path,
+):
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    first = fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+    rows = json.loads(tasks.read_text(encoding="utf-8"))
+    payload = rows[0]["payload"]
+    lease = payload.pop("family_page_leases")[0]
+    payload["family_page_claim_schema"] = 1
+    payload["family_page_lease_token"] = lease["token"]
+    payload["family_page_lease_at"] = lease["leased_at"]
+    payload["family_page_lease_by"] = lease["by"]
+    tasks.write_text(json.dumps(rows), encoding="utf-8")
+
+    retried = fi.upsert_incident(
+        paths=["a.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=11),
+    )
+    migrated = json.loads(tasks.read_text(encoding="utf-8"))[0]["payload"]
+    assert retried["page_required"] is True
+    assert retried["page_claim_token"] != first["page_claim_token"]
+    assert "family_page_delivered_at" not in migrated
+
+
+def test_schema_one_released_scalar_state_claims_a_fresh_page(tmp_path: Path):
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    first = fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+    rows = json.loads(tasks.read_text(encoding="utf-8"))
+    payload = rows[0]["payload"]
+    payload.pop("family_page_leases")
+    payload["family_page_claim_schema"] = 1
+    tasks.write_text(json.dumps(rows), encoding="utf-8")
+
+    retried = fi.upsert_incident(
+        paths=["a.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=1),
+    )
+    assert retried["page_required"] is True
+    assert retried["page_claim_token"] != first["page_claim_token"]
+
+
+def test_successor_crash_retry_reuses_the_root_transport_identity(tmp_path: Path):
+    """A→AB after an un-settled send must hit the same 24h dedupe episode."""
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    root = fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+
+    successor = fi.upsert_incident(
+        paths=["a.py", "b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=11),
+    )
+
+    assert successor["page_required"] is True
+    assert successor["page_transport_id"] == root["page_transport_id"]
+    assert (
+        phase_z._stuck_incident_alert_title(root)
+        == phase_z._stuck_incident_alert_title(successor)
+    )
+    assert fi.settle_family_page(
+        tasks,
+        token=successor["page_claim_token"],
+        delivered=True,
+        now=now + timedelta(minutes=11, seconds=1),
+    )
+    repeat = fi.upsert_incident(
+        paths=["a.py", "b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=12),
+    )
+    assert repeat["page_required"] is False
+
+
+def test_successor_moves_the_retry_lease_before_delivery_settlement(tmp_path: Path):
+    """Settlement must acknowledge the live successor, not its superseded row."""
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+
+    successor = fi.upsert_incident(
+        paths=["a.py", "b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=11),
+    )
+    assert successor["page_required"] is True
+    assert fi.settle_family_page(
+        tasks,
+        token=successor["page_claim_token"],
+        delivered=True,
+        now=now + timedelta(minutes=11, seconds=1),
+    )
+
+    open_row = fi.open_incidents(tasks)[0]
+    payload = open_row["payload"]
+    assert payload["family_page_delivered_at"]
+    assert "family_page_leases" not in payload
+
+
+def test_any_predecessor_delivery_acknowledges_a_wider_live_successor(
+    tmp_path: Path,
+):
+    """Merging two leased roots must not strand one receipt on a terminal row."""
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    root_a = fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+    root_b = fi.upsert_incident(
+        paths=["b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(seconds=1),
+    )
+
+    merged = fi.upsert_incident(
+        paths=["a.py", "b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=1),
+    )
+    assert merged["page_required"] is False
+
+    # Whichever token was moved to the successor fails; the other predecessor
+    # succeeds. The successful receipt must follow superseded_by to the live row.
+    open_payload = fi.open_incidents(tasks)[0]["payload"]
+    moved_token = open_payload["family_page_leases"][0]["token"]
+    remaining_token = next(
+        token
+        for token in (
+            root_a["page_claim_token"],
+            root_b["page_claim_token"],
+        )
+        if token != moved_token
+    )
+    assert fi.settle_family_page(
+        tasks,
+        token=moved_token,
+        delivered=False,
+        now=now + timedelta(minutes=2),
+    )
+    while_remaining_in_flight = fi.upsert_incident(
+        paths=["a.py", "b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=2, seconds=1),
+    )
+    assert while_remaining_in_flight["page_required"] is False
+    assert fi.settle_family_page(
+        tasks,
+        token=remaining_token,
+        delivered=True,
+        now=now + timedelta(minutes=2),
+    )
+
+    repeat = fi.upsert_incident(
+        paths=["a.py", "b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=3),
+    )
+    assert repeat["page_required"] is False
+    assert fi.open_incidents(tasks)[0]["payload"]["family_page_delivered_at"]
+
+
+def test_delivery_survives_when_the_original_overlap_member_closes(
+    tmp_path: Path,
+):
+    """A family acknowledgement belongs to every open overlap member.
+
+    AB and BC overlap without either being a subset.  If AB owns the page,
+    settles after BC joins, and then closes, BC must retain the acknowledgement;
+    otherwise the next exact-BC observation silently starts a second page cycle.
+    """
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    ab = fi.upsert_incident(
+        paths=["a.py", "b.py"],
+        tasks_path=tasks,
+        now=now,
+    )
+    bc = fi.upsert_incident(
+        paths=["b.py", "c.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=1),
+    )
+    assert ab["page_required"] is True
+    assert bc["page_required"] is False
+    assert fi.settle_family_page(
+        tasks,
+        token=ab["page_claim_token"],
+        delivered=True,
+        now=now + timedelta(minutes=2),
+    )
+
+    rows = json.loads(tasks.read_text(encoding="utf-8"))
+    row_ab = next(row for row in rows if row["id"] == ab["task_id"])
+    row_bc = next(row for row in rows if row["id"] == bc["task_id"])
+    assert row_ab["payload"]["family_page_delivered_at"]
+    assert row_bc["payload"]["family_page_delivered_at"]
+    row_ab["status"] = "succeeded"
+    tasks.write_text(json.dumps(rows), encoding="utf-8")
+
+    repeat = fi.upsert_incident(
+        paths=["b.py", "c.py"],
+        tasks_path=tasks,
+        now=now + timedelta(days=2),
+    )
+    assert repeat["page_required"] is False
+
+
+def test_merged_retry_checks_every_predecessor_transport_alias(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """A sent-before-crash predecessor cannot be lost when two roots merge.
+
+    B's transport delivers but its process crashes before settling.  A and B
+    then merge.  Once both leases expire, the retry must offer both historical
+    titles to the central 24h ledger; B's receipt suppresses a third email and
+    durably acknowledges the live merged row.
+    """
+    tasks = tmp_path / "next_tasks.json"
+    storage = tmp_path / "storage"
+    tasks.write_text("[]\n", encoding="utf-8")
+    now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    root_a = fi.upsert_incident(paths=["a.py"], tasks_path=tasks, now=now)
+    root_b = fi.upsert_incident(
+        paths=["b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(seconds=1),
+    )
+    title_b = phase_z._stuck_incident_alert_title(root_b)
+    dispatches: list[str] = []
+
+    def fake_dispatch(**kwargs):
+        dispatches.append(str(kwargs["title"]))
+        return {
+            "notification_id": f"notif-{len(dispatches)}",
+            "subject": str(kwargs["title"]),
+            "sent": True,
+            "configured": True,
+            "send_error": None,
+        }
+
+    monkeypatch.setattr(ops_alerts, "_dispatch_alert_email", fake_dispatch)
+    delivered_b = ops_alerts.send_alert(
+        "critical",
+        title_b,
+        "delivered before settlement crash",
+        storage_dir=str(storage),
+    )
+    assert delivered_b["sent"] is True
+
+    merged = fi.upsert_incident(
+        paths=["a.py", "b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=1),
+    )
+    assert merged["page_required"] is False
+    retried = fi.upsert_incident(
+        paths=["a.py", "b.py"],
+        tasks_path=tasks,
+        now=now + timedelta(minutes=11),
+    )
+    assert retried["page_required"] is True
+    assert root_b["page_transport_id"] in retried["page_transport_alias_ids"]
+
+    title = phase_z._stuck_incident_alert_title(retried)
+    alias_titles = phase_z._stuck_incident_alert_alias_titles(retried)
+    result = ops_alerts.send_alert(
+        "critical",
+        title,
+        "retry after merged predecessor crash",
+        storage_dir=str(storage),
+        dedup_alias_titles=alias_titles,
+    )
+    assert result["skip_reason"] == "dedup_24h"
+    assert result["dedup_matched_title"] == title_b
+    assert dispatches == [title_b]
+    assert fi.settle_family_page(
+        tasks,
+        token=retried["page_claim_token"],
+        delivered=True,
+        now=now + timedelta(minutes=11, seconds=1),
+    )
+    assert fi.open_incidents(tasks)[0]["payload"]["family_page_delivered_at"]
+
+
+def test_failed_delivery_releases_the_page_lease_for_the_next_fire(repo: Path):
+    """A ``sent=false`` receipt is not a durable notification acknowledgement."""
+    _write(repo, THEIRS, "stuck\n")
+
+    def failed_alert(**_kwargs):
+        return {"sent": False}
+
+    outcome: dict = {}
+    for _ in range(phase_z._FOREIGN_STREAK_CRITICAL):
+        phase_z.run_pre_fire_guard(repo_root=repo)
+        outcome = phase_z.run_phase_z(
+            repo_root=repo,
+            now_hhmm="03:00",
+            test_runner=_no_tests,
+            alert_fn=failed_alert,
+        )
+
+    assert outcome["incident"]["page_required"] is True
+    row = fi.open_incidents(repo / QUEUE)[0]
+    payload = row["payload"]
+    assert "family_page_leases" not in payload
+    assert "family_page_delivered_at" not in payload
+
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    retried = _fire(repo)
+    assert retried["incident"]["page_required"] is True
+    payload = fi.open_incidents(repo / QUEUE)[0]["payload"]
+    assert payload["family_page_delivered_at"]
+
+
+def test_dedup_skip_acknowledges_the_existing_external_page(repo: Path):
+    """24h transport dedupe means a prior delivery exists, so settle the lease."""
+    _write(repo, THEIRS, "stuck\n")
+
+    def deduped_alert(**_kwargs):
+        return {
+            "sent": False,
+            "skipped": True,
+            "skip_reason": "dedup_24h",
+        }
+
+    outcome: dict = {}
+    for _ in range(phase_z._FOREIGN_STREAK_CRITICAL):
+        phase_z.run_pre_fire_guard(repo_root=repo)
+        outcome = phase_z.run_phase_z(
+            repo_root=repo,
+            now_hhmm="03:00",
+            test_runner=_no_tests,
+            alert_fn=deduped_alert,
+        )
+
+    assert outcome["incident"]["page_required"] is True
+    payload = fi.open_incidents(repo / QUEUE)[0]["payload"]
+    assert payload["family_page_delivered_at"]
+    assert "family_page_leases" not in payload
+
+
 def test_the_critical_is_sent_once_and_not_re_sent_while_the_incident_is_open(repo: Path):
     """The old curve re-paged at 3/6/12/24. With an owner, a deadline and a cost
     on the row, re-paging is a second reminder channel for one condition."""
@@ -196,6 +793,7 @@ def test_the_critical_is_sent_once_and_not_re_sent_while_the_incident_is_open(re
     assert len(stuck_pages) == 1, [a[1] for a in stuck_pages]
     body = stuck_pages[0][2]
     incident = _incidents(repo)[0]
+    assert incident["id"] in stuck_pages[0][1]
     # And that single page hands over to the incident rather than ending at
     # "somebody should look at this".
     assert incident["id"] in body
@@ -212,6 +810,26 @@ def test_a_page_still_goes_out_when_the_incident_cannot_be_opened(repo: Path):
     outcome = _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL, alerts=alerts)
 
     assert outcome["incident"]["reason"] == "no_queue"
+    assert [a for a in alerts if a[0] == "critical" and "達處置門檻" in a[1]]
+
+
+def test_a_page_still_goes_out_when_incident_upsert_raises(
+    repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """A queue writer failure keeps the explicit fail-loud backoff path."""
+    _write(repo, THEIRS, "stuck\n")
+    alerts: list = []
+
+    def fail_upsert(**_kwargs):
+        raise OSError("simulated queue writer failure")
+
+    monkeypatch.setattr(phase_z, "upsert_incident", fail_upsert)
+    outcome = _fires(
+        repo, phase_z._FOREIGN_STREAK_CRITICAL, alerts=alerts,
+    )
+
+    assert outcome["incident"]["reason"] == "error"
     assert [a for a in alerts if a[0] == "critical" and "達處置門檻" in a[1]]
 
 

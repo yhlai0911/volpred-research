@@ -33,7 +33,7 @@ import subprocess
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Sequence
 from zoneinfo import ZoneInfo
 
 from croniter import croniter
@@ -646,6 +646,7 @@ def send_routed_alert(
     storage_dir: str = "storage",
     force_send: bool = False,
     delivery_class: AlertDeliveryClass = AlertDeliveryClass.RECORD,
+    dedup_alias_titles: Sequence[str] = (),
 ) -> dict[str, Any]:
     normalized_level = level.strip().lower()
     normalized_title = title.strip()
@@ -659,7 +660,39 @@ def send_routed_alert(
     now = _utc_now()
     dedup_key = _alert_key(normalized_level, normalized_title)
     dedup_state = _load_alert_dedup(storage_dir)
+    alias_titles = list(
+        dict.fromkeys(
+            str(title).strip()
+            for title in dedup_alias_titles
+            if str(title).strip() and str(title).strip() != normalized_title
+        )
+    )
+    candidate_keys = [
+        (dedup_key, normalized_title),
+        *[
+            (_alert_key(normalized_level, alias_title), alias_title)
+            for alias_title in alias_titles
+        ],
+    ]
+    matched_key = dedup_key
+    matched_title = normalized_title
     existing = dedup_state["alerts"].get(dedup_key) or {}
+    if not force_send:
+        for candidate_key, candidate_title in candidate_keys:
+            candidate = dedup_state["alerts"].get(candidate_key) or {}
+            candidate_sent_at = _parse_iso_datetime(
+                candidate.get("last_sent_at")
+            )
+            if (
+                candidate_sent_at is not None
+                and now - candidate_sent_at < ALERT_DEDUP_WINDOW
+                and candidate.get("delivery_class")
+                in {None, normalized_delivery_class.value}
+            ):
+                matched_key = candidate_key
+                matched_title = candidate_title
+                existing = dict(candidate)
+                break
     last_sent_at = _parse_iso_datetime(existing.get("last_sent_at"))
     # WS-F3: every occurrence of the alert condition counts toward the filing
     # radar, dedup-skipped ones included — dedup throttles the TRANSPORT, not
@@ -726,6 +759,14 @@ def send_routed_alert(
     ):
         existing["last_skipped_at"] = now.isoformat()
         existing["skip_count"] = int(existing.get("skip_count", 0) or 0) + 1
+        existing.update(
+            {
+                "level": normalized_level,
+                "title": normalized_title,
+                "recipient": normalized_recipient,
+                "delivery_class": normalized_delivery_class.value,
+            }
+        )
         dedup_state["alerts"][dedup_key] = existing
         _save_alert_dedup(storage_dir, dedup_state)
         _record_incident_candidate(
@@ -748,6 +789,8 @@ def send_routed_alert(
                 "telegram": "not_routed",
             },
             "alert_key": dedup_key,
+            "dedup_matched_alert_key": matched_key,
+            "dedup_matched_title": matched_title,
             "sent": False,
             "skipped": True,
             "skip_reason": "dedup_24h",
@@ -883,6 +926,7 @@ def send_alert(
     *,
     storage_dir: str = "storage",
     force_send: bool = False,
+    dedup_alias_titles: Sequence[str] = (),
 ) -> dict[str, Any]:
     """Send the stable public alert contract through the email-owned record lane."""
 
@@ -894,6 +938,7 @@ def send_alert(
         storage_dir=storage_dir,
         force_send=force_send,
         delivery_class=AlertDeliveryClass.RECORD,
+        dedup_alias_titles=dedup_alias_titles,
     )
 
 

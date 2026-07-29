@@ -54,6 +54,7 @@ from __future__ import annotations
 import ast
 import fcntl
 import hashlib
+import inspect
 import json
 import logging
 import os
@@ -72,6 +73,7 @@ from typing import Any
 from volpred.ops.foreign_incident import (
     QUARANTINE_REF_PREFIX,
     reconcile_incidents,
+    settle_family_page,
     upsert_incident,
 )
 from volpred.ops.git_writer_lock import (
@@ -1342,6 +1344,57 @@ def _quarantine_stuck_foreign(
 
 # ── persistent incident (decision doc §4 D3) ─────────────────────────────────
 
+_STUCK_INCIDENT_ALERT_TITLE = "PHASE-Z 無主或過期檔案達處置門檻"
+
+
+def _stuck_incident_alert_title(incident: dict) -> str:
+    """Bind transport dedupe identity to one durable incident episode.
+
+    ``send_alert`` keys its 24h ledger by level + title. A globally fixed title
+    lets episode A's delivery suppress a disjoint B or a later e2 recurrence,
+    after which B/e2 would incorrectly settle as delivered. The deterministic
+    ``page_transport_id`` is inherited across overlapping successor rows and
+    changes only for a disjoint/new-generation episode. It is therefore the
+    correct transport identity; ``task_id`` remains the fallback for older rows.
+    """
+    task_id = str(
+        incident.get("page_transport_id")
+        or incident.get("task_id")
+        or ""
+    ).strip()
+    return (
+        f"{_STUCK_INCIDENT_ALERT_TITLE} [{task_id}]"
+        if task_id
+        else _STUCK_INCIDENT_ALERT_TITLE
+    )
+
+
+def _stuck_incident_alert_alias_titles(incident: dict) -> list[str]:
+    """Map every merged predecessor transport id to its 24h ledger title."""
+    primary = str(incident.get("page_transport_id") or "").strip()
+    aliases = incident.get("page_transport_alias_ids") or []
+    return [
+        _stuck_incident_alert_title({"page_transport_id": transport_id})
+        for transport_id in dict.fromkeys(
+            str(value).strip() for value in aliases if str(value).strip()
+        )
+        if transport_id != primary
+    ]
+
+
+def _alert_accepts_dedup_alias_titles(alert_fn) -> bool:
+    """Keep injected legacy test/report callbacks source compatible."""
+    try:
+        parameters = inspect.signature(alert_fn).parameters.values()
+    except (TypeError, ValueError):  # silent-ok: opaque injected callback uses legacy 3-keyword contract
+        return False
+    return any(
+        parameter.name == "dedup_alias_titles"
+        or parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in parameters
+    )
+
+
 def _reconcile_open_incidents(repo_root: Path, tasks_path: Path) -> dict:
     """重跑每張未關 incident 的判準：收乾淨的關掉，其餘更新降載旗標。Never fails a fire.
 
@@ -1913,7 +1966,13 @@ def _refresh_shared_index_cas(
                 pass  # silent-ok: the CRITICAL caller reports failed refresh
 
 
-def _default_alert(*, level: str, title: str, body: str) -> dict:
+def _default_alert(
+    *,
+    level: str,
+    title: str,
+    body: str,
+    dedup_alias_titles: list[str] | None = None,
+) -> dict:
     """Ship a red-gate alert through the canonical Python send_alert API.
 
     Deferred import (matches alerts.py's own lazy-import convention) so phase_z
@@ -1924,7 +1983,12 @@ def _default_alert(*, level: str, title: str, body: str) -> dict:
     try:
         from volpred.ops.alerts import send_alert
 
-        return send_alert(level, title, body)
+        return send_alert(
+            level,
+            title,
+            body,
+            dedup_alias_titles=dedup_alias_titles or (),
+        )
     except Exception as exc:  # noqa: BLE001 — notification path, never fatal
         LOG.warning("phase_z: test-gate alert send failed (%s)", exc)
         return {"sent": False, "error": str(exc)[:200]}
@@ -3493,15 +3557,16 @@ def run_phase_z(
     # No incident means no de-rate and no owner, so silence would be strictly
     # worse than the old noise: fall back to the legacy backed-off CRITICAL.
     incident_failed = incident.get("reason") in {"error", "no_queue"}
-    if incident.get("created") or (
+    if incident.get("page_required", incident.get("created", False)) or (
         incident_failed and any(_streak_is_notifiable(streaks[p]) for p in stuck)
     ):
-        alert_fn(
-            level="critical",
-            # streak 每班 +1、count 會浮動 — 進 title 就等於每班一個新 dedup key，
-            # 同一批卡住檔案會變成連環 critical。細節全放 body。
-            title="PHASE-Z 無主或過期檔案達處置門檻",
-            body="\n".join([
+        alert_kwargs = {
+            "level": "critical",
+            # streak/count 會浮動，不能進 title。task id 則是 durable episode
+            # identity：同 episode retry 共用 dedup key；disjoint/new generation
+            # 不得被前一 episode 的 24h receipt 吞掉。
+            "title": _stuck_incident_alert_title(incident),
+            "body": "\n".join([
                 f"（fire 時間: {hhmm}；{len(stuck)} 個檔案，最長已連續 {worst_streak} 班）",
                 "",
                 "## 發生什麼",
@@ -3554,7 +3619,44 @@ def run_phase_z(
                       if why == "live_writer"],
                 ] if any(w == "live_writer" for w in quarantine["skipped"].values()) else []),
             ]),
-        )
+        }
+        alias_titles = _stuck_incident_alert_alias_titles(incident)
+        if alias_titles and _alert_accepts_dedup_alias_titles(alert_fn):
+            alert_kwargs["dedup_alias_titles"] = alias_titles
+        alert_result = alert_fn(**alert_kwargs)
+        page_token = str(incident.get("page_claim_token") or "")
+        if page_token:
+            delivered = bool(
+                alert_result.get("sent")
+                or (
+                    alert_result.get("skipped")
+                    and alert_result.get("skip_reason") == "dedup_24h"
+                )
+            ) if isinstance(alert_result, dict) else False
+            try:
+                settled = settle_family_page(
+                    repo_root / "storage" / "next_tasks.json",
+                    token=page_token,
+                    delivered=delivered,
+                )
+            except Exception as exc:  # noqa: BLE001 — lease expiry retries safely
+                settled = False
+                LOG.warning(
+                    "phase_z: family page settlement failed (%s); "
+                    "lease expiry will retry",
+                    exc,
+                )
+            if not settled:
+                LOG.warning(
+                    "phase_z: family page token %s was not settled; "
+                    "lease expiry will retry",
+                    page_token[:12],
+                )
+            elif not delivered:
+                LOG.warning(
+                    "phase_z: family page delivery not acknowledged; "
+                    "lease released for retry"
+                )
 
     # Classify machine state only after every PHASE-Z-owned control-plane
     # mutation above. Opening/updating a stuck-path incident writes the
