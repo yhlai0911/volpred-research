@@ -2860,3 +2860,20 @@ Issue #23五步Gate全過，狀態為 **`root_cause_fixed_and_verified`**。
 Issue #42狀態為 **`root_cause_fixed_and_verified`**。這只結案 T38；不代表
 Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy owner與#46
 十四日 sustained-clean 仍各自 fail closed。
+
+## 2026-07-30 — T36 runtime audit Git ownership bounded closure（Issue #41）
+
+- ✅ 定位 PHASE-Z 多筆 stuck-files incident 的共同殘留：
+  `storage/logs/trending_primary_source_verification.jsonl` 是 daemon append-only audit，
+  卻仍被 Git 追蹤。
+- ✅ 以 canonical `git_writer_lock untrack-preserve` exact-HEAD transaction 移出
+  Git index，加入 committed ignore policy；live 檔 SHA-256／1443 bytes／mode 0644
+  前後完全一致，沒有刪資料或手改 runtime content。
+- ✅ 新 repository gate 同時驗證 ignore policy 與非 tracked ownership；相關
+  **79 tests passed**。
+- ✅ Production `foreign_incident --reconcile` 自動關閉本單與另 13 筆同源 incident；
+  dispatcher cap 從 2 回復 baseline 4，P1=0、free slots=4。
+- ✅ Matt Standards／Spec review 均 PASS。
+- 🟡 此 bounded slice 為 **`root_cause_fixed_and_verified`**；Issue #41 umbrella 仍
+  被 #9 與完整 writer inventory／single interface／crash injection／recognizer
+  retirement 阻塞，維持 OPEN／`contained`。

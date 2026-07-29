@@ -395,3 +395,18 @@ Matt Spec／Standards最終雙PASS。本slice無reroute、resume、business effe
 transfer或#9/#12 bypass，底層probe slice為
 **`root_cause_fixed_and_verified`**；Issue #16 umbrella維持 **`contained`**／OPEN，
 後續cutover仍受#9→#12 blocking edge約束。
+
+### 2026-07-30 — T36 daemon audit log Git ownership bounded slice（Issue #41）
+
+`refill_reader_facing_pool` 每次執行都 append 的
+`storage/logs/trending_primary_source_verification.jsonl` 仍被 Git 追蹤，令正常
+daemon churn 反覆進入 PHASE-Z foreign-owner incident。以 generic
+`git_writer_lock untrack-preserve` 在 exact HEAD transaction 移出 index，committed
+ignore policy 與 repository-level regression 同時落地；live 檔在 migration 前後
+SHA-256 `eabfe83d…e55`、mode 0644、1443 bytes 完全一致。相關 **79 tests**
+通過；production reconciler 隨後自動關閉本單與另 13 筆同源 incident，slot budget
+由 incident cap 2 回復 baseline 4、P1=0。
+
+此 bounded slice 為 **`root_cause_fixed_and_verified`**。Issue #41 仍被 #9 阻塞，
+完整 writer inventory／single interface／crash injection 與 PHASE-Z recognizer
+全域退役未完成，維持 OPEN／`contained`。

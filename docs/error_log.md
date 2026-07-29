@@ -4701,3 +4701,33 @@ run `30480617870` 回讀 `conclusion=success`、`phase=recovered`、
 `cron_mark_last_run` acknowledgement；同一時點 schedule owner audit仍為 56/56
 Operations Core、legacy 0、conflict 0。本 incident 五步 Gate 已完成，狀態為
 **`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-07-30 — daemon audit runtime log 被 Git 追蹤，反覆觸發 PHASE-Z foreign incident
+
+**證據化症狀**：fresh `volpred.ops.foreign_incident --check` 顯示多筆 stuck-files incident
+共同只剩 `storage/logs/trending_primary_source_verification.jsonl`；該檔由
+`scripts/refill_reader_facing_pool.py::_log_trending_verification` 在排程執行時 append，
+但仍在 `git ls-files`，且沒有 ignore policy。migration 前 live 檔為 9 行、
+1443 bytes、mode 0644、SHA-256
+`eabfe83dc262c5d13b2f180b856159632947c7ee2a8f563af376ecc2a8962e55`。
+
+**根因層級（Git ownership／runtime-state contract）**：producer 已是 runtime daemon，
+但其 append-only audit output 仍由 Git 宣告 ownership。PHASE-Z 因此只能把正常 machine
+churn 看成共享 checkout 的未知作者；這不是 dedup、recognizer 或警報文案問題，繼續新增
+例外只會重複 cleanup layer 猜 ownership 的舊錯誤。
+
+**底層修復與制度化**：committed `.gitignore` 宣告 runtime ownership，並透過 generic
+`git_writer_lock.py untrack-preserve` 的 exact-HEAD transaction 移出 index，不刪除 live
+artifact。repository-level regression 同時要求 `git check-ignore --no-index` 成功且
+`git ls-files --error-unmatch` 失敗，防止日後重新追蹤。migration 前後 live 檔的
+SHA／bytes／mode 完全一致。
+
+**回歸與 production read-back**：runtime Git ownership、Git writer recovery、
+legacy-retirement migration 與 reader-facing refill 共 **79 passed**。production
+reconciler 隨後自動關閉 `assign_0c1eca40` 及另外 13 筆同源 incident；slot budget 回讀
+由 incident cap 2 恢復 baseline 4、P1 backlog 0、`auth_blocked=false`。Matt
+Standards／Spec review 均 PASS。此 bounded slice 五步 Gate 已完成，狀態為
+**`root_cause_fixed_and_verified`**；Issue #41 完整 acceptance 仍被 #9 及全域
+writer inventory／recognizer retirement 阻塞，故 umbrella 維持 OPEN／`contained`。
