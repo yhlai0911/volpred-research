@@ -31198,5 +31198,15 @@
     "owner": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
     "commit": null,
     "summary": "`K1713_article_general` → succeeded / 未寫文（本班稍早先釋回，後依與 K1208 相同判準結案，避免下一班重覆推導）。\n\n- `experiments/k1713/K1713_results.json`：task_disposition=duplicate_closure、verdict=DUPLICATE_CLOSURE_PASS、`creates_new_empirical_claim=false`、duplicate_of=K1661、pinned_source_unchanged=true。\n- K1661 已完整實作排隊設計（daily-OHLC Garman-Klass RV、range-quarticity proxy、HAR/HARQ、rolling W=1000 one-step forecasts、QLIKE、DM-HLN、SPY/0050.TW/TWII），K1713 的產出是 byte-level 重跑相符的 closure receipt。\n- experiments/k1713 無圖表資產，無法滿足 PHASE B 6(b) evidence package（≥3 可驗證數字 + ≥1 表 + ≥1 圖 + ≥1 層量化分析）。\n- 結案理由寫進 result，並註明：若要寫 reproducibility 主題應獨立選題，不掛在 auto-discovered 覆蓋單上。"
+  },
+  {
+    "timestamp": "2026-07-30T00:09:33+08:00",
+    "task_type": "experiment",
+    "task_id": "K1736",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-e9403ded9aa743e3b0dace252e5c1069",
+    "owner": "hourly-slot-1-e9403ded9aa743e3b0dace252e5c1069",
+    "commit": null,
+    "summary": "K1736（偏度風險溢酬期限結構作長 horizon 尾部訊號）已派 async research agent。\n\n**選題脈絡**：本班 dispatcher 進入 STARVATION LOCKOUT，agent lane 唯一候選是 `governance_self_revise_operating_docs_20260728`（governance 型），claim CLI 以 `supervisor_preassignment_required` 機械拒絕；另試 `assign_b48f6bac`（platform_ops，正在把 slot cap 從 4 降載到 2 的那張 incident）同樣被拒。兩次拒絕已留證，不繞過。這正是池內 `assign_a64ab146`（\"Starvation lockout can offer an hourly fire only claim-refused platform_ops tasks, idling the slot\"）描述的死結的一次現場複現 —— 但該張本身也是 platform_ops，同樣無法由本班認領。為不讓 slot 空轉，改派可認領且 diversity 正確的 experiment（last-3 work_log 全是 daily_article）。\n\n**派工內容**：\n- worktree `dispatch-slot-1-e9403ded-k1736`（經 git_writer_lock.py 建立的 registered linked worktree）\n- job `agent-brief_k1736-36bc4e`，opus / xhigh（per model_router；xhigh 無法用 Agent tool 表達，故走 compute queue）\n- source task K1736 -> awaiting_agent_job\n\n**brief 的研究把關重點**：\n1. 差異化必須成立 —— SKEW 這條線已有 7 個 level 打法的 NULL（K181/K184/K210/K258/K447/K535/K979，另 K43 打 level）。本題只有打 term-structure slope + 長 horizon 才有存在理由；brief 要求 agent 自檢 slope 與 level 相關係數，>0.9 即視為退化並標 NULL，不得硬凹。\n2. 可行性風險前置 —— CBOE 無免費 SKEW3M/6M，期限結構要自建。brief 允許「免費資料建不出真正 RN skew 期限結構」作為 data-limitation NULL 結案，明文禁止用代理硬撐再宣稱發現。\n3. 重疊觀測 —— 6-12 個月 horizon 配日頻滾動是本題頭號統計陷阱，要求 Hodrick(1992) 或 NW(lag>=horizon) 標準誤、明報 effective sample size（^SKEW 自 1990 起，12m horizon 僅約 35 個獨立觀測）、並列非重疊子樣本 robustness。\n4. 多重檢定（多 horizon x 多目標）要求 Romano-Wolf 或至少 unadjusted/adjusted 並列；子期間至少 3 段含 2008/2020（K447 即敗在子期間不穩）。\n5. lookahead `signal.shift(1)`、seed=42、run-time `finalize_experiment()` 產 reproduce spec（K1708 教訓：spec 事後補會與實際跑的程式漂移）。\n6. 邊界：禁寫 knowledge.json（K1259）、feed.json、experiment_experiences.json；產出僅限 experiments/K1736/。\n\n**收件**：後續 fire 的 PHASE A 依 followup brief 驗數字、審 slope 退化、跑 check_experiment_artifacts、派 Codex 審程式，通過後主線程寫 knowledge 並 merge worktree。\n\n**本班未做**：slot 已滿（cap=2 因 assign_b48f6bac 未關而降載，occupied=2/2），無餘裕再派第二張，故不續 batch-drain。"
   }
 ]

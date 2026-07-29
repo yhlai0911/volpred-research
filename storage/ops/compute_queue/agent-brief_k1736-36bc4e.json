@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1736-36bc4e",
+  "title": "K1736 偏度風險溢酬期限結構作長 horizon 尾部訊號",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1736-36bc4e.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e9403ded-k1736",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e9403ded-k1736/experiments/K1736/K1736_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1736-36bc4e.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-29T16:08:40Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1736-36bc4e.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1736-36bc4e.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e9403ded-k1736/experiments/K1736/K1736_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1736-36bc4e.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e9403ded-k1736",
+  "claude_followup": {
+    "brief": "收件 K1736：(1) 從 K1736_results.json 程式化取數，驗 effective sample size 與 Hodrick/NW 標準誤是否真的做了、adjusted p-values 是否並列；(2) 檢查 slope 是否退化成 level（corr>0.9 即退化，應標 NULL）；(3) 跑 check_experiment_artifacts.py；(4) 派 Codex 審程式（尤其 signal.shift(1) 與重疊觀測處理）；(5) 通過後主線程寫 knowledge 條目並 merge_worktree.sh 合併 dispatch-slot-1-e9403ded-k1736。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1736",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-29T16:08:40Z",
+    "linked_at": "2026-07-29T16:08:40Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1736.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1736-36bc4e.md"
+}
