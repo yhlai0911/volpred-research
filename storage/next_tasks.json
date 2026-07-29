@@ -36140,14 +36140,15 @@
     "compute_released_at": "2026-07-27T16:50:05.946908+00:00",
     "compute_release_reason": "external_compute_job_failed",
     "compute_job_id": "agent-brief_k1733-b39c59",
-    "blocked_reason": "external_compute_job_active"
+    "blocked_reason": "external_compute_job_running",
+    "compute_started_at": "2026-07-29T21:30:25Z"
   },
   {
     "id": "K1734",
     "title": "K1734: EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carr",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 625). Original: EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carry 報酬分佈左尾是否在 risk-off 急速放大、unwind 是否領先 EM 股 vol；明確標示 leveraged/crowded position 數據 blocked 用 proxy（來源：BIS/IMF GFSR 2025；EM drawdown 為 EUR 的 3-5 倍）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1734.py with signal.shift(1) + seed=42, (c) K1734_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "blocked",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -36230,16 +36231,25 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1734_rev4-9c5dc5",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-29T22:19:26.838062+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-brief_k1734_rev4-9c5dc5",
+        "note": "terminal receipt collected; followup=assign_17f813da"
       }
     ],
     "result": "dispatched to compute job agent-agent-brief_k1734-205644; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1734_remediation-763606; awaiting PHASE A collection\n\ndispatched to compute job agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1734_rev4-9c5dc5; awaiting PHASE A collection",
-    "compute_released_at": "2026-07-28T13:25:31Z",
-    "compute_release_reason": "worktree collision: slot-1 queued agent-brief_k1734_spec_finalize-2c769e into the same cwd 2min later; two concurrent agents rewriting experiments/k1734 would corrupt it. Nested-DM Clark-West remediation must be re-dispatched after that job settles.",
+    "compute_released_at": "2026-07-29T22:19:26Z",
+    "compute_release_reason": "terminal_receipt_collected",
     "followon_required": "nested-DM misuse gate（primary_raw_dm → Clark-West）remediation 尚未執行：本班已備妥 brief /tmp/rebrief_agent-brief_k1734_remediation-763606.md（原 agent-brief_k1734_remediation-763606 snapshot，model 已改 claude-opus-5），因與 slot-1 的 agent-brief_k1734_spec_finalize-2c769e 撞同一 worktree 而 cancel。待該 job 收件後再以 enqueue-agent 重派，勿新建 worktree、勿重做整個實驗。",
     "triage_20260729_slot1": "本班（hourly-slot-1-e98b43fc）盤點 stale worktree 時查證，未 claim 未執行，僅留證供下班接手。事實：(1) branch wt/dispatch-slot-1-1e5922b4-k1734 有 4 個 commits、落後 main 142 個 commits；(2) experiments/k1734/review_verdict.json 的 verdict 欄位是 null（非 PASS 也非 FAIL）—— 未認證，merge_worktree.sh 的 certify gate 必擋；(3) 該 verdict 的 unresolved 自陳「Codex primary-path RE-review of the remediated artifact has not run。rev2 returned FAIL 且自承因 read-only workspace 只覆蓋了一個 blocking defect 就停止，其餘四個維度仍未涵蓋；certification 不能建立在 rev1 的 fallback PASS 上，因為 rev1 漏掉了這個 defect」；(4) 另記 H1b 是 NULL 而非等價性證明（stress-regime 尾部約 68 obs，amplification gap bootstrap SD 約 0.108，power check 顯示檢定有 power，觀察值距 0 約 0.46 SD），以及 H3_oos_cw_mse 在最保守組合下 BH-adjusted p=0.0451 屬薄邊際。",
     "triage_20260729_slot1_next": "下一步不是「再跑一次同樣的 Claude 審查」：model_router --task-type experiment --attempt 2 回 at_ceiling=true、exhausted=true。但 rev2 的失敗原因是 read-only workspace 這個環境缺陷、不是模型能力不足，兩者要分開判。建議下班先確認 rev2 當時的 workspace 權限問題是否已排除，再依 3-strike 分支擇一：派 Codex primary-path 二審（覆蓋剩餘四個維度）／拆解成 bounded stages／escalate 老闆。無論走哪條，審查回合的 prompt 與 raw transcript 不可留在被審 worktree 內未 commit（.claude/rules/experiments.md §審查認證，K1715 round-3 教訓）。",
-    "compute_job_id": "agent-brief_k1734_rev4-9c5dc5",
-    "blocked_reason": "external_compute_job_active"
+    "blocked_until": "2026-08-12T22:19:38+00:00",
+    "blocked_reason": "awaiting_owner_decision",
+    "blocked_at": "2026-07-29T22:21:34+00:00",
+    "blocked_note": "Codex primary-path 認證 rev2/rev3/rev4 三連 FAIL（缺陷 1→2→5，非收斂），已依 3-strike 停止 remediation loop 並 escalate 老闆（assign_17f813da，email 2026-07-29T22:19:10Z）。禁止在裁決前重新派發、merge 或發表；worktree dispatch-slot-1-1e5922b4-k1734 原地保留。"
   },
   {
     "id": "daily_digest_20260718",
@@ -40375,38 +40385,15 @@
   },
   {
     "id": "dispatch_cadence_ab_live_20260720",
-    "title": "派工 cadence live A/B：pregate 新 gate 的 shadow 觀察窗 + 15min vs 60min token 實測",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "派工 cadence live A/B：pregate 新 gate 的 shadow 觀察窗 + 15min vs 60min token 實測",
+    "priority": 2,
     "source": "telegram",
-    "parent_task_id": "assign_672c46de",
-    "created_by": "hourly-slot-1-ba8cf19340824bff9c43476ca8cbbe4e",
     "created_at": "2026-07-20T11:18:06.854382+00:00",
-    "description": "承接 assign_672c46de（老闆 telegram-1198）。該班已交付 step 1+2 的工程面：\n- scripts/hourly_dispatch_pregate.py 加入 capacity（free slots）+ novelty（actionable signature）兩訊號，gate 從『有沒有工作』改成『能不能增加吞吐 / 世界有沒有變』。critical 也納入 novelty（它是持續 incident 狀態，不是會被消耗的佇列）；email/compute followup/drought 維持絕對不否決；cadence_due 是防餓死地板。tests/test_hourly_dispatch_pregate.py 補 8 個測試（65 passed）。\n- scripts/analyze_dispatch_cadence.py：從池變動史估 cadence 成本。近 7 天實測 15min ≈1.84x、30min ≈1.35x、60min ≈0.87x（相對現況 hourly always-proceed）。\n\n本 task 要做的是那班放不進 50min cap 的部分：\n1. 讀 storage/logs/hourly_pregate.jsonl 中新邏輯上線後的 supervisor entries，看 would_skip 分佈是否合理（重點：被 would_skip 的班次，事後看是否真的沒產出）。scripts/crosscheck_pregate_outcomes.py 是既有的交叉核對工具。\n2. 分佈合理 → 把 config/runtime_schedules.json 的 pregate.mode 由 shadow 翻 enforce。不合理 → 記錄反例並修 gate，不要硬翻。\n3. enforce 穩定後才做 live A/B：60min baseline 2 小時 vs 15min 2 小時，逐 fire 記 input/output token，輸出對照表，驗證上面 1.84x 的估算。\n4. 結論寫回 config/runtime_schedules.json 的 metadata.policy_summary（該處已有估算值，用實測值取代），並回報老闆。\n\n限制（老闆原始指令）：cadence 未經實測不得直接改 production 排程。",
-    "status_history": [
-      {
-        "ts": "2026-07-26T21:11:50.812965+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
-      },
-      {
-        "ts": "2026-07-26T21:12:00.247883+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
-      },
-      {
-        "ts": "2026-07-26T21:14:22.385891+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
-      }
-    ],
-    "started_at": "2026-07-26T21:12:00.247868+00:00",
     "completed_at": "2026-07-26T21:14:22.385870+00:00",
-    "result": "step1+2 完成（step3/4 依 gate 資料合理收斂）：crosscheck_pregate_outcomes.py(--invoker supervisor --since 2026-07-20 rewire) 顯示新 capacity+novelty gate 於 162 班僅 would_skip 2 班(1.2%)，且該 2 班經 work_log 交叉核對皆有實質產出（strict_mismatch=2/2=100% 誤判，反例 2026-07-21T07:08/08:08 UTC）。雙重不合格：skip 率過低不足以省 token + skip 時全誤判（遠超 flip 門檻 strict_rate<=0.10, verdict_hint=不flip）。決策=維持 shadow 不翻 enforce（config pregate.mode 未動）；step4=config/runtime_schedules.json metadata.policy_summary 已寫入實測結論取代待驗字句；step3 live A/B 因 enforce 未上線暫緩。建議：enforce 邊際效益<2% skip，是否值得續投 gate-signal 改造需老闆定調（handoff/receipt 已載）。"
+    "tombstone": true,
+    "archived_at": "2026-07-29T22:08:07.650482+00:00"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260720T112715143656Z_a1",
@@ -42186,38 +42173,15 @@
   },
   {
     "id": "merge_worktree_test_suite_20_red_assertions",
-    "title": "merge_worktree 測試套件常駐 20 條紅 — 含 K1262/K1618 silent-drop 重現案例，不是只有 dirty-main contract",
-    "task_type": "platform_ops",
-    "priority": 2,
-    "description": "2026-07-21 修 K1262-v4 誤判時量到的既有債務（**不是該次修改造成的** —— 已用 out-of-tree baseline 對照確認：修改版 20 條紅是 HEAD baseline 的真子集，零 regression）。\n\n`bash scripts/tests/test_merge_worktree.sh` 目前 Assertions PASS: 49 / **FAIL: 20**，且 runner 最後印 `Test cases: FAIL`。失敗清單：\nA-1, A-2（untracked experiments/ 無 commit → silent data loss）、C-1、5-1, 5-2, 6-1, 6-2（K1262 silent drop pattern + post-merge layer false negative）、7-1, 7-2, 7-3（lock 偵測）、8-1, 8-2（K1618 silent drop 重現）、9-1, 9-2（agent 修改遺失 / 無 auto-restore）、10-1（MAIN_DIR 被 cwd repo 綁架）、11-2（合併被誤 abort 擋掉）、17-1, 18-1, 18-4, 19-1（dirty-main / staged-index preflight contract）。\n\n**為什麼要單獨開單**：這次的修復 agent 把這 20 條描述成「cases 17/18/19 的 dirty-main/index contract」，實際清單裡**多數是 K1262 / K1618 的 silent-drop 重現案例**（A/5/6/8/9/10/11）—— 也就是這支腳本存在的理由本身。主線程逐條比對才發現這個誤述。兩種可能，必須查清楚是哪一種：\n  (a) 這些測試 assert 的是**舊版契約**，腳本後來演進（例如改成 fail-closed 要人工確認，      而測試還在期待「自動合併成功」）→ 那是**測試該更新**，且紅了這麼久沒人動代表沒人在看；\n  (b) 這些防線**真的失效了** → 那是 P1 級事故等級的問題，K1032/K1114/K1262/K1618 四次事故的防護是空的。\n\n在 (a)/(b) 判明之前，任何人看到這支套件「一直是紅的」都會學會忽略它 —— 這比單一 bug 更危險。\n\n要做的：(1) 逐條判定 (a) 或 (b)；(2) (a) 就更新測試到現行契約，(b) 就修腳本；(3) 讓套件回到全綠，之後任何紅都是真訊號；(4) 若某條短期修不了，明確標 skip + 理由 + 解除條件，不要讓它混在紅裡當背景噪音。\n\nparent: merge_worktree_k1262v4_overtrigger_20260719",
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "merge_worktree 測試套件常駐 20 條紅 — 含 K1262/K1618 silent-drop 重現案例，不是只有 dirty-main contract",
+    "priority": 2,
     "source": "hourly_dispatch",
     "created_at": "2026-07-21T10:48:00+00:00",
-    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014",
-    "status_history": [
-      {
-        "ts": "2026-07-26T21:22:29.931813+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
-      },
-      {
-        "ts": "2026-07-26T21:22:32.961448+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
-      },
-      {
-        "ts": "2026-07-26T21:22:50.391479+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
-      }
-    ],
-    "started_at": "2026-07-26T21:22:32.961432+00:00",
     "completed_at": "2026-07-26T21:22:50.391447+00:00",
-    "result": "已恢復（非誤報）：2026-07-21 建單當下 test_merge_worktree.sh 確有 49 PASS/20 FAIL（K1262/K1618 silent-drop、lock 偵測、dirty-main preflight 等）。後續 merge_worktree.sh 硬化（commits 503786ece stale-overlap guard、7feb97253 K1262-v6 誤合防線、7d30d8f84 shared-WIP no-stash、a16840bd0 single-writer、7f6adcbd2 bytes-bound PASS gate 等）已補齊防線並擴充測試。本班 live 重跑 scripts/tests/test_merge_worktree.sh = Assertions PASS 74 / FAIL 0、Test cases PASS 23/23，含 Case 22(K1262-v6) 與 Case 23(stale-base 雙邊改) 全綠。零殘紅，任務目標達成。",
-    "worklog": true
+    "tombstone": true,
+    "archived_at": "2026-07-29T22:08:07.650482+00:00"
   },
   {
     "id": "telegram-1258",
@@ -42365,37 +42329,15 @@
   },
   {
     "id": "throughput_recheck_max_slots_20260725",
-    "title": "[throughput] max_slots 2→4 吞吐複驗：補足 3-4 個完整日樣本後重下判斷",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
-    "created_at": "2026-07-21T13:14:14.434697+00:00",
+    "task_type": "platform_ops",
+    "title": "[throughput] max_slots 2→4 吞吐複驗：補足 3-4 個完整日樣本後重下判斷",
+    "priority": 3,
     "source": "dispatch",
-    "parent_task_id": "assign_f59976b6",
-    "description": "assign_f59976b6 首次驗收（2026-07-21）結論：吞吐**未能證實提升**，因為變更後只有 1 個乾淨完整日（07-20 = 62，恰等於基線平均 62.0），而基線本身日間全距為 45–98，已覆蓋所有觀測值。\n\n基線（07-14~18）：57 / 98 / 53 / 45 / 57，平均 62.0、中位數 57。\n變更後：07-19 = 111（含變更前 10.7h）、07-20 = 62、07-21 = 99（未整日）。\n\n要做：待 07-22~07-25 累積 3-4 個完整日後，重跑同一比對\n  jq -r '.[] | select(.status==\"succeeded\") | (.completed_at // .updated_at // \"\")[0:10]' storage/next_tasks.json | sort | uniq -c\n並更新 storage/ops/throughput_audit_max_slots_20260721.md 第 1 節。\n\n注意：首驗已發現 66% 的 cohort 只發 1 個 slot、slots_full 全期僅 1 次 —— 若複驗仍無提升，結論應指向上游（supervisor 每 cohort 發幾條主線程 / 單張任務 wall-clock），而非再調 max_slots。",
-    "status_history": [
-      {
-        "ts": "2026-07-26T21:28:42.231356+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
-      },
-      {
-        "ts": "2026-07-26T21:28:42.466691+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
-      },
-      {
-        "ts": "2026-07-26T21:30:20.765020+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
-      }
-    ],
-    "started_at": "2026-07-26T21:28:42.466674+00:00",
+    "created_at": "2026-07-21T13:14:14.434697+00:00",
     "completed_at": "2026-07-26T21:30:20.764993+00:00",
-    "result": "複驗完成（3-4 完整日已累積）：乾淨完整日 07-20=62/07-22=71/07-23=22/07-26=28 → 平均 45.75、中位數 45，vs 基線(07-14~18) 平均 62.0/中位 57 —— max_slots 2→4 未證實提升，甚至略低。另偵測 07-24/07-25 兩連續零完成日（逐時戳欄位交叉核對確認為真實斷檔非欄位假象）。定案：cap 已非 binding（66% cohort 僅 1 slot、slots_full 全期 1 次），不建議再上調 max_slots，下一步查上游(cohort 主線程數 / 單張 wall-clock / 零完成斷檔成因)。已更新 storage/ops/throughput_audit_max_slots_20260721.md 第 1 節新增 1-recheck 段。"
+    "tombstone": true,
+    "archived_at": "2026-07-29T22:08:07.650482+00:00"
   },
   {
     "id": "phase_z_orphan_half_cap_high_concurrency_20260721",
@@ -44666,42 +44608,15 @@
   },
   {
     "id": "ci-red-30215935113",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 30215935113, attempt 1）— main Test Suite",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-30215935113",
-    "ci_run_key": "30215935113:1",
     "created_at": "2026-07-26T20:00:07.427235+00:00",
-    "title": "CI 紅燈修復（run 30215935113, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30215935113\nattempt: 1\nhead_sha: dad84187e\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30215935113 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
-    "priority_capped_from": 1,
-    "status_history": [
-      {
-        "ts": "2026-07-26T21:06:06.408046+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
-      },
-      {
-        "ts": "2026-07-26T21:06:11.792704+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
-      },
-      {
-        "ts": "2026-07-26T21:10:51.837222+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
-      }
-    ],
-    "started_at": "2026-07-26T21:06:11.792690+00:00",
     "completed_at": "2026-07-26T21:10:51.837190+00:00",
-    "result": "root_cause=general-audience draft mile_35d8941b �?��??�?� 2 �?? distinct academic keyword hits�?QLIKE + Diebold-Mariano�?�?�??�?��??�?? alt-text�?�?觸�?� publisher _infer_audience upcast�??research�?validate_feed_audience.py 失�??使 CI Test Suite �?� pytest �??被 gate�?Run test suite �?��? skipped�?; repair=�??�?? guarded apply_article_correction() �?? alt-text �??�??Diebold-Mariano 檢�?�??�?�?�模�??表�?��?��??�??scrub �??�??統�?檢�?顯示�?�模�??表�?��??顯�??差�?��??�?distinct signals �??�?� {QLIKE}=1 < �??檻2�?�??章�?�?? general�?class sweep=validate_feed_audience.py �??�? PASS�?1885 entries / 482 general / 0 mismatches�?�?� feed �?��??�? leak�?; repair_commit=48ce5adeb88e7a3db4463bf610fa296def12e3b9",
-    "repair_commit_source": "post_commit_receipt"
+    "tombstone": true,
+    "archived_at": "2026-07-29T22:08:07.650482+00:00"
   },
   {
     "id": "k1715_bfgs_fix_dephantom_rerun_20260727",
@@ -44751,45 +44666,15 @@
   },
   {
     "id": "issue43_mutating_isolation_20260727",
-    "title": "[Issue #43] 強制 mutating execution isolated-or-requeued，移除 shared-main fallback",
-    "description": "依 GitHub Issue #43 與 docs/refactor_plan_ops_master_2026_07.md D4 S2-S4 實作。先以 production-shaped failing tests 覆蓋 workspace allocation active_cap/total_cap/disk/lock failure 時 mutating lane 不得 unisolated fire；gate receipt 綁 candidate/main CAS、worker cwd identity、canonical-only path fail closed、雙槽 conflict、pre-dirty、CAS lost、stale gate、crash/restart orphan。走既有 Matt implement→TDD→雙軸 code-review→live receipts；不重跑 plan/spec/tickets。",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[Issue #43] 強制 mutating execution isolated-or-requeued，移除 shared-main fallback",
+    "priority": 1,
     "source": "user",
-    "requested_by": "owner",
-    "issue_ref": "#43",
     "created_at": "2026-07-26T20:14:50.100733+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-26T20:14:50.401828+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-26T20:14:54.003232+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-26T22:00:19.272685+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-26T20:14:54.003219+00:00",
     "completed_at": "2026-07-26T22:00:19.272662+00:00",
-    "result": "Issue #43 root_cause_fixed_and_verified: enforce isolation commit 6e60353a9; deployment fixes 6893fb285/5b1b8b979; 326 tests; live canary 296aabac0 with gate/finalize/settlement receipts; GitHub issue closed.",
-    "issue_close_pending": {
-      "issue_ref": "#43",
-      "task_id": "issue43_mutating_isolation_20260727",
-      "completion_owner": "codex-vscode",
-      "completed_at": "2026-07-26T22:00:19.272662+00:00",
-      "completion_base_commit": "79c5260b3ededac3ce6eb71e953d7154b45cec70"
-    }
+    "tombstone": true,
+    "archived_at": "2026-07-29T22:08:07.650482+00:00"
   },
   {
     "id": "K1592_article_general",
@@ -45016,89 +44901,14 @@
   },
   {
     "id": "issue43_live_canary_v2_20260727",
-    "title": "[Issue #43 live canary] Verify enforced mutating isolation",
-    "description": "Production acceptance canary. Create docs/ops/issue43_live_canary.md containing the assigned task id and a concise note that supervisor receipt identifiers will be appended by the owner after machine integration. Modify no other repo path. Do not run git add/commit/merge; machine finalizer owns integration.",
     "status": "succeeded",
-    "priority": 1,
     "task_type": "platform_ops",
+    "title": "[Issue #43 live canary] Verify enforced mutating isolation",
+    "priority": 1,
     "source": "user",
-    "issue_ref": "#43",
-    "write_intent": "repo_patch",
-    "declared_output_paths": [
-      "docs/ops/issue43_live_canary.md"
-    ],
-    "post_merge_actions": [],
-    "status_history": [
-      {
-        "ts": "2026-07-26T21:43:21.826528+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-eff32f3b5e6148dbbd9c34916c1163ba",
-        "note": "supervisor_preassignment"
-      },
-      {
-        "ts": "2026-07-26T21:43:21.826531+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-eff32f3b5e6148dbbd9c34916c1163ba",
-        "note": "workspace_admission"
-      },
-      {
-        "ts": "2026-07-26T21:44:44.573528+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-eff32f3b5e6148dbbd9c34916c1163ba",
-        "note": "supervisor_settle_empty"
-      },
-      {
-        "ts": "2026-07-26T21:51:23.574299+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-8a8912b5ce354eb3be4eb47b7d8634e4",
-        "note": "supervisor_preassignment"
-      },
-      {
-        "ts": "2026-07-26T21:51:23.574302+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-8a8912b5ce354eb3be4eb47b7d8634e4",
-        "note": "workspace_admission"
-      },
-      {
-        "ts": "2026-07-26T21:52:55.866998+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-8a8912b5ce354eb3be4eb47b7d8634e4",
-        "note": "supervisor_settle_empty"
-      },
-      {
-        "ts": "2026-07-26T21:56:25.073422+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-80f1563b6a1f4dd89d5e100e2e0f4005",
-        "note": "supervisor_preassignment"
-      },
-      {
-        "ts": "2026-07-26T21:56:25.073426+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-80f1563b6a1f4dd89d5e100e2e0f4005",
-        "note": "workspace_admission"
-      },
-      {
-        "ts": "2026-07-26T21:58:38.966510+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-80f1563b6a1f4dd89d5e100e2e0f4005",
-        "note": "supervisor_post_merge_settlement"
-      }
-    ],
-    "dispatch_settled_session_id": "dispatch-80f1563b-c0becdcf",
-    "last_released_at": "2026-07-26T21:52:55.866982+00:00",
-    "last_release_reason": "workspace_empty",
-    "started_at": "2026-07-26T21:56:25.073411+00:00",
     "completed_at": "2026-07-26T21:58:38.966494+00:00",
-    "result": "worker=success; workspace=merged; main_sha=296aabac03c73f484c8e6c8dfed9e4e46d707824"
+    "tombstone": true,
+    "archived_at": "2026-07-29T22:08:07.650482+00:00"
   },
   {
     "id": "assign_9da1028c",
@@ -50457,7 +50267,7 @@
     "description": "Alert `PHASE-Z 無主或過期檔案達處置門檻` fired 5× over 4.8d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：alert_key=ce0fdba9f1a00af6 title='PHASE-Z 無主或過期檔案達處置門檻' send_count=5 span=4.8d (first 2026-07-23T00:13:40.646097+00:00 → last 2026-07-27T19:18:10.501417+00:00) — no fire in 2.1h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "dreaming",
     "created_at": "2026-07-27T21:25:04.703274+00:00",
     "dreaming": {
@@ -50466,7 +50276,26 @@
       "occurrences": 2,
       "governance_target": "docs/error_log.md"
     },
-    "priority_note": "dreaming: severity escalated to critical on 2026-07-28 (was P3)"
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-28 (was P3)",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-29T21:40:07.743007+00:00",
+    "claim_expires_at": "2026-07-29T23:40:07.743007+00:00",
+    "claim_session_id": "f47d77ad2d2e",
+    "status_history": [
+      {
+        "ts": "2026-07-29T21:40:07.743027+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T21:40:08.116417+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-29T21:40:08.116405+00:00"
   },
   {
     "id": "dreaming_unfiled_incident_class_8b681480cd8b6ca2",
@@ -50553,7 +50382,7 @@
     "title": "[dreaming] unfiled_incident_class:ce0fdba9f1a00af6",
     "description": "Alert class `PHASE-Z 無主或過期檔案達處置門檻` occurred 26x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key ce0fdba9f1a00af6...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix ce0fdba9f1a00af6) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：dedupe_key=ce0fdba9f1a00af6 title='PHASE-Z 無主或過期檔案達處置門檻' occurred 26x over 4.8d (first 2026-07-23T00:13:40.646097+00:00 → last 2026-07-27T19:18:10.501417+00:00) with NO docs/error_log.md entry\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
-    "priority": 3,
+    "priority": 2,
     "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-27T21:25:04.703274+00:00",
@@ -50562,7 +50391,8 @@
       "pattern_type": "unfiled_incident_class",
       "occurrences": 1,
       "governance_target": "docs/error_log.md"
-    }
+    },
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-29 (was P3)"
   },
   {
     "id": "dreaming_unfiled_incident_class_d32f00ad64eb4c58",
@@ -50601,7 +50431,7 @@
     "title": "[dreaming] observation_ledger_breach:hourly_dispatch_deliverable8_legacy_retirement",
     "description": "觀察項 `hourly_dispatch_deliverable8_legacy_retirement` 逾期未決策。到期動作：執行 Deliverable-8：launchctl bootout legacy + mv scripts/cron_hourly_dispatch.sh scripts/_legacy/ + retro；同步 refactor_plan_cron_dispatch.md 標 SUPERSEDED 歸檔、更新 test_cutover_orphans.py _RETIRED_BY_DESIGN；或 observation extend 明文展期附理由。二選一，不准留在 limbo：(a) 執行到期動作並 `uv run volpred ops observation resolve --id hourly_dispatch_deliverable8_legacy_retirement --resolution <做了什麼>`；(b) 有充分理由才 `uv run volpred ops observation extend --id hourly_dispatch_deliverable8_legacy_retirement --deadline <ISO> --reason <為什麼>`（展期紀錄留在帳本上）。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：observation item `hourly_dispatch_deliverable8_legacy_retirement`: deadline 2026-07-27T23:59:00+08:00 passed (0.2d overdue) — what: legacy cron_hourly_dispatch.sh 已 launchctl-disabled（2026-07-04 supervisor cutover）但實體未退役；refactor_plan_hourly_dispatch Deliverable-8（bootout + mv scripts/_legac\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
-    "priority": 3,
+    "priority": 2,
     "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-27T21:25:04.703274+00:00",
@@ -50610,7 +50440,8 @@
       "pattern_type": "observation_ledger_breach",
       "occurrences": 1,
       "governance_target": null
-    }
+    },
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-29 (was P3)"
   },
   {
     "id": "trending_repost_2026_07_28_ai資本支出",
@@ -62196,13 +62027,11 @@
     "description": "Auto-generated from research_program.md unchecked item (line 598). Original: 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1814.py with signal.shift(1) + seed=42, (c) K1814_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.\n\nRenumbered from K1731 on 2026-07-30 (k_id_registry status=renumbered). K1731 was reserved for this topic by research_backlog_auto at 2026-07-18T00:00:01Z but was squatted the same day by the GEVReg-MIDAS-SSVS arm B dispatch, which committed under the id without calling kid_reserve. Those commits live on the unmerged branch wt/dispatch-slot-1-bd00f90a-k1731, so enqueue-agent's literal-grep collision gate rejects any dispatch under K1731 forever. This id carries the original topic; do NOT reuse K1731.",
     "task_type": "experiment",
     "priority": 3,
-    "status": "awaiting_agent_job",
+    "status": "blocked",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
     "renumbered_from": "K1731",
     "created_at": "2026-07-29T19:13:00.174056+00:00",
-    "compute_job_id": "agent-brief_k1814-a3ea90",
-    "blocked_reason": "external_compute_job_running",
     "status_history": [
       {
         "ts": "2026-07-29T19:16:49.223703+00:00",
@@ -62210,15 +62039,27 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1814-a3ea90",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-29T22:14:34.663263+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-brief_k1814-a3ea90",
+        "note": "terminal receipt collected; followup=assign_d10a5a91"
       }
     ],
     "result": "dispatched to compute job agent-brief_k1814-a3ea90; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-29T20:02:23Z"
+    "compute_released_at": "2026-07-29T22:14:34Z",
+    "compute_release_reason": "terminal_receipt_collected",
+    "blocked_until": "2026-07-30T16:00:00+08:00",
+    "blocked_reason": "external_compute_job_active",
+    "blocked_at": "2026-07-29T22:21:31+00:00",
+    "blocked_note": "parent agent job agent-brief_k1814-a3ea90 已 timeout，但其 compute child python3 k1814.py pid 52501（ppid=1 orphan）於 2026-07-30 06:08 CST 仍 98% CPU 活著並持續 checkpoint，stage 6/6 ablations 中。禁止重新派發整個 K1814（會重跑已完成的 primary arm n_oos=13176 + 三個 robustness arm，且會撞 worktree collision gate）。工作已切成 assign_d10a5a91（split 1/2 landing_inventory）與 assign_a8867b27（split 2/2 verify_and_merge）；K1814 本身由 split 2/2 的 merge 收尾。"
   },
   {
     "id": "assign_cf82928c",
     "title": "PHASE-Z 卡住檔案 incident（e72eebd41371417d）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 22 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- .claude/rules/experiments.md — 22 班\n- experiments/k1630/README.md — 8 班\n- scripts/gen_k1585_general_charts.py — 16 班\n- scripts/gen_k1680_general_charts.py — 16 班\n- scripts/gen_k1705_general_charts.py — 16 班\n- storage/assets/k1585_general_effect_forest.png — 16 班\n- storage/assets/k1585_general_oos_cost.png — 16 班\n- storage/assets/k1609_general_gate_forest.png — 7 班\n- storage/assets/k1609_general_two_rulers.png — 7 班\n- storage/assets/k1623_general_ruler_flip.png — 16 班\n- storage/assets/k1623_general_survivor_funnel.png — 16 班\n- storage/assets/k1680_general_multiplicity.png — 16 班\n- storage/assets/k1680_general_per_firm.png — 16 班\n- storage/assets/k1698_general_rebuild_audit.png — 15 班\n- storage/assets/k1698_general_strength_flip.png — 15 班\n- storage/assets/k1698_general_two_targets.png — 15 班\n- storage/assets/k1705_general_sign_audit.png — 16 班\n- storage/assets/k1705_general_timing_flip.png — 16 班\n- storage/assets/k781_general_ranking.png — 21 班\n- storage/assets/k781_general_subperiod_regime.png — 21 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 18 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 18 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 18 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 18 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 18 班\n- storage/lazypack_plans/k1448_general_plan.json — 8 班\n- storage/lazypack_plans/k1585_general_plan.json — 16 班\n- storage/lazypack_plans/k1623_general_plan.json — 16 班\n- storage/lazypack_plans/k1680_general_plan.json — 16 班\n- storage/lazypack_plans/k1705_general_plan.json — 16 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T192036201708Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T202848179520Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T212447807233Z:<路徑>`",
+    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 23 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- .claude/rules/experiments.md — 23 班\n- experiments/k1630/README.md — 9 班\n- scripts/gen_k1585_general_charts.py — 17 班\n- scripts/gen_k1680_general_charts.py — 17 班\n- scripts/gen_k1705_general_charts.py — 17 班\n- storage/assets/k1585_general_effect_forest.png — 17 班\n- storage/assets/k1585_general_oos_cost.png — 17 班\n- storage/assets/k1609_general_gate_forest.png — 8 班\n- storage/assets/k1609_general_two_rulers.png — 8 班\n- storage/assets/k1623_general_ruler_flip.png — 17 班\n- storage/assets/k1623_general_survivor_funnel.png — 17 班\n- storage/assets/k1680_general_multiplicity.png — 17 班\n- storage/assets/k1680_general_per_firm.png — 17 班\n- storage/assets/k1698_general_rebuild_audit.png — 16 班\n- storage/assets/k1698_general_strength_flip.png — 16 班\n- storage/assets/k1698_general_two_targets.png — 16 班\n- storage/assets/k1705_general_sign_audit.png — 17 班\n- storage/assets/k1705_general_timing_flip.png — 17 班\n- storage/assets/k781_general_ranking.png — 22 班\n- storage/assets/k781_general_subperiod_regime.png — 22 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 19 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 19 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 19 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 19 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 19 班\n- storage/lazypack_plans/k1448_general_plan.json — 9 班\n- storage/lazypack_plans/k1585_general_plan.json — 17 班\n- storage/lazypack_plans/k1623_general_plan.json — 17 班\n- storage/lazypack_plans/k1680_general_plan.json — 17 班\n- storage/lazypack_plans/k1705_general_plan.json — 17 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T192036201708Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T202848179520Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T212447807233Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T222609805763Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -62261,46 +62102,47 @@
         "storage/lazypack_plans/k775_general_plan.json"
       ],
       "streaks": {
-        ".claude/rules/experiments.md": 22,
-        "experiments/k1630/README.md": 8,
-        "scripts/gen_k1585_general_charts.py": 16,
-        "scripts/gen_k1680_general_charts.py": 16,
-        "scripts/gen_k1705_general_charts.py": 16,
-        "storage/assets/k1585_general_effect_forest.png": 16,
-        "storage/assets/k1585_general_oos_cost.png": 16,
-        "storage/assets/k1609_general_gate_forest.png": 7,
-        "storage/assets/k1609_general_two_rulers.png": 7,
-        "storage/assets/k1623_general_ruler_flip.png": 16,
-        "storage/assets/k1623_general_survivor_funnel.png": 16,
-        "storage/assets/k1680_general_multiplicity.png": 16,
-        "storage/assets/k1680_general_per_firm.png": 16,
-        "storage/assets/k1698_general_rebuild_audit.png": 15,
-        "storage/assets/k1698_general_strength_flip.png": 15,
-        "storage/assets/k1698_general_two_targets.png": 15,
-        "storage/assets/k1705_general_sign_audit.png": 16,
-        "storage/assets/k1705_general_timing_flip.png": 16,
-        "storage/assets/k781_general_ranking.png": 21,
-        "storage/assets/k781_general_subperiod_regime.png": 21,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 18,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 18,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 18,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 18,
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 18,
-        "storage/lazypack_plans/k1448_general_plan.json": 8,
-        "storage/lazypack_plans/k1585_general_plan.json": 16,
-        "storage/lazypack_plans/k1623_general_plan.json": 16,
-        "storage/lazypack_plans/k1680_general_plan.json": 16,
-        "storage/lazypack_plans/k1705_general_plan.json": 16,
-        "storage/lazypack_plans/k775_general_plan.json": 10
+        ".claude/rules/experiments.md": 23,
+        "experiments/k1630/README.md": 9,
+        "scripts/gen_k1585_general_charts.py": 17,
+        "scripts/gen_k1680_general_charts.py": 17,
+        "scripts/gen_k1705_general_charts.py": 17,
+        "storage/assets/k1585_general_effect_forest.png": 17,
+        "storage/assets/k1585_general_oos_cost.png": 17,
+        "storage/assets/k1609_general_gate_forest.png": 8,
+        "storage/assets/k1609_general_two_rulers.png": 8,
+        "storage/assets/k1623_general_ruler_flip.png": 17,
+        "storage/assets/k1623_general_survivor_funnel.png": 17,
+        "storage/assets/k1680_general_multiplicity.png": 17,
+        "storage/assets/k1680_general_per_firm.png": 17,
+        "storage/assets/k1698_general_rebuild_audit.png": 16,
+        "storage/assets/k1698_general_strength_flip.png": 16,
+        "storage/assets/k1698_general_two_targets.png": 16,
+        "storage/assets/k1705_general_sign_audit.png": 17,
+        "storage/assets/k1705_general_timing_flip.png": 17,
+        "storage/assets/k781_general_ranking.png": 22,
+        "storage/assets/k781_general_subperiod_regime.png": 22,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 19,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 19,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 19,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 19,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 19,
+        "storage/lazypack_plans/k1448_general_plan.json": 9,
+        "storage/lazypack_plans/k1585_general_plan.json": 17,
+        "storage/lazypack_plans/k1623_general_plan.json": 17,
+        "storage/lazypack_plans/k1680_general_plan.json": 17,
+        "storage/lazypack_plans/k1705_general_plan.json": 17,
+        "storage/lazypack_plans/k775_general_plan.json": 11
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260729T192036201708Z",
         "refs/volpred/quarantine/20260729T202848179520Z",
-        "refs/volpred/quarantine/20260729T212447807233Z"
+        "refs/volpred/quarantine/20260729T212447807233Z",
+        "refs/volpred/quarantine/20260729T222609805763Z"
       ],
-      "fires": 3,
+      "fires": 4,
       "first_seen_at": "2026-07-29T19:20:59.027794+00:00",
-      "last_seen_at": "2026-07-29T21:24:47.926746+00:00",
+      "last_seen_at": "2026-07-29T22:26:09.908779+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-29T19:56:44.221774+00:00",
       "deferred": [
@@ -62338,7 +62180,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-29T21:24:47.926746+00:00"
+    "updated_at": "2026-07-29T22:26:09.908779+00:00"
   },
   {
     "id": "assign_d5999f36",
@@ -62477,15 +62319,11 @@
     "description": "Fresh GitHub Test Suite run 30490697153 was cancelled before pytest: apt-get downloaded fonts-noto-cjk from azure.archive.ubuntu.com for 17m29s until the job-level 20m timeout killed the run. Root-fix the CI dependency installation contract with bounded network time/retry and deterministic evidence; preserve real CJK font availability and ripgrep runtime coverage. Acceptance: deterministic test fails on the current unbounded workflow, fixed workflow/helper has bounded retries and leaves enough budget for pytest, targeted tests and Matt dual review pass, then a fresh origin run reaches and completes pytest.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-29T21:24:13.070783+00:00",
     "created_by": "codex-vscode",
     "priority_capped_from": 1,
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-29T21:24:17.495307+00:00",
-    "claim_expires_at": "2026-07-29T23:24:17.495307+00:00",
-    "claim_session_id": "8ee1b24f9798",
     "status_history": [
       {
         "ts": "2026-07-29T21:24:17.495323+00:00",
@@ -62498,8 +62336,151 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T21:37:08.793135+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-29T21:24:17.843589+00:00"
+    "started_at": "2026-07-29T21:24:17.843589+00:00",
+    "completed_at": "2026-07-29T21:37:08.793106+00:00",
+    "result": "GitHub run 30490697153 was cancelled before pytest because Azure apt mirror stalled on fonts-noto-cjk. Replaced raw apt with a root-owned bounded process-group supervisor: finite network/outer deadlines, two retries with partial cache, TERM/KILL grace included in 346s budget, rc125 prevents overlapping apt; 22 affected tests and Matt Standards/Spec final reviews passed. contained pending formal push and fresh GitHub CI read-back."
+  },
+  {
+    "id": "assign_f3a72eea",
+    "title": "解決長期無主的產物 `experiments/k1630`（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `experiments/k1630` — atomic_unit_incomplete (namespace=experiments, first_seen=2026-07-29T17:01:41.450631+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-29T22:00:42.725812+00:00",
+    "payload": {
+      "held_paths": [
+        "experiments/k1630"
+      ],
+      "held_reasons": {
+        "experiments/k1630": "atomic_unit_incomplete"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "assign_d10a5a91",
+    "title": "[K1814 split 1/2] detached-run 落地確認 + partial inventory（parent job agent-brief_k1814-a3ea90 timeout）",
+    "description": "**split_stage**: `landing_inventory`（parent timeout job `agent-brief_k1814-a3ea90`, parent budget 5400s）\n\n**背景（2026-07-30 06:08 CST 實測盤點，非推測）**：parent agent job 於 2026-07-29T21:30:24Z 被 timeout 殺掉（stderr: `[run_agent_job] TIMEOUT after 5279s — killing agent tree`），但它啟動的 compute child **沒死**：`python3 -u k1814.py` pid 52501 ppid=1（orphan）在 06:08 仍 98% CPU 活著並持續 checkpoint。所以這不是「成果全毀要重跑」，是「工作在跑、收件人被殺」。**禁止重跑 k1814.py、禁止殺 pid 52501**。\n\n**工作目錄**：`.claude/worktrees/dispatch-slot-1-8af0700e-k1814`（registered linked worktree，勿 force-remove）\n\n**06:08 實測進度**：`stages_completed = [primary, robustness:SPY_parkinson, robustness:SPY_garman_klass, robustness:QQQ_parkinson, ablation:channels_with_returns]`；ablations 共 5 個 spec（channels_with_returns / refit_250 / window_L66 / train_len1500 / loss_qlike_direct）只完成 1 個，refit_250 的 h=1 已出、h=5/h=22 在跑。以 4084s/5 stages 的節奏推估剩餘約 30-40 分鐘（約 06:45-06:55 CST 落地）。\n\n**開工 gate（本 stage 唯一前置）**：先確認 pid 52501 已結束 **或** `experiments/k1814/K1814_results.json` 的 `stages_completed` 已含 `complete`。若仍在跑且本班預算不足等它 → release 本 task 留下一班，**不要殺 process、不要把 partial 當終局**。\n\n**單一交付物**：`experiments/k1814/k1814_stage1_landing.json`（worktree 內）\n內容要求：(1) 最終 `stages_completed` 與 5 ablation / 3 robustness arm 的 present-vs-declared 對照表；(2) pid 52501 的結束方式（自然結束 / 被殺 / 仍活）與依據；(3) `K1814_results.json`、`reproduce_spec.json`、`run_full.log`、5 張 fig 的 sha256 + mtime；(4) 若 run 死在中途，明列哪些 arm 可保留、哪些必須標 missing。\n\n**同時修一個已定位的誠實性 bug（屬本 stage 範圍）**：`experiments/k1814/k1814.py:1329` `checkpoint(f\"ablation:{name}\", [])` 在 ablation 迴圈每輪都把 `unresolved` 寫成 `[]`，於是 06:08 的 artifact 一邊只跑完 1/5 ablation、一邊宣告「無未解項」，違反 checkpoint docstring 自己寫的「partial artifact 必須明示缺什麼」。修法：ablation 迴圈的 unresolved 應為尚未跑的 spec 名單（robustness 迴圈 line 1289 的寫法是對的）。**這是 artifact 誠實性修正，不需重跑**；修完只影響未來執行，本次缺口在 landing json 註記。\n\n**成功判準**：landing json 存在且對「哪些數字可用、哪些不可用」給出可稽核答案；unresolved 誤報已修或已明確標注。\n\n**接續**：本 stage 通過後才可開工 split 2/2（數字核實 + lookahead + merge）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "compute_queue_followup",
+    "created_at": "2026-07-29T22:14:28.448156+00:00",
+    "payload": {
+      "split_parent_job_id": "agent-brief_k1814-a3ea90",
+      "split_stage": "landing_inventory",
+      "split_index": "1/2",
+      "artifact": "experiments/k1814/k1814_stage1_landing.json",
+      "worktree": ".claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+      "detached_pid": 52501,
+      "do_not_rerun": "experiments/k1814/k1814.py"
+    },
+    "parent_task_id": "K1814",
+    "created_by": "hourly-slot-1-35ee4072472f421185b36d1ec7b3cadf"
+  },
+  {
+    "id": "assign_a8867b27",
+    "title": "[K1814 split 2/2] 數字/lookahead/HAR-baseline 核實 + artifacts gate + merge（等 stage 1 landing json 才可開工）",
+    "description": "**split_stage**: `verify_and_merge`（parent timeout job `agent-brief_k1814-a3ea90`）\n\n**前置**：`experiments/k1814/k1814_stage1_landing.json` 必須存在且顯示 run 已落地（見 split 1/2，同 parent_task_id=K1814）。缺 landing json 就開工 = 拿一份可能還在被寫入的 results 做核實，禁止。\n\n**工作目錄**：`.claude/worktrees/dispatch-slot-1-8af0700e-k1814`\n\n**載具**：以 `compute_queue.py enqueue-agent` 派（`--model claude-opus-5 --effort xhigh --timeout 2400 --timeout-parent-job-id agent-brief_k1814-a3ea90 --split-stage verify_and_merge`）。timeout 必須 < parent 5400s；本段是純核實 + review，無 40 分鐘 MLE，2400s 足夠。\n\n**單一交付物**：`experiments/k1814/review_verdict.json`\n\n**核實清單（沿用 parent 原 followup，逐項要有可貼證據）**：\n1. 資料口徑 gate：README 是否明列 yfinance 實測起訖/筆數，且宣稱口徑與程式實際使用一致。注意 run_full.log 的 data-calibre 探測：5m 只回 60 天（4680 bars）、1h 回 730 天 —— **任何「5-min RV 長樣本」敘述都與此矛盾**；primary arm 實際用 `^GSPC` 1962- 的 Parkinson range proxy（n_oos=13176）。README 若仍寫 5-min RV 為主資料 = must-fix。\n2. `K1814_results.json` 與 README 數字逐項一致（每 horizon 的 QLIKE、DM 統計量、BH-FDR 後 p、多 seed sd）。\n3. lookahead：scaler / 超參數是否只在 train window 決定；rolling refit 是否真 refit（primary refit cadence vs `ablation_refit_250` 的對照就是這題的答案，須一起讀）。\n4. HAR baseline 沒被弱化：06:08 log 顯示 **HAR-L 三個 horizon 全部打贏 LSTM/Transformer**（h=1 0.3713 vs 0.3713/0.3886；h=5 0.1982 vs 0.2054/0.2659；h=22 0.1914 vs 0.2128/0.2242）。若 README 結論方向與此相反，以 results json 為準並列 must-fix。\n5. ablation 比較基準：`_settings_note` 已聲明各 ablation 要和自己的 har/harl 欄比、不可跨 primary arm 比；驗證文中確實如此。\n6. `uv run python scripts/check_experiment_artifacts.py check --path experiments/k1814`。\n7. `review_verdict.json` 需達 CONDITIONAL_PASS 以上才可 merge。\n\n**主線程保留動作（agent 禁做，K1259）**：knowledge.json 由主線程寫；merge 走 `bash scripts/merge_worktree.sh dispatch-slot-1-8af0700e-k1814`。\n\n**成功判準**：verdict json 有 sha-pin 的核實記錄 + 每項 must-fix 有處置；FAIL 則不 merge、記錄阻擋缺陷並判斷 remediate vs 3-strike escalate。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "compute_queue_followup",
+    "created_at": "2026-07-29T22:14:28.606745+00:00",
+    "payload": {
+      "split_parent_job_id": "agent-brief_k1814-a3ea90",
+      "split_stage": "verify_and_merge",
+      "split_index": "2/2",
+      "artifact": "experiments/k1814/review_verdict.json",
+      "worktree": ".claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+      "depends_on_artifact": "experiments/k1814/k1814_stage1_landing.json",
+      "child_timeout_seconds": 2400
+    },
+    "parent_task_id": "K1814",
+    "created_by": "hourly-slot-1-35ee4072472f421185b36d1ec7b3cadf"
+  },
+  {
+    "id": "assign_17f813da",
+    "title": "[K1734 3-strike] Codex primary-path rev4 第 3 連敗 → 停止 remediation loop，等老闆裁決（A 降級收斂 / B rev5 / C 封存）",
+    "description": "**觸發**：compute job `agent-brief_k1734_rev4-9c5dc5` exit 0、artifact 齊全（agent 本身成功），但其產出的 `experiments/k1734/review_verdict.json` = **FAIL**，5 條 blocking defects。\n\n**strike 計數（Codex primary-path 認證審查）**：rev2 FAIL(1 defect) → rev3 FAIL(2) → rev4 FAIL(5)。缺陷數逐輪增加，非收斂。parent followup brief 已預先寫明：experiment 的 Codex effort ladder 已在 ceiling，第三次失敗的 remediation cycle 應 escalate 給老闆而非重跑同一份審查。**本 fire 依此停止重試。**\n\n**決定性缺陷（rev4 #1）**：rev3 的 route A 修法（放寬 H2 gate 以符合宣稱）補進 risk-off limb 六個檢定、使 `H2_accept` 由 false 翻 true；但這六個檢定是在 parent 已攤開 fitted signs 之後才出現，且 `k1734_h2_gate_fix_report.json:18` 自承「risk-off limb 早就知道會過」。→ `H2b_riskoff_accept=true` 與 `RISKOFF_*_CONFIRMED` token 是**事後探索被標成事前確認（HARKing）**。修 rev3 缺陷的動作製造了比原缺陷更嚴重的誠信問題，同法再修一輪會撞同一面牆。\n\n**其餘 4 條**：(2) H2a/H2b 口徑不對等且最終 verdict 不讀 BH 拒絕旗標（k1734.py:641-672,1220-1224）；(3) H2 lead logits 用 IID 共變異數跑日頻 tail-event 序列（k1734.py:578-588），非 HAC/cluster-robust，Codex 獨立 HAC(21) 敏感度顯示 UUP p 0.000268→0.002129（仍顯著）但其他 lead 檢定明顯轉弱；(4) QLIKE 程序標為 nested-valid general-loss test 但只 resample 已實現 OOS 損失差路徑（k1734.py:807-830）；(5) README:7 宣稱數字全 byte-traceable，但 README:116,241 的 power/bootstrap SD/最小可偵測效果無歸檔計算。\n\n**目前 verdicts（K1734_results.json 實讀）**：H1_accept=false（H1a=true, H1b=false，rev2 補檢定後 gap +0.0499 CI [-0.1646,+0.2640] boot p=0.6924）；H2_accept=true 但 H2a=false、H2b 不可採信；H3_accept=true 但 BH 後 adj p=0.0226 / 保守 0.0451（route A 把家族 9→15 後此值未變，BH 因子 9/6=15/10=1.5）。可留下的實質內容 ≈「靜態左尾不對稱成立 + 壓力放大 NULL + OOS 領先極薄」，價值主要在 NULL 記錄。\n\n**已寄 escalation email**（`[新架構派發]` 開頭、含 `[VolPred K1734]` 供回信 ingestion），三選項：\nA（本 fire 建議）降級收斂：route B 收窄宣稱改寫 README（H2b 明標 exploratory、QLIKE 改稱條件推論、砍無歸檔 power 段）+ lead logits 改 HAC(21)，寫誠實 NULL knowledge 後合併，不再送認證；\nB 再修一輪送 rev5（不建議：缺陷在增加、Codex 額度限至 2026-08-02）；\nC 封存不合併（會丟掉 H1b 那筆有檢定支撐的 NULL）。\n\n**預設行為（無回覆時）**：不 merge、不發表任何 K1734 內容，worktree `.claude/worktrees/dispatch-slot-1-1e5922b4-k1734`（branch `wt/dispatch-slot-1-1e5922b4-k1734`）原地保留。\n\n**下一步 owner**：老闆回信 → PHASE 0 email_reply 接手，依選項派工。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "blocked",
+    "source": "compute_queue_followup",
+    "created_at": "2026-07-29T22:19:04.349943+00:00",
+    "payload": {
+      "parent_job_id": "agent-brief_k1734_rev4-9c5dc5",
+      "strike_count": 3,
+      "strike_verdicts": [
+        "rev2_FAIL_1_defect",
+        "rev3_FAIL_2_defects",
+        "rev4_FAIL_5_defects"
+      ],
+      "decision_required_from": "boss",
+      "options": [
+        "A_downgrade_route_B_narrow_claim",
+        "B_rev5_remediation",
+        "C_archive_unmerged"
+      ],
+      "recommended": "A_downgrade_route_B_narrow_claim",
+      "worktree": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734",
+      "do_not_merge_until_decided": true
+    },
+    "parent_task_id": "K1734",
+    "created_by": "hourly-slot-1-35ee4072472f421185b36d1ec7b3cadf",
+    "blocked_until": "2026-08-12T22:19:38+00:00",
+    "blocked_reason": "awaiting_owner_decision",
+    "blocked_at": "2026-07-29T22:19:38+00:00",
+    "blocked_note": "3-strike escalation email 已送達老闆（2026-07-29T22:19:10Z, evidence email:sent-mail:e65c1987d3067b2a…）；A/B/C 三選項待裁決。無回覆時預設不 merge、不發表，worktree dispatch-slot-1-1e5922b4-k1734 原地保留。"
+  },
+  {
+    "id": "ci-red-30494529174",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "incident_id": "ci-red-30494529174",
+    "ci_incident_id": "ci-red-30494529174",
+    "ci_run_key": "30494529174:1",
+    "created_at": "2026-07-29T22:20:20.389018+00:00",
+    "title": "CI 紅燈修復（run 30494529174, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30494529174\nattempt: 1\nhead_sha: b3a3a361c\n偵測摘要（仍須讀完整 failed log）：2026-07-29T22:17:32.9313535Z E AssertionError: raw termination bypasses: ['scripts/ci_install_system_test_dependencies.py:89', 'scripts/ci_install_system_test_dependencies.py:102']\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30494529174 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
+    "write_intent": "repo_patch",
+    "declared_output_paths": [
+      "scripts/ci_...ncies.py",
+      "scripts/ci_install_system_test_dependencies.py",
+      "scripts/lazypack_layout_guard.py",
+      "scripts/tests/test_git_writer_lock.py",
+      "scripts/tests/test_lazypack_layout_guard.py",
+      "scripts/tests/test_termination_intent.py",
+      "src/volpred/charts/article_charts.py",
+      "src/volpred/evaluation/statistical_tests.py",
+      "src/volpred/ops/rollback.py",
+      "tests/test_append_work_log.py",
+      "tests/test_cpi_t0_official_release_dates.py",
+      "tests/test_daily_update_tw_staleness.py",
+      "tests/test_evaluation_metrics.py",
+      "tests/test_refresh_paper_snapshots_concurrent_append.py",
+      "tests/test_rollback.py",
+      "tests/test_shared_lock.py"
+    ],
+    "post_merge_actions": [],
+    "priority_capped_from": 1
   }
 ]

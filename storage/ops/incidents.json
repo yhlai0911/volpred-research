@@ -940,6 +940,51 @@
     "last_at": null
    }
   },
+  "inc_747b83bf1bab": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
+   "current_task_id": "ci-red-30494529174",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-29T22:20:23.344314+00:00",
+   "escalation": null,
+   "fingerprint": "747b83bf1bab7662d529309b4eb7757cfda4aa0b4367364c9d579d43d19f83d8",
+   "fingerprint_parts": [
+    "ci-red-30494529174"
+   ],
+   "first_seen_at": "2026-07-29T22:20:23.344314+00:00",
+   "incident_id": "inc_747b83bf1bab",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T22:20:23.344314+00:00",
+     "key": "30494529174:1",
+     "last_seen_at": "2026-07-29T22:20:23.344314+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-29T22:17:32.9313535Z E AssertionError: raw termination bypasses: ['scripts/ci_install_system_test_dependencies.py:89', 'scripts/ci_install_system_test_dependencies.py:102']",
+   "last_seen_at": "2026-07-29T22:20:23.344314+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-29T22:20:23.510571+00:00",
+     "task_id": "ci-red-30494529174"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_776caf84f125": {
    "class": "machine_self",
    "clean_observations": [],
@@ -1049,72 +1094,72 @@
      "detail": {
       "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
       "dirty": true,
-      "idle_hours": 194.3,
+      "idle_hours": 200.3,
       "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
+     "last_seen_at": "2026-07-29T22:26:12.760656+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
       "dirty": true,
-      "idle_hours": 194.4,
+      "idle_hours": 200.4,
       "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
+     "last_seen_at": "2026-07-29T22:26:12.760656+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-bd00f90a-k1731",
       "dirty": false,
-      "idle_hours": 4.5,
+      "idle_hours": 10.5,
       "unmerged_commits": 31
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
+     "last_seen_at": "2026-07-29T22:26:12.760656+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-f5a22a5f-k1095v2",
       "dirty": false,
-      "idle_hours": 188.2,
+      "idle_hours": 194.2,
       "unmerged_commits": 3
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
+     "last_seen_at": "2026-07-29T22:26:12.760656+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "worktree-agent-a148e8a94105f7935",
       "dirty": true,
-      "idle_hours": 181.6,
+      "idle_hours": 187.6,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "agent-a148e8a94105f7935",
-     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
+     "last_seen_at": "2026-07-29T22:26:12.760656+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-2-8dda242d-k1708",
       "dirty": false,
-      "idle_hours": 46.9,
+      "idle_hours": 52.9,
       "unmerged_commits": 6
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
+     "last_seen_at": "2026-07-29T22:26:12.760656+00:00"
     },
     {
      "cleared_at": "2026-07-28T10:25:56.532041+00:00",
@@ -1157,12 +1202,12 @@
      "detail": {
       "branch": "wt/dispatch-slot-2-7087efc0-signfc",
       "dirty": true,
-      "idle_hours": 57.3,
+      "idle_hours": 63.3,
       "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-27T16:25:51.225239+00:00",
      "key": "dispatch-slot-2-7087efc0-signfc",
-     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
+     "last_seen_at": "2026-07-29T22:26:12.760656+00:00"
     },
     {
      "cleared_at": null,
@@ -1193,24 +1238,24 @@
      "detail": {
       "branch": "dispatch-slot-3-87c7269d-k1720",
       "dirty": false,
-      "idle_hours": 25.3,
+      "idle_hours": 31.3,
       "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-27T22:25:51.036366+00:00",
      "key": "dispatch-slot-3-87c7269d-k1720",
-     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
+     "last_seen_at": "2026-07-29T22:26:12.760656+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "dispatch-slot-3-87c7269d-k1721",
       "dirty": true,
-      "idle_hours": 48.5,
+      "idle_hours": 54.5,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-27T22:25:51.036366+00:00",
      "key": "dispatch-slot-3-87c7269d-k1721",
-     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
+     "last_seen_at": "2026-07-29T22:26:12.760656+00:00"
     },
     {
      "cleared_at": "2026-07-29T04:25:53.479182+00:00",
@@ -1251,9 +1296,9 @@
    ],
    "kind": "worktree_unmerged",
    "last_breach_detail": "held worktree dispatch-slot-3-87c7269d-k1721",
-   "last_seen_at": "2026-07-29T16:26:16.869845+00:00",
+   "last_seen_at": "2026-07-29T22:26:12.760656+00:00",
    "notified_at": null,
-   "occurrence_count": 271,
+   "occurrence_count": 280,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2530,6 +2575,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T21:24:32.239215+00:00",
+ "updated_at": "2026-07-29T22:26:12.936917+00:00",
  "version": 1
 }
