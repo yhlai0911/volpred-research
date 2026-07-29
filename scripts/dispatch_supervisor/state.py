@@ -11,7 +11,10 @@ Schema (version 1)::
       "supervisor_release_commit": str | null,    # Git commit materialized into the release
       "supervisor_bootstrap_sha256": str | null,  # installed immutable bootstrap digest
       "cutover_quiesce": null | {                 # durable new-fire fence for launchd migration
-        "token": str, "reason": str, "requested_at": str, "expires_at": str
+        "token": str, "reason": str, "requested_at": str, "expires_at": str,
+        "previous_auth_blocked": bool,
+        "previous_auth_blocked_at": str | null,
+        "legacy_fence_at": str
       },
       "last_heartbeat_at": "<ISO>",              # liveness heartbeat (health_loop, every 30s)
       "last_fire_at": "<ISO|null>",              # last time a worker was actually spawned

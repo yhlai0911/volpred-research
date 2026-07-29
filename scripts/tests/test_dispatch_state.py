@@ -1727,6 +1727,19 @@ def _drive_every_writer(path: Path) -> None:
                          exit_code=0, outcome="success", final_model="opus", path=path)
     assert sibling.job_id == st.read_state(path)["current_job"]["job_id"]
 
+    # Issue #42: exercise the complete public cutover-fence lifecycle, then
+    # leave a second fence active so the state-shape gate below observes the
+    # durable container rather than proving only that the functions were called.
+    quiesce = st.begin_cutover_quiesce(
+        reason="state-shape-cutover", ttl_s=60, path=path,
+    )
+    st.cutover_quiesce_snapshot(token=quiesce["token"], path=path)
+    st.renew_cutover_quiesce(token=quiesce["token"], ttl_s=120, path=path)
+    assert st.end_cutover_quiesce(token=quiesce["token"], path=path)
+    st.begin_cutover_quiesce(
+        reason="state-shape-active-cutover", ttl_s=60, path=path,
+    )
+
 
 def _public_writers_of_state_module() -> set[str]:
     """AST 導出：state.py 裡所有會開 `_locked_state()` 的 public function。"""
@@ -1793,6 +1806,7 @@ def _container_shapes(node, path="$"):
 KNOWN_CONTAINERS = {
     "$", "$.current_job", "$.current_jobs[]", "$.phase_z_pending[]",
     "$.phase_z_rejections[]", "$.completions[]", "$.alerts_dedup",
+    "$.cutover_quiesce",
     # #42 durable fire generation and rejected-token evidence.
     "$.current_job.fire_lifecycle", "$.current_jobs[].fire_lifecycle",
     "$.phase_z_pending[].fire_lifecycle",
@@ -1821,6 +1835,23 @@ WORKSPACE_LIST_KEYS = {
 FIRE_LIFECYCLE_KEYS = {
     "generation_id", "captured_at", "pre_fire_dirty",
 }
+
+CUTOVER_QUIESCE_KEYS = {
+    "token", "reason", "requested_at", "expires_at",
+    "previous_auth_blocked", "previous_auth_blocked_at", "legacy_fence_at",
+}
+
+
+def test_cutover_quiesce_shape_is_flat_and_documented(tmp_state):
+    """Issue #42's durable cutover fence has one explicit, bounded schema."""
+    _drive_every_writer(tmp_state)
+    quiesce = st.read_state(tmp_state)["cutover_quiesce"]
+    assert isinstance(quiesce, dict), "驅動沒留下 active cutover fence（假綠燈風險）"
+    assert set(quiesce) == CUTOVER_QUIESCE_KEYS
+    assert all(
+        not isinstance(value, (dict, list))
+        for value in quiesce.values()
+    )
 
 
 def test_fire_lifecycle_shape_is_flat_and_documented(tmp_state):
