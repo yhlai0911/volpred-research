@@ -958,6 +958,73 @@ def test_enqueue_agent_forwards_source_task_id(tmp_path: Path, monkeypatch) -> N
     assert captured["source_task_id"] == "assign_y"
 
 
+def test_enqueue_agent_cli_recovers_utf8_title_decoded_with_surrogateescape(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A non-UTF-8 process locale must not corrupt a valid UTF-8 CLI title."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module, "QUEUE_ROOT", tmp_path)
+    monkeypatch.setattr(module, "AGENT_BRIEF_DIR", tmp_path / "briefs")
+    monkeypatch.setattr(module, "AGENT_JOB_DIR", tmp_path / "agent_jobs")
+    monkeypatch.setattr(
+        module,
+        "is_registered_linked_worktree",
+        lambda *_a, **_k: True,
+    )
+    monkeypatch.setattr(
+        module,
+        "_find_task_dispatch_collision",
+        lambda **_k: None,
+    )
+    monkeypatch.setattr(
+        module,
+        "_agent_model_policy",
+        lambda task_type: {
+            "allowed_models": frozenset({"claude-opus-5"}),
+            "canonical_model": "claude-opus-5",
+            "registry_sha256": "a" * 64,
+            "task_type": task_type,
+        },
+    )
+    monkeypatch.setattr(module, "_link_source_task", lambda *_a, **_k: None)
+
+    brief = tmp_path / "brief.md"
+    brief.write_text("do the thing", encoding="utf-8")
+    workdir = tmp_path / "worktree"
+    workdir.mkdir()
+    title = "中文派工"
+    locale_mangled_title = title.encode("utf-8").decode(
+        "ascii",
+        errors="surrogateescape",
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "compute_queue.py",
+            "enqueue-agent",
+            "--id",
+            "unicode-title",
+            "--title",
+            locale_mangled_title,
+            "--brief-file",
+            str(brief),
+            "--cwd",
+            str(workdir),
+            "--source-task-id",
+            "assign_unicode_title",
+        ],
+    )
+
+    assert module.main() == 0
+    receipt = json.loads(
+        (queue_dir / "unicode-title.json").read_text(encoding="utf-8")
+    )
+    assert receipt["title"] == title
+
+
 def test_enqueue_agent_blocks_task_id_on_another_unmerged_worktree(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:

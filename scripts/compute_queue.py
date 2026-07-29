@@ -267,6 +267,52 @@ def ensure_dirs():
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def _restore_cli_utf8(value: Any, *, field: str) -> Any:
+    """Recover valid UTF-8 argv bytes decoded through ``surrogateescape``.
+
+    A dispatch process can inherit an empty or non-UTF-8 locale.  Python then
+    preserves non-ASCII argv bytes as lone surrogates; letting those reach a
+    queue receipt makes the durable write fail after all admission checks.
+    Normalize the complete parsed CLI namespace once, before dispatching to any
+    subcommand, so callers do not need ASCII-only workarounds.
+    """
+    if isinstance(value, str):
+        if not any(0xD800 <= ord(char) <= 0xDFFF for char in value):
+            return value
+        try:
+            return value.encode(
+                "utf-8",
+                errors="surrogateescape",
+            ).decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError) as exc:
+            warn(
+                "compute_queue",
+                "replaced invalid CLI byte sequence",
+                field=field,
+                error=f"{type(exc).__name__}: {exc}",
+            )
+            return value.encode("utf-8", errors="replace").decode("utf-8")
+    if isinstance(value, list):
+        return [
+            _restore_cli_utf8(item, field=f"{field}[{index}]")
+            for index, item in enumerate(value)
+        ]
+    if isinstance(value, tuple):
+        return tuple(
+            _restore_cli_utf8(item, field=f"{field}[{index}]")
+            for index, item in enumerate(value)
+        )
+    return value
+
+
+def _normalize_cli_namespace(args: argparse.Namespace) -> argparse.Namespace:
+    for field, value in vars(args).items():
+        if field == "func":
+            continue
+        setattr(args, field, _restore_cli_utf8(value, field=field))
+    return args
+
+
 def _warn_compute_queue(message: str, path: Path, exc: Exception) -> None:
     print(
         f"[compute_queue] WARN {message}: "
@@ -4051,7 +4097,7 @@ def main():
     o.add_argument("--path", action="append", required=True)
     o.set_defaults(func=record_output_paths_cli)
 
-    args = p.parse_args()
+    args = _normalize_cli_namespace(p.parse_args())
     return args.func(args)
 
 
