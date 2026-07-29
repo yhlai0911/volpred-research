@@ -2926,8 +2926,12 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
   exact comment identity、receipt 與 cursor 不遺失。
 - ✅ canonical `runtime_schedules.json` 已同步 channel／cadence contract；affected
   suites **25 passed**，Ruff、py_compile、schedule parse、diff check均通過。
-- ⏳ 待 production schema v3 migration、自然 due batch receipt 與 24 小時頻率觀察；
-  因此目前為 **`contained`**，Issue #13 保持 OPEN，尚未宣稱整體通知政策完成。
+- ✅ production schema v3 已由自然 Core fire 接管；Issue #13 固定窗到期後只留下
+  一筆 Email durable receipt，沒有 Telegram receipt，cursor／batch terminal
+  read-back一致。
+- ⏳ GitHub dual-channel burst bounded root class 為
+  **`root_cause_fixed_and_verified`**；仍待 24 小時頻率／資訊性 sustained audit，
+  因此 Issue #13 umbrella 保持 OPEN，尚未宣稱整體通知政策完成。
 
 ## 2026-07-30 — T37 handoff slot observer ownership bounded closure（Issue #44）
 

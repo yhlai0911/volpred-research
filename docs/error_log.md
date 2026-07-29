@@ -4821,10 +4821,13 @@ canonical `runtime_schedules.json` 同步記錄 cadence 與 channel ownership。
 **回歸驗證**：固定窗邊界、同 thread 合併、跨 thread 分離、Email retry、crash
 unknown、cursor repair、v2 delivered／pending／failed／in-flight／unknown migration、
 CLI exit semantics 與 scheduler contract 共 **25 passed**；Ruff、py_compile、
-JSON schedule parse 與 diff check通過。此 root class 在 production schema v3
-read-back 與自然 due batch acknowledgement 完成前維持 **`contained`**，不得提前稱
-`root_cause_fixed_and_verified`；24 小時頻率／資訊性 sustained audit 亦為上位
-notification policy 的獨立驗收條件。
+JSON schedule parse 與 diff check通過；Matt Standards／Spec review均 PASS。
+production schema v3 migration 後，Issue #13 留言在固定窗到期的自然 Operations Core
+fire 只產生一筆 Email durable receipt（subject 含 `[新架構派發]` 與「留言摘要」），
+delivery 的 `receipt_keys` 僅有 `email`、沒有 Telegram，cursor／batch terminal state
+均回讀一致。此 GitHub dual-channel burst root class 五步 Gate 完成，狀態為
+**`root_cause_fixed_and_verified`**；24 小時頻率／資訊性 sustained audit 仍是上位
+notification policy 的獨立驗收條件，不因單一自然 receipt 而宣稱整體通知已完成。
 
 ---
 
