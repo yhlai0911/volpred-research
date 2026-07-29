@@ -1,6 +1,6 @@
 {
   "workflow_name": "platform_cycle_summary",
-  "generated_at": "2026-07-29T07:27:46.818823+00:00",
+  "generated_at": "2026-07-29T15:40:30.813866+00:00",
   "release_preview": {
     "mode": "auto",
     "settings": {
@@ -10,44 +10,53 @@
       "due_only": true,
       "include_drafts": true,
       "preferred_audiences": [],
-      "last_released_at": "2026-07-29T07:00:41.864529+00:00",
-      "updated_at": "2026-07-29T07:00:56.329144+00:00"
+      "last_released_at": "2026-07-29T15:00:22.713989+00:00",
+      "updated_at": "2026-07-29T15:00:34.885363+00:00"
     },
     "due_now": false,
-    "next_release_at": "2026-07-29T11:00:00+00:00",
+    "next_release_at": "2026-07-29T19:00:00+00:00",
     "pool_counts": {
-      "draft": 0,
+      "draft": 3,
       "scheduled": 0,
-      "eligible_before_dedup": 0,
+      "eligible_before_dedup": 3,
       "dedup_flagged": 0,
       "narrative_cluster_filtered": 0,
       "content_gate_blocked": 0,
-      "eligible": 0
+      "eligible": 3
     },
     "narrative_cluster_pressure": {
       "window": 3,
       "threshold": 2,
       "clusters": [
-        "risk_mgmt",
-        "spy"
+        "vix",
+        "har"
       ],
       "counts": {
-        "risk_mgmt": 1,
-        "spy": 1
+        "vix": 1,
+        "har": 1
       },
       "blocked_clusters": [],
       "recent_ids": [
-        "mile_a87265ab",
-        "mile_bbd72c0b",
-        "mile_35863986"
+        "mile_169bec4e",
+        "mile_6e35e47d",
+        "mile_a87265ab"
       ]
     },
     "narrative_cluster_filtered": [],
     "content_gate_blocked": [],
-    "next_candidates": []
+    "next_candidates": [
+      {
+        "id": "mile_0fdba89d",
+        "title": "存檔裡有個很漂亮的勝利，問題出在哪個減哪個",
+        "status": "draft",
+        "audience": "general",
+        "published_at": "2026-07-29T09:31:59.697682+00:00",
+        "created_at": "2026-07-29T09:31:59.697682+00:00"
+      }
+    ]
   },
   "question_ranking": {
-    "generated_at": "2026-07-29T07:27:46.818823+00:00",
+    "generated_at": "2026-07-29T15:40:30.813866+00:00",
     "cadence_hint": "每 6 小時檢查 pending_questions，評分後呼叫 question-rerank；既有榜單相對順序不應變動。",
     "table_columns": [
       "排名",

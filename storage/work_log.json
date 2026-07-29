@@ -31138,5 +31138,65 @@
     "owner": "hourly-slot-1-40fe60ce05c64a2da3174b1ed3bcdec2",
     "commit": null,
     "summary": "PHASE A collect_completed：K1731 main-integration 收件與獨立驗證（compute job agent-brief_k1731_main_integration-579c0d）。\n\n**結論：整合本身可信，但 merge 仍被卡；本班不 merge、不 requeue shards，改開 Codex review-certification 任務。**\n\n## 獨立驗證（沒有採信 agent 自評）\n\n| 檢查 | 方法 | 結果 |\n|---|---|---|\n| 兩支 gate 測試 | 自行重跑 `pytest scripts/tests/test_experiment_gates.py scripts/tests/test_nested_dm_misuse_ratchet.py` | **127 passed** (19+108)，與報告宣稱一致 |\n| Freeze 完整性 | 自行跑 `experiment_gates.py verify-freeze --manifest k1731_armB_rev12_mainmerge_freeze.txt` | **PASS 43/43 matched, 0 mismatched**，coverage 與 rev11 相同 |\n| Stale-base | 自行跑 `merge_worktree.sh --dry-run` | `[STALE-BASE SAFE] 落後 main 12 commits，變更路徑不相交` — 原 ABORT **已清除** |\n| main 變更有無被吞 | `git diff main..wt` 逐檔看刪除行 | `experiment_gates.py` **+433/-0**（main 全保留）；`audit_nested_dm_misuse.py` 刪的 5 行全是註解/docstring（AST 等價）；ratchet 測試 **47 支 vs main 46 支**，main 少的 3 支測試名在 worktree 都有對應改名版本 |\n\n報告的 `main_commits_absorbed=1233`、5 個 conflict 解法與 AST 等價論證，經上述抽查未發現造假或掩蓋。\n\n## 卡住的真正原因（非本次整合造成）\n\n`merge_worktree.sh --dry-run` 現在停在**另一道**閘門：\n\n```\n[cert] BLOCKED — experiments/k1730 (uncertified: no review_verdict.json)\n[cert] BLOCKED — experiments/k1731 (uncertified: no review_verdict.json)\n[🛑 ABORT] 未通過審查認證的實驗，拒絕合併： k1730 k1731\n```\n\n這道閘門是 **pre-existing**：先前被 stale-base 擋在前面所以照不到。清掉 stale-base 不是製造了它，而是**暴露**了它。\n\n父任務 handoff 寫的「下一班跑 merge_worktree.sh 然後 requeue 兩個 shard」**如實作為前提是錯的**，本班依 followup brief 第 6 點不執行 merge。\n\n## 為什麼不自己補 verdict\n\n`review_verdict.json` 必須綁定 frozen bytes 的真實審查裁決。自行寫入等於偽造一份沒發生過的審查 —— 正是 K1709 事故（Codex 判 FAIL 仍 merge，CI 連紅 4 次）催生這道閘門的原因。`verdict-template` 產生的是 `verdict '<missing>'`，閘門照樣拒絕。原 agent 拒絕自行補件的判斷正確。\n\n## 交棒\n\n已開 `k1730_k1731_review_certification_codex_20260729`（P2）走 Codex 主路徑審 k1730 + k1731 凍結位元組，審完才 merge、才 requeue `k1731-f1-boot-c0-parametric` / `k1731-f1-boot-c0-block`。特別提醒審查者讀**合併後**的 `scripts/experiment_gates.py`（含 k1731 審查者沒看過的 main 程式碼），而非 rev11 位元組。\n\nF1 兩個 shard 維持 failed/requeueable，未寫入任何 bootstrap 結論 —— 無假數字。"
+  },
+  {
+    "timestamp": "2026-07-29T23:27:30+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1716_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "owner": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "commit": null,
+    "summary": "本班（starvation lockout 下無可 claim 的排班工）改走 reader-facing lane，結果是兩張文章任務都不該寫，並抓出一個 dedup gate 的結構性盲點。\n\n- `K1713_article_general` → 釋回 + annotate。`experiments/k1713/K1713_results.json` verdict=DUPLICATE_CLOSURE_PASS、`creates_new_empirical_claim=false`（duplicate_of=K1661），且無圖表資產；PHASE B 6(b) evidence gate（≥3 可驗證數字 + 表 + 圖 + 量化層）無法由「重跑舊實驗 byte-for-byte 相符」滿足，依「不滿足→換題目，禁強推」處理。\n- `K1716_article_general` → succeeded / arc-covered，未寫文。既有 general 文章 `mile_74d12ac6`（2026-06-13）已覆蓋同 arc：同一組制度節點（2022-04-18 週二、2022-05-11 週四 SPX 每日到期）、同一結論（隔夜/日內占比小幅位移，週二週四專屬效果證據不足）。K1716 results.json 的 prior_replication 自述與 K1477 結論一致。\n- **gate false negative**：`check_arc_dedup --k-id k1716 --audience general` 回 exit 0 clean。根因是 `mile_74d12ac6` 的 experiment_refs=[]，K-COVERAGE 無從比對。盤點 storage/reports/feed.json：general 498 篇有 225 篇（45%）無 experiment_refs，全站 1,907 篇有 1,134 篇（59%）；其中 69 篇有 K-id 卻無 refs。publish 端 arc-dedup 已於 2026-06-23 降為 warn-only，寫前這一跑是唯一防線 → 已開 `assign_0fa3c4d6`（P2）記錄證據與三個候選修法。\n- 本班另記：STARVATION LOCKOUT 第三次把 hourly fire 逼進死路（`assign_a64ab146` 已立案）。dispatch_candidates 恰為 1 筆 `governance_self_revise_operating_docs_20260728`，claim 回 `supervisor_preassignment_required`；main-thread lane 的餓死 6 筆 claim 回 `main_thread_lane`。本班依「沒事做永不可接受」fall through 到可 claim 的 daily_article lane，未繞過任何 gate。"
+  },
+  {
+    "timestamp": "2026-07-29T23:28:12+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1477_article_general_v4",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "owner": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "commit": null,
+    "summary": "`K1477_article_general_v4` → succeeded / arc-covered，未寫文。\n\n- `experiments/k1477/k1477_results.json` 的 `verdict.plain_english`：「Post-2022-Q2 SPY shows a higher intraday share mainly because overnight variance compresses more than intraday variance; Tue/Thu interaction is not significant」。\n- 既有 general 文章 `mile_74d12ac6`（2026-06-13）逐項相同：隔夜占比 43.79%→41.51%（-2.28pp）、日內 56.21%→58.49%，並明說週二週四專屬效果證據不足。文中表格區間 2022-04-18~2026-06-12 與本實驗樣本（2018-01-03~2026-06-10, n=2120）為同一段。\n- `check_arc_dedup --k-id k1477 --audience general` 亦回 exit 1 block_arc_dup（惟命中的是另一篇 VRP 文 mile_74b80c0d，descriptive_strict entity 匹配；真正的覆蓋來源是層 2 grep 找到的 mile_74d12ac6）。\n- 與同班的 `K1716_article_general` 是同題三連（K1477 → K1716 stricter re-verification → 兩張 article 任務），全部判 arc-covered。gate 未攔下的根因同為 experiment_refs=[] → `assign_0fa3c4d6`。"
+  },
+  {
+    "timestamp": "2026-07-29T23:31:29+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_3cf55dd4",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "owner": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "commit": null,
+    "summary": "`assign_3cf55dd4`（[K1694 round-5 P1] product/exchange-scoped calendars）→ enqueue-agent，job `agent-brief_k1694_r6-6431c0`，source task 轉 `awaiting_agent_job`。\n\n- 路由：`model_router --task-type experiment` = opus / xhigh / **worktree**；因 round-5 Codex verdict=FAIL 屬可驗證失敗，依 escalation ladder 取 `--attempt 1` → **effort=max**，router 同時回 `at_ceiling=true`。已在 task 記 `escalation_attempts=1` 並註明：round-6 若仍 FAIL 即觸發 3-strike，禁止同法再重試。\n- 走 queue 而非 Agent tool 的理由：effort=max 在 Agent/Task tool 無旋鈕，且此工作預估遠超 fire 的 3000s cap（2026-07-12 三次 hang 的同一種錯）。\n- cwd 用既有 registered worktree `.claude/worktrees/dispatch-slot-1-e98b43fc-k1694`（保留 round-5 provenance，未 merge、未 force-remove）；`--result-artifact experiments/K1694/review_verdict.json`。\n- brief 寫死 round-5 兩個 blocking defect：(P1) universal `CME_UNSCHEDULED_CLOSURES` 與交易所原始公告矛盾 —— CME 2012-10-28（Sandy 只關 U.S. equity-index futures）、CFTC 12-363（NYMEX/COMEX Globex 仍可交易）、CME 2018-12-02（只關 equity/interest-rate products）；移除該白名單後 2012-10 由 22/22 變 0/22、2018-12 CORN 由通過變失敗，現行 3,276 列樣本不可採信。(P2) endpoint 測試以 `expected_month_endpoints()` 當自己的 oracle，無法證偽錯誤日曆。\n- brief 明列「刪掉白名單並下修 completeness claim」是可接受解，避免 agent 為了讓數字好看硬做 product-scoped calendar；並禁止 agent 自寫 knowledge.json（K1259）。\n- 已確認 compute worker 活著（`~/.volpred/logs/compute_worker.log` 23:30 仍在寫），job 狀態 queued 等 */15 worker 接手。"
+  },
+  {
+    "timestamp": "2026-07-29T23:48:18+08:00",
+    "task_type": "daily_article",
+    "task_id": "K775_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "owner": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "commit": null,
+    "summary": "`K775_article_general` → succeeded。draft-pool deficit=2 觸發 PHASE B-PARALLEL，但三張候選只有一張可寫，故派 1 位 writer（非 2）。\n\n- 選題：K1208 gate 回 block_arc_dup（且本身是 consolidation 非新估計）、K1713 本班稍早已因 DUPLICATE_CLOSURE_PASS 釋回，只有 K775 gate clean。\n- 差異化：站上已有 research 文 `mile_1c877c91`（2026-05-25，同一篇 arXiv:2503.00851，5 分鐘 RV pilot）。brief 寫死角度必須是**排名**（加特徵的 2025 新模型排第五、第一名是 2006 年的 AMEM，重點是選對模型家族）而非「路徑特徵無效」，並禁止重述該 pilot。\n- 證據：全部程式讀自 `experiments/k775/k775_har_pd_results.json`。SPY 2007-12-31~2026-03-30、OOS n=4590、expanding window(init=500, refit=50)。QLIKE amem 0.4721 < gjr 0.4836 < har_abs 0.5017 < ewma 0.5041 < har_pd 0.5118。har_pd vs har_abs -2.03% 但 harvey_pass=False → 文中如實寫「分不出勝負」，未寫「顯著更差」；amem/gjr 勝 har_abs 的 harvey_pass=True 才寫成「幾乎不可能是運氣」。主線程另行獨立複算過 metrics/ranking/subperiod，與 writer 回報一致。\n- Gate：`anti_ai_gate` exit 0（PASS, warn 1/3，唯一 WARN 落在 frontmatter 與表格區塊）；`check_arc_dedup --k-id k775 --audience general` 以**最終標題**複跑仍 clean。\n- 發佈鏈：修正兩處圖片相對路徑（writer 寫成 `assets/...`，publish_draft 要 repo-root 相對 `storage/drafts/assets/...`，原樣會 abort）→ `publish_draft.py --status draft` 產出 `mile_c53932a1`，2 張圖自動上傳 Supabase。\n- **關鍵一步：lazypack**。publish 後 WARN `lazypack_never_enqueued` — 沒有 plan 的 general draft **永遠不會被 release cron 放出去**，等於 deficit 沒補到。故續派一位 agent 依 lazypack-infographic skill 產 `storage/lazypack_plans/k775_general_plan.json`（4 panels、13 個 JSON pointer binding、evidence sha256 實算），主線程獨立跑 `lazypack_render.py --validate-only` 複驗 `{\"valid\": true, \"panels\": 4}` exit 0 後才 enqueue job `lazypack-mile_c53932a1`。\n- 草稿 frontmatter 已帶 `experiment_refs: [\"K775\"]` — 正是本班另外發現的 gate 盲點欄位（assign_0fa3c4d6），新稿不再貢獻該缺口。"
+  },
+  {
+    "timestamp": "2026-07-29T23:49:08+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1208_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "owner": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "commit": null,
+    "summary": "`K1208_article_general` → succeeded / 未寫文。兩條獨立理由：\n\n1. **arc-covered**：`check_arc_dedup --k-id k1208 --audience general` = block_arc_dup，命中 `mile_832dcc03`，match_reason=entity_conclusion_arc；narrative_axis 與既有文同為 methodology_robustness、conclusion_class=null_no_info、time_horizon=weekly、shared_mechanisms=[vol_term_structure]、shared_entities 涵蓋 GOLD/BITCOIN/LONG_BOND/NASDAQ/US_EQUITY/VIX。\n2. **非新估計**：K1208 是 K1116c/K1116f/K1201/K1203 的 consolidation，產出物為 Paper 4 §5 markdown 改寫稿；7/7 資產 QLIKE 5% gate 全未過（僅 TLT finstress pit_shift0 +0.50%），對讀者不構成新實證主張 —— 與本班 K1713 的判準一致。\n\n另做 publishing.md 層 2 grep（K1208/K1116/K1201/K1203/VIX-sufficiency 掃 1,907 篇 feed），未見更貼近的既有文，故以 gate 的 arc 判定為準。\n\n本班 reader-facing lane 合計裁決 4 張 article 任務：1 張真的寫（K775）、2 張 arc-covered（K1716、K1477）、1 張非新估計（K1208），另 1 張（K1713）釋回並建議改判 no-article。"
+  },
+  {
+    "timestamp": "2026-07-29T23:49:50+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1713_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "owner": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+    "commit": null,
+    "summary": "`K1713_article_general` → succeeded / 未寫文（本班稍早先釋回，後依與 K1208 相同判準結案，避免下一班重覆推導）。\n\n- `experiments/k1713/K1713_results.json`：task_disposition=duplicate_closure、verdict=DUPLICATE_CLOSURE_PASS、`creates_new_empirical_claim=false`、duplicate_of=K1661、pinned_source_unchanged=true。\n- K1661 已完整實作排隊設計（daily-OHLC Garman-Klass RV、range-quarticity proxy、HAR/HARQ、rolling W=1000 one-step forecasts、QLIKE、DM-HLN、SPY/0050.TW/TWII），K1713 的產出是 byte-level 重跑相符的 closure receipt。\n- experiments/k1713 無圖表資產，無法滿足 PHASE B 6(b) evidence package（≥3 可驗證數字 + ≥1 表 + ≥1 圖 + ≥1 層量化分析）。\n- 結案理由寫進 result，並註明：若要寫 reproducibility 主題應獨立選題，不掛在 auto-discovered 覆蓋單上。"
   }
 ]

@@ -403,7 +403,7 @@
    "class": "ordinary",
    "clean_observations": [],
    "clean_streak_started_at": null,
-   "current_task_id": "ci-red-30433823744",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-29T08:20:33.297125+00:00",
@@ -487,9 +487,19 @@
    "last_seen_at": "2026-07-29T15:00:25.526311+00:00",
    "notified_at": null,
    "occurrence_count": 11,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-29T15:25:27.586119+00:00",
+    "by": "ci-red-30433823744",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-29T15:25:27.586119+00:00",
+     "by": "ci-red-30433823744",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -2453,6 +2463,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T15:18:05.094881+00:00",
+ "updated_at": "2026-07-29T15:52:13.977452+00:00",
  "version": 1
 }

@@ -1,0 +1,61 @@
+{
+  "id": "agent-brief_k1694_r6-6431c0",
+  "title": "K1694 round-6: product/exchange-scoped official calendars + independent fixtures + full rerun",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1694_r6-6431c0.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "max",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694/experiments/K1694/review_verdict.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1694_r6-6431c0.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-07-29T15:30:26Z",
+  "started_at": "2026-07-29T15:45:33Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1694_r6-6431c0.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1694_r6-6431c0.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694/experiments/K1694/review_verdict.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1694_r6-6431c0.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694",
+  "claude_followup": {
+    "brief": "收件驗四項：(1) review_verdict.json 的 round==6 且 reviewed_at 晚於 2026-07-29T06:33:14Z；(2) 兩個 blocking defect（product_scoped_calendar_required / calendar_truth_test_is_tautological）逐項對照處置，特別確認 fixture 測試不再以 expected_month_endpoints() 當 oracle；(3) calendar_sources.md 每列 primary-source URL 抽驗至少 3 條，確認是交易所公告/CFTC filing 而非二手整理；(4) 樣本變動已量化（3276 → N、2012-10 的 22/22、2018-12 CORN）。PASS 才由主線程 programmatic writer 寫 knowledge 並走 merge_worktree.sh；FAIL 則保留 worktree、記錄無法解的項目，並注意 effort 已 at_ceiling（max）→ 觸發 3-strike，禁止同法再重試。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_3cf55dd4",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-29T15:30:26Z",
+    "linked_at": "2026-07-29T15:30:26Z",
+    "error": null
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1694_r6.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1694_r6-6431c0.md",
+  "claimed_by_pid": 33466,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:e3fa48c3fbf1b3295cf34ca6",
+    "scheduled_for": "2026-07-29T15:45:00Z"
+  },
+  "claimed_by_pid_start_wall": "Wed Jul 29 23:45:32 2026"
+}

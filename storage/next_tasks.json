@@ -44468,45 +44468,15 @@
   },
   {
     "id": "K1719_article_general",
-    "title": "K1719: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1719 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'mixed/non-novel']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: [K1719 verdict=MIXED reviewer=Codex GPT-5 primary-path (PASS, no blocking defects) artifact=experiments/k1719 task=ci-red-k1719-unrecorded-knowledge] ASIA-5 conservative daily volatility spillover ladder: does the previous local trading day's upstream information improve a target Canonical evidence: experiments/k1719/k1719_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 1,
     "status": "failed",
     "task_type": "daily_article",
+    "title": "K1719: write general-audience article (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_publish_drought_emergency",
-    "audience_correction_rewrite": false,
-    "k_id": "K1719",
-    "evidence_source_paths": [
-      "experiments/k1719/k1719_results.json"
-    ],
-    "evidence_source_kind": "experiment_results",
-    "data_source_note": "Canonical evidence: experiments/k1719/k1719_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
-    "tags": [
-      "auto-discovered",
-      "audience-general",
-      "publish-drought-emergency",
-      "reader-facing"
-    ],
-    "topic_cluster": null,
     "created_at": "2026-07-23T08:01:29+00:00",
-    "priority_capped_from": 1,
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
-    "status_history": [
-      {
-        "ts": "2026-07-26T15:12:45.233718+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-c789153b7308401daa5077575ffdda23"
-      },
-      {
-        "ts": "2026-07-26T15:13:10.657378+00:00",
-        "from": "claimed",
-        "to": "failed",
-        "by": "hourly-slot-1-c789153b7308401daa5077575ffdda23"
-      }
-    ],
     "completed_at": "2026-07-26T15:13:10.657352+00:00",
-    "result": "K1719 在 knowledge.json 不存在（max K id=1718）；auto-discovered task 指向不存在的 K，永遠無法完成。標 failed 清除永久餓死的 P1。若日後 K1719 真的產生，refill 會另建新 task。"
+    "tombstone": true,
+    "archived_at": "2026-07-29T15:20:43.952480+00:00"
   },
   {
     "id": "assign_d8bfe910",
@@ -58184,7 +58154,7 @@
     "description": "Round-5 FAIL receipt: worktree .claude/worktrees/dispatch-slot-1-e98b43fc-k1694 commit 7e55cdf6e / experiments/K1694/review_verdict.json. This is NOT an identical retry: the prior repair inferred a universal CME_UNSCHEDULED_CLOSURES map from count-only cache gaps. Official primary notices contradict it: CME 2012-10-28 says Sandy closed U.S. equity-index futures while all other CME futures remained open; CFTC submission 12-363 says NYMEX/COMEX electronic Globex remained available; CME 2018-12-02 says only U.S. equity/interest-rate products closed and all other Globex markets regular. K1694 spans CME/CBOT/NYMEX/COMEX and ICE commodities, so one universal calendar is not evidence. Required: (1) literature/source table mapping every ticker to exchange/product schedule and official URLs; (2) independent fixture tests for disputed dates and representative CME+ICE products, never expected_month_endpoints() as its own oracle; (3) either product-scoped calendars with dated endpoint cache, or delete the unsupported whitelist and explicitly downgrade screen claims; (4) rerun K1694.py + lag sensitivity + figures + finalize_experiment, no hand edits; (5) Codex round-6 review; (6) knowledge only after PASS via main-thread programmatic writer. Preserve provenance/worktree, do not merge on FAIL. Quantify sample/result changes from removing the false whitelist.",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "agent",
     "created_at": "2026-07-29T06:35:06.453419+00:00",
     "payload": {
@@ -58200,7 +58170,34 @@
     },
     "parent_task_id": "k1694_codex_fail_repair_20260729",
     "created_by": "codex-vscode",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-29T15:29:20.239593+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:29:20.574496+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:30:26.120197+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1694_r6-6431c0",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_k1694_r6-6431c0",
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job agent-brief_k1694_r6-6431c0; awaiting PHASE A collection",
+    "note": "2026-07-29 hourly-slot-1-ab61fef0: enqueue-agent job=agent-brief_k1694_r6-6431c0（opus/max, timeout 5400s, cwd=.claude/worktrees/dispatch-slot-1-e98b43fc-k1694, result-artifact=experiments/K1694/review_verdict.json）。effort 依 model_router --attempt 1 由 xhigh 升 max（round-5 Codex FAIL = 可驗證失敗）；router 回 at_ceiling=true → 若 round-6 仍 FAIL，禁止同法再重試，改走 3-strike。",
+    "escalation_attempts": 1,
+    "compute_started_at": "2026-07-29T15:45:33Z"
   },
   {
     "id": "assign_ddafbd91",
@@ -58363,7 +58360,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "incident_id": "ci-red-30433823744",
@@ -58781,23 +58778,27 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T15:24:03.329530+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
     "dispatch_settled_session_id": "dispatch-2ea85863-ae5bad15",
     "last_released_at": "2026-07-29T14:55:20.645481+00:00",
     "last_release_reason": "supervisor_kill_ef1e108b",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-29T14:55:56.286485+00:00",
-    "claim_expires_at": "2026-07-29T16:55:56.286485+00:00",
-    "claim_session_id": "f9652f703bdc",
-    "started_at": "2026-07-29T14:55:56.611593+00:00"
+    "started_at": "2026-07-29T14:55:56.611593+00:00",
+    "completed_at": "2026-07-29T15:24:03.329501+00:00",
+    "result": "root_cause_fixed_and_verified: commit d6bcf278a aligned enforcement-map ownership, scheduler custody fixtures, single-slot contract, and child CLI assertions. Local regression 603 passed, 1 skipped; GitHub Actions Test Suite run 30464149656 completed success and repository-state mutation assertion passed."
   },
   {
     "id": "K1477_article_general_v4",
     "title": "K1477: write general-audience article [retry-v4] (auto-discovered uncovered K)",
     "description": "K K1477 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K1477 [CONDITIONAL_PASS]: SPY 0DTE時代波動結構轉變檢驗，yfinance 2018-01-03至2026-06-10(n=2120)，外生breakpoint=2022-05-02。隔夜平方報酬均值7.95e-05→4.31e-05(約-45.8%)，日內平方報酬8.67e-05→7.95e-05(約-8.3%)，Parkinson range variance 9.84e-05→7.23e-05(約-26.5%)：兩者皆降但隔夜降更快。intraday_share_oc從0.553升至0.584(Welch p=0.0 Canonical evidence: experiments/k1477/k1477_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -58813,7 +58814,30 @@
       "retry-v4"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-29T09:09:17+00:00"
+    "created_at": "2026-07-29T09:09:17+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-29T15:27:43.222819+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:27:43.573771+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:28:02.181099+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      }
+    ],
+    "started_at": "2026-07-29T15:27:43.573752+00:00",
+    "completed_at": "2026-07-29T15:28:02.181073+00:00",
+    "result": "arc-covered，未寫文。experiments/k1477/k1477_results.json 的 verdict.plain_english 是「Post-2022-Q2 SPY shows a higher intraday share mainly because overnight variance compresses more than intraday variance; Tue/Thu interaction is not significant」— 與既有 general 文章 mile_74d12ac6（2026-06-13「0DTE 真的把 SPY 的波動搬進日內了嗎？2022 斷點檢定只答對一半」）的結論逐項相同（隔夜占比小降、日內小升；週二週四專屬效果證據不足），且該文表格區間 2022-04-18~2026-06-12 與本實驗樣本（2018-01-03~2026-06-10, n=2120）同一段。check_arc_dedup --k-id k1477 --audience general 亦回 exit 1 block_arc_dup。K1716 是同題的 stricter re-verification，本班一併判 arc-covered。gate 為何沒靠 K-coverage 攔下：mile_74d12ac6 的 experiment_refs=[] — 見 assign_0fa3c4d6。"
   },
   {
     "id": "assign_7d5c2e80",
@@ -58961,7 +58985,7 @@
     "title": "K1713: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1713 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1713 [DUPLICATE_CLOSURE_PASS, creates no new empirical claim]: The queued K1713 brief (noisy daily-OHLC realized-quarticity proxy making HARQ measurement-error weighting ineffective vs HAR) is already fully implemented by K1661, so K1713 closes the stale queue item with a byte-t Canonical evidence: experiments/k1713/K1713_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -58976,7 +59000,51 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-29T11:19:33+00:00"
+    "created_at": "2026-07-29T11:19:33+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-29T15:24:00.454485+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:24:00.789822+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:24:42.637435+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-29T15:49:39.098211+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:49:39.451301+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:49:39.833513+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      }
+    ],
+    "note": "2026-07-29 23:31 CST hourly-slot-1-ab61fef0: 開工前讀 experiments/k1713/K1713_results.json，verdict=DUPLICATE_CLOSURE_PASS 且 creates_new_empirical_claim=false（duplicate_of=K1661）。reader-facing evidence gate（≥3 可驗證數字 + 表 + 圖 + 量化分析層）無法由「重跑舊實驗 byte-for-byte 相符」滿足，且 experiments/k1713 無圖表資產。依 PHASE B 6(b)「不滿足 → 換題目，禁強推」釋回，本班改做 K1716。建議：此 K 的正確處置可能是 no-article（duplicate closure 不需讀者向文章），而非再排一次 retry。",
+    "last_released_at": "2026-07-29T15:24:42.637423+00:00",
+    "started_at": "2026-07-29T15:49:39.451277+00:00",
+    "completed_at": "2026-07-29T15:49:39.833488+00:00",
+    "result": "未寫文：K1713 不構成新實證主張，與 K1208 同一判準。experiments/k1713/K1713_results.json 的 task_disposition=duplicate_closure、verdict=DUPLICATE_CLOSURE_PASS、creates_new_empirical_claim=false、duplicate_of=K1661（K1661 已完整實作排隊設計：daily-OHLC Garman-Klass RV、range-quarticity proxy、HAR/HARQ、rolling W=1000 one-step forecasts、QLIKE、DM-HLN、SPY/0050.TW/TWII）。K1713 的產出是 byte-level 重跑相符的 closure receipt（pinned_source_unchanged=true），experiments/k1713 亦無圖表資產，無法滿足 PHASE B 6(b) 的 evidence package（≥3 可驗證數字 + ≥1 表 + ≥1 圖 + ≥1 層量化分析）。本班先釋回再依同一標準結案，避免下一班重覆推導同一結論。若日後要寫『我們如何確認舊結果還站得住』這類 reproducibility 主題，應以獨立選題另立任務，不掛在這張 auto-discovered 覆蓋單上。"
   },
   {
     "id": "assign_a64ab146",
@@ -59131,7 +59199,7 @@
   {
     "id": "assign_885384e2",
     "title": "PHASE-Z 卡住檔案 incident（caf7852b94966140）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n28 個未提交檔案不是任何一班 fire 產出的，最長已連續 49 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- .claude/rules/experiments.md — 12 班\n- scripts/gen_k1585_general_charts.py — 6 班\n- scripts/gen_k1680_general_charts.py — 6 班\n- scripts/gen_k1705_general_charts.py — 6 班\n- storage/assets/k1585_general_effect_forest.png — 6 班\n- storage/assets/k1585_general_oos_cost.png — 6 班\n- storage/assets/k1623_general_ruler_flip.png — 6 班\n- storage/assets/k1623_general_survivor_funnel.png — 6 班\n- storage/assets/k1680_general_multiplicity.png — 6 班\n- storage/assets/k1680_general_per_firm.png — 6 班\n- storage/assets/k1698_general_rebuild_audit.png — 5 班\n- storage/assets/k1698_general_strength_flip.png — 5 班\n- storage/assets/k1698_general_two_targets.png — 5 班\n- storage/assets/k1705_general_sign_audit.png — 6 班\n- storage/assets/k1705_general_timing_flip.png — 6 班\n- storage/assets/k781_general_ranking.png — 11 班\n- storage/assets/k781_general_subperiod_regime.png — 11 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 8 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 8 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 8 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 8 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 8 班\n- storage/lazypack_plans/k1585_general_plan.json — 6 班\n- storage/lazypack_plans/k1623_general_plan.json — 6 班\n- storage/lazypack_plans/k1680_general_plan.json — 6 班\n- storage/lazypack_plans/k1705_general_plan.json — 6 班\n- storage/logs/trending_primary_source_verification.jsonl — 42 班\n- storage/memory/knowledge.json — 49 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T141758556286Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T145538488441Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T151825497592Z:<路徑>`",
+    "description": "## 發生什麼\n28 個未提交檔案不是任何一班 fire 產出的，最長已連續 50 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- .claude/rules/experiments.md — 13 班\n- scripts/gen_k1585_general_charts.py — 7 班\n- scripts/gen_k1680_general_charts.py — 7 班\n- scripts/gen_k1705_general_charts.py — 7 班\n- storage/assets/k1585_general_effect_forest.png — 7 班\n- storage/assets/k1585_general_oos_cost.png — 7 班\n- storage/assets/k1623_general_ruler_flip.png — 7 班\n- storage/assets/k1623_general_survivor_funnel.png — 7 班\n- storage/assets/k1680_general_multiplicity.png — 7 班\n- storage/assets/k1680_general_per_firm.png — 7 班\n- storage/assets/k1698_general_rebuild_audit.png — 6 班\n- storage/assets/k1698_general_strength_flip.png — 6 班\n- storage/assets/k1698_general_two_targets.png — 6 班\n- storage/assets/k1705_general_sign_audit.png — 7 班\n- storage/assets/k1705_general_timing_flip.png — 7 班\n- storage/assets/k781_general_ranking.png — 12 班\n- storage/assets/k781_general_subperiod_regime.png — 12 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 9 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 9 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 9 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 9 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 9 班\n- storage/lazypack_plans/k1585_general_plan.json — 7 班\n- storage/lazypack_plans/k1623_general_plan.json — 7 班\n- storage/lazypack_plans/k1680_general_plan.json — 7 班\n- storage/lazypack_plans/k1705_general_plan.json — 7 班\n- storage/logs/trending_primary_source_verification.jsonl — 43 班\n- storage/memory/knowledge.json — 50 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T141758556286Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T145538488441Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T151825497592Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T155234388981Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -59171,43 +59239,44 @@
         "storage/memory/knowledge.json"
       ],
       "streaks": {
-        ".claude/rules/experiments.md": 12,
-        "scripts/gen_k1585_general_charts.py": 6,
-        "scripts/gen_k1680_general_charts.py": 6,
-        "scripts/gen_k1705_general_charts.py": 6,
-        "storage/assets/k1585_general_effect_forest.png": 6,
-        "storage/assets/k1585_general_oos_cost.png": 6,
-        "storage/assets/k1623_general_ruler_flip.png": 6,
-        "storage/assets/k1623_general_survivor_funnel.png": 6,
-        "storage/assets/k1680_general_multiplicity.png": 6,
-        "storage/assets/k1680_general_per_firm.png": 6,
-        "storage/assets/k1698_general_rebuild_audit.png": 5,
-        "storage/assets/k1698_general_strength_flip.png": 5,
-        "storage/assets/k1698_general_two_targets.png": 5,
-        "storage/assets/k1705_general_sign_audit.png": 6,
-        "storage/assets/k1705_general_timing_flip.png": 6,
-        "storage/assets/k781_general_ranking.png": 11,
-        "storage/assets/k781_general_subperiod_regime.png": 11,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 8,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 8,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 8,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 8,
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 8,
-        "storage/lazypack_plans/k1585_general_plan.json": 6,
-        "storage/lazypack_plans/k1623_general_plan.json": 6,
-        "storage/lazypack_plans/k1680_general_plan.json": 6,
-        "storage/lazypack_plans/k1705_general_plan.json": 6,
-        "storage/logs/trending_primary_source_verification.jsonl": 42,
-        "storage/memory/knowledge.json": 49
+        ".claude/rules/experiments.md": 13,
+        "scripts/gen_k1585_general_charts.py": 7,
+        "scripts/gen_k1680_general_charts.py": 7,
+        "scripts/gen_k1705_general_charts.py": 7,
+        "storage/assets/k1585_general_effect_forest.png": 7,
+        "storage/assets/k1585_general_oos_cost.png": 7,
+        "storage/assets/k1623_general_ruler_flip.png": 7,
+        "storage/assets/k1623_general_survivor_funnel.png": 7,
+        "storage/assets/k1680_general_multiplicity.png": 7,
+        "storage/assets/k1680_general_per_firm.png": 7,
+        "storage/assets/k1698_general_rebuild_audit.png": 6,
+        "storage/assets/k1698_general_strength_flip.png": 6,
+        "storage/assets/k1698_general_two_targets.png": 6,
+        "storage/assets/k1705_general_sign_audit.png": 7,
+        "storage/assets/k1705_general_timing_flip.png": 7,
+        "storage/assets/k781_general_ranking.png": 12,
+        "storage/assets/k781_general_subperiod_regime.png": 12,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 9,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 9,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 9,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 9,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 9,
+        "storage/lazypack_plans/k1585_general_plan.json": 7,
+        "storage/lazypack_plans/k1623_general_plan.json": 7,
+        "storage/lazypack_plans/k1680_general_plan.json": 7,
+        "storage/lazypack_plans/k1705_general_plan.json": 7,
+        "storage/logs/trending_primary_source_verification.jsonl": 43,
+        "storage/memory/knowledge.json": 50
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260729T141758556286Z",
         "refs/volpred/quarantine/20260729T145538488441Z",
-        "refs/volpred/quarantine/20260729T151825497592Z"
+        "refs/volpred/quarantine/20260729T151825497592Z",
+        "refs/volpred/quarantine/20260729T155234388981Z"
       ],
-      "fires": 3,
+      "fires": 4,
       "first_seen_at": "2026-07-29T14:19:04.313332+00:00",
-      "last_seen_at": "2026-07-29T15:19:57.333692+00:00",
+      "last_seen_at": "2026-07-29T15:54:12.161232+00:00",
       "derates": true,
       "derates_updated_at": "2026-07-29T14:55:38.569922+00:00",
       "deferred": [
@@ -59241,7 +59310,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-29T15:19:57.333692+00:00"
+    "updated_at": "2026-07-29T15:54:12.161232+00:00"
   },
   {
     "id": "k1731_main_integration_collect_20260729",
@@ -59294,7 +59363,7 @@
     "title": "K1716: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1716 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: K1716 [NULL_PROXY_DIAGNOSTIC, independently reviewed]: Using frozen SPY raw daily OHLC from 2018-01-02 through 2026-07-15 (2,144 trading days), the stricter re-verification finds no Tue/Thu-specific volatility break after Cboe expanded SPX Weeklys to daily expiries. The main post Canonical evidence: experiments/k1716/K1716_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -59309,6 +59378,197 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-29T15:08:44+00:00"
+    "created_at": "2026-07-29T15:08:44+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-29T15:24:47.361469+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:24:47.705022+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:26:31.437724+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      }
+    ],
+    "started_at": "2026-07-29T15:24:47.705006+00:00",
+    "completed_at": "2026-07-29T15:26:31.437696+00:00",
+    "result": "arc-covered，未寫文（3-layer 查重層 2 命中）：既有 general 文章 mile_74d12ac6（2026-06-13，標題「0DTE 真的把 SPY 的波動搬進日內了嗎？2022 斷點檢定只答對一半」）已完整覆蓋同一 arc — 同一組制度節點（2022-04-18 週二 / 2022-05-11 週四 SPX 每日到期）、同一結論（隔夜/日內占比有小幅位移，但週二週四專屬效果證據不足）。K1716 是 K1477 的 stricter re-verification，results.json prior_replication 自述『both K1477 and K1716 find no Tue/Thu-specific post-expansion interaction』，對一般讀者是同一則故事。注意：check_arc_dedup --k-id k1716 --audience general 回 exit 0 clean（false negative）— 根因是 mile_74d12ac6 的 experiment_refs=[]，K-coverage gate 無從比對；全站 498 篇 general 有 225 篇（45%）無 experiment_refs，此 gate 對它們結構性失明。已另開 followup 記錄。"
+  },
+  {
+    "id": "assign_0fa3c4d6",
+    "title": "check_arc_dedup K-COVERAGE gate 對無 experiment_refs 的文章結構性失明（45% general 文章；K1716 實例）",
+    "description": "## 觀察到的事實（2026-07-29 23:4x CST, fire slot-1 ab61fef0）\n\n`K1716_article_general` 開工前跑 canonical gate：\n\n    uv run python scripts/check_arc_dedup.py --k-id k1716 --audience general --title \"TBD\"\n    -> exit 0, verdict=\"clean\"（✅ no K coverage and no arc duplicate in window）\n\n但主線程照 `.claude/rules/publishing.md` 做層 2（grep live feed）時，命中既有 general 文章：\n\n- `mile_74d12ac6`（2026-06-13）「0DTE 真的把 SPY 的波動搬進日內了嗎？2022 斷點檢定只答對一半」\n- 同一組制度節點：2022-04-18（週二）/ 2022-05-11（週四）SPX 每日到期\n- 同一結論：隔夜/日內占比小幅位移，但週二週四專屬效果證據不足\n- K1716 的 `experiments/k1716/K1716_results.json` → `prior_replication` 自述：\n  \"both K1477 and K1716 find no Tue/Thu-specific post-expansion interaction\"\n\n亦即 gate 判 clean 的那篇，對一般讀者就是既有文章的同一則故事。\n\n## 根因（可機械複驗）\n\n`mile_74d12ac6` 的 `details.experiment_refs` 是 `[]`。K-COVERAGE gate 靠 experiment_refs\n比對 K-id，文章沒帶 refs 就等於不存在。\n\n盤點 `storage/reports/feed.json`（1,907 篇）：\n\n| 範圍 | 篇數 | 無 experiment_refs | 佔比 |\n|---|---:|---:|---:|\n| audience=general | 498 | 225 | 45% |\n| 全部 | 1,907 | 1,134 | 59% |\n\n其中 69 篇「內文/欄位出現 K-id 但 experiment_refs 仍為空」—— 這批是最可回填的。\n\n## 為什麼要緊\n\n`.claude/rules/publishing.md` 的 hard block 在 2026-06-23 已降級為 warn-only\n（dedup-gate-audit.md），寫前這一跑是**唯一防線**。防線對 45% 的 general 文章結構性失明，\n等於 auto-discovery 的「no general article in feed」前提對這批不可信 —— 這正是\n2026-07-11 K1586 / K1605 兩個 writer agent 白做工的同一種失效，當時補的是 `--audience`\n接線，沒補 refs 缺漏這一路。\n\n## 建議處置（未預判，交裁決）\n\n1. 回填：對 69 篇「有 K-id 無 refs」的文章補 `details.experiment_refs`（可機械抽取 + 人工抽驗）。\n2. 或在 gate 加第二比對層：experiment_refs 為空時退回標題/內文的 K-id 正則 + arc signature，\n   不要因為欄位空就判 clean。\n3. 或讓 auto-discovery（產 `K*_article_general` 任務的那支）在 refs 覆蓋率不足時降低信心，\n   不要直接斷言「no general article in feed」。\n\n## 已做的處置\n\n`K1716_article_general` 已 complete --status succeeded，result 記 arc-covered + 本 false negative。\n`K1713_article_general` 另因 verdict=DUPLICATE_CLOSURE_PASS / creates_new_empirical_claim=false\n（evidence gate 不滿足）釋回並 annotate。\n",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "hourly_dispatch",
+    "created_at": "2026-07-29T15:27:10.328553+00:00",
+    "parent_task_id": "K1716_article_general",
+    "created_by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+  },
+  {
+    "id": "K775_article_general",
+    "title": "K775: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K775 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: k775 [NULL]：測試HAR-PD（在HAR-ABS基礎上加入vol_trend/vol_momentum/cum_ret/max_dd四個路徑相依特徵）能否改善SPY絕對報酬波動率預測。資料：yfinance SPY 2007-12-31至2026-03-30，expanding window(init=500d,refit=50d)，OOS n=4590。QLIKE：HAR-ABS=0.5017 vs HAR-PD=0.5118（HAR-PD反而更差，改善-2.029%），DM test：har_abs_vs_har_pd t=-1.69, p Canonical evidence: experiments/k775/k775_har_pd_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K775",
+    "evidence_source_paths": [
+      "experiments/k775/k775_har_pd_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k775/k775_har_pd_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-29T15:32:27+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-29T15:33:53.755522+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:33:54.081181+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:47:56.109247+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      }
+    ],
+    "started_at": "2026-07-29T15:33:54.081168+00:00",
+    "completed_at": "2026-07-29T15:47:56.109222+00:00",
+    "result": "已產出並發佈 general 草稿 mile_c53932a1（storage/drafts/k775_general_draft.md，正文 2,698 字）。標題「我讓五個波動率模型跑同一場 4590 天的考試，2025 年的新模型考了最後一名」。evidence 全部程式讀自 experiments/k775/k775_har_pd_results.json：SPY 2007-12-31~2026-03-30、OOS n=4590、五模型排名 amem 0.4721 < gjr 0.4836 < har_abs 0.5017 < ewma 0.5041 < har_pd 0.5118、har_pd 相對 har_abs -2.03%（Harvey 未過，文中如實寫成「分不出勝負」而非「顯著更差」）、amem/gjr 勝 har_abs 則 Harvey 通過。2 張自製圖 + 1 表 + 高低波動子期間分析。anti_ai_gate exit 0（PASS, warn 1/3）；check_arc_dedup --k-id k775 --audience general 用最終標題複驗 clean。差異化角度為「排名」而非「路徑特徵無效」，避開既有 research 文 mile_1c877c91（5 分鐘 RV pilot）。lazypack plan storage/lazypack_plans/k775_general_plan.json 已 --validate-only 通過（valid, 4 panels）並 enqueue job lazypack-mile_c53932a1，release cron 待 section 落地後放行。frontmatter 已帶 experiment_refs=[K775]（正是 assign_0fa3c4d6 記的缺漏欄位）。"
+  },
+  {
+    "id": "K1208_article_general",
+    "title": "K1208: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1208 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1208 [PASS]（consolidation，非新估計）：彙整 K1116c/K1116f/K1201/K1203 四個已完成的跨資產 PIT 實驗，做 Paper 4 §5 markdown 改寫稿。7/7 資產覆蓋（SPY/^VIX、QQQ/^VXN、GLD/^GVZ、USO/^OVX、TLT/^MOVE、BTC-USD/rv30、EEM/^VIX spillover），QLIKE 5% gate 全部未過（僅 TLT finstress pit_shift0 +0.50% 為唯一正值），VIX-sufficiency null 在多數資產上 Canonical evidence: experiments/k1208/k1208_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1208",
+    "evidence_source_paths": [
+      "experiments/k1208/k1208_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1208/k1208_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-29T15:32:29+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-29T15:48:26.302592+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:48:26.719832+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      },
+      {
+        "ts": "2026-07-29T15:48:56.572806+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ab61fef05817413b87091c5b93962f81"
+      }
+    ],
+    "started_at": "2026-07-29T15:48:26.719818+00:00",
+    "completed_at": "2026-07-29T15:48:56.572769+00:00",
+    "result": "未寫文，兩條各自獨立成立的理由：(1) arc-covered — check_arc_dedup --k-id k1208 --audience general = block_arc_dup，命中 mile_832dcc03「就算只看黃金最近最強那段，原本那個 100% 的故事還是站不住」，match_reason=entity_conclusion_arc，narrative_axis 與 existing_narrative_axis 同為 methodology_robustness、conclusion_class=null_no_info、time_horizon 同為 weekly、shared_mechanisms=[vol_term_structure]、shared_entities 涵蓋 GOLD/BITCOIN/LONG_BOND/NASDAQ/US_EQUITY/VIX。(2) K1208 自身是 consolidation 非新估計 — 彙整 K1116c/K1116f/K1201/K1203 四個已完成實驗，產出物是 Paper 4 §5 的 markdown 改寫稿，7/7 資產 QLIKE 5% gate 全未過（僅 TLT finstress pit_shift0 +0.50%），對讀者不構成新的實證主張。另做 publishing.md 層 2 grep（K1208/K1116/K1201/K1203/VIX-sufficiency 關鍵字掃 storage/reports/feed.json 1,907 篇），未見更貼近的既有文，故以 gate 的 arc 判定為準。"
+  },
+  {
+    "id": "K1448_article_general",
+    "title": "K1448: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1448 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1448 [CONDITIONAL_PASS]: TIP/IEF 與 TIP/TLT 相對表現作為通膨預期 regime proxy，檢驗對 SPY/IEF/TLT 未來 21 日已實現波動率與股債相關的影響。資料源 yfinance（TIP, IEF, TLT, SPY），期間 2010-01-04至2026-06-09，n=4,133 聯合觀測日。訊號 = log(TIP/asset).diff(63).shift(1)（63日≈一季，shift(1)避免 lookahead）。HAC/Newey-West（maxlags=21）推論 + Bonf Canonical evidence: experiments/k1448/k1448_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1448",
+    "evidence_source_paths": [
+      "experiments/k1448/k1448_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1448/k1448_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-29T15:50:56+00:00"
+  },
+  {
+    "id": "K1609_article_general",
+    "title": "K1609: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1609 has verdict signal (score=3, reasons=['paradigm/decisive null', 'robust inference']) but no general article in feed.json.  Verdict preview: [NULL_RESULT] 設計：原始目標為以 CME COMEX 每日 registered/eligible 黃金與白銀倉儲庫存報表，預測 GLD/SLV/GC=F/SI=F 的已實現波動率。實際執行時兩個 CME XLS endpoint (Gold_Stocks.xls / Silver_stocks.xls) 皆 ReadTimeout（8 秒 timeout，回傳 0 bytes），因此本實驗對「真實 COMEX 註冊/合格庫存」零證據，不得做任何相關宣稱。此為 binding limitation，且僅證明本 runtime 抓不到，不代表 Canonical evidence: experiments/k1609/K1609_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1609",
+    "evidence_source_paths": [
+      "experiments/k1609/K1609_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1609/K1609_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-29T15:51:02+00:00"
+  },
+  {
+    "id": "K1630_article_general",
+    "title": "K1630: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1630 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1630 [DOCUMENTED_NEGATIVE / 已修正 2026-07-17]：檢驗『Sell in May / Halloween 效應』在台股與美股是否成立。S&P500 全樣本 (1928-2026, N=1181月)：冬夏差 β=+0.404pp/月, HAC p=0.141（不顯著）；2011-2026 子樣本 (N=185)：β=+0.235pp/月, p=0.669（不顯著）。TAIEX 全樣本 (1997-2026, N=347月)：β=+2.089pp/月, HAC p=0.0049（顯著；bootstrap 95%CI[0. Canonical evidence: experiments/k1630/k1630_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1630",
+    "evidence_source_paths": [
+      "experiments/k1630/k1630_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1630/k1630_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-29T15:51:05+00:00"
   }
 ]
