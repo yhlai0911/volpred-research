@@ -4379,3 +4379,49 @@ fire key exact match。Gate放行後只bootout `com.volpred.compute-worker`；
 證明工作未被誤停。此漏網clock類根因為
 **`root_cause_fixed_and_verified`**；Issue #46其他capability與14-day sustained-clean
 仍保持OPEN／contained。
+
+---
+
+## 2026-07-29 — K1380_v4 的 RC/SPA 兩個欄位都標錯，且方向相反（Paper 9 C3 canonical 指標）
+
+**類型**：統計方法誤標 → 對外結論失真（AGENTS.md 第 13 條回溯更正）
+
+**發現路徑**：2026-07-29 hourly slot-1（37c1e7e0）承接
+`k1380_v4_white_rc_snooping_correction_20260729`。前一班（e98b43fc）在裁決
+`k1380_stage_refactor_collect` 時讀 code 發現 `white_rc_test` 非 RC，狀態停在
+`contained`（只證據化、未修）。本班完成修復與驗證。
+
+**錯誤內容**：`experiments/K1380_v4/k1380_v4_results.json` 兩個檢定欄位都名實不符 ——
+
+1. `white_rc_test`（p=0.000，宣稱「after RC correction」）實為**單一 spec 的 bootstrap
+   DM t 檢定，零窺探修正**。`k1380_v4.py:771-782` 的 `max(0.0, t_b_a4f)` 是對純量取
+   max，而 White 的 Reality Check 定義上是跨候選集合的 max 型統計量。→ **高估顯著性**。
+2. `hansen_spa_test`（p=0.2886，不拒絕）實為 **least-favourable 的 SPA_u**
+   （每個 spec 用自己的 d-bar 置中 = studentized White RC），不是 Hansen (2005) 建議
+   回報的 consistent SPA_c。→ **低估顯著性**。
+
+第 2 項是本班新發現：先前把它當成「有做多重檢定修正所以可信」的對照組，因此得出
+「真正修正過的檢定沒有拒絕」。該讀法建立在一個同樣有缺陷的數字上。
+
+**根因**：兩處都是「按統計方法的名字命名欄位，但實作的是另一個統計量」，且沒有任何
+斷言把實作綁回定義（max 型統計量必須跨 spec 取 max；SPA 必須報 c 變體）。
+
+**修復**：`experiments/K1380_v4/k1380_v4_rc_correction.py` 純重新分析 —— `k1380_v4.py:693`
+在檢定前已存下完整 17×n_oos QLIKE 矩陣，缺陷全在其下游，**不需重跑 GARCH**。腳本以
+**逐位重現 v4 四項數字**（atol=1e-12）為前置斷言，重現失敗即中止；再計算 Hansen 三重
+recentering（u/c/l，斷言 p_l ≤ p_c ≤ p_u）、古典非 studentized White RC、以及 Holm
+step-down。v4 原始 JSON 未被修改。
+
+**驗證與新結論**：499 次 bootstrap 中 144 次超過觀測統計量，其 max **全部**由
+A5(t=-11.2)/C2(t=-21.1)/C3(t=-10.0) 三支遠差於 benchmark 的 spec 取得（77/48/19），
+無一次由具競爭力的 spec 取得 —— v4 的「不顯著」量到的是這三支的退化程度。修正後
+SPA_c p < 1/499（fixed-omega 與 per-resample 兩種 studentization 慣例下皆然），
+Holm 在 FWER 0.10 下 15 支中 11 支拒絕。**聯合窺探修正後的檢定拒絕 H0** ——
+與先前記載的方向相反。
+
+**影響面**：Paper 9 C3 在本單收斂前不得以任何一個舊口徑書寫。C3 verdict 由
+`C3 MIXED` 更新為 `C3 POSITIVE (snooping-adjusted)`，canonical 數字改指
+`k1380_v4_rc_correction_results.json`。
+
+**遺留（未關）**：A5/C2/C3 的極端損失可能是數值退化本身。SPA_c 依統計理由捨棄它們，
+但若它們是壞的就不該是候選。已開 followup 追查 + Codex 二審修正腳本。
