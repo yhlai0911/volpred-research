@@ -399,6 +399,57 @@
     "last_at": null
    }
   },
+  "inc_2f1ab59a7f47": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
+   "current_task_id": "ci-red-30433823744",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-29T08:20:33.297125+00:00",
+   "escalation": null,
+   "fingerprint": "2f1ab59a7f47ce603661d90fd7c17c6e3ed6bfdb9efcc850b065c4f2e8a30b25",
+   "fingerprint_parts": [
+    "ci-red-30433823744"
+   ],
+   "first_seen_at": "2026-07-29T08:20:33.297125+00:00",
+   "incident_id": "inc_2f1ab59a7f47",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T08:20:33.297125+00:00",
+     "key": "30433823744:1",
+     "last_seen_at": "2026-07-29T08:20:33.297125+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T08:45:35.470724+00:00",
+     "key": "30435469828:1",
+     "last_seen_at": "2026-07-29T08:45:35.470724+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-29T08:42:41.3741776Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as ",
+   "last_seen_at": "2026-07-29T08:45:35.470724+00:00",
+   "notified_at": null,
+   "occurrence_count": 2,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-29T08:20:33.477350+00:00",
+     "task_id": "ci-red-30433823744"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_407e6c77f250": {
    "class": "machine_self",
    "clean_observations": [],
@@ -620,9 +671,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-28T16:16:27.983669+00:00"
-    },
-    {
      "at": "2026-07-28T17:00:46.615210+00:00"
     },
     {
@@ -654,6 +702,9 @@
     },
     {
      "at": "2026-07-29T02:06:32.080933+00:00"
+    },
+    {
+     "at": "2026-07-29T08:53:19.591680+00:00"
     }
    ],
    "clean_streak_started_at": "2026-07-28T09:24:21.846131+00:00",
@@ -961,72 +1012,72 @@
      "detail": {
       "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
       "dirty": true,
-      "idle_hours": 176.3,
+      "idle_hours": 182.3,
       "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
       "dirty": true,
-      "idle_hours": 176.4,
+      "idle_hours": 182.4,
       "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-bd00f90a-k1731",
       "dirty": false,
-      "idle_hours": 7.7,
+      "idle_hours": 13.7,
       "unmerged_commits": 29
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-f5a22a5f-k1095v2",
       "dirty": false,
-      "idle_hours": 170.2,
+      "idle_hours": 176.2,
       "unmerged_commits": 3
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "worktree-agent-a148e8a94105f7935",
       "dirty": true,
-      "idle_hours": 163.6,
+      "idle_hours": 169.6,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "agent-a148e8a94105f7935",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-2-8dda242d-k1708",
       "dirty": false,
-      "idle_hours": 28.9,
+      "idle_hours": 34.9,
       "unmerged_commits": 6
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": "2026-07-28T10:25:56.532041+00:00",
@@ -1045,12 +1096,12 @@
      "detail": {
       "branch": "worktree-dispatch-slot-1-a4fe4570",
       "dirty": false,
-      "idle_hours": 50.9,
+      "idle_hours": 56.9,
       "unmerged_commits": 2
      },
      "first_seen_at": "2026-07-27T04:25:30.568624+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": "2026-07-28T22:14:28.969341+00:00",
@@ -1069,24 +1120,24 @@
      "detail": {
       "branch": "wt/dispatch-slot-2-7087efc0-signfc",
       "dirty": true,
-      "idle_hours": 39.3,
+      "idle_hours": 45.3,
       "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-27T16:25:51.225239+00:00",
      "key": "dispatch-slot-2-7087efc0-signfc",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-1e5922b4-k1734",
       "dirty": false,
-      "idle_hours": 7.6,
+      "idle_hours": 13.6,
       "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-27T22:25:51.036366+00:00",
      "key": "dispatch-slot-1-1e5922b4-k1734",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": "2026-07-28T22:25:46.637755+00:00",
@@ -1105,27 +1156,27 @@
      "detail": {
       "branch": "dispatch-slot-3-87c7269d-k1720",
       "dirty": false,
-      "idle_hours": 7.3,
+      "idle_hours": 13.3,
       "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-27T22:25:51.036366+00:00",
      "key": "dispatch-slot-3-87c7269d-k1720",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "dispatch-slot-3-87c7269d-k1721",
       "dirty": true,
-      "idle_hours": 30.5,
+      "idle_hours": 36.5,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-27T22:25:51.036366+00:00",
      "key": "dispatch-slot-3-87c7269d-k1721",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-29T04:25:53.479182+00:00",
      "detail": {
       "branch": null,
       "dirty": true,
@@ -1141,19 +1192,19 @@
      "detail": {
       "branch": "worktree-dispatch-slot-2-58249487",
       "dirty": true,
-      "idle_hours": 14.4,
+      "idle_hours": 20.4,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-28T16:25:53.129809+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
     }
    ],
    "kind": "worktree_unmerged",
-   "last_breach_detail": "held worktree dispatch-slot-4-6ba995a0-k1727",
-   "last_seen_at": "2026-07-28T22:25:46.637755+00:00",
+   "last_breach_detail": "held worktree dispatch-slot-3-87c7269d-k1721",
+   "last_seen_at": "2026-07-29T04:25:53.479182+00:00",
    "notified_at": null,
-   "occurrence_count": 237,
+   "occurrence_count": 249,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1176,7 +1227,7 @@
    "class": "ordinary",
    "clean_observations": [],
    "clean_streak_started_at": null,
-   "current_task_id": "ci-red-30409803097",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-29T00:20:20.567860+00:00",
@@ -1205,22 +1256,91 @@
      "first_seen_at": "2026-07-29T01:50:14.444910+00:00",
      "key": "30414278776:1",
      "last_seen_at": "2026-07-29T01:50:14.444910+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T02:25:21.019589+00:00",
+     "key": "30415888720:1",
+     "last_seen_at": "2026-07-29T02:25:21.019589+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T02:45:40.942863+00:00",
+     "key": "30416792123:1",
+     "last_seen_at": "2026-07-29T02:45:40.942863+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T03:25:16.721454+00:00",
+     "key": "30418623573:1",
+     "last_seen_at": "2026-07-29T03:25:16.721454+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T04:10:34.670601+00:00",
+     "key": "30420634055:1",
+     "last_seen_at": "2026-07-29T04:10:34.670601+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T04:35:43.583411+00:00",
+     "key": "30421794548:1",
+     "last_seen_at": "2026-07-29T04:35:43.583411+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T04:55:19.678615+00:00",
+     "key": "30422707211:1",
+     "last_seen_at": "2026-07-29T04:55:19.678615+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T06:15:23.973294+00:00",
+     "key": "30426509734:1",
+     "last_seen_at": "2026-07-29T06:15:23.973294+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T06:35:41.228613+00:00",
+     "key": "30427591102:1",
+     "last_seen_at": "2026-07-29T06:35:41.228613+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T07:00:46.514325+00:00",
+     "key": "30428956638:1",
+     "last_seen_at": "2026-07-29T07:00:46.514325+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-29T01:47:17.7780617Z E AssertionError: 3 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1694', 'K1727', 'k1812']",
-   "last_seen_at": "2026-07-29T01:50:14.444910+00:00",
+   "last_breach_detail": "2026-07-29T06:57:20.4102520Z E AssertionError: 2 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1727', 'k1812']",
+   "last_seen_at": "2026-07-29T07:00:46.514325+00:00",
    "notified_at": null,
-   "occurrence_count": 3,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "occurrence_count": 12,
+   "resolution": {
+    "at": "2026-07-29T07:20:47.399211+00:00",
+    "by": "ci-red-30409803097",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-29T07:20:47.399211+00:00",
+     "by": "ci-red-30409803097",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
      "episode": 1,
      "opened_at": "2026-07-29T00:20:20.706482+00:00",
      "task_id": "ci-red-30409803097"
+    },
+    {
+     "episode": 1,
+     "opened_at": "2026-07-29T06:15:24.168342+00:00",
+     "task_id": "ci-red-30426509734"
     }
    ],
    "task_mode": "external",
@@ -1373,7 +1493,7 @@
      },
      "first_seen_at": "2026-07-28T08:45:56.262176+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-29T02:07:10.664116+00:00"
+     "last_seen_at": "2026-07-29T08:29:31.226191+00:00"
     },
     {
      "cleared_at": null,
@@ -1387,7 +1507,7 @@
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-29T02:07:09.736940+00:00"
+     "last_seen_at": "2026-07-29T08:53:35.698638+00:00"
     },
     {
      "cleared_at": null,
@@ -1429,14 +1549,28 @@
      },
      "first_seen_at": "2026-07-29T02:02:19.114849+00:00",
      "key": "dispatch-slot-1-cfeeb2f6",
-     "last_seen_at": "2026-07-29T02:07:11.196716+00:00"
+     "last_seen_at": "2026-07-29T08:53:37.480693+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "916dd806594f565c4bf8fcd6e8d055a8d239dccf",
+      "branch": "worktree-dispatch-slot-1-d3c39bb1",
+      "checkpoint_commit": "",
+      "detail_tail": "['.claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md', 'scripts/audit_enforcement_map.py', 'scripts/check_skill_architecture.py', 'tests/test_skill_architecture.py']",
+      "reason": "undeclared_output_path",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-d3c39bb1"
+     },
+     "first_seen_at": "2026-07-29T08:53:18.944581+00:00",
+     "key": "dispatch-slot-1-d3c39bb1",
+     "last_seen_at": "2026-07-29T08:53:18.944581+00:00"
     }
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-cfeeb2f6 unmergeable (worker_unknown_external)",
-   "last_seen_at": "2026-07-29T02:07:11.196716+00:00",
+   "last_seen_at": "2026-07-29T08:53:37.480693+00:00",
    "notified_at": null,
-   "occurrence_count": 3057,
+   "occurrence_count": 4315,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2266,6 +2400,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T02:07:11.213727+00:00",
+ "updated_at": "2026-07-29T08:53:37.503091+00:00",
  "version": 1
 }

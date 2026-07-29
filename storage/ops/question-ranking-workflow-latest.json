@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-28T04:12:47.243500+00:00",
+  "generated_at": "2026-07-29T07:27:46.818823+00:00",
   "cadence_hint": "每 6 小時檢查 pending_questions，評分後呼叫 question-rerank；既有榜單相對順序不應變動。",
   "table_columns": [
     "排名",
@@ -160,7 +160,7 @@
   ],
   "evaluation_template": [],
   "next_commands": {
-    "read_summary": "uv run python -m volpred.cli ops question-ranking-summary --source user --limit 20",
-    "apply_rerank": "uv run python -m volpred.cli ops question-rerank --evaluations-json /path/to/evaluations.json"
+    "read_summary": "uv run volpred ops question-ranking-summary --source user --limit 20",
+    "apply_rerank": "uv run volpred ops question-rerank --evaluations-json /path/to/evaluations.json"
   }
 }
