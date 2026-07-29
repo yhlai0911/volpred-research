@@ -12,8 +12,7 @@ from volpred.ops.work import (
     WorkReceiptView,
     WorkSnapshot,
 )
-from volpred.ops.work.supabase import SupabaseWorkReadModel
-from volpred.ops.work.supabase import WorkReadModelError
+from volpred.ops.work.supabase import SupabaseWorkReadModel, WorkReadModelError
 
 
 class _Response:
@@ -100,6 +99,7 @@ def _snapshot_payload() -> dict[str, object]:
 
 def test_inspect_reads_exact_work_snapshot_through_service_role_rpc(
     monkeypatch: pytest.MonkeyPatch,
+    mocked_operations_core_rpc_transport: None,
 ) -> None:
     observed: dict[str, object] = {}
 
@@ -204,6 +204,7 @@ def test_inspect_reads_exact_work_snapshot_through_service_role_rpc(
 
 def test_inspect_rejects_unsupported_work_lifecycle(
     monkeypatch: pytest.MonkeyPatch,
+    mocked_operations_core_rpc_transport: None,
 ) -> None:
     payload = _snapshot_payload()
     payload["items"][0]["status"] = "apparently_done"
@@ -224,6 +225,7 @@ def test_inspect_rejects_unsupported_work_lifecycle(
 
 def test_inspect_rejects_unverified_checkpoint_identity(
     monkeypatch: pytest.MonkeyPatch,
+    mocked_operations_core_rpc_transport: None,
 ) -> None:
     payload = _snapshot_payload()
     payload["checkpoints"][0]["artifact_sha256"] = "not-a-sha256"

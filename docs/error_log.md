@@ -4855,3 +4855,37 @@ py_compile、diff check通過；Matt Standards／Spec 複審 PASS。live canonic
 由錯誤 13/4 收斂為 3/4，另顯示 11 個 stale artifacts 不占 slot。此 observer
 root class 五步 Gate 完成，狀態為 **`root_cause_fixed_and_verified`**；不代表
 Issue #44 的 Producer Isolation／recognizer retirement umbrella 已結案。
+
+---
+
+## 2026-07-30 — Operations Core read-only RPC 繞過測試的 no-remote-read gate
+
+**證據化症狀**：GitHub Test Suite run `30473391569` 在
+`test_phase_z_test_gate_red_records_machine_self_without_a_task` 讀取 notification
+owner 時，CI 因沒有 production Supabase secret 而報 `Supabase URL and service-role
+key are required`。原測試的錯誤 monkeypatch 已由 `3c14e0a57` 止血；進一步以四個
+side-effect guard 全開重播，`SupabaseOwnedEmailStore` 的兩個 read-only RPC 仍會進入
+`urlopen`。同類掃描也發現共用 `ServiceRoleRpcClient` 具有相同旁路。
+
+**根因層級（test egress contract）**：`VOLPRED_NO_REMOTE_READ` 的正式 chokepoint
+只存在於舊 `scripts/supabase_sync.py::_urlopen`；後來新增的 Operations Core
+PostgREST transports 各自直接呼叫 `urllib.request.urlopen`，只區分 read/write 以套用
+write guard，卻沒有在 read RPC 前套用 read guard。測試因而可能依賴 production
+資料，並把缺 stub 偽裝成 secret 或當日資料差異。
+
+**底層修復與制度化**：owned-email 專用 transport 與共用
+`ServiceRoleRpcClient` 都在任何 request encoding／transport 前，依 canonical
+read-only RPC inventory 加 `volpred_read_*`／`read_volpred_*` 命名 ratchet 檢查
+`VOLPRED_NO_REMOTE_READ=1` 並 fail loud；`volpred_read_primary_authority_events` 的
+漏列也已補回 inventory。RPC mutation
+仍只受 write guard 控制。共用 client 的 fake transport 測試必須顯式使用
+`mocked_operations_core_rpc_transport` fixture；owned-email 專用 transport 測試則在
+安裝 fake 後顯式移除 read guard。兩者都不能靠本機 secret 偷跑。
+
+**回歸與 read-back**：兩條 transport 的 deterministic RED 都證明修正前會進網路
+函式；修正後 owned-email／Operations Core RPC／alerts／PHASE-Z／boss-report 相鄰
+範圍 **308 passed**。四 guard live no-network probe 分別回讀
+`notification ownership remote reads are disabled` 與
+`Operations Core RPC remote reads are disabled`。此切片目前為 **`contained`**：
+程式、測試與本機 read-back 已完成，仍待 commit 進入 origin 後由新的 GitHub Test
+Suite run 回讀全綠，才升級為 **`root_cause_fixed_and_verified`**。

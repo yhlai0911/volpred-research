@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import replace
-from typing import Any
 
 import pytest
 
@@ -14,18 +13,18 @@ from volpred.ops.delivery import (
     PublisherArticleSyncEffectAdapter,
     encode_publisher_article_sync_payload,
 )
+from volpred.ops.delivery import supabase_rpc as supabase_rpc_module
 from volpred.ops.delivery.owned_publisher_article import (
     OwnedPublisherArticleAttempt,
     OwnedPublisherArticleCommand,
-    OwnedPublisherArticleRecovery,
     OwnedPublisherArticleReceipt,
+    OwnedPublisherArticleRecovery,
     OwnedPublisherArticleRequest,
     OwnedPublisherArticleSync,
     PublisherArticleSyncOwner,
     PublisherArticleSyncOwnershipLost,
     SupabaseOwnedPublisherArticleStore,
 )
-from volpred.ops.delivery import supabase_rpc as supabase_rpc_module
 
 
 def _article() -> dict[str, object]:
@@ -614,6 +613,7 @@ def test_recovery_rpc_blocks_remote_mutation_before_network(
 
 def test_owner_read_rpc_is_allowed_when_remote_writes_are_disabled(
     monkeypatch: pytest.MonkeyPatch,
+    mocked_operations_core_rpc_transport: None,
 ) -> None:
     class Response:
         def __enter__(self) -> Response:

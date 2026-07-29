@@ -2947,3 +2947,21 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
 
 此 observer root class 為 **`root_cause_fixed_and_verified`**；Issue #44 umbrella
 仍須 Producer Isolation／PHASE-Z recognizer retirement acceptance，維持 OPEN。
+
+## 2026-07-30 — Operations Core RPC test-egress containment
+
+- ✅ CI run `30473391569` 的表面 monkeypatch 問題已由既有 `3c14e0a57` 修正；本輪續追
+  到 owned-email 與共用 Operations Core PostgREST transport 都繞過
+  `VOLPRED_NO_REMOTE_READ` 的第二層根因。
+- ✅ 兩條 transport 現在於 read-only RPC 的任何 network I/O 前 fail loud；共用 client
+  同時用已知 inventory 與 `volpred_read_*`／`read_volpred_*` 命名 ratchet，補上
+  primary-authority events 漏列並防止同類新增讀取再靜默旁路。mutation 仍由獨立
+  write guard 控制，不把 read/write 兩種權限混成一個開關。
+- ✅ 共用 client 的 fake RPC 測試必須顯式 opt in
+  `mocked_operations_core_rpc_transport`；owned-email 專用測試則在安裝 fake 後顯式
+  移除 read guard。缺 stub 不再能靠本機 `.env.local` 或 production 資料變綠。
+- ✅ deterministic RED→GREEN、相鄰 **308 passed**；四 guard live probe 回讀兩條
+  transport 均在 transport 前被拒絕。
+- ⏳ 狀態 **`contained`**：待新 commit 由正式 push/CI 路徑落地，並以新的 GitHub
+  Test Suite 全綠 receipt 回讀後才升級為
+  **`root_cause_fixed_and_verified`**。

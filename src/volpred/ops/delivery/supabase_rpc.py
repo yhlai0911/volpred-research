@@ -20,6 +20,7 @@ _READ_ONLY_RPCS = frozenset(
         "volpred_read_incident_owner",
         "volpred_read_notification_owner",
         "volpred_read_owned_email_request",
+        "volpred_read_primary_authority_events",
         "volpred_read_primary_authority_owner",
         "volpred_read_provider_owner",
         "read_volpred_growth_experiment",
@@ -95,10 +96,12 @@ class ServiceRoleRpcClient:
         function: str,
         payload: Mapping[str, object],
     ) -> object:
-        if (
-            function not in _READ_ONLY_RPCS
-            and _remote_mutations_disabled()
-        ):
+        read_only = _is_read_only_rpc(function)
+        if read_only and _remote_reads_disabled():
+            raise RuntimeError(
+                "Operations Core RPC remote reads are disabled"
+            )
+        if not read_only and _remote_mutations_disabled():
             raise RuntimeError(
                 "Operations Core RPC remote writes are disabled"
             )
@@ -145,6 +148,16 @@ def _remote_mutations_disabled() -> bool:
         os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1"
         or "PYTEST_CURRENT_TEST" in os.environ
         or "PYTEST_VERSION" in os.environ
+    )
+
+
+def _remote_reads_disabled() -> bool:
+    return os.environ.get("VOLPRED_NO_REMOTE_READ") == "1"
+
+
+def _is_read_only_rpc(function: str) -> bool:
+    return function in _READ_ONLY_RPCS or function.startswith(
+        ("volpred_read_", "read_volpred_")
     )
 
 

@@ -32,7 +32,7 @@ os.environ.setdefault("VOLPRED_ANTI_AI_GATE_MODE", "warn")
 def mocked_operations_core_rpc_transport(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Allow RPC mutation contract tests only after replacing real I/O."""
+    """Allow shared Operations Core RPC tests only after replacing real I/O."""
 
     from volpred.ops.delivery import supabase_rpc
 
@@ -45,5 +45,10 @@ def mocked_operations_core_rpc_transport(
     monkeypatch.setattr(
         supabase_rpc,
         "_remote_mutations_disabled",
+        lambda: False,
+    )
+    monkeypatch.setattr(
+        supabase_rpc,
+        "_remote_reads_disabled",
         lambda: False,
     )

@@ -10,14 +10,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from volpred.ops.delivery import owned_email as owned_email_module
+from volpred.ops.authority import PrimaryLease
 from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
     EffectView,
     FailedEffect,
 )
-from volpred.ops.authority import PrimaryLease
+from volpred.ops.delivery import owned_email as owned_email_module
 from volpred.ops.delivery._email_notification import (
     EmailNotificationEffectAdapter,
 )
@@ -28,8 +28,8 @@ from volpred.ops.delivery.owned_email import (
     OwnedEmailCommand,
     OwnedEmailExistingRequest,
     OwnedEmailNotification,
-    OwnedEmailRecovery,
     OwnedEmailReceipt,
+    OwnedEmailRecovery,
     OwnedEmailRequest,
     SupabaseOwnedEmailStore,
     dispatch_email_by_current_owner,
@@ -1261,6 +1261,7 @@ def test_supabase_store_allows_owner_read_when_remote_writes_are_disabled(
         return Response()
 
     monkeypatch.setenv("VOLPRED_NO_REMOTE_WRITE", "1")
+    monkeypatch.delenv("VOLPRED_NO_REMOTE_READ", raising=False)
     monkeypatch.setattr(owned_email_module.request, "urlopen", respond)
     store = SupabaseOwnedEmailStore(
         supabase_url="https://project.supabase.co",
@@ -1274,3 +1275,37 @@ def test_supabase_store_allows_owner_read_when_remote_writes_are_disabled(
         "https://project.supabase.co/rest/v1/rpc/"
         "volpred_read_notification_owner"
     ]
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        "read_owner",
+        "read_request",
+    ],
+)
+def test_supabase_store_blocks_every_read_rpc_when_remote_reads_are_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+    operation: str,
+) -> None:
+    network_calls = 0
+
+    def fail_if_called(*args: object, **kwargs: object) -> object:
+        nonlocal network_calls
+        network_calls += 1
+        raise AssertionError("network attempted")
+
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_READ", "1")
+    monkeypatch.setattr(owned_email_module.request, "urlopen", fail_if_called)
+    store = SupabaseOwnedEmailStore(
+        supabase_url="https://project.supabase.co",
+        service_role_key="fake-service-role-key",
+    )
+
+    with pytest.raises(RuntimeError, match="remote reads are disabled"):
+        if operation == "read_owner":
+            store.read_owner()
+        else:
+            store.read_request("ops-alert:read-gate")
+
+    assert network_calls == 0

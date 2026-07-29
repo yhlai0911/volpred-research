@@ -54,6 +54,10 @@ def _remote_mutations_disabled() -> bool:
     )
 
 
+def _remote_reads_disabled() -> bool:
+    return os.environ.get("VOLPRED_NO_REMOTE_READ") == "1"
+
+
 class NotificationOwnershipLost(RuntimeError):
     """The caller no longer owns the notification family generation."""
 
@@ -1140,6 +1144,10 @@ class SupabaseOwnedEmailStore:
         function: str,
         payload: Mapping[str, object],
     ) -> Any:
+        if function in _READ_ONLY_RPCS and _remote_reads_disabled():
+            raise RuntimeError(
+                "notification ownership remote reads are disabled"
+            )
         if (
             function not in _READ_ONLY_RPCS
             and _remote_mutations_disabled()
