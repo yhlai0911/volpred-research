@@ -103,6 +103,20 @@ jobs:
           # trusted commit look nonexistent and turns a valid K1709 receipt
           # into a false methodology failure.
           fetch-depth: 0
+      - name: Resolve the pinned active frontend dependency
+        id: frontend-target
+        shell: bash
+        run: |
+          echo "repository=$(jq -r '.frontends[.active_frontend].source_repository' config/project_targets.json)" >> "$GITHUB_OUTPUT"
+          echo "revision=$(jq -r '.frontends[.active_frontend].source_revision' config/project_targets.json)" >> "$GITHUB_OUTPUT"
+      - name: Checkout the private active frontend at its audited revision
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.frontend-target.outputs.repository }}
+          ref: ${{ steps.frontend-target.outputs.revision }}
+          path: frontend-v2-fix
+          ssh-key: ${{ secrets.VOLPRED_V2_CI_DEPLOY_KEY }}
+          persist-credentials: false
       - name: Install system test dependencies
         # `volpred.ops.experiments` shells out to `rg` to find references to an
         # experiment's files before moving them. It is a real runtime dependency

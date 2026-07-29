@@ -1849,7 +1849,7 @@
       "description": "Long-lived dispatch executor after the Operations Core cutover. It has no schedule clock: a local Unix-socket trigger server accepts Operations Core ticks, while the process retains the independent health monitor, max_slots worker pool, retry/failover ladder and cohort-drained PHASE-Z safety commit. Schedule-trigger receipts and model-delivery outcomes remain separate. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover model outcomes."
     },
     {
-      "id": "telegram-poll",
+      "id": "telegram_poll",
       "type": "launchd_keepalive_daemon",
       "label": "com.volpred.telegram-poll",
       "plist": "ops/launchd/com.volpred.telegram-poll.plist",

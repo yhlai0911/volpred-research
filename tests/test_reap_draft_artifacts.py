@@ -53,13 +53,25 @@ def repo(tmp_path, monkeypatch):
     _git(tmp_path, "config", "user.name", "test")
     (tmp_path / "storage" / "drafts").mkdir(parents=True)
     (tmp_path / "storage" / "next_tasks.json").write_text("[]", encoding="utf-8")
+    registry = tmp_path / "config" / "orphan_namespaces.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        (
+            Path(__file__).resolve().parents[1]
+            / "config"
+            / "orphan_namespaces.json"
+        ).read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     _git(tmp_path, "add", "-A")
     _git(tmp_path, "commit", "-q", "-m", "base")
 
     mod = _load_module()
     monkeypatch.setattr(mod, "ROOT", tmp_path)
+    monkeypatch.setattr(mod, "REGISTRY_PATH", registry)
     monkeypatch.setattr(mod, "DRAFTS_DIR", tmp_path / "storage" / "drafts")
     monkeypatch.setattr(mod, "TASKS_PATH", tmp_path / "storage" / "next_tasks.json")
+    mod.load_registry(refresh=True)
     return mod, tmp_path
 
 

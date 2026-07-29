@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import re
 import shutil
 import socket
 import subprocess
@@ -34,6 +35,60 @@ QUESTION_ID = "b3250314-e22d-4e0e-b30a-4b0b9530b8fd"
 ANONYMOUS_ID = "anon-member-continuity-1"
 ANALYTICS_SECRET = b"member-continuity-analytics-secret-32b"
 ANALYTICS_DIGEST_KEY_ID = "member-continuity-test-key-v1"
+
+
+def test_active_frontend_source_is_pinned_and_checked_out_for_ci() -> None:
+    targets = json.loads(
+        (REPO_ROOT / "config" / "project_targets.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    active = targets["frontends"][targets["active_frontend"]]
+    assert active["source_repository"] == "yhlai0911/volpred-v2"
+    revision = active["source_revision"]
+    assert re.fullmatch(r"[0-9a-f]{40}", revision)
+
+    workflow = (
+        REPO_ROOT / ".github" / "workflows" / "pytest.yml"
+    ).read_text(encoding="utf-8")
+    assert "VOLPRED_V2_CI_DEPLOY_KEY" in workflow
+    assert "steps.frontend-target.outputs.revision" in workflow
+    assert (
+        "repository: ${{ steps.frontend-target.outputs.repository }}"
+        in workflow
+    )
+    assert "path: frontend-v2-fix" in workflow
+
+    frontend = REPO_ROOT / active["path"]
+    assert (
+        frontend / "tests" / "member-continuity-postgres-e2e.mjs"
+    ).is_file(), "CI must checkout the pinned active frontend before pytest"
+    assert subprocess.run(
+        ["git", "cat-file", "-e", f"{revision}^{{commit}}"],
+        cwd=frontend,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).returncode == 0
+    # Local development may be ahead of the CI pin, but the exact files this
+    # E2E executes must still match the audited revision. Unrelated drafts,
+    # PDFs, or package metadata cannot turn into false pinned evidence.
+    execution_surface = (
+        "src/lib/browser-anonymous-identity.ts",
+        "src/lib/member-continuity-browser.ts",
+        "src/lib/member-continuity-http.ts",
+        "src/lib/member-continuity-service.ts",
+        "src/lib/member-continuity.ts",
+        "src/lib/member-question-http.ts",
+        "tests/member-continuity-postgres-e2e.mjs",
+        "tests/register-hook.mjs",
+        "tests/ts-resolve-hook.mjs",
+    )
+    subprocess.run(
+        ["git", "diff", "--quiet", revision, "--", *execution_surface],
+        cwd=frontend,
+        check=True,
+    )
 
 
 def test_managed_postgres_owner_transfer_is_bounded() -> None:

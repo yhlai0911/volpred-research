@@ -4425,3 +4425,47 @@ Holm 在 FWER 0.10 下 15 支中 11 支拒絕。**聯合窺探修正後的檢定
 
 **遺留（未關）**：A5/C2/C3 的極端損失可能是數值退化本身。SPA_c 依統計理由捨棄它們，
 但若它們是壞的就不該是候選。已開 followup 追查 + Codex 二審修正腳本。
+
+---
+
+## 2026-07-29 — Issue #46：orphan reaper 把「無主」誤當成「可進 main」，並以非原子 Git 交易收件
+
+**證據化症狀**：K1694 在正式 Codex review 為 FAIL 後，`experiments/` orphan sweep
+仍可把結果、spec 與衍生檔收進 main；同時 reaper 的舊交易會直接操作共用 index，
+以一般 commit 前進 HEAD，失敗清理由 path-scoped reset 收尾。這使「作者 session 已結束」
+被錯當成研究 admission，且 pre-commit hook 或不合作的外部 writer 若在交易途中前進
+HEAD，reaper 沒有一個不覆蓋他人 commit 的 compare-and-swap 出口。
+
+**根因層級**：
+
+1. `experiments/` 的 ownership 與 research admission 共用同一個 `default=adopt` 判斷；
+   reaper 沒有要求完整 experiment directory、artifact gate、byte-bound review、
+   methodology gate 與 K-id registry 同時成立。
+2. admission 讀 working tree 的 knowledge、exclusion、baseline 與 registry；未提交的外部
+   工作可能替同一批候選提供「已通過」證據，政策與產物不在同一個 Git snapshot。
+3. Git writer lock 只序列化合作 writer，舊 commit 路徑仍缺少 exact parent/scope/blob
+   read-back 與 ref CAS；失敗後的補償式 reset 不能安全處理不合作 writer。
+4. active frontend 是私有 `yhlai0911/volpred-v2`，但 target config 只記本機目錄。
+   clean clone／GitHub Actions 因而拿不到前端，讓 route parity 與型別 gate 在「本機有殘留
+   checkout、CI 沒有」兩種拓撲間漂移。
+
+**底層修復與制度化**：`config/orphan_namespaces.json` 將 experiment 的 atomic unit
+提升為第一層 directory，整個單位必須一起通過 `experiment_ready_for_main`；checker
+只從同一個 committed HEAD 讀 knowledge、exclusion、baseline、K-id registry 與 namespace
+policy，再把 admission 綁到每個待 stage blob 的 SHA。未知 gate、dirty policy、HEAD
+漂移、刪除／改名中的不完整目錄一律 fail closed。Commit path 要求全域 index 起始乾淨，
+執行正式 hooks 後重驗 exact staged scope/blob，以 `write-tree` 與 detached
+`commit-tree` 建立候選，再驗 parent、tree scope、blob，最後只做一次
+`update-ref HEAD <new> <expected>` CAS；外部 HEAD 若先前進，外部 commit 保留且 reaper
+不做 ref rollback。
+
+active frontend 的 canonical target 同步補上 private repository 與 immutable revision；
+GitHub Actions 以 read-only deploy key checkout 該 revision，不再依賴 root repo 內的
+偶然巢狀 checkout。K1694 未通過 review 的衍生 artifacts 已回滾，只保留原始碼與原始
+cache；正式產品／交易日曆的 follow-up 已進任務池，不阻擋平台復機。已合併且通過 review
+的 K1727、K1812 knowledge 則單獨同步，避免 artifact CI 因另一個 session 的未合併研究
+而整體停擺。
+
+**狀態**：本機 affected-suite 與 private frontend gate 已通過；本條在 GitHub CI、
+Operations Core deploy 與 live read-back 完成前維持 **`contained`**，不得宣稱
+`root_cause_fixed_and_verified`。

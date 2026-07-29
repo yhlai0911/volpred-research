@@ -42925,5 +42925,37 @@
   ],
   "confidence": 0.7,
   "created_at": "2026-07-27T23:50:08.241257"
+ },
+ {
+  "item_id": "2ef0d80e",
+  "category": "null_result",
+  "content": "[執行: Claude compute agent (worktree dispatch-slot-4-6ba995a0-k1727); 收件+certify+knowledge: Claude main thread hourly-slot-2] K1727: Volatility targeting efficacy — risk vs non-risk assets, cross-asset daily-ETF re-validation of the JPM/Man prior. Data: yfinance auto-adjusted daily close 2003-2026, 8 ETFs (SPY/QQQ/HYG/LQD risky; TLT/UUP/DBC/GLD non-risk), ^IRX risk-free, each asset its own longest history; seed=42. Method: 20d realized-vol targeting to 10% ann, leverage cap 2.0, position=(target/realized).clip(0,cap).shift(1) (lookahead-guarded, info<=t-1); fixed baseline=unit exposure; paired moving-block bootstrap (block=21, reps=1000) on Sharpe gain. RESULT: does NOT reproduce the \"VT lifts Sharpe for risky assets only\" claim in the Sharpe channel — every per-asset bootstrap 95% CI on VT-minus-fixed Sharpe gain STRADDLES ZERO (p(gain>0) ranges 0.16-0.86). Group means lean weakly in the hypothesized direction (risky mean 0.053 vs non-risk mean 0.010, diff 0.043) but this is a descriptive n=4-per-group contrast (no asset-day pooling, K1355 rule): small, NOT significant, NOT robust (reverses at 60d vol window), and internally inconsistent (risky HYG most negative -0.044; non-risk TLT positive 0.052). vol_return_corr(lag1)~0 daily for all assets = coherent mechanism-absent reason the Sharpe channel is empty. A risky/non-risky split DOES appear only in the exposure-matched drawdown gap (SPY 0.104, QQQ 0.098 vs GLD -0.105, DBC -0.035) — but that is necessary-not-sufficient for timing skill and lies OUTSIDE the stated Sharpe hypothesis. Verdict CONDITIONAL_PASS (null / does not reproduce at daily ETF frequency). Caveats: daily one-ETF-per-bucket 20d proxy is noisier/shorter than JPM monthly multi-decade futures panels — \"does not reproduce here\" bounds the setup, does not refute the source paper; no circular-shift null run for the MDD gap; bootstrap shares seed across assets (per-asset inference unaffected).",
+  "evidence": [
+   "experiment_id=K1727; experiment_path=experiments/K1727/ (merged from worktree dispatch-slot-4-6ba995a0-k1727)",
+   "per_asset sharpe_gain: {\"SPY\": 0.081, \"QQQ\": 0.1, \"HYG\": -0.044, \"LQD\": 0.076, \"TLT\": 0.052, \"UUP\": 0.039, \"DBC\": -0.091, \"GLD\": 0.04}",
+   "per_asset p(gain>0): {\"SPY\": 0.759, \"QQQ\": 0.858, \"HYG\": 0.358, \"LQD\": 0.779, \"TLT\": 0.746, \"UUP\": 0.723, \"DBC\": 0.16, \"GLD\": 0.676} — all 8 bootstrap 95%% CIs straddle 0",
+   "group_contrast: risky_mean=0.053 non_risky_mean=0.010 diff=0.043 (descriptive, n=4/group, no pooling)",
+   "robustness_vol60 (reverses contrast): {\"SPY\": 0.068, \"QQQ\": 0.035, \"HYG\": -0.067, \"LQD\": 0.012, \"TLT\": 0.059, \"UUP\": 0.101, \"DBC\": -0.128, \"GLD\": 0.093}",
+   "exposure_matched_mdd_gap: {\"SPY\": 0.104, \"QQQ\": 0.098, \"HYG\": 0.036, \"LQD\": -0.005, \"TLT\": -0.005, \"UUP\": 0.002, \"DBC\": -0.035, \"GLD\": -0.105} (necessary-not-sufficient for timing skill; no circular-shift null)",
+   "lookahead: position=raw_scale.shift(1); vt_excess=position*excess; fixed=unit exposure; pct_change(fill_method=None); seed=42. certify PASS (subagent-fallback review, Codex credit-limited until 2026-08-02); review_verdict.json bound to committed bytes 1d9348c7",
+   "source priors: JPM Harvey et al. 2018 \"The Impact of Volatility Targeting\" + Man Group 2025"
+  ],
+  "confidence": 0.8,
+  "created_at": "2026-07-28T12:17:05.913737"
+ },
+ {
+  "item_id": "f56bd213",
+  "category": "experiment_result",
+  "content": "K1812 (pool task K1726) NULL：BAB 報酬條件於前期已實現波動的方向與 JFE 2025 一致，但在 80 檔大型股 universe 未達 5% 顯著。樣本 257 個 BAB 月（2005-02-28~2026-06-30），universe 80/83 檔，seed 42。低 vol 月後 Sharpe(ann)=0.3283（n=125）vs 高 vol 月後 -0.3573（n=132），差=0.6857。主檢定（circular block permutation，block=7 月、10000 reps、保留 regime 持續性）two-sided p=0.11379；無調參的 exhaustive circular shift 佐證 p=0.10506（256 shifts）；effect-size 主 CI（stationary bootstrap）95% = [-0.1354, 1.4625]，涵蓋 0。regime 迴歸 beta_low_vol=0.009941，HAC t=1.5919、p=0.11142（lags=4）。Tercile 單調但同樣不顯著：low 0.2601 / mid 0.0032 / high -0.3747。real-time expanding-median robustness：差=0.6267、block-permutation p=0.16388，同樣不顯著，故非 median-lookahead 產物。Baseline gate 亦為 NULL：無條件 BAB mean=-0.001083/月、Sharpe(ann)=-0.0738、HAC t=-0.3706、p=0.71094（n=257）—— 此受限的倖存者大型股 universe 幾乎不存在 BAB premium，本實驗未重建 Frazzini–Pedersen 全 CRSP universe，故不對其數值做量化對比。方法學可攜教訓：Codex round-1 擋下的 blocking defect 是「主顯著性檢定用 i.i.d. label permutation」——該 null 摧毀 regime 持續性（label acf(1) 0.326 -> -0.005），HAC 迴歸檢的是 mean 差不是 Sharpe 差、不能替代。改為保留時間相依的 block permutation 後，本樣本 p 僅由 0.11529 移到 0.11379、結論不變，原因是 BAB 報酬本身近乎無序列相關（acf(1)=0.070）；這是實測結果，不能反過來當成「i.i.d. 檢定本來就有效」的理由。primary-path Codex review round-3 PASS（blocking_defects=[]），round-1/round-2 皆 FAIL 已如實記錄於 README。",
+  "evidence": [
+   "experiments/k1812/k1812_results.json",
+   "experiments/k1812/README.md",
+   "experiments/k1812/review_verdict.json (codex-cli 0.145.0 GPT-5.1-Codex-Max xhigh, round-3 PASS, reviewed_at 2026-07-28T14:05:53Z)",
+   "experiments/k1812/codex_review_round3.md",
+   "k1812.py sha256=bf615c2fab44dc166324e1ae2208f66a6cb12da33b580d7155139ae58cee1102",
+   "test_k1812.py 22 passed (2026-07-28)"
+  ],
+  "confidence": 0.75,
+  "created_at": "2026-07-28T23:13:53.070349"
  }
 ]

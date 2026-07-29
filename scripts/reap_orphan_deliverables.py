@@ -61,6 +61,7 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 import re
@@ -188,6 +189,29 @@ def _git(*args: str) -> subprocess.CompletedProcess[str]:
     locked_kwargs = git_writer_subprocess_kwargs(env)
     return subprocess.run(
         command,
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+        **locked_kwargs,
+    )
+
+
+def _git_in_index(
+    index_file: Path,
+    *args: str,
+) -> subprocess.CompletedProcess[str]:
+    """Run one Git command against an isolated index.
+
+    Hooks inherit ``GIT_INDEX_FILE`` from this environment, so an ordinary
+    ``git add`` inside a hook cannot mutate the checkout's shared index.
+    """
+    env = os.environ.copy()
+    for key in _GIT_ENV_KEYS:
+        env.pop(key, None)
+    env["GIT_INDEX_FILE"] = str(index_file)
+    locked_kwargs = git_writer_subprocess_kwargs(env)
+    return subprocess.run(
+        ["git", "--literal-pathspecs", *args],
         cwd=str(ROOT),
         capture_output=True,
         text=True,
@@ -866,6 +890,7 @@ HELD_STATE_PATH = ROOT / "storage" / "ops" / "orphan_held_state.json"
 # 不收」（那正是本次要修掉的失效模式）。
 _BUILTIN_DEFAULTS = {
     "default": "adopt",
+    "atomic_unit": "file",
     "status_filter": "all",
     "respect_inflight": True,
     "content_gates": [],
@@ -885,19 +910,63 @@ _BUILTIN_DEFAULTS = {
 # 重複噴同一句 alert。作者 session 結束後永不回來是常態，出口必須由系統提供。
 DEFAULT_HELD_ESCALATION_SHIFTS = 6
 
-_REGISTRY_CACHE: dict[str, dict] = {}
+def _head_revision() -> tuple[str | None, str | None]:
+    resolved = _git("rev-parse", "--verify", "HEAD")
+    revision = resolved.stdout.strip()
+    if resolved.returncode != 0 or not re.fullmatch(r"[0-9a-f]{40}", revision):
+        return None, "head_unavailable"
+    return revision, None
+
+
+def _head_json(
+    rel: str,
+    *,
+    revision: str = "HEAD",
+) -> tuple[object | None, str | None]:
+    """Read one immutable JSON payload from the current Git transaction."""
+    shown = _git("show", f"{revision}:{rel}")
+    if shown.returncode != 0:
+        return None, "missing_from_head"
+    try:
+        return json.loads(shown.stdout), None
+    except json.JSONDecodeError as exc:
+        return None, f"invalid_json_in_head:{exc}"
 
 
 def load_registry(*, refresh: bool = False) -> dict:
-    """Read the namespace registry, merging each entry over the declared defaults."""
+    """Read the HEAD registry and fail closed while its working copy differs.
+
+    The reaper may commit only the paths selected by a namespace.  Letting a
+    dirty registry authorize that selection would place the policy and the
+    resulting commit in different transactions.  HEAD is therefore the policy
+    snapshot; a dirty working copy is visible only as a blocking configuration
+    error until its owner commits it.
+    """
     key = str(REGISTRY_PATH)
-    if not refresh and key in _REGISTRY_CACHE:
-        return _REGISTRY_CACHE[key]
-    raw = _load_json(REGISTRY_PATH, {})
+    try:
+        rel = REGISTRY_PATH.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        rel = "config/orphan_namespaces.json"
+    head_revision, revision_error = _head_revision()
+    raw, head_error = _head_json(
+        rel,
+        revision=head_revision or "HEAD",
+    )
+    configuration_error = revision_error or head_error
     if not isinstance(raw, dict):
-        warn("reap_orphan", "namespace registry malformed — using builtin defaults",
-             path=key)
-        raw = {}
+        # Keep any discoverable namespace paths visible so they can be held and
+        # escalated rather than disappearing from the sweep.  The error below
+        # still prevents every candidate from being adopted.
+        raw = _load_json(REGISTRY_PATH, {})
+        if not isinstance(raw, dict):
+            warn("reap_orphan", "namespace registry malformed — using builtin defaults",
+                 path=key)
+            raw = {}
+        configuration_error = configuration_error or "invalid_registry_schema_in_head"
+    elif _git(
+        "diff", "--quiet", head_revision or "HEAD", "--", rel
+    ).returncode != 0:
+        configuration_error = "registry_worktree_differs_head"
     defaults = {**_BUILTIN_DEFAULTS, **(raw.get("defaults") or {})}
     namespaces: dict[str, dict] = {}
     for entry in raw.get("namespaces") or []:
@@ -910,13 +979,16 @@ def load_registry(*, refresh: bool = False) -> dict:
         merged["path"] = str(entry["path"]).strip().strip("/")
         merged["exclusions"] = {**(defaults.get("exclusions") or {}),
                                 **(entry.get("exclusions") or {})}
+        merged["_configuration_error"] = configuration_error
+        merged["_head_revision"] = head_revision
         namespaces[merged["id"]] = merged
     registry = {
         "namespaces": namespaces,
         "held_escalation_shifts": int(
             raw.get("held_escalation_shifts") or DEFAULT_HELD_ESCALATION_SHIFTS),
+        "configuration_error": configuration_error,
+        "head_revision": head_revision,
     }
-    _REGISTRY_CACHE[key] = registry
     return registry
 
 
@@ -986,13 +1058,269 @@ def _gate_pdf_requires_clean_sources(rel: str, ctx: dict):
     return ("pdf", True, "rebuild_of_head_sources")
 
 
+def _gate_experiment_ready_for_main(rel: str, ctx: dict):
+    """Delegate experiment admission to the two existing gate owners.
+
+    Namespace ownership only proves where an orphan belongs.  It does not prove
+    that research is review-certified or complete enough for main.  K1694 was
+    auto-committed by this reaper after a Codex FAIL because ``experiments/``
+    previously treated those different questions as the same one.
+    """
+    parts = PurePosixPath(rel).parts
+    depth = int(ctx["ns_depth"])
+    if len(parts) <= depth + 1:
+        return None  # index files directly under experiments/ are not a run
+    exp_rel = PurePosixPath(*parts[: depth + 1]).as_posix()
+    cache = ctx.setdefault("experiment_admission", {})
+    if exp_rel not in cache:
+        exp_dir = ROOT / exp_rel
+        try:
+            import check_experiment_artifacts as artifacts
+            import experiment_gates
+
+            reasons: list[str] = []
+
+            knowledge_rel = artifacts.KNOWLEDGE_REL.as_posix()
+            revision = str(ctx["head_revision"])
+            knowledge_payload, knowledge_error = _head_json(
+                knowledge_rel,
+                revision=revision,
+            )
+            knowledge_ids = artifacts.knowledge_ids_from_entries(
+                knowledge_payload
+            )
+            if knowledge_error or knowledge_ids is None:
+                reasons.append(
+                    "admission evidence unavailable in HEAD: "
+                    f"{knowledge_rel} ({knowledge_error or 'invalid_schema'})"
+                )
+
+            exclusions_rel = artifacts.EXCLUSIONS_REL.as_posix()
+            exclusions_payload, exclusions_error = _head_json(
+                exclusions_rel,
+                revision=revision,
+            )
+            if exclusions_error == "missing_from_head":
+                exclusions: dict[str, str] = {}
+            else:
+                parsed_exclusions = artifacts.exclusions_from_payload(
+                    exclusions_payload
+                )
+                exclusions = parsed_exclusions or {}
+                if exclusions_error or parsed_exclusions is None:
+                    reasons.append(
+                        "admission evidence unavailable in HEAD: "
+                        f"{exclusions_rel} "
+                        f"({exclusions_error or 'invalid_schema'})"
+                    )
+
+            baseline_sites: dict[str, set[str]] = {}
+            for gate in experiment_gates.CERTIFY_GATES:
+                baseline_rel = f"storage/ops/{gate.baseline}"
+                payload, error = _head_json(
+                    baseline_rel,
+                    revision=revision,
+                )
+                if error == "missing_from_head":
+                    # No legacy exemptions is the strict, canonical fallback.
+                    payload = {}
+                elif error:
+                    reasons.append(
+                        "admission evidence unavailable in HEAD: "
+                        f"{baseline_rel} ({error})"
+                    )
+                    payload = {}
+                baseline_sites[gate.baseline] = (
+                    experiment_gates.baseline_sites_from_payload(payload)
+                )
+
+            registry_numbers: set[int] = set()
+            kid_match = re.fullmatch(
+                r"[Kk](\d+)[A-Za-z]?(?:_.*)?",
+                exp_dir.name,
+            )
+            if (
+                kid_match
+                and int(kid_match.group(1))
+                >= experiment_gates.KID_REGISTRY_ENFORCE_FROM
+            ):
+                registry_rel = "storage/ops/k_id_registry.json"
+                registry_payload, registry_error = _head_json(
+                    registry_rel,
+                    revision=revision,
+                )
+                parsed_registry = (
+                    experiment_gates.kid_registry_numbers_from_payload(
+                        registry_payload
+                    )
+                )
+                if registry_error or parsed_registry is None:
+                    reasons.append(
+                        "admission evidence unavailable in HEAD: "
+                        f"{registry_rel} "
+                        f"({registry_error or 'invalid_schema'})"
+                    )
+                else:
+                    registry_numbers = parsed_registry
+
+            certification = experiment_gates.certification_violations(
+                exp_dir,
+                baseline_sites=baseline_sites,
+                registry_numbers=registry_numbers,
+            )
+            artifact_record = artifacts.audit_experiment(
+                exp_dir,
+                # collect_namespace commits only experiment paths.  Admission
+                # uses the exact same HEAD evidence snapshot, never a later
+                # mutable working-tree read by a delegated checker.
+                knowledge_ids=knowledge_ids,
+                exclusions=exclusions,
+            )
+            reasons.extend(
+                f"{item.gate}: {item.verdict}"
+                for item in certification
+            )
+            reasons.extend(
+                f"artifact: {item}"
+                for item in artifact_record["violations"]
+            )
+        except Exception as exc:  # noqa: BLE001 - admission must fail closed
+            # Gate evaluation itself is part of admission.  It must fail closed:
+            # an unavailable checker cannot become permission to commit.
+            reasons = [
+                f"admission checker failed: {type(exc).__name__}: {exc}"
+            ]
+        cache[exp_rel] = (
+            not reasons,
+            "ready_for_main" if not reasons else "; ".join(reasons),
+        )
+    ok, why = cache[exp_rel]
+    return ("experiment_admission", ok, why)
+
+
 _CONTENT_GATES = {
     "volatile_json_only": _gate_volatile_json_only,
     "pdf_requires_clean_sources": _gate_pdf_requires_clean_sources,
+    "experiment_ready_for_main": _gate_experiment_ready_for_main,
 }
 
 
 # ── the generic engine ───────────────────────────────────────────────────────
+
+
+def _path_snapshot(rel: str, head_revision: str) -> dict[str, str] | None:
+    """Bind one admission decision to the exact bytes later staged."""
+    try:
+        payload = (ROOT / rel).read_bytes()
+    except OSError:  # silent-ok: caller records snapshot_unavailable and holds the candidate.
+        return None
+    git_header = f"blob {len(payload)}\0".encode()
+    return {
+        "head": head_revision,
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "git_blob": hashlib.sha1(git_header + payload).hexdigest(),
+    }
+
+
+def _snapshot_entry(
+    *,
+    rel: str,
+    kind: str,
+    reason: str,
+    head_revision: str,
+) -> tuple[dict | None, dict | None]:
+    snapshot = _path_snapshot(rel, head_revision)
+    if snapshot is None:
+        return None, {
+            "path": rel,
+            "kind": kind,
+            "reason": "snapshot_unavailable",
+        }
+    return {
+        "path": rel,
+        "kind": kind,
+        "reason": reason,
+        "admission_snapshot": snapshot,
+    }, None
+
+
+def _atomic_unit_key(ns: dict, path: str) -> str:
+    if ns.get("atomic_unit") != "first_child_directory":
+        return path
+    depth = len(PurePosixPath(ns["path"]).parts)
+    parts = PurePosixPath(path).parts
+    if len(parts) >= depth + 1:
+        return "/".join(parts[: depth + 1])
+    return path
+
+
+def _enforce_atomic_dirty_units(
+    *,
+    ns: dict,
+    records: list[tuple[str, str]],
+    deleted_paths: list[str],
+    collectable: list[dict],
+    held: list[dict],
+) -> tuple[list[dict], list[dict]]:
+    """A unit is collectable only when every dirty member is collectable."""
+    if ns.get("atomic_unit") != "first_child_directory":
+        return collectable, held
+
+    members_by_unit: dict[str, set[str]] = {}
+    deleted_units: set[str] = set()
+    for _code, path in records:
+        members_by_unit.setdefault(
+            _atomic_unit_key(ns, path), set()
+        ).add(path)
+    for path in deleted_paths:
+        unit = _atomic_unit_key(ns, path)
+        members_by_unit.setdefault(unit, set()).add(path)
+        deleted_units.add(unit)
+
+    collectable_paths = {entry["path"] for entry in collectable}
+    blocked_units = {
+        unit
+        for unit, members in members_by_unit.items()
+        if not members.issubset(collectable_paths)
+    }
+    if not blocked_units:
+        return collectable, held
+
+    collectable = [
+        entry
+        for entry in collectable
+        if _atomic_unit_key(ns, entry["path"]) not in blocked_units
+    ]
+    held = [
+        entry
+        for entry in held
+        if _atomic_unit_key(ns, entry["path"]) not in blocked_units
+    ]
+    for unit in sorted(blocked_units):
+        members = sorted(members_by_unit[unit])
+        pending_deletion = unit in deleted_units
+        held.append({
+            "path": unit,
+            "kind": (
+                "pending_rename"
+                if pending_deletion
+                else "atomic_unit_incomplete"
+            ),
+            "reason": (
+                "pending_rename"
+                if pending_deletion
+                else "atomic_unit_incomplete"
+            ),
+            "detail": (
+                "atomic unit contains a deleted member; the complete directory "
+                "must be reviewed and committed together"
+                if pending_deletion
+                else "atomic unit has a held, in-flight, or grace-period member; "
+                     "no sibling may be committed separately"
+            ),
+            "members": members,
+        })
+    return collectable, held
 
 
 def _exclusion_reason(rel: str, ns: dict) -> str | None:
@@ -1069,6 +1397,7 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
     records: list[tuple[str, str]] = []
     dirty_set: set[str] = set()
     deletion_dirs: set[str] = set()
+    deleted_paths: list[str] = []
     pending_rename: dict[str, list[str]] = {}
 
     for line in status.stdout.splitlines():
@@ -1082,6 +1411,7 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
                 pending_rename.setdefault(
                     str(PurePosixPath(rel).parent), []).append(rel)
                 deletion_dirs.add(str(PurePosixPath(rel).parent))
+                deleted_paths.append(rel)
             continue
         dirty_set.add(rel)
         if not all_files and code.strip() != "M":
@@ -1089,9 +1419,65 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
         records.append((code, rel))
 
     ns_depth = len(PurePosixPath(ns["path"]).parts)
-    gates = [(name, _CONTENT_GATES[name]) for name in ns.get("content_gates") or ()
-             if name in _CONTENT_GATES]
-    ctx = {"dirty_set": dirty_set, "ns_depth": ns_depth, "ns": ns}
+    configuration_error = ns.get("_configuration_error")
+    if configuration_error:
+        return {
+            "namespace": ns_id,
+            "collectable": [],
+            "held": [
+                {
+                    "path": rel,
+                    "kind": "namespace_configuration",
+                    "reason": str(configuration_error),
+                }
+                for _code, rel in records
+            ],
+            "skipped": skipped,
+        }
+    head_revision = ns.get("_head_revision")
+    if not isinstance(head_revision, str):
+        return {
+            "namespace": ns_id,
+            "collectable": [],
+            "held": [
+                {
+                    "path": rel,
+                    "kind": "namespace_configuration",
+                    "reason": "head_unavailable",
+                }
+                for _code, rel in records
+            ],
+            "skipped": skipped,
+        }
+    gate_names = [str(name) for name in ns.get("content_gates") or ()]
+    unknown_gates = sorted(set(gate_names) - set(_CONTENT_GATES))
+    if unknown_gates:
+        # A typo in an admission gate must not degrade `default=adopt` into
+        # unconditional permission.  Hold every candidate with one readable
+        # configuration reason so the existing TTL path owns the repair.
+        return {
+            "namespace": ns_id,
+            "collectable": [],
+            "held": [
+                {
+                    "path": rel,
+                    "kind": "namespace_configuration",
+                    "reason": (
+                        "unknown_content_gate:"
+                        + ",".join(unknown_gates)
+                    ),
+                }
+                for _code, rel in records
+            ],
+            "skipped": skipped,
+        }
+    gates = [(name, _CONTENT_GATES[name]) for name in gate_names]
+    ctx = {
+        "dirty_set": dirty_set,
+        "ns_depth": ns_depth,
+        "ns": ns,
+        "head_revision": head_revision,
+    }
 
     for code, rel in records:
         if adopt_default:
@@ -1119,8 +1505,19 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
                 break
         if claimed is not None:
             kind, ok, why = claimed
-            (collectable if ok else held).append(
-                {"path": rel, "kind": kind, "reason": why})
+            if not ok:
+                held.append({"path": rel, "kind": kind, "reason": why})
+                continue
+            entry, snapshot_failure = _snapshot_entry(
+                rel=rel,
+                kind=kind,
+                reason=why,
+                head_revision=head_revision,
+            )
+            if snapshot_failure:
+                held.append(snapshot_failure)
+            else:
+                collectable.append(entry)
             continue
         if not adopt_default:
             # hold-by-default namespace, no gate claimed it: someone else owns it.
@@ -1137,23 +1534,55 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
             pending_rename.setdefault(parent, []).append(rel)
             continue
 
-        collectable.append({"path": rel, "kind": PurePosixPath(rel).suffix.lstrip("."),
-                            "reason": "untracked" if code == "??" else "modified"})
+        entry, snapshot_failure = _snapshot_entry(
+            rel=rel,
+            kind=PurePosixPath(rel).suffix.lstrip("."),
+            reason="untracked" if code == "??" else "modified",
+            head_revision=head_revision,
+        )
+        if snapshot_failure:
+            held.append(snapshot_failure)
+        else:
+            collectable.append(entry)
 
     # One in-flight rename is one thing to do, not N orphans. k1380's deliberate
     # `*_INVALID_20260716.*` invalidation produced eight held rows with two
     # different "not owned" reasons, and the escalation task read as eight
     # ownerless artifacts when the actual state was "a directory is mid-rename,
     # waiting to be committed". Report the directory once, name its members.
-    for parent in sorted(pending_rename):
-        members = sorted(set(pending_rename[parent]))
-        held.append({"path": parent, "kind": "pending_rename",
-                     "reason": "pending_rename",
-                     "detail": f"{len(members)} 個檔案處於未 commit 的改名/修改中"
-                               f"（非無主）：{', '.join(members)}。"
-                               f"出口是 commit 這個目錄，不是找人認領。",
-                     "members": members})
+    if ns.get("atomic_unit") == "first_child_directory":
+        collectable, held = _enforce_atomic_dirty_units(
+            ns=ns,
+            records=records,
+            deleted_paths=deleted_paths,
+            collectable=collectable,
+            held=held,
+        )
+    else:
+        for parent in sorted(pending_rename):
+            members = sorted(set(pending_rename[parent]))
+            held.append({"path": parent, "kind": "pending_rename",
+                         "reason": "pending_rename",
+                         "detail": f"{len(members)} 個檔案處於未 commit 的改名/修改中"
+                                   f"（非無主）：{', '.join(members)}。"
+                                   f"出口是 commit 這個目錄，不是找人認領。",
+                         "members": members})
 
+    current_head, _error = _head_revision()
+    if current_head != head_revision:
+        return {
+            "namespace": ns_id,
+            "collectable": [],
+            "held": [
+                {
+                    "path": rel,
+                    "kind": "namespace_configuration",
+                    "reason": "head_changed_during_scan",
+                }
+                for _code, rel in records
+            ],
+            "skipped": skipped,
+        }
     return {"namespace": ns_id, "collectable": collectable, "held": held,
             "skipped": skipped}
 
@@ -1178,8 +1607,275 @@ def _commit_message(ns: dict, paths: list[str]) -> str:
             "Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>")
 
 
+def _namespace_batch(ns: dict, entries: list[dict], limit: int) -> list[dict]:
+    """Apply a file limit without splitting one declared atomic deliverable."""
+    if not limit or len(entries) <= limit:
+        return entries
+    if ns.get("atomic_unit") != "first_child_directory":
+        return entries[:limit]
+
+    grouped: dict[str, list[dict]] = {}
+    order: list[str] = []
+    for entry in entries:
+        key = _atomic_unit_key(ns, entry["path"])
+        if key not in grouped:
+            grouped[key] = []
+            order.append(key)
+        grouped[key].append(entry)
+
+    selected: list[dict] = []
+    for key in order:
+        unit = grouped[key]
+        if selected and len(selected) + len(unit) > limit:
+            break
+        # A single experiment larger than max_files still progresses as one
+        # complete unit. The limit is a rate limit, never permission to land a
+        # partial scientific artifact set.
+        selected.extend(unit)
+    return selected
+
+
+def _git_with_input(
+    payload: str,
+    *args: str,
+    index_file: Path | None = None,
+) -> subprocess.CompletedProcess[str]:
+    """Run one Git plumbing command with stdin under the inherited lease."""
+    env = os.environ.copy()
+    for key in _GIT_ENV_KEYS:
+        env.pop(key, None)
+    if index_file is not None:
+        env["GIT_INDEX_FILE"] = str(index_file)
+    locked_kwargs = git_writer_subprocess_kwargs(env)
+    return subprocess.run(
+        ["git", "--literal-pathspecs", *args],
+        cwd=str(ROOT),
+        input=payload,
+        capture_output=True,
+        text=True,
+        check=False,
+        **locked_kwargs,
+    )
+
+
+def _staged_identity(
+    path: str,
+    *,
+    index_file: Path,
+) -> tuple[str, str] | None:
+    staged = _git_in_index(
+        index_file,
+        "-c", "core.quotePath=false",
+        "ls-files", "--stage", "--", path,
+    )
+    rows = [line for line in staged.stdout.splitlines() if line]
+    if staged.returncode != 0 or len(rows) != 1:
+        return None
+    metadata, separator, observed = rows[0].partition("\t")
+    fields = metadata.split()
+    if (
+        separator != "\t"
+        or observed != path
+        or len(fields) != 3
+        or fields[2] != "0"
+    ):
+        return None
+    return fields[0], fields[1]
+
+
+def _commit_verified_index(
+    *,
+    expected_head: str,
+    paths: list[str],
+    identities: dict[str, tuple[str, str]],
+    message: str,
+    index_file: Path,
+) -> subprocess.CompletedProcess[str]:
+    """Verify a detached commit, then publish it with one HEAD CAS.
+
+    Hooks and tree construction run against a private index.  The checkout's
+    shared index is never a rollback target, so a foreign staged path added
+    during a hook survives either outcome.  No ref is changed until
+    ``commit-tree`` has produced a child whose parent, scope and blobs are
+    independently read back.  A foreign HEAD advance therefore makes the final
+    ``update-ref <new> <expected>`` fail without a rollback that could erase
+    the foreign commit.
+    """
+    pre_commit = _git_in_index(
+        index_file,
+        "hook", "run", "--ignore-missing", "pre-commit"
+    )
+    if pre_commit.returncode != 0:
+        return pre_commit
+    observed_head, head_error = _head_revision()
+    if observed_head != expected_head:
+        return subprocess.CompletedProcess(
+            args=["git", "hook", "run", "pre-commit"],
+            returncode=2,
+            stdout=pre_commit.stdout,
+            stderr=(
+                "HEAD changed during pre-commit hook: "
+                f"expected={expected_head} observed={observed_head or head_error}"
+            ),
+        )
+
+    staged_scope = _git_in_index(
+        index_file,
+        "-c", "core.quotePath=false",
+        "diff", "--cached", "--name-only", "--no-renames", expected_head,
+    )
+    observed_paths = {
+        line for line in staged_scope.stdout.splitlines() if line
+    }
+    blob_mismatches = []
+    for path, expected_identity in identities.items():
+        if _staged_identity(path, index_file=index_file) != expected_identity:
+            blob_mismatches.append(path)
+    if (
+        staged_scope.returncode != 0
+        or observed_paths != set(paths)
+        or blob_mismatches
+    ):
+        return subprocess.CompletedProcess(
+            args=staged_scope.args,
+            returncode=2,
+            stdout=staged_scope.stdout,
+            stderr=(
+                "candidate index changed during hooks: "
+                f"scope={sorted(observed_paths)} "
+                f"blob_mismatches={blob_mismatches}"
+            ),
+        )
+
+    git_path = _git("rev-parse", "--path-format=absolute", "--git-path",
+                    "COMMIT_EDITMSG")
+    if git_path.returncode != 0 or not git_path.stdout.strip():
+        return subprocess.CompletedProcess(
+            args=git_path.args,
+            returncode=2,
+            stdout=git_path.stdout,
+            stderr="cannot resolve COMMIT_EDITMSG",
+        )
+    message_path = Path(git_path.stdout.strip())
+    message_path.write_text(message.rstrip("\n") + "\n", encoding="utf-8")
+    for hook_name, hook_args in (
+        ("prepare-commit-msg", (str(message_path), "message")),
+        ("commit-msg", (str(message_path),)),
+    ):
+        hook = _git_in_index(
+            index_file,
+            "hook", "run", "--ignore-missing", hook_name, "--", *hook_args
+        )
+        if hook.returncode != 0:
+            return hook
+        observed_head, head_error = _head_revision()
+        if observed_head != expected_head:
+            return subprocess.CompletedProcess(
+                args=hook.args,
+                returncode=2,
+                stdout=hook.stdout,
+                stderr=(
+                    f"HEAD changed during {hook_name} hook: "
+                    f"expected={expected_head} "
+                    f"observed={observed_head or head_error}"
+                ),
+            )
+    try:
+        commit_message = message_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        return subprocess.CompletedProcess(
+            args=["git", "commit-tree"],
+            returncode=2,
+            stdout="",
+            stderr=f"cannot read validated commit message: {exc}",
+        )
+
+    tree = _git_in_index(index_file, "write-tree")
+    if tree.returncode != 0:
+        return tree
+    detached = _git_with_input(
+        commit_message,
+        "commit-tree", tree.stdout.strip(), "-p", expected_head,
+        index_file=index_file,
+    )
+    new_commit = detached.stdout.strip()
+    if detached.returncode != 0 or not re.fullmatch(
+        r"[0-9a-f]{40}|[0-9a-f]{64}", new_commit
+    ):
+        return detached
+
+    parent = _git("rev-parse", f"{new_commit}^")
+    scope = _git(
+        "-c", "core.quotePath=false",
+        "diff", "--name-only", "--no-renames",
+        expected_head, new_commit,
+    )
+    observed_paths = {
+        line for line in scope.stdout.splitlines() if line
+    }
+    blob_mismatches = []
+    for path, (_mode, expected_blob) in identities.items():
+        observed = _git("rev-parse", f"{new_commit}:{path}")
+        if (
+            observed.returncode != 0
+            or observed.stdout.strip() != expected_blob
+        ):
+            blob_mismatches.append(path)
+    if (
+        parent.returncode != 0
+        or parent.stdout.strip() != expected_head
+        or scope.returncode != 0
+        or observed_paths != set(paths)
+        or blob_mismatches
+    ):
+        return subprocess.CompletedProcess(
+            args=detached.args,
+            returncode=2,
+            stdout=detached.stdout,
+            stderr=(
+                "detached commit verification failed: "
+                f"scope={sorted(observed_paths)} "
+                f"blob_mismatches={blob_mismatches}"
+            ),
+        )
+
+    published = _git("update-ref", "HEAD", new_commit, expected_head)
+    if published.returncode != 0:
+        return subprocess.CompletedProcess(
+            args=published.args,
+            returncode=2,
+            stdout=published.stdout,
+            stderr=(
+                "HEAD CAS refused detached commit; foreign HEAD preserved: "
+                + published.stderr
+            ),
+        )
+    # Settle only the paths owned by this commit.  A non-cooperating writer may
+    # have staged an unrelated path in the shared index while hooks ran; a
+    # whole-index read-tree here would erase it.  Path reset updates our
+    # committed entries while preserving every foreign staged entry.
+    settled = _git("reset", "-q", new_commit, "--", *paths)
+    if settled.returncode != 0:
+        warn(
+            "reap_orphan",
+            "commit published but shared-index settlement failed",
+            commit=new_commit,
+            err=settled.stderr[:150],
+        )
+    # As with `git commit`, post-commit is advisory and runs only after the
+    # durable ref update. It may create a later commit; that later HEAD is not
+    # evidence that this verified commit failed and must never be rolled back.
+    _git("hook", "run", "--ignore-missing", "post-commit")
+    return subprocess.CompletedProcess(
+        args=["git", "commit-tree"],
+        returncode=0,
+        stdout=f"[{new_commit}] {commit_message.splitlines()[0]}\n",
+        stderr="",
+    )
+
+
 def collect_namespace(ns_id: str, entries: list[dict]) -> list[dict]:
-    """Commit one namespace's collectable files through the git writer lease."""
+    """Commit files only if the scan decision still names these exact bytes."""
     out: list[dict] = []
     if not entries:
         return out
@@ -1189,30 +1885,139 @@ def collect_namespace(ns_id: str, entries: list[dict]) -> list[dict]:
         if not locked:
             return [{"namespace": ns_id, "paths": paths, "committed": False,
                      "err": "git_writer_lock_busy"}]
-        pre_staged = _git("diff", "--cached", "--name-only", "--", *paths)
+        # ``write-tree`` consumes the repository index as one atomic tree, so
+        # scoped cleanliness is not enough: a foreign staged path anywhere
+        # would otherwise be smuggled into the detached commit.  The shared
+        # writer lease makes this global empty-index precondition stable for
+        # every cooperating writer.
+        pre_staged = _git(
+            "-c", "core.quotePath=false",
+            "diff", "--cached", "--name-only",
+        )
         collisions = [line for line in pre_staged.stdout.splitlines() if line]
         if pre_staged.returncode != 0 or collisions:
             err = "pre_staged_collision" if collisions else "git_preflight_failed"
             return [{"namespace": ns_id, "paths": paths, "committed": False,
                      "err": err, "collisions": collisions}]
-        index_owned = True
+
+        # The caller's scan is only a proposal. Re-evaluate admission under the
+        # same writer lease that owns the commit, then require the original
+        # HEAD/content snapshot to match the fresh decision byte for byte.
+        fresh = scan_namespace(ns_id)
+        fresh_by_path = {
+            item["path"]: item
+            for item in fresh["collectable"]
+        }
+        snapshot_mismatches: list[str] = []
+        for entry in entries:
+            path = entry["path"]
+            expected = entry.get("admission_snapshot")
+            current = fresh_by_path.get(path, {}).get("admission_snapshot")
+            if not isinstance(expected, dict) or expected != current:
+                snapshot_mismatches.append(path)
+                continue
+            if _path_snapshot(path, str(expected.get("head"))) != expected:
+                snapshot_mismatches.append(path)
+        if snapshot_mismatches:
+            return [{
+                "namespace": ns_id,
+                "paths": paths,
+                "committed": False,
+                "err": "admission_snapshot_changed",
+                "mismatches": sorted(set(snapshot_mismatches)),
+            }]
+
+        staged_against_head, _head_error = _head_revision()
+        git_dir_result = _git(
+            "rev-parse", "--path-format=absolute", "--git-common-dir"
+        )
+        if git_dir_result.returncode != 0 or not git_dir_result.stdout.strip():
+            return [{
+                "namespace": ns_id,
+                "paths": paths,
+                "committed": False,
+                "err": "git_common_dir_unavailable",
+            }]
+        isolated_index = (
+            Path(git_dir_result.stdout.strip())
+            / "volpred-orphan-index"
+        )
         try:
-            add = _git("add", "--", *paths)
+            initialize = _git_in_index(
+                isolated_index,
+                "read-tree", "--reset",
+                staged_against_head or "HEAD",
+            )
+            if initialize.returncode != 0:
+                return [{
+                    "namespace": ns_id,
+                    "paths": paths,
+                    "committed": False,
+                    "err": "isolated_index_initialization_failed",
+                }]
+            add = _git_in_index(isolated_index, "add", "--", *paths)
             if add.returncode != 0:
                 warn("reap_orphan", "namespace add failed",
                      namespace=ns_id, err=add.stderr[:150])
                 return [{"namespace": ns_id, "paths": paths, "committed": False,
                          "err": add.stderr[:150]}]
-            commit = _git("commit", "--only", "-m", _commit_message(ns, paths),
-                          "--", *paths)
-            if commit.returncode == 0:
-                index_owned = False
+            staged_mismatches = []
+            staged_identities: dict[str, tuple[str, str]] = {}
+            for entry in entries:
+                expected = entry["admission_snapshot"]
+                staged = _git_in_index(
+                    isolated_index,
+                    "rev-parse",
+                    f":{entry['path']}",
+                )
+                if (
+                    staged.returncode != 0
+                    or staged.stdout.strip() != expected["git_blob"]
+                ):
+                    staged_mismatches.append(entry["path"])
+                    continue
+                identity = _staged_identity(
+                    entry["path"],
+                    index_file=isolated_index,
+                )
+                if identity is None or identity[1] != expected["git_blob"]:
+                    staged_mismatches.append(entry["path"])
+                    continue
+                staged_identities[entry["path"]] = identity
+            current_head, _error = _head_revision()
+            expected_heads = {
+                entry["admission_snapshot"]["head"]
+                for entry in entries
+            }
+            if (
+                staged_mismatches
+                or staged_against_head is None
+                or current_head != staged_against_head
+                or expected_heads != {current_head}
+            ):
+                return [{
+                    "namespace": ns_id,
+                    "paths": paths,
+                    "committed": False,
+                    "err": "staged_snapshot_changed",
+                    "mismatches": sorted(staged_mismatches),
+                    "expected_heads": sorted(expected_heads),
+                    "current_head": current_head,
+                }]
+            commit = _commit_verified_index(
+                expected_head=current_head,
+                paths=paths,
+                identities=staged_identities,
+                message=_commit_message(ns, paths),
+                index_file=isolated_index,
+            )
         finally:
-            if index_owned:
-                # Preflight proved no one else owned these scoped index entries,
-                # so cleanup cannot erase a foreign staged change. Working files
-                # remain intact for the next sweep.
-                _git("reset", "-q", "HEAD", "--", *paths)
+            # The isolated index is durable Git machine state, not a temporary
+            # namespace copy.  Reusing one writer-lock-protected path lets the
+            # next transaction replace it with read-tree --reset and preserves
+            # the source-level invariant that this reaper has no deletion
+            # primitive at all.
+            pass
     ok = commit.returncode == 0
     if not ok:
         warn("reap_orphan", "namespace commit failed",
@@ -1552,7 +2357,11 @@ def main() -> int:
             limit = registry["namespaces"][ns_id].get("max_files") or 0
             if ns_id == "drafts" and args.max_draft_files is not None:
                 limit = args.max_draft_files
-            batch = ns_scan["collectable"][:limit] if limit else ns_scan["collectable"]
+            batch = _namespace_batch(
+                registry["namespaces"][ns_id],
+                ns_scan["collectable"],
+                int(limit),
+            )
             collected = collect_namespace(ns_id, batch)
             if collected:
                 namespace_collections[ns_id] = collected

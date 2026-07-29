@@ -47,9 +47,10 @@ import logging
 import re
 import subprocess
 import sys
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
@@ -67,23 +68,8 @@ class Violation:
     remedy: str
 
 
-def _baseline_sites(name: str) -> set[str]:
-    """Every site string frozen anywhere in an auditor's baseline.
-
-    The four baselines have four different shapes (``sites``, ``active.exposed``,
-    ``blindspot_sites``, ``reviewed_nonnested``...).  Rather than restate each
-    schema here -- a fifth place to drift -- walk the JSON and collect every
-    string that names a Python site.  Over-collecting is safe in the one
-    direction that matters: it can only make the gate *more* lenient toward
-    paths that are already recorded, and a brand-new experiment's path appears
-    in no baseline at all.  The one explicit exclusion is ``retired``: those
-    sites have surrendered their legacy exemption and may never return.
-    """
-    path = BASELINE_DIR / name
-    if not path.exists():
-        print(f"[gate] WARNING: baseline missing, treating as empty: {path}", file=sys.stderr)
-        return set()
-
+def baseline_sites_from_payload(payload: object) -> set[str]:
+    """Every non-retired Python site frozen in one baseline payload."""
     sites: set[str] = set()
 
     def walk(node: Any) -> None:
@@ -104,8 +90,19 @@ def _baseline_sites(name: str) -> set[str]:
             for value in node:
                 walk(value)
 
-    walk(json.loads(path.read_text(encoding="utf-8")))
+    walk(payload)
     return sites
+
+
+def _baseline_sites(name: str) -> set[str]:
+    """Read one baseline, then apply the shared payload interpretation."""
+    path = BASELINE_DIR / name
+    if not path.exists():
+        print(f"[gate] WARNING: baseline missing, treating as empty: {path}", file=sys.stderr)
+        return set()
+    return baseline_sites_from_payload(
+        json.loads(path.read_text(encoding="utf-8"))
+    )
 
 
 def _rel(path: Path) -> str:
@@ -258,12 +255,21 @@ def python_files(target: Path) -> list[Path]:
     ]
 
 
-def run_gates(target: Path, gates: Iterable[Gate] = GATES) -> list[Violation]:
+def run_gates(
+    target: Path,
+    gates: Iterable[Gate] = GATES,
+    *,
+    baseline_sites: Mapping[str, set[str]] | None = None,
+) -> list[Violation]:
     """Run selected integrity gates (all by default), newest debt only."""
     files = python_files(target)
     violations: list[Violation] = []
     for gate in gates:
-        frozen = _baseline_sites(gate.baseline)
+        frozen = (
+            baseline_sites[gate.baseline]
+            if baseline_sites is not None
+            else _baseline_sites(gate.baseline)
+        )
         for path in files:
             for site, verdict in gate.scan(path):
                 if site in frozen and verdict != "invalid_fixed_memory_evidence":
@@ -448,7 +454,24 @@ def _canonical_registry_path() -> Path:
         return REPO_ROOT / "storage" / "ops" / "k_id_registry.json"
 
 
-def _kid_registry_violations(exp_dir: Path) -> list[Violation]:
+def kid_registry_numbers_from_payload(payload: object) -> set[int] | None:
+    if not isinstance(payload, dict):
+        return None
+    try:
+        return {
+            int(row.get("number") or 0)
+            for row in payload.get("reservations", [])
+            if isinstance(row, dict)
+        }
+    except (TypeError, ValueError):  # silent-ok: caller turns invalid schema into a fail-closed violation.
+        return None
+
+
+def _kid_registry_violations(
+    exp_dir: Path,
+    *,
+    registry_numbers: set[int] | None = None,
+) -> list[Violation]:
     m = re.fullmatch(r"k(\d+)[a-z]?(?:_.*)?", exp_dir.name)
     if not m:
         return []  # named experiments (member_qa_*, vt_*) are outside the numeric allocator
@@ -456,13 +479,23 @@ def _kid_registry_violations(exp_dir: Path) -> list[Violation]:
     if number < KID_REGISTRY_ENFORCE_FROM:
         return []
     registry_path = _canonical_registry_path()
-    try:
-        registry = json.loads(registry_path.read_text(encoding="utf-8"))
-        numbers = {int(r.get("number") or 0) for r in registry.get("reservations", [])}
-    except (OSError, ValueError) as exc:
-        return [Violation(gate="kid-registry", site=_rel(exp_dir),
-                          verdict=f"registry unreadable ({exc}) — cannot verify K-id allocation",
-                          remedy=_KID_REGISTRY_REMEDY)]
+    if registry_numbers is None:
+        try:
+            registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            numbers = kid_registry_numbers_from_payload(registry)
+        except (OSError, ValueError) as exc:
+            return [Violation(gate="kid-registry", site=_rel(exp_dir),
+                              verdict=f"registry unreadable ({exc}) — cannot verify K-id allocation",
+                              remedy=_KID_REGISTRY_REMEDY)]
+        if numbers is None:
+            return [Violation(
+                gate="kid-registry",
+                site=_rel(exp_dir),
+                verdict="registry schema invalid — cannot verify K-id allocation",
+                remedy=_KID_REGISTRY_REMEDY,
+            )]
+    else:
+        numbers = registry_numbers
     if number not in numbers:
         return [Violation(
             gate="kid-registry", site=_rel(exp_dir),
@@ -472,7 +505,12 @@ def _kid_registry_violations(exp_dir: Path) -> list[Violation]:
     return []
 
 
-def certification_violations(exp_dir: Path) -> list[Violation]:
+def certification_violations(
+    exp_dir: Path,
+    *,
+    baseline_sites: Mapping[str, set[str]] | None = None,
+    registry_numbers: set[int] | None = None,
+) -> list[Violation]:
     """Merge admission = methodology hard gates plus byte-bound review.
 
     K1695 exposed the remaining path split: compute-queue completion ran the
@@ -483,9 +521,16 @@ def certification_violations(exp_dir: Path) -> list[Violation]:
     are intentionally not swallowed: a gate that cannot run must block merge.
     """
     return [
-        *run_gates(exp_dir, CERTIFY_GATES),
+        *run_gates(
+            exp_dir,
+            CERTIFY_GATES,
+            baseline_sites=baseline_sites,
+        ),
         *_review_certification_violations(exp_dir),
-        *_kid_registry_violations(exp_dir),
+        *_kid_registry_violations(
+            exp_dir,
+            registry_numbers=registry_numbers,
+        ),
     ]
 
 

@@ -119,6 +119,17 @@ def _canonical_root() -> Path:
         return REPO_ROOT
 
 
+def knowledge_ids_from_entries(entries: object) -> set[str] | None:
+    """Extract the K-id coverage from an already selected knowledge snapshot."""
+    if not isinstance(entries, list):
+        return None
+    recorded: set[str] = set()
+    for entry in entries:
+        blob = json.dumps(entry, ensure_ascii=False) if isinstance(entry, dict) else str(entry)
+        recorded.update(m.casefold() for m in K_IN_BLOB_RE.findall(blob))
+    return recorded
+
+
 def load_knowledge_ids(root: Path | None = None) -> set[str] | None:
     """K-ids mentioned anywhere in the knowledge base. ``None`` = unreadable."""
     path = (root or _canonical_root()) / KNOWLEDGE_REL
@@ -128,14 +139,10 @@ def load_knowledge_ids(root: Path | None = None) -> set[str] | None:
         print(f"[artifacts] WARN — knowledge base unreadable at {path}: "
               f"{type(exc).__name__}: {exc}", file=sys.stderr)
         return None
-    if not isinstance(entries, list):
+    recorded = knowledge_ids_from_entries(entries)
+    if recorded is None:
         print(f"[artifacts] WARN — knowledge base at {path} is "
               f"{type(entries).__name__}, expected a list.", file=sys.stderr)
-        return None
-    recorded: set[str] = set()
-    for entry in entries:
-        blob = json.dumps(entry, ensure_ascii=False) if isinstance(entry, dict) else str(entry)
-        recorded.update(m.casefold() for m in K_IN_BLOB_RE.findall(blob))
     return recorded
 
 
@@ -152,6 +159,17 @@ def load_exclusions(root: Path | None = None) -> dict[str, str]:
         print(f"[artifacts] WARN — exclusions unreadable at {path}, proceeding with "
               f"NO exclusions: {type(exc).__name__}: {exc}", file=sys.stderr)
         return {}
+    parsed = exclusions_from_payload(raw)
+    if parsed is None:
+        print(f"[artifacts] WARN — exclusions at {path} have invalid schema; "
+              "proceeding with NO exclusions.", file=sys.stderr)
+        return {}
+    return parsed
+
+
+def exclusions_from_payload(raw: object) -> dict[str, str] | None:
+    if not isinstance(raw, dict):
+        return None
     out: dict[str, str] = {}
     for item in raw.get("exclusions", []):
         if isinstance(item, dict) and isinstance(item.get("experiment"), str):
@@ -462,7 +480,7 @@ def _remedy(record: dict[str, Any]) -> list[str]:
             f"  uv run python -c \"import json,pathlib; "
             f"print(json.dumps(json.loads(pathlib.Path('experiments/{name}')"
             f".glob('*_results.json').__next__().read_text()), indent=2, ensure_ascii=False))\"",
-            f"  #    then append the entry via the memory writer (m.add_knowledge / "
+            "  #    then append the entry via the memory writer (m.add_knowledge / "
             "src/volpred/memory/system.py), which stamps provenance.",
         ]
     if SPEC_NAME in joined:
