@@ -1433,6 +1433,7 @@ DEAD_STATUSES = ("unpublished", "retracted")
 
 LEXICAL_HINT_THRESHOLD = 0.18
 LEXICAL_HINT_LIMIT = 5
+K_COVERAGE_GAP_MIN_SHARED_TOKENS = 3
 
 
 def tokenize(text: str) -> set[str]:
@@ -1501,6 +1502,42 @@ def find_lexical_hints(title: str, text: str, feed: list[dict]) -> list[dict]:
             )
     hits.sort(key=lambda h: h["score"], reverse=True)
     return hits[:LEXICAL_HINT_LIMIT]
+
+
+def find_k_coverage_gap_hints(
+    title: str,
+    text: str,
+    feed: list[dict],
+    audience: str | None,
+) -> list[dict]:
+    """Advisory lexical matches among live articles with no extractable K-id.
+
+    K coverage is exact only when an article exposes an experiment ref in
+    metadata or prose. Legacy articles that expose neither must not make the
+    exact gate claim a clean search. Keep this fallback warn-only: lexical
+    overlap is useful evidence for review, but not proof of duplication.
+    """
+    want_audience = str(audience or "").strip().lower() or None
+    candidates: list[dict] = []
+    for item in feed:
+        if item.get("status") in DEAD_STATUSES:
+            continue
+        item_audience = _arc_item_audience(item)
+        if want_audience and item_audience not in (
+            want_audience,
+            "uncategorized",
+        ):
+            continue
+        if _refs_from_feed_item(item):
+            continue
+        candidates.append(item)
+    probe = tokenize(f"{title}\n{text[:400]}")
+    return [
+        hint
+        for hint in find_lexical_hints(title, text, candidates)
+        if len(probe & tokenize(str(hint["title"])))
+        >= K_COVERAGE_GAP_MIN_SHARED_TOKENS
+    ]
 
 
 def find_k_coverage(k_id: str, feed: list[dict], audience: str | None) -> list[dict]:

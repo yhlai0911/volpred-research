@@ -24,7 +24,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import check_arc_dedup as cli  # noqa: E402
-from check_arc_dedup import find_k_coverage  # noqa: E402
+from check_arc_dedup import (  # noqa: E402
+    find_k_coverage,
+    find_k_coverage_gap_hints,
+)
 
 
 def _item(mile_id, k_ids, audience, status="published", title="t"):
@@ -159,3 +162,101 @@ def test_cli_logs_normalized_k_as_stable_candidate_id(
 
     assert cli.main() == 1
     assert logged == [{"candidate_id": "K1366"}]
+
+
+def test_coverage_gap_hints_only_consider_unreferenced_same_audience_articles():
+    feed = [
+        {
+            "id": "mile_legacy_general",
+            "title": "0DTE 把 SPY 波動搬進日內了嗎",
+            "status": "published",
+            "audience": "general",
+            "published_at": "2026-06-13T00:00:00+00:00",
+            "details": {"experiment_refs": []},
+        },
+        {
+            "id": "mile_referenced_general",
+            "title": "0DTE 把 SPY 波動搬進日內了嗎",
+            "status": "published",
+            "audience": "general",
+            "published_at": "2026-06-14T00:00:00+00:00",
+            "details": {"experiment_refs": ["K1400"]},
+        },
+        {
+            "id": "mile_legacy_research",
+            "title": "0DTE 把 SPY 波動搬進日內了嗎",
+            "status": "published",
+            "audience": "research",
+            "published_at": "2026-06-15T00:00:00+00:00",
+            "details": {"experiment_refs": []},
+        },
+        {
+            "id": "mile_low_information_overlap",
+            "title": "SPY 波動",
+            "status": "published",
+            "audience": "general",
+            "published_at": "2026-06-16T00:00:00+00:00",
+            "details": {"experiment_refs": []},
+        },
+    ]
+
+    hints = find_k_coverage_gap_hints(
+        "0DTE SPY 日內波動",
+        "2022 週二週四到期日的隔夜與日內波動檢定",
+        feed,
+        "general",
+    )
+
+    assert [hit["id"] for hit in hints] == ["mile_legacy_general"]
+
+
+def test_cli_does_not_claim_clean_when_matching_legacy_article_has_no_refs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    reports = tmp_path / "storage" / "reports"
+    reports.mkdir(parents=True)
+    (reports / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_legacy_general",
+                    "title": "0DTE 把 SPY 波動搬進日內了嗎",
+                    "status": "published",
+                    "audience": "general",
+                    "published_at": "2026-06-13T00:00:00+00:00",
+                    "details": {"experiment_refs": []},
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    experiment = tmp_path / "experiments" / "k1716"
+    experiment.mkdir(parents=True)
+    (experiment / "README.md").write_text(
+        "0DTE SPY 日內波動。2022 週二週四到期日的隔夜與日內波動檢定。",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.setattr(cli, "_log_dedup_decision", lambda *_a, **_k: None)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "check_arc_dedup.py",
+            "--k-id",
+            "k1716",
+            "--audience",
+            "general",
+            "--title",
+            "0DTE SPY 日內波動",
+        ],
+    )
+
+    assert cli.main() == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["verdict"] == "warn_coverage_metadata_gap"
+    assert [
+        hit["id"] for hit in report["k_coverage_metadata_gap_hints"]
+    ] == ["mile_legacy_general"]

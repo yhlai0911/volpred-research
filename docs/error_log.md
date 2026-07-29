@@ -4889,3 +4889,32 @@ read-only RPC inventory 加 `volpred_read_*`／`read_volpred_*` 命名 ratchet �
 `Operations Core RPC remote reads are disabled`。此切片目前為 **`contained`**：
 程式、測試與本機 read-back 已完成，仍待 commit 進入 origin 後由新的 GitHub Test
 Suite run 回讀全綠，才升級為 **`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-07-30 — K-COVERAGE 對無 experiment ref 舊文誤報 clean
+
+**證據化症狀**：canonical
+`check_arc_dedup.py --k-id k1716 --audience general --title TBD` 對 live feed
+回傳 `verdict=clean`，但 `mile_74d12ac6` 已發佈同一個 0DTE／SPY 日內與隔夜波動故事。
+該舊文 `details.experiment_refs=[]`，正文也沒有 K 編號；K1716 的結果則明列同題 prior
+replication。一般讀者文章 498 篇中有 225 篇缺 experiment refs，這不是單筆髒資料。
+
+**根因層級（coverage observability contract）**：exact K gate 只能證明「有找到相同
+K-id」，找不到時卻把「metadata 完整且確定沒覆蓋」與「舊文沒有任何可抽取 K-id」
+合併成同一個 clean。arc v4 又因舊文 `descriptive/reader` 與新實驗
+`null_no_info/methodology` 的合法軸差異不判 hard duplicate，因此整個 CLI 錯把
+「無法精確查」說成「已查且乾淨」。
+
+**底層修復與制度化**：不手改歷史 feed JSON，也不把 lexical similarity 升為 hard
+block。共用 `find_k_coverage_gap_hints()` 只掃同 audience、live、且 metadata／正文都
+抽不到任何 K-id 的文章；exact K 與 arc 都無判定時，有詞彙重疊便輸出
+`warn_coverage_metadata_gap`、列出證據文章並寫 dedup audit。此路徑維持 exit 0
+fail-open，但不再給綠色 clearance。
+
+**回歸與 read-back**：deterministic RED 先證明 K1716-like case 仍回 clean；修正後
+13 個 K-coverage tests 與 dedup／generator 相鄰範圍共 **182 passed**。live K1716
+重播回讀 `warn_coverage_metadata_gap`，第一筆為 `mile_74d12ac6`、overlap 0.238。
+此切片目前為 **`contained`**：程式、回歸與 live source read-back 已完成；待正式
+commit 進 origin 並取得新 GitHub CI 全綠 receipt 後，才升級為
+**`root_cause_fixed_and_verified`**。

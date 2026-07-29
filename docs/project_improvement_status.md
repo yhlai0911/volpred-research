@@ -2965,3 +2965,15 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
 - ⏳ 狀態 **`contained`**：待新 commit 由正式 push/CI 路徑落地，並以新的 GitHub
   Test Suite 全綠 receipt 回讀後才升級為
   **`root_cause_fixed_and_verified`**。
+
+## 2026-07-30 — K-COVERAGE legacy metadata-gap containment
+
+- ✅ K1716 live 重播由錯誤 `clean` 修正為 `warn_coverage_metadata_gap`，並將真正同題
+  舊文 `mile_74d12ac6` 排為第一個 review evidence。
+- ✅ 沒有手改 1,907 篇 feed 或把 fuzzy evidence 變 hard block；fallback 只看同
+  audience、live、且完全無可抽取 K-id 的舊文，維持 fail-open。
+- ✅ warning verdict、candidate list 與 dedup audit 已制度化；缺 metadata 不再與
+  「已完整檢查、確定沒有覆蓋」共用 `clean`。
+- ✅ deterministic RED→GREEN；K-coverage 13 tests、dedup／generator 相鄰範圍合計
+  **182 passed**。
+- ⏳ 狀態 **`contained`**：待正式 commit／push 與 GitHub CI read-back 後升級。

@@ -15,7 +15,7 @@ arc duplicates at publish time, but running this BEFORE writing saves the whole
 wasted article. Mandated in the hourly dispatch prompt for daily_article /
 gen_article tasks.
 
-Two gates, in order of confidence:
+Gates and advisory fallbacks, in order of confidence:
 
 1. K-COVERAGE (hard, exact): does a live feed article already carry this K-id
    for this audience? Per `.claude/rules/dedup-gate-audit.md` a same-K-id hit is
@@ -28,6 +28,14 @@ Two gates, in order of confidence:
    them. Coverage is an exact-match fact; it must not depend on a text classifier.
 
 2. ARC (fuzzy): the narrative-arc signature match, unchanged.
+
+3. K-COVERAGE METADATA GAP (warn-only): when exact coverage has no hit, inspect
+   same-audience live articles that expose no experiment ref at all. Surface
+   overlap cannot prove duplication, but it also cannot support a green
+   clearance. The CLI lists candidates and returns a warning verdict.
+
+4. ANCHOR-LESS SIGNATURE (warn-only): if the arc matcher has no useful anchor,
+   report that it could not judge instead of calling the candidate clean.
 
 `--audience` narrows both gates. Publishing a research write-up AND a
 general-reader write-up of the same K is the product design (many K-ids carry
@@ -53,9 +61,12 @@ from volpred.publisher.arc_dedup import (  # noqa: E402
     arc_signature,
     find_arc_duplicates,
     find_k_coverage,
+    find_k_coverage_gap_hints,
     find_lexical_hints,
     is_arc_anchorless,
     is_arc_near_miss,
+)
+from volpred.publisher.arc_dedup import (
     tokenize as _tokens,
 )
 from volpred.publisher.publisher import _log_dedup_decision  # noqa: E402
@@ -71,6 +82,7 @@ __all__ = [
     "LEXICAL_HINT_THRESHOLD",
     "_tokens",
     "find_k_coverage",
+    "find_k_coverage_gap_hints",
     "find_lexical_hints",
     "main",
 ]
@@ -124,6 +136,17 @@ def main() -> int:
     # gate already knows this K+audience is covered, the fuzzy verdict is moot.
     coverage = find_k_coverage(args.k_id, feed, args.audience) if args.k_id else []
     report["k_coverage"] = coverage
+    coverage_gap_hints = (
+        find_k_coverage_gap_hints(
+            args.title,
+            text,
+            feed,
+            args.audience,
+        )
+        if args.k_id and not coverage
+        else []
+    )
+    report["k_coverage_metadata_gap_hints"] = coverage_gap_hints
 
     # Gate 2 — narrative arc (fuzzy). new_refs/audience have always been
     # parameters of find_arc_duplicates; this CLI simply never passed them.
@@ -142,7 +165,7 @@ def main() -> int:
     report["arc_duplicates"] = dups
     report["arc_near_misses"] = near_misses
 
-    # Gate 3 — anchor-less signature. When the arc matcher has nothing to anchor
+    # Gate 4 — anchor-less signature. When the arc matcher has nothing to anchor
     # on, its [] means "I could not look", not "I looked and it is clean", and
     # this CLI must not render the two as the same ✅.
     #
@@ -167,6 +190,7 @@ def main() -> int:
         else "block_arc_dup" if dups
         else "warn_arc_near_miss" if near_misses
         else "unjudged_thin_signature" if thin
+        else "warn_coverage_metadata_gap" if coverage_gap_hints
         else "clean"
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
@@ -248,6 +272,34 @@ def main() -> int:
             "    Do the 3-layer check by hand (grep feed for the theme, not just "
             "the title) before writing. If the topic is real, anchor it to a K-id "
             "or a concrete asset and re-run — then the gate can actually work.",
+            file=sys.stderr,
+        )
+        return 0
+
+    if coverage_gap_hints:
+        for hit in coverage_gap_hints:
+            _log_dedup_decision(
+                storage_dir,
+                "warn_coverage_metadata_gap",
+                args.title,
+                hit.get("id"),
+                "legacy article has no extractable experiment ref; "
+                f"lexical overlap={hit.get('score')}; "
+                f"audience={args.audience or 'any'}",
+                candidate_id=candidate_id,
+            )
+        listed = "\n".join(
+            f"    - {h['id']} [{h['status']}/{h['audience']}] "
+            f"{h['published_at']} (overlap {h['score']}) {h['title']}"
+            for h in coverage_gap_hints
+        )
+        print(
+            "\n⚠️  K-COVERAGE METADATA GAP — exact K coverage found no hit, "
+            "but legacy live articles without extractable experiment refs "
+            "share candidate wording. This is not a clean clearance and is "
+            "not hard-block evidence.\n"
+            f"{listed}\n"
+            "    Review the listed article(s) before dispatching a writer.",
             file=sys.stderr,
         )
         return 0
