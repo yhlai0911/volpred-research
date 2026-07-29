@@ -2892,3 +2892,23 @@ Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy 
   `OPENAI_API_KEY` 污染觸發，未以本 slice 掩蓋。
 
 此 Unicode root class 為 **`root_cause_fixed_and_verified`**；相鄰環境隔離紅燈仍未結案。
+
+## 2026-07-30 — T37 PHASE-Z 首班 derate contract bounded closure（Issue #44）
+
+- ✅ production 同一張 `assign_cf82928c` 曾同時出現 assessor
+  `derates=false`／blocker 0 與 actuator cap 2；queue 證據為首次 row 缺
+  `payload.derates`，不是 grace 或 WIP ownership 判錯。
+- ✅ deterministic RED 在正式 `first PHASE-Z fire → durable queue → slot budget`
+  seam 命中 `KeyError: derates`；修正後首班即持久化 `false`。
+- ✅ upsert 後立即走 canonical reconciler；budget 仍唯讀、缺判定仍 fail-safe，
+  沒有複製 24h grace 邏輯、沒有關閉 incident、沒有收走任何 session WIP。
+- ✅ 兩組 cap tests 已隔離 developer-only occupancy，CI-parity 不再讀
+  `.claude/worktrees`／live agent receipt。
+- ✅ affected suites **101 passed**；Ruff、py_compile、diff check 與 Matt
+  Standards／Spec review均 PASS。
+- ✅ production reconcile 回讀五張 open incident 全部 derate lifted；
+  `assign_cf82928c` 保持 pending、31/31 deferred，slot cap 2 → baseline 4、
+  free slots 2。
+
+此 bounded slice 為 **`root_cause_fixed_and_verified`**；Issue #44 umbrella 的完整
+Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OPEN／`contained`。

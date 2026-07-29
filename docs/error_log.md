@@ -4759,3 +4759,38 @@ Standards／Spec review 均 PASS。完整 repository suite 為 **6568 passed、3
 live macOS producer coalition 不靜止與本機注入政策禁止的 `OPENAI_API_KEY`，未把它們
 冒充本 task 綠燈。本 Unicode incident 五步 Gate 已完成，狀態為
 **`root_cause_fixed_and_verified`**；相鄰 20 項環境隔離問題仍須另行根因收斂。
+
+---
+
+## 2026-07-30 — PHASE-Z 首次建單未持久化 derate verdict，active WIP 被錯降載
+
+**證據化症狀**：production `assign_cf82928c` 的 fresh assessor 回讀
+`closeable=false`、`derates=false`、31 個路徑全部 deferred、blocker 0；同一時刻
+`dispatch_slot_budget.py` 卻回傳 cap 2，理由指向同一 task／fingerprint。queue row
+顯示 `payload.derates` 與 `derates_updated_at` 都不存在。deterministic regression
+重播「第一班 PHASE-Z 建單 → durable queue → slot admission」，修正前精確以
+`KeyError: derates` RED。
+
+**根因層級（incident lifecycle ordering contract）**：
+`_open_stuck_incident()` 先 reconcile 既有 incident、再 upsert 新 incident。新 row
+因此不可能在建立當班取得 canonical verdict；slot budget 對缺值採安全的
+`default=True`，卻因此把已 quarantine 且仍在 24 小時 authoring grace 內的活躍工作
+誤當無主殘留，至少錯降載一班。問題不在 fail-safe，也不在 grace 門檻，而是 assessor
+結果沒有接到新 row 的首次生命週期。
+
+**底層修復與制度化**：PHASE-Z 現在對無 stuck 路徑先收斂既有 incident；有 stuck
+路徑則先由 canonical writer upsert，再在同一 fire lifecycle 立即呼叫唯一
+`foreign_incident.reconcile_incidents` 持久化 verdict。slot budget 保持 read-only，
+沒有複製 git／coverage／grace 邏輯；reconcile 失敗時仍保留缺值 fail-safe 降載。
+首班 regression 同時要求 durable `derates=false` 與後續 cap 非 DERATE，另將兩組 cap
+測試的 occupancy 隔離到 `tmp_path`，消除本機 worktree／agent receipt 造成的
+CI-parity 漂移。
+
+**回歸與 production read-back**：PHASE-Z foreign-incident／slot-budget suites
+**42 passed**，quarantine／ownership suites **59 passed**，Ruff F/E9（changed tests；
+PHASE-Z E9）、py_compile、diff check 均通過；Matt Standards／Spec review PASS。
+production reconcile 不關閉任何 WIP，五張 incident 仍為 pending，但都寫入
+`derates=false`；`assign_cf82928c` 31/31 deferred。slot budget 隨後由錯誤 cap 2
+回到 baseline 4、`open_incident=null`、free 2。此 bounded lifecycle root class
+五步 Gate 已完成，狀態為 **`root_cause_fixed_and_verified`**；Issue #44 的完整
+Producer Isolation／recognizer retirement acceptance 仍維持 OPEN／`contained`。

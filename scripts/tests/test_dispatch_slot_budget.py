@@ -30,6 +30,13 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import dispatch_slot_budget as sb  # noqa: E402
 
 
+@pytest.fixture(autouse=True)
+def isolate_live_occupancy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Cap tests must not inspect developer-only worktrees or agent receipts."""
+    monkeypatch.setattr(sb, "WORKTREES_DIR", tmp_path / "no-live-worktrees")
+    monkeypatch.setattr(sb, "AGENTS_DIR", tmp_path / "no-live-agents")
+
+
 # --- 1. cap has exactly one owner -------------------------------------------
 
 def test_dispatcher_has_no_hardcoded_slot_cap():

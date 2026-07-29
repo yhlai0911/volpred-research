@@ -343,6 +343,29 @@ def test_a_covered_path_someone_is_still_editing_stops_the_derate(repo: Path):
     assert verdict["closeable"] is False
 
 
+def test_first_fire_stamps_live_authoring_verdict_before_slot_admission(repo: Path):
+    """The incident creator and the cap reader must agree on the *first* fire.
+
+    The former ordering reconciled existing incidents and only then upserted the
+    newly observed one.  Its payload therefore had no ``derates`` verdict until
+    a later PHASE-Z pass.  ``dispatch_slot_budget`` correctly treats a missing
+    verdict as unsafe, but that turned covered active work into a one-fire false
+    de-rate.  Pin the real boundary: after the first incident-creating fire, the
+    durable verdict must already match the live assessor before admission reads
+    it.
+    """
+    _write(repo, THEIRS, "still working on it\n")
+
+    _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL)
+
+    incident = _incidents(repo)[0]
+    assert incident["payload"]["derates"] is False
+    assert sb.budget(
+        tasks_path=repo / QUEUE,
+        state_path=repo / "state.json",
+    )["cap"] != sb.DERATE_CAP
+
+
 def test_live_authoring_does_not_churn_the_incident_open_and_shut(repo: Path):
     """Letting the grace mark the incident closeable would close it every fire and
     re-open it the next, so one condition would mint a fresh row every hour — the

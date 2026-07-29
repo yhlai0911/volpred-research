@@ -2,7 +2,21 @@
 
 import json
 
+import pytest
+
+from scripts import dispatch_slot_budget as slot_budget
 from scripts.dispatch_slot_budget import BASE_CAP, DERATE_CAP, SURGE_CAP, budget
+
+
+@pytest.fixture(autouse=True)
+def isolate_live_occupancy(tmp_path, monkeypatch):
+    """Cap tests must not inspect developer-only worktrees or agent receipts."""
+    monkeypatch.setattr(
+        slot_budget, "WORKTREES_DIR", tmp_path / "no-live-worktrees",
+    )
+    monkeypatch.setattr(
+        slot_budget, "AGENTS_DIR", tmp_path / "no-live-agents",
+    )
 
 
 def _write(tmp_path, tasks, state):

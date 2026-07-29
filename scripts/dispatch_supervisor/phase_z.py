@@ -1382,12 +1382,9 @@ def _open_stuck_incident(
     than going quiet.
     """
     tasks_path = repo_root / "storage" / "next_tasks.json"
-    # 解除端跟建立端在同一個地方跑，而且**先跑**：一張關閉條件已滿足的 incident
-    # 若沒人關，降載就會活得比它要治的問題更久（2026-07-21：close condition 全綠、
-    # slot cap 仍是 DERATE_CAP，因為 incident_closeable 根本沒有 caller）。
-    # 放在 `if not stuck` 之前，是因為「這班沒有卡住的檔案」正是最該收單的一班。
-    _reconcile_open_incidents(repo_root, tasks_path)
     if not stuck:
+        # 「這班沒有卡住的檔案」正是最該收掉既有 incident 的一班。
+        _reconcile_open_incidents(repo_root, tasks_path)
         return {"fingerprint": None, "task_id": None, "created": False,
                 "updated": False, "reason": "no_stuck_paths"}
     if not tasks_path.exists():
@@ -1407,10 +1404,18 @@ def _open_stuck_incident(
             tasks_path=tasks_path,
         )
     except Exception as exc:  # noqa: BLE001 — a queue write must not fail a fire
+        # 建單失敗不該連帶阻止既有 incident 的機械解除端。
+        _reconcile_open_incidents(repo_root, tasks_path)
         LOG.warning("phase_z: stuck-path incident upsert failed (%s) — falling back "
                     "to the backed-off CRITICAL so the condition is not silent", exc)
         return {"fingerprint": None, "task_id": None, "created": False,
                 "updated": False, "reason": "error", "error": str(exc)}
+    # 解除端跟建立端在同一班 fire lifecycle 跑，而且必須在 upsert **之後**：
+    # 先 reconcile 再建單會讓新 row 缺少首次 ``derates`` verdict；slot budget 對
+    # 缺值採 fail-safe True，於是 covered live authoring 仍被錯降載一整班。
+    # 這裡重跑 canonical assessor 並把結果持久化，budget 仍維持 read-only、
+    # 不複製 grace 判斷，也不在派工熱路徑執行 git。
+    _reconcile_open_incidents(repo_root, tasks_path)
     LOG.info("phase_z: stuck-path incident %s (%s) — task=%s, fingerprint=%s",
              receipt["reason"], "created" if receipt["created"] else "updated",
              receipt["task_id"], receipt["fingerprint"])
