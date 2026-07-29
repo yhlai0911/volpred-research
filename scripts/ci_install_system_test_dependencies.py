@@ -6,16 +6,43 @@ downloading ``fonts-noto-cjk``.  A raw ``apt-get`` therefore consumed the
 real runtime dependencies, but bounds each process group and retries only a
 finite number of times.  Apt's partial-download cache is deliberately preserved
 between attempts.
+
+Every terminating signal is sent through the stdlib-only durable termination
+owner.  The installer runs under ``sudo python3`` before the project environment
+exists, so it loads that owner directly from its canonical file instead of
+importing the dependency-heavy ``volpred.ops`` package.
 """
 
 from __future__ import annotations
 
+import importlib.util
 import os
+import secrets
 import signal
 import subprocess
+import sys
+import tempfile
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+_TERMINATION_OWNER_PATH = ROOT / "src" / "volpred" / "ops" / "termination.py"
+_TERMINATION_SPEC = importlib.util.spec_from_file_location(
+    "_volpred_ci_termination_owner",
+    _TERMINATION_OWNER_PATH,
+)
+if _TERMINATION_SPEC is None or _TERMINATION_SPEC.loader is None:
+    raise SystemExit(f"cannot load termination owner: {_TERMINATION_OWNER_PATH}")
+termination = importlib.util.module_from_spec(_TERMINATION_SPEC)
+sys.modules[_TERMINATION_SPEC.name] = termination
+_TERMINATION_SPEC.loader.exec_module(termination)
+
+_DEFAULT_TERMINATION_LEDGER = (
+    Path(tempfile.gettempdir())
+    / f"volpred-ci-termination-{os.getpid()}-{secrets.token_hex(8)}.jsonl"
+)
 
 ATTEMPTS = 2
 UPDATE_TIMEOUT_SECONDS = 30
@@ -25,6 +52,8 @@ TERM_GRACE_SECONDS = 5
 KILL_GRACE_SECONDS = 5
 PROCESS_GROUP_POLL_SECONDS = 0.05
 PROCESS_GROUP_CLEANUP_FAILED = 125
+TERMINATION_ACTOR = "ci-install-system-test-dependencies"
+TERMINATION_REASON = "apt_attempt_timeout"
 
 APT_NETWORK_OPTIONS = (
     "-o",
@@ -83,33 +112,61 @@ def _wait_for_process_group_exit(
         time.sleep(min(PROCESS_GROUP_POLL_SECONDS, remaining))
 
 
+def _termination_ledger_path() -> Path:
+    """Return a runner-local receipt ledger outside the canonical checkout."""
+    override = os.environ.get(termination.LEDGER_PATH_ENV)
+    return Path(override) if override else _DEFAULT_TERMINATION_LEDGER
+
+
+def _process_group_drained(process: subprocess.Popen[bytes]) -> bool:
+    process.poll()
+    return not _process_group_exists(process.pid)
+
+
 def _terminate_process_group(process: subprocess.Popen[bytes]) -> bool:
     process_group_id = process.pid
     try:
-        os.killpg(process_group_id, signal.SIGTERM)
-    except ProcessLookupError:  # silent-ok: group exited between the liveness probe and TERM
-        process.poll()
-        return True
-    except PermissionError:  # silent-ok: False becomes explicit rc125 and aborts retry
-        return False
-    if _wait_for_process_group_exit(
-        process,
-        timeout_seconds=TERM_GRACE_SECONDS,
-    ):
-        return True
+        intent = termination.arm(
+            target_kind="pgid",
+            target_id=process_group_id,
+            reason=TERMINATION_REASON,
+            actor=TERMINATION_ACTOR,
+            signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+            ledger_path=_termination_ledger_path(),
+        )
+    except (termination.TerminationIntentError, OSError) as exc:
+        # Fail closed: without a durable pre-signal receipt, no system-owned
+        # terminating syscall may be issued.
+        print(f"[ci-deps] cannot arm termination intent: {exc}", flush=True)
+        return _process_group_drained(process)
 
-    try:
-        os.killpg(process_group_id, signal.SIGKILL)
-    except ProcessLookupError:  # silent-ok: group exited during the TERM grace window
-        process.poll()
-        return True
-    except PermissionError:  # silent-ok: False becomes explicit rc125 and aborts retry
-        return False
-    terminated = _wait_for_process_group_exit(
-        process,
-        timeout_seconds=KILL_GRACE_SECONDS,
-    )
-    return terminated
+    for signum, grace_seconds in (
+        (signal.SIGTERM, TERM_GRACE_SECONDS),
+        (signal.SIGKILL, KILL_GRACE_SECONDS),
+    ):
+        try:
+            status = termination.send_pgid(
+                intent,
+                signum,
+                ledger_path=_termination_ledger_path(),
+            )
+        except (termination.TerminationIntentError, OSError) as exc:
+            print(
+                f"[ci-deps] termination refused signum={signum}: {exc}",
+                flush=True,
+            )
+            return _process_group_drained(process)
+        except PermissionError:  # silent-ok: False becomes explicit rc125 and aborts retry
+            return False
+        if status == "gone":
+            process.poll()
+            return True
+        if _wait_for_process_group_exit(
+            process,
+            timeout_seconds=grace_seconds,
+        ):
+            return True
+    return False
 
 
 def run_bounded(

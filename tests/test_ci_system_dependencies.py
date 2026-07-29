@@ -1,10 +1,21 @@
+import json
 import signal
 from pathlib import Path
+
+import pytest
 
 from scripts import ci_install_system_test_dependencies as deps
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "pytest.yml"
+
+
+def _termination_events(path: Path) -> list[dict]:
+    return [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
 
 
 def test_workflow_delegates_system_dependencies_to_bounded_installer() -> None:
@@ -210,6 +221,86 @@ def test_timeout_cleanup_failure_is_bounded_and_reported(monkeypatch) -> None:
 
     assert terminated is False
     assert signals == [signal.SIGTERM, signal.SIGKILL]
+
+
+def test_timeout_cleanup_receipts_each_signal_before_the_syscall(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ledger = tmp_path / "termination.jsonl"
+    observed_events: list[list[str]] = []
+
+    class StuckLeader:
+        pid = 4321
+
+        def poll(self) -> None:
+            return None
+
+    monkeypatch.setenv(deps.termination.LEDGER_PATH_ENV, str(ledger))
+    monkeypatch.setattr(
+        deps.os,
+        "killpg",
+        lambda _pgid, _signum: observed_events.append(
+            [event["event"] for event in _termination_events(ledger)]
+        ),
+    )
+    monkeypatch.setattr(
+        deps,
+        "_wait_for_process_group_exit",
+        lambda _process, *, timeout_seconds: False,
+    )
+
+    assert deps._terminate_process_group(StuckLeader()) is False
+    assert observed_events == [
+        ["intent_armed", "signal_attempted"],
+        ["intent_armed", "signal_attempted", "signal_result", "signal_attempted"],
+    ]
+    events = _termination_events(ledger)
+    assert events[0]["actor"] == deps.TERMINATION_ACTOR
+    assert events[0]["reason"] == deps.TERMINATION_REASON
+    assert [
+        event["signum"]
+        for event in events
+        if event["event"] == "signal_attempted"
+    ] == [signal.SIGTERM, signal.SIGKILL]
+    assert len({event["intent_id"] for event in events}) == 1
+
+
+@pytest.mark.parametrize(
+    "receipt_error",
+    [
+        deps.termination.TerminationIntentError("cannot persist receipt"),
+        OSError("receipt filesystem unavailable"),
+    ],
+)
+def test_timeout_cleanup_refuses_to_signal_without_a_durable_intent(
+    receipt_error: Exception,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    signals: list[tuple[int, int]] = []
+
+    class StuckLeader:
+        pid = 9876
+
+        def poll(self) -> None:
+            return None
+
+    monkeypatch.setattr(
+        deps.termination,
+        "arm",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            receipt_error
+        ),
+    )
+    monkeypatch.setattr(
+        deps.os,
+        "killpg",
+        lambda pgid, signum: signals.append((pgid, signum)),
+    )
+    monkeypatch.setattr(deps, "_process_group_exists", lambda _pgid: True)
+
+    assert deps._terminate_process_group(StuckLeader()) is False
+    assert signals == []
 
 
 def test_signal_permission_failure_is_reported_as_incomplete_cleanup(
