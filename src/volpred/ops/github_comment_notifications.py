@@ -20,9 +20,10 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 DEFAULT_LOOKBACK_DAYS = 7
 DEFAULT_REPO = "yhlai0911/volpred-research"
+COMMENT_SOURCES = ("issue_comment", "pull_review_comment")
 DEFAULT_STATE_PATH = (
     Path.home()
     / ".volpred"
@@ -41,6 +42,7 @@ class GitHubComment:
     created_at: str
     url: str
     body: str
+    subject_kind: str = "issue"
 
     @property
     def delivery_key(self) -> str:
@@ -136,6 +138,12 @@ def fetch_github_comments(
                     str(item.get("created_at") or "")
                 )
             ).isoformat()
+            html_url = str(item["html_url"])
+            subject_kind = (
+                "pull_request"
+                if source == "pull_review_comment" or "/pull/" in html_url
+                else "issue"
+            )
             comments.append(
                 GitHubComment(
                     source=source,
@@ -143,8 +151,9 @@ def fetch_github_comments(
                     number=number,
                     author=str(author or "unknown"),
                     created_at=created_at,
-                    url=str(item["html_url"]),
+                    url=html_url,
                     body=str(item.get("body") or ""),
+                    subject_kind=subject_kind,
                 )
             )
     unique = {
@@ -191,7 +200,7 @@ def reconcile_github_comments(
 
         comments = _new_comments(
             fetch_comments(_cursor_since(state)),
-            cursor=state.get("cursor"),
+            cursors=state.get("cursors"),
         )
         if not comments:
             return {
@@ -199,7 +208,9 @@ def reconcile_github_comments(
                 "mode": "incremental",
                 "comment_count": 0,
                 "delivery_status": "idle",
-                "cursor": state.get("cursor"),
+                "cursor": _latest_cursor(state),
+                "cursors": state.get("cursors"),
+                "receipt_count": _receipt_count(state),
             }
         return _reconcile_incremental(
             state=state,
@@ -267,8 +278,22 @@ def _reconcile_backfill(
     delivered = _channels_delivered(pending)
     delivery_status = _delivery_status(pending)
     if delivered:
+        receipt_keys: dict[str, str] = {}
+        receipts = state.setdefault("receipts", {})
+        for channel in ("email", "telegram"):
+            receipt_key = f"{notification.idempotency_key}:{channel}"
+            receipts[receipt_key] = dict(pending[channel])
+            receipt_keys[channel] = receipt_key
+        deliveries = state.setdefault("deliveries", {})
+        for comment in comments:
+            deliveries[comment.delivery_key] = {
+                "comment": asdict(comment),
+                "status": "delivered",
+                "delivered_via": notification.idempotency_key,
+                "receipt_keys": dict(receipt_keys),
+            }
         state["backfill_completed_at"] = now.isoformat()
-        state["cursor"] = _cursor_for(comments)
+        state["cursors"] = _cursors_for(comments, baseline=now)
         state["pending_backfill"] = None
         _save_state(state_path, state)
     return {
@@ -281,7 +306,9 @@ def _reconcile_backfill(
             if delivery_status == "blocked"
             else {}
         ),
-        "cursor": state.get("cursor"),
+        "cursor": _latest_cursor(state),
+        "cursors": state.get("cursors"),
+        "receipt_count": _receipt_count(state),
         "channels": {
             channel: dict(pending[channel])
             for channel in ("email", "telegram")
@@ -323,7 +350,7 @@ def _attempt_channel(
         receipt = sender(notification)
     except Exception as exc:  # noqa: BLE001 - transport failure is a retryable receipt
         receipt = {"sent": False, "error": f"{type(exc).__name__}: {exc}"}
-    if bool(receipt.get("sent")):
+    if _receipt_is_complete(receipt):
         channel_state.update(
             status="delivered",
             delivered_at=now.isoformat(),
@@ -402,10 +429,12 @@ def _reconcile_incremental(
                     else {}
                 ),
                 "blocked_comment": comment.delivery_key,
-                "cursor": state.get("cursor"),
+                "cursor": _latest_cursor(state),
+                "cursors": state.get("cursors"),
+                "receipt_count": _receipt_count(state),
                 "channels": latest_channels,
             }
-        state["cursor"] = _cursor_for([comment])
+        _advance_source_cursor(state, comment)
         _save_state(state_path, state)
 
     return {
@@ -413,7 +442,9 @@ def _reconcile_incremental(
         "mode": "incremental",
         "comment_count": examined,
         "delivery_status": "delivered",
-        "cursor": state.get("cursor"),
+        "cursor": _latest_cursor(state),
+        "cursors": state.get("cursors"),
+        "receipt_count": _receipt_count(state),
         "channels": latest_channels,
     }
 
@@ -423,6 +454,13 @@ def _channels_delivered(delivery: dict[str, Any]) -> bool:
         isinstance(delivery.get(channel), dict)
         and delivery[channel].get("status") == "delivered"
         for channel in ("email", "telegram")
+    )
+
+
+def _receipt_is_complete(receipt: dict[str, Any]) -> bool:
+    return bool(receipt.get("sent")) and not any(
+        receipt.get(key)
+        for key in ("error", "reason", "send_error")
     )
 
 
@@ -452,8 +490,9 @@ def _backfill_notification(
     ]
     for comment in comments:
         summary = _summary(comment.body)
+        subject = "PR" if comment.subject_kind == "pull_request" else "Issue"
         lines.append(
-            f"- {comment.created_at} [#{comment.number}]({comment.url}) "
+            f"- {comment.created_at} [{subject} #{comment.number}]({comment.url}) "
             f"{comment.author}: {summary}"
         )
     if not comments:
@@ -466,10 +505,11 @@ def _backfill_notification(
 
 
 def _comment_notification(comment: GitHubComment) -> Notification:
-    title = f"[新架構派發][GitHub #{comment.number}] 新留言"
+    subject = "PR" if comment.subject_kind == "pull_request" else "Issue"
+    title = f"[新架構派發][GitHub #{comment.number}] {subject} 新留言"
     body = "\n".join(
         [
-            f"- 類型：{comment.source}",
+            f"- 類型：{subject}（{comment.source}）",
             f"- 作者：{comment.author}",
             f"- 時間：{comment.created_at}",
             f"- 連結：{comment.url}",
@@ -496,21 +536,24 @@ def _summary(body: str, *, limit: int = 180) -> str:
 def _new_comments(
     comments: list[GitHubComment],
     *,
-    cursor: object,
+    cursors: object,
 ) -> list[GitHubComment]:
     ordered = _sort_comments(comments)
-    if not isinstance(cursor, dict):
+    if not isinstance(cursors, dict):
         return ordered
-    cursor_key = (
-        str(cursor.get("created_at") or ""),
-        str(cursor.get("source") or ""),
-        int(cursor.get("comment_id") or 0),
-    )
-    return [
-        comment
-        for comment in ordered
-        if _comment_key(comment) > cursor_key
-    ]
+    unseen: list[GitHubComment] = []
+    for comment in ordered:
+        cursor = cursors.get(comment.source)
+        if not isinstance(cursor, dict):
+            unseen.append(comment)
+            continue
+        cursor_key = (
+            str(cursor.get("created_at") or ""),
+            int(cursor.get("comment_id") or 0),
+        )
+        if _source_comment_key(comment) > cursor_key:
+            unseen.append(comment)
+    return unseen
 
 
 def _sort_comments(comments: list[GitHubComment]) -> list[GitHubComment]:
@@ -525,23 +568,99 @@ def _comment_key(comment: GitHubComment) -> tuple[str, str, int]:
     return (comment.created_at, comment.source, comment.comment_id)
 
 
-def _cursor_for(comments: list[GitHubComment]) -> dict[str, Any] | None:
-    if not comments:
-        return None
-    latest = max(comments, key=_comment_key)
+def _source_comment_key(comment: GitHubComment) -> tuple[str, int]:
+    return (comment.created_at, comment.comment_id)
+
+
+def _cursor_for(comment: GitHubComment) -> dict[str, Any]:
     return {
-        "created_at": latest.created_at,
-        "source": latest.source,
-        "comment_id": latest.comment_id,
+        "created_at": comment.created_at,
+        "source": comment.source,
+        "comment_id": comment.comment_id,
     }
 
 
+def _cursors_for(
+    comments: list[GitHubComment],
+    *,
+    baseline: datetime,
+) -> dict[str, dict[str, Any]]:
+    cursors = {
+        source: {
+            "created_at": baseline.isoformat(),
+            "source": source,
+            "comment_id": 0,
+        }
+        for source in COMMENT_SOURCES
+    }
+    for source in COMMENT_SOURCES:
+        matches = [comment for comment in comments if comment.source == source]
+        if matches:
+            cursors[source] = _cursor_for(max(matches, key=_source_comment_key))
+    return cursors
+
+
+def _advance_source_cursor(state: dict[str, Any], comment: GitHubComment) -> None:
+    cursors = state.setdefault("cursors", {})
+    current = cursors.get(comment.source)
+    candidate = _cursor_for(comment)
+    if not isinstance(current, dict) or _source_comment_key(comment) > (
+        str(current.get("created_at") or ""),
+        int(current.get("comment_id") or 0),
+    ):
+        cursors[comment.source] = candidate
+
+
+def _latest_cursor(state: dict[str, Any]) -> dict[str, Any] | None:
+    cursors = state.get("cursors")
+    if not isinstance(cursors, dict):
+        return None
+    valid = [
+        cursor
+        for cursor in cursors.values()
+        if isinstance(cursor, dict) and cursor.get("created_at")
+    ]
+    if not valid:
+        return None
+    return max(
+        valid,
+        key=lambda cursor: (
+            str(cursor.get("created_at") or ""),
+            str(cursor.get("source") or ""),
+            int(cursor.get("comment_id") or 0),
+        ),
+    )
+
+
 def _cursor_since(state: dict[str, Any]) -> datetime:
-    cursor = state.get("cursor")
-    if not isinstance(cursor, dict) or not cursor.get("created_at"):
+    cursors = state.get("cursors")
+    if not isinstance(cursors, dict):
+        cursors = {}
+    cursor_times = [
+        _aware(datetime.fromisoformat(str(cursor["created_at"])))
+        for cursor in cursors.values()
+        if isinstance(cursor, dict) and cursor.get("created_at")
+    ]
+    if not cursor_times:
         completed = state.get("backfill_completed_at")
         return _aware(datetime.fromisoformat(str(completed)))
-    return _aware(datetime.fromisoformat(str(cursor["created_at"]))) - timedelta(seconds=1)
+    return min(cursor_times) - timedelta(seconds=1)
+
+
+def _receipt_count(state: dict[str, Any]) -> int:
+    count = len(state.get("receipts", {}))
+    deliveries = state.get("deliveries")
+    if not isinstance(deliveries, dict):
+        return count
+    for delivery in deliveries.values():
+        if not isinstance(delivery, dict) or delivery.get("delivered_via"):
+            continue
+        count += sum(
+            isinstance(delivery.get(channel), dict)
+            and delivery[channel].get("status") == "delivered"
+            for channel in ("email", "telegram")
+        )
+    return count
 
 
 def _aware(value: datetime) -> datetime:
@@ -633,9 +752,10 @@ def _load_state(path: Path) -> dict[str, Any]:
         return {
             "schema_version": SCHEMA_VERSION,
             "backfill_completed_at": None,
-            "cursor": None,
+            "cursors": {},
             "pending_backfill": None,
             "deliveries": {},
+            "receipts": {},
         }
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or payload.get("schema_version") != SCHEMA_VERSION:
