@@ -153,7 +153,8 @@ Schema (version 1)::
       "auth_blocked": false,                      # set true on 'Not logged in' — halts ticks
       "auth_blocked_at": "<ISO|null>",
       "fire_requested_at": "<ISO|null>",          # pending out-of-band fire request (request_fire)
-      "fire_request_reason": "<str|null>",        # why; both cleared by consume_fire_request()
+      "fire_request_reason": "<str|null>",        # why; cleared with request identity
+      "fire_request_id": "<uuid|null>",           # immutable CAS identity (legacy fallback = timestamp)
       "alerts_dedup": {                           # alert_key -> last_sent_at (for dedup window)
         "auth_blocked": "<ISO>"
       }
@@ -213,7 +214,7 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, Mapping
 
 from volpred.canonical_write import guard_canonical_write
 
@@ -402,6 +403,7 @@ def _empty_state() -> dict[str, Any]:
         # null 再度分不清「沒有 pending request」與「這欄位根本沒實作」。
         "fire_requested_at": None,
         "fire_request_reason": None,
+        "fire_request_id": None,
         "alerts_dedup": {},
     }
 
@@ -929,6 +931,7 @@ def request_fire(reason: str, path: Path = STATE_PATH) -> None:
     with _locked_state(path) as (_fh, data):
         data["fire_requested_at"] = _now()
         data["fire_request_reason"] = str(reason)[:200]
+        data["fire_request_id"] = uuid.uuid4().hex
 
 
 def defer_reserved_fire(
@@ -960,6 +963,7 @@ def defer_reserved_fire(
         del data["current_jobs"][index]
         data["fire_requested_at"] = _now()
         data["fire_request_reason"] = str(reason)[:200]
+        data["fire_request_id"] = uuid.uuid4().hex
         _sync_projection(data)
         if _IMPLICIT_JOB_ID.get() == str(job.get("job_id")):
             _IMPLICIT_JOB_ID.set(None)
@@ -976,6 +980,7 @@ def consume_fire_request(path: Path = STATE_PATH) -> str | None:
         reason = str(data.get("fire_request_reason") or "unspecified")
         data["fire_requested_at"] = None
         data["fire_request_reason"] = None
+        data["fire_request_id"] = None
         return reason
 
 
@@ -991,9 +996,37 @@ class JobHandle:
 class FireRequestChanged(RuntimeError):
     """The pending demand no longer matches the scheduler's decision input."""
 
-    def __init__(self, actual: str | None) -> None:
-        super().__init__(f"fire request changed during admission: {actual!r}")
+    def __init__(
+        self,
+        actual: str | None,
+        actual_request_id: str | None = None,
+    ) -> None:
+        super().__init__(
+            "fire request changed during admission: "
+            f"reason={actual!r} request_id={actual_request_id!r}"
+        )
         self.actual = actual
+        self.actual_request_id = actual_request_id
+
+
+def fire_request_snapshot(data: Mapping[str, Any]) -> tuple[str | None, str | None]:
+    """Return the pending request's decision value and immutable CAS identity.
+
+    Pre-token state files remain live-compatible: their timestamp is already a
+    stable identity, so the first new scheduler can consume them without a
+    schema reset or an unsafe random migration during a read.
+    """
+    requested_at = data.get("fire_requested_at")
+    if not requested_at:
+        return None, None
+    reason = str(data.get("fire_request_reason") or "unspecified")
+    request_id = data.get("fire_request_id")
+    identity = (
+        str(request_id)
+        if isinstance(request_id, str) and request_id
+        else f"legacy:{requested_at}"
+    )
+    return reason, identity
 
 
 def reserve_fire(
@@ -1009,6 +1042,7 @@ def reserve_fire(
     cohort_id: str | None = None,
     consume_request: bool = False,
     expected_fire_request: str | None = None,
+    expected_fire_request_id: str | None = None,
     path: Path = STATE_PATH,
 ) -> JobHandle:
     """Atomically claim the lowest free slot BEFORE spawning the child.
@@ -1071,13 +1105,12 @@ def reserve_fire(
                 f"reserve_fire while current_jobs at max_slots={max_slots}: {jobs}"
             )
         if consume_request:
-            actual_request = (
-                str(data.get("fire_request_reason") or "unspecified")
-                if data.get("fire_requested_at")
-                else None
-            )
-            if actual_request != expected_fire_request:
-                raise FireRequestChanged(actual_request)
+            actual_request, actual_request_id = fire_request_snapshot(data)
+            if (
+                actual_request != expected_fire_request
+                or actual_request_id != expected_fire_request_id
+            ):
+                raise FireRequestChanged(actual_request, actual_request_id)
         active_ids = {str(job.get("job_id")) for job in jobs}
         job_id = uuid.uuid4().hex
         while job_id in active_ids:  # defensive against a monkeypatched UUID source
@@ -1109,6 +1142,7 @@ def reserve_fire(
         if consume_request:
             data["fire_requested_at"] = None
             data["fire_request_reason"] = None
+            data["fire_request_id"] = None
         data["last_fire_at"] = started_at
         _sync_projection(data)
     _IMPLICIT_JOB_ID.set(job_id)

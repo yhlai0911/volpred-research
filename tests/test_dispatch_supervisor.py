@@ -4081,6 +4081,80 @@ def test_fire_request_roundtrip(tmp_path: Path) -> None:
     assert state.read_state(state_path)["fire_requested_at"] is None
 
 
+def test_atomic_reservation_rejects_same_reason_replacement_request(
+    tmp_path: Path,
+) -> None:
+    """Immutable identity closes the same-reason ABA hole in admission CAS."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    state.request_fire("same-owner-reason", path=state_path)
+    original = state.read_state(state_path)
+    original_request_id = original["fire_request_id"]
+    last_fire_before = state.read_state(state_path)["last_fire_at"]
+
+    state.request_fire("same-owner-reason", path=state_path)
+    replacement = state.read_state(state_path)
+    assert replacement["fire_request_id"] != original_request_id
+
+    with pytest.raises(state.FireRequestChanged) as exc_info:
+        state.reserve_fire(
+            schedule_id="hourly_dispatch",
+            attempt=1,
+            model="opus",
+            log_path="/tmp/worker.log",
+            consume_request=True,
+            expected_fire_request="same-owner-reason",
+            expected_fire_request_id=original_request_id,
+            path=state_path,
+        )
+
+    assert exc_info.value.actual == "same-owner-reason"
+    assert exc_info.value.actual_request_id == replacement["fire_request_id"]
+    snapshot = state.read_state(state_path)
+    assert snapshot["fire_request_reason"] == "same-owner-reason"
+    assert snapshot["fire_request_id"] == replacement["fire_request_id"]
+    assert snapshot["fire_requested_at"] is not None
+    assert snapshot["last_fire_at"] == last_fire_before
+    assert snapshot["current_jobs"] == []
+
+
+def test_atomic_reservation_accepts_legacy_timestamp_request_identity(
+    tmp_path: Path,
+) -> None:
+    """A live pre-token state migrates by stable timestamp, never by reset."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    requested_at = "2026-07-29T18:30:00+00:00"
+    with state._locked_state(state_path) as (_fh, data):
+        data["fire_requested_at"] = requested_at
+        data["fire_request_reason"] = "legacy-owner"
+        data.pop("fire_request_id", None)
+    snapshot = state.read_state(state_path)
+    reason, request_id = state.fire_request_snapshot(snapshot)
+    assert (reason, request_id) == (
+        "legacy-owner",
+        f"legacy:{requested_at}",
+    )
+
+    handle = state.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/worker.log",
+        consume_request=True,
+        expected_fire_request=reason,
+        expected_fire_request_id=request_id,
+        path=state_path,
+    )
+
+    assert handle.job_id
+    current = state.read_state(state_path)
+    assert current["fire_requested_at"] is None
+    assert current["fire_request_reason"] is None
+    assert current["fire_request_id"] is None
+    assert len(current["current_jobs"]) == 1
+
+
 def test_legacy_multislot_state_fails_closed_without_consuming_request(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:

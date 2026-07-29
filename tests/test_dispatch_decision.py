@@ -254,8 +254,8 @@ def test_dry_run_and_fire_agree_on_pregate_skip(consistency_env, monkeypatch) ->
 
 
 def test_requested_fire_consistency_and_request_consumption(consistency_env, monkeypatch) -> None:
-    """Off-cadence requested fire: dry-run and fire agree, and both consume the
-    request exactly once (dry-run parity with the pre-H4 behavior)."""
+    """Off-cadence requested fire: both paths agree on the Decision, while
+    only a real atomic reservation consumes the owner request."""
     env = consistency_env
     schedules_path = env.schedules({"mode": "enforce", "window_hours": 3.0})
     monkeypatch.setattr(
@@ -271,7 +271,7 @@ def test_requested_fire_consistency_and_request_consumption(consistency_env, mon
     assert dry["action"] == "dry_run_fire"
     d_dry = env.decisions[-1]
     assert d_dry.fire_reason == "requested:boss-email"
-    assert st.read_state(state_path)["fire_requested_at"] is None  # consumed
+    assert st.read_state(state_path)["fire_requested_at"] is not None  # observational
 
     env.reset_state()
     env.decisions.clear()
@@ -301,3 +301,53 @@ def test_request_survives_full_pool_skip(consistency_env, monkeypatch) -> None:
 
     assert result["reason"] == "producer_slot_in_flight"
     assert st.read_state(state_path)["fire_request_reason"] == "boss-email"  # survived
+
+
+def test_real_fire_retries_same_reason_replacement_by_request_identity(
+    consistency_env,
+    monkeypatch,
+) -> None:
+    """A same-reason owner replacement is distinct even when Decision is equal."""
+    env = consistency_env
+    schedules_path = env.schedules({"mode": "enforce", "window_hours": 3.0})
+    monkeypatch.setattr(
+        scheduler,
+        "_run_pregate",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("requested fire must bypass pregate")
+        ),
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_due_to_fire",
+        lambda **_kwargs: (False, datetime(2026, 7, 20, 10, 7)),
+    )
+    state_path = env.state_path
+    st.request_fire("same-owner", path=state_path)
+    first_id = st.read_state(state_path)["fire_request_id"]
+    reserve_after_fixture_spy = scheduler.state.reserve_fire
+    attempts = {"count": 0}
+
+    def replace_once_before_reservation(**kwargs):
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            st.request_fire("same-owner", path=state_path)
+            assert st.read_state(state_path)["fire_request_id"] != first_id
+        return reserve_after_fixture_spy(**kwargs)
+
+    monkeypatch.setattr(
+        scheduler.state,
+        "reserve_fire",
+        replace_once_before_reservation,
+    )
+
+    result = env.tick(dry_run=False, schedules_path=schedules_path)
+
+    assert result["action"] == "fired"
+    assert attempts["count"] == 2
+    assert len(env.reserve_calls) == 2
+    assert len(env.decisions) == 2
+    snapshot = st.read_state(state_path)
+    assert snapshot["fire_requested_at"] is None
+    assert snapshot["fire_request_reason"] is None
+    assert snapshot["fire_request_id"] is None

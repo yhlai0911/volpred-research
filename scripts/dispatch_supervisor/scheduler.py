@@ -1678,10 +1678,7 @@ async def _tick_once(
     # Peek (not consume) the out-of-band request: a request deliberately
     # survives auth / full-pool / bootstrap skips, so consumption may only
     # happen after the admission gates pass (below).
-    peeked_request = (
-        str(snap.get("fire_request_reason") or "unspecified")
-        if snap.get("fire_requested_at") else None
-    )
+    peeked_request, peeked_request_id = state.fire_request_snapshot(snap)
     dec_input = decision.DecisionInput(
         auth_blocked=bool(snap.get("auth_blocked")),
         active_slots=len(current_jobs),
@@ -1786,7 +1783,8 @@ async def _tick_once(
         return {"action": "skip", "reason": f"decision_error:{dec.action}"}
     if dry_run:
         LOG.info("DRY-RUN would fire (prev_scheduled=%s)", prev_fire.isoformat())
-        # update last_fire_at so we don't re-log every tick — shadow run still tracks
+        # H4 dry-run is observational for demand: it tracks the schedule slot
+        # but must not consume an owner request or reserve/spawn a worker.
         with state._locked_state(state_path) as (_fh, data):
             data["last_fire_at"] = state._now()
         return {"action": "dry_run_fire", "prev_fire": prev_fire.isoformat()}
@@ -1805,6 +1803,7 @@ async def _tick_once(
             final_input = dec_input
             final_dec = dec
             expected_request = dec_input.fire_request
+            expected_request_id = peeked_request_id
             for request_attempt in range(2):
                 fire_reason = final_dec.fire_reason or "cron"
                 try:
@@ -1824,6 +1823,7 @@ async def _tick_once(
                         ),
                         consume_request=True,
                         expected_fire_request=expected_request,
+                        expected_fire_request_id=expected_request_id,
                         path=state_path,
                     )
                     break
@@ -1838,6 +1838,7 @@ async def _tick_once(
                             "reason": "fire_request_changed",
                         }
                     expected_request = exc.actual
+                    expected_request_id = exc.actual_request_id
                     final_input = dataclasses.replace(
                         dec_input,
                         fire_request=expected_request,

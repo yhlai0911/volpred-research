@@ -4633,3 +4633,33 @@ fresh boot，terminal receipt
 回讀 `state=completed`、observed source SHA 與 supervisor generation 相符；最終
 `auth_blocked=false`、`cutover_quiesce=null`、`current_jobs=[]`。本 incident 五步
 Gate 已完成，狀態升為 **`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-07-30 — Issue #42 request CAS 只比 reason，且舊測試誤要求 dry-run 吞 demand
+
+**證據化症狀**：GitHub Actions run `30477972221` 在
+`test_requested_fire_consistency_and_request_consumption` 失敗。`983a8eaf5` 已把正式
+fire 的 request consume 移進 reservation transaction，但舊測試仍要求 dry-run 清除
+`fire_requested_at`。進一步用同一 reason 連續呼叫兩次 `request_fire()`，可證明正式
+reservation 的 expected-value CAS 只比較 reason；第二個較新的 request 會被舊 decision
+視為相同並清掉。
+
+**根因層級（dry-run contract／request identity／admission state machine）**：
+H4 canonical design 規定 dry-run 除 `last_fire_at` 外不得改 dispatch state，Issue #42
+也規定只有 reservation 成功才 consume demand；但舊測試把「同一 Decision」誤擴張成
+「同一副作用」。同時 request 沒有不可變 identity，`fire_request_reason` 這個展示值被
+錯當 CAS token，形成 same-reason ABA。
+
+**底層修復與制度化**：dry-run 恢復 observational demand 語意，只保留既有
+`last_fire_at` tracking；正式 `request_fire()` 為每次 demand 產生 UUID
+`fire_request_id`，scheduler snapshot 與 `reserve_fire()` 在同一 state-lock
+transaction 內同時比較 reason + identity，reservation 成功後才一起清除三個 request
+欄位。升級前已存在的 pending request 不重設 state，而以原
+`fire_requested_at` 形成穩定的 `legacy:<timestamp>` identity。
+
+**回歸與狀態**：原 CI symptom、same-reason replacement、scheduler CAS retry、
+request disappearance 與 legacy timestamp migration 共 5 個焦點測試通過；Matt
+Spec／Standards 重審均 PASS、Ruff F 與 diff check 通過；包含最後兩個 reviewer
+regression 的完整 dispatch/reload suite **341 passed、1 skipped**。仍需等 GitHub CI
+與 immutable supervisor release 回讀；在這兩項完成前狀態為 **`contained`**。
