@@ -1,6 +1,6 @@
 # K1694 — FCM 清算集中度與商品小型交易人的高波動排擠
 
-## 狀態：round 6 **PASS**（Codex，2026-07-30；reviewed_commit `2724b3587`）
+## 狀態：round 7 **PASS**（Claude opus/xhigh，2026-07-30；全 claim surface 認證）
 
 - **round 1 → FAIL**（`storage/ops/codex_reviews/k1694_verdict.md`）：8 項缺陷
 - **round 2 → FAIL**（`k1694_verdict_round2.md`）：4 項要求
@@ -8,7 +8,13 @@
 - **round 4 → FAIL**（`k1694_verdict_round4.md`）：2 項 RV 完整性反例
 - **round 5 → FAIL**（`review_verdict.json`）：2 項缺陷 —— 通用休市白名單無出處、
   端點測試自己當自己的 oracle
-- **round 6 → PASS**（`review_verdict.json`）：兩項缺陷皆 RESOLVED，無新增 blocking defect
+- **round 6 → PASS**（Codex，reviewed_commit `2724b3587`）：兩項缺陷皆 RESOLVED，無新增 blocking defect
+- **round 7 → PASS**：round 6 的裁決只 pin 了 8 個檔中的 3 個，README／兩張圖／
+  `lag_sensitivity.py`／`gate_history/` blob 都沒進 `reviewed_sha256`。round 7 把**全部 9 個**
+  claim-surface 檔案逐 byte 認證。過程中發現並修復一件**產物遺失**：main 整合 commit
+  `019b4e4f0` 宣稱「restoring the Codex-PASS artifacts」，卻把 reviewer 在 `2724b3587`
+  看過的 `figures/fig1_fcm_hhi_timeseries.png` 刪掉了（107974 → 0 bytes）。已從
+  `2724b3587` 原封還原（sha256 `30436a7d…`），未重跑。科學結論一字未改。
 
 `review_verdict.json` 已 PASS，`knowledge_promotion_allowed: true`。knowledge 條目仍**只能由
 主線程**寫（K1259），且每個數字必須從 `K1694_results.json` 程式化取得，不得從本 README 轉抄。
