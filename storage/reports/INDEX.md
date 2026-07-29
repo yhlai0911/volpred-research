@@ -1,26 +1,27 @@
 # Feed Index
 
-_Last built: 2026-07-29 00:05 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-29 06:09 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1901**  (with thumbnail: 89)
-- Last 30 days: **220**
-- Total chars (content): 5,900,925
+- Total articles: **1902**  (with thumbnail: 89)
+- Last 30 days: **219**
+- Total chars (content): 5,910,464
 
-**Status**: published=1695, archived=124, unpublished=66, retracted=13, draft=2, wont_fix=1
+**Status**: published=1697, archived=124, unpublished=66, retracted=13, draft=1, wont_fix=1
 
-**Audience**: research=1144, general=492, daily=165, unknown=77, member_qa=15, event=8
+**Audience**: research=1144, general=493, daily=165, unknown=77, member_qa=15, event=8
 
-**Category**: milestone=917, general=862, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
+**Category**: milestone=917, general=863, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
 
-## 最近 30 天 (220)
+## 最近 30 天 (219)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-29 | `mile_bbd72c0b` | 金絲雀，還是住隔壁的鄰居？Fed 拍板加四大雲端交卷的這一週，幣圈那盞燈到底能不能看 | general | general | published | 9539 |  | 一般讀者, 精選導讀, 比特幣, 穩定幣, 波動率, 風險管理 |
+| 2026-07-29 | `mile_35863986` | 我幫波動預測模型多裝了兩個零件，跑完 4090 天：它追平冠軍，就是超不過去 | general | general | published | 4662 |  | 一般讀者, 波動率, 模型比較, 樣本外驗證, SPY, 美股 |
 | 2026-07-29 | `mile_e9623067` | 每日策略建議：VIX 18.21（正常）— 2026-07-29 | daily | general | published | 1709 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-29 | `mile_9adf8925` | 2026-07-29 本日持倉比率建議（依據 2026-07-28 收盤數據） | daily | milestone | published | 1132 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
-| 2026-07-28 | `mile_35863986` | 我幫波動預測模型多裝了兩個零件，跑完 4090 天：它追平冠軍，就是超不過去 | general | general | draft | 4662 |  | 一般讀者, 波動率, 模型比較, 樣本外驗證, SPY, 美股 |
 | 2026-07-28 | `mile_62fa3fbc` | 賣波動的甜頭沒消失，消失的是能活著領錢的本金 | general | general | published | 3728 |  | 一般讀者, volatility, etf, risk, short-vol |
 | 2026-07-28 | `mile_3c83e665` | 資金費率能預測比特幣波動嗎？我認真拿六年數據測了這個「聰明錢訊號」 | general | general | published | 2757 |  | 一般讀者, btc, funding-rate, volatility, crypto, forecasting |
 | 2026-07-28 | `mile_eaacd072` | 穩定幣的波動警報：市場盯著資金撤離，會說話的是那 0.45% 脫鉤 | general | general | published | 2480 |  | 一般讀者 |
@@ -236,13 +237,13 @@ _Last built: 2026-07-29 00:05 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-29 | `mile_082f0578` | 交易量歸零那天，薄市場 ETF 後面 22 天更容易出事 | general | general | published | 1539 |  | 一般讀者, ETF, 流動性, 風險管理, 資料品質 |
 | 2026-06-29 | `mile_153d2908` | K1568：Federal Register 監管文件流量能預測 ETF 波動率嗎？144 個檢定、14 個 raw 顯著、Bonferroni 全滅 | research | milestone | published | 6855 |  | 研究, Federal Register, compliance, ETF, multiple testing, Bonferroni |
 | 2026-06-29 | `mile_190c7e3c` | 把美股最熱門的 5 種因子輪著買，最後還是沒贏最笨的那個組合 | research | milestone | published | 3099 |  | 研究, 美股, 因子ETF, 資產配置, 輪動策略, 黃金 |
-| 2026-06-29 | `mile_7052f32c` | VIX 自己的波動率，能不能預測 VIX？ | research | milestone | published | 4722 |  | 研究, vix, vol-of-vol, realized-vol, multiple-testing, bonferroni |
-| 2026-06-29 | `mile_abe9e68f` | 每一次失敗都在說同一件事：日頻資料的訊號天花板 | general | general | published | 5196 |  | 一般讀者, 精選導讀, daily_digest, 波動率預測, GARCH, HAR-RV |
 
-<details><summary>## 2026-Q2 (1009)</summary>
+<details><summary>## 2026-Q2 (1011)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-29 | `mile_7052f32c` | VIX 自己的波動率，能不能預測 VIX？ | research | milestone | published | 4722 |  | 研究, vix, vol-of-vol, realized-vol, multiple-testing, bonferroni |
+| 2026-06-29 | `mile_abe9e68f` | 每一次失敗都在說同一件事：日頻資料的訊號天花板 | general | general | published | 5196 |  | 一般讀者, 精選導讀, daily_digest, 波動率預測, GARCH, HAR-RV |
 | 2026-06-28 | `mile_a0b174f9` | 蘋果一週跌 4.8%、波動跳 2.3 倍；NVDA 跌 8.6% 卻反而最低 — AI 硬體股的兩種定價 | general | general | published | 2113 |  | 一般讀者, trending_repost, 半導體, AI硬體, 波動率, 跨市場 |
 | 2026-06-28 | `mile_e8d4f335` | 日頻波動率，HAR-RV 贏不了 GARCH：60 場跨資產對戰的紀錄 | research | milestone | published | 3704 |  | 研究, HAR-RV, GARCH, 波動率預測, 跨資產, 日頻 |
 | 2026-06-28 | `mile_410f7532` | 把 VIX 期限結構算成「波動風險溢酬」，能預測美股回檔嗎？4500 天回測，答案是不行 | research | milestone | published | 3518 |  | 研究, VIX, 期限結構, VRP, SPY, 回檔 |
