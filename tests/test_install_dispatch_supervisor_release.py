@@ -32,13 +32,8 @@ def _verified_legacy_coalition(
         calls["capture"].append(anchor_pid)
         return dict(custody)
 
-    def members(
-        _pgid: int,
-        *,
-        job_id: str | None,
-        custody: dict[str, object] | None = None,
-    ) -> list[int]:
-        calls["members"].append((job_id, custody))
+    def members(custody: dict[str, object] | None = None) -> list[int]:
+        calls["members"].append(custody)
         return []
 
     monkeypatch.setattr(
@@ -48,7 +43,7 @@ def _verified_legacy_coalition(
     )
     monkeypatch.setattr(
         installer.procutil,
-        "producer_cohort_members_checked",
+        "producer_custody_all_members_checked",
         members,
     )
     return calls
@@ -331,7 +326,7 @@ def test_cutover_installs_launchd_job_and_reads_back_exact_release(
     assert terminal_intent["status"] == "completed_verified"
     assert _verified_legacy_coalition["capture"] == [777]
     assert len(_verified_legacy_coalition["members"]) == 1
-    assert _verified_legacy_coalition["members"][0][0] == "legacy-cutover"
+    assert _verified_legacy_coalition["members"][0]["trusted_unique_ids"] == [1001]
 
 
 def test_cutover_restores_legacy_plist_and_pointer_when_bootstrap_fails(

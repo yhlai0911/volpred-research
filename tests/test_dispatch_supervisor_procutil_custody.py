@@ -164,6 +164,30 @@ def test_darwin_cohort_uses_uniqueids_and_ignores_outsider_pgid(
     assert members == [12]
 
 
+def test_darwin_complete_custody_includes_trusted_legacy_processes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api = _FakeDarwinCustodyAPI(
+        pids=[10, 11, 12],
+        identities={
+            10: (100, 9000),
+            11: (200, 100),
+            12: (300, 200),
+        },
+    )
+    _install_fake_darwin(monkeypatch, api)
+
+    assert procutil.producer_custody_all_members_checked(
+        {
+            "version": 2,
+            "host_uuid": HOST_UUID,
+            "boot_session_uuid": BOOT_UUID,
+            "resource_coalition_id": 73,
+            "trusted_unique_ids": [100, 200],
+        }
+    ) == [10, 11, 12]
+
+
 @pytest.mark.parametrize(
     "custody",
     [

@@ -266,10 +266,8 @@ def _cutover_quiesced(
         )
         if absence_error:
             raise CutoverError(absence_error)
-        legacy_members = procutil.producer_cohort_members_checked(
-            0,
-            job_id="legacy-cutover",
-            custody=legacy_custody,
+        legacy_members = procutil.producer_custody_all_members_checked(
+            legacy_custody,
         )
         if legacy_members != []:
             raise CutoverError(

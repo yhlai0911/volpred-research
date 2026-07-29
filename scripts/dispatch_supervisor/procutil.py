@@ -692,6 +692,38 @@ def producer_cohort_members_checked(
     return sorted(set(group_members))
 
 
+def producer_custody_all_members_checked(
+    custody: dict[str, object] | None,
+) -> list[int] | None:
+    """Return every live member of one saved Darwin coalition.
+
+    This is deliberately stricter than :func:`producer_cohort_members_checked`:
+    it does not exclude the trusted pre-spawn ancestry.  Migration uses it
+    after unloading the legacy service so the old wrapper and supervisor must
+    both disappear along with every descendant before a new custody ledger can
+    be initialized.
+    """
+    if sys.platform != "darwin":
+        return None
+    parsed = _parse_producer_custody(custody)
+    if parsed is None:
+        return None
+    coalition_id, _trusted, saved_host_uuid, saved_boot_uuid = parsed
+    try:
+        api = _get_darwin_custody_api()
+        if api.host_uuid() != saved_host_uuid:
+            return None
+        if api.boot_session_uuid() != saved_boot_uuid:
+            return []
+        return sorted(_coalition_identities(api, coalition_id))
+    except _CUSTODY_PROBE_ERRORS as exc:
+        LOG.warning(
+            "complete producer custody probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+
+
 def kill_producer_cohort(
     custody: dict[str, object] | None,
     *,
