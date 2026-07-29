@@ -350,12 +350,27 @@ for sig in SLOPE_SIGNALS + ["ts_realized"]:
 # The pure-iid variant is analytically degenerate: zeta30*(sqrt(30/T)-1) is a constant
 # multiple of the level, so |corr| = 1 by construction.  Recorded so the reader can see
 # that the VIX-ratio term is the ONLY thing keeping construction (c) off that boundary.
+#
+# The correlation is COMPUTED, not asserted (2026-07-30 collection audit ISSUE-1): the
+# constant sqrt(30/T)-1 is NEGATIVE for every T > 30, and skew_level is zeta30 itself
+# (L265), so the sign is -1.0, not +1.0.  A hardcoded +1.0 sat here and was wrong; the
+# |corr| = 1 degeneracy conclusion it supports is unaffected, but a number nobody computed
+# is exactly how a wrong number survives review.  Build the series and measure it.
+_iid_only_slope_3m = zeta30 * (np.sqrt(CAL_DAYS["VIX"] / CAL_DAYS["VIX3M"]) - 1.0)
+_iid_pair = pd.concat(
+    [_iid_only_slope_3m.rename("iid_slope"), signals["skew_level"].rename("level")], axis=1
+).dropna()
+_iid_corr = float(_iid_pair.corr().iloc[0, 1])
 degeneracy["analytic_note_iid_only_slope"] = {
     "formula": "zeta_T_iid - zeta_30 = zeta_30 * (sqrt(30/T) - 1)",
-    "corr_with_skew_level": 1.0,
-    "degenerate": True,
+    "multiplier_at_T_93": round(float(np.sqrt(CAL_DAYS["VIX"] / CAL_DAYS["VIX3M"]) - 1.0), 6),
+    "corr_with_skew_level": round(_iid_corr, 4),
+    "corr_source": "computed on the constructed iid-only slope at T=93, not asserted",
+    "n": int(len(_iid_pair)),
+    "degenerate": bool(abs(_iid_corr) > DEGENERACY_CORR),
     "comment": "A slope built from iid sqrt-scaling alone carries exactly zero information "
-    "beyond the SKEW level. Only the observed VIX/VIX_T ratio breaks that identity.",
+    "beyond the SKEW level: the multiplier is a negative constant, so the correlation is "
+    "-1 exactly. Only the observed VIX/VIX_T ratio breaks that identity.",
 }
 degeneracy["analytic_note_ts_realized"] = {
     "formula": "(zeta_30 - RS_252) - (zeta_30 - RS_21) = RS_21 - RS_252",
@@ -437,8 +452,11 @@ def run_lookahead_audit(n_probe: int = 200) -> dict:
     )
 
     # (2) The regression frames themselves: for a sample of assembled (y, x) frames, the
-    # x column must equal the raw signal one session earlier, and the target must never
-    # be observable before its own origin date.
+    # x column must equal the raw signal one session earlier.  (2026-07-30 collection audit
+    # ISSUE-3: this docstring used to also claim it verified "the target must never be
+    # observable before its own origin date" — it never did; that property is check (5)'s
+    # independent recomputation of fwd_ret_252 / fwd_mdd_252.  A dead no-op `continue`
+    # guard that suggested otherwise has been removed.)
     frame_ok = True
     for sig in ["skew_level", "rn_slope_6m", "ts_realized"]:
         for H in (21, 252):
@@ -452,8 +470,6 @@ def run_lookahead_audit(n_probe: int = 200) -> dict:
                 pos = signals.index.get_loc(date)
                 if float(fr["x"].iloc[k]) != float(signals[sig].iloc[pos - 1]):
                     frame_ok = False
-                if date + pd.Timedelta(days=1) > signals.index[-1]:
-                    continue
     checks.append(
         {
             "name": "assembled_regression_frames_carry_the_t_minus_1_regressor",
@@ -464,18 +480,54 @@ def run_lookahead_audit(n_probe: int = 200) -> dict:
 
     # (3) The OOS training cut: for every origin the loop would use, the last training row
     # must have its whole target window closed at or before the forecast origin.
+    #
+    # 2026-07-30 collection audit ISSUE-2: the previous version of this check restated the
+    # loop's own algebra (`j_max = i - H; if (j_max - 1) + H > i`), which reduces to
+    # `i - 1 > i` and can never fire.  It passed unconditionally and had ZERO power to
+    # detect an OOS lookahead.  A check that cannot fail is not evidence.  This version
+    # measures the thing itself: it walks the SESSION CALENDAR forward H sessions from the
+    # last training row's own date and asserts that window closes on or before the origin
+    # date.  It is independent of the index arithmetic it is auditing, so a sign error or
+    # an off-by-one in the loop would now surface here.
     oos_ok = True
+    oos_probed = 0
+    oos_min_gap_sessions = None
+    session_index = px.index
     for H in (126, 252):
-        n_rows = len(targets[f"fwd_ret_{H}"].dropna())
-        for i in range(MIN_TRAIN + H, n_rows, 500):
+        frame_probe = pd.concat(
+            [
+                targets[f"fwd_ret_{H}"].rename("y"),
+                signals["skew_level"].shift(1).rename("x"),
+            ],
+            axis=1,
+        ).dropna()
+        n_rows = len(frame_probe)
+        for i in range(MIN_TRAIN + H, n_rows, STEP):
             j_max = i - H  # rows [0, j_max) are the training set
-            last_train_row = j_max - 1
-            if last_train_row + H > i:
+            if j_max < MIN_TRAIN:
+                continue
+            last_train_date = frame_probe.index[j_max - 1]
+            origin_date = frame_probe.index[i]
+            pos = session_index.get_loc(last_train_date)
+            if pos + H >= len(session_index):
+                continue
+            window_close_date = session_index[pos + H]
+            gap = session_index.get_loc(origin_date) - (pos + H)
+            oos_min_gap_sessions = (
+                gap if oos_min_gap_sessions is None else min(oos_min_gap_sessions, gap)
+            )
+            oos_probed += 1
+            if window_close_date > origin_date:
                 oos_ok = False
     checks.append(
         {
             "name": "oos_training_rows_have_target_window_closed_before_origin",
-            "rule": "last training row j satisfies j + H <= i",
+            "rule": "the H-th session after the last training row's date is <= the origin date",
+            "measured_on": "SPY session calendar, independent of the loop's row arithmetic",
+            "n_origins_probed": int(oos_probed),
+            "min_gap_sessions_between_window_close_and_origin": (
+                int(oos_min_gap_sessions) if oos_min_gap_sessions is not None else None
+            ),
             "passed": bool(oos_ok),
         }
     )

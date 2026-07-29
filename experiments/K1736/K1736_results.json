@@ -314,7 +314,10 @@
         },
         {
           "name": "oos_training_rows_have_target_window_closed_before_origin",
-          "rule": "last training row j satisfies j + H <= i",
+          "rule": "the H-th session after the last training row's date is <= the origin date",
+          "measured_on": "SPY session calendar, independent of the loop's row arithmetic",
+          "n_origins_probed": 666,
+          "min_gap_sessions_between_window_close_and_origin": 1,
           "passed": true
         },
         {
@@ -452,9 +455,12 @@
     },
     "analytic_note_iid_only_slope": {
       "formula": "zeta_T_iid - zeta_30 = zeta_30 * (sqrt(30/T) - 1)",
-      "corr_with_skew_level": 1.0,
+      "multiplier_at_T_93": -0.432038,
+      "corr_with_skew_level": -1.0,
+      "corr_source": "computed on the constructed iid-only slope at T=93, not asserted",
+      "n": 8356,
       "degenerate": true,
-      "comment": "A slope built from iid sqrt-scaling alone carries exactly zero information beyond the SKEW level. Only the observed VIX/VIX_T ratio breaks that identity."
+      "comment": "A slope built from iid sqrt-scaling alone carries exactly zero information beyond the SKEW level: the multiplier is a negative constant, so the correlation is -1 exactly. Only the observed VIX/VIX_T ratio breaks that identity."
     },
     "analytic_note_ts_realized": {
       "formula": "(zeta_30 - RS_252) - (zeta_30 - RS_21) = RS_21 - RS_252",
@@ -6846,10 +6852,10 @@
   },
   "code_trace": {
     "path": "experiments/K1736/K1736.py",
-    "sha256": "ab037e14af669be0740dc6c6dc35688aceb4ea64a04606751a186412b39bc210",
-    "size_bytes": 61593
+    "sha256": "2be05aad1479895d047c943d3edd286c228664142b2352989cbad76d137a9562",
+    "size_bytes": 64660
   },
-  "runtime_seconds": 10.385,
+  "runtime_seconds": 11.019,
   "runtime_env": {
     "python": "3.12.10",
     "implementation": "CPython",

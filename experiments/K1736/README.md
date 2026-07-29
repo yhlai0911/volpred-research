@@ -398,6 +398,39 @@ stepdown / remaining-max / 單調性 / 重抽中心化 / circular block、`zeta_
 > `scripts/experiment_gates.py verdict-template` 產生後派完整審查填寫 —— 本 agent 刻意不寫，
 > 因為未填的模板被 commit 進去會變成一份「對著沒審過的東西說話」的裁決。
 
+### Round 2 — 收件審查（2026-07-30，主線程 hourly slot-1）
+
+完整紀錄見 `review_round2_collection.md`。**判 PASS**，merge 門票 `review_verdict.json` 由本輪產生。
+
+兩件事：**(i)** 主線程把 `verdict_block` 的十個計數器丟掉、只吃 64 個 univariate cells /
+32 個 multivariate rows / 35 個 OOS cells 重算一次 —— **全部對上，零筆不符**；
+另驗 64/64 的 `hac_lag ≥ H`、64/64 的 `t = β/SE`、64/64 的 Holm 單調性，以及
+Hodrick 1B 的 scope 限制**確實只在 32 個 `fwd_ret` cell 給數字、32 個 `fwd_mdd` cell 全部留白**。
+**(ii)** 另派一個獨立敵意審查 agent（預設立場：「這個 NULL 是 bug」），在凍結資料上
+**重跑得到逐位元一致的科學 payload**，判 PASS_WITH_NOTES 並找出三個缺陷 —— **本班全部修完**：
+
+1. **ISSUE-1（造假）**：`analytic_note_iid_only_slope.corr_with_skew_level = 1.0` 是寫死的、
+   沒算過，**而且正負號錯了**。`skew_level` 就是 `zeta30`（L265），iid-only 斜率的乘數
+   `√(30/93) − 1 = −0.432038` 是負的，所以相關係數是 **−1.0**。
+   已改成**把序列建出來實測**（附 `multiplier_at_T_93` / `corr_source` / `n = 8356`），
+   而不是把常數改對就算了 —— `|corr| = 1` 的退化結論不變。
+2. **ISSUE-2（驗證表演）**：lookahead audit 第 3 項是恆真檢查
+   （`(i − H − 1) + H > i` 化簡為 `i − 1 > i`），無條件 pass、對偵測 OOS lookahead 檢定力為 **0**。
+   已改成沿 **SPY session 日曆**從最後一列訓練資料自己的日期往前走 H 個 session、
+   斷言窗口在 origin 當天或之前關閉 —— 獨立於它所稽核的列運算。
+   結果：`n_origins_probed = 666`、`min_gap_sessions = 1`（貼齊但不越界），仍 pass。
+3. **ISSUE-3（死碼 / 註解誇大）**：L455-456 的 no-op guard 與 L440-441 誇大的 docstring，已清。
+
+修正後全樹 diff（忽略時間戳與 runtime 環境）**只有 9 處差異，全落在上述兩個欄位群內**；
+64 個 cell、32 個 multivariate rows、35 個 OOS cells、整個 `verdict_block` **逐位元不變**，
+`experiment_gates.py run` 仍 PASS。
+
+> ⚠️ **下一個碰這份實驗的人先看這行**：`K1736.py` **必須從 repo root 執行**。
+> 以實驗目錄為 cwd 會在 `finalize_experiment` → `reproduce_spec.trace_file` 崩潰
+> （L1469-1476 的輸入路徑相對 repo root 解析），而 `finalize_experiment`
+> **在崩潰點之前就已寫出 results JSON** —— 一次失敗的執行會覆蓋 canonical result。
+> Round 2 的審查 agent 就踩到了，已 `git checkout --` 還原並由主線程以 sha256 對 HEAD 驗證後才續行。
+
 ## 11. 若要重開這題，需要什麼
 
 **不要**再用 `^SKEW` 做另一個代理。需要的是：
