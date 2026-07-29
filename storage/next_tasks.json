@@ -62119,7 +62119,7 @@
   {
     "id": "assign_cf82928c",
     "title": "PHASE-Z 卡住檔案 incident（e72eebd41371417d）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 25 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 6 次觀察到這組）\n- .claude/rules/experiments.md — 25 班\n- experiments/k1630/README.md — 11 班\n- scripts/gen_k1585_general_charts.py — 19 班\n- scripts/gen_k1680_general_charts.py — 19 班\n- scripts/gen_k1705_general_charts.py — 19 班\n- storage/assets/k1585_general_effect_forest.png — 19 班\n- storage/assets/k1585_general_oos_cost.png — 19 班\n- storage/assets/k1609_general_gate_forest.png — 10 班\n- storage/assets/k1609_general_two_rulers.png — 10 班\n- storage/assets/k1623_general_ruler_flip.png — 19 班\n- storage/assets/k1623_general_survivor_funnel.png — 19 班\n- storage/assets/k1680_general_multiplicity.png — 19 班\n- storage/assets/k1680_general_per_firm.png — 19 班\n- storage/assets/k1698_general_rebuild_audit.png — 18 班\n- storage/assets/k1698_general_strength_flip.png — 18 班\n- storage/assets/k1698_general_two_targets.png — 18 班\n- storage/assets/k1705_general_sign_audit.png — 19 班\n- storage/assets/k1705_general_timing_flip.png — 19 班\n- storage/assets/k781_general_ranking.png — 24 班\n- storage/assets/k781_general_subperiod_regime.png — 24 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 21 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 21 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 21 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 21 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 21 班\n- storage/lazypack_plans/k1448_general_plan.json — 11 班\n- storage/lazypack_plans/k1585_general_plan.json — 19 班\n- storage/lazypack_plans/k1623_general_plan.json — 19 班\n- storage/lazypack_plans/k1680_general_plan.json — 19 班\n- storage/lazypack_plans/k1705_general_plan.json — 19 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T202848179520Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T212447807233Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T222609805763Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T225456041958Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T232603826382Z:<路徑>`",
+    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 26 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 7 次觀察到這組）\n- .claude/rules/experiments.md — 26 班\n- experiments/k1630/README.md — 12 班\n- scripts/gen_k1585_general_charts.py — 20 班\n- scripts/gen_k1680_general_charts.py — 20 班\n- scripts/gen_k1705_general_charts.py — 20 班\n- storage/assets/k1585_general_effect_forest.png — 20 班\n- storage/assets/k1585_general_oos_cost.png — 20 班\n- storage/assets/k1609_general_gate_forest.png — 11 班\n- storage/assets/k1609_general_two_rulers.png — 11 班\n- storage/assets/k1623_general_ruler_flip.png — 20 班\n- storage/assets/k1623_general_survivor_funnel.png — 20 班\n- storage/assets/k1680_general_multiplicity.png — 20 班\n- storage/assets/k1680_general_per_firm.png — 20 班\n- storage/assets/k1698_general_rebuild_audit.png — 19 班\n- storage/assets/k1698_general_strength_flip.png — 19 班\n- storage/assets/k1698_general_two_targets.png — 19 班\n- storage/assets/k1705_general_sign_audit.png — 20 班\n- storage/assets/k1705_general_timing_flip.png — 20 班\n- storage/assets/k781_general_ranking.png — 25 班\n- storage/assets/k781_general_subperiod_regime.png — 25 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 22 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 22 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 22 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 22 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 22 班\n- storage/lazypack_plans/k1448_general_plan.json — 12 班\n- storage/lazypack_plans/k1585_general_plan.json — 20 班\n- storage/lazypack_plans/k1623_general_plan.json — 20 班\n- storage/lazypack_plans/k1680_general_plan.json — 20 班\n- storage/lazypack_plans/k1705_general_plan.json — 20 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T212447807233Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T222609805763Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T225456041958Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T232603826382Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T233710536512Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -62162,37 +62162,37 @@
         "storage/lazypack_plans/k775_general_plan.json"
       ],
       "streaks": {
-        ".claude/rules/experiments.md": 25,
-        "experiments/k1630/README.md": 11,
-        "scripts/gen_k1585_general_charts.py": 19,
-        "scripts/gen_k1680_general_charts.py": 19,
-        "scripts/gen_k1705_general_charts.py": 19,
-        "storage/assets/k1585_general_effect_forest.png": 19,
-        "storage/assets/k1585_general_oos_cost.png": 19,
-        "storage/assets/k1609_general_gate_forest.png": 10,
-        "storage/assets/k1609_general_two_rulers.png": 10,
-        "storage/assets/k1623_general_ruler_flip.png": 19,
-        "storage/assets/k1623_general_survivor_funnel.png": 19,
-        "storage/assets/k1680_general_multiplicity.png": 19,
-        "storage/assets/k1680_general_per_firm.png": 19,
-        "storage/assets/k1698_general_rebuild_audit.png": 18,
-        "storage/assets/k1698_general_strength_flip.png": 18,
-        "storage/assets/k1698_general_two_targets.png": 18,
-        "storage/assets/k1705_general_sign_audit.png": 19,
-        "storage/assets/k1705_general_timing_flip.png": 19,
-        "storage/assets/k781_general_ranking.png": 24,
-        "storage/assets/k781_general_subperiod_regime.png": 24,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 21,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 21,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 21,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 21,
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 21,
-        "storage/lazypack_plans/k1448_general_plan.json": 11,
-        "storage/lazypack_plans/k1585_general_plan.json": 19,
-        "storage/lazypack_plans/k1623_general_plan.json": 19,
-        "storage/lazypack_plans/k1680_general_plan.json": 19,
-        "storage/lazypack_plans/k1705_general_plan.json": 19,
-        "storage/lazypack_plans/k775_general_plan.json": 13
+        ".claude/rules/experiments.md": 26,
+        "experiments/k1630/README.md": 12,
+        "scripts/gen_k1585_general_charts.py": 20,
+        "scripts/gen_k1680_general_charts.py": 20,
+        "scripts/gen_k1705_general_charts.py": 20,
+        "storage/assets/k1585_general_effect_forest.png": 20,
+        "storage/assets/k1585_general_oos_cost.png": 20,
+        "storage/assets/k1609_general_gate_forest.png": 11,
+        "storage/assets/k1609_general_two_rulers.png": 11,
+        "storage/assets/k1623_general_ruler_flip.png": 20,
+        "storage/assets/k1623_general_survivor_funnel.png": 20,
+        "storage/assets/k1680_general_multiplicity.png": 20,
+        "storage/assets/k1680_general_per_firm.png": 20,
+        "storage/assets/k1698_general_rebuild_audit.png": 19,
+        "storage/assets/k1698_general_strength_flip.png": 19,
+        "storage/assets/k1698_general_two_targets.png": 19,
+        "storage/assets/k1705_general_sign_audit.png": 20,
+        "storage/assets/k1705_general_timing_flip.png": 20,
+        "storage/assets/k781_general_ranking.png": 25,
+        "storage/assets/k781_general_subperiod_regime.png": 25,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 22,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 22,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 22,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 22,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 22,
+        "storage/lazypack_plans/k1448_general_plan.json": 12,
+        "storage/lazypack_plans/k1585_general_plan.json": 20,
+        "storage/lazypack_plans/k1623_general_plan.json": 20,
+        "storage/lazypack_plans/k1680_general_plan.json": 20,
+        "storage/lazypack_plans/k1705_general_plan.json": 20,
+        "storage/lazypack_plans/k775_general_plan.json": 14
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260729T192036201708Z",
@@ -62200,11 +62200,12 @@
         "refs/volpred/quarantine/20260729T212447807233Z",
         "refs/volpred/quarantine/20260729T222609805763Z",
         "refs/volpred/quarantine/20260729T225456041958Z",
-        "refs/volpred/quarantine/20260729T232603826382Z"
+        "refs/volpred/quarantine/20260729T232603826382Z",
+        "refs/volpred/quarantine/20260729T233710536512Z"
       ],
-      "fires": 6,
+      "fires": 7,
       "first_seen_at": "2026-07-29T19:20:59.027794+00:00",
-      "last_seen_at": "2026-07-29T23:26:03.901438+00:00",
+      "last_seen_at": "2026-07-29T23:37:10.644470+00:00",
       "derates": true,
       "derates_updated_at": "2026-07-29T23:26:04.063627+00:00",
       "deferred": [
@@ -62250,7 +62251,7 @@
       "family_page_delivered_by": "legacy_created_receipt_migration"
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-29T23:26:03.901438+00:00"
+    "updated_at": "2026-07-29T23:37:10.644470+00:00"
   },
   {
     "id": "assign_d5999f36",
@@ -62594,10 +62595,31 @@
         "to": "pending",
         "by": "hourly-slot-1-6d97230e852941e683151bb384d63191",
         "note": "supervisor_kill_6d97230e"
+      },
+      {
+        "ts": "2026-07-29T23:26:51.649595+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cdf2cfe62d6b4366833ece2e800f9ca9",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T23:26:51.649598+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cdf2cfe62d6b4366833ece2e800f9ca9",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T23:36:34.241451+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-cdf2cfe62d6b4366833ece2e800f9ca9",
+        "note": "supervisor_kill_cdf2cfe6"
       }
     ],
-    "last_released_at": "2026-07-29T23:24:33.497051+00:00",
-    "last_release_reason": "supervisor_kill_6d97230e"
+    "last_released_at": "2026-07-29T23:36:34.241429+00:00",
+    "last_release_reason": "supervisor_kill_cdf2cfe6"
   },
   {
     "id": "assign_8a24d005",
