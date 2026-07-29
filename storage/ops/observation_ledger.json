@@ -1,6 +1,6 @@
 {
   "schema": "observation_ledger.v1",
-  "updated_at": "2026-07-27T08:49:42.681599+00:00",
+  "updated_at": "2026-07-29T22:52:42.921354+00:00",
   "items": [
     {
       "id": "pregate_shadow",
@@ -17,8 +17,10 @@
       "started_at": "2026-07-04T00:00:00+08:00",
       "deadline": "2026-07-27T23:59:00+08:00",
       "action_on_expiry": "執行 Deliverable-8：launchctl bootout legacy + mv scripts/cron_hourly_dispatch.sh scripts/_legacy/ + retro；同步 refactor_plan_cron_dispatch.md 標 SUPERSEDED 歸檔、更新 test_cutover_orphans.py _RETIRED_BY_DESIGN；或 observation extend 明文展期附理由",
-      "status": "observing",
-      "note": "ops_master P3/D3；supervisor 已穩定跑 16 天，disable 已 disarm，留實體只剩一鍵回滾價值"
+      "status": "decided",
+      "note": "ops_master P3/D3；supervisor 已穩定跑 16 天，disable 已 disarm，留實體只剩一鍵回滾價值",
+      "decided_at": "2026-07-29T22:52:42.921342+00:00",
+      "resolution": "2026-07-30 physical retirement complete: exact-byte wrapper archived under scripts/_legacy; canonical and user LaunchAgent plists plus live TCC wrapper removed; launchctl label absent; repository ratchet and 158 adjacent tests pass; Issue #46 umbrella remains contained pending five formal owner transfers and sustained-clean gate."
     },
     {
       "id": "single_gateway_claim_next_removal",

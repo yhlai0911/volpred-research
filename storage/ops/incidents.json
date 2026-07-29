@@ -1672,13 +1672,27 @@
      "first_seen_at": "2026-07-29T14:57:09.054864+00:00",
      "key": "dispatch-slot-1-ef1e108b",
      "last_seen_at": "2026-07-29T14:57:09.054864+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "d6f10a1fa6d9e4c6ba4ec9e07f63bfdd5816e47f",
+      "branch": "worktree-dispatch-slot-1-268e30c9",
+      "checkpoint_commit": "0df50f2b2c3a21ce3e1c93b149a933f0b4980338",
+      "detail_tail": "fire ended with outcome=kill_failed_orphan_drained; dirty=True unique_commits=0",
+      "reason": "worker_kill_failed_orphan_drained",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-268e30c9"
+     },
+     "first_seen_at": "2026-07-29T22:50:23.656983+00:00",
+     "key": "dispatch-slot-1-268e30c9",
+     "last_seen_at": "2026-07-29T22:50:23.656983+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-ef1e108b unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-07-29T14:57:09.054864+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-268e30c9 unmergeable (worker_kill_failed_orphan_drained)",
+   "last_seen_at": "2026-07-29T22:50:23.656983+00:00",
    "notified_at": null,
-   "occurrence_count": 5110,
+   "occurrence_count": 5111,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2575,6 +2589,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T22:26:12.936917+00:00",
+ "updated_at": "2026-07-29T22:50:35.263026+00:00",
  "version": 1
 }
