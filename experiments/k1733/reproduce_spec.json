@@ -1,0 +1,126 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1733.py",
+    "args": [],
+    "sha256": "e29c99197be716a91a5b1d1887601f6c090c5d3d86b913c0afe0c58120726b14",
+    "size_bytes": 101233
+  },
+  "canonical_result": "K1733_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1733/data/MSFT_adjusted_ohlc.csv",
+      "sha256": "30a2631c4df025eee1245cf1cb2c956a235e1fbd904db69fa16d9b663669a39f",
+      "size_bytes": 782794
+    },
+    {
+      "path": "experiments/k1733/data/NVDA_adjusted_ohlc.csv",
+      "sha256": "2c4a491ca0ac568ce148bbef15a3095a238a4efac898a0907b2e28348e387a57",
+      "size_bytes": 601525
+    },
+    {
+      "path": "experiments/k1733/data/SMH_adjusted_ohlc.csv",
+      "sha256": "b435bbbbcb326b0545309ebdd3c5fd872b78e52fa4f5f188a9263e477568ba0f",
+      "size_bytes": 559241
+    },
+    {
+      "path": "experiments/k1733/data/QQQ_adjusted_ohlc.csv",
+      "sha256": "97978c0d5ef207d8490c459a810afb5a2da9dbd7468be4af372f0b2c41ec25eb",
+      "size_bytes": 579239
+    },
+    {
+      "path": "experiments/k1733/data/XLU_adjusted_ohlc.csv",
+      "sha256": "ab311e622ebb75f408fb0e95f0a253251c5d49f2aaf49e4b76a71c8b9b0fc609",
+      "size_bytes": 585379
+    },
+    {
+      "path": "experiments/k1733/data/PAVE_adjusted_ohlc.csv",
+      "sha256": "a1e15957598142c7755f682531597ab303b090a0b48be6bbcb2d023a335568f8",
+      "size_bytes": 201059
+    },
+    {
+      "path": "experiments/k1733/data/HYG_adjusted_ohlc.csv",
+      "sha256": "e997984a3a3bbb722e9021cebb4d2554185f9379ba295863f21c941d98dca9ed",
+      "size_bytes": 406026
+    },
+    {
+      "path": "experiments/k1733/data/LQD_adjusted_ohlc.csv",
+      "sha256": "5cd6a90ebff368e09e9b402cd2f283063da436f2e3300cb7166e9031f4485b2f",
+      "size_bytes": 503986
+    },
+    {
+      "path": "experiments/k1733/data/SPY_adjusted_ohlc.csv",
+      "sha256": "7b4eb1330117ef7cd5ed43feec8e8f71dac1014840dc25135b929324e1c601a0",
+      "size_bytes": 706596
+    },
+    {
+      "path": "experiments/k1733/data/prices_raw.csv",
+      "sha256": "2a9c55c0f4e57eeae3106fe4d9392f8a6555c4433d21fe5b5064ac7266effcb9",
+      "size_bytes": 5916170
+    }
+  ],
+  "outputs": [
+    "K1733_results.json",
+    "figures/fig1_network_full8.png",
+    "figures/fig1_network_long7.png",
+    "figures/fig2_ordering_full8.png",
+    "figures/fig2_ordering_long7.png",
+    "figures/fig3_rolling_tci.png",
+    "figures/fig4_h3_increment.png",
+    "figures/fig5_granger_full8.png",
+    "figures/fig5_granger_long7.png",
+    "figures/fig6_subperiods.png"
+  ],
+  "timeout_seconds": 639,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 193.031,
+    "recorded_at": "2026-07-29T22:15:35Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1733_results.json",
+    "sha256": "1c091d6927ca0ba0df02d4303f189651d362d4ce682ff246e7f14d1d6ba09b4f",
+    "size_bytes": 314637
+  }
+}
