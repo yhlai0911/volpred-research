@@ -42957,5 +42957,79 @@
   ],
   "confidence": 0.75,
   "created_at": "2026-07-28T23:13:53.070349"
+ },
+ {
+  "item_id": "5302e9a7",
+  "category": "experiment_result",
+  "content": "K1721 NULL: Caldara-Iacoviello daily Geopolitical Risk decomposition into Acts (GPRA) vs Threats (GPRT) adds NO robust incremental out-of-sample predictive power to a HAR-RV baseline for realized volatility, and shows no statistically robust Acts/Threats asymmetry, across SPY/GLD/XLE/ITA at horizons h=1/5/22. OOS Holm-significant incremental cells = 0; only ITA is directionally Threats>Acts but not (even raw) significant. Proxy-robust (Parkinson primary + squared close-to-close). Distinct from K446 (aggregate GPR vs VIX for SPY, also NULL). Interpretation: at daily frequency, geopolitical Acts-vs-Threats information is already embedded in HAR-RV lags; the decomposition does not recover tradable incremental signal.",
+  "evidence": [
+   "experiment_id=K1721; experiment_path=experiments/K1721/ (worktree dispatch-slot-3-87c7269d-k1721, pending merge)",
+   "seed=42; sample 1990-01-01..2026-06-16; oos_fraction=0.4; min_train=500; Holm multiple-comparison correction; HAC lag=h+5",
+   "verdict_block: verdict=NULL, oos_holm_significant_incremental=false, raw_oos_incremental_sig_cells=0, asymmetry_threats_gt_acts_holm_sig_assets=[]",
+   "self_check.passed=true; lookahead controlled: target=future window rv.rolling(h).mean().shift(-h), predictors lagged >=1d",
+   "data: GPRD/GPRA/GPRT (matteoiacoviello.com daily, 1985-2026), yfinance daily OHLC; refs Caldara-Iacoviello AER 2022, IMF GFSR 2025-04 Ch.2"
+  ],
+  "confidence": 0.8,
+  "created_at": "2026-07-28T00:31:12.602473"
+ },
+ {
+  "item_id": "5a604fb2",
+  "category": "experiment_finding",
+  "content": "K1731 arm B（GEVReg-MIDAS-SSVS，週頻 SPY 尾部區間預測）— 目標 y_w = 該 ISO 週內單日最大跌幅（-100·dlog(SPY adj close) 的週 block maximum；非重疊週、≥3 交易日；forecast origin = 前一週最後交易日，已 lookahead-guard）。資料 1995-02-06→2026-07-16，1640 週 block／7935 日報酬；point-in-time 月頻總經 CPI/NFP/IP/UNRATE/VIX/TERM（含 staleness）。Production：n_starts=30, n_draws=40000, burnin=10000, thin=10, 2 chains；seed=42（procedure seed 屬受測方法本身而固定，非被模擬的抽樣噪音）。OOS 共同樣本 967 週（2008-01-07→2026-07-13）。\n\n結論（headline_verdict）：『對 macro 效果沒有支持，也沒有證明出 null』。(1) IN-SAMPLE：macro 被弱選擇——SSVS 平均後驗納入機率(PIP) 在 19 次 refit 遠低於 0.5 prior（CPI 0.131、UNRATE 0.192、VIX 0.178、TERM 0.086 皆 <0.20；此臂 VIX 僅 0.06–0.09）。(2) OUT-OF-SAMPLE：未觀察到改善；對 nested no-macro GEV 的比較偏向 macro 讓結果更差（DM t=+1.39）。\n\n明確不支持：不能宣稱『macro 無法改善 SPY 週尾部區間預測』（此為 out-of-sample null，本設計無法建立）；亦無法對 macro 效果大小給任何形式界限。原因：PIP 是 in-sample 選擇統計、不直接量測也不單獨建立 OOS 預測力；OOS 統計是對 nested restriction 在 expanding window 上的 raw DM——null 下非漸近常態（West 1996；Clark & McCracken 2001），落在 Giacomini & White (2006) 之外，且偏向已觀察到的『macro 更差』方向（Clark & West 2007）。三個 non-nested 主比較（Empirical、GARCH-t、HAR-QR）為一般 DM、保留信賴區間語意。區間校準：GEVReg-MIDAS-SSVS OOS 90% 區間 empirical coverage 0.878（nominal 0.90），Kupiec UC p=0.027、Christoffersen independence p≈1.5e-7（違反有時間叢聚）——區間略微 under-cover 且 violation clustering。\n\nCross-arm（對 K1730 arm A）：arm A 全 19 refit 選 VIX（PIP 0.865），arm B 不選（0.06–0.09）；兩臂 xi 落在不同極值域（arm A -0.140~-0.095 有界 Weibull；arm B -0.003~+0.072 近 Gumbel）。即便 arm A 的 macro 模型，其 mean pinball loss 亦高於自家 nested GEV-HAR（0.11407 vs 0.11224）。\n\n憑證狀態：arm B 經 9+ 輪 remediation；Codex round 9 FAIL 於一處 overclaim（把低 PIP 讀成 OOS null 的證據），round 10 已在兩處 claim surface 修正為『PIP 不直接量測、也不單獨建立 OOS 預測力』。正式 Codex round-10 憑證仍 PENDING（Codex 額度受限至 2026-08-02，見 K1728）；本條目忠實反映 round-10 修正後之 headline_verdict。worktree 尚未合併進 main（另受 shared staged index 阻擋），F1（nested bootstrap 區間）結論尚未存在、不在此射程。 本條目為解 k1731_f1_bootstrap_merge_deadlock 三方環之 Exit A：補上 arm B 本就欠的 knowledge、射程只及 arm B。 [寫入：Claude main thread hourly-slot-3-0913293cc5b64ccaa73c953195fac25e]",
+  "evidence": [
+   ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_gevreg_midas_ssvs_returns_results.json",
+   ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/K1731_ARMB_REV9_COLLECTION.md",
+   ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_armB_verification.json",
+   ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/storage/ops/codex_reviews/k1731_armB_rev10_freeze.txt"
+  ],
+  "confidence": 0.7,
+  "created_at": "2026-07-28T12:31:28.979734+08:00",
+  "revisions": []
+ },
+ {
+  "item_id": "b6fbb010",
+  "category": "methodology",
+  "content": "[K1715 recert round 3 收件 2026-07-29 —— 程序性 FAIL，科學面無異動，維持 archive-unmerged] Codex round 3（gpt-5.6-sol/xhigh，reviewed_commit 3cb5749）回 verdict=FAIL，但唯一 blocking defect 是程序性的：該回合把自己的 commissioning prompt（.recert3_prompt.md）與 raw transcript（codex_recert3_raw.log）寫進它正在認證的 worktree，導致 read-back 時 git status --porcelain 非空、D4 clean-certification-surface 條件不滿足。兩檔在被審的 sha 上並不存在。round-2 的三個缺陷全部關閉並經主線程獨立回驗：sha256(K1715.py)=133c6f81... 同時等於 results.code_trace.sha256 與 reproduce_spec.spec.entrypoint.sha256（D1）；K1715_results.json（d622e1eb...）帶 guard-era schema、retired key nm_to_bfgs_improve 出現 0 次、accepted_method 出現 536 次（D2）；build_readme 對 committed results 重跑產出與 README.md byte-identical（D3）。round 3 另外獨立重建了 guard 等價性證明：guarded key g_i=min(b_i,n_i)<=b_i，且 268/268 refits 的 accepted_method 皆為 BFGS，故 unconditional-BFGS 與 guarded code 在本資料上每一次 refit 都選到相同參數向量 —— min-NLL guard 在此 empirically inert。結論：guard commit 不改變科學內容，先前的 Codex science PASS 可跨越 guard commit 成立。處置：維持 knowledge item f745bff0（2026-07-27 owner Yi-Hao Lai 授權 delegated）的 ARCHIVE-UNMERGED 裁決 —— 不 merge worktree k1715-204d556b，科學結論續存於 knowledge item 5e41886b（verdict=NULL）。round 3 的結果強化而非動搖該裁決：guard 既已證明 inert，未合併的 branch 對 main 沒有隱瞞任何科學內容。round-4 決策點依 owner 既有裁決收斂為選項 (i)：接受 K1715.py convergence_summary 內那句「low bfgs_success_rate 會 fall back to Nelder-Mead」為凍結 archived artifact 上的已知不精確字串（本次 run 從未 fall back）；選項 (ii) 重跑 estimator 已被 f745bff0 以 ROI 理由明文禁止，且會破壞剛認證完的 sha lineage。該不精確字串只存在於未合併 branch，永遠不會抵達 main。worktree checkout 已依 reclaim option 3 移除、branch worktree-k1715-204d556b（22 commits）完整保留。PATTERN LESSON：帶 clean-tree 條件的審查回合，其 prompt / transcript 必須落在被審樹之外或在 read-back 前先 commit，否則回合會自我判死；已寫入 .claude/rules/experiments.md §審查認證。",
+  "evidence": [
+   "experiments/K1715/review_verdict.json (verdict=FAIL, reviewed_commit 3cb574937d458a8c9375e03945018216b25e1de6) on branch worktree-k1715-204d556b",
+   "main-thread independent re-verification: shasum -a 256 experiments/K1715/K1715.py == 133c6f81bc966241f801e387af75a7fb246d2c5836affb748ab769c3e608a9a3 == results.code_trace.sha256 == reproduce_spec.spec.entrypoint.sha256",
+   "main-thread independent re-verification: K1715_results.json contains accepted_method x536 and nm_to_bfgs_improve x0",
+   "standing owner decision: knowledge item f745bff0 (2026-07-27, owner Yi-Hao Lai, delegated) = archive-unmerged, bars further transcription loops and estimator re-runs",
+   "science of record: knowledge item 5e41886b (K1715 verdict=NULL, Codex science PASS, no blocking defects)",
+   "compute job agent-brief_k1715_recert3-823a28 (exit_code=0, completed 2026-07-28T20:56:59Z) collected via PHASE A"
+  ],
+  "confidence": 0.9,
+  "created_at": "2026-07-29T06:13:05.271647"
+ },
+ {
+  "item_id": "e32f1aa8",
+  "category": "methodology",
+  "content": "[K1694 round-6 Codex PASS 收件 —— NULL：高波動排擠假說未獲支持，連續型交互項反而顯著為正] 主要檢定 fcm_x_highvol（spec1_fcm_highvol）coef=0.00030339、t_DK=1.483、t_cluster_month=1.518，stationary block bootstrap 95% CI=[-9.02413e-05, 0.000778169]、雙尾 p=0.13 —— CI 跨 0，故 verdict=NULL（claim_type=ex_post_association）。關鍵是 NULL 的方向性：它只說「負向排擠假說未獲支持」，不等於「無關聯」——連續型對照 spec2 的 fcm_x_rvz coef=0.00028846、t_DK=2.545、p=0.01098，顯著為正，與排擠方向相反。樣本：估計樣本 3275 列 / 22 檔商品 / 149 個月（2014-02–2026-06），lagged frame 2748 列，seed=1694。穩健性：把 MAX_RV_MONTH_SHORTFALL 由 1 收緊到 0（非報告設定）後 n_obs=3210、n_months=146、coef=0.000334819、t_DK=1.687、p=0.09173 —— 仍未達 1.96，結論不變。round-6 的實質修正是方法論而非結論：round-5 用「通用休市白名單」把 2012-10-29/30 與 2018-12-05 從所有商品日曆剔除，但交易所公告（CFTC 12-363、ICE、CME）顯示當時只關閉股指與利率商品，本 panel 的商品全數照常交易；改成 product/exchange-scoped 日曆後估計樣本由 3276 → 3275、lagged frame 2749 → 2748，結論與門檻（MIN_RV_DAYS=15 等）皆未移動。第二項 round-5 缺陷「端點測試自己當自己的 oracle」已改由 calendar_fixtures.json（手抄自交易所公告、URL 列於 calendar_sources.md）當唯一 oracle。局限（隨結論一併記錄，不可略）：No source found for ICE Futures U.S. on 2018-12-05. Reviewer: 'Carrying the unsourced ICE date as open is acceptable because uncertainty is disclosed and both possible statuses give the identical sample.' / The New-Year-on-a-Saturday rule rests on the panel's own bar counts rather than an exchange notice, and is labelled EMPIRICAL-FROM-PANEL. Reviewer: accurately labelled. / The frozen rv_monthly.csv is count-only, so the reported months are SCREENED, never certified; the endpoint gate exists and is tested but is not exercised by the reported run. Reviewer: accurately labelled. / 2018-12 passes the completeness screen while CME's own notice says the market was open on 2018-12-05, for which no commodity has a bar. Published at run time in rule.rv_months_short_of_the_exchange_calendar and quantified in robustness_strict_month_gate (n 3210, t_DK 1.69, still short of 1.96).",
+  "evidence": [
+   "experiments/K1694/review_verdict.json (verdict=PASS, round=6, reviewer=Codex gpt-5.6-sol, read-only sandbox, reviewed_commit 2724b3587, merge_allowed=True, knowledge_promotion_allowed=True, blocking_defects=0)",
+   "main-thread independent re-verification: shasum -a 256 of 7/8 reviewed artifacts (K1694.py, K1694_results.json, test_K1694.py, reproduce_spec.json, calendar_sources.md, calendar_fixtures.json, r6_repair_report.json) match review_verdict.reviewed_sha256 exactly; README.md differs only because commit 1a4f43d90 flipped its status line to PASS after the reviewer hashed it at reviewed_commit 2724b3587",
+   "main-thread independent re-verification: the reviewer could NOT run pytest (read-only sandbox, no linearmodels); main thread ran it — uv run --active python -m pytest experiments/K1694/test_K1694.py -q -> 50 passed in 9.06s",
+   "main-thread independent re-verification of round-5 defect 2: expected_month_endpoints() appears in test_K1694.py only on the ASSERTED side (line 397, checked against calendar_fixtures.json); the endpoint acceptance test (line 402) injects endpoints from the fixtures, not from the module",
+   "main-thread independent re-verification of primary sources: every URL in calendar_sources.md resolves to cmegroup.com / ice.com / ir.theice.com / cftc.gov or a web.archive.org snapshot of those domains — no secondhand aggregator",
+   "numbers taken programmatically from experiments/K1694/K1694_results.json (run_utc=2026-07-29T16:18:44.499560+00:00, seed=1694); none retyped from README or agent summary",
+   "compute job agent-brief_k1694_r6-6431c0 (exit_code=0, completed 2026-07-29T16:36:19Z) collected via PHASE A"
+  ],
+  "confidence": 0.9,
+  "created_at": "2026-07-30T00:55:17.296082"
+ },
+ {
+  "item_id": "3d87b0ec",
+  "category": "experiment_result",
+  "content": "[K1736 收件 PASS —— NULL_DEGENERATE：偏度風險溢酬「期限結構斜率」在 6–12 個月 horizon 上既退化又檢定力不足，此題在免費資料下問不出來] 研究問題：偏度風險溢酬的**期限結構斜率**是否比 SKEW **level** 更能預測 6–12 個月的 SPY 報酬與回撤（K181/K184/K210/K258/K447/K535/K979/K43 八個 level→短 horizon 的 NULL 之後的新設計格）。結論 verdict=NULL_DEGENERATE，D1（斜率是否帶 level 以外的資訊）=FAIL_degenerate，D2（長 horizon 是否比短 horizon 強）=MIXED_OR_FAIL。樣本 1993-02-01–2026-06-29，64 個 (signal,target,horizon) cell，SPY/^SKEW/^VIX/VIX3M/VIX6M 日資料（yfinance，凍結於 experiments/K1736/data，sha256 列於 reproduce_spec.json），seed=42、bootstrap B=2000。 **兩個獨立理由讓這題收 NULL，必須一起講否則就是過度宣稱**：(1) **退化**——三個 risk-neutral 斜率與 SKEW level 的相關係數為 rn_slope_3m -0.9266（level 解釋 R²=0.8585, n=4969）、rn_slope_6m -0.944（R²=0.8911, n=4601）、srp_slope_6m -0.9326（R²=0.8698, n=4601），全數超過 |corr|>0.90 門檻。根因是資料而非方法：CBOE 只在 30 天到期發布 ^SKEW，沒有免費的 SKEW3M/SKEW6M，所以 ζ(T) 只能用 ζ30·sqrt(30/T)·(VIX/VIX_T)³ 在「jump intensity 不隨到期變化」的假設下外推。results JSON 自己給出解析證據：純 iid sqrt-scaling 的斜率（乘數 -0.432038）與 level 的相關係數實測為 -1.0（n=8356），亦即唯一打破恆等式的只有觀測得到的 VIX/VIX_T 比值，而它顯然不夠。(2) **檢定力不足**——唯一不退化的實際偏度斜率 ts_realized（corr 0.0965, R²=0.0093）在目標 horizon 上的有效樣本數只有 H=126 的 64.0 與 H=252 的 31.5 個。所有 slope cell 在 H∈{126,252} 的最大 |t_HAC| 僅 1.1162、最大 |incremental t|（控制 level 與到期匹配的變異數期限結構後）2.15、最佳 OOS R² 0.000257；事前宣告的 joint gate（同一 (signal,target,horizon) 三元組須同時過 Romano-Wolf+Hodrick、OOS R²>0 且 Clark-West p<0.05、對 level 與變異數期限結構的 incremental |t|>3）存活數 = 0。 **不是 pipeline 壞掉**：64 個 cell 中確實有 6 個 |t_HAC|>3，但全部落在 H=21 的 fwd_mdd（不在假設範圍內），且其中 t 最大的兩個（vts_6m t=-4.4268 holm_global=0.00064、vts_3m t=-3.7829 holm_global=0.0098）是**變異數**期限結構控制項而非偏度訊號；在該 cell 上 slope 的 multivariate incremental t≈0（rn_slope_6m -0.258、srp_slope_6m -0.382），亦即 H=21 的訊號來自變異數期限結構，這反而強化 NULL_DEGENERATE。 **可引用的正確口徑（不可簡化為「偏度期限結構無預測力」）**：在只有 30 天 ^SKEW 的免費資料條件下，外推出的偏度期限結構斜率與 level 統計上無法區分；唯一非退化的實際偏度斜率在 6–12 個月 horizon 有效樣本數僅 31.5–64，檢定力不足以支持任何方向的結論。這是一個 power-limited 且被資料可得性封頂的 NULL。重開此題的前提是取得多到期的 model-free RN skewness（OptionMetrics / CBOE 完整期權鏈做 Bakshi-Kapadia-Madan，或 skewness swap 報價），不是再換一個 ^SKEW 的代理；本腳本的推論機器（HAC/Hodrick/非重疊/Romano-Wolf/Clark-West/子期間）可直接沿用。 **審查（round 2 收件，2026-07-30）判 PASS**：主線程把 verdict_block 十個計數器丟掉、只吃原始 cells 重算，10/10 對上；64/64 的 hac_lag≥H、64/64 的 t=β/SE、64/64 的 Holm 單調性；Hodrick 1B 的 scope 限制確實只在 32 個 fwd_ret cell 給數字、32 個 fwd_mdd path-functional cell 全部留白（在該給不出數字的地方留白而非硬擠）。另派獨立敵意 code audit（預設立場「這個 NULL 是 bug」），在凍結資料上重跑得到逐位元一致的科學 payload，判 PASS_WITH_NOTES 並找出三個缺陷，本班全部修完：(a) analytic_note_iid_only_slope 的相關係數原本寫死 1.0、沒算過且正負號錯（skew_level 即 ζ30，iid 乘數為負，真值 -1.0）——改成把序列建出來實測而非把常數改對；(b) lookahead audit 第 3 項是恆真檢查（(i-H-1)+H>i 化簡為 i-1>i），無條件 pass、檢定力為 0 ——改成沿 SPY session 日曆獨立量測（n_origins_probed=666、min_gap_sessions=1，仍 pass）；(c) 死碼與誇大 docstring 已清。修正後全樹 diff 僅 9 處、全落在上述兩個欄位群內，64 個 cell / 32 個 multivariate rows / 35 個 OOS cells / 整個 verdict_block 逐位元不變。 **局限（隨結論一併記錄）**：ζ(T) 是模型外推非量測，constant jump intensity 若不成立則有方向未知的系統性偏誤，這是本實驗最重要的單一假設；12 個月 horizon 的獨立觀測僅 13–32.5 個；Romano-Wolf 每個 replicate 只有 19–34 個 block；Hodrick 1B 不涵蓋 fwd_mdd（那些 cell 只有 HAC + 非重疊兩種重疊處理）；單一市場（SPY）未跨市場驗證；無交易成本、無策略回測，全篇是預測性迴歸，不宣稱任何可交易性。 **操作陷阱（下一個碰這份實驗的人先看）**：K1736.py 必須從 repo root 執行；以實驗目錄為 cwd 會在 finalize_experiment → reproduce_spec.trace_file 崩潰，而 finalize_experiment 在崩潰點之前就已寫出 results JSON —— 一次失敗的執行會覆蓋 canonical result。round 2 的審查 agent 就踩到了，已 git checkout 還原並經 sha256 對 HEAD 驗證後才續行。",
+  "evidence": [
+   "experiments/K1736/K1736_results.json (verdict_block.verdict=NULL_DEGENERATE; sha256 5dd8330133561f72d697d098153565850fa4269a1b8f415989d556d10dc4cb44)",
+   "experiments/K1736/review_verdict.json (verdict=PASS, blocking_defects=[], reviewed_commit 0974370d99a0ec674ddd2a88604189420e41b52e)",
+   "experiments/K1736/review_round2_collection.md (收件審查全紀錄：數值對帳 + 獨立敵意 code audit + 三個缺陷修正)",
+   "experiments/K1736/README.md §9 局限 / §10 審查紀錄 / §11 若要重開這題需要什麼",
+   "experiments/K1736/reproduce_spec.json (entrypoint sha256 2be05aad1479895d047c943d3edd286c228664142b2352989cbad76d137a9562, network=deny, seed numpy=42)",
+   "compute job agent-brief_k1736-36bc4e (exit 0, validation_ok=true)"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-30T01:35:08.872825"
  }
 ]
