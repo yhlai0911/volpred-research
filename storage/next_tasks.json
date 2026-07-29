@@ -42101,7 +42101,7 @@
     "title": "K1731 F1 三方循環相依：shard 要 merge、merge 要 knowledge、knowledge 要 shard 結果",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "auto_discovered",
     "created_at": "2026-07-21T08:35:00+00:00",
     "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
@@ -42192,6 +42192,25 @@
         "from": "blocked",
         "to": "pending",
         "reason": "blocked_until_expired (2026-07-29T09:00:00+08:00)"
+      },
+      {
+        "ts": "2026-07-29T11:10:37.169182+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-39e21e0f9a094254aca3e2845c9f9b6d"
+      },
+      {
+        "ts": "2026-07-29T11:10:41.243778+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-39e21e0f9a094254aca3e2845c9f9b6d"
+      },
+      {
+        "ts": "2026-07-29T11:15:19.947986+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1731_main_integration-579c0d",
+        "note": "durable_external_execution_receipt"
       }
     ],
     "block_transition_previous": {
@@ -42207,7 +42226,10 @@
     "merge_gate_reproduce_spec": "RESOLVED 2026-07-28 by hourly-slot-1-8904dcde: experiments/k1731/reproduce_spec.json committed cd25c295a on the worktree branch; check_experiment_artifacts check --path experiments/k1731 -> PASS (strict). entrypoint.sha256 intentionally omitted (pre-convention spec; skipped-no-sha) rather than synthesised.",
     "rediagnosis_20260728": "原 3-way cycle 前提已過期。實測（slot-2 d5563e60，2026-07-28 CST）：\n(1) knowledge 邊已解 — canonical storage/memory/knowledge.json 含 arm B 條目 5a604fb2（該筆 experiment_id=null，用 experiment_id 查會誤判為 0）。\n(2) artifact gate 已 PASS — check_experiment_artifacts.py check --path <worktree>/experiments/k1731 → PASS（knowledge entry + reproduce_spec.json, spec check: strict）。\n(3) claim surface 已乾淨 — k1731_armB_verification.py 實跑：README claim scan 0 violation、全部數字 traceable；round-10 的 B/D FAIL 已由上一班修好。\n(4) 殘留的唯一 merge 閘 = review-certification：experiments/k1731/review_verdict.json 不存在，experiment_gates.py certify → BLOCKED。\n(5) 該 verdict 產不出來，因為 compute-k1731-armb-codex-review-round-10-1785127371 永久卡在 queued。\n根因不在 k1731，在 compute_queue binding leak（upstream task assign_1c16f316）。\n偵測器：uv run python scripts/audit_compute_queue_bindings.py（本班新增）。\n註：main index 的 foreign staged 內容是併發 fire 的暫態，非本 task 的結構性阻塞。",
     "blocked_on_task": "assign_1c16f316",
-    "freshness_recheck": "[狀態複核 2026-07-29 18:35 CST，hourly-slot-1-5a59ff1d66f14262a9e0406c150b6900 — 未 claim，僅更新前提]\n\n本 task 的描述寫於 2026-07-21，其中三項前提已隨 arm B 後續工作漂移。下一班動手前請以下列複核結果為準：\n\n1. **worktree HEAD 已推進**：描述記 `dc3e5be04`（17 unmerged commits），實際為 `4f15f040f`，`main..HEAD` = **29 commits**。工作區 clean。\n2. **arm B 並非「已完成且經獨立審查」**：`k1731_armB_rev12_gatefix_report.json` 的 `status = READY_FOR_CODEX_ROUND_11`，即 rev12 是為修好 rev11 崩掉的 gate 而做、正在等 Codex round 11，尚未通過。描述引用的 rev8 remediation / verification 已被 rev11 freeze 與 rev12 gatefix 取代。**出口 A 的前提（「它的發現現在就存在、本來就欠一筆 knowledge」）需要重新判斷射程**：可寫的只有已被 rev12 自證的部分，且 rev12 自己列了 unresolved 項（archived rev5 production run 缺 `entrypoint.sha256` provenance，rev12 明白選擇不捏造，並把「是否接受 prose-level provenance」交給 Codex round 11 / 主線程裁決）。這一項未決之前寫 knowledge，等於替一個尚未裁決的 provenance 缺口背書。\n3. **knowledge.json 的 k1731 條目數仍為 0（前提成立）**：canonical `storage/memory/knowledge.json` 內 grep 到 3 筆提及 k1731 的條目，但都是 K1730 等條目在正文中引用 K1731，`item_id` 均非 k1731。描述所述的 merge 鎖成因未變。\n4. **兩個 shard 仍是 `status=failed, exit_code=2`**（`k1731-f1-boot-c0-parametric` 已確認），file-not-found 的成因未變，requeue 仍是預定回收路徑。\n\n**本班未 claim 的理由**：剩餘預算約 25 分鐘。出口 A 的核心動作是主線程親手寫 knowledge 條目（PHASE B 第 9 條禁止 agent 代寫），而該條目的正確射程現在取決於 rev12 那筆 unresolved provenance 裁決 — 這是研究誠實層級的判斷，不是可以壓時間趕出來的。與其留下一個射程可疑的永久條目或一個半合併的 worktree，依 batch-drain 收班條件 (b) 留給下一班。下一班請先讀 `k1731_armB_rev12_gatefix_report.json` 的 `unresolved` / `caveats_for_the_reviewer` / `status_rationale` 三個欄位再決定出口。"
+    "freshness_recheck": "[狀態複核 2026-07-29 18:35 CST，hourly-slot-1-5a59ff1d66f14262a9e0406c150b6900 — 未 claim，僅更新前提]\n\n本 task 的描述寫於 2026-07-21，其中三項前提已隨 arm B 後續工作漂移。下一班動手前請以下列複核結果為準：\n\n1. **worktree HEAD 已推進**：描述記 `dc3e5be04`（17 unmerged commits），實際為 `4f15f040f`，`main..HEAD` = **29 commits**。工作區 clean。\n2. **arm B 並非「已完成且經獨立審查」**：`k1731_armB_rev12_gatefix_report.json` 的 `status = READY_FOR_CODEX_ROUND_11`，即 rev12 是為修好 rev11 崩掉的 gate 而做、正在等 Codex round 11，尚未通過。描述引用的 rev8 remediation / verification 已被 rev11 freeze 與 rev12 gatefix 取代。**出口 A 的前提（「它的發現現在就存在、本來就欠一筆 knowledge」）需要重新判斷射程**：可寫的只有已被 rev12 自證的部分，且 rev12 自己列了 unresolved 項（archived rev5 production run 缺 `entrypoint.sha256` provenance，rev12 明白選擇不捏造，並把「是否接受 prose-level provenance」交給 Codex round 11 / 主線程裁決）。這一項未決之前寫 knowledge，等於替一個尚未裁決的 provenance 缺口背書。\n3. **knowledge.json 的 k1731 條目數仍為 0（前提成立）**：canonical `storage/memory/knowledge.json` 內 grep 到 3 筆提及 k1731 的條目，但都是 K1730 等條目在正文中引用 K1731，`item_id` 均非 k1731。描述所述的 merge 鎖成因未變。\n4. **兩個 shard 仍是 `status=failed, exit_code=2`**（`k1731-f1-boot-c0-parametric` 已確認），file-not-found 的成因未變，requeue 仍是預定回收路徑。\n\n**本班未 claim 的理由**：剩餘預算約 25 分鐘。出口 A 的核心動作是主線程親手寫 knowledge 條目（PHASE B 第 9 條禁止 agent 代寫），而該條目的正確射程現在取決於 rev12 那筆 unresolved provenance 裁決 — 這是研究誠實層級的判斷，不是可以壓時間趕出來的。與其留下一個射程可疑的永久條目或一個半合併的 worktree，依 batch-drain 收班條件 (b) 留給下一班。下一班請先讀 `k1731_armB_rev12_gatefix_report.json` 的 `unresolved` / `caveats_for_the_reviewer` / `status_rationale` 三個欄位再決定出口。",
+    "compute_job_id": "agent-brief_k1731_main_integration-579c0d",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-brief_k1731_main_integration-579c0d; awaiting PHASE A collection"
   },
   {
     "id": "article_task_generator_evidence_pointer",
@@ -43597,7 +43619,7 @@
     "description": "一個或多個 producer-scoped workspace 無法自動 merge。worktree 與 branch 一律保留（禁 --force）。這是 incident `inc_792a94b0ecf4` 的唯一 aggregate 裁決任務 —— 全部未清實例見 `storage/ops/incidents.json` 該 row 的 instances[]（cleared_at 為空者）。\n逐實例三選一：fix-in-worktree 後 `bash scripts/merge_worktree.sh <name>`；path-scoped 抽取可救檔；或記明理由後 plain `git worktree remove` + `git branch -D`。裁決完把該實例自然清除（成功 merge 會自動 clear_instance）。來源: scripts/dispatch_supervisor/workspace.py。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "dispatch_lane": "main_thread",
     "source": "incident_router",
     "incident_id": "inc_792a94b0ecf4",
@@ -43633,15 +43655,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "owner-interactive-platform-recovery"
+      },
+      {
+        "ts": "2026-07-29T10:50:39.592556+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "owner-interactive-platform-recovery",
+        "note": "auto_release_claim_expired"
       }
     ],
-    "last_released_at": "2026-07-28T09:50:11.967526+00:00",
-    "last_release_reason": "auto_release_claim_expired",
-    "claimed_by": "owner-interactive-platform-recovery",
-    "claimed_at": "2026-07-29T08:28:18.559687+00:00",
-    "claim_expires_at": "2026-07-29T10:28:18.559687+00:00",
-    "claim_session_id": "7a57b348fb49",
-    "started_at": "2026-07-29T08:28:24.333077+00:00"
+    "last_released_at": "2026-07-29T10:50:39.592547+00:00",
+    "last_release_reason": "auto_release_claim_expired"
   },
   {
     "id": "assign_b802db4f",
@@ -51928,7 +51952,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52514,7 +52538,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52579,7 +52603,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52722,7 +52746,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53038,7 +53062,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53203,7 +53227,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53394,7 +53418,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53442,7 +53466,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53496,7 +53520,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -54605,7 +54629,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -54833,7 +54857,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -55185,7 +55209,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -55312,7 +55336,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -55436,7 +55460,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T23:39:51.528258+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -58516,14 +58540,33 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T11:02:33.358622+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-29T11:02:33.739435+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T11:02:34.091999+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
       }
     ],
-    "last_released_at": "2026-07-29T09:40:15.894306+00:00",
+    "last_released_at": "2026-07-29T11:02:33.358608+00:00",
     "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-29T09:40:21.438313+00:00",
-    "claim_expires_at": "2026-07-29T11:40:21.438313+00:00",
-    "claim_session_id": "be480f663e37",
-    "started_at": "2026-07-29T09:40:24.966186+00:00"
+    "claimed_at": "2026-07-29T11:02:33.739421+00:00",
+    "claim_expires_at": "2026-07-29T13:02:33.739421+00:00",
+    "claim_session_id": "8ecd61003709",
+    "started_at": "2026-07-29T11:02:34.091983+00:00"
   },
   {
     "id": "ci-red-30433823744",
@@ -58832,7 +58875,7 @@
     "description": "## 發生什麼\n12 個未提交檔案不是任何一班 fire 產出的，最長已連續 45 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- .claude/rules/experiments.md — 8 班\n- scripts/dispatch_supervisor/workspace.py — 3 班\n- storage/assets/k781_general_ranking.png — 7 班\n- storage/assets/k781_general_subperiod_regime.png — 7 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 4 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 4 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 4 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 4 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 4 班\n- storage/logs/trending_primary_source_verification.jsonl — 38 班\n- storage/memory/knowledge.json — 45 班\n- tests/test_dispatch_supervisor.py — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T103555744761Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-29T10:37:09.824513+00:00",
     "payload": {
@@ -58871,7 +58914,155 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-29T10:37:09.809029+00:00",
-      "last_seen_at": "2026-07-29T10:37:09.809029+00:00"
+      "last_seen_at": "2026-07-29T10:37:09.809029+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-29T11:26:42.782112+00:00",
+      "deferred": [
+        ".claude/rules/experiments.md: 已保存，且 3.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_supervisor/workspace.py: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_ranking.png: 已保存，且 12.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_subperiod_regime.png: 已保存，且 12.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png: 已保存，且 9.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png: 已保存，且 9.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png: 已保存，且 9.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png: 已保存，且 9.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py: 已保存，且 9.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_dispatch_supervisor.py: 已保存，且 0.3 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1,
+    "superseded_at": "2026-07-29T11:27:53.606071+00:00",
+    "superseded_by": "assign_dc879467",
+    "completed_at": "2026-07-29T11:27:53.606071+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
+  },
+  {
+    "id": "assign_8b0b2c61",
+    "title": "compute_queue enqueue-agent crashes on non-ASCII title when locale is unset (UnicodeEncodeError: surrogates not allowed)",
+    "description": "compute_queue.py enqueue-agent crashes with UnicodeEncodeError when --title (or any argv) contains non-ASCII and the fire environment has LANG/LC_ALL unset.\n\nEvidence (2026-07-29 19:14, fire slot-1 39e21e0f):\n  Traceback ... scripts/compute_queue.py line 1648 enqueue_agent -> line 844 enqueue -> line 306 _write_job_file\n  UnicodeEncodeError: 'utf-8' codec can't encode characters in position 82-83: surrogates not allowed\nEnvironment: LANG= (empty), LC_ALL= (empty); sys.getfilesystemencoding()=utf-8.\nCommand used a Chinese --title. Retrying with an ASCII title plus LANG/LC_ALL=en_US.UTF-8 PYTHONUTF8=1 succeeded (job agent-brief_k1731_main_integration-579c0d).\nVerified no partial/corrupt job file was left behind by the crash.\n\nWhy it matters: argv arrives decoded with surrogateescape when the locale is not UTF-8, so the surrogate code points survive into the job dict and only explode at json write time. The hourly dispatch prompt asks agents to write Chinese task/job titles, so every fire that enqueues an agent job with a Chinese title hits this. It fails after the pre-flight, at the write, with a raw traceback rather than a usable error.\n\nRoot-cause candidates (needs the fix to be at the process level, not a per-caller workaround):\n  - set PYTHONUTF8=1 / force UTF-8 in the dispatch worker environment (scripts/dispatch_supervisor/worker.py), so every fire gets a UTF-8 locale; and/or\n  - sanitize/re-decode argv-sourced strings at the compute_queue entry point (surrogateescape round-trip) so a bad locale degrades gracefully instead of crashing at _write_job_file.\nDo not fix by telling callers to use ASCII titles - that is the workaround this task exists to replace.\n\nAcceptance: enqueue-agent with a Chinese --title succeeds under LANG= (empty), and a regression test covers it.\nFound by fire slot-1 39e21e0f while working k1731_f1_bootstrap_merge_deadlock (see work_log 2026-07-29).",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-29T11:17:35.834861+00:00",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "K1713_article_general",
+    "title": "K1713: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1713 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1713 [DUPLICATE_CLOSURE_PASS, creates no new empirical claim]: The queued K1713 brief (noisy daily-OHLC realized-quarticity proxy making HARQ measurement-error weighting ineffective vs HAR) is already fully implemented by K1661, so K1713 closes the stale queue item with a byte-t Canonical evidence: experiments/k1713/K1713_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1713",
+    "evidence_source_paths": [
+      "experiments/k1713/K1713_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1713/K1713_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-29T11:19:33+00:00"
+  },
+  {
+    "id": "assign_a64ab146",
+    "title": "Starvation lockout can offer an hourly fire only claim-refused platform_ops tasks, idling the slot",
+    "description": "Under STARVATION LOCKOUT the dispatcher can hand an hourly fire a candidate set that the fire is mechanically forbidden to claim, so the slot goes idle even though ~106 tasks are pending.\n\nObserved live twice in fire slot-1 39e21e0f (2026-07-29 19:07-19:20 CST):\n\nPass 1 (19:09) - dispatch report:\n  [dispatch] pending: total=105 agentable 98 / main_thread 7\n  [dispatch] STARVED - only pickable this shift (1):\n    - P1 issue42_persistent_fire_lifecycle_20260727 [platform_ops]\n  task_pool_claim.py claim -> {\"ok\": false, \"reason\": \"supervisor_preassignment_required\", \"task_type\": \"platform_ops\"}\nThe fire only found work because k1731_f1_bootstrap_merge_deadlock (type=experiment) also sat on the starved P2 list.\n\nPass 2 (19:19), after k1731 left the list:\n  [dispatch] STARVED - only pickable this shift (1): the same claim-refused issue42.\n  All 10 starved P2 entries are platform_ops or governance.\n  Main-thread starved 6: 5 x platform_ops + 1 P4 paper_body blocked on external data.\n  dispatch_candidates in dispatch_report_latest.json = exactly 1 entry, the refused one.\n\nThe two rules are individually sound but compose into a dead end:\n  - Starvation lockout says: pick only from the starved list, diversity rotation paused, clear the starved backlog first.\n  - Task-pool claim says: platform_ops / governance require supervisor preassignment before worker spawn; a worker must not bypass it.\nSince the starved backlog is overwhelmingly platform_ops, once the non-platform_ops starved items are drained every subsequent fire is offered nothing it can legally claim. The fire's only exits are to idle or to break the lockout - neither is what either rule intends. The starved platform_ops backlog also never drains this way, so the lockout is self-perpetuating.\n\nNote the interaction with the slot budget, which is separately de-rated right now: \"PHASE-Z stuck-file incident assign_b48f6bac unclosed (8 files unowned) - de-rated\", cap=2.\n\nWhat a fix needs to decide (not prejudged here):\n  - Should the dispatcher exclude preassignment-required tasks from the STARVED list it shows a non-supervisor worker, so the list reflects what the caller can actually claim?\n  - Or should the supervisor preassign one starved platform_ops task per fire, so that backlog actually drains?\n  - Or should the lockout fall through to normal rotation when the starved set is entirely unclaimable by the current caller?\nWhichever is chosen, the dispatcher and the claim CLI should agree on claimability, so a fire is never handed a candidate set of size 1 that it is forbidden to take.\n\nAcceptance: a non-supervisor fire facing an all-platform_ops starved backlog is either given claimable work or is told explicitly that the lane is supervisor-only, with a regression test covering the compose case.\nFiled by fire slot-1 39e21e0f; see work_log 2026-07-29 entry for k1731_f1_bootstrap_merge_deadlock.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-29T11:20:47.502996+00:00",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "assign_dc879467",
+    "title": "PHASE-Z 卡住檔案 incident（4d7a6f1082c1fd4e）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n30 個未提交檔案不是任何一班 fire 產出的，最長已連續 46 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- .claude/rules/experiments.md — 9 班\n- scripts/dispatch_supervisor/workspace.py — 4 班\n- scripts/gen_k1585_general_charts.py — 3 班\n- scripts/gen_k1680_general_charts.py — 3 班\n- scripts/gen_k1705_general_charts.py — 3 班\n- storage/assets/k1585_general_effect_forest.png — 3 班\n- storage/assets/k1585_general_oos_cost.png — 3 班\n- storage/assets/k1623_general_ruler_flip.png — 3 班\n- storage/assets/k1623_general_survivor_funnel.png — 3 班\n- storage/assets/k1680_general_multiplicity.png — 3 班\n- storage/assets/k1680_general_per_firm.png — 3 班\n- storage/assets/k1705_general_sign_audit.png — 3 班\n- storage/assets/k1705_general_timing_flip.png — 3 班\n- storage/assets/k781_general_ranking.png — 8 班\n- storage/assets/k781_general_subperiod_regime.png — 8 班\n- storage/drafts/K1585_general_draft.md — 3 班\n- storage/drafts/K1680_general_draft.md — 3 班\n- storage/drafts/K1705_general_draft.md — 3 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 5 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 5 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 5 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 5 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 5 班\n- storage/lazypack_plans/k1585_general_plan.json — 3 班\n- storage/lazypack_plans/k1623_general_plan.json — 3 班\n- storage/lazypack_plans/k1680_general_plan.json — 3 班\n- storage/lazypack_plans/k1705_general_plan.json — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 39 班\n- storage/memory/knowledge.json — 46 班\n- tests/test_dispatch_supervisor.py — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T112642661726Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-29T11:27:53.623099+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "4d7a6f1082c1fd4e",
+      "paths": [
+        ".claude/rules/experiments.md",
+        "scripts/dispatch_supervisor/workspace.py",
+        "scripts/gen_k1585_general_charts.py",
+        "scripts/gen_k1680_general_charts.py",
+        "scripts/gen_k1705_general_charts.py",
+        "storage/assets/k1585_general_effect_forest.png",
+        "storage/assets/k1585_general_oos_cost.png",
+        "storage/assets/k1623_general_ruler_flip.png",
+        "storage/assets/k1623_general_survivor_funnel.png",
+        "storage/assets/k1680_general_multiplicity.png",
+        "storage/assets/k1680_general_per_firm.png",
+        "storage/assets/k1705_general_sign_audit.png",
+        "storage/assets/k1705_general_timing_flip.png",
+        "storage/assets/k781_general_ranking.png",
+        "storage/assets/k781_general_subperiod_regime.png",
+        "storage/drafts/K1585_general_draft.md",
+        "storage/drafts/K1680_general_draft.md",
+        "storage/drafts/K1705_general_draft.md",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py",
+        "storage/lazypack_plans/k1585_general_plan.json",
+        "storage/lazypack_plans/k1623_general_plan.json",
+        "storage/lazypack_plans/k1680_general_plan.json",
+        "storage/lazypack_plans/k1705_general_plan.json",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "tests/test_dispatch_supervisor.py"
+      ],
+      "streaks": {
+        ".claude/rules/experiments.md": 9,
+        "scripts/dispatch_supervisor/workspace.py": 4,
+        "scripts/gen_k1585_general_charts.py": 3,
+        "scripts/gen_k1680_general_charts.py": 3,
+        "scripts/gen_k1705_general_charts.py": 3,
+        "storage/assets/k1585_general_effect_forest.png": 3,
+        "storage/assets/k1585_general_oos_cost.png": 3,
+        "storage/assets/k1623_general_ruler_flip.png": 3,
+        "storage/assets/k1623_general_survivor_funnel.png": 3,
+        "storage/assets/k1680_general_multiplicity.png": 3,
+        "storage/assets/k1680_general_per_firm.png": 3,
+        "storage/assets/k1705_general_sign_audit.png": 3,
+        "storage/assets/k1705_general_timing_flip.png": 3,
+        "storage/assets/k781_general_ranking.png": 8,
+        "storage/assets/k781_general_subperiod_regime.png": 8,
+        "storage/drafts/K1585_general_draft.md": 3,
+        "storage/drafts/K1680_general_draft.md": 3,
+        "storage/drafts/K1705_general_draft.md": 3,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 5,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 5,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 5,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 5,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 5,
+        "storage/lazypack_plans/k1585_general_plan.json": 3,
+        "storage/lazypack_plans/k1623_general_plan.json": 3,
+        "storage/lazypack_plans/k1680_general_plan.json": 3,
+        "storage/lazypack_plans/k1705_general_plan.json": 3,
+        "storage/logs/trending_primary_source_verification.jsonl": 39,
+        "storage/memory/knowledge.json": 46,
+        "tests/test_dispatch_supervisor.py": 4
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260729T112642661726Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-29T11:27:53.606071+00:00",
+      "last_seen_at": "2026-07-29T11:27:53.606071+00:00"
     },
     "priority_capped_from": 1
   }
