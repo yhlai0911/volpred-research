@@ -42228,8 +42228,10 @@
     "blocked_on_task": "assign_1c16f316",
     "freshness_recheck": "[狀態複核 2026-07-29 18:35 CST，hourly-slot-1-5a59ff1d66f14262a9e0406c150b6900 — 未 claim，僅更新前提]\n\n本 task 的描述寫於 2026-07-21，其中三項前提已隨 arm B 後續工作漂移。下一班動手前請以下列複核結果為準：\n\n1. **worktree HEAD 已推進**：描述記 `dc3e5be04`（17 unmerged commits），實際為 `4f15f040f`，`main..HEAD` = **29 commits**。工作區 clean。\n2. **arm B 並非「已完成且經獨立審查」**：`k1731_armB_rev12_gatefix_report.json` 的 `status = READY_FOR_CODEX_ROUND_11`，即 rev12 是為修好 rev11 崩掉的 gate 而做、正在等 Codex round 11，尚未通過。描述引用的 rev8 remediation / verification 已被 rev11 freeze 與 rev12 gatefix 取代。**出口 A 的前提（「它的發現現在就存在、本來就欠一筆 knowledge」）需要重新判斷射程**：可寫的只有已被 rev12 自證的部分，且 rev12 自己列了 unresolved 項（archived rev5 production run 缺 `entrypoint.sha256` provenance，rev12 明白選擇不捏造，並把「是否接受 prose-level provenance」交給 Codex round 11 / 主線程裁決）。這一項未決之前寫 knowledge，等於替一個尚未裁決的 provenance 缺口背書。\n3. **knowledge.json 的 k1731 條目數仍為 0（前提成立）**：canonical `storage/memory/knowledge.json` 內 grep 到 3 筆提及 k1731 的條目，但都是 K1730 等條目在正文中引用 K1731，`item_id` 均非 k1731。描述所述的 merge 鎖成因未變。\n4. **兩個 shard 仍是 `status=failed, exit_code=2`**（`k1731-f1-boot-c0-parametric` 已確認），file-not-found 的成因未變，requeue 仍是預定回收路徑。\n\n**本班未 claim 的理由**：剩餘預算約 25 分鐘。出口 A 的核心動作是主線程親手寫 knowledge 條目（PHASE B 第 9 條禁止 agent 代寫），而該條目的正確射程現在取決於 rev12 那筆 unresolved provenance 裁決 — 這是研究誠實層級的判斷，不是可以壓時間趕出來的。與其留下一個射程可疑的永久條目或一個半合併的 worktree，依 batch-drain 收班條件 (b) 留給下一班。下一班請先讀 `k1731_armB_rev12_gatefix_report.json` 的 `unresolved` / `caveats_for_the_reviewer` / `status_rationale` 三個欄位再決定出口。",
     "compute_job_id": "agent-brief_k1731_main_integration-579c0d",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-brief_k1731_main_integration-579c0d; awaiting PHASE A collection"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "result": "dispatched to compute job agent-brief_k1731_main_integration-579c0d; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-29T11:30:44Z",
+    "compute_finished_at": "2026-07-29T11:59:34Z"
   },
   {
     "id": "article_task_generator_evidence_pointer",
@@ -45617,7 +45619,7 @@
     "description": "依 GitHub Issue #42 與既有 Matt spec 實作 durable fire generation、baseline receipt、restart closeout matching 與 failure-injection tests；完成 production planned reload read-back 與 sustained-clean gate。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "agent",
     "source": "user_issue42_implementation",
     "issue_ref": "#42",
@@ -45686,11 +45688,28 @@
         "from": "blocked",
         "to": "pending",
         "reason": "unblock_gate_satisfied (incident_sustained_clean_v1)"
+      },
+      {
+        "ts": "2026-07-29T14:10:19.175544+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T14:10:22.854542+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
       }
     ],
     "result": "Code + immediate production acceptance root fixed: de63029c0 durable lifecycle, dec1f8057 multi-slot generation gate, 98f407daf verified live evidence. Planned reload rejected two pre-deploy tokens into durable phase_z_rejections; post-reload cohort b978d748 carried generation 78987568 across 3 slots; canary workspace e08db4da3 merged to main 74735c9f2. Incident inc_537a3ff3304f remains open by policy until >=3 clean observations spanning >=24h; task intentionally remains in_progress/contained until that gate.",
     "last_released_at": "2026-07-28T17:35:37.202145+00:00",
-    "last_release_reason": "normalize_pending_claim_residue"
+    "last_release_reason": "normalize_pending_claim_residue",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-29T14:10:19.175529+00:00",
+    "claim_expires_at": "2026-07-29T16:10:19.175529+00:00",
+    "claim_session_id": "af16c309e0f0",
+    "started_at": "2026-07-29T14:10:22.854527+00:00"
   },
   {
     "id": "issue42_production_fire_lifecycle_acceptance_20260727",
@@ -51952,7 +51971,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52538,7 +52557,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52603,7 +52622,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52746,7 +52765,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53062,7 +53081,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53227,7 +53246,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53418,7 +53437,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53466,7 +53485,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53520,7 +53539,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -54629,7 +54648,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -54857,7 +54876,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -55209,7 +55228,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -55336,7 +55355,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -55460,7 +55479,7 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T23:39:51.528258+00:00",
       "deferred": [
-        "storage/memory/knowledge.json: 已保存，且 4.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -58484,7 +58503,7 @@
     "description": "Live supervisor has emitted task_pool_cli_failed every minute since immutable release cutover. Remove immutable release identity from canonical task-pool child environment, preserve stderr on nonzero exits, TDD, reload and verify a new worker receipt.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "preferred_agent": "codex",
     "dispatch_lane": "agent",
@@ -58559,21 +58578,44 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T12:41:04.991915+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-29T12:41:05.314953+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T12:41:05.618311+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T14:00:52.703320+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "last_released_at": "2026-07-29T11:02:33.358608+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-29T11:02:33.739421+00:00",
-    "claim_expires_at": "2026-07-29T13:02:33.739421+00:00",
-    "claim_session_id": "8ecd61003709",
-    "started_at": "2026-07-29T11:02:34.091983+00:00"
+    "last_released_at": "2026-07-29T12:41:04.991901+00:00",
+    "started_at": "2026-07-29T12:41:05.618296+00:00",
+    "completed_at": "2026-07-29T14:00:52.703297+00:00",
+    "result": "root_cause_fixed_and_verified: immutable release 0877b6694 installed; pre-custody workspace generations migrated from verified cutover proof, capacity 3/3 -> 0/3 with checkpoint refs preserved. Live canary 57e01130 launched in isolated workspace with v2 kernel custody; site/API/publication feed and launchd readbacks are healthy."
   },
   {
     "id": "ci-red-30433823744",
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "pending",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "incident_id": "ci-red-30433823744",
@@ -58762,27 +58804,207 @@
         "to": "in_progress",
         "by": "hourly-slot-1-d3c39bb1f9944fdba1f0832e5fd07e93",
         "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T11:50:22.242884+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-d3c39bb1f9944fdba1f0832e5fd07e93",
+        "note": "auto_release_claim_expired"
+      },
+      {
+        "ts": "2026-07-29T11:51:27.183280+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-3c5820fba9ef40438accad52bf95f271",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T11:51:27.183283+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-3c5820fba9ef40438accad52bf95f271",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T11:51:28.595956+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-3c5820fba9ef40438accad52bf95f271",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-29T11:52:26.937822+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f258ac10b77c428eb5045245b1f6f048",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T11:52:26.937825+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f258ac10b77c428eb5045245b1f6f048",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T11:52:28.575841+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-f258ac10b77c428eb5045245b1f6f048",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-29T13:23:03.792090+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-afae30c24592417399b88b8f62bfd9f5",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T13:23:03.792092+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-afae30c24592417399b88b8f62bfd9f5",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T13:23:04.287226+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-afae30c24592417399b88b8f62bfd9f5",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-29T13:23:27.697936+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-efd83f10027a4aa592b6bf716256ce61",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T13:23:27.697939+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-efd83f10027a4aa592b6bf716256ce61",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T13:23:28.202385+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-efd83f10027a4aa592b6bf716256ce61",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-29T13:24:27.556559+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-98199fe09b9f46e4b09d6e147d866b72",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T13:24:27.556561+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-98199fe09b9f46e4b09d6e147d866b72",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T13:24:28.016191+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-98199fe09b9f46e4b09d6e147d866b72",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-29T13:25:31.242812+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-29068c1a0b6143129f1fdb0de3625c5d",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T13:25:31.242815+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-29068c1a0b6143129f1fdb0de3625c5d",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T13:25:31.753424+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-29068c1a0b6143129f1fdb0de3625c5d",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-29T13:26:29.157646+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-bf03f421bdce45b3be386b185f963f57",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T13:26:29.157649+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-bf03f421bdce45b3be386b185f963f57",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T13:26:29.630488+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-bf03f421bdce45b3be386b185f963f57",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-29T13:27:28.070882+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2ea85863990148b0b998ee9aa43cf0b7",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T13:27:28.070884+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2ea85863990148b0b998ee9aa43cf0b7",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T13:27:28.522797+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-2ea85863990148b0b998ee9aa43cf0b7",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-29T13:59:32.493685+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-57e01130ddd342a58790badef24861d5",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T13:59:32.493688+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-57e01130ddd342a58790badef24861d5",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T14:17:42.805432+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-57e01130ddd342a58790badef24861d5",
+        "note": "supervisor_kill_57e01130"
       }
     ],
-    "dispatch_settled_session_id": "dispatch-7bddf910-522d69e9",
-    "last_released_at": "2026-07-29T08:29:38.160022+00:00",
-    "last_release_reason": "workspace_retry",
-    "claimed_by": "hourly-slot-1-d3c39bb1f9944fdba1f0832e5fd07e93",
-    "claimed_at": "2026-07-29T08:31:18.752673+00:00",
-    "claim_expires_at": "2026-07-29T10:53:16.733834+00:00",
-    "claim_session_id": "dispatch-d3c39bb1-2681ae3b",
-    "started_at": "2026-07-29T08:31:18.752673+00:00",
-    "dispatch_managed": true,
-    "dispatch_managed_owner": "hourly-slot-1-d3c39bb1f9944fdba1f0832e5fd07e93",
-    "dispatch_job_id": "d3c39bb1f9944fdba1f0832e5fd07e93",
-    "dispatch_settlement_pending": {
-      "job_id": "d3c39bb1f9944fdba1f0832e5fd07e93",
-      "task_id": "ci-red-30433823744",
-      "claim_session_id": "dispatch-d3c39bb1-2681ae3b",
-      "phase": "admission",
-      "default_disposition": "retry",
-      "created_at": "2026-07-29T08:31:18.752673+00:00"
-    }
+    "dispatch_settled_session_id": "dispatch-2ea85863-ae5bad15",
+    "last_released_at": "2026-07-29T14:17:42.805416+00:00",
+    "last_release_reason": "supervisor_kill_57e01130"
   },
   {
     "id": "K1477_article_general_v4",
@@ -59062,7 +59284,130 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-29T11:27:53.606071+00:00",
-      "last_seen_at": "2026-07-29T11:27:53.606071+00:00"
+      "last_seen_at": "2026-07-29T11:27:53.606071+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-29T14:17:58.681453+00:00",
+      "deferred": [
+        ".claude/rules/experiments.md: 已保存，且 6.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1585_general_charts.py: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1680_general_charts.py: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1705_general_charts.py: 已保存，且 4.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_effect_forest.png: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_oos_cost.png: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_ruler_flip.png: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_survivor_funnel.png: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_multiplicity.png: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_per_firm.png: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_sign_audit.png: 已保存，且 4.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_timing_flip.png: 已保存，且 4.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_ranking.png: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_subperiod_regime.png: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png: 已保存，且 12.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png: 已保存，且 12.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png: 已保存，且 12.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png: 已保存，且 12.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py: 已保存，且 12.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1585_general_plan.json: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1623_general_plan.json: 已保存，且 5.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1680_general_plan.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1705_general_plan.json: 已保存，且 4.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 7.3 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1
+  },
+  {
+    "id": "alert_host_cron_fail_20260729",
+    "title": "[alert] Host cron failure detected",
+    "description": "由 alert `host_cron_fail` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=1；non_hang_failure=False）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- failing_logs:\n  - storage/logs/cron/check_alerts.log exit=1 at unknown recency=unknown_exited_at\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-29T14:01:00.674134+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "host_cron_fail"
+    ]
+  },
+  {
+    "id": "assign_885384e2",
+    "title": "PHASE-Z 卡住檔案 incident（caf7852b94966140）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n28 個未提交檔案不是任何一班 fire 產出的，最長已連續 47 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- .claude/rules/experiments.md — 10 班\n- scripts/gen_k1585_general_charts.py — 4 班\n- scripts/gen_k1680_general_charts.py — 4 班\n- scripts/gen_k1705_general_charts.py — 4 班\n- storage/assets/k1585_general_effect_forest.png — 4 班\n- storage/assets/k1585_general_oos_cost.png — 4 班\n- storage/assets/k1623_general_ruler_flip.png — 4 班\n- storage/assets/k1623_general_survivor_funnel.png — 4 班\n- storage/assets/k1680_general_multiplicity.png — 4 班\n- storage/assets/k1680_general_per_firm.png — 4 班\n- storage/assets/k1698_general_rebuild_audit.png — 3 班\n- storage/assets/k1698_general_strength_flip.png — 3 班\n- storage/assets/k1698_general_two_targets.png — 3 班\n- storage/assets/k1705_general_sign_audit.png — 4 班\n- storage/assets/k1705_general_timing_flip.png — 4 班\n- storage/assets/k781_general_ranking.png — 9 班\n- storage/assets/k781_general_subperiod_regime.png — 9 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 6 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 6 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 6 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 6 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 6 班\n- storage/lazypack_plans/k1585_general_plan.json — 4 班\n- storage/lazypack_plans/k1623_general_plan.json — 4 班\n- storage/lazypack_plans/k1680_general_plan.json — 4 班\n- storage/lazypack_plans/k1705_general_plan.json — 4 班\n- storage/logs/trending_primary_source_verification.jsonl — 40 班\n- storage/memory/knowledge.json — 47 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T141758556286Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-29T14:19:04.328784+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "caf7852b94966140",
+      "paths": [
+        ".claude/rules/experiments.md",
+        "scripts/gen_k1585_general_charts.py",
+        "scripts/gen_k1680_general_charts.py",
+        "scripts/gen_k1705_general_charts.py",
+        "storage/assets/k1585_general_effect_forest.png",
+        "storage/assets/k1585_general_oos_cost.png",
+        "storage/assets/k1623_general_ruler_flip.png",
+        "storage/assets/k1623_general_survivor_funnel.png",
+        "storage/assets/k1680_general_multiplicity.png",
+        "storage/assets/k1680_general_per_firm.png",
+        "storage/assets/k1698_general_rebuild_audit.png",
+        "storage/assets/k1698_general_strength_flip.png",
+        "storage/assets/k1698_general_two_targets.png",
+        "storage/assets/k1705_general_sign_audit.png",
+        "storage/assets/k1705_general_timing_flip.png",
+        "storage/assets/k781_general_ranking.png",
+        "storage/assets/k781_general_subperiod_regime.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py",
+        "storage/lazypack_plans/k1585_general_plan.json",
+        "storage/lazypack_plans/k1623_general_plan.json",
+        "storage/lazypack_plans/k1680_general_plan.json",
+        "storage/lazypack_plans/k1705_general_plan.json",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json"
+      ],
+      "streaks": {
+        ".claude/rules/experiments.md": 10,
+        "scripts/gen_k1585_general_charts.py": 4,
+        "scripts/gen_k1680_general_charts.py": 4,
+        "scripts/gen_k1705_general_charts.py": 4,
+        "storage/assets/k1585_general_effect_forest.png": 4,
+        "storage/assets/k1585_general_oos_cost.png": 4,
+        "storage/assets/k1623_general_ruler_flip.png": 4,
+        "storage/assets/k1623_general_survivor_funnel.png": 4,
+        "storage/assets/k1680_general_multiplicity.png": 4,
+        "storage/assets/k1680_general_per_firm.png": 4,
+        "storage/assets/k1698_general_rebuild_audit.png": 3,
+        "storage/assets/k1698_general_strength_flip.png": 3,
+        "storage/assets/k1698_general_two_targets.png": 3,
+        "storage/assets/k1705_general_sign_audit.png": 4,
+        "storage/assets/k1705_general_timing_flip.png": 4,
+        "storage/assets/k781_general_ranking.png": 9,
+        "storage/assets/k781_general_subperiod_regime.png": 9,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 6,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 6,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 6,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 6,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 6,
+        "storage/lazypack_plans/k1585_general_plan.json": 4,
+        "storage/lazypack_plans/k1623_general_plan.json": 4,
+        "storage/lazypack_plans/k1680_general_plan.json": 4,
+        "storage/lazypack_plans/k1705_general_plan.json": 4,
+        "storage/logs/trending_primary_source_verification.jsonl": 40,
+        "storage/memory/knowledge.json": 47
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260729T141758556286Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-29T14:19:04.313332+00:00",
+      "last_seen_at": "2026-07-29T14:19:04.313332+00:00"
     },
     "priority_capped_from": 1
   }

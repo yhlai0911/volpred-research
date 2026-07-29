@@ -450,13 +450,25 @@
      "first_seen_at": "2026-07-29T11:25:36.466250+00:00",
      "key": "30446217613:1",
      "last_seen_at": "2026-07-29T11:25:36.466250+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T11:50:27.795636+00:00",
+     "key": "30447854654:1",
+     "last_seen_at": "2026-07-29T11:50:27.795636+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T13:40:18.795404+00:00",
+     "key": "30455565263:1",
+     "last_seen_at": "2026-07-29T13:40:18.795404+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-29T11:22:52.2321901Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as ",
-   "last_seen_at": "2026-07-29T11:25:36.466250+00:00",
+   "last_breach_detail": "2026-07-29T13:38:51.8622942Z E AssertionError: assert 'skip' == 'dry_run_fire'",
+   "last_seen_at": "2026-07-29T13:40:18.795404+00:00",
    "notified_at": null,
-   "occurrence_count": 6,
+   "occurrence_count": 8,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1509,14 +1521,14 @@
      "detail": {
       "base_sha": "",
       "branch": "worktree-dispatch-slot-1-a4fe4570",
-      "checkpoint_commit": "",
+      "checkpoint_commit": "7b2b309b455de574023571e1c6a2243700755c30",
       "detail_tail": "fire ended with outcome=orphaned; dirty=False unique_commits=2",
       "reason": "worker_orphaned",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-a4fe4570"
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-29T11:23:15.872446+00:00"
+     "last_seen_at": "2026-07-29T13:58:17.996597+00:00"
     },
     {
      "cleared_at": null,
@@ -1551,35 +1563,35 @@
      "detail": {
       "base_sha": "0ac4cbdbb454a4a027e202fa00c8e3a5a9353b0e",
       "branch": "worktree-dispatch-slot-1-cfeeb2f6",
-      "checkpoint_commit": "",
+      "checkpoint_commit": "1e8eef63f55e97184dee77bf6d5c0d486dc6adfe",
       "detail_tail": "fire ended with outcome=unknown_external; dirty=True unique_commits=0",
       "reason": "worker_unknown_external",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-cfeeb2f6"
      },
      "first_seen_at": "2026-07-29T02:02:19.114849+00:00",
      "key": "dispatch-slot-1-cfeeb2f6",
-     "last_seen_at": "2026-07-29T11:23:23.985027+00:00"
+     "last_seen_at": "2026-07-29T13:58:28.558256+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "base_sha": "916dd806594f565c4bf8fcd6e8d055a8d239dccf",
       "branch": "worktree-dispatch-slot-1-d3c39bb1",
-      "checkpoint_commit": "",
+      "checkpoint_commit": "5645aecee8de2c145fe42b52c0fb51cb53c5eacc",
       "detail_tail": "['.claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md', 'scripts/audit_enforcement_map.py', 'scripts/check_skill_architecture.py', 'tests/test_skill_architecture.py']",
       "reason": "undeclared_output_path",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-d3c39bb1"
      },
      "first_seen_at": "2026-07-29T08:53:18.944581+00:00",
      "key": "dispatch-slot-1-d3c39bb1",
-     "last_seen_at": "2026-07-29T11:23:25.823829+00:00"
+     "last_seen_at": "2026-07-29T13:58:39.956577+00:00"
     }
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-d3c39bb1 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-29T11:23:25.823829+00:00",
+   "last_seen_at": "2026-07-29T13:58:39.956577+00:00",
    "notified_at": null,
-   "occurrence_count": 4756,
+   "occurrence_count": 5109,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2409,6 +2421,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T11:25:36.467884+00:00",
+ "updated_at": "2026-07-29T14:17:43.719982+00:00",
  "version": 1
 }
