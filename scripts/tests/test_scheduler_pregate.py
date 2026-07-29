@@ -26,9 +26,18 @@ from types import SimpleNamespace
 
 import pytest
 
-from scripts.dispatch_supervisor import scheduler, state as st
+from scripts.dispatch_supervisor import custody_receipt, scheduler, state as st
 
 CRON = "7 * * * *"
+
+
+@pytest.fixture(autouse=True)
+def initialized_custody_ledger(tmp_path: Path) -> None:
+    """Decision tests run after the one-time production custody cutover."""
+    custody_receipt.initialize_producer_custody_ledger(
+        tmp_path,
+        migration_confirmed_quiescent=True,
+    )
 
 
 @pytest.fixture

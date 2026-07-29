@@ -3,7 +3,7 @@
 
 Why this exists (2026-07-20, WS-F1)
 -----------------------------------
-`loop-health-and-dreaming.md` holds the Enforcement Layer Map — the authoritative
+`docs/governance/enforcement_layer_map.md` holds the Enforcement Layer Map — the authoritative
 index every new constraint is supposed to consult before opening a new hook /
 cron / workflow ("不要疊床架屋"). On 2026-07-20 the map was audited by hand and
 found to be missing 3 registered Claude Code hooks, 4 PreToolUse deny rules,
@@ -44,7 +44,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 
-MAP_PATH = REPO / ".claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md"
+MAP_PATH = REPO / "docs/governance/enforcement_layer_map.md"
 SETTINGS = REPO / ".claude/settings.json"
 SETTINGS_LOCAL = REPO / ".claude/settings.local.json"
 BASH_DENY_OWNER = REPO / ".claude/hooks/pretooluse-bash-optimizer.sh"

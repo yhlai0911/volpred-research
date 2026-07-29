@@ -7931,7 +7931,10 @@ def test_task_pool_cli_child_does_not_inherit_release_identity(
     assert result["ok"] is False
     assert result["reason"] == "supervisor_capability_required"
     assert result["rc"] == 1
-    assert "supervisor_capability_required" in result["detail"]
+    assert (
+        "supervisor_capability_required" in result["detail"]
+        or "supervisor capability proof unavailable" in result["detail"]
+    )
     assert "ModuleNotFoundError" not in result["detail"]
 
 

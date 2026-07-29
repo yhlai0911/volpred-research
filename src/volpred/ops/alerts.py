@@ -15,7 +15,8 @@ Alert dedup has exactly TWO stores with an explicit division of labor
   flood gate still land here (it calls `send-alert --force` because burst
   semantics differ from standing-condition semantics).
 
-Enforcement Layer Map (loop-health-and-dreaming.md) carries the same split.
+Enforcement Layer Map (`docs/governance/enforcement_layer_map.md`) carries the
+machine inventory; channel policy remains owned by Operations Core contracts.
 """
 
 from __future__ import annotations

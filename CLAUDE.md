@@ -163,7 +163,7 @@
 
 ### Anti-stacking（不疊床架屋，2026-07-02 owner 指令）
 
-一個 concern 只有**一個 enforcement owner**；新增 gate/watchdog/hook 必須收編進既有機制，同 commit 把被取代的提醒層降級成一行 pointer。升級路徑：prose 提醒（strike 1）→ 機械 gate（strike 2+），機械化後 prose 縮 pointer。Layer map：`.claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md` §Enforcement Layer Map。
+一個 concern 只有**一個 enforcement owner**；新增 gate/watchdog/hook 必須收編進既有機制，同 commit 把被取代的提醒層降級成一行 pointer。升級路徑：prose 提醒（strike 1）→ 機械 gate（strike 2+），機械化後 prose 縮 pointer。Layer map：`docs/governance/enforcement_layer_map.md`。
 
 ### CLI / Workflow 優先順序
 
