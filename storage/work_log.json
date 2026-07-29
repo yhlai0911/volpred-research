@@ -31208,5 +31208,39 @@
     "owner": "hourly-slot-1-e9403ded9aa743e3b0dace252e5c1069",
     "commit": null,
     "summary": "K1736（偏度風險溢酬期限結構作長 horizon 尾部訊號）已派 async research agent。\n\n**選題脈絡**：本班 dispatcher 進入 STARVATION LOCKOUT，agent lane 唯一候選是 `governance_self_revise_operating_docs_20260728`（governance 型），claim CLI 以 `supervisor_preassignment_required` 機械拒絕；另試 `assign_b48f6bac`（platform_ops，正在把 slot cap 從 4 降載到 2 的那張 incident）同樣被拒。兩次拒絕已留證，不繞過。這正是池內 `assign_a64ab146`（\"Starvation lockout can offer an hourly fire only claim-refused platform_ops tasks, idling the slot\"）描述的死結的一次現場複現 —— 但該張本身也是 platform_ops，同樣無法由本班認領。為不讓 slot 空轉，改派可認領且 diversity 正確的 experiment（last-3 work_log 全是 daily_article）。\n\n**派工內容**：\n- worktree `dispatch-slot-1-e9403ded-k1736`（經 git_writer_lock.py 建立的 registered linked worktree）\n- job `agent-brief_k1736-36bc4e`，opus / xhigh（per model_router；xhigh 無法用 Agent tool 表達，故走 compute queue）\n- source task K1736 -> awaiting_agent_job\n\n**brief 的研究把關重點**：\n1. 差異化必須成立 —— SKEW 這條線已有 7 個 level 打法的 NULL（K181/K184/K210/K258/K447/K535/K979，另 K43 打 level）。本題只有打 term-structure slope + 長 horizon 才有存在理由；brief 要求 agent 自檢 slope 與 level 相關係數，>0.9 即視為退化並標 NULL，不得硬凹。\n2. 可行性風險前置 —— CBOE 無免費 SKEW3M/6M，期限結構要自建。brief 允許「免費資料建不出真正 RN skew 期限結構」作為 data-limitation NULL 結案，明文禁止用代理硬撐再宣稱發現。\n3. 重疊觀測 —— 6-12 個月 horizon 配日頻滾動是本題頭號統計陷阱，要求 Hodrick(1992) 或 NW(lag>=horizon) 標準誤、明報 effective sample size（^SKEW 自 1990 起，12m horizon 僅約 35 個獨立觀測）、並列非重疊子樣本 robustness。\n4. 多重檢定（多 horizon x 多目標）要求 Romano-Wolf 或至少 unadjusted/adjusted 並列；子期間至少 3 段含 2008/2020（K447 即敗在子期間不穩）。\n5. lookahead `signal.shift(1)`、seed=42、run-time `finalize_experiment()` 產 reproduce spec（K1708 教訓：spec 事後補會與實際跑的程式漂移）。\n6. 邊界：禁寫 knowledge.json（K1259）、feed.json、experiment_experiences.json；產出僅限 experiments/K1736/。\n\n**收件**：後續 fire 的 PHASE A 依 followup brief 驗數字、審 slope 退化、跑 check_experiment_artifacts、派 Codex 審程式，通過後主線程寫 knowledge 並 merge worktree。\n\n**本班未做**：slot 已滿（cap=2 因 assign_b48f6bac 未關而降載，occupied=2/2），無餘裕再派第二張，故不續 batch-drain。"
+  },
+  {
+    "timestamp": "2026-07-30T00:34:46+08:00",
+    "task_id": "K1630_article_general",
+    "task_type": "daily_article",
+    "actor": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d",
+    "owner": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d",
+    "summary": "K1630 一般讀者向文章：『五月賣股票，萬聖節再買回』台美對照。draft 發佈為 mile_6c6fa752（status=draft），lazypack 計畫 storage/lazypack_plans/k1630_general_plan.json 已 enqueue（job lazypack-mile_6c6fa752）等 */15 worker render 後可 release。",
+    "artifacts": [
+      "storage/drafts/K1630_general_draft.md",
+      "storage/drafts/assets/k1630_general_effect_ci.png",
+      "storage/drafts/assets/k1630_general_winter_summer.png",
+      "storage/drafts/assets/k1630_general_charts.py",
+      "storage/lazypack_plans/k1630_general_plan.json",
+      "experiments/k1630/README.md"
+    ],
+    "verification": "check_arc_dedup --k-id k1630 --audience general exit0；feed.json K1630 零命中；anti_ai_gate.py exit0（主線程獨立複跑，warn=1/3）；四格數字對 k1630_results.json 逐一核對；Holm/交互作用 p 溯源至 storage/ops/orphan_collect/k1630_knowledge_proposal.json（Holm 算式 0.00492*4=0.0197 已驗）。",
+    "notes": "順手修 BD1(CRITICAL)：experiments/k1630/README.md Verdict 仍是未修正版（宣稱近15年消失/迷思破除/被套利掉），與 knowledge item 2609 之 2026-07-17 修正版衝突；已改寫並標註不得引用舊版。另記 BD2 資料警告（0050.TW snapshot 假跳空）。"
+  },
+  {
+    "timestamp": "2026-07-30T00:46:46+08:00",
+    "task_id": "K1448_article_general",
+    "task_type": "daily_article",
+    "actor": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d",
+    "owner": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d",
+    "summary": "K1448 一般讀者向文章：通膨預期 regime 對股債相關性（非波動率）才有資訊。draft 發佈為 mile_dd7e7aa4（status=draft），lazypack plan storage/lazypack_plans/k1448_general_plan.json 已 enqueue（job lazypack-mile_dd7e7aa4）。",
+    "artifacts": [
+      "storage/drafts/K1448_general_draft.md",
+      "storage/drafts/assets/k1448_general_corr_by_regime.png",
+      "storage/drafts/assets/k1448_general_ten_tests.png",
+      "storage/lazypack_plans/k1448_general_plan.json"
+    ],
+    "verification": "check_arc_dedup --k-id k1448 --audience general exit0；feed.json K1448 零命中；anti_ai_gate.py exit0（主線程獨立複跑）；存活兩格係數 +0.20896/+0.20199、p=1.913e-06/1.909e-06 直接自 k1448_results.json 讀出核對；n_obs_joint_prices=4133 相符。",
+    "notes": "CONDITIONAL_PASS：10 個主檢定 Bonferroni(alpha=0.005) 下僅 2 格存活，且兩格高度重疊（SPY-IEF 與 SPY-TLT corr 幾乎同一件事）。agent 主動揭露 BH 校正下會變 5 格存活，文中保留此揭露以免選擇性報告。lazypack plan 只綁 results.json 可驗數字。"
   }
 ]

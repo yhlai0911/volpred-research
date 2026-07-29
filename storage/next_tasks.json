@@ -37424,8 +37424,9 @@
       }
     ],
     "compute_job_id": "agent-brief_k1736-36bc4e",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-brief_k1736-36bc4e; awaiting PHASE A collection"
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job agent-brief_k1736-36bc4e; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-29T16:36:19Z"
   },
   {
     "id": "K1737",
@@ -45292,7 +45293,7 @@
     "description": "依 GitHub Issue #42 與既有 Matt spec 實作 durable fire generation、baseline receipt、restart closeout matching 與 failure-injection tests；完成 production planned reload read-back 與 sustained-clean gate。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "source": "user_issue42_implementation",
     "issue_ref": "#42",
@@ -45373,16 +45374,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T16:22:30.010679+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "result": "Code + immediate production acceptance root fixed: de63029c0 durable lifecycle, dec1f8057 multi-slot generation gate, 98f407daf verified live evidence. Planned reload rejected two pre-deploy tokens into durable phase_z_rejections; post-reload cohort b978d748 carried generation 78987568 across 3 slots; canary workspace e08db4da3 merged to main 74735c9f2. Incident inc_537a3ff3304f remains open by policy until >=3 clean observations spanning >=24h; task intentionally remains in_progress/contained until that gate.",
+    "result": "Code + immediate production acceptance root fixed: de63029c0 durable lifecycle, dec1f8057 multi-slot generation gate, 98f407daf verified live evidence. Planned reload rejected two pre-deploy tokens into durable phase_z_rejections; post-reload cohort b978d748 carried generation 78987568 across 3 slots; canary workspace e08db4da3 merged to main 74735c9f2. Incident inc_537a3ff3304f remains open by policy until >=3 clean observations spanning >=24h; task intentionally remains in_progress/contained until that gate.\n\n新版 immutable supervisor generation 9ceb7e1838c14f9fa3bc7524f98ebeb9 完成自然 fire→worker→PHASE-Z commit receipt 371e54f7（commit 5e63b6b5）；後續 cron generation 22cddb1d 亦按 runtime_schedules 啟動 claude-opus-5。此完成 runtime slice，Issue #42 umbrella 仍依其他 acceptance 保持 open。",
     "last_released_at": "2026-07-28T17:35:37.202145+00:00",
     "last_release_reason": "normalize_pending_claim_residue",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-29T14:10:19.175529+00:00",
-    "claim_expires_at": "2026-07-29T16:10:19.175529+00:00",
-    "claim_session_id": "af16c309e0f0",
-    "started_at": "2026-07-29T14:10:22.854527+00:00"
+    "started_at": "2026-07-29T14:10:22.854527+00:00",
+    "completed_at": "2026-07-29T16:22:30.010654+00:00",
+    "issue_disposition": "contained"
   },
   {
     "id": "issue42_production_fire_lifecycle_acceptance_20260727",
@@ -58150,11 +58155,12 @@
       }
     ],
     "compute_job_id": "agent-brief_k1694_r6-6431c0",
-    "blocked_reason": "external_compute_job_running",
+    "blocked_reason": "external_compute_receipt_pending_collection",
     "result": "dispatched to compute job agent-brief_k1694_r6-6431c0; awaiting PHASE A collection",
     "note": "2026-07-29 hourly-slot-1-ab61fef0: enqueue-agent job=agent-brief_k1694_r6-6431c0（opus/max, timeout 5400s, cwd=.claude/worktrees/dispatch-slot-1-e98b43fc-k1694, result-artifact=experiments/K1694/review_verdict.json）。effort 依 model_router --attempt 1 由 xhigh 升 max（round-5 Codex FAIL = 可驗證失敗）；router 回 at_ceiling=true → 若 round-6 仍 FAIL，禁止同法再重試，改走 3-strike。",
     "escalation_attempts": 1,
-    "compute_started_at": "2026-07-29T15:45:33Z"
+    "compute_started_at": "2026-07-29T15:45:33Z",
+    "compute_finished_at": "2026-07-29T16:36:18Z"
   },
   {
     "id": "assign_ddafbd91",
@@ -59009,11 +59015,30 @@
     "description": "Under STARVATION LOCKOUT the dispatcher can hand an hourly fire a candidate set that the fire is mechanically forbidden to claim, so the slot goes idle even though ~106 tasks are pending.\n\nObserved live twice in fire slot-1 39e21e0f (2026-07-29 19:07-19:20 CST):\n\nPass 1 (19:09) - dispatch report:\n  [dispatch] pending: total=105 agentable 98 / main_thread 7\n  [dispatch] STARVED - only pickable this shift (1):\n    - P1 issue42_persistent_fire_lifecycle_20260727 [platform_ops]\n  task_pool_claim.py claim -> {\"ok\": false, \"reason\": \"supervisor_preassignment_required\", \"task_type\": \"platform_ops\"}\nThe fire only found work because k1731_f1_bootstrap_merge_deadlock (type=experiment) also sat on the starved P2 list.\n\nPass 2 (19:19), after k1731 left the list:\n  [dispatch] STARVED - only pickable this shift (1): the same claim-refused issue42.\n  All 10 starved P2 entries are platform_ops or governance.\n  Main-thread starved 6: 5 x platform_ops + 1 P4 paper_body blocked on external data.\n  dispatch_candidates in dispatch_report_latest.json = exactly 1 entry, the refused one.\n\nThe two rules are individually sound but compose into a dead end:\n  - Starvation lockout says: pick only from the starved list, diversity rotation paused, clear the starved backlog first.\n  - Task-pool claim says: platform_ops / governance require supervisor preassignment before worker spawn; a worker must not bypass it.\nSince the starved backlog is overwhelmingly platform_ops, once the non-platform_ops starved items are drained every subsequent fire is offered nothing it can legally claim. The fire's only exits are to idle or to break the lockout - neither is what either rule intends. The starved platform_ops backlog also never drains this way, so the lockout is self-perpetuating.\n\nNote the interaction with the slot budget, which is separately de-rated right now: \"PHASE-Z stuck-file incident assign_b48f6bac unclosed (8 files unowned) - de-rated\", cap=2.\n\nWhat a fix needs to decide (not prejudged here):\n  - Should the dispatcher exclude preassignment-required tasks from the STARVED list it shows a non-supervisor worker, so the list reflects what the caller can actually claim?\n  - Or should the supervisor preassign one starved platform_ops task per fire, so that backlog actually drains?\n  - Or should the lockout fall through to normal rotation when the starved set is entirely unclaimable by the current caller?\nWhichever is chosen, the dispatcher and the claim CLI should agree on claimability, so a fire is never handed a candidate set of size 1 that it is forbidden to take.\n\nAcceptance: a non-supervisor fire facing an all-platform_ops starved backlog is either given claimable work or is told explicitly that the lane is supervisor-only, with a regression test covering the compose case.\nFiled by fire slot-1 39e21e0f; see work_log 2026-07-29 entry for k1731_f1_bootstrap_merge_deadlock.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-29T11:20:47.502996+00:00",
     "priority_capped_from": 1,
-    "third_observation_20260729_2330": "Third live occurrence — fire slot-1 40fe60ce (2026-07-29 22:57-23:30 CST).\n\nIMPORTANT ESCALATION: this fire drained the escape hatch this report names.\nThe report says \"The fire only found work because k1731_f1_bootstrap_merge_deadlock\n(type=experiment) also sat on the starved P2 list.\" That task was collected and\ncompleted succeeded in THIS fire (PHASE A collect_completed). It is no longer on the\nstarved list. The remaining starved agentable set is now 100% claim-refused.\n\nEvidence from this fire, in order:\n  1. ci-red-30433823744 [platform_ops] -> claim {\"ok\": false,\n     \"reason\": \"supervisor_preassignment_required\"}\n  2. PHASE A gave real work (k1731 collection) -> completed succeeded; escape hatch gone\n  3. dispatch --report -> STARVATION LOCKOUT, \"本班只能從這裡挑 (1)\":\n       P2 governance_self_revise_operating_docs_20260728 [governance]\n  4. claim governance_self_revise_operating_docs_20260728 -> {\"ok\": false,\n     \"reason\": \"supervisor_preassignment_required\", \"task_type\": \"governance\"}\n  5. pending by type at 23:27 CST: platform_ops=80, experiment=24, daily_article=3,\n     paper_body=1, governance=1. Every one of the 81 platform_ops+governance pending\n     is claim-refused to an hourly fire; the lockout excludes the other 28.\n\nSo the predicted steady state has arrived: from this fire onward the lockout offers\nhourly fires nothing claimable. Slot budget is still de-rated to cap=2 by the unclosed\nPHASE-Z stuck-file incident assign_b48f6bac, compounding it.\n\nAlso note this task itself (assign_a64ab146, type=platform_ops) is claim-refused by the\nvery gate it describes, so no hourly fire can fix it — it needs supervisor preassignment\nor a Codex/interactive session. That is the deadlock closing over its own repair."
+    "third_observation_20260729_2330": "Third live occurrence — fire slot-1 40fe60ce (2026-07-29 22:57-23:30 CST).\n\nIMPORTANT ESCALATION: this fire drained the escape hatch this report names.\nThe report says \"The fire only found work because k1731_f1_bootstrap_merge_deadlock\n(type=experiment) also sat on the starved P2 list.\" That task was collected and\ncompleted succeeded in THIS fire (PHASE A collect_completed). It is no longer on the\nstarved list. The remaining starved agentable set is now 100% claim-refused.\n\nEvidence from this fire, in order:\n  1. ci-red-30433823744 [platform_ops] -> claim {\"ok\": false,\n     \"reason\": \"supervisor_preassignment_required\"}\n  2. PHASE A gave real work (k1731 collection) -> completed succeeded; escape hatch gone\n  3. dispatch --report -> STARVATION LOCKOUT, \"本班只能從這裡挑 (1)\":\n       P2 governance_self_revise_operating_docs_20260728 [governance]\n  4. claim governance_self_revise_operating_docs_20260728 -> {\"ok\": false,\n     \"reason\": \"supervisor_preassignment_required\", \"task_type\": \"governance\"}\n  5. pending by type at 23:27 CST: platform_ops=80, experiment=24, daily_article=3,\n     paper_body=1, governance=1. Every one of the 81 platform_ops+governance pending\n     is claim-refused to an hourly fire; the lockout excludes the other 28.\n\nSo the predicted steady state has arrived: from this fire onward the lockout offers\nhourly fires nothing claimable. Slot budget is still de-rated to cap=2 by the unclosed\nPHASE-Z stuck-file incident assign_b48f6bac, compounding it.\n\nAlso note this task itself (assign_a64ab146, type=platform_ops) is claim-refused by the\nvery gate it describes, so no hourly fire can fix it — it needs supervisor preassignment\nor a Codex/interactive session. That is the deadlock closing over its own repair.",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-29T16:47:45.691062+00:00",
+    "claim_expires_at": "2026-07-29T18:47:45.691062+00:00",
+    "claim_session_id": "1bc632fd2f88",
+    "status_history": [
+      {
+        "ts": "2026-07-29T16:47:45.691079+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T16:47:46.030909+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-29T16:47:46.030896+00:00"
   },
   {
     "id": "assign_dc879467",
@@ -59159,7 +59184,7 @@
     "description": "## 發生什麼\n28 個未提交檔案不是任何一班 fire 產出的，最長已連續 51 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- .claude/rules/experiments.md — 14 班\n- scripts/gen_k1585_general_charts.py — 8 班\n- scripts/gen_k1680_general_charts.py — 8 班\n- scripts/gen_k1705_general_charts.py — 8 班\n- storage/assets/k1585_general_effect_forest.png — 8 班\n- storage/assets/k1585_general_oos_cost.png — 8 班\n- storage/assets/k1623_general_ruler_flip.png — 8 班\n- storage/assets/k1623_general_survivor_funnel.png — 8 班\n- storage/assets/k1680_general_multiplicity.png — 8 班\n- storage/assets/k1680_general_per_firm.png — 8 班\n- storage/assets/k1698_general_rebuild_audit.png — 7 班\n- storage/assets/k1698_general_strength_flip.png — 7 班\n- storage/assets/k1698_general_two_targets.png — 7 班\n- storage/assets/k1705_general_sign_audit.png — 8 班\n- storage/assets/k1705_general_timing_flip.png — 8 班\n- storage/assets/k781_general_ranking.png — 13 班\n- storage/assets/k781_general_subperiod_regime.png — 13 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 10 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 10 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 10 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 10 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 10 班\n- storage/lazypack_plans/k1585_general_plan.json — 8 班\n- storage/lazypack_plans/k1623_general_plan.json — 8 班\n- storage/lazypack_plans/k1680_general_plan.json — 8 班\n- storage/lazypack_plans/k1705_general_plan.json — 8 班\n- storage/logs/trending_primary_source_verification.jsonl — 44 班\n- storage/memory/knowledge.json — 51 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T141758556286Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T145538488441Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T151825497592Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T155234388981Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T161212218408Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-29T14:19:04.328784+00:00",
     "payload": {
@@ -59268,7 +59293,11 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-29T16:14:09.215079+00:00"
+    "updated_at": "2026-07-29T16:14:09.215079+00:00",
+    "superseded_at": "2026-07-29T16:50:12.551917+00:00",
+    "superseded_by": "assign_42e185c0",
+    "completed_at": "2026-07-29T16:50:12.551917+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "k1731_main_integration_collect_20260729",
@@ -59468,7 +59497,7 @@
     "title": "K1448: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1448 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1448 [CONDITIONAL_PASS]: TIP/IEF 與 TIP/TLT 相對表現作為通膨預期 regime proxy，檢驗對 SPY/IEF/TLT 未來 21 日已實現波動率與股債相關的影響。資料源 yfinance（TIP, IEF, TLT, SPY），期間 2010-01-04至2026-06-09，n=4,133 聯合觀測日。訊號 = log(TIP/asset).diff(63).shift(1)（63日≈一季，shift(1)避免 lookahead）。HAC/Newey-West（maxlags=21）推論 + Bonf Canonical evidence: experiments/k1448/k1448_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -59483,7 +59512,30 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-29T15:50:56+00:00"
+    "created_at": "2026-07-29T15:50:56+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-29T16:35:49.794272+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d"
+      },
+      {
+        "ts": "2026-07-29T16:35:50.121179+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d"
+      },
+      {
+        "ts": "2026-07-29T16:46:46.567162+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d"
+      }
+    ],
+    "started_at": "2026-07-29T16:35:50.121165+00:00",
+    "completed_at": "2026-07-29T16:46:46.567131+00:00",
+    "result": "K1448 一般讀者向文章完成：draft mile_dd7e7aa4（通膨預期 regime → 股債相關性而非波動率）。anti_ai_gate exit0、dedup clean、存活兩格係數與 p 值對 results.json 核對。lazypack plan 已 enqueue（lazypack-mile_dd7e7aa4），render 後可 release。誠實揭露 10 檢定僅 2 存活且兩格重疊。"
   },
   {
     "id": "K1609_article_general",
@@ -59512,7 +59564,7 @@
     "title": "K1630: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1630 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1630 [DOCUMENTED_NEGATIVE / 已修正 2026-07-17]：檢驗『Sell in May / Halloween 效應』在台股與美股是否成立。S&P500 全樣本 (1928-2026, N=1181月)：冬夏差 β=+0.404pp/月, HAC p=0.141（不顯著）；2011-2026 子樣本 (N=185)：β=+0.235pp/月, p=0.669（不顯著）。TAIEX 全樣本 (1997-2026, N=347月)：β=+2.089pp/月, HAC p=0.0049（顯著；bootstrap 95%CI[0. Canonical evidence: experiments/k1630/k1630_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -59527,7 +59579,30 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-29T15:51:05+00:00"
+    "created_at": "2026-07-29T15:51:05+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-29T16:19:05.510064+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d"
+      },
+      {
+        "ts": "2026-07-29T16:19:16.154727+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d"
+      },
+      {
+        "ts": "2026-07-29T16:34:46.834104+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-519ca88b7a5b47559d48a21142468e5d"
+      }
+    ],
+    "started_at": "2026-07-29T16:19:16.154713+00:00",
+    "completed_at": "2026-07-29T16:34:46.834074+00:00",
+    "result": "K1630 一般讀者向文章完成：draft mile_6c6fa752（台美 Sell in May 對照，誠實版：不宣稱效應衰退）。anti_ai_gate exit0、dedup gate clean、數字對 results.json 核對。lazypack plan 已 enqueue（lazypack-mile_6c6fa752），render 後可 release。附帶修正 experiments/k1630/README.md 的 BD1 CRITICAL 未修正 Verdict。"
   },
   {
     "id": "assign_2400da2d",
@@ -59535,7 +59610,7 @@
     "description": "依 Matt master spec WS-H/H2 與 2026-07-29 live audit：修正 send_alert 全量 Telegram mirror；建立中央通道路由，真正需人工即時介入才 email+Telegram，recovery 僅 email，自癒/breadcrumb 留 ops/digest；TDD、code review、live read-back。關聯 Issue #13。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-29T16:00:36.958383+00:00",
     "payload": {
@@ -59545,10 +59620,6 @@
     },
     "created_by": "codex-vscode",
     "issue_ref": "#13",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-29T16:00:42.242554+00:00",
-    "claim_expires_at": "2026-07-29T18:00:42.242554+00:00",
-    "claim_session_id": "1e72ad7e78bd",
     "status_history": [
       {
         "ts": "2026-07-29T16:00:42.242597+00:00",
@@ -59561,8 +59632,157 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T16:29:24.689971+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-29T16:00:47.241639+00:00"
+    "started_at": "2026-07-29T16:00:47.241639+00:00",
+    "completed_at": "2026-07-29T16:29:24.689947+00:00",
+    "result": "依 H2/Incident gate 完成 disposition-based notification routing：Telegram 回到 progress_report 單一 owner，owner decision/recovery/record 走 email，自癒前兩次只記 persistent incident、第三次才 root-cause escalation；owned-email command key 綁 payload hash，typed conflict/effect evidence 不再冒泡成 host_cron_fail；新版 email title 加 [新架構派發]。affected 251 passed + incident 42 passed，commit 96018b340；待 production reload/read-back 前 Issue #13 保持 open/contained。",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "issue42_closure_audit_20260730",
+    "title": "[Issue #42] T38 final closure audit after sustained-clean resolution",
+    "description": "依 Issue #42 六項 acceptance 逐條回讀：failure-injection boundaries、durable generation、unmatched rejection、planned reload production receipt、downstream commit/claim、inc_537a3ff3304f sustained-clean resolution。缺任一項只 contained，不關 issue。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "source": "user",
+    "issue_ref": "#42",
+    "tags": [
+      "matt-plan",
+      "issue-42",
+      "closure-audit"
+    ],
+    "created_at": "2026-07-29T16:34:09.887505+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-29T16:34:10.287119+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T16:34:13.509835+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T16:44:50.626735+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-29T16:34:13.509820+00:00",
+    "completed_at": "2026-07-29T16:44:50.626710+00:00",
+    "result": "Issue #42 six acceptance criteria verified. Replayed exact pre-fix RED -> HEAD GREEN; 92 focused tests; production generation/commit read-back; detector sustained-clean resolution; Matt Spec+Standards PASS. Evidence commit 0dadf0ca6.",
+    "issue_disposition": "close",
+    "issue_close_pending": {
+      "issue_disposition": "close",
+      "issue_ref": "#42",
+      "task_id": "issue42_closure_audit_20260730",
+      "completion_owner": "codex-vscode",
+      "completed_at": "2026-07-29T16:44:50.626710+00:00",
+      "completion_base_commit": "0dadf0ca65325fdcaee5ebecb38a50f430ad294a"
+    }
+  },
+  {
+    "id": "assign_42e185c0",
+    "title": "PHASE-Z 卡住檔案 incident（ebef47ce579c8649）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n33 個未提交檔案不是任何一班 fire 產出的，最長已連續 52 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- .claude/rules/experiments.md — 15 班\n- scripts/gen_k1585_general_charts.py — 9 班\n- scripts/gen_k1680_general_charts.py — 9 班\n- scripts/gen_k1705_general_charts.py — 9 班\n- storage/assets/k1585_general_effect_forest.png — 9 班\n- storage/assets/k1585_general_oos_cost.png — 9 班\n- storage/assets/k1623_general_ruler_flip.png — 9 班\n- storage/assets/k1623_general_survivor_funnel.png — 9 班\n- storage/assets/k1680_general_multiplicity.png — 9 班\n- storage/assets/k1680_general_per_firm.png — 9 班\n- storage/assets/k1698_general_rebuild_audit.png — 8 班\n- storage/assets/k1698_general_strength_flip.png — 8 班\n- storage/assets/k1698_general_two_targets.png — 8 班\n- storage/assets/k1705_general_sign_audit.png — 9 班\n- storage/assets/k1705_general_timing_flip.png — 9 班\n- storage/assets/k781_general_ranking.png — 14 班\n- storage/assets/k781_general_subperiod_regime.png — 14 班\n- storage/drafts/assets/k775_general_ranking.png — 3 班\n- storage/drafts/assets/k775_general_regime.png — 3 班\n- storage/drafts/k775_general_draft.md — 3 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 11 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 11 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 11 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 11 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 11 班\n- storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/plan.json — 3 班\n- storage/lazypack_plans/k1585_general_plan.json — 9 班\n- storage/lazypack_plans/k1623_general_plan.json — 9 班\n- storage/lazypack_plans/k1680_general_plan.json — 9 班\n- storage/lazypack_plans/k1705_general_plan.json — 9 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T164853036101Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-29T16:50:12.568815+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "ebef47ce579c8649",
+      "paths": [
+        ".claude/rules/experiments.md",
+        "scripts/gen_k1585_general_charts.py",
+        "scripts/gen_k1680_general_charts.py",
+        "scripts/gen_k1705_general_charts.py",
+        "storage/assets/k1585_general_effect_forest.png",
+        "storage/assets/k1585_general_oos_cost.png",
+        "storage/assets/k1623_general_ruler_flip.png",
+        "storage/assets/k1623_general_survivor_funnel.png",
+        "storage/assets/k1680_general_multiplicity.png",
+        "storage/assets/k1680_general_per_firm.png",
+        "storage/assets/k1698_general_rebuild_audit.png",
+        "storage/assets/k1698_general_strength_flip.png",
+        "storage/assets/k1698_general_two_targets.png",
+        "storage/assets/k1705_general_sign_audit.png",
+        "storage/assets/k1705_general_timing_flip.png",
+        "storage/assets/k781_general_ranking.png",
+        "storage/assets/k781_general_subperiod_regime.png",
+        "storage/drafts/assets/k775_general_ranking.png",
+        "storage/drafts/assets/k775_general_regime.png",
+        "storage/drafts/k775_general_draft.md",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py",
+        "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/plan.json",
+        "storage/lazypack_plans/k1585_general_plan.json",
+        "storage/lazypack_plans/k1623_general_plan.json",
+        "storage/lazypack_plans/k1680_general_plan.json",
+        "storage/lazypack_plans/k1705_general_plan.json",
+        "storage/lazypack_plans/k775_general_plan.json",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json"
+      ],
+      "streaks": {
+        ".claude/rules/experiments.md": 15,
+        "scripts/gen_k1585_general_charts.py": 9,
+        "scripts/gen_k1680_general_charts.py": 9,
+        "scripts/gen_k1705_general_charts.py": 9,
+        "storage/assets/k1585_general_effect_forest.png": 9,
+        "storage/assets/k1585_general_oos_cost.png": 9,
+        "storage/assets/k1623_general_ruler_flip.png": 9,
+        "storage/assets/k1623_general_survivor_funnel.png": 9,
+        "storage/assets/k1680_general_multiplicity.png": 9,
+        "storage/assets/k1680_general_per_firm.png": 9,
+        "storage/assets/k1698_general_rebuild_audit.png": 8,
+        "storage/assets/k1698_general_strength_flip.png": 8,
+        "storage/assets/k1698_general_two_targets.png": 8,
+        "storage/assets/k1705_general_sign_audit.png": 9,
+        "storage/assets/k1705_general_timing_flip.png": 9,
+        "storage/assets/k781_general_ranking.png": 14,
+        "storage/assets/k781_general_subperiod_regime.png": 14,
+        "storage/drafts/assets/k775_general_ranking.png": 3,
+        "storage/drafts/assets/k775_general_regime.png": 3,
+        "storage/drafts/k775_general_draft.md": 3,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 11,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 11,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 11,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 11,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 11,
+        "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/plan.json": 3,
+        "storage/lazypack_plans/k1585_general_plan.json": 9,
+        "storage/lazypack_plans/k1623_general_plan.json": 9,
+        "storage/lazypack_plans/k1680_general_plan.json": 9,
+        "storage/lazypack_plans/k1705_general_plan.json": 9,
+        "storage/lazypack_plans/k775_general_plan.json": 3,
+        "storage/logs/trending_primary_source_verification.jsonl": 45,
+        "storage/memory/knowledge.json": 52
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260729T164853036101Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-29T16:50:12.551917+00:00",
+      "last_seen_at": "2026-07-29T16:50:12.551917+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]
