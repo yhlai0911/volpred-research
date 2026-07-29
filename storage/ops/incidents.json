@@ -620,9 +620,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-28T15:46:03.801321+00:00"
-    },
-    {
      "at": "2026-07-28T16:16:27.983669+00:00"
     },
     {
@@ -654,6 +651,9 @@
     },
     {
      "at": "2026-07-29T01:19:46.302587+00:00"
+    },
+    {
+     "at": "2026-07-29T02:06:32.080933+00:00"
     }
    ],
    "clean_streak_started_at": "2026-07-28T09:24:21.846131+00:00",
@@ -1199,13 +1199,19 @@
      "first_seen_at": "2026-07-29T00:50:26.302662+00:00",
      "key": "30411360764:1",
      "last_seen_at": "2026-07-29T00:50:26.302662+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T01:50:14.444910+00:00",
+     "key": "30414278776:1",
+     "last_seen_at": "2026-07-29T01:50:14.444910+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-29T00:48:58.7426534Z E AssertionError: 3 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1694', 'K1727', 'k1812']",
-   "last_seen_at": "2026-07-29T00:50:26.302662+00:00",
+   "last_breach_detail": "2026-07-29T01:47:17.7780617Z E AssertionError: 3 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1694', 'K1727', 'k1812']",
+   "last_seen_at": "2026-07-29T01:50:14.444910+00:00",
    "notified_at": null,
-   "occurrence_count": 2,
+   "occurrence_count": 3,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1367,7 +1373,7 @@
      },
      "first_seen_at": "2026-07-28T08:45:56.262176+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-29T01:19:39.839372+00:00"
+     "last_seen_at": "2026-07-29T02:07:10.664116+00:00"
     },
     {
      "cleared_at": null,
@@ -1381,7 +1387,7 @@
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-29T01:19:29.310861+00:00"
+     "last_seen_at": "2026-07-29T02:07:09.736940+00:00"
     },
     {
      "cleared_at": null,
@@ -1410,13 +1416,27 @@
      "first_seen_at": "2026-07-28T14:05:06.679719+00:00",
      "key": "dispatch-slot-1-24c9dbdc",
      "last_seen_at": "2026-07-28T14:05:06.679719+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "0ac4cbdbb454a4a027e202fa00c8e3a5a9353b0e",
+      "branch": "worktree-dispatch-slot-1-cfeeb2f6",
+      "checkpoint_commit": "",
+      "detail_tail": "fire ended with outcome=unknown_external; dirty=True unique_commits=0",
+      "reason": "worker_unknown_external",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-cfeeb2f6"
+     },
+     "first_seen_at": "2026-07-29T02:02:19.114849+00:00",
+     "key": "dispatch-slot-1-cfeeb2f6",
+     "last_seen_at": "2026-07-29T02:07:11.196716+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-2-58249487 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-29T01:19:39.839372+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-cfeeb2f6 unmergeable (worker_unknown_external)",
+   "last_seen_at": "2026-07-29T02:07:11.196716+00:00",
    "notified_at": null,
-   "occurrence_count": 2966,
+   "occurrence_count": 3057,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2246,6 +2266,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T01:19:46.303369+00:00",
+ "updated_at": "2026-07-29T02:07:11.213727+00:00",
  "version": 1
 }

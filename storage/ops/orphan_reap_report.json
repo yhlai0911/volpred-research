@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-29T01:00:41.442727+00:00",
+  "generated_at": "2026-07-29T02:00:14.616503+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 20.5
+      "age_hours": 21.4
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 20.3
+      "age_hours": 21.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 15.6
+      "age_hours": 16.6
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 14.7
+      "age_hours": 15.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 179.6
+      "age_hours": 180.6
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 14.6
+      "age_hours": 15.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 31.6
+      "age_hours": 32.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -63,14 +63,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 39.7
+      "age_hours": 40.7
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 65,
-    "grace": 1,
+    "registered": 66,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 8,
@@ -92,14 +92,29 @@
   "job_deliveries": [],
   "namespaces": {
     "drafts": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "storage/drafts/K781_general_draft.md",
+          "kind": "md",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
         "grace": 1,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "drafts",
+          "paths": [
+            "storage/drafts/K781_general_draft.md"
+          ],
+          "committed": true,
+          "detail": "[main 089bc2cf4] chore(draft-reap): collect orphaned draft artifacts (1 files)\n 1 file changed, 159 insertions(+)\n create mode 100644 storage/drafts/K"
+        }
+      ]
     },
     "paper": {
       "collectable": [],
@@ -112,14 +127,29 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "experiments/k781/k781_figures.py",
+          "kind": "py",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 4,
+        "grace": 3,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "experiments",
+          "paths": [
+            "experiments/k781/k781_figures.py"
+          ],
+          "committed": true,
+          "detail": "[main 80be0a732] chore(experiment-reap): collect orphaned experiment artifacts (1 files)\n 1 file changed, 205 insertions(+)\n create mode 100644 experi"
+        }
+      ]
     }
   },
   "held_escalations": [],

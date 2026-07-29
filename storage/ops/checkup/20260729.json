@@ -1,0 +1,86 @@
+{
+  "generated_at": "2026-07-29T09:40:22.699429",
+  "overall": "critical",
+  "critical_count": 3,
+  "warn_count": 8,
+  "findings": [
+    {
+      "dimension": "content_pipeline",
+      "severity": "warn",
+      "message": "草稿池僅 1 篇（門檻 4）—— Mission 1 缺產出",
+      "recovery": "主動派寫作 agent 補池（feed-publisher，新鮮非 spy 主題）"
+    },
+    {
+      "dimension": "reader_metrics",
+      "severity": "info",
+      "message": "top-3 讀者互動: 買的時候時點沒那麼重要，賣的時候順序可能決定你幾(score=440); VIX 在 2026 衝到 31，標普同期漲 8(score=180); K1006: 台指期隔夜跳空累計 83.6% 卻(score=170)",
+      "recovery": null
+    },
+    {
+      "dimension": "dedup_calibration",
+      "severity": "warn",
+      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=852, AI saturation=14 (threshold=5, margin=9), NFP control=3, FOMC theme=0 / hard=0",
+      "recovery": "uv run python scripts/daily_checkup.py --json  # 檢查 dedup_calibration"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "REPORT_STALE: 2 priority report(s) no longer match their audited subject hashes（例：k1699, K1710）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "PRIORITY_UNVERIFIED: 220 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1023, k1025, k1025b）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "PRIORITY_REFERENCE_UNRESOLVED: 4 paper/feed reference(s) do not resolve to an experiment directory（例：K54, K55, K71, K79）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "CODE_WITHOUT_RESULTS: 168 K-family directories have code but no archived *_results.json（例：k1212, k1267, k1380, k144, k150）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "KNOWLEDGE_UNRECORDED: 1 finished experiment(s) never reached knowledge.json — invisible to dedup/topic selection, so the pipeline can re-run them（例：K1694）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "worktree_reconcile",
+      "severity": "critical",
+      "message": "殭屍任務 assign_ae004ae2 [blocked] 指向已消失的 worktree ['dispatch-slot-3-30adeed7-k528nfp'] —— branch 也不存在（成果僅存 reflog）: ['dispatch-slot-3-30adeed7-k528nfp']",
+      "recovery": "查 git reflog / merge-base 裁定 commits 是否已進 main；已合併→關單並註明，未合併→依 feedback_no_research_artifact_loss 復原。禁止直接關單了事"
+    },
+    {
+      "dimension": "worktree_reconcile",
+      "severity": "critical",
+      "message": "殭屍任務 assign_06d6352d [pending] 指向已消失的 worktree ['dispatch-slot-3-30adeed7-k528nfp'] —— branch 也不存在（成果僅存 reflog）: ['dispatch-slot-3-30adeed7-k528nfp']",
+      "recovery": "查 git reflog / merge-base 裁定 commits 是否已進 main；已合併→關單並註明，未合併→依 feedback_no_research_artifact_loss 復原。禁止直接關單了事"
+    },
+    {
+      "dimension": "worktree_reconcile",
+      "severity": "critical",
+      "message": "殭屍任務 assign_6a2adc68 [blocked] 指向已消失的 worktree ['dispatch-slot-1-e98b43fc-k1694.'] —— branch 也不存在（成果僅存 reflog）: ['dispatch-slot-1-e98b43fc-k1694.']",
+      "recovery": "查 git reflog / merge-base 裁定 commits 是否已進 main；已合併→關單並註明，未合併→依 feedback_no_research_artifact_loss 復原。禁止直接關單了事"
+    },
+    {
+      "dimension": "task_pool_pressure",
+      "severity": "warn",
+      "message": "pending=106 超過 drain-first 閾值 80（{'p2': 33, 'p3': 69, 'p4': 4}）—— 自動 refill/discovery 應已停止",
+      "recovery": "清既有 pending；超齡任務走 superseded / closed_no_action 正式裁決"
+    },
+    {
+      "dimension": "task_pool_pressure",
+      "severity": "info",
+      "message": "drain-first 生效中（entered_at=2026-07-28T00:00:31.632909+00:00）；退出條件 pending<80 且連續 3 日 succeeded>=created （目前 未滿足吞吐條件）",
+      "recovery": null
+    }
+  ]
+}

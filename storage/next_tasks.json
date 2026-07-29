@@ -42101,7 +42101,7 @@
     "title": "K1731 F1 三方循環相依：shard 要 merge、merge 要 knowledge、knowledge 要 shard 結果",
     "task_type": "experiment",
     "priority": 2,
-    "status": "blocked",
+    "status": "pending",
     "source": "auto_discovered",
     "created_at": "2026-07-21T08:35:00+00:00",
     "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
@@ -42186,6 +42186,12 @@
         "from": "pending",
         "to": "claimed",
         "by": "hourly-slot-2-d5563e609fa645f5bf6cc2982f534424"
+      },
+      {
+        "at": "2026-07-29T01:38:39.366284+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-29T09:00:00+08:00)"
       }
     ],
     "block_transition_previous": {
@@ -42200,11 +42206,7 @@
     "last_released_at": "2026-07-28T07:08:42.038520+00:00",
     "merge_gate_reproduce_spec": "RESOLVED 2026-07-28 by hourly-slot-1-8904dcde: experiments/k1731/reproduce_spec.json committed cd25c295a on the worktree branch; check_experiment_artifacts check --path experiments/k1731 -> PASS (strict). entrypoint.sha256 intentionally omitted (pre-convention spec; skipped-no-sha) rather than synthesised.",
     "rediagnosis_20260728": "原 3-way cycle 前提已過期。實測（slot-2 d5563e60，2026-07-28 CST）：\n(1) knowledge 邊已解 — canonical storage/memory/knowledge.json 含 arm B 條目 5a604fb2（該筆 experiment_id=null，用 experiment_id 查會誤判為 0）。\n(2) artifact gate 已 PASS — check_experiment_artifacts.py check --path <worktree>/experiments/k1731 → PASS（knowledge entry + reproduce_spec.json, spec check: strict）。\n(3) claim surface 已乾淨 — k1731_armB_verification.py 實跑：README claim scan 0 violation、全部數字 traceable；round-10 的 B/D FAIL 已由上一班修好。\n(4) 殘留的唯一 merge 閘 = review-certification：experiments/k1731/review_verdict.json 不存在，experiment_gates.py certify → BLOCKED。\n(5) 該 verdict 產不出來，因為 compute-k1731-armb-codex-review-round-10-1785127371 永久卡在 queued。\n根因不在 k1731，在 compute_queue binding leak（upstream task assign_1c16f316）。\n偵測器：uv run python scripts/audit_compute_queue_bindings.py（本班新增）。\n註：main index 的 foreign staged 內容是併發 fire 的暫態，非本 task 的結構性阻塞。",
-    "blocked_on_task": "assign_1c16f316",
-    "blocked_until": "2026-07-29T09:00:00+08:00",
-    "blocked_reason": "awaiting_prerequisite_fix",
-    "blocked_at": "2026-07-28T09:04:10+00:00",
-    "blocked_note": "merge 僅剩 review-certification 一閘；其 round-10 review job 卡在 compute_queue binding leak（10/10 queued jobs stranded）。上游修復 = assign_1c16f316。偵測器 scripts/audit_compute_queue_bindings.py。knowledge/artifact/claim-surface 三邊本班已實測解除。"
+    "blocked_on_task": "assign_1c16f316"
   },
   {
     "id": "article_task_generator_evidence_pointer",
@@ -55408,15 +55410,11 @@
     "description": "Root closure control-plane slice: blocked Issue #42 parent currently lacks blocked_until and no allowlisted gate can read canonical incident state. Add incident_sustained_clean_v1 read-only unblock gate, TDD pending/retain behavior, bind parent to inc_537a3ff3304f and live read back. Do not mark Issue #42 complete until incident state=resolved after 24h.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-28T23:56:46.216820+00:00",
     "created_by": "codex-vscode",
     "issue_ref": "#42",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-28T23:56:52.126659+00:00",
-    "claim_expires_at": "2026-07-29T01:56:52.126659+00:00",
-    "claim_session_id": "9c7f900c4824",
     "status_history": [
       {
         "ts": "2026-07-28T23:56:52.126675+00:00",
@@ -55429,9 +55427,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T01:29:42.040889+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-28T23:56:55.298947+00:00"
+    "started_at": "2026-07-28T23:56:55.298947+00:00",
+    "completed_at": "2026-07-29T01:29:42.040866+00:00",
+    "result": "root_cause_fixed_and_verified（code/control-plane slice）：sustained-clean incident gate、rollback-safe unknown-gate reader、append-only rejection audit 已部署；新 supervisor PID 70051 live 回讀，2 筆 legacy rejection hash/audit_ref 完整，重啟後無 gate/baseline error。Issue #42 umbrella 保持 contained/open，待 inc_537a3ff3304f 連續乾淨滿 24h 才能正式 resolution。",
+    "issue_disposition": "contained"
   },
   {
     "id": "assign_a88eed84",
@@ -55533,11 +55540,32 @@
         "to": "pending",
         "by": "hourly-slot-2-cf8e57a93ba74f2aa77e0e5f1704fd20",
         "note": "supervisor_settle_empty"
+      },
+      {
+        "ts": "2026-07-29T01:26:56.525566+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cfeeb2f6ce054980aee0cbf12eb878fb",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T01:26:56.525568+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cfeeb2f6ce054980aee0cbf12eb878fb",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T02:02:08.686304+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-cfeeb2f6ce054980aee0cbf12eb878fb",
+        "note": "supervisor_kill_cfeeb2f6"
       }
     ],
     "dispatch_settled_session_id": "dispatch-cf8e57a9-34a4d6ff",
-    "last_released_at": "2026-07-29T01:19:54.550732+00:00",
-    "last_release_reason": "workspace_empty"
+    "last_released_at": "2026-07-29T02:02:08.686292+00:00",
+    "last_release_reason": "supervisor_kill_cfeeb2f6"
   },
   {
     "id": "assign_b8abe71a",
@@ -55558,7 +55586,7 @@
     "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
     "task_type": "daily_digest",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "created_at": "2026-07-29T09:00:27.663327+08:00",
     "source": "scheduled",
@@ -55566,7 +55594,27 @@
       "daily_digest",
       "reader_facing",
       "精選導讀"
-    ]
+    ],
+    "claimed_by": "hourly-slot-2-7cc0e66b2c03450098a77aa49111847f",
+    "claimed_at": "2026-07-29T01:38:56.984453+00:00",
+    "claim_expires_at": "2026-07-29T03:38:56.984453+00:00",
+    "claim_session_id": "f2eabc054a40",
+    "status_history": [
+      {
+        "ts": "2026-07-29T01:38:56.984467+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-7cc0e66b2c03450098a77aa49111847f"
+      },
+      {
+        "ts": "2026-07-29T01:39:02.685484+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-7cc0e66b2c03450098a77aa49111847f"
+      }
+    ],
+    "started_at": "2026-07-29T01:39:02.685470+00:00",
+    "result": "已發佈 mile_bbd72c0b〈金絲雀，還是住隔壁的鄰居？Fed 拍板加四大雲端交卷的這一週，幣圈那盞燈到底能不能看〉。主題由今日時事驅動（2026-07-29 FOMC 拍板 + 四大雲端 7/29-31 財報），回答「幣圈能不能當美股預警燈」。8 篇跨 archive 來源，日期跨度 2026-03-17→2026-07-28 共 133 天（過 _audit_digest_archive_span 14 天門檻）。具名心智模型「金絲雀 vs 住隔壁的鄰居」；骨幹為「幣圈訊號採購清單」分級對照表（刻意避開前三期連用的 N 問形狀）。含自我打臉節（mile_7d99dfd0 舊結論 vs mile_ea920f7f 八年重測四方向全不顯著）。正文 4,812 中文字、內文證據圖 inline、文末 4 張另生框架 poster；anti_ai_gate exit 0（未 force）；走 publish_draft.py 正式入口。註：先前 result 為 enqueue_daily_digest 的 auto-reconcile 文字，非本次實際結果，已覆寫。"
   },
   {
     "id": "alert_dispatch_supervisor_stale_code_20260729",
@@ -55574,12 +55622,89 @@
     "description": "由 alert `dispatch_supervisor_stale_code` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n派工程式的程式碼被改過，但那個常駐程式還在跑舊版 —— 改動沒有生效。\n- daemon 開機時間: 2026-07-28T22:54:00.278035+00:00\n- 改了但沒生效的檔案: ['state.py', 'blocked_reasons.py', 'next_tasks.py']\n- 最久的一個已經放置: 63.0 分鐘\n- 門檻: warn>20.0分 / critical>120.0分\n\n## 影響\n常駐程式讀的是它啟動當下的程式碼。改了檔案不重載，等於沒改 —— 而且它看起來\n完全正常：心跳新鮮、任務照跑、零告警。2026-07-10 有三個修好的問題就這樣躺了\n三個多小時沒生效，沒有任何訊號。\n\n## 建議行動\n1. 確認沒有派工正在跑：uv run python -m scripts.dispatch_supervisor.cli status\n2. 重載：bash scripts/reload_dispatch_supervisor.sh --reason <為什麼>\n   （它會拒絕殺掉在飛的工作，也會避免這次重啟被誤報成崩潰）\n3. 若那些改動是刻意不上線的，把它們 revert 或說明，別讓磁碟與線上長期分岔。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-29T01:01:22.114979+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "dispatch_supervisor_stale_code"
+    ],
+    "completed_at": "2026-07-29T02:01:00.892523+00:00",
+    "result": "ordinary alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-29T02:01:00.892523+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
     ]
+  },
+  {
+    "id": "issue43_sandbox_child_signal_20260729",
+    "title": "[Issue #43] Restore least-privilege child signalling inside producer isolation",
+    "description": "Production regression: macOS producer sandbox allows process* but omits explicit `signal (target children)`, so multiprocessing cleanup receives EPERM, pytest hangs, and timed-out workers leave orphan descendants. Implement test-first at the public isolation.prepare→sandbox-exec seam: own child TERM succeeds, unrelated host PID TERM remains denied; add kill-at-boundary regression, deploy, live isolated replay, and zero-orphan read-back. Do not weaken tests or disable sandbox. Matt implement→TDD→dual-axis code-review.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "requested_by": "owner",
+    "issue_ref": "#43",
+    "created_at": "2026-07-29T01:38:12.196080+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-29T01:38:12.604225+00:00",
+    "claim_expires_at": "2026-07-29T03:38:12.604225+00:00",
+    "claim_session_id": "d0552df8474b",
+    "status_history": [
+      {
+        "ts": "2026-07-29T01:38:12.604241+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T01:38:15.617455+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-29T01:38:15.617441+00:00"
+  },
+  {
+    "id": "assign_b037b36b",
+    "title": "PHASE-Z 卡住檔案 incident（9dde9a8c414ead99）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n5 個未提交檔案不是任何一班 fire 產出的，最長已連續 42 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- .claude/rules/experiments.md — 5 班\n- storage/assets/k781_general_ranking.png — 4 班\n- storage/assets/k781_general_subperiod_regime.png — 4 班\n- storage/logs/trending_primary_source_verification.jsonl — 35 班\n- storage/memory/knowledge.json — 42 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T020632359822Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-29T02:07:23.402852+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "9dde9a8c414ead99",
+      "paths": [
+        ".claude/rules/experiments.md",
+        "storage/assets/k781_general_ranking.png",
+        "storage/assets/k781_general_subperiod_regime.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json"
+      ],
+      "streaks": {
+        ".claude/rules/experiments.md": 5,
+        "storage/assets/k781_general_ranking.png": 4,
+        "storage/assets/k781_general_subperiod_regime.png": 4,
+        "storage/logs/trending_primary_source_verification.jsonl": 35,
+        "storage/memory/knowledge.json": 42
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260729T020632359822Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-29T02:07:23.388400+00:00",
+      "last_seen_at": "2026-07-29T02:07:23.388400+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]
