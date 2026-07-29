@@ -4661,5 +4661,13 @@ transaction 內同時比較 reason + identity，reservation 成功後才一起�
 **回歸與狀態**：原 CI symptom、same-reason replacement、scheduler CAS retry、
 request disappearance 與 legacy timestamp migration 共 5 個焦點測試通過；Matt
 Spec／Standards 重審均 PASS、Ruff F 與 diff check 通過；包含最後兩個 reviewer
-regression 的完整 dispatch/reload suite **341 passed、1 skipped**。仍需等 GitHub CI
-與 immutable supervisor release 回讀；在這兩項完成前狀態為 **`contained`**。
+regression 的完整 dispatch/reload suite **341 passed、1 skipped**。GitHub Test Suite
+run `30480617870` 與同一 HEAD 的 Source Encoding、Data Baseline、Silent Fallback、
+Experiment Artifacts 四道 gate 全綠。immutable supervisor release
+`f9a5d1a9191b0c9039e90b291baf47df88cb02e42ba9f9c07cb1dbda663849ed`
+已載入修正 commit `b676122e087d54ef480c081f97910f80168964d0`；terminal receipt
+回讀 `state=completed`，release archive SHA-256
+`ee1cce9df1deeaa18cf0342250f182541410c3b45b724c9ff752457c33c46434`，
+live status heartbeat 新鮮、`current_jobs=[]`、`phase_z_pending=[]`、
+`auth_blocked=false`。本 incident 五步 Gate 已完成，狀態升為
+**`root_cause_fixed_and_verified`**。
