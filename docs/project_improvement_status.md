@@ -2824,3 +2824,27 @@ Issue #23五步Gate全過，狀態為 **`root_cause_fixed_and_verified`**。
   cross-thread/process排他，144 tests與Matt雙review PASS。此compute clock漏網與
   nested-lock slice為 **`root_cause_fixed_and_verified`**；Issue #46 umbrella仍需
   其他capability與14-day clean，不在本slice冒稱關閉。
+
+## 2026-07-30 — T38 Supervisor Fire Lifecycle 最終結案（Issue #42）
+
+- ✅ 將同一個 committed regression overlay 到精確 pre-fix parent `dad84187e`：
+  `test_defers_while_durable_closeout_is_pending` 實際 RED，舊碼在仍有 durable
+  `phase_z_pending` generation 時錯回 `reload`；目前 HEAD 同一 test GREEN。
+- ✅ restart／generation／closeout／self-reload 聚焦範圍 **92 passed**；覆蓋
+  pre-fire、worker running、worker complete、closeout failure、terminal commit後
+  recovery，以及無 matching generation 時拒絕 closeout。
+- ✅ Production generation receipt
+  `371e54f705a729ea9b8421960acfb7e2d88e5bbf7a0a870e3dfdf5e33ed20239`
+  對應 commit `5e63b6b57f9c5f2e1ad3dbc426509d8a089999fe`；`phase_z_pending=[]`，
+  downstream commit可回讀。
+- ✅ `inc_537a3ff3304f`由 detector 依 `clean_streak_k3_24h` 自動 resolved，
+  非人工改狀態；planned reload後沒有新 baseline-missing episode。
+- ✅ Matt Standards review PASS；Matt Spec review原本只缺歷史 RED receipt，
+  補上可重播 pre-fix RED→HEAD GREEN 後六項 acceptance 均有證據。
+- ℹ️ 00:14 immutable release 因 monitored notification source 尚未 commit 而拒絕，
+  是正確 fail-closed：沒有載入 mutable bytes、沒有中止 worker、fresh generation
+  仍成功建立；兩檔已於 `96018b340`／`13061f9dc`正式落地。
+
+Issue #42狀態為 **`root_cause_fixed_and_verified`**。這只結案 T38；不代表
+Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy owner與#46
+十四日 sustained-clean 仍各自 fail closed。
