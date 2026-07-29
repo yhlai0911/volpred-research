@@ -23,6 +23,7 @@ import argparse
 import json
 import os
 import plistlib
+import re
 import secrets
 import stat
 import subprocess
@@ -50,6 +51,10 @@ from volpred.ops.diagnostics import warn
 LABEL = "com.volpred.dispatch-supervisor"
 PLIST_SOURCE = ROOT / "ops" / "launchd" / f"{LABEL}.plist"
 PLIST_DESTINATION = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
+_RESOURCE_COALITION_RE = re.compile(
+    r"resource coalition = \{\s*ID = (?P<coalition_id>[1-9][0-9]*)",
+    re.MULTILINE,
+)
 
 
 class CutoverError(RuntimeError):
@@ -210,9 +215,24 @@ def _cutover_quiesced(
     )
     legacy_pid = before.get("supervisor_pid")
     legacy_custody = procutil.capture_existing_producer_custody(legacy_pid)
+    legacy_drain_reference: dict[str, object] | None = None
     if legacy_custody is None:
+        loaded = runner(["launchctl", "print", service], False)
+        coalition_id = _launchd_resource_coalition_id(loaded)
+        legacy_drain_reference = procutil.capture_coalition_drain_reference(
+            coalition_id
+        )
+        pre_stop_members = procutil.coalition_drain_members_checked(
+            legacy_drain_reference
+        )
+        if legacy_drain_reference is None or pre_stop_members != []:
+            raise CutoverError(
+                "legacy supervisor coalition was neither a clean ancestry nor "
+                "a kernel-verified empty launchd coalition"
+            )
+    if legacy_custody is None and legacy_drain_reference is None:
         raise CutoverError(
-            "legacy supervisor coalition was not a clean, verified ancestry"
+            "legacy supervisor coalition could not be pinned for drain proof"
         )
     mutation_receipt = request_root / "cutover_receipts" / "in_progress.json"
     try:
@@ -266,8 +286,12 @@ def _cutover_quiesced(
         )
         if absence_error:
             raise CutoverError(absence_error)
-        legacy_members = procutil.producer_custody_all_members_checked(
-            legacy_custody,
+        legacy_members = (
+            procutil.producer_custody_all_members_checked(legacy_custody)
+            if legacy_custody is not None
+            else procutil.coalition_drain_members_checked(
+                legacy_drain_reference
+            )
         )
         if legacy_members != []:
             raise CutoverError(
@@ -644,6 +668,22 @@ def _wait_service_absent(
             )
         sleep_fn(0.25)
     return "launchd service remained loaded after bootout timeout"
+
+
+def _launchd_resource_coalition_id(
+    status: subprocess.CompletedProcess[str],
+) -> int:
+    """Extract the exact resource-coalition ID from launchctl service state."""
+    if status.returncode != 0:
+        raise CutoverError(
+            "cannot pin legacy launchd coalition because the service is absent"
+        )
+    match = _RESOURCE_COALITION_RE.search(status.stdout or "")
+    if match is None:
+        raise CutoverError(
+            "launchctl service state lacks a resource coalition identity"
+        )
+    return int(match.group("coalition_id"))
 
 
 def _wait_new_release_ready(

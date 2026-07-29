@@ -193,6 +193,7 @@ _COALITION_TYPE_RESOURCE = 0
 _COALITION_NUM_TYPES = 2
 _COALITION_INFO_PID_LIST_MAX_PIDS = 512
 _CUSTODY_VERSION = 2
+_COALITION_DRAIN_REFERENCE_VERSION = 1
 
 
 class _ProcUniqueIdentifierInfo(ctypes.Structure):
@@ -719,6 +720,112 @@ def producer_custody_all_members_checked(
     except _CUSTODY_PROBE_ERRORS as exc:
         LOG.warning(
             "complete producer custody probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+
+
+def capture_coalition_drain_reference(
+    coalition_id: int,
+) -> dict[str, object] | None:
+    """Pin one directly identified Darwin coalition for a later drain proof.
+
+    This narrow migration primitive is used only when launchd reports a loaded
+    service coalition with no live process to anchor (for example, between two
+    crash-loop attempts).  The initial kernel probe must succeed and be empty;
+    the caller enforces emptiness before accepting the reference.
+    """
+    if (
+        sys.platform != "darwin"
+        or isinstance(coalition_id, bool)
+        or not isinstance(coalition_id, int)
+        or coalition_id <= 0
+    ):
+        return None
+    try:
+        api = _get_darwin_custody_api()
+        _coalition_identities(api, coalition_id)
+        return {
+            "version": _COALITION_DRAIN_REFERENCE_VERSION,
+            "host_uuid": api.host_uuid(),
+            "boot_session_uuid": api.boot_session_uuid(),
+            "resource_coalition_id": coalition_id,
+        }
+    except _CUSTODY_PROBE_ERRORS as exc:
+        LOG.warning(
+            "coalition drain reference capture failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+
+
+def coalition_drain_members_checked(
+    reference: dict[str, object] | None,
+) -> list[int] | None:
+    """Return all members of a previously pinned Darwin coalition.
+
+    A same-host later boot or kernel-confirmed missing coalition is positively
+    drained.  Foreign-host, malformed, and ambiguous probe results fail closed.
+    """
+    expected_keys = {
+        "version",
+        "host_uuid",
+        "boot_session_uuid",
+        "resource_coalition_id",
+    }
+    if (
+        sys.platform != "darwin"
+        or not isinstance(reference, dict)
+        or set(reference) != expected_keys
+        or reference.get("version") != _COALITION_DRAIN_REFERENCE_VERSION
+    ):
+        return None
+    coalition_id = reference.get("resource_coalition_id")
+    if (
+        isinstance(coalition_id, bool)
+        or not isinstance(coalition_id, int)
+        or coalition_id <= 0
+    ):
+        return None
+    try:
+        saved_host_uuid = str(uuid.UUID(reference.get("host_uuid")))
+        saved_boot_uuid = str(uuid.UUID(reference.get("boot_session_uuid")))
+    except (AttributeError, TypeError, ValueError) as exc:
+        LOG.warning(
+            "coalition drain reference UUID contract rejected: %s",
+            type(exc).__name__,
+        )
+        return None
+    if (
+        reference.get("host_uuid") != saved_host_uuid
+        or reference.get("boot_session_uuid") != saved_boot_uuid
+    ):
+        return None
+    try:
+        api = _get_darwin_custody_api()
+        if api.host_uuid() != saved_host_uuid:
+            return None
+        if api.boot_session_uuid() != saved_boot_uuid:
+            return []
+    except _CUSTODY_PROBE_ERRORS as exc:
+        LOG.warning(
+            "coalition drain probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+    try:
+        return sorted(_coalition_identities(api, coalition_id))
+    except OSError as exc:
+        if exc.errno == errno.ESRCH:
+            return []
+        LOG.warning(
+            "coalition drain probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+    except _DarwinCustodyProbeError as exc:
+        LOG.warning(
+            "coalition drain probe failed closed: %s",
             type(exc).__name__,
         )
         return None

@@ -677,6 +677,26 @@ def test_invalid_failover_plist_is_rejected_before_any_mutation(
     assert observed["auth_blocked"] is False
 
 
+def test_launchd_resource_coalition_id_is_exactly_parsed() -> None:
+    status = subprocess.CompletedProcess(
+        ["launchctl", "print", "gui/501/com.volpred.dispatch-supervisor"],
+        0,
+        """
+        domain = gui/501 [100020]
+        resource coalition = {
+            ID = 59071
+            type = resource
+        }
+        jetsam coalition = {
+            ID = 59072
+        }
+        """,
+        "",
+    )
+
+    assert installer._launchd_resource_coalition_id(status) == 59071
+
+
 def test_plist_must_match_the_materialized_release_commit(
     tmp_path: Path,
 ) -> None:

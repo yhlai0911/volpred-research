@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import errno
 import json
 import os
 import subprocess
@@ -186,6 +187,31 @@ def test_darwin_complete_custody_includes_trusted_legacy_processes(
             "trusted_unique_ids": [100, 200],
         }
     ) == [10, 11, 12]
+
+
+def test_empty_launchd_coalition_reference_survives_service_removal(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api = _FakeDarwinCustodyAPI(pids=[])
+    _install_fake_darwin(monkeypatch, api)
+
+    reference = procutil.capture_coalition_drain_reference(73)
+    assert reference == {
+        "version": 1,
+        "host_uuid": HOST_UUID,
+        "boot_session_uuid": BOOT_UUID,
+        "resource_coalition_id": 73,
+    }
+    assert procutil.coalition_drain_members_checked(reference) == []
+
+    monkeypatch.setattr(
+        api,
+        "coalition_pids",
+        lambda _coalition_id: (_ for _ in ()).throw(
+            ProcessLookupError(errno.ESRCH, "coalition removed")
+        ),
+    )
+    assert procutil.coalition_drain_members_checked(reference) == []
 
 
 @pytest.mark.parametrize(
