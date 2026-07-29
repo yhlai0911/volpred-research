@@ -1,10 +1,10 @@
 """Telegram transport for boss two-way interaction (2026-07-02 boss request).
 
-Design (anti-stacking): this is a TRANSPORT under the existing alert/ops
-messaging layer, not a new alert system — `send_alert` mirrors to Telegram
-when configured; the poll daemon (scripts/telegram_poll.py) converts incoming
-boss messages into next_tasks entries exactly like gmail_inbox_poll does for
-email replies.
+Design (anti-stacking): this transport is owned by the boss interaction and
+progress-report path, not by the alert layer.  `send_alert` must not mirror to
+Telegram; routed alerts use durable email or the incident lifecycle.  The poll
+daemon (scripts/telegram_poll.py) converts incoming boss messages into
+next_tasks entries exactly like gmail_inbox_poll does for email replies.
 
 Config:
 - TELEGRAM_BOT_TOKEN  — .env / env var (bot @Volpred_manager_bot)
@@ -12,8 +12,9 @@ Config:
                         storage/ops/telegram_state.json (env TELEGRAM_CHAT_ID
                         overrides if set)
 
-All failures are fail-open with a diagnostics trace (a broken Telegram mirror
-must never break email alerts or a publish flow).
+All failures are fail-open with a diagnostics trace (a broken Telegram
+interaction/progress delivery must never break email alerts or a publish
+flow).
 """
 from __future__ import annotations
 

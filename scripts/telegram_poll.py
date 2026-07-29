@@ -8,16 +8,18 @@ Mirrors gmail_inbox_poll.py's contract but with ~instant latency:
      this is also the end-to-end send-path verification).
   3. Every boss message → append task_type="telegram_reply" (priority P1,
      source="telegram") to storage/next_tasks.json — same pending-queue
-     contract as email_reply — and send an immediate ack with the ETA.
+     contract as email_reply.  The responder later sends the real reply;
+     normal admission does not emit a redundant "received" ack.
   4. All raw messages archived to storage/ops/telegram_inbox.jsonl.
 
 Run modes:
   --once     one getUpdates pass (cron/test friendly)
   --daemon   loop forever (LaunchAgent KeepAlive)
 
-Anti-stacking: transport lives in src/volpred/ops/telegram.py (shared with the
-send_alert mirror); this script only adds the inbound loop, following the
-established gmail-poll pattern (state file / ack / next_tasks append).
+Anti-stacking: transport lives in src/volpred/ops/telegram.py.  This script
+owns the inbound loop and handshake only; alert disposition routing does not
+mirror through Telegram.  It follows the established gmail-poll pattern
+(state file / admission diagnostics / next_tasks append).
 """
 from __future__ import annotations
 
@@ -151,7 +153,8 @@ def _handle_update(update: dict) -> None:
         _log(f"handshake: captured chat_id={chat['id']}")
         send_telegram(
             "✅ VolPred 營運經理連線完成。這個通道雙向可用：\n"
-            "• 我會把 alert / 重大進度即時鏡射到這裡（email 仍是完整版）\n"
+            "• 這裡提供互動回覆、逐程序進度與有 delivery receipt 的指定事件通知；"
+            "告警與週期摘要走 email\n"
             "• 你傳的任何訊息會直接進任務池（P1 user-assigned），我處理完在這裡回你\n"
             "隨時吩咐。"
         )

@@ -95,16 +95,3 @@ def test_close_window_is_an_early_stop(paths):
     assert dispatch_burst.close_window(path=burst) is True
     assert dispatch_burst.active(path=burst, state_path=state) is False
     assert dispatch_burst.close_window(path=burst) is False
-
-
-def test_format_completion_is_one_short_line():
-    line = dispatch_burst.format_completion(
-        {"id": "assign_x", "title": "測試任務", "task_type": "platform_ops"}, "succeeded")
-    assert "✅" in line and "完成" in line and "測試任務" in line and "assign_x" in line
-    assert line.count("\n") == 1
-
-
-def test_format_completion_truncates_a_long_title():
-    line = dispatch_burst.format_completion({"id": "a", "title": "標" * 200}, "failed")
-    assert "…" in line and "❌" in line
-    assert len(line.splitlines()[0]) < 100

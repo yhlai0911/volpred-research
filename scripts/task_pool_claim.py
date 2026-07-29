@@ -1151,19 +1151,20 @@ def cmd_handoff_main_thread(args: argparse.Namespace) -> dict[str, Any]:
         return {"ok": True, "task_id": args.id, "status": "pending_main_thread"}
 
 
-def _burst_actions(task: dict[str, Any], status_value: str,
-                   tasks: list[dict[str, Any]]) -> dict[str, Any] | None:
+def _burst_continuation_actions(
+    tasks: list[dict[str, Any]],
+) -> dict[str, Any] | None:
     """What a burst window wants doing for this completion, or None.
 
     Returns None when no window is open (the normal state — completions are
     silent and dispatch keeps its hourly cadence), or when the burst module is
-    unavailable: a notification problem must never fail the completion it is
-    only describing.
+    unavailable: a continuation probe problem must never fail the completion
+    it is only accelerating.
 
-    `text` is omitted if the row already carries `burst_reported_at`, so a
-    re-run of `complete` never double-notifies while still keeping the loop
-    going. Counting pending here, under the lock, avoids waking the supervisor
-    for an empty queue.
+    Completion reporting is deliberately absent here.  Burst mode only
+    accelerates scheduling; structured progress is owned by
+    ``progress_report.py``.  Counting pending here, under the lock, avoids
+    waking the supervisor for an empty queue.
     """
     try:
         from volpred.ops import dispatch_burst
@@ -1171,26 +1172,17 @@ def _burst_actions(task: dict[str, Any], status_value: str,
             return None
         pending = sum(1 for t in tasks
                       if isinstance(t, dict) and (t.get("status") or "").lower() == "pending")
-        out: dict[str, Any] = {"pending_left": pending}
-        if not task.get("burst_reported_at"):
-            out["text"] = dispatch_burst.format_completion(task, status_value)
-        return out
+        return {"pending_left": pending}
     except Exception as exc:
         # Fail-open: the claim/complete write already landed under the lock, so a
         # broken burst window must never fail the caller. Observable, not silent.
         from volpred.ops.diagnostics import warn
-        warn("task_pool_claim", "burst report probe failed",
-             err=f"{type(exc).__name__}: {exc}", task_id=str(task.get("id") or ""))
+        warn(
+            "task_pool_claim",
+            "burst continuation probe failed",
+            err=f"{type(exc).__name__}: {exc}",
+        )
         return None
-
-
-def _send_burst_report(*, text: str) -> dict[str, Any]:
-    """Best-effort Telegram line. Never raises — the work is already done."""
-    try:
-        from volpred.ops.telegram import send_telegram
-        return send_telegram(text)
-    except Exception as exc:
-        return {"sent": False, "reason": f"{type(exc).__name__}: {exc}"}
 
 
 def _request_burst_fire(task_id: str, pending_left: int) -> dict[str, Any]:
@@ -1243,10 +1235,8 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
         completion_base_commit=_current_repo_head(),
     )
     if burst:
-        # Both run outside the queue lock: network IO and the supervisor's own
-        # lock have no business being held under the queue's LOCK_EX.
-        if burst.get("text"):
-            out["burst_report"] = _send_burst_report(text=burst["text"])
+        # The supervisor owns a separate lock; never hold queue LOCK_EX while
+        # requesting the next fire.
         if burst.get("pending_left"):
             out["burst_next_fire"] = _request_burst_fire(args.id, burst["pending_left"])
     return out
@@ -1386,11 +1376,7 @@ def _complete_locked(
                 }
         if effect:
             out["review_followup_effect"] = effect
-        # Stamped inside the same LOCK_EX that wrote the terminal status, so the
-        # "already reported" claim can never disagree with the row it describes.
-        burst = _burst_actions(task, args.status, tasks)
-        if burst and burst.get("text"):
-            task["burst_reported_at"] = _now()
+        burst = _burst_continuation_actions(tasks)
         return out, burst
 
 

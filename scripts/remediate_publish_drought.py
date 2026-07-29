@@ -19,7 +19,8 @@ rule）。由 `scripts/check_alerts.py` 每小時在寄出 publishing_freshness 
      `refill_task_pool.refill(reader_facing_only=True, emergency=True)` 立即補一篇
      fresh reader-facing daily_article 進 task pool，下一班 dispatcher 優先生文。
   4. 若 force-release 與 reader-facing refill 都是 0 → 直接升級 critical alert
-     （send_alert 會同步 Telegram mirror），禁止靜默 skip。
+     （由 alert disposition 路由 durable email／incident lifecycle，不鏡射
+     Telegram），禁止靜默 skip。
 
 每步結果寫入回傳 summary + `diagnostics.warn` log；publishing_freshness alert body
 讀「系統已自動修復」框架，不再對老闆下 imperative 指令。

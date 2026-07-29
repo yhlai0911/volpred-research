@@ -712,7 +712,7 @@
         "cron": null,
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_telegram_poll.sh",
         "log_path": "~/.volpred/logs/telegram_poll.log",
-        "description": "常駐 long-poll (getUpdates timeout=25s) — 即時雙向：boss 訊息 → telegram_reply P1 task 進 next_tasks.json + 即時 ack；send_alert 自動鏡射到 TG（email 仍 canonical）。首次 /start 自動握手抓 chat_id（storage/ops/telegram_state.json）。LaunchAgent KeepAlive canonical (com.volpred.telegram-poll, host_crontab_managed=false)。2026-07-02 boss 要求「除了 email 用 telegram 互動」。",
+        "description": "常駐 long-poll (getUpdates timeout=25s) — 即時雙向：boss 訊息 → telegram_reply P1 task 進 next_tasks.json；互動回覆由 responder／telegram-send 負責，逐程序進度唯一 owner 為 progress_report.py，GitHub comment 通知則由具 delivery receipt 的 typed pipeline 負責。send_alert 依 disposition 走 durable email／incident lifecycle，不鏡射 Telegram。首次 /start 自動握手抓 chat_id（storage/ops/telegram_state.json）。LaunchAgent KeepAlive canonical (com.volpred.telegram-poll, host_crontab_managed=false)。2026-07-02 boss 要求「除了 email 用 telegram 互動」；2026-07-30 對齊分工式單一 owner 通知政策。",
         "host_crontab_managed": false,
         "launchagent_label": "com.volpred.telegram-poll",
         "matchers": [

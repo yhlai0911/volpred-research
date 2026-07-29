@@ -2015,6 +2015,59 @@ def test_burst_fire_request_is_intercepted_not_written_to_canonical_state(
     assert burst_fire_requests == ["burst:K9999_example"]
 
 
+def test_burst_completion_accelerates_dispatch_without_telegram_side_channel(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    """Burst mode is a scheduling accelerator, not a second progress owner."""
+    from volpred.ops import dispatch_burst
+
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "done-now",
+                    "status": "in_progress",
+                    "task_type": "experiment",
+                    "claimed_by": "worker",
+                },
+                {
+                    "id": "next-up",
+                    "status": "pending",
+                    "task_type": "experiment",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(dispatch_burst, "active", lambda: True)
+    requested: list[tuple[str, int]] = []
+    monkeypatch.setattr(
+        task_pool_claim,
+        "_request_burst_fire",
+        lambda task_id, pending_left: (
+            requested.append((task_id, pending_left))
+            or {"requested": True, "pending_left": pending_left}
+        ),
+    )
+
+    out = task_pool_claim.cmd_complete(
+        argparse.Namespace(
+            id="done-now",
+            status="succeeded",
+            result="verified",
+            issue_disposition="contained",
+        )
+    )
+
+    assert out["ok"] is True
+    assert "burst_report" not in out
+    assert out["burst_next_fire"]["requested"] is True
+    assert requested == [("done-now", 1)]
+
+
 def _dreaming_orphan_task(kid: str = "k1697") -> dict:
     return {
         "id": f"dreaming_orphaned_experiment_{kid}",

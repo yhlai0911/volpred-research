@@ -4539,6 +4539,16 @@ smoke `effect_owned_email_c737f1e75e5172720523bf6723459c35` 由
 Gate，狀態為 **`root_cause_fixed_and_verified`**；Issue #13 umbrella 的其他 acceptance
 仍各自驗收，不因本條自動關閉。
 
+**2026-07-30 review follow-up**：Spec review 另抓到 `task_pool_claim.py` 的 burst
+completion 仍直接呼叫 Telegram，形成第二個「進度」owner；而 schedule、Telegram
+handshake 與 transport docstring 還宣稱 alert mirror／正常入池立即 ack。以公開
+`cmd_complete()` 先做 RED，證明 active burst 會繞過 `progress_report.py`；修後 burst
+只保留 completion-driven `request_fire`，不再外送 Telegram，下一工仍在空槽時立即
+推進。互動回覆、逐程序進度、GitHub typed notification 與 alert email 的 owner
+矩陣已同步回 canonical schedule／ops manual／handshake。相鄰
+task-pool／burst／notification／Telegram／schedule suites **320 passed**，因此這個
+旁路也達 **`root_cause_fixed_and_verified`**。
+
 ---
 
 ## 2026-07-30 — Starvation lockout 把 generic hourly worker 鎖在不可 claim 的 mutating tasks

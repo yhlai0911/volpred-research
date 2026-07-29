@@ -7,7 +7,9 @@ fires on `state.request_fire`. Between a fire finishing at :25 and the next
 cron slot at :07 the pool sits idle even with 89 tasks pending. On 2026-07-19
 the owner asked for that gap to close for one afternoon (Telegram msg
 1012-1014, task `assign_cadde1b5`): "從現在開始到 16:00 持續執行任務不停止",
-"16:00 後恢復正常班次", "每完成一項就回報".
+"16:00 後恢復正常班次".  The original per-completion Telegram side channel was
+retired on 2026-07-30: progress delivery now has one structured owner,
+``scripts/progress_report.py``.
 
 ## The shape of the fix
 
@@ -32,10 +34,8 @@ Both consumers therefore gate on `active()` alone.
   cold-load per fire on runs that cannot work, so a quota streak suspends the
   burst — without ending it, because quota resolves on a clock too and the
   window should resume when it does.
-* **Reporting idempotency** lives on the task row itself
-  (`burst_reported_at`), inside the same `LOCK_EX` that writes the terminal
-  status. A separate marker file could disagree with the queue; a field on the
-  row it describes cannot.
+* **No notification side effect.** Burst mode requests the next fire only.
+  Task completion must not bypass the structured progress-report owner.
 * Every read is **fail-open to inactive**: a missing or corrupt window file
   means "no burst", never "burst forever".
 """
@@ -149,13 +149,3 @@ def close_window(*, path: Path = BURST_PATH) -> bool:
         return False
     path.unlink()
     return True
-
-
-def format_completion(task: dict[str, Any], status_value: str) -> str:
-    """One short spoken line per finished task — name + result, nothing else."""
-    mark = {"succeeded": "✅", "failed": "❌"}.get(status_value, "⏸")
-    title = str(task.get("title") or task.get("id") or "(無標題)").strip()
-    if len(title) > 90:
-        title = title[:87] + "…"
-    verb = {"succeeded": "完成", "failed": "失敗", "blocked": "卡住"}.get(status_value, status_value)
-    return f"{mark} {verb}：{title}\n({task.get('id')} · {task.get('task_type') or 'task'})"

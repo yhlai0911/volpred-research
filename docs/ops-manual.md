@@ -88,13 +88,14 @@ platform_ops 類的排程 agent 現在**每班配一個機械指派的隔離工�
 
 | 通道 | 內容 | Owner |
 |---|---|---|
-| **Telegram** | 即時互動回覆 + 逐程序進度回報（結論/驗證/產物/下一步，宣稱完成必附實測） | `scripts/progress_report.py`（唯一） |
+| **Telegram** | 即時互動回覆 + 逐程序進度回報（結論/驗證/產物/下一步，宣稱完成必附實測）+ 具 delivery receipt 的指定事件通知 | responder／`telegram-send`；`scripts/progress_report.py`（逐程序進度唯一 owner）；typed notification pipeline |
 | **Email** | 週期摘要、需要你決策的事（🔴 標題 + mailto 快速回覆）、告警、skill 修改通知 | `volpred ops send-alert` + 排程報告 |
 
 **分工原則**：Telegram = 「現在正在發生什麼」；Email = 「定期總結 + 需要你出手的」。
-`volpred ops send-alert` **不得直接鏡像 Telegram**：Telegram 的唯一外送 owner
-仍是 `scripts/progress_report.py`，避免同一事件被 alert 層與進度層各送一次。Alert
-依 remediation disposition 路由：
+`volpred ops send-alert` **不得直接鏡像 Telegram**：逐程序進度的唯一 owner
+是 `scripts/progress_report.py`；互動回覆由 responder／`telegram-send` 負責，另有
+delivery receipt 綁定的 GitHub comment typed pipeline。這些用途彼此分工，避免同一
+事件被 alert 層與進度層各送一次。Alert 依 remediation disposition 路由：
 
 - `owner_decision`：立即寄 email（標題含 `[新架構派發]`；需要回覆時另有
   `🔴【需老闆回信】`）。
