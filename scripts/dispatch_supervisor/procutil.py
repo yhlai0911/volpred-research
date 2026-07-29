@@ -13,11 +13,16 @@ identity-sensitive operation (health check, restart orphan cleanup).
 """
 from __future__ import annotations
 
+import ctypes
+import errno
+import functools
 import logging
 import os
 import signal
 import subprocess
+import sys
 import time
+import uuid
 
 from volpred.ops import termination
 
@@ -180,6 +185,622 @@ def pgid_members(pgid: int) -> list[int]:
     must use ``pgid_members_checked`` so probe failure cannot mean "gone".
     """
     return pgid_members_checked(pgid) or []
+
+
+_PROC_PIDUNIQIDENTIFIERINFO = 17
+_PROC_PIDCOALITIONINFO = 20
+_COALITION_TYPE_RESOURCE = 0
+_COALITION_NUM_TYPES = 2
+_COALITION_INFO_PID_LIST_MAX_PIDS = 512
+_CUSTODY_VERSION = 2
+
+
+class _ProcUniqueIdentifierInfo(ctypes.Structure):
+    """ABI from Apple's ``sys/proc_info_private.h`` (56 bytes)."""
+
+    _fields_ = [
+        ("p_uuid", ctypes.c_uint8 * 16),
+        ("p_uniqueid", ctypes.c_uint64),
+        ("p_puniqueid", ctypes.c_uint64),
+        ("p_idversion", ctypes.c_int32),
+        ("p_orig_ppidversion", ctypes.c_int32),
+        ("p_reserve2", ctypes.c_uint64),
+        ("p_reserve3", ctypes.c_uint64),
+    ]
+
+
+class _ProcPidCoalitionInfo(ctypes.Structure):
+    """ABI from Apple's ``sys/proc_info_private.h`` (40 bytes on macOS)."""
+
+    _fields_ = [
+        ("coalition_id", ctypes.c_uint64 * _COALITION_NUM_TYPES),
+        ("reserved1", ctypes.c_uint64),
+        ("reserved2", ctypes.c_uint64),
+        ("reserved3", ctypes.c_uint64),
+    ]
+
+
+class _Timespec(ctypes.Structure):
+    """Darwin ``struct timespec`` used by ``gethostuuid(3)``."""
+
+    _fields_ = [
+        ("tv_sec", ctypes.c_long),
+        ("tv_nsec", ctypes.c_long),
+    ]
+
+
+class _DarwinCustodyProbeError(RuntimeError):
+    """The kernel custody answer was absent, truncated, or ABI-incompatible."""
+
+
+_CUSTODY_PROBE_ERRORS = (
+    OSError,
+    TypeError,
+    ValueError,
+    OverflowError,
+    AttributeError,
+    ctypes.ArgumentError,
+    _DarwinCustodyProbeError,
+)
+
+
+class _DarwinCustodyAPI:
+    """Narrow, secret-free adapter over exported libSystem process APIs."""
+
+    def __init__(self) -> None:
+        if ctypes.sizeof(_ProcUniqueIdentifierInfo) != 56:
+            raise _DarwinCustodyProbeError("unexpected unique-id ABI size")
+        if ctypes.sizeof(_ProcPidCoalitionInfo) != 40:
+            raise _DarwinCustodyProbeError("unexpected coalition ABI size")
+        try:
+            libsystem = ctypes.CDLL(
+                "/usr/lib/libSystem.B.dylib",
+                use_errno=True,
+            )
+            proc_pidinfo = libsystem.proc_pidinfo
+            coalition_info_pid_list = libsystem.coalition_info_pid_list
+            gethostuuid = libsystem.gethostuuid
+            sysctlbyname = libsystem.sysctlbyname
+        except (AttributeError, OSError) as exc:
+            raise _DarwinCustodyProbeError(
+                "required libSystem custody API unavailable"
+            ) from exc
+        proc_pidinfo.argtypes = [
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_uint64,
+            ctypes.c_void_p,
+            ctypes.c_int,
+        ]
+        proc_pidinfo.restype = ctypes.c_int
+        coalition_info_pid_list.argtypes = [
+            ctypes.c_uint64,
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.POINTER(ctypes.c_size_t),
+        ]
+        coalition_info_pid_list.restype = ctypes.c_int
+        gethostuuid.argtypes = [
+            ctypes.POINTER(ctypes.c_uint8),
+            ctypes.POINTER(_Timespec),
+        ]
+        gethostuuid.restype = ctypes.c_int
+        sysctlbyname.argtypes = [
+            ctypes.c_char_p,
+            ctypes.c_void_p,
+            ctypes.POINTER(ctypes.c_size_t),
+            ctypes.c_void_p,
+            ctypes.c_size_t,
+        ]
+        sysctlbyname.restype = ctypes.c_int
+        self._proc_pidinfo = proc_pidinfo
+        self._coalition_info_pid_list = coalition_info_pid_list
+        self._gethostuuid = gethostuuid
+        self._sysctlbyname = sysctlbyname
+
+    @staticmethod
+    def _os_error(operation: str) -> OSError:
+        error_number = ctypes.get_errno() or errno.EIO
+        return OSError(error_number, f"{operation} failed")
+
+    def resource_coalition_id(self, pid: int) -> int:
+        info = _ProcPidCoalitionInfo()
+        ctypes.set_errno(0)
+        copied = self._proc_pidinfo(
+            int(pid),
+            _PROC_PIDCOALITIONINFO,
+            0,
+            ctypes.byref(info),
+            ctypes.sizeof(info),
+        )
+        if copied != ctypes.sizeof(info):
+            if copied <= 0:
+                raise self._os_error("proc_pidinfo coalition probe")
+            raise _DarwinCustodyProbeError(
+                "proc_pidinfo returned a partial coalition record"
+            )
+        coalition_id = int(info.coalition_id[_COALITION_TYPE_RESOURCE])
+        if coalition_id <= 0:
+            raise _DarwinCustodyProbeError("invalid resource coalition id")
+        return coalition_id
+
+    def host_uuid(self) -> str:
+        """Return a stable physical-host UUID without spawning a helper."""
+        raw = (ctypes.c_uint8 * 16)()
+        timeout = _Timespec(5, 0)
+        ctypes.set_errno(0)
+        result = self._gethostuuid(raw, ctypes.byref(timeout))
+        if result != 0:
+            raise self._os_error("gethostuuid")
+        try:
+            value = str(uuid.UUID(bytes=bytes(raw)))
+        except (ValueError, AttributeError) as exc:
+            raise _DarwinCustodyProbeError(
+                "gethostuuid returned malformed identity"
+            ) from exc
+        if value == str(uuid.UUID(int=0)):
+            raise _DarwinCustodyProbeError("gethostuuid returned zero identity")
+        return value
+
+    def boot_session_uuid(self) -> str:
+        """Return the kernel boot-session UUID without spawning a helper."""
+        name = b"kern.bootsessionuuid"
+        size = ctypes.c_size_t()
+        ctypes.set_errno(0)
+        if self._sysctlbyname(
+            name,
+            None,
+            ctypes.byref(size),
+            None,
+            0,
+        ) != 0:
+            raise self._os_error("sysctlbyname boot-session size")
+        if size.value <= 1 or size.value > 128:
+            raise _DarwinCustodyProbeError(
+                "sysctlbyname returned invalid boot-session size"
+            )
+        raw = ctypes.create_string_buffer(size.value)
+        ctypes.set_errno(0)
+        if self._sysctlbyname(
+            name,
+            raw,
+            ctypes.byref(size),
+            None,
+            0,
+        ) != 0:
+            raise self._os_error("sysctlbyname boot-session read")
+        try:
+            return str(uuid.UUID(raw.value.decode("ascii")))
+        except (UnicodeError, ValueError) as exc:
+            raise _DarwinCustodyProbeError(
+                "sysctlbyname returned malformed boot-session identity"
+            ) from exc
+
+    def coalition_pids(self, coalition_id: int) -> list[int]:
+        if isinstance(coalition_id, bool) or int(coalition_id) <= 0:
+            raise _DarwinCustodyProbeError("invalid resource coalition id")
+        pid_buffer = (
+            ctypes.c_int * _COALITION_INFO_PID_LIST_MAX_PIDS
+        )()
+        size_bytes = ctypes.c_size_t(ctypes.sizeof(pid_buffer))
+        ctypes.set_errno(0)
+        result = self._coalition_info_pid_list(
+            int(coalition_id),
+            pid_buffer,
+            ctypes.byref(size_bytes),
+        )
+        if result != 0:
+            raise self._os_error("coalition_info_pid_list")
+        returned_bytes = int(size_bytes.value)
+        pid_size = ctypes.sizeof(ctypes.c_int)
+        if (
+            returned_bytes < 0
+            or returned_bytes > ctypes.sizeof(pid_buffer)
+            or returned_bytes % pid_size
+        ):
+            raise _DarwinCustodyProbeError(
+                "malformed coalition pid-list size"
+            )
+        count = returned_bytes // pid_size
+        # The API truncates silently. A full buffer is not proof that every
+        # member was observed, even when the true cardinality happens to be 512.
+        if count >= _COALITION_INFO_PID_LIST_MAX_PIDS:
+            raise _DarwinCustodyProbeError("coalition pid-list cap reached")
+        pids = [int(pid_buffer[index]) for index in range(count)]
+        if any(pid <= 0 for pid in pids) or len(set(pids)) != len(pids):
+            raise _DarwinCustodyProbeError("malformed coalition pid list")
+        return pids
+
+    def process_identity(self, pid: int) -> tuple[int, int] | None:
+        """Return ``(uniqueid, parent_uniqueid)``; ``None`` means confirmed gone.
+
+        Flavor 17 with ``arg=0`` excludes zombies in XNU. Thus a successful
+        exact-size record is both the PID-reuse fingerprint and the non-zombie
+        liveness proof needed by custody.
+        """
+        info = _ProcUniqueIdentifierInfo()
+        ctypes.set_errno(0)
+        copied = self._proc_pidinfo(
+            int(pid),
+            _PROC_PIDUNIQIDENTIFIERINFO,
+            0,
+            ctypes.byref(info),
+            ctypes.sizeof(info),
+        )
+        if copied == 0 and ctypes.get_errno() == errno.ESRCH:
+            return None
+        if copied != ctypes.sizeof(info):
+            if copied <= 0:
+                raise self._os_error("proc_pidinfo unique-id probe")
+            raise _DarwinCustodyProbeError(
+                "proc_pidinfo returned a partial unique-id record"
+            )
+        uniqueid = int(info.p_uniqueid)
+        parent_uniqueid = int(info.p_puniqueid)
+        if uniqueid <= 0 or parent_uniqueid < 0:
+            raise _DarwinCustodyProbeError("malformed process identity")
+        return uniqueid, parent_uniqueid
+
+
+@functools.lru_cache(maxsize=1)
+def _get_darwin_custody_api() -> _DarwinCustodyAPI:
+    return _DarwinCustodyAPI()
+
+
+def _coalition_identities(
+    api: _DarwinCustodyAPI,
+    coalition_id: int,
+) -> dict[int, tuple[int, int]]:
+    """Snapshot live coalition members as pid -> (uniqueid, parent uniqueid)."""
+    identities: dict[int, tuple[int, int]] = {}
+    uniqueids: set[int] = set()
+    pids = api.coalition_pids(coalition_id)
+    if len(pids) >= _COALITION_INFO_PID_LIST_MAX_PIDS:
+        raise _DarwinCustodyProbeError("coalition pid-list cap reached")
+    for pid in pids:
+        identity_before = api.process_identity(pid)
+        if identity_before is None:
+            continue  # exited or became a zombie after the coalition snapshot
+        try:
+            observed_coalition_id = api.resource_coalition_id(pid)
+        except OSError as exc:
+            if exc.errno == errno.ESRCH:
+                continue
+            raise
+        identity_after = api.process_identity(pid)
+        if identity_after is None:
+            continue
+        if identity_after != identity_before:
+            # A PID changed owners while the multi-call userspace snapshot was
+            # being formed. No conclusion about that number is safe.
+            raise _DarwinCustodyProbeError(
+                "pid reused during coalition identity probe"
+            )
+        if observed_coalition_id != coalition_id:
+            # The coalition list raced with exit + PID reuse into an unrelated
+            # coalition. It is not a member and must never gain kill authority.
+            continue
+        identity = identity_after
+        uniqueid, _parent_uniqueid = identity
+        if uniqueid in uniqueids:
+            raise _DarwinCustodyProbeError(
+                "duplicate process unique id in coalition"
+            )
+        identities[pid] = identity
+        uniqueids.add(uniqueid)
+    return identities
+
+
+def _verified_ancestor_uniqueids(
+    identities: dict[int, tuple[int, int]],
+    current_pid: int,
+) -> set[int]:
+    """Kernel-verified current process plus its live same-coalition ancestors."""
+    current_identity = identities.get(current_pid)
+    if current_identity is None:
+        raise _DarwinCustodyProbeError(
+            "current process absent from coalition snapshot"
+        )
+    by_uniqueid = {
+        uniqueid: parent_uniqueid
+        for uniqueid, parent_uniqueid in identities.values()
+    }
+    trusted: set[int] = set()
+    cursor = current_identity[0]
+    while cursor in by_uniqueid:
+        if cursor in trusted:
+            raise _DarwinCustodyProbeError("process ancestry cycle")
+        trusted.add(cursor)
+        cursor = by_uniqueid[cursor]
+    return trusted
+
+
+def capture_producer_custody() -> dict[str, object] | None:
+    """Capture a clean Darwin coalition baseline immediately before spawn.
+
+    The baseline cannot be every existing coalition member: doing so would
+    permanently bless an already-detached producer as "pre-existing". Only
+    the current process and its kernel-verified same-coalition ancestor chain
+    are trusted. Any other live member makes capture fail closed, so callers
+    must not spawn a provider from a shared/dirty coalition.
+    """
+    return capture_existing_producer_custody(os.getpid())
+
+
+def capture_existing_producer_custody(
+    anchor_pid: int,
+) -> dict[str, object] | None:
+    """Capture one clean Darwin coalition around an existing leaf process.
+
+    The installer uses this before unloading the legacy supervisor.  A clean
+    capture proves that the saved anchor plus its same-coalition ancestors are
+    the *only* live members at the migration boundary.  A detached child,
+    sibling helper, PID reuse, or probe ambiguity therefore fails closed.
+    """
+    if (
+        sys.platform != "darwin"
+        or isinstance(anchor_pid, bool)
+        or not isinstance(anchor_pid, int)
+        or anchor_pid <= 0
+    ):
+        return None
+    try:
+        api = _get_darwin_custody_api()
+        coalition_id = api.resource_coalition_id(anchor_pid)
+        identities = _coalition_identities(api, coalition_id)
+        trusted = _verified_ancestor_uniqueids(identities, anchor_pid)
+        observed = {identity[0] for identity in identities.values()}
+        if observed != trusted:
+            return None
+        return {
+            "version": _CUSTODY_VERSION,
+            "host_uuid": api.host_uuid(),
+            "boot_session_uuid": api.boot_session_uuid(),
+            "resource_coalition_id": coalition_id,
+            "trusted_unique_ids": sorted(trusted),
+        }
+    except _CUSTODY_PROBE_ERRORS as exc:
+        LOG.warning(
+            "producer custody capture failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+
+
+def _parse_producer_custody(
+    custody: dict[str, object] | None,
+) -> tuple[int, set[int], str, str] | None:
+    if not isinstance(custody, dict) or custody.get("version") != _CUSTODY_VERSION:
+        return None
+    if set(custody) != {
+        "version",
+        "host_uuid",
+        "boot_session_uuid",
+        "resource_coalition_id",
+        "trusted_unique_ids",
+    }:
+        return None
+    coalition_id = custody.get("resource_coalition_id")
+    trusted_raw = custody.get("trusted_unique_ids")
+    host_uuid_raw = custody.get("host_uuid")
+    boot_uuid_raw = custody.get("boot_session_uuid")
+    if (
+        isinstance(coalition_id, bool)
+        or not isinstance(coalition_id, int)
+        or coalition_id <= 0
+        or not isinstance(trusted_raw, list)
+        or not trusted_raw
+        or len(trusted_raw) >= _COALITION_INFO_PID_LIST_MAX_PIDS
+    ):
+        return None
+    if any(
+        isinstance(uniqueid, bool)
+        or not isinstance(uniqueid, int)
+        or uniqueid <= 0
+        for uniqueid in trusted_raw
+    ):
+        return None
+    trusted = set(trusted_raw)
+    if len(trusted) != len(trusted_raw):
+        return None
+    try:
+        host_uuid = str(uuid.UUID(host_uuid_raw))
+        boot_uuid = str(uuid.UUID(boot_uuid_raw))
+    except (AttributeError, TypeError, ValueError) as exc:
+        LOG.warning(
+            "producer custody UUID contract rejected: %s",
+            type(exc).__name__,
+        )
+        return None
+    # Canonical lower-case UUIDs make ledger comparison and strict replay
+    # deterministic; alternative textual forms are rejected, not normalized.
+    if host_uuid_raw != host_uuid or boot_uuid_raw != boot_uuid:
+        return None
+    return coalition_id, trusted, host_uuid, boot_uuid
+
+
+def _unknown_custody_members(
+    custody: dict[str, object] | None,
+) -> dict[int, int] | None:
+    """Return pid -> uniqueid for live, non-trusted members of saved custody."""
+    parsed = _parse_producer_custody(custody)
+    if parsed is None:
+        return None
+    coalition_id, saved_trusted, saved_host_uuid, saved_boot_uuid = parsed
+    try:
+        api = _get_darwin_custody_api()
+        current_host_uuid = api.host_uuid()
+        current_boot_uuid = api.boot_session_uuid()
+        if current_host_uuid != saved_host_uuid:
+            # A foreign host cannot prove anything about producers on the
+            # authority host. Cross-host release requires an explicit remote
+            # drain acknowledgement, which this local ledger does not carry.
+            return None
+        if current_boot_uuid != saved_boot_uuid:
+            # Same physical Mac, later boot: no process or coalition from the
+            # saved boot can still exist. Avoid probing a possibly reused ID.
+            return {}
+        identities = _coalition_identities(api, coalition_id)
+        dynamic_trusted: set[int] = set()
+        current_pid = os.getpid()
+        current_cid = api.resource_coalition_id(current_pid)
+        if current_cid == coalition_id:
+            dynamic_trusted = _verified_ancestor_uniqueids(
+                identities,
+                current_pid,
+            )
+        trusted = saved_trusted | dynamic_trusted
+        return {
+            pid: uniqueid
+            for pid, (uniqueid, _parent_uniqueid) in identities.items()
+            if uniqueid not in trusted
+        }
+    except _CUSTODY_PROBE_ERRORS as exc:
+        LOG.warning(
+            "producer custody probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+
+
+def producer_cohort_members_checked(
+    pgid: int,
+    *,
+    job_id: str | None,
+    custody: dict[str, object] | None = None,
+) -> list[int] | None:
+    """Return live producer members, including descendants that called setsid.
+
+    Darwin uses resource-coalition membership plus kernel process unique IDs;
+    no command line or environment (and therefore no credential) is read.
+    ``job_id`` remains in the interface for caller attribution but is never
+    used as a process identity.
+    """
+    _ = job_id
+    if sys.platform == "darwin":
+        # The saved resource coalition is the complete Darwin producer
+        # authority. Never union a bare PGID into it: once the original group
+        # drains, a recycled PGID could name an unrelated process. Avoiding the
+        # PGID probe also prevents this observer's `ps` helper from briefly
+        # appearing as an unknown member of the shared launchd coalition.
+        unknown = _unknown_custody_members(custody)
+        if unknown is None:
+            return None
+        return sorted(unknown)
+    group_members = pgid_members_checked(pgid)
+    if group_members is None:
+        return None
+    return sorted(set(group_members))
+
+
+def kill_producer_cohort(
+    custody: dict[str, object] | None,
+    *,
+    intent: termination.TerminationIntent | None,
+    ledger_path=None,
+    grace_s: float = DEFAULT_KILL_GRACE_S,
+) -> bool:
+    """Terminate every unknown custody member and prove the coalition drained.
+
+    Each PID is rechecked against its kernel unique ID immediately before each
+    signal. A recycled PID therefore cannot inherit the prior process's kill
+    authority. The final answer comes from a fresh kernel coalition probe, not
+    from successful signal syscalls.
+    """
+    if sys.platform != "darwin":
+        return False
+    if intent is None:
+        raise termination.TerminationIntentRequired(
+            "kill_producer_cohort requires a durable termination intent"
+        )
+    if signal.SIGTERM not in intent.signal_sequence or signal.SIGKILL not in intent.signal_sequence:
+        raise termination.TerminationIntentMismatch(
+            "producer custody requires TERM and KILL authority"
+        )
+    parsed_custody = _parse_producer_custody(custody)
+    if parsed_custody is None:
+        return False
+    coalition_id, _trusted_uniqueids, _host_uuid, _boot_uuid = parsed_custody
+    members = _unknown_custody_members(custody)
+    if members is None:
+        return False
+    if not members:
+        return True
+    try:
+        api = _get_darwin_custody_api()
+    except _CUSTODY_PROBE_ERRORS as exc:
+        LOG.warning(
+            "producer custody kill unavailable: %s",
+            type(exc).__name__,
+        )
+        return False
+
+    def _signal_members(
+        members: dict[int, int],
+        signum: int,
+    ) -> bool:
+        all_sent = True
+        for pid, expected_uniqueid in members.items():
+            def _identity_matches(
+                target_pid: int,
+                expected: int = expected_uniqueid,
+            ) -> bool:
+                try:
+                    identity_before = api.process_identity(target_pid)
+                    if identity_before is None or identity_before[0] != expected:
+                        return False
+                    observed_cid = api.resource_coalition_id(target_pid)
+                    identity_after = api.process_identity(target_pid)
+                except _CUSTODY_PROBE_ERRORS as exc:
+                    LOG.warning(
+                        "producer custody identity recheck failed pid=%d: %s",
+                        target_pid,
+                        type(exc).__name__,
+                    )
+                    return False
+                return (
+                    observed_cid == coalition_id
+                    and identity_after == identity_before
+                )
+
+            try:
+                termination.send_member_pid(
+                    intent,
+                    pid,
+                    signum,
+                    ledger_path=ledger_path,
+                    identity_verifier=_identity_matches,
+                )
+            except (
+                OSError,
+                termination.TerminationIntentError,
+            ) as exc:
+                LOG.warning(
+                    "producer custody signal failed pid=%d signal=%d: %s",
+                    pid,
+                    signum,
+                    type(exc).__name__,
+                )
+                all_sent = False
+        return all_sent
+
+    _signal_members(members, signal.SIGTERM)
+    deadline = time.monotonic() + max(0.0, grace_s)
+    survivors = members
+    while survivors and time.monotonic() < deadline:
+        time.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
+        survivors = _unknown_custody_members(custody)
+        if survivors is None:
+            return False
+    if grace_s <= 0:
+        survivors = _unknown_custody_members(custody)
+    if survivors is None:
+        return False
+    if not survivors:
+        return True
+    _signal_members(survivors, signal.SIGKILL)
+    time.sleep(0.5)
+    survivors = _unknown_custody_members(custody)
+    return survivors == {}
 
 
 def kill_pgid(

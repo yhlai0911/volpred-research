@@ -5,6 +5,7 @@ import asyncio
 import contextlib
 import fcntl
 import hashlib
+import io
 import json
 import logging
 import os
@@ -13,8 +14,6 @@ import shutil
 import signal
 import subprocess
 import sys
-import tempfile
-import threading
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -68,6 +67,87 @@ def _provider_guard_stub(monkeypatch):
 
 def _tmp_state(tmp_path: Path) -> Path:
     return tmp_path / "dispatch_state.json"
+
+
+def _stub_worker_custody(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    monkeypatch.setattr(
+        worker.procutil,
+        "capture_producer_custody",
+        lambda: dict(custody),
+    )
+    monkeypatch.setattr(
+        worker.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
+    )
+    monkeypatch.setattr(
+        worker.state,
+        "attach_producer_custody",
+        lambda **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        worker.state,
+        "mark_producer_spawn_committed",
+        lambda **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        worker.state,
+        "mark_producer_spawn_aborted",
+        lambda **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        worker.workspace_mod,
+        "bind_producer_custody",
+        lambda *_args, **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        worker.custody_receipt,
+        "bind_producer_custody",
+        lambda *_args, **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        worker.custody_receipt,
+        "release_producer_custody",
+        lambda *_args, **_kwargs: True,
+    )
+    return custody
+
+
+def _bind_drained_workspace_custody(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    repo: Path,
+    workspace_receipt: dict,
+    job_id: str,
+) -> dict[str, object]:
+    """Give a sweep fixture the same durable pre-Popen receipt as production."""
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    assert workspace.bind_producer_custody(
+        repo,
+        workspace=workspace_receipt,
+        job_id=job_id,
+        producer_custody=custody,
+        attempt=1,
+    )
+    monkeypatch.setattr(
+        workspace.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
+    )
+    return custody
 
 
 def _reserve_like_production(kwargs: dict, *, pid: int = 4242, pgid: int = 4242) -> None:
@@ -148,6 +228,26 @@ def _never_spawn_the_real_pregate(monkeypatch) -> None:
     monkeypatch.setattr(
         scheduler.phase_z, "_default_internal_alert",
         lambda **_kwargs: {"sent": True, "test_stub": True},
+    )
+    monkeypatch.setattr(
+        scheduler.custody_receipt,
+        "reconcile_pending_producer_custodies",
+        lambda _repo_root: {
+            "ok": True,
+            "pending_count": 0,
+            "released": [],
+            "unresolved": [],
+        },
+    )
+    monkeypatch.setattr(
+        health.custody_receipt,
+        "reconcile_pending_producer_custodies",
+        lambda _repo_root: {
+            "ok": True,
+            "pending_count": 0,
+            "released": [],
+            "unresolved": [],
+        },
     )
 
 
@@ -1268,6 +1368,11 @@ def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
     )
     monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(
+        health.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
+    )
+    monkeypatch.setattr(
         health.alerts,
         "send_hang_alert",
         lambda **kwargs: alerts_called.append(kwargs) or True,
@@ -1679,6 +1784,11 @@ def test_health_check_kills_overdue_job_skips_kill_on_identity_mismatch(
     )
     monkeypatch.setattr(health.procutil, "check_identity", lambda pid, started_wall: procutil.IDENTITY_MISMATCH)
     monkeypatch.setattr(
+        health.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
+    )
+    monkeypatch.setattr(
         state,
         "get_current_jobs",
         lambda path=state_path: [state.CurrentJob(
@@ -1754,6 +1864,11 @@ def test_health_check_marks_silent_death(tmp_path: Path, monkeypatch) -> None:
 
     monkeypatch.setattr(health.procutil, "check_identity", lambda pid, started_wall: procutil.IDENTITY_MISMATCH)
     monkeypatch.setattr(
+        health.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
+    )
+    monkeypatch.setattr(
         health.alerts,
         "send_silent_death_alert",
         lambda **kwargs: alerts_called.append(kwargs) or True,
@@ -1800,6 +1915,11 @@ def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch, tmp_path) -
     # process group on a CI runner, where the kill then escalated to SIGKILL and
     # failed the assert below (run 29372109046).
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [])
+    monkeypatch.setattr(
+        health.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
+    )
     monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
 
     health._force_kill_pgid(456, state_path=tmp_path / "dispatch_state.json")
@@ -1814,6 +1934,11 @@ def test_force_kill_pgid_tolerates_exit_after_term(monkeypatch, tmp_path) -> Non
     sigs: list[int] = []
     monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: sigs.append(sig))
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [])
+    monkeypatch.setattr(
+        health.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
+    )
     monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
 
     assert health._force_kill_pgid(
@@ -1830,6 +1955,123 @@ def test_force_kill_pgid_reports_false_when_orphan_survives(monkeypatch, tmp_pat
     assert health._force_kill_pgid(
         456, state_path=tmp_path / "dispatch_state.json",
     ) is False
+
+
+@pytest.mark.skipif(
+    sys.platform != "darwin",
+    reason="macOS kernel coalition custody probe",
+)
+def test_producer_cohort_probe_tracks_detached_process() -> None:
+    """A setsid descendant remains attributable after leaving its old PGID."""
+    custody = procutil.capture_producer_custody()
+    if custody is None:
+        pytest.skip("test runner shares a non-quiescent launchd coalition")
+    job_id = f"cohort-{os.getpid()}-{time.time_ns()}"
+    child = subprocess.Popen(
+        ["/bin/sleep", "10"],
+        start_new_session=True,
+    )
+    try:
+        members = procutil.producer_cohort_members_checked(
+            0,
+            job_id=job_id,
+            custody=custody,
+        )
+        assert members is not None
+        assert child.pid in members
+    finally:
+        child.terminate()
+        child.wait(timeout=5)
+
+
+def test_termination_wrappers_use_tree_when_leader_identity_is_known(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Detached descendants are part of the producer cohort, not free agents."""
+    tree_calls: list[int] = []
+    monkeypatch.setattr(
+        procutil,
+        "kill_tree",
+        lambda pid, **_kwargs: bool(tree_calls.append(pid) or True),
+    )
+    monkeypatch.setattr(
+        procutil,
+        "kill_pgid",
+        lambda *_args, **_kwargs: pytest.fail("PGID-only fallback used"),
+    )
+    monkeypatch.setattr(
+        procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
+    )
+
+    assert worker._kill_pgid(
+        456,
+        leader_pid=123,
+        state_path=tmp_path / "worker-state.json",
+    ) is True
+    assert health._force_kill_pgid(
+        654,
+        leader_pid=321,
+        state_path=tmp_path / "health-state.json",
+    ) is True
+    assert tree_calls == [123, 321]
+
+
+def test_health_never_closes_dead_leader_with_live_cohort(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Health cannot win the leader-exit race and bypass workspace quarantine."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path,
+        pid=123,
+        pgid=456,
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/worker.log",
+        started_wall="leader-start",
+    )
+    job_id = str(
+        state.read_state(state_path)["current_jobs"][0]["job_id"]
+    )
+    monkeypatch.setattr(
+        health.procutil,
+        "check_identity",
+        lambda _pid, _started: procutil.IDENTITY_DEAD,
+    )
+    monkeypatch.setattr(
+        health.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [789],
+    )
+    monkeypatch.setattr(
+        health.alerts,
+        "send_hang_alert",
+        lambda **_kwargs: None,
+    )
+
+    action = health.check_once(
+        state_path=state_path,
+        max_age_s=99999,
+    )
+
+    assert action == "kill_failed_orphan"
+    snap = state.read_state(state_path)
+    current = next(
+        job
+        for job in snap["current_jobs"]
+        if job["job_id"] == job_id
+    )
+    assert current["phase"] == "kill_failed_orphan"
+    assert not [
+        entry
+        for entry in snap["completions"]
+        if entry.get("job_id") == job_id
+    ]
 
 
 def test_supervisor_set_runtime_env_raises_soft_limit(
@@ -1914,6 +2156,8 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
     monkeypatch,
     caplog,
 ) -> None:
+    _stub_worker_custody(monkeypatch)
+
     class StuckProc:
         pid = 123
 
@@ -1926,7 +2170,6 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
     fingerprint_calls: list[dict] = []
 
     monkeypatch.setattr(worker, "_spawn", lambda **kwargs: StuckProc())
-    monkeypatch.setattr(worker.os, "getpgid", lambda pid: 456)
     monkeypatch.setattr(
         worker, "_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
@@ -1955,7 +2198,7 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
 
     assert exit_code == worker.TIMEOUT_KILLED_SENTINEL
     assert duration >= 0
-    assert kills == [456]
+    assert kills == [123]
     assert reserve_calls, "reserve_fire must be called before spawn (§10 #5)"
     # 2026-07-04 gate-blocking fix #2: attach_process() is called IMMEDIATELY
     # after Popen with started_wall=None (fast — no `ps` subprocess call yet)
@@ -1966,6 +2209,133 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
     assert fingerprint_calls and fingerprint_calls[0]["pid"] == 123
     assert fingerprint_calls[0]["started_wall"] == "Wed Jan  1 00:00:00 2026"
     assert "still alive after SIGKILL grace" in caplog.text
+
+
+def test_run_one_attempt_requires_empty_process_group_after_leader_exit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A returned provider leader is not proof its producer cohort drained."""
+    _stub_worker_custody(monkeypatch)
+
+    class ExitedProc:
+        pid = 123
+
+    monkeypatch.setattr(
+        worker,
+        "authorize_provider_spawn",
+        lambda **kwargs: SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-settings.json",
+            environment=lambda: {},
+        ),
+    )
+    monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
+    monkeypatch.setattr(worker, "_spawn", lambda **_kwargs: ExitedProc())
+    monkeypatch.setattr(
+        worker,
+        "_wait_with_fatal_probe",
+        lambda *_args, **_kwargs: ("exited", 0),
+    )
+    monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kwargs: object())
+    monkeypatch.setattr(worker.state, "attach_process", lambda **_kwargs: None)
+    monkeypatch.setattr(
+        worker.state,
+        "update_started_wall",
+        lambda **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        worker.procutil,
+        "get_process_start_wall",
+        lambda _pid: "start-id",
+    )
+    monkeypatch.setattr(
+        worker.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [789],
+    )
+    monkeypatch.setattr(
+        worker.fire_manifest,
+        "open_manifest",
+        lambda *_args, **_kwargs: None,
+    )
+
+    exit_code, _duration, _output = worker._run_one_attempt(
+        prompt_text="prompt",
+        model=worker.OPUS_MODEL,
+        timeout_s=10,
+        log_path=tmp_path / "worker.log",
+        attempt=1,
+        schedule_id="hourly_dispatch",
+        state_path=tmp_path / "state.json",
+        job_id="job-live-descendant",
+        slot_id="slot-1",
+    )
+
+    assert exit_code == worker.TIMEOUT_SURVIVED_SENTINEL
+
+
+def test_run_one_attempt_globally_binds_before_spawn_and_releases_after_drain(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    real_bind = worker.custody_receipt.bind_producer_custody
+    real_release = worker.custody_receipt.release_producer_custody
+    _stub_worker_custody(monkeypatch)
+    monkeypatch.setattr(worker.custody_receipt, "bind_producer_custody", real_bind)
+    monkeypatch.setattr(
+        worker.custody_receipt,
+        "release_producer_custody",
+        real_release,
+    )
+    monkeypatch.setattr(worker, "PROJECT_ROOT", tmp_path)
+    worker.custody_receipt.initialize_producer_custody_ledger(
+        tmp_path,
+        migration_confirmed_quiescent=True,
+    )
+    observed_pending_at_spawn: list[int] = []
+
+    class ExitedProc:
+        pid = 123
+
+    def fake_spawn(**_kwargs):
+        observed_pending_at_spawn.append(
+            len(
+                worker.custody_receipt.read_pending_producer_custodies(
+                    tmp_path
+                )
+            )
+        )
+        return ExitedProc()
+
+    monkeypatch.setattr(worker, "_spawn", fake_spawn)
+    monkeypatch.setattr(
+        worker,
+        "_wait_with_fatal_probe",
+        lambda *_args, **_kwargs: ("exited", 0),
+    )
+    monkeypatch.setattr(
+        worker.procutil,
+        "get_process_start_wall",
+        lambda _pid: "start-id",
+    )
+
+    exit_code, _duration, _output = worker._run_one_attempt(
+        prompt_text="prompt",
+        model=worker.OPUS_MODEL,
+        timeout_s=10,
+        log_path=tmp_path / "worker.log",
+        attempt=1,
+        schedule_id="hourly_dispatch",
+        state_path=tmp_path / "state.json",
+    )
+
+    assert exit_code == 0
+    assert observed_pending_at_spawn == [1]
+    assert (
+        worker.custody_receipt.read_pending_producer_custodies(tmp_path)
+        == []
+    )
 
 
 def test_worker_timeout_path_short_circuits_retry(tmp_path: Path, monkeypatch) -> None:
@@ -2128,12 +2498,13 @@ def test_raw_signal_with_exact_sent_intent_is_system_terminated(
 def test_health_cas_loss_preserves_raw_signal_for_intent_classification(
     tmp_path: Path, monkeypatch,
 ) -> None:
+    _stub_worker_custody(monkeypatch)
+
     class ExitedProc:
         pid = 123
 
     seen_pgid: list[int] = []
     monkeypatch.setattr(worker, "_spawn", lambda **_kw: ExitedProc())
-    monkeypatch.setattr(worker.os, "getpgid", lambda _pid: 456)
     monkeypatch.setattr(
         worker, "_wait_with_fatal_probe", lambda *_a, **_kw: ("exited", -15),
     )
@@ -2155,7 +2526,7 @@ def test_health_cas_loss_preserves_raw_signal_for_intent_classification(
     )
 
     assert exit_code == 143
-    assert seen_pgid == [456]
+    assert seen_pgid == [123]
 
 
 def test_worker_registry_denial_happens_before_popen(
@@ -2372,7 +2743,11 @@ def test_handle_restart_orphan_skips_kill_on_identity_mismatch(tmp_path: Path, m
         supervisor.worker, "_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_MISMATCH)
-    monkeypatch.setattr(supervisor.procutil, "pgid_members_checked", lambda pgid: [])
+    monkeypatch.setattr(
+        supervisor.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
+    )
     monkeypatch.setattr(
         supervisor.alerts, "send_orphan_restart_alert",
         lambda **kwargs: alerts_called.append(kwargs) or True,
@@ -2432,7 +2807,9 @@ def test_restart_verified_dead_workspace_is_adjudicated_before_state_release(
         lambda _pid, _wall: procutil.IDENTITY_MISMATCH,
     )
     monkeypatch.setattr(
-        supervisor.procutil, "pgid_members_checked", lambda _pgid: [],
+        supervisor.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
     )
     monkeypatch.setattr(
         supervisor.alerts, "send_orphan_restart_alert", lambda **_kwargs: True,
@@ -2478,7 +2855,9 @@ def test_restart_keeps_slot_when_leader_dead_but_pgid_descendant_survives(
         supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_DEAD,
     )
     monkeypatch.setattr(
-        supervisor.procutil, "pgid_members_checked", lambda pgid: [1001],
+        supervisor.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [1001],
     )
     monkeypatch.setattr(
         supervisor.alerts, "send_orphan_restart_alert", lambda **kwargs: True,
@@ -2569,7 +2948,7 @@ def test_handle_restart_orphan_clears_abandoned_pid_none_reservation(
     assert alerts_called[0]["killed"] is False
     snap = state.read_state(state_path)
     assert snap["current_job"] is None, "slot must not stay wedged forever"
-    assert snap["completions"][-1]["outcome"] == "reservation_abandoned_no_pid"
+    assert snap["completions"][-1]["outcome"] == "spawn_not_started"
     # PHASE-Z drain is persistent across restart; scheduler clears it before
     # admitting the next fire.
     state.finish_phase_z(
@@ -2809,6 +3188,94 @@ def test_health_loop_heartbeats_before_each_check(tmp_path: Path, monkeypatch) -
     assert beats[0]["supervisor_pid"] == os.getpid(), "stale pid not re-stamped"
 
 
+def test_health_loop_defers_child_spawning_maintenance_during_reservation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Shared coalition is exclusive before custody capture, not only after."""
+    state_path = _tmp_state(tmp_path)
+    state.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/reserved.log",
+        path=state_path,
+    )
+    checks: list[int] = []
+    maintenance: list[str] = []
+
+    async def fake_sleep(_seconds):
+        return None
+
+    def fake_check_once(**_kwargs):
+        checks.append(1)
+        if len(checks) == 2:
+            raise asyncio.CancelledError()
+
+    monkeypatch.setattr(health.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(health, "check_once", fake_check_once)
+    monkeypatch.setattr(
+        health,
+        "_renew_live_dispatch_claims",
+        lambda **_kwargs: {"ok": True, "renewed": [], "count": 0},
+    )
+    monkeypatch.setattr(
+        health.isolation,
+        "reap_quarantined_provider_auth_leases",
+        lambda: maintenance.append("quarantine") or {"cleaned": 0},
+    )
+    monkeypatch.setattr(
+        health.isolation,
+        "recover_provider_auth_reapers",
+        lambda: maintenance.append("recovery")
+        or {"recovered": 0, "active": 0, "invalid": 0},
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(health.health_loop(state_path=state_path))
+
+    assert checks == [1, 1]
+    assert maintenance == []
+
+
+def test_scheduler_tick_defers_all_helpers_during_precapture_reservation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    state.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/reserved.log",
+        path=state_path,
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "sweep_orphan_workspaces",
+        lambda **_kwargs: pytest.fail(
+            "scheduler must not spawn/reconcile inside custody capture window"
+        ),
+    )
+
+    decision = asyncio.run(
+        scheduler._tick_once(
+            state_path=state_path,
+            cron_expr="7 * * * *",
+            prompt_path=tmp_path / "prompt.md",
+            log_path=tmp_path / "worker.log",
+            dry_run=True,
+            repo_root=tmp_path,
+        )
+    )
+
+    assert decision == {
+        "action": "skip",
+        "reason": "producer_slot_in_flight",
+        "active_jobs": 1,
+    }
+
+
 def test_health_renews_only_identity_verified_dispatch_jobs(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -3022,23 +3489,32 @@ def test_supervisor_startup_registry_denial_precedes_state_and_provider_io(
         supervisor.main([])
 
 
-def test_supervisor_startup_invalid_auth_recovery_fails_before_state_mutation(
-    monkeypatch,
+def test_supervisor_startup_invalid_auth_recovery_runs_after_orphan_reconciliation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    state_path = _tmp_state(tmp_path)
+    order: list[str] = []
     monkeypatch.setattr(supervisor, "_setup_logging", lambda _level: None)
     monkeypatch.setattr(supervisor, "_set_runtime_env", lambda: None)
     monkeypatch.setattr(supervisor, "load_provider_registry", lambda: None)
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    monkeypatch.setattr(
+        supervisor,
+        "_handle_restart_orphan",
+        lambda: order.append("orphan_reconciled"),
+    )
     monkeypatch.setattr(
         supervisor.isolation,
         "recover_provider_auth_reapers",
-        lambda: {"recovered": 0, "active": 0, "invalid": 1},
+        lambda: order.append("auth_recovery")
+        or {"recovered": 0, "active": 0, "invalid": 1},
     )
     monkeypatch.setattr(
-        supervisor.state,
-        "read_state",
-        lambda *_a, **_k: pytest.fail(
-            "invalid auth recovery must precede state mutation"
-        ),
+        supervisor.alerts,
+        "send_loop_crash",
+        lambda component, _tb, **_kwargs: order.append(f"alert:{component}")
+        or True,
     )
 
     with pytest.raises(
@@ -3046,6 +3522,90 @@ def test_supervisor_startup_invalid_auth_recovery_fails_before_state_mutation(
         match="startup recovery failed closed",
     ):
         supervisor.main([])
+    assert order == [
+        "orphan_reconciled",
+        "auth_recovery",
+        "alert:supervisor_startup",
+    ]
+    assert state_path.exists()
+
+
+def test_supervisor_startup_custody_failure_alerts_before_reraising(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    alerts_seen: list[tuple[str, str]] = []
+    monkeypatch.setattr(supervisor, "_setup_logging", lambda _level: None)
+    monkeypatch.setattr(supervisor, "_set_runtime_env", lambda: None)
+    monkeypatch.setattr(supervisor, "load_provider_registry", lambda: None)
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    monkeypatch.setattr(
+        supervisor.custody_receipt,
+        "reconcile_pending_producer_custodies",
+        lambda _root: (_ for _ in ()).throw(
+            supervisor.custody_receipt.CustodyLedgerUnavailable(
+                "ledger missing"
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        supervisor.alerts,
+        "send_loop_crash",
+        lambda component, tb, **_kwargs: alerts_seen.append((component, tb))
+        or True,
+    )
+
+    with pytest.raises(
+        supervisor.custody_receipt.CustodyLedgerUnavailable,
+        match="ledger missing",
+    ):
+        supervisor.main([])
+
+    assert len(alerts_seen) == 1
+    assert alerts_seen[0][0] == "supervisor_startup"
+    assert "ledger missing" in alerts_seen[0][1]
+
+
+def test_supervisor_startup_defers_auth_reaper_while_orphan_is_retained(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    state.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/orphan.log",
+        path=state_path,
+    )
+    monkeypatch.setattr(supervisor, "_setup_logging", lambda _level: None)
+    monkeypatch.setattr(supervisor, "_set_runtime_env", lambda: None)
+    monkeypatch.setattr(supervisor, "load_provider_registry", lambda: None)
+    monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
+    monkeypatch.setattr(supervisor, "_handle_restart_orphan", lambda: None)
+    monkeypatch.setattr(
+        supervisor.isolation,
+        "recover_provider_auth_reapers",
+        lambda: pytest.fail("auth reaper must wait for retained orphan drain"),
+    )
+    monkeypatch.setattr(
+        supervisor.alerts,
+        "send_supervisor_restart",
+        lambda **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        supervisor.state,
+        "consume_planned_restart_marker",
+        lambda: None,
+    )
+    monkeypatch.setattr(
+        supervisor.asyncio,
+        "run",
+        lambda coroutine: coroutine.close() or 0,
+    )
+
+    assert supervisor.main([]) == 0
 
 
 def test_supervisor_main_writes_only_to_patched_state_path(tmp_path: Path, monkeypatch) -> None:
@@ -3091,7 +3651,7 @@ def test_supervisor_main_writes_only_to_patched_state_path(tmp_path: Path, monke
     # main() wrote to `default_path` instead.
     assert patched_path.exists(), "main() ignored the patched STATE_PATH"
     assert real_read_state(patched_path)["supervisor_pid"] == os.getpid()
-    assert observed_paths == [patched_path, patched_path]
+    assert observed_paths == [patched_path, patched_path, patched_path]
 
 
 # ---------------------------------------------------------------------------
@@ -3237,6 +3797,7 @@ def test_stale_auth_line_in_shared_log_does_not_freeze_loop(tmp_path: Path, monk
     attempt fails with an unrelated error. Must classify hard_failure (retry),
     NOT auth (which would set auth_blocked and halt all future fires)."""
     state_path = _tmp_state(tmp_path)
+    _stub_worker_custody(monkeypatch)
     log_path = tmp_path / "worker.log"
     log_path.write_text("PREVIOUS FIRE: Not logged in. Please run /login\n", encoding="utf-8")
 
@@ -3253,7 +3814,6 @@ def test_stale_auth_line_in_shared_log_does_not_freeze_loop(tmp_path: Path, monk
         "_spawn",
         lambda **kwargs: spawned.append(kwargs) or FakeProc(),
     )
-    monkeypatch.setattr(worker.os, "getpgid", lambda pid: 4242)
     monkeypatch.setattr(worker.procutil, "get_process_start_wall", lambda pid: "Wed Jan  1 00:00:00 2026")
 
     scratch = tmp_path / "scratch"
@@ -3291,7 +3851,7 @@ def test_fire_request_roundtrip(tmp_path: Path) -> None:
     assert state.read_state(state_path)["fire_requested_at"] is None
 
 
-def test_multislot_full_pool_skips_without_consuming_request(
+def test_legacy_multislot_state_fails_closed_without_consuming_request(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     state_path = _tmp_state(tmp_path)
@@ -3307,6 +3867,12 @@ def test_multislot_full_pool_skips_without_consuming_request(
     state.request_fire("email_reply:test", path=state_path)
     prompt = tmp_path / "prompt.md"
     prompt.write_text("prompt", encoding="utf-8")
+    schedules = tmp_path / "runtime_schedules.json"
+    schedules.write_text(json.dumps({"daemons": [{
+        "id": scheduler.DAEMON_ID,
+        "max_slots": 2,
+        "producer_custody": {"mode": "per_fire_isolated_coalition"},
+    }]}), encoding="utf-8")
     monkeypatch.setattr(
         scheduler.worker, "run_worker",
         lambda **_kwargs: pytest.fail("full pool must not spawn"),
@@ -3315,14 +3881,18 @@ def test_multislot_full_pool_skips_without_consuming_request(
     decision = asyncio.run(scheduler._tick_once(
         state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt,
         log_path=tmp_path / "worker.log", dry_run=False, repo_root=tmp_path,
-        max_slots=2, background=True,
+        schedules_path=schedules, max_slots=2, background=True,
     ))
 
-    assert decision["reason"] == "slots_full"
+    assert decision == {
+        "action": "skip",
+        "reason": "producer_slot_in_flight",
+        "active_jobs": 2,
+    }
     assert state.read_state(state_path)["fire_requested_at"] is not None
 
 
-def test_multislot_half_pool_launches_second_without_waiting(
+def test_unimplemented_isolated_mode_cannot_launch_second_producer(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     state_path = _tmp_state(tmp_path)
@@ -3341,38 +3911,35 @@ def test_multislot_half_pool_launches_second_without_waiting(
     _seed_due(state_path)
     prompt = tmp_path / "prompt.md"
     prompt.write_text("prompt", encoding="utf-8")
-    _stub_pregate(monkeypatch)
-    started = threading.Event()
-    release = threading.Event()
-
-    def blocking_worker(**_kwargs):
-        started.set()
-        assert release.wait(2)
-        return _ok_worker()
-
-    monkeypatch.setattr(scheduler.worker, "run_worker", blocking_worker)
+    schedules = tmp_path / "runtime_schedules.json"
+    schedules.write_text(json.dumps({"daemons": [{
+        "id": scheduler.DAEMON_ID,
+        "max_slots": 2,
+        "producer_custody": {"mode": "per_fire_isolated_coalition"},
+    }]}), encoding="utf-8")
     monkeypatch.setattr(
-        scheduler.phase_z, "run_phase_z",
-        lambda **_kwargs: {"committed": False, "reason": "clean"},
+        scheduler.worker,
+        "run_worker",
+        lambda **_kwargs: pytest.fail(
+            "a config string cannot create an isolated kernel coalition"
+        ),
     )
 
-    async def scenario():
-        decision = await scheduler._tick_once(
-            state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt,
-            log_path=tmp_path / "worker.log", dry_run=False, repo_root=tmp_path,
-            max_slots=2, background=True,
-        )
-        assert decision["action"] == "launched"
-        assert decision["slot_id"] == "slot-2"
-        assert await asyncio.to_thread(started.wait, 1)
-        jobs = state.read_state(state_path)["current_jobs"]
-        assert len(jobs) == 2
-        assert {job["cohort_id"] for job in jobs} == {first.cohort_id}
-        assert [job["fire_lifecycle"] for job in jobs] == [lifecycle, lifecycle]
-        release.set()
-        await asyncio.gather(*list(scheduler._ACTIVE_FIRE_TASKS.values()))
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt,
+        log_path=tmp_path / "worker.log", dry_run=False, repo_root=tmp_path,
+        schedules_path=schedules, max_slots=2, background=True,
+    ))
 
-    asyncio.run(scenario())
+    assert decision == {
+        "action": "skip",
+        "reason": "producer_slot_in_flight",
+        "active_jobs": 1,
+    }
+    jobs = state.read_state(state_path)["current_jobs"]
+    assert [(job["job_id"], job["fire_lifecycle"]) for job in jobs] == [
+        (first.job_id, lifecycle),
+    ]
 
 
 def test_multislot_health_closes_dead_job_without_touching_live_sibling(
@@ -3393,6 +3960,11 @@ def test_multislot_health_closes_dead_job_without_touching_live_sibling(
     monkeypatch.setattr(
         health.procutil, "check_identity",
         lambda pid, _wall: procutil.IDENTITY_DEAD if pid == 101 else procutil.IDENTITY_MATCH,
+    )
+    monkeypatch.setattr(
+        health.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [],
     )
     sent: list[dict] = []
     monkeypatch.setattr(
@@ -3542,17 +4114,98 @@ def test_scheduler_does_not_close_quarantined_worker_slot(
     ]
 
 
-def test_load_max_slots_uses_daemon_config_and_bounds_invalid(tmp_path: Path) -> None:
+def test_load_max_slots_stays_one_until_kernel_isolation_exists(tmp_path: Path) -> None:
     cfg = tmp_path / "runtime_schedules.json"
+    state_path = _tmp_state(tmp_path)
     cfg.write_text(json.dumps({"daemons": [{
         "id": scheduler.DAEMON_ID, "max_slots": 3,
     }]}), encoding="utf-8")
-    assert scheduler.load_max_slots(schedules_path=cfg) == 3
+    assert scheduler.load_max_slots(
+        schedules_path=cfg, state_path=state_path,
+    ) == scheduler.FAIL_CLOSED_MAX_SLOTS
 
     cfg.write_text(json.dumps({"daemons": [{
         "id": scheduler.DAEMON_ID, "max_slots": 0,
     }]}), encoding="utf-8")
-    assert scheduler.load_max_slots(schedules_path=cfg) == scheduler.DEFAULT_MAX_SLOTS
+    assert scheduler.load_max_slots(
+        schedules_path=cfg, state_path=state_path,
+    ) == scheduler.FAIL_CLOSED_MAX_SLOTS
+
+
+def test_unknown_custody_mode_fails_closed_shared_and_single_slot(
+    tmp_path: Path,
+) -> None:
+    cfg = tmp_path / "runtime_schedules.json"
+    cfg.write_text(json.dumps({"daemons": [{
+        "id": scheduler.DAEMON_ID,
+        "max_slots": 9,
+        "producer_custody": {"mode": "per_fire_isolated_coaltion_typo"},
+        "writer_isolation": {"max_active": 9},
+    }]}), encoding="utf-8")
+
+    assert scheduler.load_producer_custody_mode(
+        schedules_path=cfg,
+    ) == scheduler.SHARED_LAUNCHD_COALITION_MODE
+    assert scheduler.load_max_slots(schedules_path=cfg) == 1
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        None,
+        "{not-json",
+        json.dumps({"daemons": []}),
+    ],
+)
+def test_load_max_slots_ambiguous_config_fails_closed_to_one(
+    tmp_path: Path,
+    payload: str | None,
+) -> None:
+    cfg = tmp_path / "runtime_schedules.json"
+    if payload is not None:
+        cfg.write_text(payload, encoding="utf-8")
+
+    assert scheduler.load_max_slots(
+        schedules_path=cfg,
+        state_path=_tmp_state(tmp_path),
+    ) == scheduler.FAIL_CLOSED_MAX_SLOTS
+
+
+@pytest.mark.parametrize(
+    ("configured_slots", "configured_writer_active"),
+    [(4, 2), (0, 2), (True, 1), (1, 9)],
+)
+def test_load_max_slots_shared_coalition_fails_safe_to_one(
+    tmp_path: Path,
+    configured_slots: object,
+    configured_writer_active: int,
+) -> None:
+    cfg = tmp_path / "runtime_schedules.json"
+    cfg.write_text(json.dumps({"daemons": [{
+        "id": scheduler.DAEMON_ID,
+        "max_slots": configured_slots,
+        "producer_custody": {
+            "mode": scheduler.SHARED_LAUNCHD_COALITION_MODE,
+        },
+        "writer_isolation": {"max_active": configured_writer_active},
+    }]}), encoding="utf-8")
+
+    assert scheduler.load_max_slots(schedules_path=cfg) == 1
+
+
+def test_production_shared_coalition_config_enforces_single_writer() -> None:
+    config = json.loads(scheduler.SCHEDULES_PATH.read_text(encoding="utf-8"))
+    daemon = next(
+        item for item in config["daemons"]
+        if item["id"] == scheduler.DAEMON_ID
+    )
+
+    assert daemon["producer_custody"]["mode"] == (
+        scheduler.SHARED_LAUNCHD_COALITION_MODE
+    )
+    assert daemon["max_slots"] == 1
+    assert daemon["writer_isolation"]["max_active"] == 1
+    assert scheduler.load_max_slots() == 1
 
 
 def test_phase_z_recovery_retains_token_on_nonterminal_error(
@@ -4090,6 +4743,12 @@ def test_workspace_registration_failure_never_mutates_unverified_path(
     _git_init_repo(repo)
     queue = _tmp_queue(tmp_path)
     ws = _ws_allocate(repo)
+    _bind_drained_workspace_custody(
+        monkeypatch,
+        repo=repo,
+        workspace_receipt=ws,
+        job_id="a" * 32,
+    )
     real_registration_check = workspace.is_registered_linked_worktree
     monkeypatch.setattr(
         workspace,
@@ -4787,6 +5446,1165 @@ def test_workspace_finalize_gate_red_checkpoints_branch_and_releases_capacity(
     assert replacement is not None
 
 
+def test_workspace_remediation_checkpoints_undeclared_bytes_without_landing_them(
+    tmp_path: Path,
+) -> None:
+    """Integration contracts reject undeclared output; quarantine must preserve it.
+
+    A failed worker can write outside its declared paths.  Those bytes must
+    never auto-merge, but leaving the checkout live forever exhausts
+    ``max_total``.  Remediation therefore checkpoints the complete
+    non-canonical workspace, binds the aggregate adjudication task, and releases
+    the checkout while keeping the undeclared bytes recoverable on the branch.
+    """
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(
+        repo,
+        task_binding={
+            "task_id": "undeclared-output",
+            "claim_session_id": "undeclared-session",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["declared.py"],
+            "post_merge_actions": [],
+        },
+    )
+    wt = Path(ws["path"])
+    (wt / "undeclared.py").write_text("RECOVER_ME = True\n", encoding="utf-8")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=queue,
+    )
+
+    assert out["disposition"] == "remediation_opened"
+    assert out["checkpoint"]["ok"] is True
+    assert out["checkpoint"]["released"] is True
+    assert out["checkpoint"]["checkpoint_changed_paths"] == ["undeclared.py"]
+    assert out["checkpoint"]["quarantined_undeclared_paths"] == ["undeclared.py"]
+    assert out["checkpoint"]["task_binding_missing"] is False
+    assert not wt.exists()
+    recovered = subprocess.run(
+        ["git", "-C", str(repo), "show", f"{ws['branch']}:undeclared.py"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert recovered.stdout == "RECOVER_ME = True\n"
+
+
+@pytest.mark.parametrize(
+    "worker_outcome",
+    [
+        "kill_failed_orphan",
+        "timeout_unverified",
+        "orphan_unverified_not_killed",
+        "orphan_unverified_no_pid",
+    ],
+)
+def test_workspace_live_or_unverified_producer_is_never_finalized(
+    tmp_path: Path,
+    worker_outcome: str,
+) -> None:
+    """Positive producer-death proof precedes every checkpoint and release."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(
+        repo,
+        config=_iso_cfg(max_total=1),
+        task_binding={
+            "task_id": "live-producer",
+            "claim_session_id": "live-session",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["partial.py"],
+            "post_merge_actions": [],
+        },
+    )
+    wt = Path(ws["path"])
+    (wt / "partial.py").write_text("PARTIAL = True\n", encoding="utf-8")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome=worker_outcome,
+        queue_path=queue,
+    )
+
+    assert out["disposition"] == "producer_active"
+    assert out["reason"] == "producer_liveness_unverified"
+    assert out["checkpoint"]["released"] is False
+    assert wt.exists()
+    assert not [
+        event
+        for event in _ws_receipt_events(repo)
+        if event["event"] in {"checkpointed", "released"}
+        and event["workspace"] == ws["name"]
+    ]
+    assert workspace.pending_task_settlements(repo) == []
+    replacement = _ws_allocate(
+        repo,
+        job_id="e" * 32,
+        config=_iso_cfg(max_total=1),
+    )
+    assert replacement is None
+
+
+def test_workspace_remediation_releases_clean_legacy_branch_without_binding(
+    tmp_path: Path,
+) -> None:
+    """Pre-contract clean branches are durable evidence, not permanent capacity."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = workspace.allocate_workspace(
+        repo_root=repo,
+        slot_id="slot-1",
+        job_id="b" * 32,
+        config=_iso_cfg(mode="pilot", max_total=1),
+        task_binding=None,
+    )
+    assert ws is not None
+    wt = Path(ws["path"])
+    (wt / "legacy_fix.py").write_text("PRESERVED = True\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "legacy_fix.py"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(wt),
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.com",
+            "commit",
+            "-m",
+            "legacy preserved fix",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    legacy_head = subprocess.run(
+        ["git", "-C", str(wt), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="orphaned",
+        queue_path=queue,
+    )
+
+    assert out["disposition"] == "remediation_opened"
+    assert out["checkpoint"]["ok"] is True
+    assert out["checkpoint"]["commit"] == legacy_head
+    assert out["checkpoint"]["released"] is True
+    assert out["checkpoint"]["checkpoint_changed_paths"] == ["legacy_fix.py"]
+    assert out["checkpoint"]["quarantined_undeclared_paths"] == ["legacy_fix.py"]
+    assert out["checkpoint"]["task_binding_missing"] is True
+    assert not wt.exists()
+    replacement = _ws_allocate(
+        repo,
+        job_id="c" * 32,
+        config=_iso_cfg(max_total=1),
+    )
+    assert replacement is not None
+
+
+def test_workspace_remediation_still_refuses_canonical_only_paths(
+    tmp_path: Path,
+) -> None:
+    """Quarantine may widen task paths, never the canonical storage boundary."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    forbidden = wt / "storage" / "ops" / "forbidden.json"
+    forbidden.parent.mkdir(parents=True)
+    forbidden.write_text("{}\n", encoding="utf-8")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["disposition"] == "remediation_opened"
+    assert out["checkpoint"]["ok"] is False
+    assert out["checkpoint"]["reason"] == "canonical_path_denied"
+    assert out["checkpoint"]["paths"] == ["storage/ops/forbidden.json"]
+    assert wt.exists()
+
+
+def test_workspace_remediation_refuses_committed_canonical_path_with_newline(
+    tmp_path: Path,
+) -> None:
+    """Git's quoted display form must not disguise an exact denied pathname."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    rel = "storage/ops/forbidden\n.json"
+    forbidden = wt / rel
+    forbidden.parent.mkdir(parents=True)
+    forbidden.write_text("{}\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "--", rel], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(wt),
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.com",
+            "commit",
+            "-m",
+            "commit disguised canonical path",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["checkpoint"]["ok"] is False
+    assert out["checkpoint"]["reason"] == "canonical_path_denied"
+    assert out["checkpoint"]["paths"] == [rel]
+    assert wt.exists()
+
+
+def test_workspace_remediation_rechecks_denied_paths_under_writer_lock(
+    tmp_path: Path,
+) -> None:
+    """A late producer write cannot race past the quarantine storage fence."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    status_calls = 0
+
+    def runner(args, **kwargs):
+        nonlocal status_calls
+        if "status" in args and str(wt) in args:
+            status_calls += 1
+            if status_calls == 3:
+                raced = wt / "storage" / "ops" / "raced.json"
+                raced.parent.mkdir(parents=True)
+                raced.write_text("{}\n", encoding="utf-8")
+        return subprocess.run(args, **kwargs)
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+        runner=runner,
+    )
+
+    assert status_calls >= 2
+    assert out["disposition"] == "remediation_opened"
+    assert out["checkpoint"]["ok"] is False
+    assert out["checkpoint"]["reason"] == "canonical_path_denied"
+    assert out["checkpoint"]["paths"] == ["storage/ops/raced.json"]
+    assert wt.exists()
+    committed = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "cat-file",
+            "-e",
+            f"{ws['branch']}:storage/ops/raced.json",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert committed.returncode != 0
+
+
+def test_workspace_remediation_marks_partial_binding_missing(
+    tmp_path: Path,
+) -> None:
+    """Declared paths do not make a task binding without its ownership ids."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = workspace.allocate_workspace(
+        repo_root=repo,
+        slot_id="slot-1",
+        job_id="d" * 32,
+        config=_iso_cfg(mode="pilot"),
+        task_binding={
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["declared.py"],
+        },
+    )
+    assert ws is not None
+    Path(ws["path"], "declared.py").write_text("VALUE = 1\n", encoding="utf-8")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["checkpoint"]["ok"] is True
+    assert out["checkpoint"]["released"] is True
+    assert out["checkpoint"]["task_binding_missing"] is True
+    assert out["checkpoint"]["checkpoint_changed_paths"] == ["declared.py"]
+    assert out["checkpoint"]["quarantined_undeclared_paths"] == []
+
+
+def test_workspace_remediation_refuses_secret_candidate_before_git_write(
+    tmp_path: Path,
+) -> None:
+    """Opaque credentials remain in the checkout and never enter its branch."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(
+        repo,
+        task_binding={
+            "task_id": "secret-output",
+            "claim_session_id": "secret-session",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["declared.py"],
+            "post_merge_actions": [],
+        },
+    )
+    wt = Path(ws["path"])
+    secret_path = wt / "debug_credentials.txt"
+    secret_text = (
+        "access_token=oauth_" + ("A1b2C3d4" * 8) + "\n"
+    )
+    secret_path.write_text(secret_text, encoding="utf-8")
+    candidate_oid = subprocess.run(
+        ["git", "-C", str(repo), "hash-object", "--stdin"],
+        input=secret_text,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["checkpoint"]["ok"] is False
+    assert out["checkpoint"]["reason"] == "secret_candidate_detected"
+    assert out["checkpoint"]["paths"] == ["debug_credentials.txt"]
+    assert wt.exists()
+    committed = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "cat-file",
+            "-e",
+            f"{ws['branch']}:debug_credentials.txt",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert committed.returncode != 0
+    loose_object = subprocess.run(
+        ["git", "-C", str(repo), "cat-file", "-e", candidate_oid],
+        capture_output=True,
+        text=True,
+    )
+    assert loose_object.returncode != 0
+
+
+def test_workspace_remediation_scans_committed_secret_path_with_newline(
+    tmp_path: Path,
+) -> None:
+    """Secret readback uses exact NUL-delimited paths, not quoted Git output."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    rel = "notes/line\nbreak.txt"
+    secret = wt / rel
+    secret.parent.mkdir(parents=True)
+    secret.write_text(
+        "access_token=oauth_" + ("Z9y8X7w6" * 8) + "\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "-C", str(wt), "add", "--", rel], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(wt),
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.com",
+            "commit",
+            "-m",
+            "commit disguised secret path",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["checkpoint"]["ok"] is False
+    assert out["checkpoint"]["reason"] == "secret_candidate_detected"
+    assert out["checkpoint"]["paths"] == [rel]
+    assert wt.exists()
+
+
+def test_workspace_remediation_streams_large_snapshot_with_bounded_windows(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Snapshot memory stays constant while the exact large blob is preserved."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(
+        repo,
+        task_binding={
+            "task_id": "large-output",
+            "claim_session_id": "large-session",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["large.bin"],
+            "post_merge_actions": [],
+        },
+    )
+    wt = Path(ws["path"])
+    large = wt / "large.bin"
+    expected_size = 8 * 1024 * 1024
+    with large.open("wb") as handle:
+        handle.seek(expected_size - 1)
+        handle.write(b"\0")
+    observed_windows: list[int] = []
+    real_scan = workspace._secret_candidate_rules
+
+    def bounded_scan(data: bytes) -> list[str]:
+        observed_windows.append(len(data))
+        return real_scan(data)
+
+    monkeypatch.setattr(workspace, "_secret_candidate_rules", bounded_scan)
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["checkpoint"]["ok"] is True
+    assert out["checkpoint"]["released"] is True
+    assert observed_windows
+    assert max(observed_windows) <= (
+        workspace._SECRET_SCAN_CHUNK_BYTES
+        + workspace._SECRET_SCAN_OVERLAP_BYTES
+    )
+    blob_size = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "cat-file",
+            "-s",
+            f"{ws['branch']}:large.bin",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert int(blob_size) == expected_size
+
+
+def test_workspace_remediation_streams_large_committed_blob_with_bounded_windows(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Committed-branch secret readback also avoids capture_output growth."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    large = wt / "large-committed.bin"
+    expected_size = 8 * 1024 * 1024
+    with large.open("wb") as handle:
+        handle.seek(expected_size - 1)
+        handle.write(b"\0")
+    subprocess.run(
+        ["git", "-C", str(wt), "add", "large-committed.bin"],
+        check=True,
+    )
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(wt),
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.com",
+            "commit",
+            "-m",
+            "large committed checkpoint candidate",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    observed_windows: list[int] = []
+    real_scan = workspace._secret_candidate_rules
+
+    def bounded_scan(data: bytes) -> list[str]:
+        observed_windows.append(len(data))
+        return real_scan(data)
+
+    monkeypatch.setattr(workspace, "_secret_candidate_rules", bounded_scan)
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["checkpoint"]["ok"] is True
+    assert out["checkpoint"]["released"] is True
+    assert observed_windows
+    assert max(observed_windows) <= (
+        workspace._SECRET_SCAN_CHUNK_BYTES
+        + workspace._SECRET_SCAN_OVERLAP_BYTES
+    )
+
+
+def test_workspace_stream_scan_matches_long_runtime_credential_across_chunks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Exact env credentials do not depend on a fixed overlap length."""
+    token = ("R7vP3xQ9" * 8750).encode("ascii")
+    assert len(token) > workspace._SECRET_SCAN_OVERLAP_BYTES
+    monkeypatch.setenv("VOLPRED_REVIEW_TOKEN", token.decode("ascii"))
+    prefix = b"x" * (workspace._SECRET_SCAN_CHUNK_BYTES - 66_000)
+    payload = prefix + token + b"\n"
+
+    whole = workspace._secret_candidate_rules(payload)
+    streamed = workspace._scan_secret_stream(io.BytesIO(payload))
+
+    assert "runtime_credential" in whole
+    assert "runtime_credential" in streamed
+
+
+def test_workspace_stream_scan_matches_long_jwt_across_chunks() -> None:
+    """Unbounded JWT segments retain whole-buffer detection semantics."""
+    jwt = b"eyJ" + (b"A" * 70_000) + b"." + (b"B" * 12) + b"." + (b"C" * 12)
+    prefix = (
+        b"x" * (workspace._SECRET_SCAN_CHUNK_BYTES - 66_001)
+        + b" "
+    )
+    payload = prefix + jwt + b"\n"
+
+    whole = workspace._secret_candidate_rules(payload)
+    streamed = workspace._scan_secret_stream(io.BytesIO(payload))
+
+    assert "jwt" in whole
+    assert "jwt" in streamed
+
+
+def test_workspace_stream_scan_preserves_jwt_word_boundary() -> None:
+    """Streaming detection must not widen the whole-buffer regex contract."""
+    payload = (
+        b"xeyJ"
+        + (b"A" * 12)
+        + b"."
+        + (b"B" * 12)
+        + b"."
+        + (b"C" * 12)
+    )
+
+    whole = workspace._secret_candidate_rules(payload)
+    streamed = workspace._scan_secret_stream(io.BytesIO(payload))
+
+    assert "jwt" not in whole
+    assert "jwt" not in streamed
+
+
+def test_workspace_pipe_scan_enforces_deadline_before_eof() -> None:
+    """A child that keeps stdout open cannot bypass the scan timeout."""
+    proc = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(2)"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    assert proc.stdout is not None
+    started = time.monotonic()
+    try:
+        with pytest.raises(workspace._ScanDeadlineExceeded):
+            workspace._scan_secret_pipe(
+                proc.stdout,
+                deadline=time.monotonic() + 0.05,
+            )
+    finally:
+        proc.kill()
+        proc.wait()
+        if proc.stderr is not None:
+            proc.stderr.close()
+        proc.stdout.close()
+
+    assert time.monotonic() - started < 0.5
+
+
+@pytest.mark.skipif(
+    sys.platform != "darwin",
+    reason="production APFS clonefile behavior",
+)
+def test_workspace_snapshot_clone_preserves_sparse_allocation(
+    tmp_path: Path,
+) -> None:
+    """A low-cost huge sparse artifact cannot materialize onto system disk."""
+    source = tmp_path / "source.bin"
+    snapshot = tmp_path / "snapshot.bin"
+    logical_size = 1024 * 1024 * 1024
+    with source.open("wb") as handle:
+        handle.truncate(logical_size)
+    source_fd = os.open(source, os.O_RDONLY)
+    try:
+        error, fallback_used = workspace._clone_file_snapshot(
+            source_fd,
+            snapshot,
+            fallback_budget=workspace._SNAPSHOT_FALLBACK_BUDGET_BYTES,
+            deadline=time.monotonic() + 10,
+        )
+    finally:
+        os.close(source_fd)
+
+    assert error == ""
+    assert fallback_used == 0
+    assert snapshot.stat().st_size == logical_size
+    assert snapshot.stat().st_blocks <= source.stat().st_blocks + 16
+
+
+def test_workspace_snapshot_clamps_extents_to_pinned_fstat_size(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An in-place grow after fstat cannot widen the snapshot boundary."""
+    source = tmp_path / "source.bin"
+    snapshot = tmp_path / "snapshot.bin"
+    source.write_bytes(b"safe")
+    source_fd = os.open(source, os.O_RDWR)
+    real_lseek = workspace.os.lseek
+    grew = False
+
+    def growing_lseek(fd: int, offset: int, whence: int) -> int:
+        nonlocal grew
+        if fd == source_fd and whence == os.SEEK_DATA:
+            if not grew:
+                os.ftruncate(
+                    source_fd,
+                    workspace._CHECKPOINT_SCAN_LOGICAL_BYTES + 1,
+                )
+                grew = True
+            return 0
+        if fd == source_fd and whence == os.SEEK_HOLE:
+            return workspace._CHECKPOINT_SCAN_LOGICAL_BYTES + 1
+        return real_lseek(fd, offset, whence)
+
+    monkeypatch.setattr(workspace.os, "lseek", growing_lseek)
+    try:
+        error, _fallback_used = workspace._clone_file_snapshot(
+            source_fd,
+            snapshot,
+            fallback_budget=workspace._SNAPSHOT_FALLBACK_BUDGET_BYTES,
+            deadline=time.monotonic() + 10,
+        )
+    finally:
+        os.close(source_fd)
+
+    assert error == ""
+    assert snapshot.read_bytes() == b"safe"
+
+
+def test_workspace_oversized_artifact_stays_registered_and_fail_closed(
+    tmp_path: Path,
+) -> None:
+    """Unscanned bytes never receive a false terminal release receipt."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(
+        repo,
+        config=_iso_cfg(max_total=1),
+        task_binding={
+            "task_id": "oversized-output",
+            "claim_session_id": "oversized-session",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["oversized.bin"],
+            "post_merge_actions": [],
+        },
+    )
+    wt = Path(ws["path"])
+    oversized = wt / "oversized.bin"
+    with oversized.open("wb") as handle:
+        handle.truncate(workspace._CHECKPOINT_SCAN_LOGICAL_BYTES + 1)
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["disposition"] == "remediation_opened"
+    assert out["checkpoint"]["ok"] is False
+    assert out["checkpoint"]["released"] is False
+    assert (
+        out["checkpoint"]["reason"]
+        == "oversized_artifact_quarantine_required"
+    )
+    assert wt.exists()
+    assert oversized.exists()
+    terminal = [
+        event
+        for event in _ws_receipt_events(repo)
+        if event["event"] == "released"
+        and event["workspace"] == ws["name"]
+    ]
+    assert terminal == []
+
+    replacement = _ws_allocate(
+        repo,
+        job_id="e" * 32,
+        config=_iso_cfg(max_total=1),
+    )
+    assert replacement is None
+
+
+def test_workspace_snapshot_rechecks_logical_cap_on_pinned_fd(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A file growing after pathname preflight is rejected before cloning."""
+    worktree = tmp_path / "worktree"
+    worktree.mkdir()
+    artifact = worktree / "growing.bin"
+    artifact.write_bytes(b"x")
+    real_snapshot = workspace._snapshot_workspace_paths
+
+    def grow_before_open(*args, **kwargs):
+        with artifact.open("r+b") as handle:
+            handle.truncate(workspace._CHECKPOINT_SCAN_LOGICAL_BYTES + 1)
+        return real_snapshot(*args, **kwargs)
+
+    def clone_must_not_run(*_args, **_kwargs):
+        raise AssertionError("oversized pinned FD reached clone")
+
+    monkeypatch.setattr(
+        workspace,
+        "_snapshot_workspace_paths",
+        grow_before_open,
+    )
+    monkeypatch.setattr(
+        workspace,
+        "_clone_file_snapshot",
+        clone_must_not_run,
+    )
+
+    result = workspace._stage_dirty_checkpoint(
+        worktree,
+        ["growing.bin"],
+    )
+
+    assert result["ok"] is False
+    assert result["reason"] == "oversized_artifact_quarantine_required"
+    assert result["logical_bytes"] == (
+        workspace._CHECKPOINT_SCAN_LOGICAL_BYTES + 1
+    )
+
+
+def test_workspace_release_rejects_branch_advance_after_checkpoint(
+    tmp_path: Path,
+) -> None:
+    """A durable checkpoint is a CAS token, not permission to remove any HEAD."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    checkpoint = workspace._checkpoint_workspace(
+        repo_root=repo,
+        workspace=ws,
+        reason="test_checkpoint",
+    )
+    assert checkpoint["ok"] is True
+
+    raced = wt / "storage" / "ops" / "raced.json"
+    raced.parent.mkdir(parents=True)
+    raced.write_text("{}\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "storage/ops/raced.json"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(wt),
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.com",
+            "commit",
+            "-m",
+            "raced branch advance",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    released = workspace._release_checkpointed_workspace(
+        repo_root=repo,
+        workspace=ws,
+        reason="test_checkpoint",
+        checkpoint=checkpoint,
+        remediation={
+            "incident_id": "inc_test",
+            "task_id": "task_test",
+            "created": True,
+        },
+    )
+
+    assert released["released"] is False
+    assert released["reason"] == "checkpoint_branch_advanced"
+    assert wt.exists()
+    assert not [
+        event
+        for event in _ws_receipt_events(repo)
+        if event["event"] == "released" and event["workspace"] == ws["name"]
+    ]
+
+
+def test_workspace_release_ref_lock_blocks_commit_during_remove(
+    tmp_path: Path,
+) -> None:
+    """The destructive window fences even Git writers that ignore our mutex."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    checkpoint = workspace._checkpoint_workspace(
+        repo_root=repo,
+        workspace=ws,
+        reason="test_checkpoint",
+    )
+    assert checkpoint["ok"] is True
+    raced_commit_rc: list[int] = []
+
+    def runner(args, **kwargs):
+        if (
+            "worktree" in args
+            and "remove" in args
+            and not raced_commit_rc
+        ):
+            raced = wt / "storage" / "ops" / "raced.json"
+            raced.parent.mkdir(parents=True)
+            raced.write_text("{}\n", encoding="utf-8")
+            subprocess.run(
+                ["git", "-C", str(wt), "add", "storage/ops/raced.json"],
+                check=True,
+            )
+            attempted = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(wt),
+                    "-c",
+                    "user.name=Test",
+                    "-c",
+                    "user.email=test@example.com",
+                    "commit",
+                    "-m",
+                    "attempt branch advance under release lock",
+                ],
+                capture_output=True,
+                text=True,
+            )
+            raced_commit_rc.append(attempted.returncode)
+        return subprocess.run(args, **kwargs)
+
+    released = workspace._release_checkpointed_workspace(
+        repo_root=repo,
+        workspace=ws,
+        reason="test_checkpoint",
+        checkpoint=checkpoint,
+        remediation={
+            "incident_id": "inc_test",
+            "task_id": "task_test",
+            "created": True,
+        },
+        runner=runner,
+    )
+
+    assert raced_commit_rc and raced_commit_rc[0] != 0
+    assert released["released"] is False
+    assert released["reason"] == "checkpoint_remove_failed"
+    assert wt.exists()
+    branch_head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", ws["branch"]],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert branch_head == checkpoint["commit"]
+
+
+def test_workspace_release_reclaims_dead_owned_ref_lock_after_restart(
+    tmp_path: Path,
+) -> None:
+    """A crash-owned lock has durable identity and cannot exhaust capacity."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    checkpoint = workspace._checkpoint_workspace(
+        repo_root=repo,
+        workspace=ws,
+        reason="test_checkpoint",
+    )
+    assert checkpoint["ok"] is True
+    common = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "--git-common-dir"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    common_path = Path(common)
+    if not common_path.is_absolute():
+        common_path = (repo / common_path).resolve()
+    lock_path = (
+        common_path
+        / "refs"
+        / "heads"
+        / f"{ws['branch']}.lock"
+    )
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path.write_text(
+        json.dumps(
+            {
+                "kind": workspace._REF_LOCK_OWNER_KIND,
+                "pid": 2**31 - 1,
+                "pid_started_wall": "Mon Jan  1 00:00:00 2001",
+                "token": "crashed-owner",
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    released = workspace._release_checkpointed_workspace(
+        repo_root=repo,
+        workspace=ws,
+        reason="test_checkpoint",
+        checkpoint=checkpoint,
+        remediation={
+            "incident_id": "inc_test",
+            "task_id": "task_test",
+            "created": True,
+        },
+    )
+
+    assert released["released"] is True
+    assert not wt.exists()
+    assert not lock_path.exists()
+
+
+def test_workspace_release_never_reclaims_live_owned_ref_lock(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An identity match stays fail-closed even when another pass wants space."""
+    lock_path = tmp_path / "branch.lock"
+    lock_path.write_text(
+        json.dumps(
+            {
+                "kind": workspace._REF_LOCK_OWNER_KIND,
+                "pid": 1234,
+                "pid_started_wall": "live-start",
+                "token": "live-owner",
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        workspace.procutil,
+        "check_identity",
+        lambda _pid, _started: workspace.procutil.IDENTITY_MATCH,
+    )
+
+    reclaimed = workspace._reclaim_stale_release_ref_lock(lock_path)
+
+    assert reclaimed is False
+    assert lock_path.exists()
+
+
+def test_workspace_absent_release_race_is_never_recovered_as_success(
+    tmp_path: Path,
+) -> None:
+    """A prior failed CAS outranks the older remediation binding on replay."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    checkpoint = workspace._checkpoint_workspace(
+        repo_root=repo,
+        workspace=ws,
+        reason="test_checkpoint",
+    )
+    assert checkpoint["ok"] is True
+    assert workspace._append_receipt(
+        repo,
+        {
+            "event": "remediation_bound",
+            "workspace": ws["name"],
+            "branch": ws["branch"],
+            "checkpoint_commit": checkpoint["commit"],
+            "incident_id": "inc_test",
+            "task_id": "task_test",
+            "reason": "test_checkpoint",
+        },
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "worktree", "remove", str(wt)],
+        check=True,
+    )
+    assert workspace._append_receipt(
+        repo,
+        {
+            "event": "release_race_detected",
+            "workspace": ws["name"],
+            "branch": ws["branch"],
+            "checkpoint_commit": checkpoint["commit"],
+            "branch_head": "f" * 40,
+            "reason": "post_release_branch_advanced",
+        },
+    )
+
+    replay = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert replay["disposition"] == "reconcile_pending"
+    assert replay["reason"] == "post_release_branch_advanced"
+    assert replay["checkpoint"]["released"] is False
+    assert not [
+        event
+        for event in _ws_receipt_events(repo)
+        if event["event"] == "released" and event["workspace"] == ws["name"]
+    ]
+
+
+def test_workspace_absent_recovery_rechecks_bound_branch_head(
+    tmp_path: Path,
+) -> None:
+    """A crash-window binding cannot release a subsequently moved branch."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    checkpoint = workspace._checkpoint_workspace(
+        repo_root=repo,
+        workspace=ws,
+        reason="test_checkpoint",
+    )
+    assert checkpoint["ok"] is True
+    assert workspace._append_receipt(
+        repo,
+        {
+            "event": "remediation_bound",
+            "workspace": ws["name"],
+            "branch": ws["branch"],
+            "checkpoint_commit": checkpoint["commit"],
+            "incident_id": "inc_test",
+            "task_id": "task_test",
+            "reason": "test_checkpoint",
+        },
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "worktree", "remove", str(wt)],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "branch", "-f", ws["branch"], "main"],
+        check=True,
+    )
+
+    replay = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="failure",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert replay["disposition"] == "reconcile_pending"
+    assert replay["reason"] == "post_release_branch_advanced"
+    assert replay["checkpoint"]["released"] is False
+    assert not [
+        event
+        for event in _ws_receipt_events(repo)
+        if event["event"] == "released" and event["workspace"] == ws["name"]
+    ]
+
+
 def test_workspace_checkpoint_receipt_must_persist_before_release(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -4868,6 +6686,85 @@ def test_workspace_release_receipt_is_recovered_without_duplicate_task(
         event["event"] for event in _ws_receipt_events(repo)
         if event["event"] == "released"
     ] == ["released"]
+
+
+def test_workspace_absent_recovery_locks_ref_through_release_receipt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Recovered release fsync and branch HEAD form one native-ref CAS."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    checkpoint = workspace._checkpoint_workspace(
+        repo_root=repo,
+        workspace=ws,
+        reason="test_checkpoint",
+    )
+    assert checkpoint["ok"] is True
+    assert workspace._append_receipt(
+        repo,
+        {
+            "event": "remediation_bound",
+            "workspace": ws["name"],
+            "branch": ws["branch"],
+            "checkpoint_commit": checkpoint["commit"],
+            "incident_id": "inc_test",
+            "task_id": "task_test",
+            "reason": "test_checkpoint",
+        },
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "worktree", "remove", str(wt)],
+        check=True,
+    )
+    real_append = workspace._append_receipt
+    raced_rc: list[int] = []
+
+    def race_before_release_receipt(root: Path, payload: dict) -> bool:
+        if payload.get("event") == "released" and not raced_rc:
+            attempted = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(repo),
+                    "branch",
+                    "-f",
+                    ws["branch"],
+                    "main",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            raced_rc.append(attempted.returncode)
+        return real_append(root, payload)
+
+    monkeypatch.setattr(
+        workspace,
+        "_append_receipt",
+        race_before_release_receipt,
+    )
+
+    replay = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="killed_timeout",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert replay["checkpoint"]["released"] is True
+    assert raced_rc and raced_rc[0] != 0
+    branch_head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", ws["branch"]],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    assert branch_head == checkpoint["commit"]
 
 
 def test_workspace_branch_advance_requires_new_remediation_binding(
@@ -5089,7 +6986,10 @@ def test_workspace_finalize_unregistered_dir_untouched(tmp_path: Path) -> None:
     assert (fake / "loot.txt").exists()
 
 
-def test_workspace_sweep_closes_true_orphans_only(tmp_path: Path) -> None:
+def test_workspace_sweep_closes_true_orphans_only(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     _git_init_repo(repo)
@@ -5097,6 +6997,12 @@ def test_workspace_sweep_closes_true_orphans_only(tmp_path: Path) -> None:
     protected_ws = _ws_allocate(repo, job_id="b" * 32)
     orphan_ws = _ws_allocate(repo, job_id="c" * 32, slot="slot-2")
     assert protected_ws is not None and orphan_ws is not None
+    _bind_drained_workspace_custody(
+        monkeypatch,
+        repo=repo,
+        workspace_receipt=orphan_ws,
+        job_id="c" * 32,
+    )
     results = workspace.sweep_orphan_workspaces(
         repo_root=repo, protected_job_ids=["b" * 32], queue_path=queue,
     )
@@ -5144,6 +7050,12 @@ def test_workspace_sweep_restart_does_not_double_count_orphan(
     _git_init_repo(repo)
     orphan_ws = _ws_allocate(repo, job_id="e" * 32)
     assert orphan_ws is not None
+    _bind_drained_workspace_custody(
+        monkeypatch,
+        repo=repo,
+        workspace_receipt=orphan_ws,
+        job_id="e" * 32,
+    )
     real_finalize = workspace.finalize_workspace
     calls = 0
 
@@ -5210,6 +7122,7 @@ def test_workspace_sweep_ignores_unowned_dispatch_shaped_worktree(
 
 def test_workspace_sweep_ignores_durable_remediation_owner(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -5217,6 +7130,12 @@ def test_workspace_sweep_ignores_durable_remediation_owner(
     queue = _tmp_queue(tmp_path)
     orphan_ws = _ws_allocate(repo, job_id="a" * 32)
     assert orphan_ws is not None
+    producer_custody = _bind_drained_workspace_custody(
+        monkeypatch,
+        repo=repo,
+        workspace_receipt=orphan_ws,
+        job_id="a" * 32,
+    )
     wt = Path(orphan_ws["path"])
     (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
 
@@ -5236,6 +7155,7 @@ def test_workspace_sweep_ignores_durable_remediation_owner(
         workspace=orphan_ws,
         worker_outcome="killed_timeout",
         job_id="a" * 8,
+        producer_custody=producer_custody,
         queue_path=queue,
         runner=fail_remove,
     )
@@ -5255,12 +7175,19 @@ def test_workspace_sweep_ignores_durable_remediation_owner(
 
 def test_workspace_sweep_records_unreadable_branch_and_fails_closed(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     _git_init_repo(repo)
     orphan_ws = _ws_allocate(repo, job_id="f" * 32)
     assert orphan_ws is not None
+    _bind_drained_workspace_custody(
+        monkeypatch,
+        repo=repo,
+        workspace_receipt=orphan_ws,
+        job_id="f" * 32,
+    )
 
     def fail_branch_probe(args, **kwargs):
         if "rev-parse" in args and "--abbrev-ref" in args:
@@ -5702,7 +7629,7 @@ def test_task_pool_cli_child_does_not_inherit_release_identity(
     assert result["ok"] is False
     assert result["reason"] == "supervisor_capability_required"
     assert result["rc"] == 1
-    assert "supervisor capability proof unavailable" in result["detail"]
+    assert "supervisor_capability_required" in result["detail"]
     assert "ModuleNotFoundError" not in result["detail"]
 
 
@@ -7912,6 +9839,8 @@ def test_isolated_claude_scrubs_before_authorize_and_spawn(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
+    _stub_worker_custody(monkeypatch)
+
     workdir = tmp_path / "workspace"
     run_dir = tmp_path / "run"
     for path in (workdir, run_dir / "home", run_dir / "tmp", run_dir / "pycache"):
@@ -7959,7 +9888,6 @@ def test_isolated_claude_scrubs_before_authorize_and_spawn(
         }) or ExitedProc(),
     )
     monkeypatch.setattr(worker, "_wait_with_fatal_probe", lambda *_a, **_kw: ("exited", 0))
-    monkeypatch.setattr(worker.os, "getpgid", lambda _pid: 123)
     monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kw: object())
     monkeypatch.setattr(worker.state, "attach_process", lambda **_kw: None)
     monkeypatch.setattr(worker.state, "update_started_wall", lambda **_kw: None)

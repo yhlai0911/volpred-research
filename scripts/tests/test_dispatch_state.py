@@ -24,7 +24,7 @@ import logging
 import os
 import subprocess
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -1630,6 +1630,24 @@ def _drive_every_writer(path: Path) -> None:
 
     orphan_handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                                     log_path="/tmp/x.log", path=path)
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    assert st.attach_producer_custody(
+        job_id=orphan_handle.job_id,
+        custody=custody,
+        expected_attempt=1,
+        path=path,
+    )
+    assert st.mark_producer_spawn_committed(
+        job_id=orphan_handle.job_id,
+        expected_attempt=1,
+        path=path,
+    )
     st.attach_process(job_id=orphan_handle.job_id, expected_attempt=1,
                       pid=4242, pgid=4242, started_wall="w1", path=path)
     st.update_started_wall(job_id=orphan_handle.job_id, expected_attempt=1,
@@ -1653,6 +1671,25 @@ def _drive_every_writer(path: Path) -> None:
     st.mark_job_phase(job_id=retry_handle.job_id, expected_attempt=2,
                       phase="phase_z", path=path)
     st.release_reservation(path=path, job_id=retry_handle.job_id, expected_attempt=2)
+
+    aborted = st.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/aborted.log",
+        path=path,
+    )
+    assert st.mark_producer_spawn_committed(
+        job_id=aborted.job_id,
+        expected_attempt=1,
+        path=path,
+    )
+    assert st.mark_producer_spawn_aborted(
+        job_id=aborted.job_id,
+        expected_attempt=1,
+        path=path,
+    )
+    st.release_reservation(path=path, job_id=aborted.job_id, expected_attempt=1)
 
     done = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                            log_path="/tmp/done.log", path=path)
@@ -1815,6 +1852,8 @@ KNOWN_CONTAINERS = {
     # shape gate = test_workspace_receipt_shape_is_flat_and_documented。
     "$.current_job.workspace", "$.current_jobs[].workspace",
     "$.completions[].workspace",
+    # The exhaustive writer drive leaves custody in its terminal receipt.
+    "$.completions[].producer_custody",
 }
 
 # WS-B workspace receipt 的欄位契約（state.py docstring schema 同步列出）。
@@ -1839,6 +1878,14 @@ FIRE_LIFECYCLE_KEYS = {
 CUTOVER_QUIESCE_KEYS = {
     "token", "reason", "requested_at", "expires_at",
     "previous_auth_blocked", "previous_auth_blocked_at", "legacy_fence_at",
+}
+
+PRODUCER_CUSTODY_KEYS = {
+    "version",
+    "host_uuid",
+    "boot_session_uuid",
+    "resource_coalition_id",
+    "trusted_unique_ids",
 }
 
 
@@ -1901,6 +1948,28 @@ def test_workspace_receipt_shape_is_flat_and_documented(tmp_state):
                 assert not isinstance(value, (dict, list)), (
                     f"workspace[{key!r}] 是 {type(value).__name__} —— receipt 必須扁平"
                 )
+
+
+def test_producer_custody_shape_is_bounded_and_documented(tmp_state):
+    """Terminal custody receipts retain only the kernel identity contract."""
+    _drive_every_writer(tmp_state)
+    receipts = [
+        entry["producer_custody"]
+        for entry in st.read_state(tmp_state)["completions"]
+        if "producer_custody" in entry
+    ]
+    assert receipts, "驅動沒長出任何 producer custody（假綠燈風險）"
+    for receipt in receipts:
+        assert set(receipt) == PRODUCER_CUSTODY_KEYS
+        assert isinstance(receipt["trusted_unique_ids"], list)
+        assert all(
+            isinstance(item, int) and not isinstance(item, bool) and item > 0
+            for item in receipt["trusted_unique_ids"]
+        )
+        assert all(
+            not isinstance(value, dict)
+            for value in receipt.values()
+        )
 
 
 def test_no_undocumented_nested_container(tmp_state):

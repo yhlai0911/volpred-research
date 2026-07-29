@@ -38,6 +38,7 @@ from volpred.ops import termination
 from . import (
     alerts,
     claim_release,
+    custody_receipt,
     deferred_reload,
     identity,  # noqa: F401 — re-exported for callers/tests of health.identity
     isolation,
@@ -75,13 +76,16 @@ def _reload_from_durable_request(request: dict) -> None:
 def _force_kill_pgid(
     pgid: int,
     *,
+    leader_pid: int | None = None,
     job_id: str | None = None,
     attempt: int | None = None,
+    custody: dict | None = None,
     state_path: Path = state.STATE_PATH,
 ) -> bool:
     """Codex review fix #5 (2026-07-04): this used to be a near-duplicate of
-    worker.py's kill routine and missed a PermissionError fix applied there
-    (found via a live smoke test) — now both share `procutil.kill_pgid()`.
+    worker.py's kill routine and missed a PermissionError fix applied there.
+    Both now share ``procutil``; a known leader uses ``kill_tree`` so a child
+    that escaped the PGID cannot keep writing after the slot is released.
 
     Returns whether the group is CONFIRMED gone (2026-07-11) — a denied killpg
     used to be indistinguishable from a successful one here."""
@@ -89,6 +93,11 @@ def _force_kill_pgid(
     intent = termination.arm(
         target_kind="pgid",
         target_id=pgid,
+        target_identity=(
+            f"producer-custody:{custody.get('resource_coalition_id', 'unknown')}"
+            if custody is not None
+            else None
+        ),
         reason="health_max_age_watchdog",
         actor="dispatch-supervisor.health",
         signal_sequence=[signal.SIGTERM, signal.SIGKILL],
@@ -96,9 +105,30 @@ def _force_kill_pgid(
         attempt=attempt,
         ledger_path=ledger_path,
     )
-    return procutil.kill_pgid(
-        pgid, intent=intent, ledger_path=ledger_path,
+    if custody is not None:
+        drained = procutil.kill_producer_cohort(
+            custody,
+            intent=intent,
+            ledger_path=ledger_path,
+        )
+    elif leader_pid is not None:
+        drained = procutil.kill_tree(
+            leader_pid,
+            intent=intent,
+            ledger_path=ledger_path,
+        )
+    else:
+        drained = procutil.kill_pgid(
+            pgid, intent=intent, ledger_path=ledger_path,
+        )
+    if not drained:
+        return False
+    cohort = procutil.producer_cohort_members_checked(
+        pgid,
+        job_id=job_id,
+        custody=custody,
     )
+    return cohort == []
 
 
 def _repend_killed_job_claims(*, job_id: str, slot_id: int | str) -> list[str]:
@@ -131,7 +161,21 @@ def _check_job(
         # process group. Only a *confirmed empty* PGID can drain quarantine;
         # a failed probe is deliberately sticky so PHASE-Z cannot commit while
         # an unobserved descendant may still be writing.
-        survivors = procutil.pgid_members_checked(job.pgid)
+        survivors = procutil.producer_cohort_members_checked(
+            job.pgid,
+            job_id=job_id,
+            custody=job.producer_custody,
+        )
+        if survivors and job.producer_custody is not None:
+            if _force_kill_pgid(
+                job.pgid,
+                leader_pid=job.pid,
+                job_id=job_id,
+                attempt=job.attempt,
+                custody=job.producer_custody,
+                state_path=state_path,
+            ):
+                survivors = []
         if survivors is None or survivors:
             LOG.error(
                 "health: quarantined job_id=%s pgid=%d remains blocked survivors=%s",
@@ -143,23 +187,71 @@ def _check_job(
             expected_phase=job.phase, exit_code=-1,
             outcome=f"{job.phase}_drained", final_model=job.model, path=state_path,
         )
+        if closed is not None:
+            _repend_killed_job_claims(
+                job_id=job_id,
+                slot_id=job.slot_id,
+            )
         return "quarantine_drained" if closed is not None else None
-    identity_verdict = procutil.check_identity(job.pid, job.started_wall)
+    if job.producer_custody is not None:
+        custody_members = procutil.producer_cohort_members_checked(
+            job.pgid,
+            job_id=job_id,
+            custody=job.producer_custody,
+        )
+        identity_verdict = (
+            procutil.IDENTITY_UNVERIFIED
+            if custody_members is None
+            else procutil.IDENTITY_MATCH
+            if job.pid in custody_members
+            else procutil.IDENTITY_DEAD
+        )
+    else:
+        identity_verdict = procutil.check_identity(job.pid, job.started_wall)
     repended_tasks: list[str] = []
+    should_repend = False
     if job.age_seconds > max_age_s:
-        if identity_verdict == procutil.IDENTITY_MATCH:
+        if job.producer_custody is not None:
+            LOG.warning(
+                "health: custody-owned worker job_id=%s age=%.0fs > %.0fs cap "
+                "— terminating full producer coalition",
+                job_id,
+                job.age_seconds,
+                max_age_s,
+            )
+            if _force_kill_pgid(
+                job.pgid,
+                leader_pid=job.pid,
+                job_id=job_id,
+                attempt=job.attempt,
+                custody=job.producer_custody,
+                state_path=state_path,
+            ):
+                exit_code, outcome = -9, "killed_timeout"
+                should_repend = True
+                log_tail = (
+                    "(full producer custody cohort killed by health monitor)\n\n"
+                    + alerts.read_log_tail(job.log_path)
+                )
+            else:
+                exit_code, outcome = -9, "kill_failed_orphan"
+                log_tail = (
+                    "(custody-backed timeout kill did not produce a positive "
+                    "coalition drain proof; slot remains quarantined)"
+                )
+        elif identity_verdict == procutil.IDENTITY_MATCH:
             LOG.warning("health: worker pgid=%d age=%.0fs > %.0fs cap — force-killing", job.pgid, job.age_seconds, max_age_s)
             if _force_kill_pgid(
-                job.pgid, job_id=job_id, attempt=job.attempt,
+                job.pgid, leader_pid=job.pid,
+                job_id=job_id, attempt=job.attempt,
+                custody=job.producer_custody,
                 state_path=state_path,
             ):
                 exit_code, outcome = -9, "killed_timeout"
                 # The process is confirmed gone, so nothing can still be acting
                 # on its claim — release it now rather than stranding the task
                 # until the stale sweep (WS-A2b).
-                repended_tasks = _repend_killed_job_claims(
-                    job_id=job_id, slot_id=job.slot_id,
-                )
+                should_repend = True
                 log_tail = ("(killed by health monitor)\n\n"
                             + alerts.read_log_tail(job.log_path))
             else:
@@ -191,12 +283,36 @@ def _check_job(
         else:
             # IDENTITY_MISMATCH or IDENTITY_DEAD — confirmed NOT our process
             # (already gone, or the OS recycled the pid to something else).
-            LOG.warning(
-                "health: worker pid=%d aged out but identity=%s (pgid=%d) — skipping kill",
-                job.pid, identity_verdict, job.pgid,
+            survivors = procutil.producer_cohort_members_checked(
+                job.pgid,
+                job_id=job_id,
+                custody=job.producer_custody,
             )
-            exit_code, outcome = -1, "silent_death"
-            log_tail = "(identity mismatch/dead at max-age check — not killed, recorded as silent_death)"
+            if survivors is None or survivors:
+                LOG.error(
+                    "health: leader pid=%d identity=%s but producer cohort "
+                    "job_id=%s remains %s",
+                    job.pid,
+                    identity_verdict,
+                    job_id,
+                    survivors if survivors is not None else "unverified",
+                )
+                exit_code, outcome = -1, "kill_failed_orphan"
+                log_tail = (
+                    "(leader exited/reused but producer cohort is still active "
+                    "or unverified; slot retained)"
+                )
+            else:
+                LOG.warning(
+                    "health: worker pid=%d aged out but identity=%s "
+                    "(pgid=%d, cohort empty) — skipping kill",
+                    job.pid, identity_verdict, job.pgid,
+                )
+                exit_code, outcome = -1, "silent_death"
+                log_tail = (
+                    "(identity mismatch/dead at max-age check and producer "
+                    "cohort empty — not killed, recorded as silent_death)"
+                )
         if outcome in {"kill_failed_orphan", "timeout_unverified"}:
             # Process may still be writing. Multi-slot lets us quarantine only
             # this slot while healthy siblings continue; freeing it would let
@@ -235,6 +351,11 @@ def _check_job(
                 job.pid,
             )
         else:
+            if should_repend:
+                repended_tasks = _repend_killed_job_claims(
+                    job_id=job_id,
+                    slot_id=job.slot_id,
+                )
             alerts.send_hang_alert(
                 job={"job_id": job_id, "slot_id": job.slot_id,
                      "pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
@@ -254,9 +375,62 @@ def _check_job(
             return outcome
         return "killed" if outcome == "killed_timeout" else outcome
     if identity_verdict in (procutil.IDENTITY_MISMATCH, procutil.IDENTITY_DEAD):
+        survivors = procutil.producer_cohort_members_checked(
+            job.pgid,
+            job_id=job_id,
+            custody=job.producer_custody,
+        )
+        if survivors and job.producer_custody is not None:
+            if _force_kill_pgid(
+                job.pgid,
+                leader_pid=job.pid,
+                job_id=job_id,
+                attempt=job.attempt,
+                custody=job.producer_custody,
+                state_path=state_path,
+            ):
+                survivors = []
+        if survivors is None or survivors:
+            LOG.error(
+                "health: leader pid=%d dead/reused but producer cohort "
+                "job_id=%s remains %s; quarantining slot",
+                job.pid,
+                job_id,
+                survivors if survivors is not None else "unverified",
+            )
+            owned = state.mark_job_phase(
+                job_id=job_id,
+                expected_attempt=job.attempt,
+                expected_pid=job.pid,
+                phase="kill_failed_orphan",
+                path=state_path,
+            )
+            if owned:
+                alerts.send_hang_alert(
+                    job={
+                        "job_id": job_id,
+                        "slot_id": job.slot_id,
+                        "pid": job.pid,
+                        "pgid": job.pgid,
+                        "started_at": job.started_at,
+                        "attempt": job.attempt,
+                        "model": job.model,
+                        "log_path": job.log_path,
+                        "survivors": survivors or [],
+                        "slot_quarantined": True,
+                    },
+                    log_tail=(
+                        "leader 已退出，但 producer cohort 仍存活或無法驗證；"
+                        "保留 workspace 與 slot。"
+                    ),
+                    state_path=state_path,
+                )
+            return "kill_failed_orphan"
         LOG.warning(
-            "health: worker pid=%d dead/reused (identity=%s) but state has current_job — recording silent failure",
-            job.pid, identity_verdict,
+            "health: worker pid=%d dead/reused (identity=%s) and producer "
+            "cohort empty — recording silent failure",
+            job.pid,
+            identity_verdict,
         )
         # Same ownership rule as the hang path: only the caller that actually
         # closed the slot reports it.
@@ -273,6 +447,11 @@ def _check_job(
                 job.pid,
             )
         else:
+            if job.producer_custody is not None:
+                _repend_killed_job_claims(
+                    job_id=job_id,
+                    slot_id=job.slot_id,
+                )
             alerts.send_silent_death_alert(
                 job={"job_id": job_id, "slot_id": job.slot_id,
                      "pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
@@ -318,14 +497,21 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
 
 def _renew_live_dispatch_claims(*, state_path: Path) -> dict[str, object]:
     """Renew only claims backed by PID-reuse-safe worker identity evidence."""
-    verified_job_ids = [
-        job.job_id
-        for job in state.get_current_jobs(state_path)
-        if (
+    verified_job_ids: list[str] = []
+    for job in state.get_current_jobs(state_path):
+        if job.producer_custody is not None:
+            members = procutil.producer_cohort_members_checked(
+                job.pgid,
+                job_id=job.job_id,
+                custody=job.producer_custody,
+            )
+            if members is not None and job.pid in members:
+                verified_job_ids.append(job.job_id)
+        elif (
             procutil.check_identity(job.pid, job.started_wall)
             == procutil.IDENTITY_MATCH
-        )
-    ]
+        ):
+            verified_job_ids.append(job.job_id)
     return _task_pool_claim().renew_verified_dispatch_claims(
         verified_job_ids
     )
@@ -356,6 +542,26 @@ async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: 
             state.heartbeat(path=state_path)
             check_once(state_path=state_path)
             _renew_live_dispatch_claims(state_path=state_path)
+            if state.read_state(state_path).get("current_jobs"):
+                # Reaper/reload helpers spawn control-plane children. In shared
+                # coalition mode those children could race the reservation →
+                # custody capture window or contaminate live producer custody,
+                # so defer maintenance until the single slot fully drains.
+                continue
+            try:
+                custody_recovery = await asyncio.to_thread(
+                    custody_receipt.reconcile_pending_producer_custodies,
+                    Path(__file__).resolve().parents[2],
+                )
+            except custody_receipt.CustodyReceiptError as exc:
+                LOG.error("producer custody health recovery unavailable: %s", exc)
+                continue
+            if not custody_recovery.get("ok"):
+                LOG.error(
+                    "producer custody health recovery unresolved: %s",
+                    custody_recovery,
+                )
+                continue
             quarantine_recovery = await asyncio.to_thread(
                 isolation.reap_quarantined_provider_auth_leases
             )

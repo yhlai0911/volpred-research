@@ -52,10 +52,12 @@ from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 from . import (
     alerts,
+    custody_receipt,
     decision,
     identity,
     isolation,
     phase_z,
+    procutil,
     state,
     worker,
 )
@@ -80,7 +82,9 @@ DAEMON_ID = "volpred-dispatch-supervisor"
 # Also the floor the pool de-rates to during a quota outage: the capacity that
 # ran for months without exhausting the window is the safe thing to fall back to.
 DEFAULT_MAX_SLOTS = 2
+FAIL_CLOSED_MAX_SLOTS = 1
 QUOTA_DERATE_STREAK = 2
+SHARED_LAUNCHD_COALITION_MODE = "shared_launchd_coalition"
 
 # Strong references keep launched fire tasks alive until their done callback
 # observes the result. Keys are immutable state job_ids, never reusable slots.
@@ -309,37 +313,89 @@ def load_max_slots(
     """Hot-load the daemon pool capacity from runtime_schedules.json.
 
     The owner is ``daemons[id=volpred-dispatch-supervisor].max_slots``. Missing
-    or invalid values fall back to two; bool is rejected even though it is an
-    ``int`` subclass.  A config reduction never kills existing workers — it
+    or invalid/ambiguous values fail closed to one; bool is rejected even
+    though it is an ``int`` subclass. A config reduction never kills existing workers — it
     only blocks new admission until occupancy falls below the new limit.
 
-    The configured value is a ceiling, not a promise: while a quota streak is
-    active the pool is clamped back to ``DEFAULT_MAX_SLOTS``. Keeping that here
-    rather than in the caller preserves the single-owner rule — everyone who
-    asks "how many slots exist" gets the same answer, de-rate included.
+    The configured value is a ceiling, not a promise.  Shared launchd-coalition
+    producer custody cannot safely distinguish concurrently-started fires, so
+    that mode always returns one even if either capacity field drifts.  While a
+    quota streak is active other custody modes are clamped back to
+    ``DEFAULT_MAX_SLOTS``. Keeping these guards here rather than in the caller
+    preserves the single-owner rule — everyone who asks "how many slots exist"
+    gets the same answer.
     """
     try:
         data = json.loads(schedules_path.read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError) as exc:
-        LOG.warning("load_max_slots fallback=%d: %s", DEFAULT_MAX_SLOTS, exc)
-        return DEFAULT_MAX_SLOTS
+        LOG.warning(
+            "load_max_slots fail-closed=%d: %s",
+            FAIL_CLOSED_MAX_SLOTS,
+            exc,
+        )
+        return FAIL_CLOSED_MAX_SLOTS
     for item in data.get("daemons") or []:
         if not isinstance(item, dict) or item.get("id") != daemon_id:
             continue
         value = item.get("max_slots", DEFAULT_MAX_SLOTS)
-        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
-            LOG.warning("max_slots %r invalid — using %d", value, DEFAULT_MAX_SLOTS)
-            return DEFAULT_MAX_SLOTS
-        if value > DEFAULT_MAX_SLOTS and quota_derate_active(state_path):
+        custody = item.get("producer_custody")
+        custody_mode = custody.get("mode") if isinstance(custody, dict) else None
+        writer_cfg = item.get("writer_isolation")
+        writer_max_active = (
+            writer_cfg.get("max_active")
+            if isinstance(writer_cfg, dict)
+            else None
+        )
+        if (
+            value != 1
+            or writer_max_active != 1
+            or custody_mode != SHARED_LAUNCHD_COALITION_MODE
+        ):
             LOG.warning(
-                "max_slots %d de-rated to %d: last %d completions were quota_blocked "
-                "(self-clears on the next successful fire)",
-                value, DEFAULT_MAX_SLOTS, QUOTA_DERATE_STREAK,
+                "per-fire producer coalition isolation is not implemented; "
+                "admission remains single-slot shared custody "
+                "(configured mode/slots/writers=%r/%r/%r)",
+                custody_mode,
+                value,
+                writer_max_active,
             )
-            return DEFAULT_MAX_SLOTS
-        return value
-    LOG.warning("daemon %s missing max_slots — using %d", daemon_id, DEFAULT_MAX_SLOTS)
-    return DEFAULT_MAX_SLOTS
+        return FAIL_CLOSED_MAX_SLOTS
+    LOG.warning(
+        "daemon %s missing max_slots — fail-closed to %d",
+        daemon_id,
+        FAIL_CLOSED_MAX_SLOTS,
+    )
+    return FAIL_CLOSED_MAX_SLOTS
+
+
+def load_producer_custody_mode(
+    *,
+    schedules_path: Path = SCHEDULES_PATH,
+    daemon_id: str = DAEMON_ID,
+) -> str:
+    """Read custody mode; ambiguity retains the strict shared-coalition gate."""
+    try:
+        data = json.loads(schedules_path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        LOG.warning(
+            "producer custody mode unavailable — fail-closed shared: %s",
+            exc,
+        )
+        return SHARED_LAUNCHD_COALITION_MODE
+    for item in data.get("daemons") or []:
+        if not isinstance(item, dict) or item.get("id") != daemon_id:
+            continue
+        custody = item.get("producer_custody")
+        mode = custody.get("mode") if isinstance(custody, dict) else None
+        if mode == SHARED_LAUNCHD_COALITION_MODE:
+            return SHARED_LAUNCHD_COALITION_MODE
+        LOG.warning(
+            "producer custody mode %r is not implemented — fail-closed shared",
+            mode,
+        )
+        return SHARED_LAUNCHD_COALITION_MODE
+    LOG.warning("producer custody daemon row missing — fail-closed shared")
+    return SHARED_LAUNCHD_COALITION_MODE
 
 
 def _slot_log_path(base: Path, *, slot_id: str, job_id: str) -> Path:
@@ -578,6 +634,11 @@ def reconcile_task_settlements(
             workspace=workspace,
             job_id=str(completion.get("job_id") or ""),
             worker_outcome=str(completion.get("outcome") or "failure"),
+            producer_custody=(
+                completion.get("producer_custody")
+                if isinstance(completion.get("producer_custody"), dict)
+                else None
+            ),
         ):
             receipt_error = True
     if receipt_error:
@@ -603,6 +664,11 @@ def reconcile_task_settlements(
             workspace=workspace,
             worker_outcome=str(pending.get("worker_outcome") or "failure"),
             job_id=str(pending.get("job_id") or ""),
+            producer_custody=(
+                pending.get("producer_custody")
+                if isinstance(pending.get("producer_custody"), dict)
+                else None
+            ),
         )
         disposition = _settlement_disposition(final)
         if disposition is None:
@@ -784,9 +850,20 @@ async def _run_reserved_fire(
              if str(job.get("job_id")) == job_id),
             None,
         )
-        if own is not None and own.get("pid") is None and own.get("phase") not in {
-            "kill_failed_orphan", "timeout_unverified", "orphan_unverified_not_killed",
-        }:
+        if (
+            own is not None
+            and own.get("pid") is None
+            and own.get("phase") not in {
+                "kill_failed_orphan",
+                "timeout_unverified",
+                "orphan_unverified_not_killed",
+            }
+            and result.outcome not in {
+                "kill_failed_orphan",
+                "timeout_unverified",
+                "orphan_unverified_not_killed",
+            }
+        ):
             state.record_completion(
                 job_id=job_id, expected_attempt=int(own.get("attempt", result.attempts)),
                 expected_pid=own.get("pid"), exit_code=result.exit_code,
@@ -802,11 +879,49 @@ async def _run_reserved_fire(
             None,
         )
         if own is not None and own.get("pid") is None:
-            state.record_completion(
-                job_id=job_id, expected_attempt=int(own.get("attempt", 1)),
-                exit_code=-1, outcome="failure", final_model=str(own.get("model") or "unknown"),
-                path=state_path,
+            producer_custody = (
+                own.get("producer_custody")
+                if isinstance(own.get("producer_custody"), dict)
+                else None
             )
+            members = (
+                procutil.producer_cohort_members_checked(
+                    0,
+                    job_id=job_id,
+                    custody=producer_custody,
+                )
+                if producer_custody is not None
+                else []
+                if own.get("producer_spawn_state") == "not_started"
+                else None
+            )
+            if members == []:
+                state.record_completion(
+                    job_id=job_id,
+                    expected_attempt=int(own.get("attempt", 1)),
+                    exit_code=-1,
+                    outcome=(
+                        "failure"
+                        if producer_custody is not None
+                        else "spawn_not_started"
+                    ),
+                    final_model=str(own.get("model") or "unknown"),
+                    path=state_path,
+                )
+            else:
+                state.mark_job_phase(
+                    job_id=job_id,
+                    phase="orphan_unverified_no_pid",
+                    expected_attempt=int(own.get("attempt", 1)),
+                    path=state_path,
+                )
+                LOG.error(
+                    "worker failed before pid attach and custody is %s; "
+                    "retaining slot job_id=%s members=%s",
+                    "unverified" if members is None else "active",
+                    job_id,
+                    members,
+                )
     finally:
         # Close the producer-side state machine before any workspace/PHASE-Z
         # consumer reads it. fire_receipt normally seals successful output;
@@ -835,11 +950,38 @@ async def _run_reserved_fire(
         # crash here must not skip the cohort drain below.
         if fire_workspace is not None:
             try:
-                worker_outcome = result.outcome if result is not None else "failure"
+                custody_snapshot = state.read_state(state_path)
+                custody_sources = [
+                    *(custody_snapshot.get("current_jobs") or []),
+                    *reversed(custody_snapshot.get("completions") or []),
+                ]
+                terminal_record = next(
+                    (
+                        item
+                        for item in custody_sources
+                        if str(item.get("job_id") or "") == job_id
+                    ),
+                    {},
+                )
+                worker_outcome = (
+                    result.outcome
+                    if result is not None
+                    else str(
+                        terminal_record.get("outcome")
+                        or terminal_record.get("phase")
+                        or "failure"
+                    )
+                )
+                producer_custody = (
+                    terminal_record.get("producer_custody")
+                    if isinstance(terminal_record.get("producer_custody"), dict)
+                    else None
+                )
                 workspace_outcome = await asyncio.to_thread(
                     workspace_mod.finalize_workspace,
                     repo_root=repo_root, workspace=fire_workspace,
                     worker_outcome=worker_outcome, job_id=job_id,
+                    producer_custody=producer_custody,
                 )
                 LOG.info("workspace finalize job_id=%s disposition=%s",
                          job_id, (workspace_outcome or {}).get("disposition"))
@@ -1160,6 +1302,44 @@ async def _tick_once(
     """One tick. Returns a small dict describing the decision (for tests + audit log)."""
     state.heartbeat(path=state_path)
     pre_reconcile = state.read_state(state_path)
+    active_jobs = list(pre_reconcile.get("current_jobs") or [])
+    if active_jobs:
+        # Shared-coalition safety mode: any scheduler subprocess started while a
+        # producer reservation is crossing capture/Popen, or while its producer
+        # is live, would inherit the same coalition and become indistinguishable
+        # from producer output. Do no reconciliation, git, task-pool, or
+        # admission work until the sole slot drains.
+        return {
+            "action": "skip",
+            "reason": "producer_slot_in_flight",
+            "active_jobs": len(active_jobs),
+        }
+    try:
+        custody_recovery = await asyncio.to_thread(
+            custody_receipt.reconcile_pending_producer_custodies,
+            repo_root,
+        )
+    except custody_receipt.CustodyReceiptError as exc:
+        LOG.error("producer custody admission gate unavailable: %s", exc)
+        return {
+            "action": "skip",
+            "reason": "producer_custody_ledger_unavailable",
+        }
+    if not custody_recovery.get("ok"):
+        LOG.error(
+            "producer custody admission gate unresolved: %s",
+            custody_recovery,
+        )
+        return {
+            "action": "skip",
+            "reason": "producer_custody_recovery_unresolved",
+            "unresolved": len(custody_recovery.get("unresolved") or []),
+        }
+    if custody_recovery.get("released"):
+        LOG.warning(
+            "producer custody admission recovered=%s",
+            custody_recovery["released"],
+        )
     if (Path(repo_root) / ".git").exists():
         protected_workspace_jobs = (
             [

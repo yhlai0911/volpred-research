@@ -32,6 +32,7 @@ import logging
 import os
 import signal
 import subprocess
+import sys
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -49,11 +50,13 @@ from . import (
     alerts,
     claim_release,
     codex_failover,
+    custody_receipt,
     failure_class,
     identity,
     isolation,
     procutil,
     state,
+    workspace as workspace_mod,
 )
 from .child_env import external_child_environment
 
@@ -356,24 +359,31 @@ def _wait_with_fatal_probe(
 def _kill_pgid(
     pgid: int,
     *,
+    leader_pid: int | None = None,
     reason: str = "worker_watchdog",
     job_id: str | None = None,
     attempt: int | None = None,
+    custody: dict | None = None,
     state_path: Path = state.STATE_PATH,
     grace_s: float = GRACE_PERIOD_S,
 ) -> bool:
-    """SIGTERM whole process group; SIGKILL after grace_s if still alive.
+    """Terminate the producer cohort and confirm no known descendant survives.
 
     Codex review fix #5 (2026-07-04): the actual implementation moved to
-    `procutil.kill_pgid()` — health.py had its own near-duplicate copy that
-    missed a PermissionError fix applied here (found via a live smoke test),
-    so both now share one implementation. Kept as a thin wrapper so existing
-    callers/tests referencing `worker._kill_pgid` by name are unaffected.
+    ``procutil``.  When the leader identity is available, use ``kill_tree``:
+    a descendant may call ``setsid()`` and escape the original PGID while
+    retaining write access to the producer workspace.  The PGID-only fallback
+    remains for legacy callers that genuinely lack the leader identity.
     """
     ledger_path = termination.ledger_for_state(state_path)
     intent = termination.arm(
         target_kind="pgid",
         target_id=pgid,
+        target_identity=(
+            f"producer-custody:{custody.get('resource_coalition_id', 'unknown')}"
+            if custody is not None
+            else None
+        ),
         reason=reason,
         actor="dispatch-supervisor.worker",
         signal_sequence=[signal.SIGTERM, signal.SIGKILL],
@@ -381,9 +391,32 @@ def _kill_pgid(
         attempt=attempt,
         ledger_path=ledger_path,
     )
-    return procutil.kill_pgid(
-        pgid, intent=intent, ledger_path=ledger_path, grace_s=grace_s,
+    if custody is not None:
+        drained = procutil.kill_producer_cohort(
+            custody,
+            intent=intent,
+            ledger_path=ledger_path,
+            grace_s=grace_s,
+        )
+    elif leader_pid is not None:
+        drained = procutil.kill_tree(
+            leader_pid,
+            intent=intent,
+            ledger_path=ledger_path,
+            grace_s=grace_s,
+        )
+    else:
+        drained = procutil.kill_pgid(
+            pgid, intent=intent, ledger_path=ledger_path, grace_s=grace_s,
+        )
+    if not drained:
+        return False
+    cohort = procutil.producer_cohort_members_checked(
+        pgid,
+        job_id=job_id,
+        custody=custody,
     )
+    return cohort == []
 
 
 def _dispatch_actor(
@@ -507,6 +540,30 @@ def _run_one_attempt(
         if isinstance(isolated_workspace, dict)
         else None
     )
+    custody_repo_root = Path(
+        str(
+            (
+                isolated_workspace.get("isolation_canonical_root")
+                if isinstance(isolated_workspace, dict)
+                else None
+            )
+            or PROJECT_ROOT
+        )
+    )
+    producer_custody: dict | None = None
+    global_custody_bound = False
+
+    def _release_global_custody() -> None:
+        nonlocal global_custody_bound
+        if not global_custody_bound:
+            return
+        custody_receipt.release_producer_custody(
+            custody_repo_root,
+            job_id=str(job_id),
+            attempt=attempt,
+            drain_confirmed=True,
+        )
+        global_custody_bound = False
     debug_root = (
         Path(str(isolation_receipt["run_dir"]))
         if isinstance(isolation_receipt, dict)
@@ -605,10 +662,10 @@ def _run_one_attempt(
             )
         except Exception as exc:  # noqa: BLE001 — attribution must never veto a fire
             LOG.warning("fire manifest open failed for job_id=%s: %s", job_id, exc)
+    # Resolve and verify the executable before taking the kernel baseline.  No
+    # provider can exist yet, so a policy/wrapper error is a mechanically proven
+    # no-spawn outcome rather than a pid=None ambiguity.
     try:
-        # This is intentionally adjacent to Popen. It reloads canonical config
-        # on every retry attempt and stamps the exact registry bytes into the
-        # provider process environment.
         provider_receipt = authorize_provider_spawn(
             contract_id="dispatch-supervisor.claude",
             model_id=model,
@@ -634,25 +691,143 @@ def _run_one_attempt(
         if isolated_workspace is not None:
             assert isinstance(isolation_receipt, dict)
             argv = isolation.wrap_prepared(argv, isolation_receipt)
-        proc = _spawn(argv=argv, log_path=log_path, env=child_env, cwd=workdir)
-    except OSError:
-        # Spawn itself failed (e.g. claude_bin missing) — free the slot we
-        # just reserved so it doesn't wedge forever with no process behind it.
-        state.release_reservation(job_id=job_id, path=state_path)
+        # Capture a kernel-backed producer boundary immediately before Popen,
+        # then persist it under the exact attempt CAS.  On macOS this is the
+        # launchd resource-coalition id plus process unique IDs for only the
+        # trusted supervisor ancestor chain; an existing unknown member makes
+        # capture fail closed instead of laundering an orphan into the baseline.
+        producer_custody = procutil.capture_producer_custody()
+        if producer_custody is None and sys.platform == "darwin":
+            raise isolation.IsolationUnavailable(
+                "producer custody baseline is unavailable or coalition is not quiescent"
+            )
+        if producer_custody is not None:
+            if managed_state and not state.attach_producer_custody(
+                job_id=job_id,
+                custody=producer_custody,
+                expected_attempt=attempt,
+                path=state_path,
+            ):
+                raise RuntimeError(
+                    f"producer custody CAS lost: job_id={job_id} attempt={attempt}"
+                )
+            custody_receipt.bind_producer_custody(
+                custody_repo_root,
+                job_id=job_id,
+                attempt=attempt,
+                custody=producer_custody,
+            )
+            global_custody_bound = True
+            if (
+                isinstance(isolated_workspace, dict)
+                and not workspace_mod.bind_producer_custody(
+                    Path(
+                        str(
+                            isolated_workspace.get("isolation_canonical_root")
+                            or PROJECT_ROOT
+                        )
+                    ),
+                    workspace=isolated_workspace,
+                    job_id=job_id,
+                    producer_custody=producer_custody,
+                    attempt=attempt,
+                )
+            ):
+                raise isolation.IsolationUnavailable(
+                    "producer custody receipt was not durably bound before spawn"
+                )
+        if managed_state and not state.mark_producer_spawn_committed(
+            job_id=job_id,
+            expected_attempt=attempt,
+            path=state_path,
+        ):
+            raise RuntimeError(
+                f"producer spawn-commit CAS lost: job_id={job_id} attempt={attempt}"
+            )
+        try:
+            proc = _spawn(
+                argv=argv,
+                log_path=log_path,
+                env=child_env,
+                cwd=workdir,
+            )
+        except OSError:
+            if managed_state:
+                state.mark_producer_spawn_aborted(
+                    job_id=job_id,
+                    expected_attempt=attempt,
+                    path=state_path,
+                )
+            if producer_custody is not None:
+                members = procutil.producer_cohort_members_checked(
+                    0,
+                    job_id=job_id,
+                    custody=producer_custody,
+                )
+                if members == []:
+                    _release_global_custody()
+            raise
+    except BaseException:
+        # Keep the exact reservation.  The scheduler records a durable
+        # spawn_not_started outcome when no custody was bound, or verifies the
+        # bound custody is empty when Popen itself failed.  Releasing here used
+        # to erase the only restart/reconciliation identity.
         raise
-    pgid = os.getpgid(proc.pid)
-    if process_identity_sink is not None:
-        process_identity_sink(pgid)
+    # `_spawn` always uses start_new_session=True, so POSIX guarantees the new
+    # session leader's PGID equals its PID.  Avoid a fallible extra syscall in
+    # the Popen-return→durable-attach crash window.
+    pgid = proc.pid
     # Attach pid+pgid IMMEDIATELY (fast — os.getpgid() is a plain syscall) so
     # the pid=None reservation window (a supervisor crash here would strand
     # current_job forever — see supervisor._handle_restart_orphan's
     # pid-is-None branch, Codex review fix #2, 2026-07-04) is narrowed down
     # to the Popen() call itself, not the slower `ps`-based fingerprint call
     # that used to run first and be attached in the same step.
-    state.attach_process(
-        job_id=job_id, expected_attempt=attempt, pid=proc.pid, pgid=pgid,
-        started_wall=None, path=state_path,
-    )
+    try:
+        state.attach_process(
+            job_id=job_id, expected_attempt=attempt, pid=proc.pid, pgid=pgid,
+            started_wall=None, path=state_path,
+        )
+    except BaseException:
+        # A child exists but state attachment failed.  Drain by kernel custody
+        # before propagating; never let the scheduler classify this as an
+        # ordinary pre-spawn failure.
+        ledger_path = termination.ledger_for_state(state_path)
+        intent = termination.arm(
+            target_kind="pid",
+            target_id=proc.pid,
+            target_identity=(
+                "producer-custody:"
+                f"{producer_custody.get('resource_coalition_id', 'unknown')}"
+                if producer_custody is not None
+                else None
+            ),
+            reason="producer_state_attach_failed",
+            actor="dispatch-supervisor.worker",
+            signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+            job_id=job_id,
+            attempt=attempt,
+            ledger_path=ledger_path,
+        )
+        if producer_custody is not None:
+            drained = procutil.kill_producer_cohort(
+                producer_custody,
+                intent=intent,
+                ledger_path=ledger_path,
+                grace_s=GRACE_PERIOD_S,
+            )
+        else:
+            drained = procutil.kill_tree(
+                proc.pid,
+                intent=intent,
+                ledger_path=ledger_path,
+                grace_s=GRACE_PERIOD_S,
+            )
+        if drained:
+            _release_global_custody()
+        raise
+    if process_identity_sink is not None:
+        process_identity_sink(pgid)
     # Codex review §10 #2: fingerprint the process's OS start time so later
     # identity checks (health.py polling, restart orphan cleanup) can detect
     # PID reuse instead of trusting a bare `os.kill(pid, 0)`.
@@ -678,7 +853,9 @@ def _run_one_attempt(
             attempt, FATAL_STALL_S, pgid, timeout_s,
         )
         killed = bool(_kill_pgid(
-            pgid, reason="fatal_stall", job_id=job_id, attempt=attempt,
+            pgid, leader_pid=proc.pid, reason="fatal_stall",
+            job_id=job_id, attempt=attempt,
+            custody=producer_custody,
             state_path=state_path,
         ))
         try:
@@ -695,6 +872,7 @@ def _run_one_attempt(
             # quarantine it exactly like a surviving hang rather than declaring
             # the slot free while something may still be writing.
             return TIMEOUT_SURVIVED_SENTINEL, duration, attempt_output
+        _release_global_custody()
         if managed_state and not state.mark_job_phase(
             job_id=job_id, phase="classifying", expected_phase="running",
             expected_attempt=attempt, expected_pid=proc.pid, path=state_path,
@@ -709,7 +887,9 @@ def _run_one_attempt(
         # classification path single-source and impossible to misread.
         LOG.warning("worker attempt=%d timeout=%ds — SIGTERM→SIGKILL pgid=%d", attempt, timeout_s, pgid)
         killed = bool(_kill_pgid(
-            pgid, reason="work_timeout", job_id=job_id, attempt=attempt,
+            pgid, leader_pid=proc.pid, reason="work_timeout",
+            job_id=job_id, attempt=attempt,
+            custody=producer_custody,
             state_path=state_path,
         ))
         try:
@@ -724,15 +904,48 @@ def _run_one_attempt(
         attempt_output = _read_since(log_path, log_offset)
         if not killed:
             return TIMEOUT_SURVIVED_SENTINEL, duration, attempt_output
+        _release_global_custody()
         if managed_state and not state.mark_job_phase(
             job_id=job_id, phase="classifying", expected_phase="running",
             expected_attempt=attempt, expected_pid=proc.pid, path=state_path,
         ):
             return OWNERSHIP_LOST_SENTINEL, duration, attempt_output
         return TIMEOUT_KILLED_SENTINEL, duration, attempt_output
+    # Popen.wait() proves only that the process-group leader exited.  A child
+    # can keep the inherited sandbox and continue writing the producer
+    # workspace after its parent returns.  Finalization must never snapshot and
+    # remove that checkout until the whole group is positively empty.
+    remaining_members = procutil.producer_cohort_members_checked(
+        pgid,
+        job_id=job_id,
+        custody=producer_custody,
+    )
+    if remaining_members is None or remaining_members:
+        LOG.error(
+            "worker attempt=%d leader exited but producer pgid=%d is %s; "
+            "retaining workspace and slot",
+            attempt,
+            pgid,
+            (
+                "unverifiable"
+                if remaining_members is None
+                else f"still active: {remaining_members}"
+            ),
+        )
+        duration = time.time() - started
+        attempt_output = _read_since(log_path, log_offset)
+        return TIMEOUT_SURVIVED_SENTINEL, duration, attempt_output
     exit_code = raw_exit
     duration = time.time() - started
     attempt_output = _read_since(log_path, log_offset)
+    # Auth/quota may hand this same immutable attempt to Codex. Keep global
+    # custody pending across that handoff; `_attempt_codex_failover` releases it
+    # only after probes, alerts and auth cleanup have all left the coalition.
+    if _classify(_normalize_signal_exit(exit_code), attempt_output) not in {
+        "auth",
+        "quota",
+    }:
+        _release_global_custody()
     if exit_code == 0:
         # Debug sidecars only exist to explain failures; a clean attempt's copy
         # is pure disk cost (a 50-minute opus fire's debug stream is large).
@@ -803,6 +1016,168 @@ def _attempt_codex_failover(
             path=state_path,
         )
 
+    custody_state = state.read_state(state_path)
+    producer_custody = next(
+        (
+            raw.get("producer_custody")
+            for raw in (custody_state.get("current_jobs") or [])
+            if str(raw.get("job_id") or "") == job_id
+            and isinstance(raw.get("producer_custody"), dict)
+        ),
+        None,
+    )
+    custody_repo_root = Path(
+        str(
+            (
+                isolated_workspace.get("isolation_canonical_root")
+                if isinstance(isolated_workspace, dict)
+                else None
+            )
+            or PROJECT_ROOT
+        )
+    )
+
+    def _quarantine_unresolved_failover_custody(
+        *,
+        detail: str,
+    ) -> WorkerResult | None:
+        """Return a quarantine result unless the full failover cohort drained."""
+        if producer_custody is None:
+            return None
+        members = procutil.producer_cohort_members_checked(
+            0,
+            job_id=job_id,
+            custody=producer_custody,
+        )
+        if members:
+            ledger_path = termination.ledger_for_state(state_path)
+            intent = termination.arm(
+                target_kind="pid",
+                target_id=int(members[0]),
+                target_identity=(
+                    "producer-custody:"
+                    f"{producer_custody.get('resource_coalition_id', 'unknown')}"
+                ),
+                reason="codex_failover_final_custody_drain",
+                actor="dispatch-supervisor.worker",
+                signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+                job_id=job_id,
+                attempt=attempt,
+                ledger_path=ledger_path,
+            )
+            if procutil.kill_producer_cohort(
+                producer_custody,
+                intent=intent,
+                ledger_path=ledger_path,
+            ):
+                members = []
+            else:
+                members = procutil.producer_cohort_members_checked(
+                    0,
+                    job_id=job_id,
+                    custody=producer_custody,
+                )
+        if members == []:
+            custody_receipt.release_producer_custody(
+                custody_repo_root,
+                job_id=job_id,
+                attempt=attempt,
+                drain_confirmed=True,
+            )
+            return None
+
+        # Never let a failed/unverifiable failover fall through to the caller's
+        # auth/quota completion.  Preserve a representative PID when one is
+        # available so health can keep reconciling; kernel custody remains the
+        # actual authority even if that representative later exits.
+        current = next(
+            (
+                raw
+                for raw in (
+                    state.read_state(state_path).get("current_jobs") or []
+                )
+                if str(raw.get("job_id") or "") == job_id
+            ),
+            {},
+        )
+        representative = int(members[0]) if members else None
+        if representative is not None and current.get("pid") is None:
+            try:
+                state.attach_process(
+                    job_id=job_id,
+                    expected_attempt=attempt,
+                    pid=representative,
+                    pgid=representative,
+                    started_wall=None,
+                    path=state_path,
+                )
+                current = {"phase": "running", "pid": representative}
+            except RuntimeError as exc:
+                LOG.warning(
+                    "codex failover custody representative attach lost: %s",
+                    exc,
+                )
+        phase_owned = state.mark_job_phase(
+            job_id=job_id,
+            phase="kill_failed_orphan",
+            expected_phase=str(current.get("phase") or "codex_failover"),
+            expected_attempt=attempt,
+            expected_pid=(
+                int(current["pid"])
+                if current.get("pid") is not None
+                else None
+            ),
+            path=state_path,
+        )
+        if not phase_owned:
+            fresh = next(
+                (
+                    raw
+                    for raw in (
+                        state.read_state(state_path).get("current_jobs") or []
+                    )
+                    if str(raw.get("job_id") or "") == job_id
+                ),
+                None,
+            )
+            if fresh is not None:
+                phase_owned = state.mark_job_phase(
+                    job_id=job_id,
+                    phase="kill_failed_orphan",
+                    expected_phase=str(fresh.get("phase") or ""),
+                    expected_attempt=attempt,
+                    expected_pid=(
+                        int(fresh["pid"])
+                        if fresh.get("pid") is not None
+                        else None
+                    ),
+                    path=state_path,
+                )
+        if not phase_owned:
+            LOG.error(
+                "codex failover custody quarantine lost state CAS job_id=%s; "
+                "global custody remains pending",
+                job_id,
+            )
+        survivor_text = (
+            "unverified" if members is None else ",".join(map(str, members))
+        )
+        LOG.error(
+            "codex failover custody did not drain job_id=%s survivors=%s",
+            job_id,
+            survivor_text,
+        )
+        return WorkerResult(
+            exit_code=137,
+            outcome="kill_failed_orphan",
+            final_model=CODEX_MODEL_LABEL,
+            attempts=attempt,
+            duration_s=total_duration,
+            log_tail=(
+                f"{detail}\nproducer custody survivors={survivor_text}"
+            ).strip(),
+        )
+
     try:
         result = codex_failover.run_codex_failover(
             reason=reason, slot_id=slot_id, job_id=job_id,
@@ -810,6 +1185,7 @@ def _attempt_codex_failover(
             on_process_finished=_track_finished,
             workdir=workdir,
             isolated_workspace=isolated_workspace,
+            producer_custody=producer_custody,
             state_path=state_path,
         )
     except Exception as exc:  # failover must never take the supervisor down
@@ -819,14 +1195,21 @@ def _attempt_codex_failover(
             detail=f"failover 本身拋出例外：{exc}", attempted=True,
             output_tail=log_tail, state_path=state_path,
         )
-        return None
+        return _quarantine_unresolved_failover_custody(
+            detail=f"failover exception: {exc}",
+        )
 
     alerts.send_codex_failover_alert(
         reason=reason, recovered=result.recovered, exit_code=result.exit_code,
         detail=result.detail, attempted=result.attempted,
         output_tail=result.output_tail, state_path=state_path,
     )
-    if result.process_active:
+    custody_quarantine = _quarantine_unresolved_failover_custody(
+        detail=result.output_tail or result.detail,
+    )
+    if custody_quarantine is not None:
+        return custody_quarantine
+    if result.process_active and producer_custody is None:
         state.mark_job_phase(
             job_id=job_id, phase="kill_failed_orphan",
             expected_phase="codex_failover", expected_attempt=attempt,

@@ -36,6 +36,11 @@ Schema (version 1)::
           "scheduled_for": "<ISO|null>",
           "fire_reason": "cron|requested:*|cron+requested:*",
           "fire_key": str | null,                 # atomic cron-slot dedup identity
+          "producer_custody": null | {             # macOS kernel resource-coalition authority
+            "version": 2, "host_uuid": str, "boot_session_uuid": str,
+            "resource_coalition_id": int, "trusted_unique_ids": [int]
+          },
+          "producer_spawn_state": "not_started|custody_bound|spawn_committed|attached",
           "fire_lifecycle": {                     # durable PHASE-Z authority
             "generation_id": str,                 # one immutable cohort generation
             "captured_at": "<ISO>",
@@ -75,6 +80,11 @@ Schema (version 1)::
         "scheduled_for": "<ISO|null>",            # cron slot this fire services (naive local ISO)
         "fire_reason": "cron|requested:*|cron+requested:*",
         "fire_key": str | null,
+        "producer_custody": null | {
+          "version": 2, "host_uuid": str, "boot_session_uuid": str,
+          "resource_coalition_id": int, "trusted_unique_ids": [int]
+        },
+        "producer_spawn_state": "not_started|custody_bound|spawn_committed|attached",
         "workspace": {"name": str, "path": str, "branch": str, "base_sha": str,
                       "lanes": [str], "created_at": "<ISO>", "setup_s": float},
         "restart_cleanup_pending": true,          # only present while a restart-orphan investigation is in flight
@@ -114,6 +124,11 @@ Schema (version 1)::
           "pid": int, "pgid": int, "started_wall": str,
           # 只在 WS-B 隔離 fire 出現：ownership 由 worktree 隔離產生的 receipt。
           "workspace": {"name": str, "path": str, "branch": str, "base_sha": str},
+          # 只在 custody 已於 Popen 前持久化的 fire 出現；供 crash/restart audit。
+          "producer_custody": {
+            "version": 2, "host_uuid": str, "boot_session_uuid": str,
+            "resource_coalition_id": int, "trusted_unique_ids": [int]
+          },
           "outcome": "success" | "failure" | "killed_timeout" | "kill_failed_orphan" |
                      "silent_death" |
                      "timeout_unverified" | "killed_supervisor_restart" |
@@ -185,7 +200,7 @@ import tempfile
 import uuid
 from contextlib import contextmanager
 from contextvars import ContextVar
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
@@ -777,6 +792,8 @@ def _phase_z_pending_record(job: dict[str, Any]) -> dict[str, Any]:
     }
     if job.get("fire_lifecycle") is not None:
         pending["fire_lifecycle"] = dict(job["fire_lifecycle"])
+    if job.get("producer_custody") is not None:
+        pending["producer_custody"] = dict(job["producer_custody"])
     return pending
 
 
@@ -836,6 +853,8 @@ def append_completion_entry(
             entry["started_wall"] = job.get("started_wall")
         if job.get("workspace") is not None:
             entry["workspace"] = job.get("workspace")
+        if job.get("producer_custody") is not None:
+            entry["producer_custody"] = dict(job["producer_custody"])
         completions = data.get("completions") or []
         completions.append(entry)
         if len(completions) > COMPLETIONS_MAX:
@@ -1042,6 +1061,8 @@ def reserve_fire(
             "pid": None,
             "pgid": None,
             "started_wall": None,
+            "producer_custody": None,
+            "producer_spawn_state": "not_started",
             "schedule_id": schedule_id,
             "started_at": started_at,
             "attempt_started_at": started_at,
@@ -1210,6 +1231,10 @@ def begin_attempt(
             "pid": None,
             "pgid": None,
             "started_wall": None,
+            # Custody is attempt-scoped.  A retry takes a fresh kernel baseline
+            # immediately before its own provider spawn.
+            "producer_custody": None,
+            "producer_spawn_state": "not_started",
             "attempt_started_at": attempt_started_at,
             "attempt": int(attempt),
             "model": model,
@@ -1290,6 +1315,7 @@ def attach_process(
         job["pgid"] = pgid
         job["started_wall"] = started_wall
         job["phase"] = "running"
+        job["producer_spawn_state"] = "attached"
         _sync_projection(data)
 
 
@@ -1311,6 +1337,95 @@ def attach_workspace(
             return False
         _index, job = found
         job["workspace"] = dict(workspace)
+        _sync_projection(data)
+        return True
+
+
+def attach_producer_custody(
+    *,
+    job_id: str,
+    custody: dict[str, Any],
+    expected_attempt: int | None = None,
+    path: Path = STATE_PATH,
+) -> bool:
+    """Durably bind the pre-spawn kernel custody baseline to one attempt.
+
+    This transition must happen after provider authorization and immediately
+    before ``Popen``.  It closes the former crash window where a provider could
+    be spawned but neither its PID nor a durable way to discover detached
+    descendants existed.  A bound baseline is immutable for that attempt.
+    """
+    if not isinstance(custody, dict) or not custody:
+        raise ValueError("producer custody must be a non-empty mapping")
+    normalized = dict(custody)
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            LOG.warning("attach_producer_custody: job %s not found", job_id)
+            return False
+        _index, job = found
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            return False
+        if job.get("pid") is not None:
+            raise RuntimeError(
+                f"attach_producer_custody after process attach: job_id={job_id}"
+            )
+        existing = job.get("producer_custody")
+        if existing is not None and existing != normalized:
+            raise RuntimeError(
+                f"producer custody already bound to another baseline: job_id={job_id}"
+            )
+        job["producer_custody"] = normalized
+        job["producer_spawn_state"] = "custody_bound"
+        _sync_projection(data)
+        return True
+
+
+def mark_producer_spawn_committed(
+    *,
+    job_id: str,
+    expected_attempt: int | None = None,
+    path: Path = STATE_PATH,
+) -> bool:
+    """Persist the last pre-Popen state transition.
+
+    ``spawn_committed`` means a crash may have occurred inside Popen and pid=None
+    is no longer evidence that no child exists.  Only an observed Popen failure
+    may move it back to ``not_started``.
+    """
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            return False
+        _index, job = found
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            return False
+        if job.get("pid") is not None:
+            return False
+        job["producer_spawn_state"] = "spawn_committed"
+        _sync_projection(data)
+        return True
+
+
+def mark_producer_spawn_aborted(
+    *,
+    job_id: str,
+    expected_attempt: int | None = None,
+    path: Path = STATE_PATH,
+) -> bool:
+    """Record a Popen syscall that raised before returning a child handle."""
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            return False
+        _index, job = found
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            return False
+        if job.get("pid") is not None:
+            return False
+        if job.get("producer_spawn_state") != "spawn_committed":
+            return False
+        job["producer_spawn_state"] = "not_started"
         _sync_projection(data)
         return True
 
@@ -1486,6 +1601,8 @@ def record_completion(
             # WS-B ownership receipt: the completion ring is where an auditor
             # reverse-maps a merged branch to the fire that produced it.
             entry["workspace"] = job.get("workspace")
+        if job.get("producer_custody") is not None:
+            entry["producer_custody"] = dict(job["producer_custody"])
         completions = data.get("completions") or []
         completions.append(entry)
         if len(completions) > COMPLETIONS_MAX:
@@ -1737,6 +1854,7 @@ class CurrentJob:
     slot_id: int = 1
     phase: str = "running"
     started_wall: str | None = None
+    producer_custody: dict[str, Any] | None = None
     age_seconds: float = 0.0
 
 
@@ -1776,6 +1894,11 @@ def get_current_jobs(path: Path = STATE_PATH) -> list[CurrentJob]:
             log_path=str(job.get("log_path", "")),
             phase=str(job.get("phase", "running")),
             started_wall=job.get("started_wall"),
+            producer_custody=(
+                dict(job["producer_custody"])
+                if isinstance(job.get("producer_custody"), dict)
+                else None
+            ),
             age_seconds=age,
         ))
     return result

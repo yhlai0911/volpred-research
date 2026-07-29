@@ -1832,21 +1832,30 @@
       "entrypoint": "uv run python -m scripts.dispatch_supervisor.supervisor",
       "state_file": "storage/ops/dispatch_state.json",
       "log": "~/.volpred/logs/dispatch_supervisor.log",
-      "max_slots": 4,
-      "max_slots_rationale": "2026-07-19 老闆『加快清任務池』(assign_794c4bc2)：2→4。2 個 slot 長期滿載，requested fire（email/telegram/急件）撞 slots_full 被延到下一 tick。放大的是「同時幾條主線程」，不是 agent 數 —— agent 並行度的唯一 owner 仍是 scripts/dispatch_slot_budget.py（全 repo worktree occupancy，4/surge 6），不隨 max_slots 倍增。上限依據：10 CPU core（主線程 IO-bound）、64GB RAM、weekly quota 剩 67.7%、磁碟 85GB free（91% used，worktree 是這裡的真限制而非 slot 數）。守門：scheduler.load_max_slots 於連 2 次 outcome=quota_blocked 時自動 clamp 回 2，成功一次即自愈。",
+      "producer_custody": {
+        "mode": "shared_launchd_coalition",
+        "rationale": "2026-07-29 production safety cutover：supervisor 以 launchd resource coalition + per-fire process unique-id baseline 追蹤 setsid／leader-exit 後仍存活的 producer。shared coalition 無法安全區分同時起跑的多個 fire，因此 scheduler 必須機械限流為單一 slot；恢復多 slot 前須先切到 per-fire isolated coalition 並完成 live drain read-back。"
+      },
+      "codex_failover": {
+        "mode": "disabled_until_per_fire_custody",
+        "environment": "VOLPRED_CODEX_FAILOVER=0",
+        "rationale": "2026-07-29 safe-launch gate：Codex reachability/preflight 與 provider-auth reaper 仍以 subprocess/PGID 管理，無法證明 setsid descendant 與 credential lease 同時 drained；shared launchd coalition 期間機械停用 failover。Claude subscription 主執行不受影響；只有 per-fire custody + lease drain regression/live proof 全綠後才可恢復。"
+      },
+      "max_slots": 1,
+      "max_slots_rationale": "2026-07-29 shared_launchd_coalition custody safety mode：單一 shared coalition 的 per-fire baseline 在並行 fire 下會互相看見新成員，故 production 必須 max_slots=1；scheduler.load_max_slots 即使讀到漂移值或無效值也 fail-safe clamp 1。2026-07-19 的 4-slot throughput 設定暫停，待 per-fire isolated coalition 通過 regression + live drain proof 後才可恢復。",
       "fires": "Receives model-free ticks only from Operations Core job agent_dispatch_tick; each tick evaluates the hourly volpred-hourly-dispatch policy plus state.fire_requested_at",
       "writer_isolation": {
         "mode": "enforce",
         "lanes": [
           "platform_ops"
         ],
-        "max_active": 2,
+        "max_active": 1,
         "max_total": 3,
         "disk_floor_gib": 20,
-        "rationale": "Issue #43 enforce cutover：每班 mutating-capable fire 由 supervisor 在 agent spawn 前機械配發 registered worktree，worker cwd 與 macOS sandbox 綁定該 workspace；allocation/cap/disk/lock 任一失敗只會釋放 slot 並保留 fire request 重派，禁止 shared-main fallback。candidate head + main base 進 durable gate receipt；main 前進必 rebase + re-gate，integrator 以雙 SHA fence 落地。canonical storage 只容許既有帶鎖 CLI；workspace 內 storage/** 變更在 merge gate fail closed。max_active=2 允許雙 slot 不相交工作並行，max_total=3 保留一個 checkpoint/remediation 緩衝；超限只重派。"
+        "rationale": "Issue #43 enforce cutover：每班 mutating-capable fire 由 supervisor 在 agent spawn 前機械配發 registered worktree，worker cwd 與 macOS sandbox 綁定該 workspace；allocation/cap/disk/lock 任一失敗只會釋放 slot 並保留 fire request 重派，禁止 shared-main fallback。candidate head + main base 進 durable gate receipt；main 前進必 rebase + re-gate，integrator 以雙 SHA fence 落地。canonical storage 只容許既有帶鎖 CLI；workspace 內 storage/** 變更在 merge gate fail closed。max_active=1 與 shared_launchd_coalition 的單 slot custody gate 一致；max_total=3 保留 checkpoint/remediation 緩衝，超限只重派。"
       },
       "since": "2026-07-04T16:36:00+08:00",
-      "description": "Long-lived dispatch executor after the Operations Core cutover. It has no schedule clock: a local Unix-socket trigger server accepts Operations Core ticks, while the process retains the independent health monitor, max_slots worker pool, retry/failover ladder and cohort-drained PHASE-Z safety commit. Schedule-trigger receipts and model-delivery outcomes remain separate. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover model outcomes."
+      "description": "Long-lived dispatch executor after the Operations Core cutover. It has no schedule clock: a local Unix-socket trigger server accepts Operations Core ticks, while the process retains the independent health monitor, single-slot shared-coalition worker, retry ladder and cohort-drained PHASE-Z safety commit. Codex failover is fail-closed disabled until per-fire custody also owns provider-auth lease drain. Schedule-trigger receipts and model-delivery outcomes remain separate. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover model outcomes."
     },
     {
       "id": "telegram_poll",

@@ -469,6 +469,7 @@ def run_codex_failover(
     on_process_finished: Callable[[int], None] | None = None,
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
+    producer_custody: dict | None = None,
     state_path: Path = state.STATE_PATH,
 ) -> FailoverResult:
     """Try to let ``codex exec`` cover this hourly slot without leaking auth."""
@@ -487,6 +488,7 @@ def run_codex_failover(
             on_process_finished=on_process_finished,
             workdir=workdir,
             isolated_workspace=isolated_workspace,
+            producer_custody=producer_custody,
             state_path=state_path,
             lease_guard=lease_guard,
         )
@@ -516,6 +518,7 @@ def _run_codex_failover_impl(
     on_process_finished: Callable[[int], None] | None = None,
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
+    producer_custody: dict | None = None,
     state_path: Path = state.STATE_PATH,
     lease_guard: _ProviderAuthLeaseGuard,
 ) -> FailoverResult:
@@ -666,7 +669,11 @@ def _run_codex_failover_impl(
     tracked_pid: int | None = None
     process_confirmed_finished = False
     try:
-        if on_process_started is None and lease_guard.lease is None:
+        if (
+            on_process_started is None
+            and lease_guard.lease is None
+            and producer_custody is None
+        ):
             result = subprocess.run(
                 argv, cwd=str(launch_cwd), capture_output=True, text=True,
                 timeout=cap_s, env=child_env,
@@ -705,13 +712,27 @@ def _run_codex_failover_impl(
                 ledger_path = termination.ledger_for_state(state_path)
                 intent = termination.arm(
                     target_kind="pgid", target_id=pgid,
+                    target_identity=(
+                        "producer-custody:"
+                        f"{producer_custody.get('resource_coalition_id', 'unknown')}"
+                        if producer_custody is not None
+                        else None
+                    ),
                     reason="codex_failover_admission_rejected",
                     actor="dispatch-supervisor.codex-failover",
                     signal_sequence=[signal.SIGTERM, signal.SIGKILL],
                     ledger_path=ledger_path,
                 )
-                group_drained = procutil.kill_pgid(
-                    pgid, intent=intent, ledger_path=ledger_path,
+                group_drained = (
+                    procutil.kill_producer_cohort(
+                        producer_custody,
+                        intent=intent,
+                        ledger_path=ledger_path,
+                    )
+                    if producer_custody is not None
+                    else procutil.kill_pgid(
+                        pgid, intent=intent, ledger_path=ledger_path,
+                    )
                 )
                 stdout, _ = proc.communicate(timeout=10)
                 process_confirmed_finished = group_drained
@@ -725,13 +746,27 @@ def _run_codex_failover_impl(
                     ledger_path = termination.ledger_for_state(state_path)
                     intent = termination.arm(
                         target_kind="pgid", target_id=pgid,
+                        target_identity=(
+                            "producer-custody:"
+                            f"{producer_custody.get('resource_coalition_id', 'unknown')}"
+                            if producer_custody is not None
+                            else None
+                        ),
                         reason="codex_failover_timeout",
                         actor="dispatch-supervisor.codex-failover",
                         signal_sequence=[signal.SIGTERM, signal.SIGKILL],
                         ledger_path=ledger_path,
                     )
-                    group_drained = procutil.kill_pgid(
-                        pgid, intent=intent, ledger_path=ledger_path,
+                    group_drained = (
+                        procutil.kill_producer_cohort(
+                            producer_custody,
+                            intent=intent,
+                            ledger_path=ledger_path,
+                        )
+                        if producer_custody is not None
+                        else procutil.kill_pgid(
+                            pgid, intent=intent, ledger_path=ledger_path,
+                        )
                     )
                     stdout, _ = proc.communicate(timeout=15)
                     process_confirmed_finished = group_drained
@@ -741,7 +776,18 @@ def _run_codex_failover_impl(
                         cmd=exc.cmd, timeout=cap_s, output=stdout,
                     ) from exc
                 result = subprocess.CompletedProcess(argv, proc.returncode, stdout, "")
-                process_confirmed_finished = procutil.pgid_members_checked(pgid) == []
+                process_confirmed_finished = (
+                    (
+                        procutil.producer_cohort_members_checked(
+                            pgid,
+                            job_id=job_id,
+                            custody=producer_custody,
+                        )
+                        if producer_custody is not None
+                        else procutil.pgid_members_checked(pgid)
+                    )
+                    == []
+                )
                 if process_confirmed_finished:
                     lease_guard.mark_process_group_drained()
     except subprocess.TimeoutExpired as exc:
