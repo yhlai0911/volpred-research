@@ -464,6 +464,27 @@ def test_canonical_writer_accepts_allowlisted_event_window_gate(
     assert json.loads(path.read_text(encoding="utf-8")) == [task]
 
 
+def test_canonical_reader_preserves_unknown_future_gate_fail_closed(
+    tmp_path,
+) -> None:
+    """A rollback reader must not crash or make an unknown gate dispatchable."""
+    path = tmp_path / "next_tasks.json"
+    task = {
+        "id": "future-gated-task",
+        "status": "blocked",
+        "priority": 1,
+        "blocked_reason": "awaiting_event_window",
+        "blocked_until": "2099-01-01T00:00:00+00:00",
+        "unblock_gate": "future_gate_v99",
+        "future_gate_receipt": {"generation": 99},
+    }
+    path.write_text("[]", encoding="utf-8")
+
+    nt.write_tasks_locked(path, [task])
+
+    assert json.loads(path.read_text(encoding="utf-8")) == [task]
+
+
 def test_blocked_until_audit_is_quiet_on_well_formed_blocked_rows(tmp_path, capsys):
     """A properly-expiring block is the normal case and must stay silent."""
     tasks = [
