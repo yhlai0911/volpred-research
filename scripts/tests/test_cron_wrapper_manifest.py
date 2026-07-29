@@ -134,6 +134,19 @@ def test_cron_lib_is_never_installed(sync):
     assert (PROJECT_ROOT / "scripts" / "cron_lib.sh").exists()
 
 
+def test_installed_wrappers_do_not_source_uninstalled_sibling_cron_lib(sync):
+    """A live wrapper may not expect cron_lib.sh beside itself when deploy omits it."""
+    offenders = []
+    for wrapper in sync.iter_canonical_wrappers(PROJECT_ROOT):
+        body = wrapper.read_text(encoding="utf-8")
+        if '${SCRIPT_DIR}/cron_lib.sh' in body:
+            offenders.append(wrapper.name)
+    assert offenders == [], (
+        "cron_lib.sh is intentionally not installed in ~/.volpred/bin; wrappers "
+        f"must source the canonical repo copy, offenders={offenders}"
+    )
+
+
 def test_check_manifest_detects_a_tampered_wrapper(sync, tmp_path):
     """Negative control: the gate actually fires. A passing suite proves nothing otherwise."""
     root = tmp_path

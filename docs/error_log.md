@@ -4671,3 +4671,27 @@ Experiment Artifacts 四道 gate 全綠。immutable supervisor release
 live status heartbeat 新鮮、`current_jobs=[]`、`phase_z_pending=[]`、
 `auth_blocked=false`。本 incident 五步 Gate 已完成，狀態升為
 **`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-07-30 — CI watcher live wrapper source 未安裝的 sibling `cron_lib.sh`
+
+**證據化症狀**：Operations Core 的 `ci_watch` 每五分鐘都有執行主要 Python
+檢查，但 `storage/logs/cron/ci_watch.log` 在每次 fire 前後都記錄
+`cron_emit_start: command not found` 與 `cron_emit_exit: command not found`。
+canonical 與 live `cron_ci_watch.sh` bytes 一致，因此不是一般 wrapper drift；
+實際回讀 `~/.volpred/bin/cron_lib.sh` 不存在。
+
+**根因層級（deployment dependency contract）**：
+`sync_cron_wrappers.py` 明確把 `cron_lib.sh` 列為 `NOT_INSTALLED`，設計上所有 live
+wrapper 都應 source repo 內 canonical helper；但 `cron_ci_watch.sh` 是唯一從
+`${SCRIPT_DIR}/cron_lib.sh` 載入的 wrapper。既有 manifest gate 只驗 wrapper 自身
+bytes／mode／population，沒有驗「已安裝 wrapper 不得引用刻意不安裝的 sibling」，
+所以 canonical=manifest=live 全相等仍可部署壞掉的依賴。
+
+**底層修復與制度化**：`cron_ci_watch.sh` 改為 fail-closed source canonical repo
+helper；manifest gate 新增全 population invariant，任何 installed wrapper 再引用
+`${SCRIPT_DIR}/cron_lib.sh` 都會在 CI 失敗。RED 精確抓出唯一 offender
+`cron_ci_watch.sh`，修後 cron wrapper／owner gate／alert script affected suite
+**51 passed**，bash syntax與diff check通過。仍需 immutable wrapper apply與下一次
+自然 Operations Core fire回讀；在這兩項完成前狀態為 **`contained`**。

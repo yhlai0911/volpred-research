@@ -2,8 +2,7 @@
 # Dedicated five-minute CI incident owner. Canonical schedule:
 # config/runtime_schedules.json -> Operations Core.
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/cron_lib.sh"
+source /Users/yhlai0911/volpred-research/scripts/cron_lib.sh || exit 1
 
 exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/ci_watch.log 2>&1
 cd /Users/yhlai0911/volpred-research || exit 1
