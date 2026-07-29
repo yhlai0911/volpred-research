@@ -1,0 +1,284 @@
+{
+  "experiment_id": "k1380_v4_rc_correction",
+  "title": "K1380_v4 data-snooping correction: proper max-type RC/SPA re-analysis from the saved QLIKE matrix",
+  "supersedes": {
+    "file": "experiments/K1380_v4/k1380_v4_results.json",
+    "fields": [
+      "white_rc_test",
+      "hansen_spa_test",
+      "c3_verdict"
+    ],
+    "reason": "`white_rc_test` is a single-spec bootstrap DM test with no snooping adjustment, mislabelled as a Reality Check (k1380_v4.py:771-782). `hansen_spa_test` recenters every spec by its own d-bar, which is the least-favourable configuration (SPA_u / studentized White RC), not Hansen's consistent SPA_c.",
+    "v4_results_file_left_unmodified": true
+  },
+  "provenance": {
+    "loss_matrix": "k1380_v4_losses_all.npy",
+    "loss_matrix_written_by": "k1380_v4.py:693 (before any testing)",
+    "garch_refit_rerun": false,
+    "rerun_not_required_because": "the defect is entirely downstream of the saved QLIKE matrix; no model estimation is involved in the correction",
+    "bootstrap_B": 499,
+    "bootstrap_seed": 42,
+    "n_valid_spa": 1879,
+    "n_eligible_specs": 15,
+    "eligible_specs": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A2f",
+      "A4f",
+      "A3f",
+      "A2n",
+      "A4n",
+      "B1",
+      "B2",
+      "B3",
+      "C2",
+      "C3"
+    ],
+    "pvalue_resolution": 0.002004008016032064
+  },
+  "reproduction_check": {
+    "status": "PASS",
+    "detail": {
+      "v4_hansen_spa_stat": {
+        "ours": 4.204654737813586,
+        "committed": 4.204654737813586
+      },
+      "v4_hansen_spa_pval": {
+        "ours": 0.28857715430861725,
+        "committed": 0.28857715430861725
+      },
+      "v4_white_rc_t_stat": {
+        "ours": 4.1334667187930885,
+        "committed": 4.1334667187930885
+      },
+      "v4_white_rc_pval": {
+        "ours": 0.0,
+        "committed": 0.0
+      }
+    },
+    "note": "All four v4 statistics reproduced exactly (atol=1e-12) from the saved loss matrix, establishing that the corrected numbers below come from the same data and code path."
+  },
+  "hansen_spa_corrected": {
+    "stat": 4.204654737813586,
+    "stat_attained_by": "B1",
+    "n_specs_tested": 15,
+    "consistent_threshold_sqrt_2loglogT": 2.009986348161046,
+    "n_specs_recentered_c": 12,
+    "n_specs_recentered_l": 12,
+    "specs_dropped_by_c": [
+      "A5",
+      "C2",
+      "C3"
+    ],
+    "studentization_fixed_omega": {
+      "pval_l": 0.0,
+      "pval_c": 0.0,
+      "pval_u": 0.23046092184368738
+    },
+    "studentization_resample_omega_v4_convention": {
+      "pval_l": 0.0,
+      "pval_c": 0.0,
+      "pval_u": 0.28857715430861725
+    },
+    "primary_pval": 0.0,
+    "primary_variant": "c (consistent, Hansen 2005), fixed-omega studentization",
+    "reject_h0_p10": true,
+    "robust_to_studentization_choice": true,
+    "interpretation": "With proper max-type snooping adjustment over 15 eligible specs, SPA_c p=0.0000; H0 IS rejected at the 10% level. The same conclusion holds under both studentization conventions."
+  },
+  "least_favourable_tail_attribution": {
+    "question": "Which specs attain the max in the u-recentered bootstrap draws that exceed the observed statistic?",
+    "n_draws_exceeding": 144,
+    "bootstrap_B": 499,
+    "argmax_counts": {
+      "A5": 77,
+      "C2": 48,
+      "C3": 19
+    },
+    "finding": "Every exceeding draw is attained by a spec that is catastrophically WORSE than the benchmark (A5 t=-11.2, C2 t=-21.1, C3 t=-10.0). No draw is attained by a competitive spec. The v4 non-rejection therefore measures the degeneracy of the three worst specs under least-favourable recentering, not the competitiveness of the candidate set \u2014 which is exactly the conservativeness Hansen's SPA_c removes.",
+    "caveat": "The three specs' extreme QLIKE losses (10-21 sigma below benchmark) are themselves worth investigating for numerical degeneracy; they are dropped by SPA_c on statistical grounds, but if they are simply broken they should not be candidates at all. Either route yields the same corrected verdict."
+  },
+  "white_rc_corrected": {
+    "definition": "White (2000) max-type Reality Check, non-studentized",
+    "stat": 3.7333357298210785,
+    "pval": 0.6052104208416834,
+    "reject_h0_p10": false,
+    "note": "The studentized equivalent is hansen_spa_corrected.pval_u."
+  },
+  "per_spec_dm_tests": {
+    "snooping_adjusted": false,
+    "warning": "These are per-spec Diebold-Mariano bootstrap t-tests. They are NOT snooping-adjusted and must never be cited as Reality Check evidence. Use holm_step_down for a multiplicity-controlled per-spec statement.",
+    "specs": {
+      "A1": {
+        "t_stat": 3.126631716534911,
+        "d_bar": 0.07438206059658156,
+        "raw_bootstrap_p": 0.0
+      },
+      "A2": {
+        "t_stat": 3.28170901162484,
+        "d_bar": 0.0768326675730953,
+        "raw_bootstrap_p": 0.0
+      },
+      "A3": {
+        "t_stat": 3.126631716534911,
+        "d_bar": 0.07438206059658156,
+        "raw_bootstrap_p": 0.0
+      },
+      "A4": {
+        "t_stat": 4.041648788367642,
+        "d_bar": 0.08448843595977416,
+        "raw_bootstrap_p": 0.0
+      },
+      "A5": {
+        "t_stat": -11.20900929230887,
+        "d_bar": -0.6571646278478944,
+        "raw_bootstrap_p": 1.0
+      },
+      "A2f": {
+        "t_stat": 3.0634940289277237,
+        "d_bar": 0.06697106828216035,
+        "raw_bootstrap_p": 0.0
+      },
+      "A4f": {
+        "t_stat": 4.1334667187930885,
+        "d_bar": 0.0861258768853484,
+        "raw_bootstrap_p": 0.0
+      },
+      "A3f": {
+        "t_stat": 3.303230399388028,
+        "d_bar": 0.060799540932767224,
+        "raw_bootstrap_p": 0.0
+      },
+      "A2n": {
+        "t_stat": 3.28170901162484,
+        "d_bar": 0.0768326675730953,
+        "raw_bootstrap_p": 0.0
+      },
+      "A4n": {
+        "t_stat": 4.041648788367642,
+        "d_bar": 0.08448843595977416,
+        "raw_bootstrap_p": 0.0
+      },
+      "B1": {
+        "t_stat": 4.204654737813586,
+        "d_bar": 0.06242772241183504,
+        "raw_bootstrap_p": 0.0
+      },
+      "B2": {
+        "t_stat": 1.3886952615606116,
+        "d_bar": 0.02613763260650694,
+        "raw_bootstrap_p": 0.22444889779559118
+      },
+      "B3": {
+        "t_stat": 3.771057291507994,
+        "d_bar": 0.05240693072249591,
+        "raw_bootstrap_p": 0.0
+      },
+      "C2": {
+        "t_stat": -21.06651358551618,
+        "d_bar": -0.9049118549804696,
+        "raw_bootstrap_p": 1.0
+      },
+      "C3": {
+        "t_stat": -9.963159160313067,
+        "d_bar": -0.48154931429470554,
+        "raw_bootstrap_p": 1.0
+      }
+    }
+  },
+  "holm_step_down": {
+    "alpha": 0.1,
+    "family_size": 15,
+    "n_reject": 11,
+    "per_spec": {
+      "A1": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "A2": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "A3": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "A4": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "A5": {
+        "raw_p": 1.0,
+        "holm_adj_p": 1.0,
+        "reject_at_0.10": false
+      },
+      "A2f": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "A4f": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "A3f": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "A2n": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "A4n": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "B1": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "B2": {
+        "raw_p": 0.22444889779559118,
+        "holm_adj_p": 0.8977955911823647,
+        "reject_at_0.10": false
+      },
+      "B3": {
+        "raw_p": 0.0,
+        "holm_adj_p": 0.0,
+        "reject_at_0.10": true
+      },
+      "C2": {
+        "raw_p": 1.0,
+        "holm_adj_p": 1.0,
+        "reject_at_0.10": false
+      },
+      "C3": {
+        "raw_p": 1.0,
+        "holm_adj_p": 1.0,
+        "reject_at_0.10": false
+      }
+    }
+  },
+  "a4f_headline_correction": {
+    "v4_claim": "A4f significantly beats GJR after RC correction (p=0.000)",
+    "v4_pval": 0.0,
+    "what_that_number_actually_is": "single-spec bootstrap DM t-test, no snooping adjustment",
+    "pvalue_floor_note": "p=0.000 is below the bootstrap resolution 1/499=0.0020; it should be reported as p < 0.0020, never as exactly 0.",
+    "a4f_holm_adj_p": 0.0,
+    "a4f_holm_reject_at_0.10": true,
+    "corrected_reading": "The snooping-adjusted joint test gives SPA_c p=0.0000. A4f's Holm-adjusted per-spec p is 0.0000."
+  },
+  "c3_verdict_corrected": "C3 POSITIVE (snooping-adjusted): SPA_c p=0.0000 (< 1/499) and A4f survives Holm (adj p=0.0000); 11/15 specs reject at FWER 0.10. BOTH v4 numbers were wrong, in OPPOSITE directions: the field named `white_rc_test` was an unadjusted single-spec DM test (overstated), and the field named `hansen_spa_test` (p=0.2886, non-rejecting) was the least-favourable SPA_u whose entire upper tail is produced by three degenerate specs (understated). The correct snooping-adjusted joint test rejects H0. Note this REVERSES the prior reading that 'the properly corrected test does not reject'."
+}
