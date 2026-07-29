@@ -23,6 +23,7 @@ import pytest
 from scripts.dispatch_supervisor import phase_z
 from volpred.ops import fire_manifest
 
+
 def _snapshot(root: Path) -> Path:
     """Where PHASE-Z parks its fire-start baseline: inside the git dir, so no
     `.gitignore` rule is load-bearing and nobody can ever commit it."""
@@ -492,6 +493,48 @@ def test_candidate_hook_reads_candidate_tree_and_side_effects_are_isolated(repo:
     assert not (repo / "hook-side-effect.txt").exists()
 
 
+def test_candidate_hook_does_not_leak_supervisor_private_environment(
+    repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_path = os.environ.get("PATH", "")
+    marker_path = f"/volpred-hook-path:{original_path}"
+    monkeypatch.setenv("PATH", marker_path)
+    monkeypatch.setenv("VOLPRED_ACTOR", "phase-z-owner")
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_RELEASE_SHA256", "private-release")
+    monkeypatch.setenv(
+        "VOLPRED_DEFERRED_RELOAD_TEST_SOURCE_ROOTS",
+        "/private/reload-source",
+    )
+    monkeypatch.setenv("VOLPRED_CANONICAL_REPO_ROOT", "/private/canonical")
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "storage/ops/ours.txt", "candidate bytes\n")
+    hook_envs: list[dict[str, str]] = []
+
+    def recording_runner(cmd, **kwargs):
+        if cmd and cmd[0] == "bash" and "trusted-pre-commit" in cmd[1]:
+            hook_envs.append(dict(kwargs["env"]))
+        return subprocess.run(cmd, **kwargs)
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        runner=recording_runner,
+        test_runner=_no_tests,
+        alert_fn=lambda **_kwargs: {},
+    )
+
+    assert outcome["committed"] is True
+    assert len(hook_envs) == 1
+    child_env = hook_envs[0]
+    assert child_env["PATH"] == marker_path
+    assert child_env["VOLPRED_ACTOR"] == "phase-z-owner"
+    assert child_env["GIT_INDEX_FILE"]
+    assert "VOLPRED_SUPERVISOR_RELEASE_SHA256" not in child_env
+    assert "VOLPRED_DEFERRED_RELOAD_TEST_SOURCE_ROOTS" not in child_env
+    assert "VOLPRED_CANONICAL_REPO_ROOT" not in child_env
+
+
 def test_missing_immutable_hook_fails_closed(repo: Path) -> None:
     (repo / ".git" / "hooks" / "pre-commit").unlink()
     phase_z.run_pre_fire_guard(repo_root=repo)
@@ -783,6 +826,42 @@ def test_guard_baselines_even_when_guard_script_is_absent(repo: Path) -> None:
     assert outcome["reason"] == "guard_missing"
     assert outcome["dirty_at_fire_start"] == 1
     assert _snapshot(repo).exists()
+
+
+def test_pre_fire_guard_does_not_leak_supervisor_private_environment(
+    repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write(repo, "scripts/git_conflict_guard.py", "raise SystemExit(0)\n")
+    original_path = os.environ.get("PATH", "")
+    marker_path = f"/volpred-actor-path:{original_path}"
+    monkeypatch.setenv("PATH", marker_path)
+    monkeypatch.setenv("VOLPRED_ACTOR", "codex-vscode")
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_RELEASE_ID", "private-release")
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_BOOTSTRAP_SHA256", "private-bootstrap")
+    monkeypatch.setenv("VOLPRED_DEFERRED_RELOAD_ROOT", "/private/reload")
+    monkeypatch.setenv("VOLPRED_CANONICAL_REPO_ROOT", "/private/canonical")
+    calls: list[dict] = []
+
+    def guard_runner(argv, **kwargs):
+        calls.append(kwargs)
+        return subprocess.CompletedProcess(argv, 0, "", "")
+
+    outcome = phase_z.run_pre_fire_guard(
+        repo_root=repo,
+        runner=guard_runner,
+        git_runner=subprocess.run,
+    )
+
+    assert outcome["reason"] == "ok"
+    assert len(calls) == 1
+    child_env = calls[0]["env"]
+    assert child_env["PATH"] == marker_path
+    assert child_env["VOLPRED_ACTOR"] == "codex-vscode"
+    assert "VOLPRED_SUPERVISOR_RELEASE_ID" not in child_env
+    assert "VOLPRED_SUPERVISOR_BOOTSTRAP_SHA256" not in child_env
+    assert "VOLPRED_DEFERRED_RELOAD_ROOT" not in child_env
+    assert "VOLPRED_CANONICAL_REPO_ROOT" not in child_env
 
 
 # ── porcelain parsing ────────────────────────────────────────────────────────

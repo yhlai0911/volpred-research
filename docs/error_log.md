@@ -4469,3 +4469,37 @@ cache；正式產品／交易日曆的 follow-up 已進任務池，不阻擋平�
 **狀態**：本機 affected-suite 與 private frontend gate 已通過；本條在 GitHub CI、
 Operations Core deploy 與 live read-back 完成前維持 **`contained`**，不得宣稱
 `root_cause_fixed_and_verified`。
+
+---
+
+## 2026-07-29 — immutable supervisor 身分不可繼承到 canonical／provider child
+
+**證據化症狀**：immutable release cutover 後，dispatch supervisor 每分鐘的 admission
+settlement 都回 `task_pool_cli_failed rc=1`，沒有新 worker。以 live daemon 的
+`VOLPRED_SUPERVISOR_RELEASE_*`、`VOLPRED_SUPERVISOR_BOOTSTRAP_SHA256` 與
+`VOLPRED_CANONICAL_REPO_ROOT` 重播 canonical
+`scripts/task_pool_claim.py dispatch-pending`，可 100% 重現
+`ModuleNotFoundError: No module named 'scripts'`；移除 release marker 後則正常進到
+`supervisor_capability_required`。Queue validator 同期為 0/3569 invalid，child PPID
+也精確指向 supervisor，故不是壞資料或 parent-proof 誤拒。
+
+**根因層級（process identity／import provenance contract）**：release marker 是
+daemon 本身的 process-scoped identity，bootstrap 卻讓所有 subprocess 原樣繼承。
+Canonical child 並未由 pinned loader 啟動，但 `volpred.ops` 看到 marker 後改走 pinned
+語意，造成 import path 與 writer capability 判斷錯置。原 `_task_pool_command` 又把空
+stdout 解成 `{}` 並丟棄 stderr，live 只剩 generic failure，掩蓋真正 traceback。
+
+**底層修復與制度化**：新增 dependency-free
+`dispatch_supervisor.child_env.external_child_environment()`；在套用 overrides 後統一
+移除所有 `VOLPRED_SUPERVISOR_*`、`VOLPRED_DEFERRED_RELOAD_*` 與
+`VOLPRED_CANONICAL_REPO_ROOT`，但保留 PATH、HOME、OAuth、actor、task owner、
+provider receipt 與 Git writer lease。Task-pool、pregate、send-alert、Claude、
+Codex preflight／reachability／worker、PHASE-Z pre-fire／clone pytest／trusted hook、
+workspace merge 全部走同一邊界；stage0→bootstrap 是唯一刻意保留 pinned identity 的
+chain。Task-pool 非零退出同時保留 bounded stderr，避免同類事故再被 generic rc
+靜默化。
+
+**回歸與狀態**：各邊界先有可重現 RED，再修成 GREEN；bootstrap→grandchild E2E 也斷言
+private identity 為空，supervisor／PHASE-Z／workspace／release／task-pool affected
+suite 共 **460 passed**。在 immutable live reload、新 worker completion receipt、
+連續 scheduler tick 與通知／pregate read-back 完成前，本條仍為 **`contained`**。

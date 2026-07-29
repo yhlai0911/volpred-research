@@ -5581,6 +5581,161 @@ def test_admission_outbox_requeues_task_after_preassign_crash(
     assert commands[1][commands[1].index("--disposition") + 1] == "retry"
 
 
+def test_task_pool_cli_failure_preserves_subprocess_stderr(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    """A control-plane crash must remain diagnosable at the scheduler boundary."""
+
+    monkeypatch.setattr(
+        scheduler.subprocess,
+        "run",
+        lambda *_args, **_kwargs: subprocess.CompletedProcess(
+            args=["python", "task_pool_claim.py"],
+            returncode=1,
+            stdout="",
+            stderr="InvalidUnblockGate: issue42 lifecycle shape",
+        ),
+    )
+
+    result = scheduler._task_pool_command(
+        repo_root=tmp_path,
+        args=["dispatch-pending", "--limit", "20"],
+    )
+
+    assert result == {
+        "ok": False,
+        "reason": "task_pool_cli_failed",
+        "rc": 1,
+        "detail": "InvalidUnblockGate: issue42 lifecycle shape",
+    }
+
+
+def test_task_pool_structured_failure_still_preserves_subprocess_stderr(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    """A JSON error payload must not make the process traceback disappear."""
+
+    monkeypatch.setattr(
+        scheduler.subprocess,
+        "run",
+        lambda *_args, **_kwargs: subprocess.CompletedProcess(
+            args=["python", "task_pool_claim.py"],
+            returncode=2,
+            stdout='{"ok": false, "reason": "invalid_state"}',
+            stderr="traceback details from canonical child",
+        ),
+    )
+
+    result = scheduler._task_pool_command(
+        repo_root=tmp_path,
+        args=["dispatch-pending", "--limit", "20"],
+    )
+
+    assert result == {
+        "ok": False,
+        "reason": "invalid_state",
+        "rc": 2,
+        "detail": "traceback details from canonical child",
+    }
+
+
+def test_task_pool_cli_child_scrubs_all_supervisor_private_environment(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    captured: dict[str, str] = {}
+    for key in (
+        "VOLPRED_SUPERVISOR_RELEASE_ID",
+        "VOLPRED_SUPERVISOR_BOOTSTRAP_SHA256",
+        "VOLPRED_SUPERVISOR_FUTURE_MARKER",
+        "VOLPRED_DEFERRED_RELOAD_ROOT",
+        "VOLPRED_DEFERRED_RELOAD_FUTURE_MARKER",
+        "VOLPRED_CANONICAL_REPO_ROOT",
+    ):
+        monkeypatch.setenv(key, f"private-{key.lower()}")
+    monkeypatch.setenv("VOLPRED_ACTOR", "dispatch-supervisor")
+
+    def run(*_args, **kwargs):
+        captured.update(kwargs["env"])
+        return subprocess.CompletedProcess(
+            args=["python", "task_pool_claim.py"],
+            returncode=0,
+            stdout='{"ok": false, "reason": "no_work"}',
+            stderr="",
+        )
+
+    monkeypatch.setattr(scheduler.subprocess, "run", run)
+
+    result = scheduler._task_pool_command(
+        repo_root=tmp_path,
+        args=["dispatch-pending", "--limit", "1"],
+    )
+
+    assert result == {"ok": False, "reason": "no_work"}
+    assert captured["VOLPRED_ACTOR"] == "dispatch-supervisor"
+    assert not any(
+        key.startswith(("VOLPRED_SUPERVISOR_", "VOLPRED_DEFERRED_RELOAD_"))
+        for key in captured
+    )
+    assert "VOLPRED_CANONICAL_REPO_ROOT" not in captured
+
+
+def test_task_pool_cli_child_does_not_inherit_release_identity(
+    monkeypatch,
+) -> None:
+    """Canonical child CLIs must not masquerade as the immutable supervisor."""
+
+    for key in (
+        "VOLPRED_SUPERVISOR_RELEASE_ID",
+        "VOLPRED_SUPERVISOR_RELEASE_SHA256",
+        "VOLPRED_SUPERVISOR_RELEASE_COMMIT",
+        "VOLPRED_SUPERVISOR_RELEASE_ARCHIVE",
+        "VOLPRED_CANONICAL_REPO_ROOT",
+    ):
+        monkeypatch.setenv(key, f"test-{key.lower()}")
+
+    repo_root = Path(__file__).resolve().parents[1]
+    result = scheduler._task_pool_command(
+        repo_root=repo_root,
+        args=["dispatch-pending", "--limit", "1"],
+    )
+
+    assert result["ok"] is False
+    assert result["reason"] == "supervisor_capability_required"
+    assert result["rc"] == 1
+    assert "supervisor capability proof unavailable" in result["detail"]
+    assert "ModuleNotFoundError" not in result["detail"]
+
+
+def test_pregate_child_scrubs_supervisor_private_environment(
+    monkeypatch,
+) -> None:
+    captured: dict[str, str] = {}
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_RELEASE_ID", "release")
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_FUTURE_MARKER", "future")
+    monkeypatch.setenv("VOLPRED_DEFERRED_RELOAD_ROOT", "/tmp/reload")
+    monkeypatch.setenv("VOLPRED_CANONICAL_REPO_ROOT", "/repo")
+    monkeypatch.setenv("VOLPRED_ACTOR", "dispatch-supervisor")
+
+    def run(*_args, **kwargs):
+        captured.update(kwargs["env"])
+        return subprocess.CompletedProcess(
+            args=["python", "hourly_dispatch_pregate.py"],
+            returncode=1,
+            stdout="",
+            stderr="",
+        )
+
+    monkeypatch.setattr(scheduler.subprocess, "run", run)
+
+    assert _REAL_RUN_PREGATE(mode="enforce", window_hours=3.0) is False
+    assert captured["VOLPRED_ACTOR"] == "dispatch-supervisor"
+    assert not any(
+        key.startswith(("VOLPRED_SUPERVISOR_", "VOLPRED_DEFERRED_RELOAD_"))
+        for key in captured
+    )
+    assert "VOLPRED_CANONICAL_REPO_ROOT" not in captured
+
+
 def test_admission_outbox_waits_for_live_job_or_workspace_owner(
     tmp_path: Path, monkeypatch,
 ) -> None:

@@ -166,6 +166,46 @@ def test_exec_success_marks_recovered(monkeypatch) -> None:
     assert len(work_envs[0]["VOLPRED_PROVIDER_REGISTRY_SHA256"]) == 64
 
 
+def test_all_codex_boundaries_scrub_supervisor_private_environment(
+    monkeypatch,
+) -> None:
+    environments: list[dict[str, str]] = []
+    for key in (
+        "VOLPRED_SUPERVISOR_RELEASE_ID",
+        "VOLPRED_SUPERVISOR_FUTURE_MARKER",
+        "VOLPRED_DEFERRED_RELOAD_ROOT",
+        "VOLPRED_CANONICAL_REPO_ROOT",
+    ):
+        monkeypatch.setenv(key, f"private-{key.lower()}")
+    monkeypatch.setenv("VOLPRED_ACTOR", "dispatch-supervisor")
+
+    inner = _fake_codex(
+        probe=_PROBE_OK,
+        work=SimpleNamespace(returncode=0, stdout="done", stderr=""),
+    )
+
+    def run(argv, **kwargs):
+        environments.append(dict(kwargs["env"]))
+        return inner(argv, **kwargs)
+
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(codex_failover.subprocess, "run", run)
+
+    result = codex_failover.run_codex_failover(reason="quota", enabled=True)
+
+    assert result.recovered is True
+    assert len(environments) == 3
+    for environment in environments:
+        assert environment["VOLPRED_ACTOR"] == "dispatch-supervisor"
+        assert not any(
+            key.startswith(
+                ("VOLPRED_SUPERVISOR_", "VOLPRED_DEFERRED_RELOAD_")
+            )
+            for key in environment
+        )
+        assert "VOLPRED_CANONICAL_REPO_ROOT" not in environment
+
+
 def test_registry_denial_prevents_any_codex_subprocess(monkeypatch) -> None:
     monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
     monkeypatch.setattr(

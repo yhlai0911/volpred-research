@@ -40,6 +40,7 @@ from pathlib import Path
 from typing import Any
 
 from . import state
+from .child_env import external_child_environment
 
 LOG = logging.getLogger(__name__)
 
@@ -74,7 +75,12 @@ def _send(level: str, title: str, body_md: str) -> int:
         ]
         try:
             result = subprocess.run(
-                cmd, cwd=str(ROOT), capture_output=True, text=True, timeout=60
+                cmd,
+                cwd=str(ROOT),
+                capture_output=True,
+                text=True,
+                timeout=60,
+                env=external_child_environment(),
             )
             if result.returncode != 0:
                 LOG.warning("send-alert exit=%d stderr=%s", result.returncode, result.stderr[:200])

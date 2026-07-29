@@ -33,11 +33,10 @@ import os
 import signal
 import subprocess
 import time
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Sequence
-from typing import Callable
 
 from volpred.ops import fire_manifest, termination
 from volpred.ops.execution.registry import (
@@ -47,9 +46,16 @@ from volpred.ops.execution.registry import (
 )
 
 from . import (
-    alerts, claim_release, codex_failover, failure_class, identity, isolation,
-    procutil, state,
+    alerts,
+    claim_release,
+    codex_failover,
+    failure_class,
+    identity,
+    isolation,
+    procutil,
+    state,
 )
+from .child_env import external_child_environment
 
 LOG = logging.getLogger(__name__)
 
@@ -416,10 +422,10 @@ def _spawn(
 ) -> subprocess.Popen:
     """Spawn child in its own process group; redirect combined stdout+stderr to log_path.
 
-    `env=None` (the default) inherits the parent's environment unchanged — the
-    pre-2026-07-10 behaviour. Callers that need to stamp VOLPRED_ACTOR pass an
-    os.environ EXTENSION (`{**os.environ, ...}`), never a replacement, so PATH /
-    auth / HOME survive.
+    ``env=None`` starts from the parent environment.  In either case the final
+    Popen boundary removes immutable-supervisor identity: that identity belongs
+    to the daemon and must never reach a provider or any of its descendants.
+    Ordinary PATH / auth / HOME / actor values survive.
 
     Hang-log capture (2026-07-18): a child's stdout to a plain file fd is
     block-buffered by default, so when a hung worker is SIGKILL'd the whole
@@ -430,8 +436,8 @@ def _spawn(
     every python child (the worker's helpers and any python the agent spawns)
     flushes each line to the OS page cache, which persists across SIGKILL.
 
-    We must extend the resolved env, never replace it: `{**(env or os.environ),
-    ...}`. A bare `{"PYTHONUNBUFFERED": "1"}` would wipe PATH/HOME/auth and the
+    We must extend the resolved env, never replace it. A bare
+    `{"PYTHONUNBUFFERED": "1"}` would wipe PATH/HOME/auth and the
     child could not exec or authenticate.
 
     Scope honesty: this helps python children only. The real hourly child is the
@@ -448,7 +454,10 @@ def _spawn(
     """
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_fh = log_path.open("ab")
-    child_env = {**(env or os.environ), "PYTHONUNBUFFERED": "1"}
+    child_env = external_child_environment(
+        env,
+        overrides={"PYTHONUNBUFFERED": "1"},
+    )
     return subprocess.Popen(
         list(argv),
         stdout=log_fh,
@@ -549,22 +558,24 @@ def _run_one_attempt(
     log_offset = _log_size(log_path)
     started = time.time()
     # Stamp the fire onto the agent's env so its shared-state writes are
-    # attributable (see _dispatch_actor). Extend os.environ — the supervisor
-    # boot set VOLPRED_ACTOR=dispatch-supervisor as a process default, which we
-    # deliberately override here so AGENT writes carry the fire, not the daemon.
-    child_env = {
-        **os.environ,
-        "VOLPRED_ACTOR": _dispatch_actor(
-            schedule_id, slot_id=slot_id, job_id=job_id,
-        ),
-        "VOLPRED_DISPATCH_SLOT": slot_id,
-        "VOLPRED_DISPATCH_JOB_ID": job_id,
-        "VOLPRED_FIRE_ID": job_id,
-        "VOLPRED_FIRE_REPO_ROOT": str(PROJECT_ROOT),
-        "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
-            role="hourly", slot_id=slot_id, job_id=job_id,
-        ),
-    }
+    # attributable (see _dispatch_actor). Extend the sanitized parent
+    # environment — the supervisor boot set VOLPRED_ACTOR=dispatch-supervisor
+    # as a process default, which we deliberately override here so AGENT writes
+    # carry the fire, not the daemon.
+    child_env = external_child_environment(
+        overrides={
+            "VOLPRED_ACTOR": _dispatch_actor(
+                schedule_id, slot_id=slot_id, job_id=job_id,
+            ),
+            "VOLPRED_DISPATCH_SLOT": slot_id,
+            "VOLPRED_DISPATCH_JOB_ID": job_id,
+            "VOLPRED_FIRE_ID": job_id,
+            "VOLPRED_FIRE_REPO_ROOT": str(PROJECT_ROOT),
+            "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
+                role="hourly", slot_id=slot_id, job_id=job_id,
+            ),
+        },
+    )
     if isolated_workspace is not None:
         expected_workspace = Path(str(isolated_workspace.get("path") or "")).resolve()
         if workdir is None or Path(workdir).resolve() != expected_workspace:
@@ -604,7 +615,10 @@ def _run_one_attempt(
             executable_path=claude_bin,
             environment=child_env,
         )
-        child_env.update(provider_receipt.environment())
+        child_env = external_child_environment(
+            child_env,
+            overrides=provider_receipt.environment(),
+        )
         argv[0] = provider_receipt.resolved_executable
         if provider_receipt.settings_path is None:
             raise ProviderRegistryError(

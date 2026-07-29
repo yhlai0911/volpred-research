@@ -58,8 +58,9 @@ from . import (
     phase_z,
     state,
     worker,
-    workspace as workspace_mod,
 )
+from . import workspace as workspace_mod
+from .child_env import external_child_environment
 from .report_contract import inject_external_report_contract
 
 LOG = logging.getLogger(__name__)
@@ -465,6 +466,7 @@ def _task_pool_command(
     proc = subprocess.run(
         [sys.executable, str(repo_root / "scripts" / "task_pool_claim.py"), *args],
         cwd=repo_root,
+        env=external_child_environment(),
         capture_output=True,
         text=True,
         timeout=30,
@@ -479,12 +481,20 @@ def _task_pool_command(
             "rc": proc.returncode,
             "detail": (proc.stderr or proc.stdout or "")[-500:],
         }
-    if proc.returncode != 0 and payload.get("ok") is not False:
+    if proc.returncode != 0:
+        existing_detail = payload.get("detail")
+        detail = (
+            proc.stderr
+            or (existing_detail if isinstance(existing_detail, str) else "")
+            or proc.stdout
+            or ""
+        )[-1000:]
         payload = {
             **payload,
             "ok": False,
             "reason": payload.get("reason") or "task_pool_cli_failed",
             "rc": proc.returncode,
+            **({"detail": detail} if detail else {}),
         }
     return payload
 
@@ -1021,6 +1031,7 @@ def _run_pregate(*, mode: str, window_hours: float) -> bool:
         proc = subprocess.run(
             cmd, capture_output=True, text=True,
             timeout=PREGATE_TIMEOUT_S, cwd=str(ROOT), check=False,
+            env=external_child_environment(),
         )
     except subprocess.TimeoutExpired:
         LOG.warning("pregate timeout after %ss — fail-open PROCEED", PREGATE_TIMEOUT_S)

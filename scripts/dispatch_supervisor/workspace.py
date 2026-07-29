@@ -67,6 +67,7 @@ from volpred.ops.next_tasks import append_task_record
 from volpred.ops.remediation_throttle import INCIDENT_ADJUDICATION_SOURCE
 
 from . import phase_z
+from .child_env import external_child_environment
 
 LOG = logging.getLogger(__name__)
 
@@ -951,7 +952,7 @@ def _run_merge_script(*, repo_root: Path, workspace: dict[str, Any],
                 ["/bin/bash", str(script), workspace["name"]],
                 capture_output=True, text=True, timeout=_MERGE_TIMEOUT_S,
                 cwd=str(repo_root), check=False,  # K1618: never from inside the worktree
-                env=lease.child_env(),
+                env=external_child_environment(lease.child_env()),
                 pass_fds=lease.child_pass_fds(),
             )
     except GitWriterLockError as exc:

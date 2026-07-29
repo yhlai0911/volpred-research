@@ -59,6 +59,7 @@ from volpred.ops.execution.registry import (
 )
 
 from . import identity, isolation, procutil, state
+from .child_env import external_child_environment
 from .report_contract import inject_external_report_contract
 
 LOG = logging.getLogger(__name__)
@@ -164,9 +165,12 @@ def preflight(
 ) -> tuple[bool, int, str]:
     """`codex --version`. Returns (ok, rc, detail)."""
     try:
-        child_env = dict(environment if environment is not None else os.environ)
+        child_env = external_child_environment(environment)
         receipt = _authorize_codex(codex_bin, child_env)
-        child_env.update(receipt.environment())
+        child_env = external_child_environment(
+            child_env,
+            overrides=receipt.environment(),
+        )
         verify_spawn_receipt(receipt)
         result = subprocess.run(
             [receipt.resolved_executable, "--version"],
@@ -203,9 +207,12 @@ def check_reachable(
     in seconds, whose failure is real evidence the API is unavailable.
     """
     try:
-        child_env = dict(environment if environment is not None else os.environ)
+        child_env = external_child_environment(environment)
         receipt = _authorize_codex(codex_bin, child_env)
-        child_env.update(receipt.environment())
+        child_env = external_child_environment(
+            child_env,
+            overrides=receipt.environment(),
+        )
         verify_spawn_receipt(receipt)
         result = subprocess.run(
             [
@@ -528,7 +535,7 @@ def _run_codex_failover_impl(
         return FailoverResult(False, False, RC_BINARY_MISSING, "找不到可執行的 codex binary")
 
     launch_cwd = (workdir or ROOT).resolve()
-    child_env = dict(os.environ)
+    child_env = external_child_environment()
     isolation_receipt: dict[str, str] | None = None
     tracked_pgid: int | None = None
 
@@ -637,7 +644,10 @@ def _run_codex_failover_impl(
             RC_POLICY_DENIED,
             f"provider policy denied Codex work spawn: {exc}",
         ))
-    child_env = {**child_env, **provider_receipt.environment()}
+    child_env = external_child_environment(
+        child_env,
+        overrides=provider_receipt.environment(),
+    )
     argv[0] = provider_receipt.resolved_executable
     if isolated_workspace is not None:
         try:

@@ -18,6 +18,7 @@ BOOTSTRAP = ROOT / "scripts" / "dispatch_supervisor_bootstrap.py"
 STAGE0 = ROOT / "scripts" / "dispatch_supervisor_stage0.py"
 CLAIM_RELEASE = ROOT / "scripts" / "dispatch_supervisor" / "claim_release.py"
 IDENTITY = ROOT / "scripts" / "dispatch_supervisor" / "identity.py"
+CHILD_ENV = ROOT / "scripts" / "dispatch_supervisor" / "child_env.py"
 
 
 def test_private_directory_converges_owner_owned_readonly_bits(
@@ -59,13 +60,19 @@ def _release(tmp_path: Path) -> tuple[Path, Path, dict[str, str]]:
     output = tmp_path / "loaded.json"
     provisional = releases / "provisional.zip"
     module = (
-        "import importlib.util, json, os, sys\n"
+        "import importlib.util, json, os, subprocess, sys\n"
         "from pathlib import Path\n"
         "from volpred.ops import RELEASE_VALUE\n"
         "sys.path.insert(0, str(Path.cwd()))\n"
         "from scripts.dispatch_supervisor import pinned_probe\n"
         "from scripts.dispatch_supervisor import claim_release\n"
+        "from scripts.dispatch_supervisor.child_env import external_child_environment\n"
         "task_pool = claim_release._task_pool_claim()\n"
+        "grandchild = subprocess.run(\n"
+        "  [sys.executable, '-c', \"import os; print('|'.join(sorted(k for k in os.environ if k.startswith(('VOLPRED_SUPERVISOR_', 'VOLPRED_DEFERRED_RELOAD_')) or k == 'VOLPRED_CANONICAL_REPO_ROOT')))\"] ,\n"
+        "  capture_output=True, text=True, check=True,\n"
+        "  env=external_child_environment(),\n"
+        ")\n"
         "denied = False\n"
         "try:\n"
         "  spec = importlib.util.spec_from_file_location(\n"
@@ -83,6 +90,7 @@ def _release(tmp_path: Path) -> tuple[Path, Path, dict[str, str]]:
         "  'pinned_probe': pinned_probe.VALUE,\n"
         "  'task_pool_value': task_pool.PINNED_TASK_POOL_VALUE,\n"
         "  'task_pool_file': task_pool.__file__,\n"
+        "  'grandchild_private_environment': grandchild.stdout.strip(),\n"
         "  'mutable_python_denied': denied,\n"
         "  'loader': type(__loader__).__name__,\n"
         "}), encoding='utf-8')\n"
@@ -96,6 +104,9 @@ def _release(tmp_path: Path) -> tuple[Path, Path, dict[str, str]]:
             CLAIM_RELEASE.read_text(encoding="utf-8")
         ),
         "scripts/dispatch_supervisor/identity.py": IDENTITY.read_text(
+            encoding="utf-8"
+        ),
+        "scripts/dispatch_supervisor/child_env.py": CHILD_ENV.read_text(
             encoding="utf-8"
         ),
         "scripts/task_pool_claim.py": "PINNED_TASK_POOL_VALUE = 73\n",
@@ -188,6 +199,7 @@ def test_bootstrap_imports_supervisor_only_from_pinned_release(tmp_path: Path) -
     assert loaded["task_pool_file"] == str(
         tmp_path / "canonical" / "scripts" / "task_pool_claim.py"
     )
+    assert loaded["grandchild_private_environment"] == ""
     assert loaded["mutable_python_denied"] is True
 
 

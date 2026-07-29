@@ -74,23 +74,25 @@ from volpred.ops.foreign_incident import (
     reconcile_incidents,
     upsert_incident,
 )
-from volpred.ops.machine_churn import (
-    MachineChurnClassification,
-    MachineChurnIdentity,
-    classify_machine_churn,
-    machine_churn_identity_matches,
-)
-from volpred.ops.issue_tracker_sync import (
-    pending_issue_task_ids_for_owners,
-    settle_completed_task_issues,
-)
-from volpred.ops.next_tasks import backfill_ci_repair_commit
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
     git_writer_lock,
     git_writer_subprocess_kwargs,
     require_canonical_main_checkout,
 )
+from volpred.ops.issue_tracker_sync import (
+    pending_issue_task_ids_for_owners,
+    settle_completed_task_issues,
+)
+from volpred.ops.machine_churn import (
+    MachineChurnClassification,
+    MachineChurnIdentity,
+    classify_machine_churn,
+    machine_churn_identity_matches,
+)
+from volpred.ops.next_tasks import backfill_ci_repair_commit
+
+from .child_env import external_child_environment
 
 LOG = logging.getLogger(__name__)
 
@@ -1511,6 +1513,7 @@ def run_pre_fire_guard(
             text=True,
             timeout=_GUARD_TIMEOUT_S,
             cwd=str(repo_root),
+            env=external_child_environment(),
             check=False,
         )
     except subprocess.TimeoutExpired:
@@ -2155,15 +2158,18 @@ def _run_clone_pytest(
     ]
     if k_expr:
         argv += ["-k", k_expr]
-    env = os.environ.copy()
-    env.update({
-        "VOLPRED_NO_EMAIL": "1",
-        "VOLPRED_NO_REMOTE_WRITE": "1",
-        "VOLPRED_NO_REMOTE_READ": "1",
-        "VOLPRED_NO_CANONICAL_WRITE": "1",
-        "VOLPRED_CI_PARITY": "0",
-        "PYTHONPATH": os.pathsep.join([str(clone_root), str(clone_root / "src")]),
-    })
+    env = external_child_environment(
+        overrides={
+            "VOLPRED_NO_EMAIL": "1",
+            "VOLPRED_NO_REMOTE_WRITE": "1",
+            "VOLPRED_NO_REMOTE_READ": "1",
+            "VOLPRED_NO_CANONICAL_WRITE": "1",
+            "VOLPRED_CI_PARITY": "0",
+            "PYTHONPATH": os.pathsep.join(
+                [str(clone_root), str(clone_root / "src")]
+            ),
+        }
+    )
     try:
         proc = test_runner(
             argv,
@@ -3725,15 +3731,17 @@ def run_phase_z(
             )
             if git_dir_probe.returncode != 0:
                 return {"committed": False, "reason": "candidate_gate_error", "rolled_back": True}
-            hook_env = candidate_env.copy()
-            hook_env.update({
-                "GIT_DIR": (git_dir_probe.stdout or "").strip(),
-                "GIT_WORK_TREE": str(candidate_root),
-                "VOLPRED_NO_EMAIL": "1",
-                "VOLPRED_NO_REMOTE_WRITE": "1",
-                "VOLPRED_NO_REMOTE_READ": "1",
-                "VOLPRED_NO_CANONICAL_WRITE": "1",
-            })
+            hook_env = external_child_environment(
+                candidate_env,
+                overrides={
+                    "GIT_DIR": (git_dir_probe.stdout or "").strip(),
+                    "GIT_WORK_TREE": str(candidate_root),
+                    "VOLPRED_NO_EMAIL": "1",
+                    "VOLPRED_NO_REMOTE_WRITE": "1",
+                    "VOLPRED_NO_REMOTE_READ": "1",
+                    "VOLPRED_NO_CANONICAL_WRITE": "1",
+                },
+            )
             if trusted_auditor.is_file():
                 hook_env["VOLPRED_TRUSTED_TEST_IMPORT_AUDITOR"] = str(trusted_auditor)
             hook_observed_at = datetime.now(timezone.utc)
