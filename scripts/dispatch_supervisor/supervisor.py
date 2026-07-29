@@ -513,15 +513,23 @@ def _finalize_restart_workspace(orphan: dict, *, outcome: str) -> bool:
     workspace = orphan.get("workspace")
     if not isinstance(workspace, dict):
         return True
+    job_id = str(orphan.get("job_id") or "")
     final = workspace_mod.finalize_workspace(
         repo_root=ROOT,
         workspace=workspace,
         worker_outcome=outcome,
-        job_id=str(orphan.get("job_id") or ""),
+        job_id=job_id,
         producer_custody=(
             orphan.get("producer_custody")
             if isinstance(orphan.get("producer_custody"), dict)
             else None
+        ),
+        producer_drain_confirmed=(
+            workspace_mod.legacy_workspace_producer_drain_confirmed(
+                ROOT,
+                workspace_name=str(workspace.get("name") or ""),
+                job_id=job_id,
+            )
         ),
     )
     disposition = str(final.get("disposition") or "")

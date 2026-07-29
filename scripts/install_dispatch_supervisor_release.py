@@ -56,6 +56,10 @@ _RESOURCE_COALITION_RE = re.compile(
     r"resource coalition = \{\s*ID = (?P<coalition_id>[1-9][0-9]*)",
     re.MULTILINE,
 )
+_COALITION_DRAIN_CONTRACT_VERSION = 1
+_COALITION_DRAIN_MIN_RELEASE_COMMIT = (
+    "634da5e548888e4ea5f1d9b3173d48446eb844ac"
+)
 
 
 class CutoverError(RuntimeError):
@@ -73,6 +77,8 @@ class CutoverError(RuntimeError):
 
 def _verified_prior_cutover_receipt(
     request_root: Path,
+    *,
+    repo_root: Path,
 ) -> dict[str, Any] | None:
     """Read the two-file completed cutover authority or fail closed."""
     receipt_root = Path(request_root) / "cutover_receipts"
@@ -105,7 +111,16 @@ def _verified_prior_cutover_receipt(
         intent.get("status") != "completed_verified"
         or latest.get("status") != "completed"
         or any(intent.get(field) != latest.get(field) for field in paired_fields)
-        or not str(intent.get("request_id") or "").strip()
+        or re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(intent.get("request_id") or ""),
+        )
+        is None
+        or re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(intent.get("release_sha256") or ""),
+        )
+        is None
         or re.fullmatch(
             r"[0-9a-f]{40}",
             str(intent.get("release_commit") or ""),
@@ -115,7 +130,54 @@ def _verified_prior_cutover_receipt(
         or completed.utcoffset() is None
     ):
         raise CutoverError("prior completed cutover receipt pair did not verify")
+    explicit_attestation = (
+        intent.get("coalition_drain_contract_version")
+        == _COALITION_DRAIN_CONTRACT_VERSION
+        and latest.get("coalition_drain_contract_version")
+        == _COALITION_DRAIN_CONTRACT_VERSION
+        and intent.get("legacy_coalition_drained") is True
+        and latest.get("legacy_coalition_drained") is True
+    )
+    if not explicit_attestation and not _release_has_verified_coalition_drain(
+        Path(repo_root),
+        release_commit=str(intent["release_commit"]),
+    ):
+        raise CutoverError(
+            "prior cutover predates the verified coalition-drain contract"
+        )
     return intent
+
+
+def _release_has_verified_coalition_drain(
+    repo_root: Path,
+    *,
+    release_commit: str,
+) -> bool:
+    """Accept only the known drain-capable release lineage."""
+    try:
+        probe = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repo_root),
+                "merge-base",
+                "--is-ancestor",
+                _COALITION_DRAIN_MIN_RELEASE_COMMIT,
+                str(release_commit),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        warn(
+            "dispatch_cutover_lineage_probe",
+            "coalition-drain release lineage could not be verified",
+            reason=type(exc).__name__,
+        )
+        return False
+    return probe.returncode == 0
 
 
 def _backfill_pre_custody_workspace_drain(
@@ -146,7 +208,10 @@ def _backfill_pre_custody_workspace_drain(
         uncovered.append(generation)
     if not uncovered:
         return 0
-    prior = _verified_prior_cutover_receipt(Path(request_root))
+    prior = _verified_prior_cutover_receipt(
+        Path(request_root),
+        repo_root=root,
+    )
     if prior is None:
         raise CutoverError(
             "pre-custody workspaces exist without a verified prior cutover"
@@ -477,6 +542,10 @@ def _cutover_quiesced(
         receipt = {
             "schema_version": 1,
             "status": "completed",
+            "coalition_drain_contract_version": (
+                _COALITION_DRAIN_CONTRACT_VERSION
+            ),
+            "legacy_coalition_drained": True,
             "request_id": request["request_id"],
             "release_sha256": request["release_sha256"],
             "release_commit": request["release_commit"],

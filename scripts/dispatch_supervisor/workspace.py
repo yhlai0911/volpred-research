@@ -1862,7 +1862,12 @@ def _latest_terminal_receipt(
     """Return the terminal receipt for the exact allocation generation."""
     source = Path(repo_root) / RECEIPTS_RELPATH
     try:
-        lines = source.read_text(encoding="utf-8").splitlines()
+        with source.open("r", encoding="utf-8") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+            try:
+                lines = handle.read().splitlines()
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
     except FileNotFoundError:  # silent-ok: no prior receipt means this is the first finalization
         return None
     except OSError as exc:
@@ -1874,9 +1879,11 @@ def _latest_terminal_receipt(
             event = json.loads(line)
         except json.JSONDecodeError as exc:
             LOG.warning("workspace terminal receipt line unreadable (%s): %s", source, exc)
-            continue
-        if isinstance(event, dict):
-            events.append(event)
+            return None
+        if not isinstance(event, dict):
+            LOG.warning("workspace terminal receipt is not an object: %s", source)
+            return None
+        events.append(event)
     normalized_job_id = str(job_id or "").strip()
     generation_start = 0
     if normalized_job_id:

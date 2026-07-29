@@ -4950,6 +4950,47 @@ def test_terminal_generation_replays_before_missing_custody_probe(
     assert replay["replayed"] is True
 
 
+def test_terminal_replay_fails_closed_on_partial_receipt_line(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    job_id = "a" * 32
+    ws = _ws_allocate(repo, job_id=job_id)
+    first = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        job_id=job_id,
+        producer_drain_confirmed=True,
+        queue_path=_tmp_queue(tmp_path),
+    )
+    assert first["disposition"] == "empty_removed"
+    with (repo / workspace.RECEIPTS_RELPATH).open(
+        "a",
+        encoding="utf-8",
+    ) as handle:
+        handle.write('{"event":')
+    monkeypatch.setattr(
+        workspace.procutil,
+        "producer_cohort_members_checked",
+        lambda *_args, **_kwargs: None,
+    )
+
+    retry = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="timeout_unverified",
+        job_id=job_id,
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert retry["disposition"] == "producer_active"
+    assert retry["cohort_status"] == "unverified"
+
+
 def test_workspace_finalize_gate_green_merges(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -7113,6 +7154,7 @@ def test_workspace_sweep_uses_cutover_drain_for_pre_custody_orphan(
 
 def test_installer_backfills_from_exact_prior_cutover_pair(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from scripts import install_dispatch_supervisor_release as installer
     from scripts.dispatch_supervisor import custody_receipt
@@ -7130,11 +7172,16 @@ def test_installer_backfills_from_exact_prior_cutover_pair(
     receipts.mkdir(parents=True)
     paired = {
         "schema_version": 1,
-        "request_id": "cutover-prior",
+        "request_id": "c" * 64,
         "release_sha256": "a" * 64,
         "release_commit": "b" * 40,
         "completed_at": "2099-07-29T00:00:00+00:00",
     }
+    monkeypatch.setattr(
+        installer,
+        "_release_has_verified_coalition_drain",
+        lambda *_args, **_kwargs: True,
+    )
     (receipts / "in_progress.json").write_text(
         json.dumps({**paired, "status": "completed_verified"}),
         encoding="utf-8",
@@ -7685,6 +7732,50 @@ def test_task_settlement_reconciler_uses_cutover_workspace_drain(
 
     assert result[0]["settlement_completed"] is True
     assert finalized[0]["producer_drain_confirmed"] is True
+
+
+def test_restart_finalizer_uses_generation_bound_cutover_drain(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    job_id = "abcd1234" * 4
+    finalizations: list[dict] = []
+    confirmations: list[dict] = []
+    monkeypatch.setattr(supervisor, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        supervisor.workspace_mod,
+        "legacy_workspace_producer_drain_confirmed",
+        lambda repo_root, **kwargs: confirmations.append(
+            {"repo_root": repo_root, **kwargs}
+        )
+        or True,
+    )
+    monkeypatch.setattr(
+        supervisor.workspace_mod,
+        "finalize_workspace",
+        lambda **kwargs: finalizations.append(kwargs)
+        or {"disposition": "empty_removed"},
+    )
+
+    terminal = supervisor._finalize_restart_workspace(
+        {
+            "job_id": job_id,
+            "workspace": {
+                "name": "dispatch-slot-1-abcd1234",
+                "path": str(tmp_path / "workspace"),
+                "branch": "worktree-dispatch-slot-1-abcd1234",
+            },
+        },
+        outcome="orphaned",
+    )
+
+    assert terminal is True
+    assert confirmations == [{
+        "repo_root": tmp_path,
+        "workspace_name": "dispatch-slot-1-abcd1234",
+        "job_id": job_id,
+    }]
+    assert finalizations[0]["producer_drain_confirmed"] is True
 
 
 def test_admission_outbox_requeues_task_after_preassign_crash(
