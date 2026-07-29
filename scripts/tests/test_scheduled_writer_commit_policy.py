@@ -40,9 +40,18 @@ def _load(path: Path) -> dict:
 
 
 def _runtime_process_ids(runtime: dict) -> set[str]:
+    cron_jobs = (
+        item
+        for item in runtime["cron_jobs"]
+        if item.get("status") != "retired"
+        or any(
+            item.get(field)
+            for field in ("command", "canonical_script", "tcc_bypass_copy")
+        )
+    )
     processes = {
         *(item["id"] for item in runtime["system_crontab"]["items"]),
-        *(item["id"] for item in runtime["cron_jobs"]),
+        *(item["id"] for item in cron_jobs),
         *(item["id"] for item in runtime["daemons"]),
     }
     scheduler = runtime.get("schedule_materialization") or {}

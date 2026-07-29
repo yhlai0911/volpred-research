@@ -2049,7 +2049,6 @@ def test_repo_owned_writers_route_through_canonical_lease() -> None:
         "scripts/merge_worktree.sh": "scripts/git_writer_lock.py\" run",
         "scripts/codex_loop.sh": "scripts/git_writer_lock.py\" commit",
         "scripts/cron_backfill_work_log_from_commits.sh": "scripts/git_writer_lock.py\" commit",
-        "scripts/cron_hourly_dispatch.sh": "scripts/git_writer_lock.py\" run",
         "src/volpred/ops/rollback.py": "git_writer_lock(",
         "scripts/reclaim_stale_worktrees.py": "git_writer_lock(",
     }
@@ -2065,6 +2064,11 @@ def test_repo_owned_writers_route_through_canonical_lease() -> None:
         assert "require_canonical_main_checkout" in (ROOT / rel).read_text(), (
             f"{rel} holds the lease but can publish to side/detached HEAD"
         )
+    retired_dispatch = (
+        ROOT / "scripts" / "_legacy" / "cron_hourly_dispatch.sh"
+    ).read_text()
+    assert "scripts/git_writer_lock.py\" run" in retired_dispatch
+    assert not (ROOT / "scripts" / "cron_hourly_dispatch.sh").exists()
     phase_z = (ROOT / "scripts/dispatch_supervisor/phase_z.py").read_text()
     assert '"update-ref", "refs/heads/main"' in phase_z
     merge = (ROOT / "scripts/merge_worktree.sh").read_text()

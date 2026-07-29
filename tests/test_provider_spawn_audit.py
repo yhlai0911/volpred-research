@@ -73,9 +73,13 @@ def test_live_shell_launchers_route_through_the_same_provider_policy() -> None:
     assert "VOLPRED_CODEX_EXEC_CONTRACT=telegram-responder.codex" in responder
 
     retired_hourly = next(
-        item
-        for item in schedules["cron_jobs"]
-        if item.get("canonical_script") == "scripts/cron_hourly_dispatch.sh"
+        item for item in schedules["cron_jobs"]
+        if item.get("id") == "volpred-hourly-dispatch"
     )
     assert retired_hourly["status"] == "retired"
     assert retired_hourly["host_crontab_managed"] is False
+    assert {
+        "command",
+        "canonical_script",
+        "tcc_bypass_copy",
+    }.isdisjoint(retired_hourly)

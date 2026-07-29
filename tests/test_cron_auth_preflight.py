@@ -5,7 +5,15 @@ import stat
 import subprocess
 from pathlib import Path
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "cron_hourly_dispatch.sh"
+# The production wrapper was physically retired on 2026-07-30.  These tests
+# preserve audit coverage for the historical auth-preflight incident without
+# resurrecting a live entrypoint.
+SCRIPT = (
+    Path(__file__).resolve().parents[1]
+    / "scripts"
+    / "_legacy"
+    / "cron_hourly_dispatch.sh"
+)
 
 
 def _write_executable(path: Path, content: str) -> None:

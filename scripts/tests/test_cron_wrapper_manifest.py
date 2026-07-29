@@ -116,12 +116,13 @@ def test_declared_host_wrappers_scans_every_config_section(sync):
     """Guards the subset-audit blind spot that hid the dispatch backbone.
 
     `system_crontab.items[].wrapper_script` is not the only place host wrappers are
-    named: `cron_jobs[].tcc_bypass_copy` holds `cron_hourly_dispatch.sh`. A scan that
-    reads only the first section reports "all clean" while the backbone drifts.
+    named: the not-yet-physically-retired compute rollback row still declares
+    `cron_compute_worker.sh` under `cron_jobs[].tcc_bypass_copy`. A scan that reads
+    only the first section reports "all clean" while that executable drifts.
     """
     declared = sync.declared_host_wrappers(PROJECT_ROOT)
-    assert "cron_hourly_dispatch.sh" in declared, (
-        "cron_hourly_dispatch.sh is declared under cron_jobs[].tcc_bypass_copy, not "
+    assert "cron_compute_worker.sh" in declared, (
+        "cron_compute_worker.sh is declared under cron_jobs[].tcc_bypass_copy, not "
         "system_crontab — the config walk must not be section-scoped"
     )
     assert "cron_check_alerts.sh" in declared  # system_crontab.items[].wrapper_script

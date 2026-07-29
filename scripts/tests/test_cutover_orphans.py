@@ -2,7 +2,8 @@
 
 2026-07-10, after the FOURTH cutover orphan. The 2026-07-04 dispatch-supervisor
 cutover unloaded `com.volpred.hourly-dispatch`, whose shell wrapper
-(`scripts/cron_hourly_dispatch.sh`) was the sole caller of several components.
+(`scripts/_legacy/cron_hourly_dispatch.sh`) was the sole caller of several
+components before its physical retirement.
 Each one silently stopped running; each was found by hand, days later:
 
   - `scripts/hourly_dispatch_pregate.py`  — 6 days, ~6 wasted opus cold-loads/day
@@ -18,7 +19,8 @@ be referenced from the supervisor package (i.e. carried across the cutover), or
 be declared dead here with a reason. There is no third option, and "nobody
 noticed" stops being reachable.
 
-When the legacy wrapper is finally deleted, delete this file with it.
+The archived wrapper remains immutable rollback evidence.  This gate reads that
+archive while separately proving the executable `scripts/` entrypoint is gone.
 """
 from __future__ import annotations
 
@@ -28,7 +30,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-LEGACY_WRAPPER = ROOT / "scripts" / "cron_hourly_dispatch.sh"
+LEGACY_WRAPPER = ROOT / "scripts" / "_legacy" / "cron_hourly_dispatch.sh"
+LIVE_WRAPPER = ROOT / "scripts" / "cron_hourly_dispatch.sh"
 SUPERVISOR_PKG = ROOT / "scripts" / "dispatch_supervisor"
 
 # `scripts/<something>.py` appearing on a line the shell actually runs.
@@ -76,12 +79,12 @@ def _supervisor_sources() -> str:
     )
 
 
-def test_legacy_wrapper_still_exists_or_this_gate_is_dead() -> None:
-    # If someone deletes the wrapper, this whole file must go too — a gate that
-    # silently passes because its input vanished is worse than no gate.
+def test_legacy_wrapper_is_archived_and_not_live() -> None:
     assert LEGACY_WRAPPER.exists(), (
-        f"{LEGACY_WRAPPER} is gone — delete scripts/tests/test_cutover_orphans.py "
-        "along with it (see module docstring)."
+        f"{LEGACY_WRAPPER} is gone — the cutover evidence cannot be audited."
+    )
+    assert not LIVE_WRAPPER.exists(), (
+        f"{LIVE_WRAPPER} resurrected the physically retired dispatcher."
     )
 
 

@@ -23,7 +23,8 @@ Contract: every shell function the legacy wrapper defines must either name the
 supervisor symbol that carries its behaviour across the cutover (and that symbol
 must actually exist), or be declared dead here with a reason.
 
-When the legacy wrapper is finally deleted, delete this file with it.
+The archived wrapper remains immutable rollback evidence.  This gate reads that
+archive while separately proving the executable `scripts/` entrypoint is gone.
 """
 from __future__ import annotations
 
@@ -33,7 +34,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-LEGACY_WRAPPER = ROOT / "scripts" / "cron_hourly_dispatch.sh"
+LEGACY_WRAPPER = ROOT / "scripts" / "_legacy" / "cron_hourly_dispatch.sh"
+LIVE_WRAPPER = ROOT / "scripts" / "cron_hourly_dispatch.sh"
 SUPERVISOR_PKG = ROOT / "scripts" / "dispatch_supervisor"
 
 # `name() {` at the start of a line — how every function in the wrapper is defined.
@@ -85,10 +87,12 @@ def _supervisor_sources() -> str:
     )
 
 
-def test_legacy_wrapper_still_exists_or_this_gate_is_dead() -> None:
+def test_legacy_wrapper_is_archived_and_not_live() -> None:
     assert LEGACY_WRAPPER.exists(), (
-        f"{LEGACY_WRAPPER} is gone — delete scripts/tests/test_cutover_behaviour_orphans.py "
-        "along with it (see module docstring)."
+        f"{LEGACY_WRAPPER} is gone — the behaviour transfer cannot be audited."
+    )
+    assert not LIVE_WRAPPER.exists(), (
+        f"{LIVE_WRAPPER} resurrected the physically retired dispatcher."
     )
 
 

@@ -488,12 +488,6 @@
       "tracked_outputs": [],
       "reason": "Operations Core delivers a local socket trigger only. The executor owns ignored dispatch state and each admitted fire retains the delegated delivery contract."
     },
-    "volpred-hourly-dispatch": {
-      "entrypoint": "scripts/cron_hourly_dispatch.sh",
-      "policy": "deprecated",
-      "tracked_outputs": [],
-      "reason": "LaunchAgent is disabled; the wrapper is a one-command rollback artifact. The active supervisor owns delivery."
-    },
     "volpred-compute-worker": {
       "entrypoint": "scripts/compute_queue.py",
       "policy": "delegated_delivery_contract",
@@ -530,7 +524,6 @@
     "com.volpred.dispatch-supervisor": {"job_id": "volpred-dispatch-supervisor", "status": "active"},
     "com.volpred.gmail-poll": {"job_id": "gmail_poll", "status": "active"},
     "com.volpred.handoff-regen": {"job_id": "handoff_regen", "status": "active"},
-    "com.volpred.hourly-dispatch": {"job_id": "volpred-hourly-dispatch", "status": "retired"},
     "com.volpred.market-calendar-sync": {"job_id": "market_calendar_sync", "status": "active"},
     "com.volpred.market-closure-detect": {"job_id": "market_closure_detect", "status": "active"},
     "com.volpred.memory-health-daily": {"job_id": "memory_health_daily", "status": "active"},

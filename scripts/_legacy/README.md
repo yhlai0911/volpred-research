@@ -26,3 +26,11 @@ canonical ���章�����路����� `scripts/publish_draft.p
   單一真相裁決（codex bespoke = PRIMARY）後歸檔於此；唯一 live 引用是
   `scripts/gen_lazypack_codex.py::_REFERENCE_RENDERER`（prompt 內的參考範例，
   已同 commit 改指本路徑；檔案缺失時 prompt 只是少一行提示，不影響渲染鏈）。
+
+## 2026-07-30 Deliverable 8（hourly dispatch physical retirement）
+
+- `cron_hourly_dispatch.sh` — 2026-07-04 已由 Operations Core dispatch
+  supervisor 接管；2026-07-30 移除正式 `scripts/` entrypoint、TCC live copy 與
+  `com.volpred.hourly-dispatch` LaunchAgent／plist。此檔只保留不可排程的歷史與
+  rollback 稽核證據；`scripts/tests/test_cutover_{,behaviour_}orphans.py` 仍從本
+  歸檔驗證所有舊 caller／shell behaviour 都有明確 successor 或退休理由。

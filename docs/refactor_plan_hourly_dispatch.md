@@ -1,6 +1,14 @@
 # Refactor Plan — hourly-dispatch worker daemon
 
-**Status**: TRIGGERED (3-strike threshold crossed). Deliverables 5-6/8 DONE. **Phase = CUTOVER OBSERVATION (Deliverable 7/8), 2026-07-04 17:17 台灣時間** — legacy `com.volpred.hourly-dispatch` disabled/booted out; `com.volpred.dispatch-supervisor` now real-run (`--dry-run` removed, `dry_run=False` confirmed in log). First real production fire (17:07) **fully PASS**: worker spawned via supervisor, exit 0, completion recorded, no orphan, PHASE-Z clean. Boss approved twice via Telegram msg124 + msg127. Instant rollback = re-enable legacy (one command, §7). See §Deliverable 7 cutover record below.
+**Status**: DELIVERABLES 1-8/8 DONE（2026-07-30）. Legacy `com.volpred.hourly-dispatch`
+已從 live host、canonical plist 與正式 `scripts/` entrypoint 實體退役；
+Operations Core scheduler + dispatch supervisor 是唯一 live clock／executor。歷史 wrapper
+以原 bytes 歸檔在 `scripts/_legacy/cron_hourly_dispatch.sh`（SHA-256
+`65e8bbc27e02ceddb93e5d55cd8c543b30e029ef5f4102cef9947a0252e4e463`），只供稽核與
+recoverable rollback，不再是可排程面。此 bounded dispatcher refactor 已
+**`root_cause_fixed_and_verified`**；全域 Legacy Execution Retirement（Issue #46）
+仍因五個 formal owner 尚未 transfer 與 14 日 sustained-clean gate 而維持
+**`contained`**，兩者不可混稱。
 **Authority**: `CLAUDE.md` Three-Strike Rule (commit `a55620b4`) — "strike 3 是 LATEST 觸發點不是 ONLY 觸發點；一旦看見結構性 root cause...就立刻三層重構".
 **Supersedes**: `docs/refactor_plan_cron_dispatch.md` (2026-05-14 pre-staged version, drafted for hang-class strikes only).
 **Parent task**: `platform_ops_refactor_hourly_dispatch_worker_daemon` (P2, `storage/next_tasks.json`).
@@ -126,7 +134,7 @@ Before phase 2 (shadow run start): submit `dispatch_supervisor.py` + tests to Co
 | Supervisor itself hangs / crashes loop | launchd `KeepAlive` + `ThrottleInterval=60` rate-limits respawn; external monitor (`check_alerts.py`) flags `dispatch_supervisor_dead` if no heartbeat in `storage/ops/dispatch_state.json` for >75min |
 | State file corruption | `fcntl.LOCK_EX` write + atomic rename (`os.replace`); supervisor on startup validates JSON; fallback to bootstrap-from-zero if invalid |
 | Migration regression in shadow phase | Both systems run in parallel — instant fallback by re-enabling old plist |
-| Phase 5 (deprecate) breaks something hidden | `git tag pre-supervisor-refactor` at phase 0 = trivial revert; `_legacy/` keeps shell callable for emergency `bash scripts/_legacy/cron_hourly_dispatch.sh` invocation |
+| Phase 5 (deprecate) breaks something hidden | 只能由退役前 Git commit 恢復完整 wrapper + plist/config，再跑 owner reconciliation 與 unique-owner audit；`_legacy/` 是 0644 稽核證據，不可直接執行或單獨複製回 live，避免雙 clock 復活 |
 
 ## 8. Execution Order (next sessions)
 
@@ -397,11 +405,32 @@ launchctl bootout gui/501/com.volpred.dispatch-supervisor # stop supervisor
 # 兩份 plist re-add <string>--dry-run</string> + bootstrap → 回 shadow
 ```
 
-**剩 Deliverable 8**（deprecate）：數班 clean fire 後 → `launchctl bootout` legacy（那時已非其子孫）+ `mv scripts/cron_hourly_dispatch.sh scripts/_legacy/` + retro。**現在不做**（disable 已足夠 disarm；實體移除等觀察窗）。
+**當時剩 Deliverable 8**（deprecate）：數班 clean fire 後再實體移除。此項已於
+2026-07-30 完成，證據見下方「Deliverable 8」。
 
 *Updated 2026-07-04 16:31 台灣時間 by hourly-16 — cutover 落地：PHASE-Z ported+reviewed、real-run smoke PASS、legacy disabled、supervisor real-run 驗證。首輪 17:07 由 health.py + followup 確認。*
 
 **首輪 17:07 real fire — FULL PASS（2026-07-04 17:17 台灣，PID 64345）**：`last_fire_at=17:07:31`（離開 dry-run 值）✓、supervisor 16:30 起 `dry_run=False` ✓、log 有 `firing worker` + `worker attempt=1/3` ✓、legacy `hourly-dispatch` NOT loaded（無雙 fire）✓、排程精準（17:07:31 對 17:07:00）✓。Completion-side 也已驗證：`completions[-1].outcome=success`、`exit_code=0`、`attempts=1`、`final_model=claude-opus-4-8`、`duration_s=584.33`、`current_job=null` 無孤兒、supervisor log 有 `worker returned outcome=success attempts=1 duration=584.3s` + `phase_z outcome={'committed': False, 'reason': 'clean'}`。PHASE-Z 未產生 commit 是正確 clean no-op。→ 新 supervisor real-run 路徑（準點 fire、真 spawn、成功 completion、post-fire PHASE-Z、無雙派工）**fully PASS**；任務 `platform_ops_verify_supervisor_first_real_fire_1707` closure 由 Codex 17:20 完成。
+
+### Deliverable 8 — PHYSICAL RETIREMENT EXECUTED（2026-07-30）
+
+- repo 正式 entrypoint `scripts/cron_hourly_dispatch.sh` 已以 exact bytes 移至
+  `scripts/_legacy/cron_hourly_dispatch.sh`；移動前後 SHA-256 都是
+  `65e8bbc27e02ceddb93e5d55cd8c543b30e029ef5f4102cef9947a0252e4e463`。
+- canonical `ops/launchd/com.volpred.hourly-dispatch.plist` 已刪除；
+  `runtime_schedules.json` 的 retired row 僅保留 Operations Core 需要的
+  `schedule`／pregate policy，不再含 `command`、`canonical_script` 或
+  `tcc_bypass_copy`。
+- live `~/.volpred/bin/cron_hourly_dispatch.sh` 與
+  `~/Library/LaunchAgents/com.volpred.hourly-dispatch.plist` 已移入可復原的
+  `~/.Trash/volpred-hourly-dispatch-retired-20260730/`；`launchctl print` 回讀
+  legacy label 不存在。Operations Core scheduler 與 dispatch supervisor 均保持
+  running。
+- repository ratchet、cutover orphan/behaviour audit、schedule owner/config suites
+  共 158 tests 通過；正式 retirement assessor 不再回報 physical blocker，只剩
+  `formal_owner_census_blocked` 與 `sustained_clean_blocked`。因此本 dispatcher
+  slice 可標 **`root_cause_fixed_and_verified`**，Issue #46 umbrella 仍是
+  **`contained`**。
 
 ### Multi-slot pool（2026-07-13，task `platform-ops-dispatch-multislot`）
 

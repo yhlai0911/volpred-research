@@ -18,6 +18,7 @@ from volpred.ops.legacy_retirement import (
 )
 
 NOW = datetime(2026, 7, 27, 10, 30, tzinfo=UTC)
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _owner_report(
@@ -127,6 +128,47 @@ def _write_runtime_files(root: Path, *, retired: bool = True) -> None:
         "<plist/>",
         encoding="utf-8",
     )
+
+
+def test_repository_has_physically_retired_hourly_dispatch_surfaces() -> None:
+    """The rollback artifact may exist only under scripts/_legacy."""
+    runtime = json.loads(
+        (ROOT / "config" / "runtime_schedules.json").read_text(encoding="utf-8")
+    )
+    row = next(
+        item
+        for item in runtime["cron_jobs"]
+        if item["id"] == "volpred-hourly-dispatch"
+    )
+    assert row["status"] == "retired"
+    assert row["schedule"] == "7 * * * *"
+    assert isinstance(row.get("pregate"), dict)
+    assert {"command", "canonical_script", "tcc_bypass_copy"}.isdisjoint(row)
+
+    ownership = json.loads(
+        (ROOT / "config" / "scheduled_writer_ownership.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert "volpred-hourly-dispatch" not in ownership["jobs"]
+    assert "com.volpred.hourly-dispatch" not in ownership["launchagents"]
+
+    manifest = json.loads(
+        (ROOT / "config" / "cron_wrapper_manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert "cron_hourly_dispatch.sh" not in manifest["wrappers"]
+    assert not (ROOT / "scripts" / "cron_hourly_dispatch.sh").exists()
+    assert (
+        ROOT / "scripts" / "_legacy" / "cron_hourly_dispatch.sh"
+    ).is_file()
+    assert not (
+        ROOT / "scripts" / "_legacy" / "cron_hourly_dispatch.sh"
+    ).stat().st_mode & 0o111
+    assert not (
+        ROOT / "ops" / "launchd" / "com.volpred.hourly-dispatch.plist"
+    ).exists()
 
 
 def _rehash_receipt(payload: dict[str, object]) -> None:

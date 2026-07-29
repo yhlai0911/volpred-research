@@ -5046,3 +5046,34 @@ successor receipt 回讀
 48 小時計時必須從本修正正式部署後開始；且 commit 尚待 push／GitHub CI read-back。
 兩者完成前不得升級
 為 **`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-07-30 — legacy hourly dispatcher「disabled」被誤當成「已退役」
+
+**證據化症狀**：`com.volpred.hourly-dispatch` 雖未載入，repo仍保留正式
+`scripts/cron_hourly_dispatch.sh`、canonical plist、runtime executable references，
+host仍保留TCC live copy與user plist。這些surface可被誤 bootstrap／直接執行，
+Deliverable 8 observation已逾期；「目前沒跑」不等於「不能復活」。
+
+**根因層級（retirement contract）**：cutover只完成runtime disarm，卻把rollback
+artifact留在live namespace。owner audit能證明當下沒有雙clock，不能阻止下一次安裝、
+wrapper sync或人工命令把legacy execution重新帶回來。
+
+**底層修復**：wrapper exact bytes移至不可排程的`scripts/_legacy/`，canonical plist
+刪除；runtime retired row只保留Operations Core scheduler需要的`schedule`與pregate，
+移除`command`／`canonical_script`／`tcc_bypass_copy`；ownership與wrapper manifest
+也不再宣告legacy owner。live TCC copy與user plist移入
+`~/.Trash/volpred-hourly-dispatch-retired-20260730/`，不是不可復原刪除。
+
+**回歸與回讀**：wrapper前後SHA-256皆為
+`65e8bbc27e02ceddb93e5d55cd8c543b30e029ef5f4102cef9947a0252e4e463`；
+repository ratchet與cutover/schedule/config相鄰範圍158 tests通過；
+`launchctl print`回讀legacy label absent，live/canonical四個surface全 absent。
+formal retirement assessor已不再輸出physical blocker，只剩
+`formal_owner_census_blocked`與`sustained_clean_blocked`。
+
+**制度化寫回與狀態**：repository test會阻止正式wrapper、plist或executable references
+復活；archived wrapper仍由caller/behaviour transfer gates稽核。此bounded dispatcher
+slice為 **`root_cause_fixed_and_verified`**；全域Issue #46因五個formal legacy
+owners與14日clean gate仍是 **`contained`**。

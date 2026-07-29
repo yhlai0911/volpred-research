@@ -610,7 +610,10 @@ def test_materializer_counts_new_sequence_at_equal_time_boundary(
 
 def test_legacy_wrapper_records_before_pregate_and_fails_closed() -> None:
     wrapper = (
-        Path(__file__).resolve().parents[1] / "scripts" / "cron_hourly_dispatch.sh"
+        Path(__file__).resolve().parents[1]
+        / "scripts"
+        / "_legacy"
+        / "cron_hourly_dispatch.sh"
     ).read_text(encoding="utf-8")
 
     tripwire = wrapper.index("scripts/record_legacy_business_fire.py")

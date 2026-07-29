@@ -2848,6 +2848,7 @@ Issue #23五步Gate全過，狀態為 **`root_cause_fixed_and_verified`**。
   durable 後，舊 scheduler 仍於 01:17 與 01:49 各 admission 一班，證明
   health-loop-only drain 沒有封住 scheduler TOCTOU。`983a8eaf5`新增共用 reload-root
   admission lock、active-intent fail-closed 與 fire-demand CAS；相鄰最終
+
   **336 passed、1 skipped**，Matt Spec／Standards雙 PASS。
 - ✅ 兩班舊 worker 都自然 `exit=0`，沒有 signal kill；token-owned quiesce 阻止第三班。
   immutable release `451f9bf61cc0…` 於 02:04:40 fresh boot，包含
@@ -2860,6 +2861,23 @@ Issue #23五步Gate全過，狀態為 **`root_cause_fixed_and_verified`**。
 Issue #42狀態為 **`root_cause_fixed_and_verified`**。這只結案 T38；不代表
 Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy owner與#46
 十四日 sustained-clean 仍各自 fail closed。
+
+## 2026-07-30 — T40 legacy hourly dispatcher 實體退役（Issue #46）
+
+- ✅ `scripts/cron_hourly_dispatch.sh` exact bytes 已移到
+  `scripts/_legacy/cron_hourly_dispatch.sh`，SHA-256 保持
+  `65e8bbc27e02ceddb93e5d55cd8c543b30e029ef5f4102cef9947a0252e4e463`。
+- ✅ canonical plist、live TCC wrapper 與 user LaunchAgent plist 已移除；live host
+  檔案存入可復原的 `~/.Trash/volpred-hourly-dispatch-retired-20260730/`，
+  `launchctl print` 回讀 legacy label absent。
+- ✅ retired runtime row僅保留Operations Core需要的hourly schedule/pregate，
+  executable fields、owner map與wrapper manifest references全部移除。
+- ✅ repository ratchet、cutover orphan／behaviour、schedule ownership與config
+  相鄰範圍共 **158 passed**；formal retirement assessor已只剩
+  `formal_owner_census_blocked`、`sustained_clean_blocked`，無physical blocker。
+- 🟡 本 dispatcher physical-retirement slice為
+  **`root_cause_fixed_and_verified`**；Issue #46 umbrella仍有五個formal legacy
+  owners與14日clean gate，故維持 **`contained`**。
 
 ## 2026-07-30 — T36 runtime audit Git ownership bounded closure（Issue #41）
 
