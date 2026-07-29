@@ -2877,3 +2877,18 @@ Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy 
 - 🟡 此 bounded slice 為 **`root_cause_fixed_and_verified`**；Issue #41 umbrella 仍
   被 #9 與完整 writer inventory／single interface／crash injection／recognizer
   retirement 阻塞，維持 OPEN／`contained`。
+
+## 2026-07-30 — Compute queue UTF-8 argv boundary
+
+- ✅ `assign_8b0b2c61` 已完成；commit `f3c504abd`。
+- ✅ 正式 `compute_queue main → enqueue-agent → durable receipt` seam 由 RED
+  `UnicodeEncodeError` 轉 GREEN，空 locale process 回讀中文 title `中文派工`。
+- ✅ 修正在完整 argparse namespace 的單一 process boundary，不要求 caller 改 ASCII，
+  並涵蓋序列 argv。
+- ✅ Affected suites **104 passed**；Ruff F/E9、py_compile、diff check、Matt
+  Standards／Spec 均 PASS。
+- ⚠️ 完整 suite **6568 passed、3 skipped、20 failed**；紅燈全部在未修改的
+  dispatch-supervisor／agent-auth 範圍，分別由 live producer coalition 與本機
+  `OPENAI_API_KEY` 污染觸發，未以本 slice 掩蓋。
+
+此 Unicode root class 為 **`root_cause_fixed_and_verified`**；相鄰環境隔離紅燈仍未結案。

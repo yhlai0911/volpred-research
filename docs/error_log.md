@@ -4731,3 +4731,31 @@ reconciler 隨後自動關閉 `assign_0c1eca40` 及另外 13 筆同源 incident�
 Standards／Spec review 均 PASS。此 bounded slice 五步 Gate 已完成，狀態為
 **`root_cause_fixed_and_verified`**；Issue #41 完整 acceptance 仍被 #9 及全域
 writer inventory／recognizer retirement 阻塞，故 umbrella 維持 OPEN／`contained`。
+
+---
+
+## 2026-07-30 — compute queue 在非 UTF-8 locale 下寫中文 argv 於 durable write 崩潰
+
+**證據化症狀**：fire `slot-1 39e21e0f` 以中文 `--title` 呼叫
+`compute_queue.py enqueue-agent`；argv 已被 Python `surrogateescape` 解成 lone
+surrogates，直到所有 admission checks 完成、`_write_job_file` 寫 UTF-8 receipt 時才拋
+`UnicodeEncodeError: surrogates not allowed`。TDD 以相同 surrogateescape bytes 經正式
+`main()`／`enqueue-agent` seam 重播，修正前 traceback 精確落在同一 writer。
+
+**根因層級（process argv encoding boundary）**：queue writer 的 atomic replace／fsync
+契約正確，但 parsed CLI namespace 沒有編碼邊界；要求 caller 改 ASCII 或逐一清洗
+`--title` 只會保留同一 root class，因 `--script-args` 等序列欄位也可能帶入相同 bytes。
+
+**底層修復與制度化**：commit `f3c504abd` 在 argparse parse 完成、分派任何 subcommand
+之前一次正規化完整 namespace。合法 UTF-8 bytes 由 surrogateescape round-trip 還原成
+原字串；真正無效的 byte sequence 才以可觀察 warning replacement 降級。list／tuple
+argv 同走該 process boundary，不新增 caller workaround，也不改 durable writer 語意。
+
+**回歸與 read-back**：全新 `LANG=`／`LC_ALL=`／`PYTHONUTF8=0` process 中，中文
+`enqueue-agent` regression 成功寫入 receipt 且回讀 title 完整為 `中文派工`；相鄰
+compute queue suites **104 passed**，Ruff F/E9、py_compile、diff check 與 Matt
+Standards／Spec review 均 PASS。完整 repository suite 為 **6568 passed、3 skipped、
+20 failed**；20 項全部位於未修改的 dispatch-supervisor／agent-auth 測試，失敗證據為
+live macOS producer coalition 不靜止與本機注入政策禁止的 `OPENAI_API_KEY`，未把它們
+冒充本 task 綠燈。本 Unicode incident 五步 Gate 已完成，狀態為
+**`root_cause_fixed_and_verified`**；相鄰 20 項環境隔離問題仍須另行根因收斂。
