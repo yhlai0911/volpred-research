@@ -80,15 +80,16 @@ def test_cutover_installs_launchd_job_and_reads_back_exact_release(
     plist_destination.write_bytes(b"<plist>legacy</plist>\n")
     commands: list[list[str]] = []
     loaded = True
+    unload_reads_remaining = 1
 
     def launchctl(
         command: list[str],
         _check: bool,
     ) -> subprocess.CompletedProcess[str]:
-        nonlocal loaded
+        nonlocal loaded, unload_reads_remaining
         commands.append(command)
         if "bootout" in command:
-            loaded = False
+            unload_reads_remaining = 1
             return subprocess.CompletedProcess(command, 0, "", "")
         if "bootstrap" in command:
             loaded = True
@@ -110,8 +111,18 @@ def test_cutover_installs_launchd_job_and_reads_back_exact_release(
             state_path.write_text(json.dumps(observed), encoding="utf-8")
         stdout = ""
         if "print" in command:
+            if unload_reads_remaining:
+                unload_reads_remaining -= 1
+                if unload_reads_remaining == 0:
+                    loaded = False
+                return subprocess.CompletedProcess(command, 0, "still loaded", "")
             if not loaded:
-                return subprocess.CompletedProcess(command, 1, "", "not loaded")
+                return subprocess.CompletedProcess(
+                    command,
+                    1,
+                    "",
+                    "could not find service",
+                )
             pointer = json.loads(
                 (
                     tmp_path / "run" / "current_release.json"
@@ -136,6 +147,7 @@ def test_cutover_installs_launchd_job_and_reads_back_exact_release(
     assert plist_destination.read_bytes() == plist_source.read_bytes()
     assert [command[1] for command in commands] == [
         "bootout",
+        "print",
         "print",
         "bootstrap",
         "print",

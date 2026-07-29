@@ -204,9 +204,26 @@ def _cutover_quiesced(
                 f"cannot unload legacy scheduler: {(stopped.stderr or '')[:300]}"
             )
         launchd_touched = True
-        still_loaded = runner(["launchctl", "print", service], False)
-        if still_loaded.returncode == 0:
-            raise CutoverError("legacy scheduler remained loaded after bootout")
+        unload_deadline = time.monotonic() + min(30.0, timeout_s)
+        while True:
+            state.renew_cutover_quiesce(
+                token=quiesce_token,
+                ttl_s=quiesce_ttl_s,
+                path=Path(state_path),
+            )
+            still_loaded = runner(["launchctl", "print", service], False)
+            if still_loaded.returncode != 0:
+                if not _service_absent(still_loaded.stderr or ""):
+                    raise CutoverError(
+                        "cannot verify legacy scheduler unload: "
+                        f"{(still_loaded.stderr or '')[:300]}"
+                    )
+                break
+            if time.monotonic() >= unload_deadline:
+                raise CutoverError(
+                    "legacy scheduler remained loaded after bootout timeout"
+                )
+            sleep_fn(0.25)
         final_gate = state.cutover_quiesce_snapshot(
             token=quiesce_token,
             path=Path(state_path),
@@ -454,7 +471,12 @@ def _service_absent(detail: str) -> bool:
     lowered = detail.lower()
     return any(
         marker in lowered
-        for marker in ("could not find service", "no such process", "not found")
+        for marker in (
+            "could not find service",
+            "no such process",
+            "not found",
+            "not loaded",
+        )
     )
 
 
