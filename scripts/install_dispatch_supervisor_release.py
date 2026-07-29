@@ -46,6 +46,7 @@ from scripts.dispatch_supervisor import (
     release_image,
     state,
 )
+from scripts.dispatch_supervisor import workspace as workspace_mod
 from volpred.ops.diagnostics import warn
 
 LABEL = "com.volpred.dispatch-supervisor"
@@ -213,6 +214,16 @@ def _cutover_quiesced(
         if plist_destination.exists()
         else 0o644
     )
+    custody_ledger_preexisting = (
+        Path(repo_root) / custody_receipt.RECEIPTS_RELPATH
+    ).exists()
+    legacy_workspace_generations = (
+        []
+        if custody_ledger_preexisting
+        else workspace_mod.active_allocated_workspace_generations(
+            Path(repo_root)
+        )
+    )
     legacy_pid = before.get("supervisor_pid")
     legacy_custody = procutil.capture_existing_producer_custody(legacy_pid)
     legacy_drain_reference: dict[str, object] | None = None
@@ -299,6 +310,20 @@ def _cutover_quiesced(
                 f"members={legacy_members}"
             )
         transaction["legacy_custody_unresolved"] = False
+        drain_confirmed_at = datetime.now(UTC).isoformat()
+        if legacy_workspace_generations and not (
+            workspace_mod.record_legacy_workspace_producer_drain(
+                Path(repo_root),
+                workspace_generations=legacy_workspace_generations,
+                cutover_request_id=str(request["request_id"]),
+                cutover_completed_at=drain_confirmed_at,
+                complete_coalition_drained=True,
+                release_commit=str(request["release_commit"]),
+            )
+        ):
+            raise CutoverError(
+                "legacy workspace coalition-drain receipt was not durable"
+            )
         final_gate = state.cutover_quiesce_snapshot(
             token=quiesce_token,
             path=Path(state_path),

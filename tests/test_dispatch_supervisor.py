@@ -4911,6 +4911,45 @@ def test_workspace_empty_terminal_receipt_recovers_after_remove(
     ]) == 1
 
 
+def test_terminal_generation_replays_before_missing_custody_probe(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A completed generation cannot become nonterminal after a daemon restart."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    job_id = "a" * 32
+    ws = _ws_allocate(repo, job_id=job_id)
+    first = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        job_id=job_id,
+        producer_drain_confirmed=True,
+        queue_path=_tmp_queue(tmp_path),
+    )
+    assert first["disposition"] == "empty_removed"
+    monkeypatch.setattr(
+        workspace.procutil,
+        "producer_cohort_members_checked",
+        lambda *_args, **_kwargs: pytest.fail(
+            "terminal generation must replay before custody probing"
+        ),
+    )
+
+    replay = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="timeout_unverified",
+        job_id=job_id,
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert replay["disposition"] == "empty_removed"
+    assert replay["replayed"] is True
+
+
 def test_workspace_finalize_gate_green_merges(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -7014,6 +7053,64 @@ def test_workspace_sweep_closes_true_orphans_only(
     assert [event["workspace"] for event in events] == [orphan_ws["name"]]
 
 
+def test_workspace_sweep_uses_cutover_drain_for_pre_custody_orphan(
+    tmp_path: Path,
+) -> None:
+    """A proven global cutover drain closes workspaces created before custody.
+
+    These workspaces cannot have a per-job custody receipt because the receipt
+    contract did not exist when their provider started.  The installer drains
+    the complete legacy supervisor coalition, then durably binds that proof to
+    the exact pre-cutover workspace names so they do not consume ``max_total``
+    forever.
+    """
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    orphan_ws = workspace.allocate_workspace(
+        repo_root=repo,
+        slot_id="slot-1",
+        job_id="9" * 32,
+        config=_iso_cfg(mode="pilot", max_total=1),
+        task_binding=None,
+    )
+    assert orphan_ws is not None
+    generations = workspace.active_allocated_workspace_generations(repo)
+    assert workspace.record_legacy_workspace_producer_drain(
+        repo,
+        workspace_generations=generations,
+        cutover_request_id="cutover-proof-1",
+        cutover_completed_at="2099-07-29T00:00:00+00:00",
+        complete_coalition_drained=True,
+        release_commit="b" * 40,
+    )
+    assert workspace.legacy_workspace_producer_drain_confirmed(
+        repo,
+        workspace_name=orphan_ws["name"],
+        job_id="9" * 32,
+    )
+    assert not workspace.legacy_workspace_producer_drain_confirmed(
+        repo,
+        workspace_name=orphan_ws["name"],
+        job_id="9" * 31 + "8",
+    )
+
+    results = workspace.sweep_orphan_workspaces(
+        repo_root=repo,
+        protected_job_ids=[],
+        queue_path=queue,
+    )
+
+    assert [result["disposition"] for result in results] == ["empty_removed"]
+    assert not Path(orphan_ws["path"]).exists()
+    assert _ws_allocate(
+        repo,
+        job_id="8" * 32,
+        config=_iso_cfg(max_total=1),
+    ) is not None
+
+
 def test_workspace_sweep_fails_closed_when_orphan_evidence_cannot_append(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -7474,6 +7571,70 @@ def test_task_settlement_reconciler_recovers_completion_before_finalizer(
     assert result[0]["settlement_completed"] is True
     assert finalized[0]["job_id"] == lease.job_id
     assert workspace.pending_task_settlements(repo) == []
+
+
+def test_task_settlement_reconciler_uses_cutover_workspace_drain(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    state_path = _tmp_state(tmp_path)
+    job_id = "abcd1234" * 4
+    ws = _ws_allocate(
+        repo,
+        job_id=job_id,
+        task_binding={
+            "task_id": "task-migrated",
+            "claim_session_id": "claim-migrated",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["scripts"],
+            "post_merge_actions": [],
+        },
+    )
+    assert ws is not None
+    ws = {
+        **ws,
+        "task_id": "task-migrated",
+        "claim_session_id": "claim-migrated",
+    }
+    assert workspace.ensure_task_settlement_pending(
+        repo,
+        workspace=ws,
+        job_id=job_id,
+        worker_outcome="success",
+    )
+    assert workspace.record_legacy_workspace_producer_drain(
+        repo,
+        workspace_generations=workspace.active_allocated_workspace_generations(
+            repo
+        ),
+        cutover_request_id="cutover-proof-2",
+        cutover_completed_at="2099-07-29T00:00:00+00:00",
+        complete_coalition_drained=True,
+        release_commit="c" * 40,
+    )
+    finalized: list[dict] = []
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "finalize_workspace",
+        lambda **kwargs: finalized.append(kwargs)
+        or {"disposition": "empty_removed"},
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_settle_mutating_task",
+        lambda **_kwargs: {"ok": True, "status": "succeeded"},
+    )
+
+    result = scheduler.reconcile_task_settlements(
+        repo_root=repo,
+        state_path=state_path,
+    )
+
+    assert result[0]["settlement_completed"] is True
+    assert finalized[0]["producer_drain_confirmed"] is True
 
 
 def test_admission_outbox_requeues_task_after_preassign_crash(

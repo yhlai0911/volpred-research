@@ -100,6 +100,7 @@ _ISOLATION_MODES = ("off", "pilot", "enforce")
 # exhaustion, auth/quota, superseded, orphan sweep) produced bytes nobody
 # verified end-of-turn — those go to remediation, never silently to main.
 _MERGEABLE_OUTCOMES = {"success", "codex_failover_recovered"}
+_LEGACY_WORKSPACE_DRAIN_EVENT = "legacy_workspace_producer_drain"
 _PRODUCER_LIVENESS_UNVERIFIED_OUTCOMES = {
     "kill_failed_orphan",
     "timeout_unverified",
@@ -1421,6 +1422,287 @@ def read_bound_producer_custody(
     return latest
 
 
+def _allocation_generation(event: dict[str, Any]) -> dict[str, str] | None:
+    """Normalize one exact allocator generation or fail closed."""
+    if event.get("event") != "allocated":
+        return None
+    workspace_name = str(event.get("workspace") or "").strip()
+    job_id = str(event.get("job_id") or "").strip()
+    receipt_id = str(event.get("receipt_id") or "").strip()
+    allocated_at = str(event.get("at") or "").strip()
+    branch = str(event.get("branch") or "").strip()
+    base_sha = str(event.get("base_sha") or "").strip()
+    match = _JOB8_RE.fullmatch(workspace_name)
+    try:
+        allocated_time = datetime.fromisoformat(allocated_at)
+    except ValueError as exc:
+        LOG.warning(
+            "workspace allocation timestamp is invalid receipt_id=%s: %s",
+            receipt_id,
+            exc,
+        )
+        return None
+    if (
+        match is None
+        or len(job_id) < 8
+        or match.group(1) != job_id[:8]
+        or re.fullmatch(r"[0-9a-f]{32}", receipt_id) is None
+        or allocated_time.tzinfo is None
+        or allocated_time.utcoffset() is None
+        or branch != f"worktree-{workspace_name}"
+        or re.fullmatch(r"[0-9a-f]{40}", base_sha) is None
+    ):
+        return None
+    return {
+        "workspace": workspace_name,
+        "job_id": job_id,
+        "allocation_receipt_id": receipt_id,
+        "allocated_at": allocated_at,
+        "branch": branch,
+        "base_sha": base_sha,
+    }
+
+
+def active_allocated_workspace_generations(
+    repo_root: Path,
+) -> list[dict[str, str]]:
+    """Return exact live allocator generations, not reusable short names."""
+    source = Path(repo_root) / RECEIPTS_RELPATH
+    try:
+        lines = source.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        lines = []
+    except OSError as exc:
+        raise RuntimeError(
+            f"workspace allocation receipts unavailable: {source}"
+        ) from exc
+    active: dict[str, dict[str, str]] = {}
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(
+                f"workspace allocation receipts corrupt: {source}"
+            ) from exc
+        if not isinstance(event, dict):
+            raise TypeError(
+                f"workspace allocation receipt is not an object: {source}"
+            )
+        name = str(event.get("workspace") or event.get("name") or "")
+        if event.get("event") == "allocated":
+            generation = _allocation_generation(event)
+            if generation is None:
+                raise RuntimeError(
+                    f"workspace allocation generation is invalid: {name}"
+                )
+            active[name] = generation
+        elif event.get("event") in {"allocation_aborted", "released"} or (
+            event.get("event") == "finalized"
+            and event.get("disposition") in {"empty_removed", "merged"}
+        ):
+            active.pop(name, None)
+    registered = {
+        path.name for path in _registered_dispatch_worktrees(Path(repo_root))
+    }
+    missing = registered - active.keys()
+    if missing:
+        raise RuntimeError(
+            "registered allocator workspace has no exact allocation generation: "
+            + ", ".join(sorted(missing))
+        )
+    return [active[name] for name in sorted(registered)]
+
+
+def record_legacy_workspace_producer_drain(
+    repo_root: Path,
+    *,
+    workspace_generations: list[dict[str, str]],
+    cutover_request_id: str,
+    cutover_completed_at: str,
+    complete_coalition_drained: bool,
+    release_commit: str = "",
+) -> bool:
+    """Bind a verified cutover drain to exact pre-custody generations."""
+    if complete_coalition_drained is not True:
+        raise ValueError(
+            "legacy workspace migration requires complete coalition drain"
+        )
+    request_id = str(cutover_request_id or "").strip()
+    completed_at = str(cutover_completed_at or "").strip()
+    release = str(release_commit or "").strip()
+    try:
+        completed_time = datetime.fromisoformat(completed_at)
+    except ValueError as exc:
+        raise ValueError(
+            "legacy workspace cutover timestamp is invalid"
+        ) from exc
+    if (
+        not request_id
+        or completed_time.tzinfo is None
+        or completed_time.utcoffset() is None
+        or re.fullmatch(r"[0-9a-f]{40}", release) is None
+        or not workspace_generations
+    ):
+        raise ValueError("legacy workspace migration identity is invalid")
+    source = Path(repo_root) / RECEIPTS_RELPATH
+    try:
+        events = [
+            json.loads(line)
+            for line in source.read_text(encoding="utf-8").splitlines()
+        ]
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(
+            "legacy workspace allocation receipts are unavailable"
+        ) from exc
+    actual = {
+        normalized["allocation_receipt_id"]: normalized
+        for event in events
+        if isinstance(event, dict)
+        and (normalized := _allocation_generation(event)) is not None
+    }
+    normalized_generations: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for generation in workspace_generations:
+        if not isinstance(generation, dict):
+            raise TypeError("legacy workspace generation is invalid")
+        candidate = {
+            key: str(generation.get(key) or "").strip()
+            for key in (
+                "workspace",
+                "job_id",
+                "allocation_receipt_id",
+                "allocated_at",
+                "branch",
+                "base_sha",
+            )
+        }
+        receipt_id = candidate["allocation_receipt_id"]
+        if (
+            not receipt_id
+            or receipt_id in seen
+            or actual.get(receipt_id) != candidate
+            or datetime.fromisoformat(candidate["allocated_at"]) > completed_time
+        ):
+            raise ValueError(
+                "legacy workspace generation is not covered by cutover"
+            )
+        seen.add(receipt_id)
+        normalized_generations.append(candidate)
+    return _append_receipt(
+        Path(repo_root),
+        {
+            "event": _LEGACY_WORKSPACE_DRAIN_EVENT,
+            "cutover_request_id": request_id,
+            "cutover_completed_at": completed_at,
+            "workspace_generations": sorted(
+                normalized_generations,
+                key=lambda item: item["allocation_receipt_id"],
+            ),
+            "complete_coalition_drained": True,
+            "proof": "complete_legacy_supervisor_coalition_drained",
+            "release_commit": release,
+        },
+    )
+
+
+def legacy_workspace_producer_drain_confirmed(
+    repo_root: Path,
+    *,
+    workspace_name: str,
+    job_id: str,
+) -> bool:
+    """Read generation-bound migration proof; malformed history fails closed."""
+    name = str(workspace_name or "").strip()
+    normalized_job_id = str(job_id or "").strip()
+    match = _JOB8_RE.fullmatch(name)
+    if (
+        match is None
+        or len(normalized_job_id) < 8
+        or match.group(1) != normalized_job_id[:8]
+    ):
+        return False
+    source = Path(repo_root) / RECEIPTS_RELPATH
+    try:
+        with source.open("r", encoding="utf-8") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+            try:
+                lines = handle.read().splitlines()
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    except FileNotFoundError:
+        LOG.warning("legacy workspace drain receipt store is absent: %s", source)
+        return False
+    except OSError as exc:
+        LOG.warning(
+            "legacy workspace drain receipt read failed (%s): %s",
+            source,
+            exc,
+        )
+        return False
+    allocations: dict[tuple[str, str], dict[str, str]] = {}
+    migrations: list[dict[str, Any]] = []
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError as exc:
+            LOG.warning(
+                "legacy workspace drain receipt corrupt (%s): %s",
+                source,
+                exc,
+            )
+            return False
+        if not isinstance(event, dict):
+            return False
+        generation = _allocation_generation(event)
+        if generation is not None:
+            allocations[(generation["workspace"], generation["job_id"])] = (
+                generation
+            )
+        if event.get("event") == _LEGACY_WORKSPACE_DRAIN_EVENT:
+            migrations.append(event)
+    target = allocations.get((name, normalized_job_id))
+    if target is None:
+        return False
+    for event in migrations:
+        generations = event.get("workspace_generations")
+        completed_at = str(event.get("cutover_completed_at") or "")
+        release = str(event.get("release_commit") or "")
+        try:
+            completed_time = datetime.fromisoformat(completed_at)
+        except ValueError as exc:
+            LOG.warning(
+                "legacy workspace cutover timestamp is invalid request_id=%s: %s",
+                event.get("cutover_request_id"),
+                exc,
+            )
+            return False
+        if (
+            event.get("complete_coalition_drained") is not True
+            or event.get("proof")
+            != "complete_legacy_supervisor_coalition_drained"
+            or not str(event.get("cutover_request_id") or "").strip()
+            or completed_time.tzinfo is None
+            or completed_time.utcoffset() is None
+            or re.fullmatch(r"[0-9a-f]{40}", release) is None
+            or not isinstance(generations, list)
+        ):
+            return False
+        for candidate in generations:
+            if not isinstance(candidate, dict):
+                return False
+            normalized = {
+                key: str(candidate.get(key) or "").strip()
+                for key in target
+            }
+            if (
+                normalized == target
+                and datetime.fromisoformat(target["allocated_at"])
+                <= completed_time
+            ):
+                return True
+    return False
+
+
 def _settlement_key(payload: dict[str, Any]) -> tuple[str, str]:
     return (
         str(payload.get("task_id") or ""),
@@ -1574,8 +1856,10 @@ def record_allocation_deferred(
 def _latest_terminal_receipt(
     repo_root: Path,
     workspace_name: str,
+    *,
+    job_id: str = "",
 ) -> dict[str, Any] | None:
-    """Return the last durable finalization for one workspace, if any."""
+    """Return the terminal receipt for the exact allocation generation."""
     source = Path(repo_root) / RECEIPTS_RELPATH
     try:
         lines = source.read_text(encoding="utf-8").splitlines()
@@ -1584,16 +1868,40 @@ def _latest_terminal_receipt(
     except OSError as exc:
         LOG.warning("workspace terminal receipt read failed (%s): %s", source, exc)
         return None
-    for line in reversed(lines):
+    events: list[dict[str, Any]] = []
+    for line in lines:
         try:
             event = json.loads(line)
         except json.JSONDecodeError as exc:
             LOG.warning("workspace terminal receipt line unreadable (%s): %s", source, exc)
             continue
+        if isinstance(event, dict):
+            events.append(event)
+    normalized_job_id = str(job_id or "").strip()
+    generation_start = 0
+    if normalized_job_id:
+        generation_start = -1
+        for index, event in enumerate(events):
+            if (
+                event.get("event") == "allocated"
+                and event.get("workspace") == workspace_name
+            ):
+                generation_start = (
+                    index
+                    if str(event.get("job_id") or "") == normalized_job_id
+                    else -1
+                )
+        if generation_start < 0:
+            return None
+    for event in reversed(events[generation_start:]):
         if (
-            isinstance(event, dict)
-            and event.get("event") in {"finalized", "released"}
+            event.get("event") in {"finalized", "released"}
             and event.get("workspace") == workspace_name
+            and (
+                not normalized_job_id
+                or not str(event.get("job_id") or "")
+                or str(event.get("job_id") or "") == normalized_job_id
+            )
             and (
                 event.get("event") == "released"
                 or event.get("disposition")
@@ -3604,6 +3912,7 @@ def finalize_workspace(
     worker_outcome: str,
     job_id: str = "",
     producer_custody: dict[str, Any] | None = None,
+    producer_drain_confirmed: bool = False,
     queue_path: Path | None = None,
     runner=subprocess.run,
     gate_fn: Callable[..., dict[str, Any]] | None = None,
@@ -3620,9 +3929,17 @@ def finalize_workspace(
         LOG.warning("workspace finalize refused: test process on canonical checkout")
         return {"disposition": "canonical_guard", "workspace": workspace.get("name")}
     workspace_name = str(workspace.get("name") or "")
+    prior = _latest_terminal_receipt(
+        repo_root,
+        workspace_name,
+        job_id=job_id,
+    )
+    if prior is not None:
+        return {**prior, "replayed": True}
     cohort_members = (
         []
-        if worker_outcome in _PRODUCER_NEVER_SPAWNED_OUTCOMES
+        if producer_drain_confirmed
+        or worker_outcome in _PRODUCER_NEVER_SPAWNED_OUTCOMES
         else procutil.producer_cohort_members_checked(
             0,
             job_id=job_id,
@@ -3636,7 +3953,10 @@ def finalize_workspace(
     # and, after a positively empty PGID probe, records a new ``*_drained``
     # completion whose reconciliation pass may safely finalize this checkout.
     if (
-        worker_outcome in _PRODUCER_LIVENESS_UNVERIFIED_OUTCOMES
+        (
+            worker_outcome in _PRODUCER_LIVENESS_UNVERIFIED_OUTCOMES
+            and not producer_drain_confirmed
+        )
         or cohort_members is None
         or cohort_members
     ):
@@ -3683,7 +4003,11 @@ def finalize_workspace(
             "workspace": workspace_name,
             "reason": "task_settlement_pending_not_durable",
         }
-    prior = _latest_terminal_receipt(repo_root, workspace_name)
+    prior = _latest_terminal_receipt(
+        repo_root,
+        workspace_name,
+        job_id=job_id,
+    )
     if prior is not None:
         return {**prior, "replayed": True}
     reconciled = _reconcile_terminal_intent(
@@ -4300,6 +4624,10 @@ def sweep_orphan_workspaces(
         return []
     active8 = {str(j)[:8] for j in protected_job_ids}
     results: list[dict[str, Any]] = []
+    generations = {
+        item["workspace"]: item
+        for item in active_allocated_workspace_generations(repo_root)
+    }
     for wt_path in _registered_dispatch_worktrees(repo_root, runner=runner):
         match = _JOB8_RE.match(wt_path.name)
         job8 = match.group(1) if match else None
@@ -4339,9 +4667,18 @@ def sweep_orphan_workspaces(
             workspace_name=wt_path.name,
             job_id_prefix=job8,
         )
+        full_job_id = str(
+            (generations.get(wt_path.name) or {}).get("job_id") or job8
+        )
+        migration_drain = legacy_workspace_producer_drain_confirmed(
+            repo_root,
+            workspace_name=wt_path.name,
+            job_id=full_job_id,
+        )
         results.append(finalize_workspace(
             repo_root=repo_root, workspace=workspace, worker_outcome="orphaned",
-            job_id=job8 or "", producer_custody=sweep_custody,
+            job_id=full_job_id, producer_custody=sweep_custody,
+            producer_drain_confirmed=migration_drain,
             queue_path=queue_path, runner=runner,
         ))
     return results

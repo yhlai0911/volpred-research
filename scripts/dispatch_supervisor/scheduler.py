@@ -669,6 +669,13 @@ def reconcile_task_settlements(
                 if isinstance(pending.get("producer_custody"), dict)
                 else None
             ),
+            producer_drain_confirmed=(
+                workspace_mod.legacy_workspace_producer_drain_confirmed(
+                    repo_root,
+                    workspace_name=str(workspace.get("name") or ""),
+                    job_id=pending_job_id,
+                )
+            ),
         )
         disposition = _settlement_disposition(final)
         if disposition is None:

@@ -95,6 +95,63 @@ def _isolated_custody_ledger(
     return calls
 
 
+@pytest.fixture(autouse=True)
+def _isolated_legacy_workspace_drain(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> dict[str, list[object]]:
+    calls: dict[str, list[object]] = {"active": [], "record": []}
+    monkeypatch.setattr(
+        installer.custody_receipt,
+        "RECEIPTS_RELPATH",
+        tmp_path / "producer_custody_receipts.jsonl",
+    )
+
+    def active(repo_root: Path) -> list[dict[str, str]]:
+        calls["active"].append(Path(repo_root))
+        return [{
+            "workspace": "dispatch-slot-1-deadbeef",
+            "job_id": "deadbeef" * 4,
+            "allocation_receipt_id": "a" * 32,
+            "allocated_at": "2026-07-29T00:00:00+00:00",
+            "branch": "worktree-dispatch-slot-1-deadbeef",
+            "base_sha": "b" * 40,
+        }]
+
+    def record(
+        repo_root: Path,
+        *,
+        workspace_generations: list[dict[str, str]],
+        cutover_request_id: str,
+        cutover_completed_at: str,
+        complete_coalition_drained: bool,
+        release_commit: str,
+    ) -> bool:
+        calls["record"].append(
+            {
+                "repo_root": Path(repo_root),
+                "workspace_generations": list(workspace_generations),
+                "cutover_request_id": cutover_request_id,
+                "cutover_completed_at": cutover_completed_at,
+                "complete_coalition_drained": complete_coalition_drained,
+                "release_commit": release_commit,
+            }
+        )
+        return True
+
+    monkeypatch.setattr(
+        installer.workspace_mod,
+        "active_allocated_workspace_generations",
+        active,
+    )
+    monkeypatch.setattr(
+        installer.workspace_mod,
+        "record_legacy_workspace_producer_drain",
+        record,
+    )
+    return calls
+
+
 def _plist(
     *,
     stage0_path: str,
