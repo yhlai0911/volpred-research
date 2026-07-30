@@ -175,27 +175,89 @@ def test_append_to_feed_uses_single_report_sync(
     assert calls == [("mile_append_single", "Append Single")]
 
 
-def test_article_notification_failure_warns_without_blocking(
+def test_article_notification_is_deferred_to_owned_boss_batch(
     tmp_path: Path,
     monkeypatch,
-    capsys,
 ):
-    def fail_notify(self, *args, **kwargs):
-        raise RuntimeError("smtp down")
+    class ForbiddenLegacyNotifier:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("automatic article path used direct notifier")
 
-    monkeypatch.setattr(EmailNotifier, "notify_article_published", fail_notify)
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        ForbiddenLegacyNotifier,
+    )
     pub = Publisher(storage_dir=str(tmp_path))
 
     result = pub._notify_article_published(
-        {"id": "mile_notify_fail", "title": "Notification failure"},
+        {"id": "mile_batch", "title": "Batched article"},
         reason="publish_milestone",
     )
 
-    captured = capsys.readouterr()
-    assert result is None
-    assert "[email_notify] article notification failed" in captured.out
-    assert "mile_notify_fail" in captured.out
-    assert "smtp down" in captured.out
+    assert result == {
+        "article_id": "mile_batch",
+        "delivery": "boss_report_4h",
+        "reason": "publish_milestone",
+        "status": "deferred",
+    }
+
+
+def test_manual_article_notification_uses_formal_owned_email(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    reports_dir = tmp_path / "reports"
+    reports_dir.mkdir(parents=True)
+    (reports_dir / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_manual",
+                    "title": "Manual article",
+                    "description": "Evidence-bound summary",
+                    "status": "published",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    captured: dict[str, object] = {}
+
+    class ForbiddenLegacyNotifier:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("manual article path used direct notifier")
+
+    def fake_dispatch(command, *, storage_dir):
+        captured["command"] = command
+        captured["storage_dir"] = storage_dir
+        return {
+            "delivery_owner": "operations_core",
+            "effect_status": "delivered",
+            "sent": True,
+        }
+
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        ForbiddenLegacyNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.dispatch_email_by_current_owner",
+        fake_dispatch,
+    )
+
+    result = Publisher(storage_dir=str(tmp_path)).send_article_notification(
+        "mile_manual"
+    )
+
+    command = captured["command"]
+    assert command.idempotency_key == (
+        "manual-article-notification:mile_manual"
+    )
+    assert command.title.startswith("[新架構派發]")
+    assert command.actor_ref == "manual:article-notification:mile_manual"
+    assert captured["storage_dir"] == str(tmp_path)
+    assert result["delivery_owner"] == "operations_core"
+    assert result["effect_status"] == "delivered"
 
 
 def test_unpublish_supabase_sync_failure_is_queued(

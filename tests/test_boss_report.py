@@ -444,7 +444,9 @@ def test_daily_close_renders_day_close_sections(monkeypatch) -> None:
     assert "published=1" in plain
 
 
-def test_plain_edition_skips_day_close_sections(monkeypatch) -> None:
+def test_plain_edition_batches_articles_but_skips_other_day_close_sections(
+    monkeypatch,
+) -> None:
     monkeypatch.setattr(boss_report, "_dashboard", lambda: {"overall_status": "ok", "sections": []})
     monkeypatch.setattr(boss_report, "_commits_in_window", lambda: [])
     monkeypatch.setattr(boss_report, "_paper_portfolio", lambda: [])
@@ -454,16 +456,48 @@ def test_plain_edition_skips_day_close_sections(monkeypatch) -> None:
     monkeypatch.setattr(boss_report, "_blockers", lambda: [])
     monkeypatch.setattr(boss_report, "_cron_review", lambda: "ok")
 
-    called = []
-    monkeypatch.setattr(boss_report, "_articles_in_window", lambda: called.append("articles"))
+    monkeypatch.setattr(
+        boss_report,
+        "_articles_in_window",
+        lambda: {
+            "published": [
+                {
+                    "id": "mile_batch",
+                    "title": "Batched article",
+                    "ts": "10:00",
+                    "audience": "general",
+                }
+            ],
+            "drafts": [],
+        },
+    )
 
     title, html_body, plain = boss_report.build_html(daily_close=False)
 
-    assert called == []  # day-close collectors must not run on the 4h editions
     assert title.startswith("[新架構派發][VolPred Boss Report]")
     assert title.count("[新架構派發]") == 1
+    assert "本報告窗口文章（published 1 / drafts 0）" in html_body
+    assert "Batched article" in html_body
     assert "日結" not in html_body
     assert "Daily close" not in plain
+
+
+def test_boss_report_is_the_only_scheduled_article_email_batch() -> None:
+    root = Path(__file__).resolve().parents[1]
+    schedules = json.loads(
+        (root / "config" / "runtime_schedules.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    job = next(
+        item
+        for item in schedules["system_crontab"]["items"]
+        if item["id"] == "boss_report_4h"
+    )
+
+    assert job["cron"] == "10 8,14,20 * * *"
+    assert "新文章通知唯一批次 owner" in job["description"]
+    assert "禁止逐篇 Email" in job["description"]
 
 
 def test_build_html_uses_one_program_snapshot(monkeypatch) -> None:

@@ -160,10 +160,9 @@ def test_update_content_release_settings_warns_when_supabase_patch_fails(
     assert "RuntimeError: patch denied" in captured.out
 
 
-def test_release_pool_notification_failure_warns_without_blocking(
+def test_release_pool_defers_article_email_to_boss_batch(
     tmp_path: Path,
     monkeypatch,
-    capsys,
 ):
     storage_dir = tmp_path / "storage"
     frozen_now = datetime(2026, 4, 19, 8, 0, tzinfo=timezone.utc)
@@ -171,10 +170,13 @@ def test_release_pool_notification_failure_warns_without_blocking(
     _stub_release_side_effects(monkeypatch)
     from volpred.publisher.email_notifier import EmailNotifier
 
-    def fail_notify(*args, **kwargs):
-        raise RuntimeError("smtp down")
-
-    monkeypatch.setattr(EmailNotifier, "notify_article_published", fail_notify)
+    monkeypatch.setattr(
+        EmailNotifier,
+        "notify_article_published",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("release pool used direct article email")
+        ),
+    )
     _write_json(
         storage_dir / ".release_settings.json",
         {
@@ -204,12 +206,9 @@ def test_release_pool_notification_failure_warns_without_blocking(
 
     result = content.release_pool_by_settings(storage_dir=str(storage_dir))
 
-    captured = capsys.readouterr()
     feed = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
     assert result["released_count"] == 1
     assert feed[0]["status"] == "published"
-    assert "[email_notify] article notification failed for mile_notify_fail" in captured.out
-    assert "(release_pool): smtp down" in captured.out
 
 
 def test_release_pool_warns_when_failed_sync_ledger_is_corrupt(

@@ -1308,20 +1308,21 @@ class Publisher:
         pass
 
     def _notify_article_published(self, item: dict, *, reason: str, force_send: bool = False):
-        try:
-            from volpred.publisher.email_notifier import EmailNotifier
+        """Defer automatic article mail to the existing owned Boss batch.
 
-            return EmailNotifier(storage_dir=str(self.reports_dir.parent)).notify_article_published(
-                item,
-                reason=reason,
-                force_send=force_send,
-            )
-        except Exception as exc:
-            print(
-                f"  [email_notify] article notification failed for "
-                f"{item.get('id', '?')} ({reason}): {exc}"
-            )
-            return None
+        Publication is already a formal content effect.  Starting a second,
+        direct SMTP effect here produced one message per article and bypassed
+        Operations Core ownership.  The three daily ``boss_report_4h`` windows
+        now read the canonical feed and carry every article in their window
+        through the durable ``email.ops_alert`` owner.
+        """
+        del force_send  # automatic publication has no transport bypass
+        return {
+            "article_id": str(item.get("id") or ""),
+            "delivery": "boss_report_4h",
+            "reason": reason,
+            "status": "deferred",
+        }
 
     def _record_dead_letter(self, queue_name: str, pub_id: str) -> None:
         """Append ``pub_id`` to a projection dead-letter queue (idempotent)."""
@@ -2884,14 +2885,52 @@ class Publisher:
         article = self.get_report(pub_id)
         if not article:
             return {"found": False, "id": pub_id}
-        from volpred.publisher.email_notifier import EmailNotifier
+        from uuid import uuid4
 
-        notification_id = EmailNotifier(storage_dir=str(self.reports_dir.parent)).notify_article_published(
-            article,
-            reason='manual_resend',
-            force_send=force_send,
+        from volpred.ops.alerts import ALERT_RECIPIENT
+        from volpred.ops.delivery.owned_email import (
+            OwnedEmailCommand,
+            dispatch_email_by_current_owner,
         )
-        return {"found": True, "id": pub_id, "notification_id": notification_id}
+
+        title = str(article.get("title") or pub_id)
+        summary = str(
+            article.get("description")
+            or article.get("excerpt")
+            or ""
+        ).strip()
+        site_url = os.environ.get(
+            "NEXT_PUBLIC_SITE_URL",
+            get_default_remote_url(),
+        ).rstrip("/")
+        body = "\n".join(
+            [
+                f"文章標題：{title}",
+                f"文章 ID：{pub_id}",
+                f"狀態：{article.get('status') or 'unknown'}",
+                f"摘要：{summary or '—'}",
+                f"網站：{site_url}/reports/{pub_id}",
+            ]
+        )
+        force_suffix = f":{uuid4().hex}" if force_send else ""
+        receipt = dispatch_email_by_current_owner(
+            OwnedEmailCommand(
+                idempotency_key=(
+                    f"manual-article-notification:{pub_id}{force_suffix}"
+                ),
+                level="info",
+                title=(
+                    "[新架構派發][VolPred] 手動文章通知："
+                    f"{title}"
+                ),
+                recipient=ALERT_RECIPIENT,
+                text_body=body,
+                html_body=None,
+                actor_ref=f"manual:article-notification:{pub_id}",
+            ),
+            storage_dir=str(self.reports_dir.parent),
+        )
+        return {"found": True, "id": pub_id, **receipt}
 
     def send_daily_digest(self, *, target_date: date | None = None, force_send: bool = False) -> dict:
         from volpred.publisher.email_notifier import EmailNotifier

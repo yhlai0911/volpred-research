@@ -13,8 +13,11 @@ Structure (per user 2026-05-19 directive — user is boss, receives reports only
   4. Signal for boss (strategic input wanted, no ask)
   5. Next cycle plan (no input needed)
   6. Direction recommendations
+  Every edition batches articles published/drafted inside its own report window.
+  This is the only automatic new-article email; publishing never sends one
+  direct message per article.
   Daily-close extras (2026-07-20 WS-H2, merged from retired work_summary_6h):
-  Mission-5 progress, articles published/drafted, work-log entries, active
+  Mission-5 progress, work-log entries, active
   worktree agents, notifications, top files changed.
 
 Channel contract (WS-H2): work_summary_6h is RETIRED — its content lives here
@@ -491,7 +494,7 @@ def build_html(daily_close: bool = False):
         program.as_report_fields() if program is not None else {}
     )
     blockers = _blockers()
-    articles = _articles_in_window() if daily_close else {"published": [], "drafts": []}
+    articles = _articles_in_window()
     work = _work_log_entries() if daily_close else []
     worktrees = _active_worktrees() if daily_close else []
     notifs = _new_notifications() if daily_close else []
@@ -581,6 +584,38 @@ def build_html(daily_close: bool = False):
             parts.append(f"<tr><td class='commit'>{_esc(c['sha'])}</td><td>{_esc(c['subject'])}</td><td class='small'>{_esc(c['iso'][11:16])}</td></tr>")
         parts.append("</table>")
 
+    article_heading = (
+        "②-c 日結 · 文章"
+        if daily_close
+        else "②-a 本報告窗口文章"
+    )
+    parts.append(
+        f"<h2>{article_heading}（published {len(articles['published'])} / "
+        f"drafts {len(articles['drafts'])}）</h2>"
+    )
+    if articles["published"] or articles["drafts"]:
+        parts.append(
+            "<table><tr><th>時間</th><th>狀態</th><th>標題</th>"
+            "<th>受眾</th></tr>"
+        )
+        for article in articles["published"]:
+            parts.append(
+                f"<tr><td class='small'>{_esc(article['ts'])}</td>"
+                "<td class='ok'>published</td>"
+                f"<td>{_esc(plainify_boss_text(article['title']))}</td>"
+                f"<td class='small'>{_esc(article['audience'])}</td></tr>"
+            )
+        for article in articles["drafts"]:
+            parts.append(
+                f"<tr><td class='small'>{_esc(article['ts'])}</td>"
+                "<td class='small'>draft</td>"
+                f"<td>{_esc(plainify_boss_text(article['title']))}</td>"
+                f"<td class='small'>{_esc(article['audience'])}</td></tr>"
+            )
+        parts.append("</table>")
+    else:
+        parts.append("<p class='small'>窗口內無新文章。</p>")
+
     # 2b. Daily-close sections (20:10 edition; merged from retired work_summary_6h)
     if daily_close:
         parts.append("<h2>②-b 日結 · Mission 5 大目標推進（24h）</h2>")
@@ -590,19 +625,6 @@ def build_html(daily_close: bool = False):
             parts.append(f"<tr><td>{_esc(name)}</td><td class='{cls}'>{_esc(row['status'])}</td>"
                          f"<td class='small'>{_esc(row['evidence'])}</td></tr>")
         parts.append("</table>")
-
-        parts.append(f"<h2>②-c 日結 · 文章（published {len(articles['published'])} / drafts {len(articles['drafts'])}）</h2>")
-        if articles["published"] or articles["drafts"]:
-            parts.append("<table><tr><th>時間</th><th>狀態</th><th>標題</th><th>受眾</th></tr>")
-            for a in articles["published"]:
-                parts.append(f"<tr><td class='small'>{_esc(a['ts'])}</td><td class='ok'>published</td>"
-                             f"<td>{_esc(plainify_boss_text(a['title']))}</td><td class='small'>{_esc(a['audience'])}</td></tr>")
-            for a in articles["drafts"]:
-                parts.append(f"<tr><td class='small'>{_esc(a['ts'])}</td><td class='small'>draft</td>"
-                             f"<td>{_esc(plainify_boss_text(a['title']))}</td><td class='small'>{_esc(a['audience'])}</td></tr>")
-            parts.append("</table>")
-        else:
-            parts.append("<p class='small'>窗口內無新文章。</p>")
 
         parts.append(f"<h2>②-d 日結 · Work log（{len(work)} 筆）</h2>")
         if work:
