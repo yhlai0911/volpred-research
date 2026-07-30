@@ -60,6 +60,11 @@ def _wire_fixture(monkeypatch, tmp_path: Path) -> tuple[Path, dict]:
     monkeypatch.setattr(ctd, "WORK_LOG", tmp_path / "work_log.json")
     monkeypatch.setattr(ctd, "REPORT_PATH", tmp_path / "dispatch_report_latest.json")
     monkeypatch.setattr(
+        ctd,
+        "_find_task_dispatch_collisions",
+        lambda **kwargs: {},
+    )
+    monkeypatch.setattr(
         ctd, "_slot_budget",
         SimpleNamespace(
             occupancy=lambda: {"occupied": 0, "worktrees": [], "active_agents": [], "stale": []},

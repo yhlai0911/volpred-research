@@ -85,6 +85,9 @@ from scripts.dispatch_supervisor.failure_class import classify_output  # noqa: E
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
+from volpred.ops.task_dispatch_collision import (  # noqa: E402
+    find_task_dispatch_collision,
+)
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 # Payload execution is a distinct adapter from process-table probes and other
@@ -1315,84 +1318,14 @@ def _find_task_dispatch_collision(
     target_workdir: Path,
     runner=subprocess.run,
 ) -> dict[str, str] | None:
-    """Return an unmerged worktree branch already carrying ``task_id``.
+    """Compatibility seam; the shared batch query owns collision semantics."""
 
-    ``enqueue-agent`` is the one dispatch boundary that knows both the canonical
-    pool task id and the worktree that is about to receive an expensive agent.
-    Keep the collision invariant here rather than duplicating best-effort prompt
-    checks in every hourly lane.
-
-    A matching commit already reachable from canonical HEAD is historical and
-    therefore harmless. A matching commit reachable from another registered
-    worktree branch but not HEAD is live, unmerged work for the same task and
-    must stop the second dispatch.
-    """
-
-    def git(*args: str) -> subprocess.CompletedProcess:
-        try:
-            return runner(
-                ["git", "-C", str(repo_root), *args],
-                capture_output=True,
-                text=True,
-                timeout=30,
-                check=False,
-            )
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            raise RuntimeError(f"git {' '.join(args[:2])} failed: {exc}") from exc
-
-    matches = git(
-        "log", "--all", "--fixed-strings", f"--grep={task_id}", "--format=%H"
+    return find_task_dispatch_collision(
+        repo_root=repo_root,
+        task_id=task_id,
+        target_workdir=target_workdir,
+        runner=runner,
     )
-    if matches.returncode != 0:
-        raise RuntimeError(
-            f"git log collision scan failed rc={matches.returncode}: "
-            f"{(matches.stderr or '').strip()[-240:]}"
-        )
-    matching_shas = [line.strip() for line in matches.stdout.splitlines() if line.strip()]
-    if not matching_shas:
-        return None
-
-    worktrees = git("worktree", "list", "--porcelain")
-    if worktrees.returncode != 0:
-        raise RuntimeError(
-            f"git worktree collision scan failed rc={worktrees.returncode}: "
-            f"{(worktrees.stderr or '').strip()[-240:]}"
-        )
-
-    records: list[dict[str, str]] = []
-    current: dict[str, str] = {}
-    for line in [*(worktrees.stdout or "").splitlines(), ""]:
-        if not line:
-            if current:
-                records.append(current)
-                current = {}
-            continue
-        key, _, value = line.partition(" ")
-        if key in {"worktree", "branch"} and value:
-            current[key] = value.removeprefix("refs/heads/") if key == "branch" else value
-
-    target = target_workdir.resolve()
-    for record in records:
-        raw_path = record.get("worktree")
-        branch = record.get("branch")
-        if not raw_path or not branch or Path(raw_path).resolve() == target:
-            continue
-        for sha in matching_shas:
-            merged = git("merge-base", "--is-ancestor", sha, "HEAD")
-            if merged.returncode == 0:
-                continue
-            if merged.returncode != 1:
-                raise RuntimeError(
-                    f"cannot determine whether task commit {sha[:12]} is merged into HEAD"
-                )
-            on_branch = git("merge-base", "--is-ancestor", sha, branch)
-            if on_branch.returncode == 0:
-                return {"worktree": raw_path, "branch": branch, "commit": sha}
-            if on_branch.returncode != 1:
-                raise RuntimeError(
-                    f"cannot inspect task commit {sha[:12]} on branch {branch}"
-                )
-    return None
 
 
 def _find_live_agent_workdir_collision(

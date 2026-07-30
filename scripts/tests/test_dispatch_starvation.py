@@ -35,6 +35,19 @@ from continue_task_dispatch import (  # noqa: E402
 NOW = datetime(2026, 7, 13, 0, 0, tzinfo=timezone.utc)
 
 
+@pytest.fixture(autouse=True)
+def _no_worktree_collisions(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Most policy tests are hermetic and do not need the repository git graph."""
+
+    import continue_task_dispatch as ctd
+
+    monkeypatch.setattr(
+        ctd,
+        "_find_task_dispatch_collisions",
+        lambda **_kwargs: {},
+    )
+
+
 def _task(task_id: str, priority, age_hours: float | None, **extra) -> dict:
     task: dict = {"id": task_id, "priority": priority, "task_type": "member_qa", **extra}
     if age_hours is not None:
@@ -123,6 +136,129 @@ def test_lockout_collapses_the_candidate_menu(
     assert report["starvation"]["locked"] is True
     assert [c["id"] for c in report["dispatch_candidates"]] == ["starving_p1"]
     assert report["dispatch_candidates"][0]["starved"] is True
+
+
+def test_lockout_skips_unmerged_worktree_collisions_before_slot_truncation(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The 2026-07-30 deadlock: blocked K1730/K1731 must not consume both seats."""
+
+    import continue_task_dispatch as ctd
+
+    blocked_a = _task("K1730", 3, STARVATION_HOURS[3] + 200)
+    blocked_b = _task("K1731", 3, STARVATION_HOURS[3] + 190)
+    dispatchable_a = _task("K1735", 3, STARVATION_HOURS[3] + 180)
+    dispatchable_b = _task("K1737", 3, STARVATION_HOURS[3] + 170)
+    _dispatch_env(
+        monkeypatch,
+        tmp_path,
+        [blocked_a, blocked_b, dispatchable_a, dispatchable_b],
+        cap=2,
+    )
+    monkeypatch.setattr(
+        ctd,
+        "_find_task_dispatch_collisions",
+        lambda **_kwargs: {
+            "K1730": {
+                "worktree": "/repo/.claude/worktrees/k1730",
+                "branch": "wt/k1730",
+                "commit": "a" * 40,
+            },
+            "K1731": {
+                "worktree": "/repo/.claude/worktrees/k1731",
+                "branch": "wt/k1731",
+                "commit": "b" * 40,
+            },
+        },
+    )
+
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    assert [item["id"] for item in report["dispatch_candidates"]] == [
+        "K1735",
+        "K1737",
+    ]
+    assert [item["id"] for item in report["starvation"]["starved_tasks"]] == [
+        "K1735",
+        "K1737",
+    ]
+    assert [
+        item["id"] for item in report["starvation"]["collision_blocked_tasks"]
+    ] == ["K1730", "K1731"]
+    assert report["starvation"]["collision_scan_error"] is None
+
+
+@pytest.mark.parametrize(
+    "blocked_extra",
+    [
+        {"source": "telegram-incident"},
+        {"dispatch_preempt": True},
+    ],
+    ids=["urgent-lane", "dispatch-preempt"],
+)
+def test_collision_preflight_runs_before_lane_and_preempt_seating(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    blocked_extra: dict,
+) -> None:
+    """No outer lane may occupy a seat with work enqueue-agent must reject."""
+
+    import continue_task_dispatch as ctd
+
+    blocked = _task("blocked_outer_lane", 1, 0.1, **blocked_extra)
+    dispatchable = _task(
+        "dispatchable_starved",
+        1,
+        STARVATION_HOURS[1] + 10,
+    )
+    _dispatch_env(monkeypatch, tmp_path, [blocked, dispatchable], cap=1)
+    monkeypatch.setattr(
+        ctd,
+        "_find_task_dispatch_collisions",
+        lambda **_kwargs: {
+            "blocked_outer_lane": {
+                "worktree": "/repo/.claude/worktrees/blocked",
+                "branch": "wt/blocked",
+                "commit": "c" * 40,
+            }
+        },
+    )
+
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    assert [item["id"] for item in report["dispatch_candidates"]] == [
+        "dispatchable_starved"
+    ]
+    assert [
+        item["id"] for item in report["starvation"]["collision_blocked_tasks"]
+    ] == ["blocked_outer_lane"]
+
+
+def test_lockout_fails_closed_when_collision_scan_cannot_prove_dispatchability(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import continue_task_dispatch as ctd
+
+    starving = _task("K1730", 3, STARVATION_HOURS[3] + 200)
+    fresh = _task("K1800", 3, 1)
+    _dispatch_env(monkeypatch, tmp_path, [starving, fresh], cap=2)
+
+    def _scan_failed(**_kwargs):
+        raise RuntimeError("git worktree list timed out")
+
+    monkeypatch.setattr(
+        ctd,
+        "_find_task_dispatch_collisions",
+        _scan_failed,
+    )
+
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    assert report["dispatch_candidates"] == []
+    assert report["starvation"]["locked"] is False
+    assert report["starvation"]["collision_scan_error"] == (
+        "RuntimeError: git worktree list timed out"
+    )
 
 
 def test_ci_incident_is_reserved_for_supervisor_while_starvation_stays_claimable(

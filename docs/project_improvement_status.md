@@ -3159,3 +3159,27 @@ Operations Core owner、legacy per-job LaunchAgent 為 0；但 formal census 仍
 `incident.lifecycle`、`provider.execution` 五個 legacy owner，14 日 retirement
 clean-window 尚未開始。因此可受控運行新排程，但不可宣稱已完全取代舊架構或關閉
 program goal。
+
+## 2026-07-30 — Starvation lockout 與 worktree collision 共識化
+
+- ✅ `enqueue-agent` 原有的 task-id／未合併 worktree collision 判定已抽成
+  `volpred.ops.task_dispatch_collision` 單一 owner；單筆 enqueue 與 dispatcher
+  批次 preflight 共用相同 git commit、HEAD ancestry、registered worktree branch
+  語意，不在 starvation 另寫第二套猜測。
+- ✅ dispatcher 在 lane ranking、preempt seating 與 free-slot 截斷前，對完整
+  worker-claimable pool 做一次批次 collision query。已被
+  未合併 worktree 綁定的 task 會從 scheduled menu 移除並出現在
+  `collision_blocked_tasks`（含 worktree、branch、commit）；後方可派的 starved
+  tasks 會補進席次。git／worktree 查詢無法完成時整班 fail closed，並輸出
+  `collision_scan_error`，不再交給 worker 到 enqueue 階段才機械失敗。
+- ✅ 事故回歸固定 K1730／K1731 已 collision-blocked、K1735／K1737 可派的兩席
+  情境；另驗 urgent lane、dispatch-preempt 都不能以 collision task 占席、batch
+  與 enqueue 單筆 gate 相同、merge 進 HEAD 後 collision 自動消失、scan failure
+  不派工。相關 suites **110 passed**。
+- ✅ live read-back：批次 gate 對目前 git graph 正確指出 K1730、K1731 都由
+  `wt/dispatch-slot-1-bd00f90a-k1731` 的未合併 commits 持有，K1735、K1737
+  無 collision；自然 dispatch report 的 starved 清單已從 K1735 起，不再推薦
+  這兩張必敗 task。
+- 🟢 此 deadlock class 為 **`root_cause_fixed_and_verified`**；目前 experiment
+  lane 仍因 PHASE-Z incident 將 slot cap 降到 2 且兩席占滿而暫無 free slot，
+  那是下一張獨立根因 ticket，不混入本結案。

@@ -202,6 +202,11 @@ def test_build_report_exposes_disambiguated_pending_summary(monkeypatch, tmp_pat
     monkeypatch.setattr(dispatch, "load_recent_task_type_counts", lambda limit=10: Counter())
     monkeypatch.setattr(dispatch, "_maybe_refill", lambda *args, **kwargs: None)
     monkeypatch.setattr(dispatch, "_maybe_refill_draft_pool", lambda **kwargs: None)
+    monkeypatch.setattr(
+        dispatch,
+        "_find_task_dispatch_collisions",
+        lambda **kwargs: {},
+    )
 
     report = dispatch.build_report(auto_refill=False)
 

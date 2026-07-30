@@ -88,6 +88,9 @@ if str(Path(__file__).resolve().parent) not in sys.path:
 import dispatch_slot_budget as _slot_budget  # noqa: E402
 
 from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
+from volpred.ops.task_dispatch_collision import (  # noqa: E402
+    find_task_dispatch_collisions as _find_task_dispatch_collisions,
+)
 # 2026-07-01 3-STRIKE fix (dreaming persistent_alert draft_pool_low, 5x/73d):
 # `draft_pool_low` alert (src/volpred/ops/alerts.py::_parse_draft_pool_state)
 # measures feed.json `status=="draft"` article count directly — a DIFFERENT
@@ -1163,6 +1166,45 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
         for task in cats["agentable"]
         if not requires_supervisor_preassignment(task)
     ]
+    collision_blocked_tasks: list[dict] = []
+    collision_scan_error: str | None = None
+    if worker_claimable:
+        try:
+            collision_by_id = _find_task_dispatch_collisions(
+                repo_root=ROOT,
+                task_ids=(
+                    str(task.get("id") or "")
+                    for task in worker_claimable
+                ),
+                target_workdir=ROOT,
+            )
+        except RuntimeError as exc:
+            collision_scan_error = f"{type(exc).__name__}: {exc}"
+            collision_by_id = {}
+        if collision_scan_error is None:
+            collision_blocked_tasks = [
+                {
+                    "id": task.get("id"),
+                    "priority": task.get("priority"),
+                    "task_type": task.get("task_type"),
+                    "age_hours": task_age_hours(task, now=now),
+                    **collision_by_id[str(task.get("id") or "")],
+                }
+                for task in worker_claimable
+                if str(task.get("id") or "") in collision_by_id
+            ]
+            collision_blocked_ids = {
+                item["id"] for item in collision_blocked_tasks
+            }
+            worker_claimable = [
+                task
+                for task in worker_claimable
+                if task.get("id") not in collision_blocked_ids
+            ]
+        else:
+            # enqueue-agent uses the same git query and would also reject every
+            # candidate.  Do not advertise a menu that cannot pass admission.
+            worker_claimable = []
 
     # 2026-07-21 dispatch-lanes R1: lane rank is the OUTERMOST ordering key.
     # `task_urgency.classify()` has been the single urgency owner since
@@ -1227,7 +1269,11 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
             preemptive + [task for task in scheduled_pool if task.get("id") not in preempt_ids]
         )[:scheduled_slots]
         tail_floor_ids = []
-    candidates_to_dispatch = lane_head + scheduled_candidates
+    candidates_to_dispatch = (
+        []
+        if collision_scan_error is not None
+        else lane_head + scheduled_candidates
+    )
 
     pending_summary = {
         "agentable": len(cats["agentable"]),
@@ -1288,6 +1334,9 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
             "locked": bool(starved),
             "incident_preempt_count": len(preemptive),
             "starved_count": len(starved),
+            "collision_blocked_count": len(collision_blocked_tasks),
+            "collision_blocked_tasks": collision_blocked_tasks,
+            "collision_scan_error": collision_scan_error,
             # Which candidate (if any) is sitting in the reserved tail seat, so the
             # trade this fire made is auditable rather than inferred from ordering.
             "tail_floor_task_ids": tail_floor_ids,
@@ -1434,6 +1483,18 @@ def print_report(report: dict) -> None:
             )
 
     starvation = report.get("starvation") or {}
+    if starvation.get("collision_scan_error"):
+        print(
+            "[dispatch] ⛔ task/worktree collision scan failed closed: "
+            f"{starvation['collision_scan_error']}"
+        )
+    for blocked in starvation.get("collision_blocked_tasks", []):
+        print(
+            "  ↳ collision-blocked "
+            f"P{blocked['priority']} {blocked['id']} :: "
+            f"{blocked['worktree']} ({blocked['branch']} "
+            f"{blocked['commit'][:12]})"
+        )
     if starvation.get("locked"):
         print(f"[dispatch] {starvation['directive']}")
         for s in starvation.get("starved_tasks", []):

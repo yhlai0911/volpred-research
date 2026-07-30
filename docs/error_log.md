@@ -5227,3 +5227,33 @@ ACK／CLOSE、下一個自然 Token 08:00 fire與 24 小時通知頻率／必要
 `root_cause_fixed_and_verified`。制度化規則：**通知 source marker、schedule owner
 與 transport exit 0 都不是送達／頻率正確的證據；必須同時驗 identity、唯一 channel
 owner、durable effect receipt 與收件端 read-back。**
+
+---
+
+## 2026-07-30 — Starvation lockout 先截斷、enqueue 後驗 collision，形成永久死結
+
+**證據化症狀**：starvation lockout 曾只 offer K1730、K1731 兩席，但兩者各有
+未合併 worktree；worker claim、建 worktree 後才被 `enqueue-agent` 的 task-id
+collision gate 拒絕。後方 K1735／K1737 等無 worktree 的餓死任務永遠進不了
+候選席，experiment lane 因此即使有工作也沒有可成功 enqueue 的工作。
+
+**根因層級（selection／admission contract 分岔）**：starvation 只以 priority、
+age 與 free-slot 數截斷；唯一知道 git commit／worktree ownership 的 collision
+判定藏在 enqueue boundary。兩個 gate 各自正確，但上游 menu 不知道下游必拒條件，
+把「必敗」誤當成「可派」並重複 force-feed。
+
+**底層修復與制度化**：collision query 已移到
+`volpred.ops.task_dispatch_collision`；enqueue 單筆與 starvation 批次 preflight
+共用同一實作。dispatcher 在 urgent/time-critical lane ranking、preempt seating 與
+slot truncation 前先掃完整 worker-claimable pool，排除 collision，保留明確
+worktree／branch／commit evidence 並由後方可派 task 補席；查詢失敗則 fail closed，
+不得假設無 collision。batch query 只掃一次 git log/worktree registry，避免逐 task
+重跑完整 git graph。
+
+**回歸與狀態**：K1730／K1731 blocked、K1735／K1737 backfill、urgent/preempt
+collision、scan error、single/batch parity 與 merge-to-HEAD release 等相關 tests
+**110 passed**；live graph
+回讀亦精確定位 K1730／K1731 的 owner commits，K1735／K1737 為 clean。
+此類為 **`root_cause_fixed_and_verified`**。制度化規則：**任何會縮窄候選的
+selection gate，都必須在截斷前共用 downstream admission 的機械可派工判定；
+不可先推薦、再讓下一層永久拒絕。**

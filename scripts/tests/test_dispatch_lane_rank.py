@@ -36,6 +36,15 @@ from volpred.ops.task_urgency import (  # noqa: E402
 NOW = datetime(2026, 7, 21, 6, 0, tzinfo=timezone.utc)
 
 
+@pytest.fixture(autouse=True)
+def _no_worktree_collisions(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        ctd,
+        "_find_task_dispatch_collisions",
+        lambda **_kwargs: {},
+    )
+
+
 def _task(task_id: str, *, priority=1, age_hours: float = 0.5, **extra) -> dict:
     task: dict = {
         "id": task_id,
