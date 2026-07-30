@@ -310,6 +310,69 @@ def test_custody_success_refuses_live_bound_target(
     assert proc.poll() is None
 
 
+def test_custody_target_probe_error_fails_closed(
+    tmp_path: Path,
+    spawn_process,
+    monkeypatch,
+) -> None:
+    state_path = tmp_path / "dispatch_state.json"
+    proc = spawn_process()
+    pgid = os.getpgid(proc.pid)
+    custody = {
+        "version": 2,
+        "host_uuid": "host-a",
+        "boot_session_uuid": "boot-a",
+        "resource_coalition_id": 42,
+        "trusted_unique_ids": [1, 2],
+    }
+    _write_dispatch_state(
+        state_path,
+        proc=proc,
+        producer_custody=custody,
+    )
+    membership_reads = iter([[proc.pid], []])
+    monkeypatch.setattr(
+        terminate_dispatch_job.procutil,
+        "producer_custody_all_members_checked",
+        lambda _custody: next(membership_reads),
+    )
+    monkeypatch.setattr(
+        terminate_dispatch_job.procutil,
+        "kill_producer_cohort",
+        lambda *_args, **_kwargs: True,
+    )
+    fake_subprocess = type(
+        "FakeSubprocess",
+        (),
+        {
+            "TimeoutExpired": subprocess.TimeoutExpired,
+            "run": staticmethod(
+                lambda *_args, **_kwargs: subprocess.CompletedProcess(
+                    args=["/bin/ps"],
+                    returncode=2,
+                    stdout="",
+                    stderr="observer unavailable",
+                )
+            ),
+        },
+    )
+    monkeypatch.setattr(
+        terminate_dispatch_job.termination_command,
+        "subprocess",
+        fake_subprocess,
+    )
+
+    result = _run_formal_cli(
+        target_id=pgid,
+        state_path=state_path,
+        signal_name="TERM_KILL",
+    )
+
+    assert result.returncode == 2
+    assert "target liveness probe was ambiguous" in result.stderr
+    assert proc.poll() is None
+
+
 def test_formal_command_requires_complete_identity_before_arm(
     tmp_path: Path,
     spawn_process,

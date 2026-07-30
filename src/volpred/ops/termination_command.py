@@ -40,18 +40,32 @@ def target_still_exists(
     target_kind: termination.TargetKind,
     target_id: int,
 ) -> bool:
-    probe = subprocess.run(
-        (
-            ["ps", "-o", "pid=", "-g", str(target_id)]
-            if target_kind == "pgid"
-            else ["ps", "-o", "pid=", "-p", str(target_id)]
-        ),
-        capture_output=True,
-        text=True,
-        timeout=5,
-        check=False,
+    try:
+        probe = subprocess.run(
+            (
+                ["/bin/ps", "-o", "pid=", "-g", str(target_id)]
+                if target_kind == "pgid"
+                else ["/bin/ps", "-o", "pid=", "-p", str(target_id)]
+            ),
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise termination.TerminationIntentError(
+            f"target liveness probe failed: {type(exc).__name__}: {exc}"
+        ) from exc
+    stdout = probe.stdout.strip()
+    stderr = probe.stderr.strip()
+    if probe.returncode == 0 and stdout and not stderr:
+        return True
+    if probe.returncode == 1 and not stdout and not stderr:
+        return False
+    raise termination.TerminationIntentError(
+        "target liveness probe was ambiguous: "
+        f"rc={probe.returncode} stderr={stderr[:200]!r}"
     )
-    return probe.returncode == 0 and bool(probe.stdout.strip())
 
 
 def wait_for_target_absent(
