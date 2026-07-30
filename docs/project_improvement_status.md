@@ -3118,3 +3118,36 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
   仍缺checkpoint resume、host restart、lease expiry及duplicate
   commit/effect acceptance，受#9/#24 blocking edge約束，維持
   **`contained`**、OPEN。
+
+## 2026-07-30 — Issue #13 剩餘通知旁路與頻率洩漏收斂
+
+- ✅ live evidence 顯示 dispatch loop crash 曾在 63 分鐘內寄出 13 封；自動文章
+  發佈仍逐篇直接寄 Email；Telegram daemon 的長存 file descriptor 在 log rotation
+  後繼續寫舊 inode，且 rotator 未保證新檔維持 `0600`。這三類不是文案問題，而是
+  dedup identity、channel ownership 與 runtime file lifecycle 的底層缺口。
+- ✅ supervisor 所有 alert 已移除 `--force`；loop crash identity 現由正規化
+  traceback frame／function／exception cause 組成，completion／silent-death／orphan
+  依可處置結果分流。動態 timestamp、UUID、hex、path、數字與 canonical
+  `assign_<hex>` task id 不再製造新 episode，穩定不同 cause 也不會被錯誤合併。
+- ✅ 自動文章通知不再逐篇 direct Email；唯一週期性 owner 改為 Boss Report。
+  08:10／14:10／20:10 依 canonical `scheduled_for` 半開區間聚合，20:10 只取
+  14:10 後六小時的文章 delta，不會把同一批文章在三版報表反覆寄送。
+- ✅ Telegram logger 每次寫入重新開啟目前 pathname，rotator 以 atomic replace
+  保留既有 mode 並固定 private umask。live rotation canary 回讀 archive inode
+  不再增長、新 inode 接收新訊息且兩者 mode 都是 `0600`；正式 wrapper exact
+  同步完成。retry 測試亦改寫到隔離 temp log，不再污染 production log。
+- ✅ 最終相關回歸 **353 passed、1 skipped**；Matt Standards／Spec 雙軸最終
+  PASS。修正 commits `09588aee9` 至 `71d55be44` 已封裝成 immutable release
+  `41c5b86d…6466b5`，durable reload request
+  `5f3cad26…5457` 已交由 supervisor 在既有 worker drain 後安全啟用。
+- 🟡 狀態仍為 **`contained`**：不得以單元測試取代收件端驗證。尚待 fresh
+  Telegram receive→process→reply、目標 Gmail ACK／CLOSE read-back、下一個自然
+  Token 08:00 fire，以及完整 24 小時頻率／必要性 audit。Issue #13 保持 OPEN。
+
+同日全域 read-back：網站根頁與 `/api/health` 均為 HTTP 200，queue 已回
+`queued_execution`（direct mode 關閉），56 個 schedule capability 皆為唯一
+Operations Core owner、legacy per-job LaunchAgent 為 0；但 formal census 仍有
+`work.coordinate`、`git.commit`、`publisher.article.supabase.delete`、
+`incident.lifecycle`、`provider.execution` 五個 legacy owner，14 日 retirement
+clean-window 尚未開始。因此可受控運行新排程，但不可宣稱已完全取代舊架構或關閉
+program goal。

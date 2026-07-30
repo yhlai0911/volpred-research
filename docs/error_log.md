@@ -5175,3 +5175,41 @@ delivery 等相鄰範圍 **107 passed**，Matt Standards／Spec 均 PASS。目�
 **`contained`**：今天 08:00 natural fire 早於修正，不人工重送以免雙寄；須待下一個
 自然 08:00 fire 回讀 exact WorkItem／Effect、attempt 1 與 Gmail Sent evidence，
 且 Issue #13 的 24 小時通知頻率 audit 完成後，才可升級。
+
+---
+
+## 2026-07-30 — 通知雖已切新架構標題，仍可由 identity／旁路／log inode 重複噴送
+
+**證據化症狀**：新架構 dispatch loop crash 在 63 分鐘內寄出 13 封；文章發佈仍
+逐篇 direct Email，繞過聚合 owner；Telegram daemon 遇 atomic log rotation 後仍持有
+舊 inode，pytest retry 也會寫 production log。單看 `[新架構派發]` 標題或
+schedule owner 已切換，不能證明通知政策完成。
+
+**根因層級**：
+
+1. supervisor 用 `--force` 及含動態 task／時間內容的 title 建 dedup identity；
+2. article producer 與 Boss Report 同時擁有 Email channel；
+3. 長存 logger 與 rotator 沒有共同 pathname／permission contract，測試也沒隔離
+   effect boundary。
+
+**底層修復**：所有 supervisor alert 移除 `--force`；loop crash 以正規化的
+traceback frame／function／exception cause 建 root，並移除 timestamp、UUID、hex、
+path、數字與 canonical `assign_<hex>` identity。completion failure、silent death、
+orphan 以 outcome／action 分開，避免不同可處置事件被中央 24h dedup 吃掉。文章
+Email 唯一週期性 owner 收斂到 Boss Report，依 immutable schedule fire 的
+`scheduled_for` 半開窗聚合；08:10／14:10／20:10 article delta 不重疊。Telegram
+每次寫入 reopen current pathname；rotator atomic replace 保留 mode 並使用
+private umask；retry tests 改用 temp log。
+
+**回歸與 live read-back**：最終相關 suite **353 passed、1 skipped**，Matt
+Standards／Spec 均 PASS。production rotation canary 證明 archive inode 不再增長、
+current inode 收到新寫入且兩者均 `0600`；canonical 與 live rotator wrapper exact
+一致。immutable supervisor release `41c5b86d…6466b5` 已由 durable request
+`5f3cad26…5457` 排隊，等待既有 worker drain 後 activation。
+
+**狀態：`contained`**。fresh Telegram receive→process→reply、目標 Gmail
+ACK／CLOSE、下一個自然 Token 08:00 fire與 24 小時通知頻率／必要性 audit 尚未完成；
+這些下游 acknowledgement 缺一不可升級為
+`root_cause_fixed_and_verified`。制度化規則：**通知 source marker、schedule owner
+與 transport exit 0 都不是送達／頻率正確的證據；必須同時驗 identity、唯一 channel
+owner、durable effect receipt 與收件端 read-back。**
