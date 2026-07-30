@@ -4,7 +4,7 @@
    "class": "ordinary",
    "clean_observations": [],
    "clean_streak_started_at": null,
-   "current_task_id": "ci-red-30507270318",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-30T02:20:40.519862+00:00",
@@ -28,9 +28,19 @@
    "last_seen_at": "2026-07-30T02:20:40.519862+00:00",
    "notified_at": null,
    "occurrence_count": 1,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-30T02:50:35.309845+00:00",
+    "by": "ci-red-30507270318",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-30T02:50:35.309845+00:00",
+     "by": "ci-red-30507270318",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -1767,13 +1777,27 @@
      "first_seen_at": "2026-07-29T23:25:38.092723+00:00",
      "key": "dispatch-slot-1-6d97230e",
      "last_seen_at": "2026-07-29T23:25:38.092723+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "b0be02db6a1d6d674249feb1dffd2f1286505d1f",
+      "branch": "worktree-dispatch-slot-1-59f8020c",
+      "checkpoint_commit": "8908389e25fef9f83961ac88c8fac5bfc6b8cad8",
+      "detail_tail": "fire ended with outcome=kill_failed_orphan_drained; dirty=True unique_commits=0",
+      "reason": "worker_kill_failed_orphan_drained",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-59f8020c"
+     },
+     "first_seen_at": "2026-07-30T03:06:27.871903+00:00",
+     "key": "dispatch-slot-1-59f8020c",
+     "last_seen_at": "2026-07-30T03:06:27.871903+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-6d97230e unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-07-29T23:25:38.092723+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-59f8020c unmergeable (worker_kill_failed_orphan_drained)",
+   "last_seen_at": "2026-07-30T03:06:27.871903+00:00",
    "notified_at": null,
-   "occurrence_count": 5112,
+   "occurrence_count": 5113,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2670,6 +2694,6 @@
    }
   }
  },
- "updated_at": "2026-07-30T02:31:00.492366+00:00",
+ "updated_at": "2026-07-30T03:06:41.253325+00:00",
  "version": 1
 }
