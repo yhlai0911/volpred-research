@@ -82,6 +82,24 @@ Claim surface = `*.py` + `README.md` + `*_results.json`（README 也算：**over
 推論：**agent 自己叫 Codex 來審是安全的** —— 審完再動 code，sha 就對不上，gate 自動再擋一次。
 所以流程是「凍結 → 審 → 寫裁決 → 不要再動」；真要改，就重審，**不要手改裁決檔**。
 
+### 審查回合的 prompt / transcript 不可落在被審的樹裡（2026-07-29，K1715 round 3 教訓）
+
+若該回合另外帶一條 **clean-tree 條件**（read-back 時 `git status --porcelain` 必須為空），那麼
+「審查把自己的 commissioning prompt 與 raw transcript 寫進它正在認證的 worktree」就會**自己把自己判死**：
+K1715 recert round 3 的 D1/D2/D3 全部關閉、guard 等價性也被獨立重建證明，最後卻回 FAIL —— 唯一
+blocking defect 是 `.recert3_prompt.md` 與 `codex_recert3_raw.log` 在 read-back 當下 untracked。
+兩個檔都是**這一輪自己造的**，在被審的 sha 上根本不存在。這不是 K1715 的缺陷，是回合的 staging 缺陷。
+
+因此派審查回合時，brief 必須二選一並寫死：
+
+1. commissioning prompt 與 raw transcript 落在**被審 worktree 之外**（`storage/ops/agent_briefs/`、
+   `/tmp/`），worktree 內只留 gate 真正要的 `review_verdict.json`；或
+2. 若一定要留在樹內，**read-back 之前先 commit**，讓 clean-tree 條件可被滿足。
+
+`review_verdict.json` 本身留在 `experiments/<kid>/` 是設計（gate 要在那裡找它），它會被 commit，
+所以不衝突 —— 會衝突的一律是**沒人打算 commit 的過程檔**。clean-tree 條件與「審查會寫檔進樹」
+直接相牴觸，回合開跑前就要挑掉一邊，不要留給 reviewer 在最後一刻按字面判。
+
 ## Methodology 硬規則
 
 ### 套件限制 ≠ 模型無效

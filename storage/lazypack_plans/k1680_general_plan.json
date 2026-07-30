@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "title": "K1680 懶人包：本地搜尋熱度預測不了下週的震盪",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1680/K1680_results.json",
+      "sha256": "be66e5a30bad7dd1e34da1bbfbfbe2f2649abf035a123ebe7315e81e37d04a70",
+      "label": "experiment K1680 results (geographic investor attention as a leading indicator of next-week firm risk; retrospective pseudo-OOS diagnostic)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "本地人先知道，搜尋會先動嗎",
+      "alt": "若公司總部所在州的搜尋熱度高於全國平均，可能代表當地有尚未傳開的消息。動手測預測力之前，先用公開複製資料包確認本地人確實比較會搜本地公司。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "前提要先成立",
+          "body": [
+            "本地人先知道、搜尋行為先動、股價後動，這條路走得通的話就有一個免費的每週預警指標。",
+            "但要先確認本地人真的比較會搜本地公司，不成立的話後面整套都不用做。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "同州的平均搜尋強度",
+          "value": {
+            "source": "results",
+            "path": "/rcfs_replication_demo_sanity/mean_search_same_state",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "其他州的平均搜尋強度",
+          "value": {
+            "source": "results",
+            "path": "/rcfs_replication_demo_sanity/mean_search_other_states",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "本地是外地的幾倍",
+          "value": {
+            "source": "results",
+            "path": "/rcfs_replication_demo_sanity/same_state_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "單獨看像有東西，把測了幾件事算進去就沒了",
+      "alt": "四個目標中只有下週波動幅度單獨看落在可疑範圍，但校正掉同時測試四個目標的影響後即退出該範圍，訊號強度也未達事先寫定的要求。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "測四件事，有一件像有發現並不奇怪",
+          "body": [
+            "就像四個人各丟一次銅板，有一個丟出正面不叫神奇；要判斷是不是真的，得把總共測了幾件算進去。",
+            "門檻是開跑前就寫死在程式裡的，三個條件必須同時滿足。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "單獨看這個目標的可疑程度",
+          "value": {
+            "source": "results",
+            "path": "/retrospective_pseudo_oos_results/rv/pooled_by_week/clark_west/p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "把四個目標一起算進去之後",
+          "value": {
+            "source": "results",
+            "path": "/retrospective_pseudo_oos_results/rv/pooled_by_week/clark_west/holm_p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "實際訊號強度（門檻要求為三）",
+          "value": {
+            "source": "results",
+            "path": "/retrospective_pseudo_oos_results/rv/pooled_by_week/clark_west/t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "給了它事後資料的優勢，還是沒撐住",
+      "alt": "搜尋熱度歷史為一次性回溯下載的當前版本，等於讓模型享有當年拿不到的整理後資料優勢；即使如此仍未通過門檻，因此可放心視為沒有預測力。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "偏向讓訊號好看，仍然沒過",
+          "body": [
+            "搜尋熱度是事後一次性回頭下載的版本，而平台會抽樣也會回溯修訂，當年看到的數字未必相同。",
+            "方向既然是偏向讓訊號好看，一個在這種條件下都沒撐住的結果，可以放心當成沒有。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "共同評分週數",
+          "value": {
+            "source": "results",
+            "path": "/retrospective_pseudo_oos_results/rv/pooled_by_week/common_evaluation_weeks",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "每週納入的股票檔數",
+          "value": {
+            "source": "results",
+            "path": "/retrospective_pseudo_oos_results/rv/pooled_by_week/firms_per_week",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "準確度改善（百分比）",
+          "value": {
+            "source": "results",
+            "path": "/retrospective_pseudo_oos_results/rv/pooled_by_week/mse_improvement_pct",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

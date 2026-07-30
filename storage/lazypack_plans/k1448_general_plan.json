@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "title": "K1448 懶人包：通膨預期改變的不是股市抖不抖，是債券還保不保護你",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1448/k1448_results.json",
+      "sha256": "c86200c807b2b2679c334d25868b9384a78fec52a4a0e4b40368a8989ff9ca3d",
+      "label": "experiment K1448 results (通膨連結債相對表現作為通膨預期 regime proxy，對未來已實現波動率與股債相關性的 HAC 迴歸與多重比較校正)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "問錯的問題，跟該問的問題",
+      "alt": "多數人問通膨會不會讓股市更震盪，這份資料量出來的答案是幾乎量不到；真正被通膨預期改變的是股票和債券會不會同時下跌。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "怎麼量通膨預期",
+          "body": [
+            "用抗通膨公債相對於一般公債的相對表現當溫度計：抗通膨的那邊跑贏，代表市場在上調通膨預期。",
+            "溫度計一律用前一天的值去對後面的市場，避免拿當天結果推當天訊號。",
+            "然後分兩種情況比較：通膨預期升溫的日子，與降溫的日子。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "納入計算的共同交易日",
+          "value": {
+            "source": "results",
+            "path": "/period/n_obs_joint_prices",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "股債相關性整個抬上來",
+      "alt": "通膨預期降溫時股債相關性明顯為負，債券能反向抵銷股票；升溫時相關性往上抬近零，兩者更容易一起跌，抗通膨對一般公債與長天期公債兩組都看到同樣方向。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "股與中天期公債：通膨預期降溫時的相關性",
+          "value": {
+            "source": "results",
+            "path": "/analyses/tip_over_tlt/summaries/fwd_corr_spy_ief/falling/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "股與中天期公債：通膨預期升溫時的相關性",
+          "value": {
+            "source": "results",
+            "path": "/analyses/tip_over_tlt/summaries/fwd_corr_spy_ief/rising/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "股與長天期公債：通膨預期降溫時的相關性",
+          "value": {
+            "source": "results",
+            "path": "/analyses/tip_over_tlt/summaries/fwd_corr_spy_tlt/falling/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "股與長天期公債：通膨預期升溫時的相關性",
+          "value": {
+            "source": "results",
+            "path": "/analyses/tip_over_tlt/summaries/fwd_corr_spy_tlt/rising/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "白話講",
+          "body": [
+            "相關性是負的，代表股票跌的時候債券傾向漲，這正是把債券放進投資組合的理由。",
+            "通膨預期升溫時這個數字往零靠，債券反向抵銷的力道變薄。",
+            "同一份保單，理賠條件在你沒注意的時候縮水了。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "十個檢定，活下來兩個",
+      "alt": "一次跑兩個指標乘五個結果共十個檢定，用嚴格的多重比較門檻只有兩格存活，而且都是股債相關性；波動率那幾格全部沒過，兩個存活的格子其實高度重疊，等於一個發現被記了兩次分。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "存活格一：股債相關性被抬高多少（中天期）",
+          "value": {
+            "source": "results",
+            "path": "/analyses/tip_over_tlt/hac_regression/fwd_corr_spy_ief/C(regime, Treatment(reference=\"falling\"))[T.rising]/coef",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "存活格二：股債相關性被抬高多少（長天期）",
+          "value": {
+            "source": "results",
+            "path": "/analyses/tip_over_tlt/hac_regression/fwd_corr_spy_tlt/C(regime, Treatment(reference=\"falling\"))[T.rising]/coef",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "為什麼要講存活率",
+          "body": [
+            "同時檢定很多組合，就算全是雜訊也總會有幾格看起來漂亮。",
+            "所以要先講清楚一共問了幾個問題，再看有幾個撐得住嚴格門檻。",
+            "撐住的兩格都是股債相關性，波動率那幾格一個都沒過。",
+            "而且這兩格量的幾乎是同一件事，老實說是一個發現被記了兩次分。",
+            "能用的結論只有一句：通膨預期升溫時，別預設債券還會像以前那樣接住你。"
+          ]
+        }
+      ]
+    }
+  ]
+}
