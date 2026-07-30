@@ -17,6 +17,7 @@ away believing the arc gate covers it.
 from __future__ import annotations
 
 import itertools
+import json
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -35,7 +36,9 @@ from volpred.ops.topic_dedup import (  # noqa: E402
     WARN_ARC_DUP,
     WARN_ARC_NEAR_MISS,
     WARN_THEME_SATURATED,
+    TopicScreen,
     _is_recurring_macro_event,
+    log_decision,
     screen_topic,
 )
 from volpred.publisher.arc_dedup import (  # noqa: E402
@@ -60,6 +63,61 @@ def _article(aid: str, title: str, **kw) -> dict:
     }
     item.update(kw)
     return item
+
+
+def test_decision_log_records_graph_transitions_not_identical_polls(
+    tmp_path,
+):
+    first = TopicScreen(
+        verdict=WARN_ARC_NEAR_MISS,
+        blocked=False,
+        reason="near miss of mile_a",
+        matches=[{"id": "mile_a"}],
+    )
+    changed = TopicScreen(
+        verdict=CLEAN,
+        blocked=False,
+        reason="no duplicate",
+    )
+
+    assert log_decision(tmp_path, "event_article", "event_fomc_t0", first) is True
+    assert log_decision(tmp_path, "event_article", "event_fomc_t0", first) is False
+    assert log_decision(tmp_path, "event_article", "event_fomc_t0", changed) is True
+
+    rows = [
+        json.loads(line)
+        for line in (
+            tmp_path / "logs" / "dedup_decisions.jsonl"
+        ).read_text(encoding="utf-8").splitlines()
+    ]
+    assert [row["action"] for row in rows] == [
+        WARN_ARC_NEAR_MISS,
+        CLEAN,
+    ]
+
+
+def test_decision_log_skips_malformed_and_non_object_rows(tmp_path):
+    log_path = tmp_path / "logs" / "dedup_decisions.jsonl"
+    log_path.parent.mkdir(parents=True)
+    log_path.write_text(
+        "not-json\n[]\nnull\n\"valid-json-string\"\n",
+        encoding="utf-8",
+    )
+    screen = TopicScreen(
+        verdict=CLEAN,
+        blocked=False,
+        reason="no duplicate",
+    )
+
+    assert log_decision(
+        tmp_path,
+        "event_article",
+        "event_fomc_tplus1",
+        screen,
+    ) is True
+    assert json.loads(
+        log_path.read_text(encoding="utf-8").splitlines()[-1]
+    )["target_id"] == "event_fomc_tplus1"
 
 
 # The five real same-arc articles from the incident (verbatim titles).

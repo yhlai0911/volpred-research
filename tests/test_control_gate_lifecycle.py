@@ -413,6 +413,12 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     } <= gates.keys()
     assert gates["hourly_pregate"]["mode"] == "shadow"
     assert gates["dispatch_starvation_lockout"]["mode"] == "selection_constraint"
+    task_generation = gates["task_generation"]
+    assert task_generation["lifecycle"]["last_action"] == "recalibrate"
+    assert task_generation["lifecycle"]["review_task_id"] == (
+        "control_gate_review_task_generation_"
+        "20260730T090031_ec3b7176e81d"
+    )
     publisher_arc = gates["publisher_arc_dedup"]
     assert publisher_arc["mode"] == "warn"
     assert publisher_arc["lifecycle"]["last_action"] == "downgrade_to_warn"

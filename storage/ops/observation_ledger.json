@@ -1,6 +1,6 @@
 {
   "schema": "observation_ledger.v1",
-  "updated_at": "2026-07-30T11:17:39.763113+00:00",
+  "updated_at": "2026-07-30T11:31:33.480577+00:00",
   "items": [
     {
       "id": "pregate_shadow",
@@ -61,6 +61,15 @@
       "action_on_expiry": "Run the H4-4 post-cutover audit and record a rollback rehearsal receipt; if dispatch fire or provider-usage proxy regresses by more than 20 percent, rollback the immutable H4-4 release without restoring any legacy executable owner, then reopen the control-gate review.",
       "status": "observing",
       "note": "Required by docs/dispatch-decision-pipeline-design.md R3 and Issue #46 rollback/sustained-clean gate."
+    },
+    {
+      "id": "task_generation_transition_logging_monitor",
+      "what": "task_generation gate 改為每個 canonical target 只記錄 verdict/blocked/reason/matches 的狀態轉移；監測 event/trending reconcile 是否仍把相同 polling 誤算成 gate trigger，並追蹤 task -> writer -> feed 下游結果。",
+      "started_at": "2026-07-30T19:30:00+08:00",
+      "deadline": "2026-08-06T20:00:00+08:00",
+      "action_on_expiry": "執行 task_generation gate lifecycle audit：確認同 target 相同裁決未重複追加、transition trigger/candidate 比例合理、無 publication starvation；若 raw polling flood 或 unjoined harm 復發，重開 gate review 並修 producer identity，不得只調高 threshold。",
+      "status": "observing",
+      "note": "PDCA/loop/graph engineering：保留歷史 930 raw receipts；新時間窗改以狀態轉移計數，legacy action 復活仍由 control_gate_registry 偵測。"
     }
   ]
 }

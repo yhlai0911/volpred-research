@@ -40,6 +40,7 @@ with an explicit reason, per `.claude/rules/no-silent-fallback.md`.
 
 from __future__ import annotations
 
+import fcntl
 import json
 import os
 import re
@@ -140,11 +141,17 @@ def log_decision(
     lane: str,
     task_id: str,
     screen: TopicScreen,
-) -> None:
-    """Append the decision to the shared dedup audit trail.
+) -> bool:
+    """Append one state transition to the shared dedup audit trail.
 
     Same JSONL as the publish-time gate (`storage/logs/dedup_decisions.jsonl`) so
     one audit tool sees every dedup decision the platform makes, at any stage.
+    Reconciliation polls repeatedly screen the same canonical task.  An
+    unchanged poll is not another graph intervention, so it is coalesced under
+    the file lock; a changed verdict, reason, or match set is appended.
+
+    Returns ``True`` when a transition was appended and ``False`` for an
+    identical poll or a fail-open logging error.
     """
     path = os.path.join(str(storage_dir), "logs", "dedup_decisions.jsonl")
     guard_canonical_write(path)
@@ -162,8 +169,45 @@ def log_decision(
             "theme_terms": screen.theme_terms,
             "matched_ids": [m.get("id") for m in screen.matches[:5]],
         }
-        with open(path, "a", encoding="utf-8") as fh:
+        state_fields = (
+            "gate",
+            "lane",
+            "action",
+            "blocked",
+            "target_id",
+            "reason",
+            "saturation",
+            "theme_terms",
+            "matched_ids",
+        )
+        with open(path, "a+", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+            fh.seek(0)
+            prior: dict[str, Any] | None = None
+            for raw_line in reversed(fh.readlines()):
+                try:
+                    row = json.loads(raw_line)
+                except (json.JSONDecodeError, TypeError):  # silent-ok: source-health reports malformed rows
+                    continue
+                if not isinstance(row, dict):
+                    continue
+                if (
+                    row.get("gate") == "task_generation"
+                    and row.get("lane") == lane
+                    and row.get("target_id") == task_id
+                ):
+                    prior = row
+                    break
+            if prior is not None and all(
+                prior.get(field) == rec.get(field)
+                for field in state_fields
+            ):
+                return False
+            fh.seek(0, os.SEEK_END)
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+        return True
     except Exception as exc:  # pragma: no cover - logging must never break refill
         _diag_warn(
             "topic_dedup",
@@ -172,6 +216,7 @@ def log_decision(
             lane=lane,
             task_id=task_id,
         )
+        return False  # silent-ok: diagnostic emitted above; advisory gate fails open
 
 
 def screen_topic(
