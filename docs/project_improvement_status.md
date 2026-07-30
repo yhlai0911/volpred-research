@@ -3098,3 +3098,23 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
   legacy／new 雙寄不做人工 canary。待下一個自然 08:00 fire 回讀 exact command、
   WorkItem／Effect terminal receipt、attempt 1 與 Gmail Sent evidence，再決定是否
   升級；Issue #13 的 24 小時頻率／資訊性 audit 仍須另行完成。
+
+## 2026-07-30 — T39 operator termination／observe-only bounded closure（Issue #45）
+
+- ✅ Dispatch新增明示 `write_intent=observe_only`、空 output contract與
+  disposition×intent matrix；task／claim session／job／attempt identity在admission、
+  replay、settlement全程CAS，純觀察worker不得取得repo mutation能力。
+- ✅ Custody-backed operator termination只接受PGID coalition的`TERM_KILL`；
+  signal前驗exact custody membership，signal後bounded回讀PID與PGID皆消失。
+  `ps` timeout、stderr、非預期return code與OSError全部fail closed。
+- ✅ Live canary job `7394003cc1ec4848a30b137bcf93e55d`／PGID `63096`：
+  intent `a639722ce60843eaa00f42f2c7c3d484` → `custody_drained` →
+  completion `system_terminated`／143 → task自動re-pend → workspace
+  `empty_removed`；canary task其後由正式claim／start／complete收口。
+- ✅ Commits `e9397f62b`、`abd77f9dd`、`43efe2a44`、`bfd6bc2cd`、
+  `04da4f679`、`98159061d`；clean checkout **419 passed、1 skipped**，
+  Matt Standards／Spec最終雙PASS、0 P1/P2。
+- 🟡 此bounded slice為 **`root_cause_fixed_and_verified`**；Issue #45 umbrella
+  仍缺checkpoint resume、host restart、lease expiry及duplicate
+  commit/effect acceptance，受#9/#24 blocking edge約束，維持
+  **`contained`**、OPEN。

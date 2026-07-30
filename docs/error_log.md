@@ -3806,6 +3806,28 @@ Git writer／agentic CLI suites **339 passed**；child-process tests以
 ChangeSet/outbox/effect零重複與host-restart/lease-expiry演練仍被 #9/#24 阻塞，
 umbrella必須維持 **`contained`**、OPEN。
 
+**2026-07-30 operator termination／observe-only 增量驗證**：第一輪以舊
+`repo_patch` metadata做 live canary，暴露 operator kill 未綁 producer custody，
+且純觀察工作仍會取得可寫 workspace。正式 dispatch contract 現新增
+`write_intent=observe_only`、明示空 `declared_output_paths`、task／claim session／
+dispatch job／attempt CAS，observe-only worker 在 OS sandbox 及 disposition matrix
+均不可寫 repo；admission crash replay亦保留 exact `dispatch_job_id`。Operator
+termination 對 custody-backed producer只能使用 `TERM_KILL`，在 signal 前驗 exact
+PGID coalition、signal整個 coalition，並以 bounded process-table read-back確認
+PID／PGID皆消失；`ps` timeout、stderr、非預期 return code 或 OSError 一律
+fail closed，不得把探測失敗冒充「目標不存在」。
+
+最終 live canary job `7394003cc1ec4848a30b137bcf93e55d`／PGID `63096`
+產生 durable intent `a639722ce60843eaa00f42f2c7c3d484`，CLI 回
+`custody_drained`，completion receipt 回讀 `system_terminated`／exit 143，
+task自動 re-pend，observe-only workspace receipt為 `empty_removed`；其後 canary
+task正常 claim／start／complete。Clean checkout在 commit `98159061d` 跑
+**419 passed、1 skipped**，Matt Spec／Standards雙審均 PASS、0 P1/P2。此
+operator termination＋observe-only bounded slice完成五步Gate，狀態為
+**`root_cause_fixed_and_verified`**；但Issue #45完整checkpoint resume、
+host restart、lease expiry及duplicate commit/effect acceptance仍受#9/#24阻塞，
+umbrella繼續 **`contained`**、OPEN。
+
 ### 2026-07-27 — Sent read-back 與 SMTP send 間缺少 Primary Authority 再驗證
 
 **證據化症狀**：`OwnedEmailNotification.deliver()`在呼叫provider前會驗證目前
