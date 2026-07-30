@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "title": "新尺比較精細，不代表預測一定更準",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1649/K1649_results.json",
+      "sha256": "0c47555d6db0b16f7f06d2e262ebdcdd466fc68849f4dfa7271c244161f73a10",
+      "label": "TLT 與 HYG 的 expectile-VaR 對照分位數 VaR 樣本外結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "理論更漂亮，先拿真實債券資料驗證",
+      "alt": "研究用長天期美債與高收益債，比較傳統分位數尺和會替大誤差加重權重的新尺，所有模型都只使用預測當下已知資訊。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩把尺看同一種尾部風險",
+          "body": [
+            "傳統做法只看報酬有沒有跌破門檻；新做法還會衡量跌得多深。",
+            "更精細的計分方式有理論吸引力，但是否更準仍要交給樣本外資料。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本外起點",
+          "value": {
+            "source": "results",
+            "path": "/meta/oos_start",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "每個資產與門檻的評分筆數",
+          "value": {
+            "source": "results",
+            "path": "/by_asset_alpha/TLT_05/per_model/LinearQR/obs",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_scorecard",
+      "info": "results",
+      "style": "professional",
+      "title": "帳面領先平均分成兩邊",
+      "alt": "四個資產與風險門檻的組合中，新尺和分位數回歸各拿兩個最低平均罰分；其中長天期美債的較寬門檻，新尺只有小幅領先。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "不是一面倒的勝負",
+          "body": [
+            "新尺有時候拿到較低平均罰分，另外一些組合仍是分位數回歸較好。",
+            "小數點後的領先要再接受統計檢定，才能分辨實力與抽樣運氣。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "新尺拿到最低平均罰分的組合數",
+          "value": {
+            "source": "results",
+            "path": "/overall/best_mean_pinball_counts/CARE-SAV",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "分位數回歸拿到最低平均罰分的組合數",
+          "value": {
+            "source": "results",
+            "path": "/overall/best_mean_pinball_counts/LinearQR",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "長天期美債較寬門檻的新尺平均罰分",
+          "value": {
+            "source": "results",
+            "path": "/by_asset_alpha/TLT_05/per_model/CARE-SAV/mean_pinball",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "scale": 1000
+            }
+          },
+          "note": "圖卡以千分尺度呈現，方便看清模型間的小差距。"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "沒有一場跨過事先設定的嚴格門檻",
+      "alt": "新尺對分位數回歸的所有比較都沒有達到預先設定的嚴格統計門檻，最接近的一場仍有明顯距離，因此結果只能說兩者分不出穩健勝負。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "合格替代品，不是已證明的升級",
+          "body": [
+            "兩類方法的校準都可控，差別在於新尺沒有拿到可重複、站得住的優勢。",
+            "誠實結論是保留這個空結果，不把理論光環包裝成實證突破。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "新尺顯著勝過分位數回歸的場數",
+          "value": {
+            "source": "results",
+            "path": "/overall/expectile_harvey_wins_vs_linearqr",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "事先設定的統計強度門檻",
+          "value": {
+            "source": "results",
+            "path": "/overall/harvey_abs_t_threshold",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最接近門檻的一場統計強度",
+          "value": {
+            "source": "results",
+            "path": "/by_asset_alpha/TLT_01/dm_pairs/ALSExpectile-VaR_vs_LinearQR/stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "absolute": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
