@@ -1578,6 +1578,23 @@ def main() -> int:
             REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
             REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
             print(f"[dispatch] report written: {REPORT_PATH}")
+            try:
+                from volpred.ops.control_gate_lifecycle import (
+                    record_dispatch_gate_decisions,
+                )
+
+                gate_receipt = record_dispatch_gate_decisions(
+                    report,
+                    storage_dir=str(ROOT / "storage"),
+                )
+                if gate_receipt["recorded"]:
+                    print(
+                        "[dispatch] control-gate evidence: "
+                        f"{gate_receipt['recorded']} "
+                        f"{gate_receipt['gate_ids']}"
+                    )
+            except Exception as exc:  # noqa: BLE001 - audit loss must not veto dispatch
+                _warn_dispatch(f"control-gate evidence write failed: {exc}")
 
     if args.execute:
         print("[dispatch] --execute not yet implemented; main-thread should pick up candidates and dispatch agents (Task tool / claude general-purpose / codex-rescue) per .claude/rules/agent-delegation.md")

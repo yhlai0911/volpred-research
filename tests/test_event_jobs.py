@@ -721,6 +721,10 @@ def test_reaction_coverage_is_preserved_in_single_owner(tmp_path: Path, monkeypa
                     "title": "6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%",
                     "tags": ["NFP", "非農就業"],
                     "published_at": "2026-07-03T00:00:00+00:00",
+                    "event_key": "NFP_US_2026_07_03",
+                    "event_type": "NFP_US",
+                    "event_date": "2026-07-03",
+                    "event_series_slot": "T+0",
                 }
             ],
             ensure_ascii=False,
@@ -878,6 +882,55 @@ def test_explicit_cpi_title_keyword_still_covers_legacy_reaction():
     assert hit == {"id": "mile_cpi_reaction", "match": "title_keyword"}
 
 
+def test_legacy_title_candidate_is_advisory_and_does_not_retire_event_task(
+    tmp_path: Path,
+    monkeypatch,
+):
+    now = datetime(2026, 7, 14, 14, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "cpi-us-2026-07-14-t0",
+        event_type="CPI_US",
+        event_date="2026-07-14",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=36)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = tmp_path / "storage"
+    feed_path = storage_dir / "reports" / "feed.json"
+    feed_path.parent.mkdir(parents=True, exist_ok=True)
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_legacy_cpi_reaction",
+                    "status": "published",
+                    "title": "美國 CPI 低於預期，殖利率回落",
+                    "published_at": now.isoformat(),
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    result = expand_due_event_jobs(storage_dir=str(storage_dir), now=now)
+
+    assert [row["task"]["id"] for row in result["created"]] == [
+        "event_article_cpi_us_2026-07-14_tplus0"
+    ]
+    decision = json.loads(
+        (storage_dir / "logs" / "dedup_decisions.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()[-1]
+    )
+    assert decision["decision"] == "warn"
+    assert decision["reason"] == "legacy_reaction_candidate_advisory"
+
+
 def test_legacy_event_title_before_release_cannot_cover_reaction():
     release_at = datetime(2026, 7, 29, 18, 0, tzinfo=timezone.utc)
     feed = [
@@ -992,6 +1045,10 @@ def test_reaction_coverage_supersedes_existing_pending_row(tmp_path: Path, monke
                     "title": "非農就業結果出爐",
                     "tags": ["NFP"],
                     "published_at": now.isoformat(),
+                    "event_key": "NFP_US_2026_07_03",
+                    "event_type": "NFP_US",
+                    "event_date": "2026-07-03",
+                    "event_series_slot": "T+0",
                 }
             ],
             ensure_ascii=False,
@@ -1060,6 +1117,10 @@ def test_covered_reaction_cancels_legacy_without_fake_successor(tmp_path: Path, 
                     "title": "非農結果出爐",
                     "tags": ["NFP"],
                     "published_at": now.isoformat(),
+                    "event_key": "NFP_US_2026_07_03",
+                    "event_type": "NFP_US",
+                    "event_date": "2026-07-03",
+                    "event_series_slot": "T+0",
                 }
             ],
             ensure_ascii=False,

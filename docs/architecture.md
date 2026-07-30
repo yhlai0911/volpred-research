@@ -884,6 +884,31 @@ receipt 只證明排程已交付，模型成功／quota_blocked／auth_blocked �
 - Dedup 避免重複轟炸；CLI 支援 `--force` 強制發信
 - 由 host crontab hourly `check_alerts` 入口驅動
 
+**Control gate lifecycle**（PDCA / loop / graph）：
+
+- `config/control_gate_registry.json` 是曾造成 incident／高頻觸發 gate 的唯一 inventory，
+  明列 owner、invariant、mode、identity strength、保護的 graph edge、被切斷的
+  downstream edges、incident refs 與 review threshold。
+- `volpred.ops.control_gate_lifecycle` 讀既有 dedup／pregate／dispatch／PHASE-Z evidence，
+  與 canonical feed、task deadline/status、incident lifecycle join；render
+  `storage/ops/control_gate_lifecycle_latest.json`。
+  Pregate signature 以時間相關 ID 對回 `dispatch_state.completions` 的 fire／workspace
+  task claim，不把「看見一筆 pregate log」自稱為下游 outcome。
+- `check_alert_conditions` 是既有 hourly Act owner；threshold 到期時只透過
+  `append_task_record` 建一張 gate/window review task。Dashboard 的
+  `build_alert_condition_report` 維持 read-only，不建立 task。
+  Review ID 含 lossless evidence-watermark hash；同一 queue `LOCK_EX` 內另以
+  `gate_review_id` 強制一個 gate 只有一張 active review，避免並行 auditor TOCTOU。
+- source health 是 audit contract 的一部分：缺檔／壞 JSON／壞 timestamp 會告警，
+  不會偽裝成 healthy 的 0 triggers。Review 完成後用 registry + task receipt
+  watermark 消耗舊 evidence，避免隔日把同一批觀察重開成新單。
+  Source-health 是獨立 alert condition，不會被另一個 gate 已成功建 review task
+  的 suppress 規則吞掉。
+- heuristic 新 gate 預設 shadow／warn；hard-block／fail-closed／mutex 只接受
+  canonical/cryptographic exact proof。Review 必裁決 retain／recalibrate／
+  downgrade-to-warn／retire，不能永久 observing；`task_pool_claim complete`
+  會機械驗證 registry Act 欄位與 live read-back。
+
 **CLI 首選入口**：`uv run volpred ops ...`（agent + 真人共用同一套操作）
 
 已統一的操作：

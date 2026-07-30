@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "owner": "volpred.ops.control_gate_lifecycle",
+  "review_task": {
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "control_gate_lifecycle"
+  },
+  "gates": [
+    {
+      "gate_id": "event_stage_idempotency",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "At most one active feed row owns an exact event_key + event_series_slot identity.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["event_task", "feed_event_stage"],
+        "edges": ["event_task -> feed_event_stage"]
+      },
+      "blocked_downstream_edges": [
+        "feed_event_stage -> supabase",
+        "feed_event_stage -> mirror",
+        "feed_event_stage -> reader"
+      ],
+      "incident_refs": [
+        "2026-07-30 FOMC T+0 pre-event suppression"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "action": ["block_event_stage_coverage"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_event_stage",
+      "deadline_required": true,
+      "review_policy": {
+        "window_hours": 168,
+        "max_raw_triggers": 10,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "event_reaction_coverage",
+      "owner": "volpred.ops.event_jobs",
+      "invariant": "Only structured exact same-stage coverage may retire an event task; legacy title evidence is advisory.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["event_schedule_slot", "event_task", "feed_event_stage"],
+        "edges": ["event_schedule_slot -> event_task"]
+      },
+      "blocked_downstream_edges": [
+        "event_task -> writer",
+        "writer -> feed_event_stage"
+      ],
+      "incident_refs": [
+        "2026-07-30 FOMC T+0 reaction_already_covered false positive"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": ["event_reaction_coverage"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_event_stage",
+      "deadline_required": true,
+      "review_policy": {
+        "window_hours": 168,
+        "max_raw_triggers": 20,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "hourly_pregate",
+      "owner": "scripts.hourly_dispatch_pregate",
+      "invariant": "A repeated unchanged dispatch observation should not spend another model cold-start when no capacity exists.",
+      "mode": "shadow",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["dispatch_tick", "dispatch_fire", "agent_capacity"],
+        "edges": ["dispatch_tick -> dispatch_fire"]
+      },
+      "blocked_downstream_edges": [
+        "dispatch_fire -> worker",
+        "worker -> task_claim"
+      ],
+      "incident_refs": [
+        "Issue #46 pregate/dispatch reachability audit"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/hourly_pregate.jsonl",
+          "match": {
+            "mode": ["shadow", "real"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "dispatch_signature",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_raw_triggers": 100,
+        "min_distinct_candidates": 20,
+        "max_harm_outcomes": 1,
+        "max_false_positive_signals": 2,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "dispatch_collision",
+      "owner": "volpred.ops.task_dispatch_collision",
+      "invariant": "One task identity may not own two active worktrees or divergent delivery paths.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["pending_task", "git_commit", "agent_workspace"],
+        "edges": ["pending_task -> agent_workspace"]
+      },
+      "blocked_downstream_edges": [
+        "agent_workspace -> agent_job",
+        "agent_job -> merge"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-30 starvation/collision deadlock"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/control_gate_decisions.jsonl",
+          "match": {
+            "gate_id": ["dispatch_collision"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_task",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_raw_triggers": 10,
+        "min_distinct_candidates": 3,
+        "max_harm_outcomes": 1,
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "dispatch_starvation_lockout",
+      "owner": "scripts.continue_task_dispatch",
+      "invariant": "Aged scheduled work receives a bounded dispatch seat without suppressing urgent, time-critical, or collision-free alternatives.",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["pending_task", "dispatch_candidate", "worker_slot"],
+        "edges": ["pending_task -> dispatch_candidate"]
+      },
+      "blocked_downstream_edges": [
+        "non_starved_task -> dispatch_candidate",
+        "dispatch_candidate -> worker_slot"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-30 starvation/collision deadlock"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/control_gate_decisions.jsonl",
+          "match": {
+            "gate_id": ["dispatch_starvation_lockout"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_task",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_raw_triggers": 20,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "max_false_positive_signals": 2,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "phase_z_baseline_ownership",
+      "owner": "scripts.dispatch_supervisor.phase_z",
+      "invariant": "PHASE-Z may commit only bytes proven to have appeared after the same fire generation baseline.",
+      "mode": "fail_closed",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["fire_generation", "pre_fire_baseline", "git_commit"],
+        "edges": ["pre_fire_baseline -> git_commit"]
+      },
+      "blocked_downstream_edges": [
+        "git_commit -> push",
+        "push -> main_ci"
+      ],
+      "incident_refs": [
+        "incident inc_537a3ff3304f",
+        "phase_z_generation_rejected"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "ops/phase_z_rejections.jsonl",
+          "match": {}
+        }
+      ],
+      "incident_kinds": [
+        "phase_z_baseline_missing",
+        "phase_z_generation_rejected",
+        "phase_z_test_gate_red"
+      ],
+      "outcome_join": "incident_or_generation",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 336,
+        "max_raw_triggers": 5,
+        "min_distinct_candidates": 3,
+        "max_harm_outcomes": 1,
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    }
+  ]
+}

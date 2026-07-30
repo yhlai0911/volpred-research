@@ -23,6 +23,8 @@ Commands:
   handoff-main-thread --id <task_id> --note <text>
   complete --id <task_id> [--result <text>] [--status succeeded|failed]
            [--issue-disposition contained|close]
+           [--gate-decision retain|recalibrate|downgrade_to_warn|retire
+            --gate-live-readback <evidence>]
   list     [--status pending|claimed|in_progress|stale] [--owner <name>] [--limit N] [--codex-eligible]
   cleanup  --stale-hours <N>   (auto-release claims older than N hours with no completion)
 
@@ -86,6 +88,7 @@ from volpred.ops.task_pool_selection import (  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 FB_DRAFTS_DIR = ROOT / "storage" / "drafts"
+CONTROL_GATE_REGISTRY = ROOT / "config" / "control_gate_registry.json"
 
 DEFAULT_STALE_HOURS = 2  # Canonical handoff stale sweep contract
 TERMINAL_STATUSES = {"succeeded", "failed", "blocked"}
@@ -95,6 +98,12 @@ _PUBLISH_EVIDENCE_RE = re.compile(
     r"(?:發佈|發布|已發|publish(?:ed)?|feed\s+live|volpred\s+feed)",
     re.IGNORECASE,
 )
+_GATE_REVIEW_ACTIONS = {
+    "retain",
+    "recalibrate",
+    "downgrade_to_warn",
+    "retire",
+}
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -1287,6 +1296,115 @@ def _current_repo_head(repo_root: Path = ROOT) -> str | None:
     return sha if observed.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}", sha) else None
 
 
+def _gate_review_completion_contract(
+    task: dict[str, Any],
+    args: argparse.Namespace,
+) -> tuple[dict[str, str] | None, dict[str, Any] | None]:
+    """Require a review to finish the PDCA Act step, not merely say "done"."""
+
+    gate_id = str(task.get("gate_review_id") or "").strip()
+    if not gate_id or args.status != "succeeded":
+        return None, None
+    decision = str(getattr(args, "gate_decision", None) or "").strip()
+    live_readback = str(
+        getattr(args, "gate_live_readback", None) or ""
+    ).strip()
+    if decision not in _GATE_REVIEW_ACTIONS or not live_readback:
+        return None, {
+            "ok": False,
+            "reason": "gate_adjudication_required",
+            "task_id": args.id,
+            "required_decisions": sorted(_GATE_REVIEW_ACTIONS),
+            "required_evidence": "gate_live_readback",
+        }
+    try:
+        registry = json.loads(
+            CONTROL_GATE_REGISTRY.read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, {
+            "ok": False,
+            "reason": "gate_registry_unavailable",
+            "task_id": args.id,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+    gate = next(
+        (
+            row
+            for row in registry.get("gates", [])
+            if isinstance(row, dict) and row.get("gate_id") == gate_id
+        ),
+        None,
+    )
+    lifecycle = gate.get("lifecycle") if isinstance(gate, dict) else None
+    if not isinstance(lifecycle, dict):
+        return None, {
+            "ok": False,
+            "reason": "gate_registry_act_missing",
+            "task_id": args.id,
+            "gate_id": gate_id,
+        }
+    reviewed_at = str(lifecycle.get("last_reviewed_at") or "").strip()
+    try:
+        parsed_reviewed_at = datetime.fromisoformat(
+            reviewed_at.replace("Z", "+00:00")
+        )
+    except ValueError:
+        parsed_reviewed_at = None
+    watermark_raw = str(
+        task.get("gate_review_watermark")
+        or task.get("created_at")
+        or ""
+    ).strip()
+    try:
+        parsed_watermark = datetime.fromisoformat(
+            watermark_raw.replace("Z", "+00:00")
+        )
+    except ValueError:
+        parsed_watermark = None
+    has_review_timezone = (
+        parsed_reviewed_at is not None
+        and parsed_reviewed_at.tzinfo is not None
+        and parsed_reviewed_at.utcoffset() is not None
+    )
+    has_watermark_timezone = (
+        parsed_watermark is not None
+        and parsed_watermark.tzinfo is not None
+        and parsed_watermark.utcoffset() is not None
+    )
+    current = datetime.now(timezone.utc)
+    reviewed_utc = (
+        parsed_reviewed_at.astimezone(timezone.utc)
+        if has_review_timezone
+        else None
+    )
+    watermark_utc = (
+        parsed_watermark.astimezone(timezone.utc)
+        if has_watermark_timezone
+        else None
+    )
+    if (
+        lifecycle.get("last_action") != decision
+        or lifecycle.get("review_task_id") != args.id
+        or reviewed_utc is None
+        or watermark_utc is None
+        or reviewed_utc < watermark_utc
+        or reviewed_utc > current
+    ):
+        return None, {
+            "ok": False,
+            "reason": "gate_registry_act_missing",
+            "task_id": args.id,
+            "gate_id": gate_id,
+            "expected_action": decision,
+        }
+    return {
+        "gate_decision": decision,
+        "gate_live_readback": live_readback,
+        "gate_registry_reviewed_at": reviewed_at,
+    }, None
+
+
 def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
     out, burst = _complete_locked(
         args,
@@ -1365,6 +1483,11 @@ def _complete_locked(
         )
         if args.status == "succeeded":
             _require_fb_drafts_for_dual_publish(task, result_text)
+        gate_receipt, gate_error = _gate_review_completion_contract(task, args)
+        if gate_error is not None:
+            return gate_error, None
+        if gate_receipt is not None:
+            task.update(gate_receipt)
         task["status"] = args.status
         task["completed_at"] = _now()
         _record_status_history(
@@ -1879,7 +2002,7 @@ def main() -> int:
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
-    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.add_argument("--issue-disposition", choices=["contained", "close"], default="contained", help="GitHub issue lifecycle: keep open by default; close only after all issue acceptance gates pass"); p.set_defaults(fn=cmd_complete)
+    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.add_argument("--issue-disposition", choices=["contained", "close"], default="contained", help="GitHub issue lifecycle: keep open by default; close only after all issue acceptance gates pass"); p.add_argument("--gate-decision", choices=sorted(_GATE_REVIEW_ACTIONS), help="Required for succeeded control-gate reviews; must match registry lifecycle.last_action"); p.add_argument("--gate-live-readback", help="Required downstream read-back for succeeded control-gate reviews"); p.set_defaults(fn=cmd_complete)
     p = sub.add_parser("annotate", help="set free-form metadata fields on a task (locked canonical write; replaces jq-edit)")
     p.add_argument("--id", required=True)
     p.add_argument("--set", action="append", metavar="FIELD=VALUE", help="set FIELD to a string VALUE (repeatable)")

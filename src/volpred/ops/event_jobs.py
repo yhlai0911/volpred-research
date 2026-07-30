@@ -275,7 +275,12 @@ def reaction_already_covered(
 
 
 def _log_coverage_decision(
-    *, storage_dir: str, target_id: str, covered_by: dict[str, str], now: datetime
+    *,
+    storage_dir: str,
+    target_id: str,
+    covered_by: dict[str, str],
+    now: datetime,
+    blocking: bool,
 ) -> None:
     path = _dedup_log_path(storage_dir)
     guard_canonical_write(path)
@@ -285,8 +290,13 @@ def _log_coverage_decision(
             "ts": now.isoformat(),
             "gate": "event_reaction_coverage",
             "target_id": target_id,
-            "decision": "skip",
-            "reason": "reaction_already_covered",
+            "candidate_id": target_id,
+            "decision": "skip" if blocking else "warn",
+            "reason": (
+                "reaction_already_covered"
+                if blocking
+                else "legacy_reaction_candidate_advisory"
+            ),
             "dup_of": covered_by.get("id", ""),
             "match": covered_by.get("match", ""),
         }
@@ -347,12 +357,19 @@ def _coverage_for_item(
         release_at=release_at,
     )
     if covered:
+        blocking = covered.get("match") == "metadata"
         _log_coverage_decision(
             storage_dir=storage_dir,
             target_id=_event_task_id(item),
             covered_by=covered,
             now=now,
+            blocking=blocking,
         )
+        if not blocking:
+            # A legacy title after release is useful review evidence but cannot
+            # prove the exact stage identity. Exact identity alone may cut the
+            # schedule_slot -> event_task graph edge.
+            return None
     return covered
 
 

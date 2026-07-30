@@ -5417,6 +5417,166 @@ def _parse_dedup_gate_health_state(storage_dir: str, now: datetime) -> dict[str,
     }
 
 
+def _parse_control_gate_lifecycle_state(
+    storage_dir: str,
+    now: datetime,
+) -> dict[str, Any]:
+    """Render the single Operations Core lock/gate PDCA auditor."""
+
+    from .control_gate_lifecycle import audit_control_gates
+
+    try:
+        verdict = audit_control_gates(
+            storage_dir=storage_dir,
+            now=now,
+            materialize_reviews=False,
+            write_state=False,
+        )
+    except Exception as exc:  # noqa: BLE001 - watchdog failure must be visible
+        warn("control_gate_lifecycle", "audit crashed", err=str(exc))
+        return {
+            "id": "control_gate_lifecycle",
+            "breached": True,
+            "level": "warn",
+            "title": "控制閘生命週期 audit 失明",
+            "body": (
+                "## 觸發條件\n"
+                f"`audit_control_gates` 失敗：{type(exc).__name__}: {exc}\n\n"
+                "## 影響\n"
+                "曾造成 incident 或高頻觸發的 lock/gate 無法完成 PDCA outcome join。\n\n"
+                "## 修復入口\n"
+                "`uv run python scripts/audit_control_gate_lifecycle.py`"
+            ),
+            "details": {
+                "error": str(exc),
+                # The read-only renderer did not create a review task. Keep
+                # this condition eligible for ordinary remediation/alerting.
+                "self_materialized_review": False,
+            },
+        }
+
+    due = [gate for gate in verdict["gates"] if gate["review"]["due"]]
+    audit_health = verdict.get("audit_health") or {}
+    unhealthy_sources = audit_health.get("unhealthy_sources") or []
+    if not due:
+        return {
+            "id": "control_gate_lifecycle",
+            "breached": False,
+            "level": "info",
+            "title": "control_gate_lifecycle ok",
+            "body": "",
+            "details": {
+                "summary": verdict["summary"],
+                "audit_health": audit_health,
+                "self_materialized_review": False,
+            },
+        }
+
+    lines = [
+        "## 觸發條件",
+        f"{len(due)} 個已登記 gate 達到 PDCA review threshold：",
+    ]
+    for gate in due:
+        lines.append(
+            f"- `{gate['gate_id']}` ({gate['mode']}): "
+            f"{', '.join(gate['review']['reasons'])}"
+        )
+    lines += [
+        "",
+        "## 下游 outcome",
+    ]
+    for gate in due:
+        outcomes = gate["outcomes"]
+        lines.append(
+            f"- `{gate['gate_id']}`: missed_deadline={outcomes['missed_deadline']}, "
+            f"sequence_gap={outcomes['sequence_coverage_gap']}, "
+            f"waiver={outcomes['waiver']}, retry={outcomes['retry']}"
+        )
+    if unhealthy_sources:
+        lines += [
+            "",
+            "## Evidence source health",
+            f"- {len(unhealthy_sources)} 個來源缺失、損壞或含無效時間戳；"
+            "不得以本輪零觸發作健康結論。",
+        ]
+    lines += [
+        "",
+        "## 系統已自動執行",
+        "check-alerts 會透過 canonical next_tasks ingress 為每個 gate/window "
+        "materialize 至多一張 review task；不建立第二 queue。",
+        "裁決必須是 retain / recalibrate / downgrade_to_warn / retire，"
+        "不得永久留在 observing。",
+    ]
+    return {
+        "id": "control_gate_lifecycle",
+        "breached": True,
+        "level": "warn",
+        "title": f"控制閘 PDCA 到期（{len(due)} 個）",
+        "body": "\n".join(lines),
+        "details": {
+            "summary": verdict["summary"],
+            "due_gates": [
+                {
+                    "gate_id": gate["gate_id"],
+                    "review": gate["review"],
+                    "outcomes": gate["outcomes"],
+                }
+                for gate in due
+            ],
+            "unhealthy_sources": unhealthy_sources,
+            "audit_health": audit_health,
+            # check_alert_conditions flips this only after the Act path
+            # confirms a canonical review task was created or already exists.
+            "self_materialized_review": False,
+        },
+    }
+
+
+def _parse_control_gate_source_health_state(
+    lifecycle_condition: dict[str, Any],
+) -> dict[str, Any]:
+    """Render source blindness independently from gate review actuation."""
+
+    details = lifecycle_condition.get("details")
+    details = details if isinstance(details, dict) else {}
+    audit_health = details.get("audit_health")
+    audit_health = audit_health if isinstance(audit_health, dict) else {}
+    unhealthy_sources = audit_health.get("unhealthy_sources") or []
+    if not unhealthy_sources:
+        return {
+            "id": "control_gate_source_health",
+            "breached": False,
+            "level": "info",
+            "title": "control_gate_source_health ok",
+            "body": "",
+            "details": {"unhealthy_sources": []},
+        }
+    return {
+        "id": "control_gate_source_health",
+        "breached": True,
+        "level": "warn",
+        "title": "控制閘 evidence source 失明",
+        "body": "\n".join(
+            [
+                "## 觸發條件",
+                f"{len(unhealthy_sources)} 個 gate evidence source "
+                "缺失、損壞或含無效時間戳。",
+                "",
+                "## 影響",
+                "本輪不把缺失證據當成零次觸發；PDCA outcome join "
+                "健康狀態不可判定。",
+                "",
+                "## 修復入口",
+                "`uv run python scripts/audit_control_gate_lifecycle.py`",
+            ]
+        ),
+        "details": {
+            "unhealthy_sources": unhealthy_sources,
+            "self_materialized_review": False,
+        },
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -5424,6 +5584,10 @@ def build_alert_condition_report(
     paper_root: Path | None = None,
 ) -> dict[str, Any]:
     current = now.astimezone(timezone.utc) if now is not None else _utc_now()
+    control_gate_lifecycle = _parse_control_gate_lifecycle_state(
+        storage_dir,
+        current,
+    )
     conditions = [
         _parse_release_pool_state(storage_dir, current),
         _parse_draft_pool_state(storage_dir),
@@ -5454,6 +5618,8 @@ def build_alert_condition_report(
         _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_content_quality_state(storage_dir, current),       # 2026-06-24 meta-fix: content patrol layer
         _parse_dedup_gate_health_state(storage_dir, current),     # 2026-07-20 WS-F2: dedup-gate-audit rule §4 兌現（2026-06-23 8-day 黑洞復發偵測）
+        control_gate_lifecycle,                                   # 2026-07-30 single-owner lock/gate PDCA + graph outcome join
+        _parse_control_gate_source_health_state(control_gate_lifecycle), # evidence blindness must never be suppressed by review Act
         _parse_cluster_cap_drift_state(storage_dir),              # 2026-06-29 K1333 publish discovered vix 6.1x / spy 8.3x overshoot
         _parse_loop_health_state(storage_dir, current),           # 2026-06-29 loop-engineering: is the loop improving?
         _parse_series_registry_state(storage_dir),                # 2026-07-06 迷思實驗室 4-mistake incident: series-brand drift detector (SoT = config/article_series.json)
@@ -5473,9 +5639,47 @@ def check_alert_conditions(
     now: datetime | None = None,
     paper_root: Path | None = None,
 ) -> dict[str, Any]:
+    # Side effects stay in the side-effecting alert workflow, never in
+    # build_alert_condition_report (dashboards call that read-only renderer).
+    # The lifecycle auditor owns its own single review task, so generic alert
+    # remediation must not create a second task for the same gate breach.
+    try:
+        from .control_gate_lifecycle import audit_control_gates
+
+        gate_lifecycle_receipt = audit_control_gates(
+            storage_dir=storage_dir,
+            now=now,
+            materialize_reviews=True,
+            write_state=True,
+        )
+    except Exception as exc:  # noqa: BLE001 - remaining alerts still need to run
+        warn("control_gate_lifecycle", "hourly actuation failed", err=str(exc))
+        gate_lifecycle_receipt = {
+            "error": f"{type(exc).__name__}: {exc}",
+            "review_tasks": {"created_count": 0},
+        }
+
     report = build_alert_condition_report(
         storage_dir=storage_dir, now=now, paper_root=paper_root
     )
+    for condition in report.get("conditions", []):
+        if condition.get("id") == "control_gate_lifecycle":
+            details = (
+                condition.setdefault("details", {})
+                if isinstance(condition.get("details"), dict)
+                else {}
+            )
+            details["actuation"] = gate_lifecycle_receipt.get("review_tasks")
+            review_tasks = gate_lifecycle_receipt.get("review_tasks")
+            materialized = (
+                isinstance(review_tasks, dict)
+                and (
+                    int(review_tasks.get("created_count") or 0) > 0
+                    or bool(review_tasks.get("existing_ids"))
+                )
+            )
+            details["self_materialized_review"] = materialized
+            condition["details"] = details
     report_observed_at = _parse_iso_datetime(report.get("generated_at")) or now
 
     # 2026-07-13 (owner, twice in one hour: 「你要立即處理 不是只建議我」): a breached
@@ -5490,12 +5694,19 @@ def check_alert_conditions(
         for condition in report.get("conditions", [])
         if _internal_condition_alert_key(condition)
     }
+    self_materialized = {
+        id(condition)
+        for condition in report.get("conditions", [])
+        if isinstance(condition.get("details"), dict)
+        and condition["details"].get("self_materialized_review") is True
+    }
     ordinary_report = {
         **report,
         "conditions": [
             condition
             for condition in report.get("conditions", [])
             if id(condition) not in internally_routed
+            and id(condition) not in self_materialized
         ],
     }
     try:

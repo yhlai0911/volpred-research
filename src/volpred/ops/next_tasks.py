@@ -1078,6 +1078,7 @@ def append_task_record(
     path: str | Path = "storage/next_tasks.json",
     if_exists: str = "skip",
     semantic_dedupe: bool = True,
+    active_unique_fields: tuple[str, ...] = (),
 ) -> tuple[dict[str, Any], bool]:
     """Append one caller-built task record to the queue under LOCK_EX.
 
@@ -1101,6 +1102,13 @@ def append_task_record(
     records come back as ``(record, False)`` with ``duplicate_of`` /
     ``duplicate_reason`` set so the caller can report instead of silently
     growing the pool.
+
+    ``active_unique_fields`` adds an exact machine-identity constraint under
+    the same queue ``LOCK_EX``. If every named field matches an already-open
+    record, that record is returned with ``created=False``. This covers
+    contracts such as one active review per ``gate_review_id`` where generic
+    text similarity is the wrong identity and caller-side checking has a
+    TOCTOU race.
 
     After the lock is released an urgent record (``task_urgency.is_urgent``)
     requests an out-of-band supervisor fire; ``record['fire_requested']`` is a
@@ -1165,6 +1173,35 @@ def append_task_record(
                     if if_exists == "raise":
                         raise ValueError(f"duplicate task id {task_id}")
                     return existing, False
+            if active_unique_fields:
+                missing_fields = [
+                    field
+                    for field in active_unique_fields
+                    if record.get(field) in (None, "")
+                ]
+                if missing_fields:
+                    raise ValueError(
+                        "active_unique_fields require non-empty record values: "
+                        f"{missing_fields!r}"
+                    )
+                active_statuses = {
+                    "pending",
+                    "pending_main_thread",
+                    "claimed",
+                    "in_progress",
+                    "awaiting_agent_job",
+                    "blocked",
+                }
+                for existing in tasks:
+                    if not isinstance(existing, dict):
+                        continue
+                    if str(existing.get("status") or "") not in active_statuses:
+                        continue
+                    if all(
+                        existing.get(field) == record.get(field)
+                        for field in active_unique_fields
+                    ):
+                        return existing, False
             if is_canonical_queue:
                 # Admission ownership precedes payload provenance: direct mode
                 # and an unreadable owner-state must fail closed before any

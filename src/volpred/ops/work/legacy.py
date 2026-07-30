@@ -108,6 +108,7 @@ _NEXT_TASK_SOURCE = {
     "incident_adjudication": "schedule",
     "incident_escalation": "schedule",
     "incident_router": "schedule",
+    "control_gate_lifecycle": "schedule",
     "phase_z_gate_review": "schedule",
     "machine": "schedule",
     "weekly_requeue:governance_self_revise_operating_docs": "schedule",

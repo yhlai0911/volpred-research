@@ -92,8 +92,24 @@ Alert 出口 = `volpred.ops.alerts._parse_dedup_gate_health_state`（condition i
   recalibrate、downgrade-to-warn 或 retire，並附 live read-back。不得讓同一 gate
   永久留在「再觀察」。
 
-全域 lock/gate inventory 與跨 log outcome join 應由單一 Operations Core auditor
-擁有；本 dedup audit 是其中已上線的內容子圖，不得另建平行 pending queue。
+全域 lock/gate inventory 與跨 log outcome join 的單一 owner =
+`src/volpred/ops/control_gate_lifecycle.py`，registry =
+`config/control_gate_registry.json`，hourly read-back =
+`alerts._parse_control_gate_lifecycle_state`。達 threshold 的 review 一律走
+`append_task_record` 寫入 canonical `storage/next_tasks.json`；不得另建平行 pending
+queue。初始 inventory 必含 event stage dedup、event reaction coverage、hourly
+pregate、dispatch collision、starvation lockout 與 PHASE-Z baseline ownership。
+Review task ID 必含 lossless watermark hash，且 queue `LOCK_EX` 內以
+`gate_review_id` enforce 一個 gate 只有一張 active review；禁止只靠 lock 外 snapshot。
+evidence 缺檔、壞 JSON 或無效 timestamp 必標 unhealthy，禁止當成零次觸發；
+source-health 走獨立 alert condition，不得因另一個 due gate 已建 review task 而抑制。
+完成 review 後以 registry `last_reviewed_at` + succeeded review receipt 作 consumed
+watermark；receipt 必須同時具 task succeeded、四選一 decision、live read-back，
+且與 registry task/action/time 完整相符，只有 watermark 後的新 evidence 才可重開。
+`task_pool_claim complete`
+必帶 `--gate-decision`、`--gate-live-readback`，且會回讀 registry 的
+`last_action/last_reviewed_at/review_task_id`，缺任一項拒絕結案。
+本 dedup audit 是內容子圖的細粒度 detector，不再兼任全域 lifecycle owner。
 
 ## Why
 

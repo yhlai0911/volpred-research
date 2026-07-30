@@ -10,7 +10,11 @@ from click.testing import CliRunner
 
 from volpred.cli import cli
 from volpred.ops import next_tasks
-from volpred.ops.next_tasks import _legacy_priority_to_p, append_next_task, append_task_record
+from volpred.ops.next_tasks import (
+    _legacy_priority_to_p,
+    append_next_task,
+    append_task_record,
+)
 
 
 def test_append_task_record_stamps_an_aware_created_at(tmp_path):
@@ -34,6 +38,47 @@ def test_append_task_record_stamps_an_aware_created_at(tmp_path):
     assert created is True
     assert parsed.tzinfo is not None
     assert stored["created_at"] == rec["created_at"]
+
+
+def test_append_task_record_enforces_active_exact_identity_under_queue_lock(
+    tmp_path,
+):
+    queue = tmp_path / "next_tasks.json"
+    first, first_created = append_task_record(
+        {
+            "id": "review-gate-a-watermark-1",
+            "title": "review gate A",
+            "description": "first evidence watermark",
+            "task_type": "platform_ops",
+            "priority": 2,
+            "status": "pending",
+            "source": "user",
+            "gate_review_id": "gate-a",
+        },
+        path=queue,
+        semantic_dedupe=False,
+        active_unique_fields=("gate_review_id",),
+    )
+    second, second_created = append_task_record(
+        {
+            "id": "review-gate-a-watermark-2",
+            "title": "review gate A",
+            "description": "concurrent newer evidence watermark",
+            "task_type": "platform_ops",
+            "priority": 2,
+            "status": "pending",
+            "source": "user",
+            "gate_review_id": "gate-a",
+        },
+        path=queue,
+        semantic_dedupe=False,
+        active_unique_fields=("gate_review_id",),
+    )
+
+    assert first_created is True
+    assert second_created is False
+    assert second["id"] == first["id"]
+    assert len(json.loads(queue.read_text(encoding="utf-8"))) == 1
 
 
 def test_append_task_record_rejects_a_naive_created_at(tmp_path):

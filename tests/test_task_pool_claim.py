@@ -583,6 +583,157 @@ def test_complete_accepts_published_dual_publish_with_fb_draft(
     assert saved["status"] == "succeeded"
 
 
+def test_gate_review_completion_requires_machine_adjudication(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps([
+            {
+                "id": "gate-review",
+                "status": "in_progress",
+                "gate_review_id": "event_stage_idempotency",
+                "claimed_by": "codex-vscode",
+                "gate_review_watermark": "2026-07-30T04:00:00+00:00",
+            }
+        ]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    out, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="gate-review",
+            status="succeeded",
+            result="looked good",
+            gate_decision=None,
+            gate_live_readback=None,
+        )
+    )
+
+    assert out["ok"] is False
+    assert out["reason"] == "gate_adjudication_required"
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "in_progress"
+
+
+def test_gate_review_completion_matches_registry_act_and_persists_receipt(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    registry_path = tmp_path / "control_gate_registry.json"
+    next_tasks.write_text(
+        json.dumps([
+            {
+                "id": "gate-review",
+                "status": "in_progress",
+                "gate_review_id": "event_stage_idempotency",
+                "claimed_by": "codex-vscode",
+                "gate_review_watermark": "2026-07-30T04:00:00+00:00",
+            }
+        ]),
+        encoding="utf-8",
+    )
+    registry_path.write_text(
+        json.dumps(
+            {
+                "gates": [{
+                    "gate_id": "event_stage_idempotency",
+                    "lifecycle": {
+                        "last_action": "retain",
+                        "last_reviewed_at": "2026-07-30T05:00:00+00:00",
+                        "review_task_id": "gate-review",
+                    },
+                }]
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim, "CONTROL_GATE_REGISTRY", registry_path)
+
+    out, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="gate-review",
+            status="succeeded",
+            result="PDCA Act verified",
+            gate_decision="retain",
+            gate_live_readback="audit state clean after retained exact gate",
+        )
+    )
+
+    assert out["ok"] is True
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "succeeded"
+    assert saved["gate_decision"] == "retain"
+    assert saved["gate_live_readback"].startswith("audit state clean")
+
+
+@pytest.mark.parametrize(
+    "reviewed_at",
+    [
+        "2026-07-30T05:00:00",
+        "2099-01-01T00:00:00+00:00",
+        "2026-07-30T03:00:00+00:00",
+    ],
+)
+def test_gate_review_completion_rejects_unsafe_registry_watermark(
+    tmp_path,
+    monkeypatch,
+    reviewed_at: str,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    registry_path = tmp_path / "control_gate_registry.json"
+    next_tasks.write_text(
+        json.dumps([
+            {
+                "id": "gate-review",
+                "status": "in_progress",
+                "gate_review_id": "event_stage_idempotency",
+                "gate_review_watermark": "2026-07-30T04:00:00+00:00",
+            }
+        ]),
+        encoding="utf-8",
+    )
+    registry_path.write_text(
+        json.dumps(
+            {
+                "gates": [{
+                    "gate_id": "event_stage_idempotency",
+                    "lifecycle": {
+                        "last_action": "retain",
+                        "last_reviewed_at": reviewed_at,
+                        "review_task_id": "gate-review",
+                    },
+                }]
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        task_pool_claim,
+        "CONTROL_GATE_REGISTRY",
+        registry_path,
+    )
+
+    out, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="gate-review",
+            status="succeeded",
+            result="unsafe watermark",
+            gate_decision="retain",
+            gate_live_readback="claimed readback",
+        )
+    )
+
+    assert out["ok"] is False
+    assert out["reason"] == "gate_registry_act_missing"
+    assert json.loads(next_tasks.read_text(encoding="utf-8"))[0][
+        "status"
+    ] == "in_progress"
+
+
 def test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task(
     tmp_path, monkeypatch, burst_fire_requests
 ) -> None:
