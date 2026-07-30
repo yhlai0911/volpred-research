@@ -1188,16 +1188,29 @@ def record_dispatch_gate_decisions(
                 "protected_edge": "pending_task -> agent_workspace",
             }
         )
+    admitted_candidate_ids = {
+        str(item["id"])
+        for item in report.get("dispatch_candidates") or []
+        if isinstance(item, dict) and item.get("id")
+    }
     if starvation.get("locked"):
         for item in starvation.get("starved_tasks") or []:
             if not isinstance(item, dict) or not item.get("id"):
+                continue
+            candidate_id = str(item["id"])
+            # A lockout observation is not itself a graph intervention.  Record
+            # the gate only when this report actually admits the starved task
+            # onto pending_task -> dispatch_candidate.  In particular, a
+            # zero-capacity pass has no candidate edge to constrain and must not
+            # inflate lifecycle trigger counts on every dry observation.
+            if candidate_id not in admitted_candidate_ids:
                 continue
             rows.append(
                 {
                     "ts": timestamp,
                     "gate_id": "dispatch_starvation_lockout",
                     "decision": "constrain",
-                    "candidate_id": str(item["id"]),
+                    "candidate_id": candidate_id,
                     "reason": (
                         f"age_hours={item.get('age_hours')} "
                         f"threshold_hours={item.get('threshold_hours')}"

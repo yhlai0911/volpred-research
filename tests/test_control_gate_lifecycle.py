@@ -163,6 +163,10 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     } <= gates.keys()
     assert gates["hourly_pregate"]["mode"] == "shadow"
     assert gates["dispatch_starvation_lockout"]["mode"] == "selection_constraint"
+    for gate_id, gate in gates.items():
+        review_task_id = gate["lifecycle"].get("review_task_id")
+        if review_task_id:
+            assert review_task_id.startswith(f"control_gate_review_{gate_id}_")
     assert all(
         row["identity_strength"] != "heuristic"
         for row in gates.values()
@@ -346,6 +350,7 @@ def test_dispatch_report_decisions_are_durable_and_stable(tmp_path: Path) -> Non
     storage = tmp_path / "storage"
     report = {
         "generated_at": NOW.isoformat(),
+        "dispatch_candidates": [{"id": "task-old"}],
         "starvation": {
             "locked": True,
             "starved_tasks": [
@@ -390,6 +395,34 @@ def test_dispatch_report_decisions_are_durable_and_stable(tmp_path: Path) -> Non
         ("dispatch_collision", "task-collision", "block"),
         ("dispatch_starvation_lockout", "task-old", "constrain"),
     }
+
+
+def test_starvation_decision_requires_an_actual_candidate_edge(tmp_path: Path) -> None:
+    storage = tmp_path / "storage"
+    report = {
+        "generated_at": NOW.isoformat(),
+        "free_slots": 0,
+        "dispatch_candidates": [],
+        "starvation": {
+            "locked": True,
+            "starved_tasks": [
+                {
+                    "id": "task-observed-but-not-admitted",
+                    "age_hours": 80,
+                    "threshold_hours": 72,
+                }
+            ],
+            "collision_blocked_tasks": [],
+        },
+    }
+
+    receipt = record_dispatch_gate_decisions(
+        report,
+        storage_dir=str(storage),
+    )
+
+    assert receipt == {"recorded": 0, "gate_ids": []}
+    assert not (storage / "logs" / "control_gate_decisions.jsonl").exists()
 
 
 def test_candidate_task_join_uses_candidate_id_and_detects_failed_cut_edge(

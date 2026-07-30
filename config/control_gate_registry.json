@@ -215,7 +215,10 @@
       },
       "lifecycle": {
         "phase": "check",
-        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"],
+        "last_action": "recalibrate",
+        "last_reviewed_at": "2026-07-30T08:29:28.517506+00:00",
+        "review_task_id": "control_gate_review_dispatch_starvation_lockout_20260730T003255"
       }
     },
     {
