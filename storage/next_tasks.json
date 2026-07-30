@@ -62950,10 +62950,31 @@
         "to": "pending",
         "by": "hourly-slot-1-99a9caea1dc54795a1ab0b99c9857a0b",
         "note": "supervisor_kill_99a9caea"
+      },
+      {
+        "ts": "2026-07-30T06:20:14.697728+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f686f4e46e7f4aacbe115efd2fe49ad6",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-30T06:20:14.697730+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f686f4e46e7f4aacbe115efd2fe49ad6",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-30T06:55:44.101792+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-f686f4e46e7f4aacbe115efd2fe49ad6",
+        "note": "supervisor_kill_f686f4e4"
       }
     ],
-    "last_released_at": "2026-07-30T05:27:09.880412+00:00",
-    "last_release_reason": "supervisor_kill_99a9caea"
+    "last_released_at": "2026-07-30T06:55:44.101775+00:00",
+    "last_release_reason": "supervisor_kill_f686f4e4"
   },
   {
     "id": "alert_dispatch_supervisor_stale_code_20260730",
@@ -63078,14 +63099,10 @@
     "description": "修正 FOMC/CPI/NFP source timezone 與 DST release clock；reaction coverage 不得把 future-tense pre-event article 判成 T+0；re-materialize 2026-07-29 FOMC reaction task，完成 feed-publisher 後續交付與 live read-back。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "source": "user",
     "dispatch_lane": "agent",
     "created_at": "2026-07-30T04:36:23.584483+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-30T04:36:24.106061+00:00",
-    "claim_expires_at": "2026-07-30T06:36:24.106061+00:00",
-    "claim_session_id": "0761077ba85c",
     "status_history": [
       {
         "ts": "2026-07-30T04:36:24.106081+00:00",
@@ -63098,9 +63115,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T06:50:50.166136+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "auto_release_claim_expired"
       }
     ],
-    "started_at": "2026-07-30T04:36:24.489235+00:00"
+    "last_released_at": "2026-07-30T06:50:50.166084+00:00",
+    "last_release_reason": "auto_release_claim_expired"
   },
   {
     "id": "control_gate_lifecycle_pdca_20260730",
@@ -63147,7 +63172,7 @@
   {
     "id": "phase-z-foreign-e72eebd41371417d-e2",
     "title": "PHASE-Z 卡住檔案 incident（e72eebd41371417d）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 39 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- .claude/rules/experiments.md — 39 班\n- experiments/k1630/README.md — 25 班\n- scripts/gen_k1585_general_charts.py — 33 班\n- scripts/gen_k1680_general_charts.py — 33 班\n- scripts/gen_k1705_general_charts.py — 33 班\n- storage/assets/k1585_general_effect_forest.png — 33 班\n- storage/assets/k1585_general_oos_cost.png — 33 班\n- storage/assets/k1609_general_gate_forest.png — 24 班\n- storage/assets/k1609_general_two_rulers.png — 24 班\n- storage/assets/k1623_general_ruler_flip.png — 33 班\n- storage/assets/k1623_general_survivor_funnel.png — 33 班\n- storage/assets/k1680_general_multiplicity.png — 33 班\n- storage/assets/k1680_general_per_firm.png — 33 班\n- storage/assets/k1698_general_rebuild_audit.png — 32 班\n- storage/assets/k1698_general_strength_flip.png — 32 班\n- storage/assets/k1698_general_two_targets.png — 32 班\n- storage/assets/k1705_general_sign_audit.png — 33 班\n- storage/assets/k1705_general_timing_flip.png — 33 班\n- storage/assets/k781_general_ranking.png — 38 班\n- storage/assets/k781_general_subperiod_regime.png — 38 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 35 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 35 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 35 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 35 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 35 班\n- storage/lazypack_plans/k1448_general_plan.json — 25 班\n- storage/lazypack_plans/k1585_general_plan.json — 33 班\n- storage/lazypack_plans/k1623_general_plan.json — 33 班\n- storage/lazypack_plans/k1680_general_plan.json — 33 班\n- storage/lazypack_plans/k1705_general_plan.json — 33 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260730T044526519019Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T052011831216Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T061758625202Z:<路徑>`",
+    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 40 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- .claude/rules/experiments.md — 40 班\n- experiments/k1630/README.md — 26 班\n- scripts/gen_k1585_general_charts.py — 34 班\n- scripts/gen_k1680_general_charts.py — 34 班\n- scripts/gen_k1705_general_charts.py — 34 班\n- storage/assets/k1585_general_effect_forest.png — 34 班\n- storage/assets/k1585_general_oos_cost.png — 34 班\n- storage/assets/k1609_general_gate_forest.png — 25 班\n- storage/assets/k1609_general_two_rulers.png — 25 班\n- storage/assets/k1623_general_ruler_flip.png — 34 班\n- storage/assets/k1623_general_survivor_funnel.png — 34 班\n- storage/assets/k1680_general_multiplicity.png — 34 班\n- storage/assets/k1680_general_per_firm.png — 34 班\n- storage/assets/k1698_general_rebuild_audit.png — 33 班\n- storage/assets/k1698_general_strength_flip.png — 33 班\n- storage/assets/k1698_general_two_targets.png — 33 班\n- storage/assets/k1705_general_sign_audit.png — 34 班\n- storage/assets/k1705_general_timing_flip.png — 34 班\n- storage/assets/k781_general_ranking.png — 39 班\n- storage/assets/k781_general_subperiod_regime.png — 39 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 36 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 36 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 36 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 36 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 36 班\n- storage/lazypack_plans/k1448_general_plan.json — 26 班\n- storage/lazypack_plans/k1585_general_plan.json — 34 班\n- storage/lazypack_plans/k1623_general_plan.json — 34 班\n- storage/lazypack_plans/k1680_general_plan.json — 34 班\n- storage/lazypack_plans/k1705_general_plan.json — 34 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260730T044526519019Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T052011831216Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T061758625202Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T065718123592Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -63190,46 +63215,47 @@
         "storage/lazypack_plans/k775_general_plan.json"
       ],
       "streaks": {
-        ".claude/rules/experiments.md": 39,
-        "experiments/k1630/README.md": 25,
-        "scripts/gen_k1585_general_charts.py": 33,
-        "scripts/gen_k1680_general_charts.py": 33,
-        "scripts/gen_k1705_general_charts.py": 33,
-        "storage/assets/k1585_general_effect_forest.png": 33,
-        "storage/assets/k1585_general_oos_cost.png": 33,
-        "storage/assets/k1609_general_gate_forest.png": 24,
-        "storage/assets/k1609_general_two_rulers.png": 24,
-        "storage/assets/k1623_general_ruler_flip.png": 33,
-        "storage/assets/k1623_general_survivor_funnel.png": 33,
-        "storage/assets/k1680_general_multiplicity.png": 33,
-        "storage/assets/k1680_general_per_firm.png": 33,
-        "storage/assets/k1698_general_rebuild_audit.png": 32,
-        "storage/assets/k1698_general_strength_flip.png": 32,
-        "storage/assets/k1698_general_two_targets.png": 32,
-        "storage/assets/k1705_general_sign_audit.png": 33,
-        "storage/assets/k1705_general_timing_flip.png": 33,
-        "storage/assets/k781_general_ranking.png": 38,
-        "storage/assets/k781_general_subperiod_regime.png": 38,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 35,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 35,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 35,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 35,
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 35,
-        "storage/lazypack_plans/k1448_general_plan.json": 25,
-        "storage/lazypack_plans/k1585_general_plan.json": 33,
-        "storage/lazypack_plans/k1623_general_plan.json": 33,
-        "storage/lazypack_plans/k1680_general_plan.json": 33,
-        "storage/lazypack_plans/k1705_general_plan.json": 33,
-        "storage/lazypack_plans/k775_general_plan.json": 27
+        ".claude/rules/experiments.md": 40,
+        "experiments/k1630/README.md": 26,
+        "scripts/gen_k1585_general_charts.py": 34,
+        "scripts/gen_k1680_general_charts.py": 34,
+        "scripts/gen_k1705_general_charts.py": 34,
+        "storage/assets/k1585_general_effect_forest.png": 34,
+        "storage/assets/k1585_general_oos_cost.png": 34,
+        "storage/assets/k1609_general_gate_forest.png": 25,
+        "storage/assets/k1609_general_two_rulers.png": 25,
+        "storage/assets/k1623_general_ruler_flip.png": 34,
+        "storage/assets/k1623_general_survivor_funnel.png": 34,
+        "storage/assets/k1680_general_multiplicity.png": 34,
+        "storage/assets/k1680_general_per_firm.png": 34,
+        "storage/assets/k1698_general_rebuild_audit.png": 33,
+        "storage/assets/k1698_general_strength_flip.png": 33,
+        "storage/assets/k1698_general_two_targets.png": 33,
+        "storage/assets/k1705_general_sign_audit.png": 34,
+        "storage/assets/k1705_general_timing_flip.png": 34,
+        "storage/assets/k781_general_ranking.png": 39,
+        "storage/assets/k781_general_subperiod_regime.png": 39,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 36,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 36,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 36,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 36,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 36,
+        "storage/lazypack_plans/k1448_general_plan.json": 26,
+        "storage/lazypack_plans/k1585_general_plan.json": 34,
+        "storage/lazypack_plans/k1623_general_plan.json": 34,
+        "storage/lazypack_plans/k1680_general_plan.json": 34,
+        "storage/lazypack_plans/k1705_general_plan.json": 34,
+        "storage/lazypack_plans/k775_general_plan.json": 28
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260730T044526519019Z",
         "refs/volpred/quarantine/20260730T052011831216Z",
-        "refs/volpred/quarantine/20260730T061758625202Z"
+        "refs/volpred/quarantine/20260730T061758625202Z",
+        "refs/volpred/quarantine/20260730T065718123592Z"
       ],
-      "fires": 3,
+      "fires": 4,
       "first_seen_at": "2026-07-30T04:45:26.630988+00:00",
-      "last_seen_at": "2026-07-30T06:17:58.728037+00:00",
+      "last_seen_at": "2026-07-30T06:57:18.206668+00:00",
       "family_page_claim_schema": 2,
       "episode_generation": 2,
       "family_transport_id": "assign_dc879467",
@@ -63273,7 +63299,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-30T06:17:58.728037+00:00"
+    "updated_at": "2026-07-30T06:57:18.206668+00:00"
   },
   {
     "id": "control_gate_review_event_reaction_coverage_20260723",
