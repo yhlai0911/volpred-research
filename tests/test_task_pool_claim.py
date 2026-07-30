@@ -2954,6 +2954,248 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
     assert replay["already_settled"] is True
 
 
+def test_dispatch_preassign_yields_to_higher_ranked_event_article(
+    tmp_path, monkeypatch
+) -> None:
+    """A platform backlog must not steal a fire from a time-critical event."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "event_article_fomc_tplus0",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "event_article",
+                    "dispatch_lane": "agent",
+                    "preferred_agent": "claude",
+                    "source": "event_expander",
+                    "ref_event_job_id": "fomc_tplus0",
+                    "deadline": "2099-07-31T06:00:00+00:00",
+                },
+                {
+                    "id": "a-platform-backlog",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "platform_ops",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-event-first",
+            job_id="job-event-first",
+        )
+    )
+
+    assert assigned == {
+        "ok": True,
+        "assigned": False,
+        "reason": "immediate_non_mutating_task",
+        "selected_task_id": "event_article_fomc_tplus0",
+        "blocked_contracts": [],
+    }
+    rows = {row["id"]: row for row in json.loads(next_tasks.read_text())}
+    assert rows["event_article_fomc_tplus0"]["status"] == "pending"
+    assert rows["a-platform-backlog"]["status"] == "pending"
+
+
+def test_dispatch_preassign_ignores_expired_event_before_mutating_task(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "expired-event",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "event_article",
+                    "dispatch_lane": "agent",
+                    "source": "event_expander",
+                    "ref_event_job_id": "expired",
+                    "deadline": "2000-01-01T00:00:00+00:00",
+                },
+                {
+                    "id": "platform-now",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-platform",
+            job_id="job-platform",
+        )
+    )
+
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "platform-now"
+
+
+def test_dispatch_preassign_skips_single_flight_blocked_event(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "active-event",
+                    "status": "in_progress",
+                    "priority": 1,
+                    "task_type": "event_article",
+                    "dispatch_lane": "agent",
+                },
+                {
+                    "id": "pending-event",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "event_article",
+                    "dispatch_lane": "agent",
+                    "source": "event_expander",
+                    "ref_event_job_id": "pending",
+                    "deadline": "2099-07-31T06:00:00+00:00",
+                },
+                {
+                    "id": "platform-runnable",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-platform",
+            job_id="job-platform",
+        )
+    )
+
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "platform-runnable"
+
+
+def test_dispatch_preassign_skips_duplicate_non_mutating_identity(
+    tmp_path, monkeypatch
+) -> None:
+    duplicate = {
+        "id": "duplicate-event",
+        "status": "pending",
+        "priority": 1,
+        "task_type": "event_article",
+        "dispatch_lane": "agent",
+        "source": "event_expander",
+        "ref_event_job_id": "duplicate",
+        "deadline": "2099-07-31T06:00:00+00:00",
+    }
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                duplicate,
+                dict(duplicate),
+                {
+                    "id": "platform-unique",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-platform",
+            job_id="job-platform",
+        )
+    )
+
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "platform-unique"
+
+
+def test_dispatch_preassign_does_not_duplicate_scheduled_menu_rotation(
+    tmp_path, monkeypatch
+) -> None:
+    """Scheduled non-mutating order stays owned by continue_task_dispatch."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "a-scheduled-article",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "daily_article",
+                    "dispatch_lane": "agent",
+                },
+                {
+                    "id": "platform-scheduled",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-platform",
+            job_id="job-platform",
+        )
+    )
+
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "platform-scheduled"
+
+
 def test_dispatch_preassign_accepts_observe_only_without_fake_output_paths(
     tmp_path, monkeypatch
 ) -> None:

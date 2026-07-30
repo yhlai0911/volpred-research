@@ -46,6 +46,7 @@ import re
 import subprocess
 import sys
 import uuid
+from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -75,7 +76,9 @@ from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 from volpred.ops import dreaming_revalidate  # noqa: E402
 from volpred.ops.task_pool_selection import (  # noqa: E402
     CODEX_ELIGIBLE_TASK_TYPES,  # noqa: F401 - compatibility re-export
+    dispatch_admission_rank_key,
     evaluate_task_claim,
+    is_immediate_dispatch_task,
     is_codex_eligible_task as _is_codex_eligible_task,
     is_pending_list_candidate,
     normalized_task_type as _normalized_task_type,
@@ -782,7 +785,13 @@ def _dispatch_execution_contract(
 
 
 def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
-    """Atomically claim+start the highest-ranked contract-complete mutating task."""
+    """Bind mutating work unless a runnable immediate-lane task owns the fire.
+
+    The supervisor asks this before spawning every worker.  Admission must
+    honor the worker menu's canonical urgent/time-critical head before looking
+    inside the mutating subset.  Scheduled rotation/starvation remains owned by
+    the worker menu and is intentionally not reimplemented here.
+    """
     from volpred.ops.task_pool_mode import load_task_pool_mode, task_pool_mode_path
 
     if not _dispatch_supervisor_authorized():
@@ -800,18 +809,32 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
     session = args.session or uuid.uuid4().hex[:12]
     blockers: list[dict[str, str]] = []
     with _locked_load() as (_fh, tasks):
-        for task in sorted(tasks, key=task_rank_key):
+        identity_counts = Counter(task_identity(task) for task in tasks)
+        for task in sorted(tasks, key=dispatch_admission_rank_key):
             if (task.get("status") or "").lower() != "pending":
                 continue
-            if not requires_supervisor_preassignment(task):
+            task_id = _task_key(task)
+            if not task_id or identity_counts[task_id] != 1:
+                if requires_supervisor_preassignment(task):
+                    blockers.append(
+                        {
+                            "task_id": task_id,
+                            "reason": (
+                                "missing_task_id"
+                                if not task_id
+                                else "duplicate_task_id"
+                            ),
+                        }
+                    )
                 continue
             if task.get("unblock_gate") is not None:
-                blockers.append(
-                    {
-                        "task_id": _task_key(task),
-                        "reason": "unblock_gate_not_satisfied",
-                    }
-                )
+                if requires_supervisor_preassignment(task):
+                    blockers.append(
+                        {
+                            "task_id": _task_key(task),
+                            "reason": "unblock_gate_not_satisfied",
+                        }
+                    )
                 continue
             observed_at = datetime.now(timezone.utc)
             decision = evaluate_task_claim(
@@ -832,6 +855,19 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
                     revalidation_checked=True,
                 )
             if not decision.eligible:
+                continue
+            active_task_id = single_flight_blocker_task_id(tasks, task)
+            if active_task_id is not None:
+                continue
+            if not requires_supervisor_preassignment(task):
+                if is_immediate_dispatch_task(task):
+                    return {
+                        "ok": True,
+                        "assigned": False,
+                        "reason": "immediate_non_mutating_task",
+                        "selected_task_id": _task_key(task),
+                        "blocked_contracts": blockers[:20],
+                    }
                 continue
             contract, error = _dispatch_execution_contract(task)
             if contract is None:

@@ -18,6 +18,13 @@ from .next_tasks import (
     priority_sort_key,
 )
 from .dreaming_revalidate import requires_live_revalidation
+from .task_urgency import (
+    LANE_DEFERRED,
+    LANE_SCHEDULED,
+    LANE_TIME_CRITICAL,
+    LANE_URGENT,
+    classify as classify_urgency,
+)
 from .timestamps import parse_iso_warn
 
 
@@ -207,6 +214,48 @@ def task_rank_key(task: Mapping[str, Any]) -> tuple[int, str]:
         priority_sort_key(task.get("priority"), default=999),
         task_id,
     )
+
+
+def dispatch_admission_rank_key(
+    task: Mapping[str, Any],
+) -> tuple[int, int, str, str]:
+    """Put canonical immediate lanes ahead of mutating preassignment.
+
+    ``continue_task_dispatch`` uses :mod:`task_urgency` as the single lane
+    owner.  The supervisor consults this key before deciding whether to bind a
+    mutating workspace or leave the fire generic, so an urgent/time-critical
+    task cannot be displaced by the mutating subset.  This is deliberately not
+    the scheduled-menu selector: starvation, rotation and collision policy
+    stay owned by ``continue_task_dispatch``.
+    """
+
+    lane = classify_urgency(dict(task))
+    lane_rank = {
+        LANE_URGENT: 0,
+        LANE_TIME_CRITICAL: 1,
+        LANE_SCHEDULED: 2,
+        LANE_DEFERRED: 3,
+    }.get(lane, 2)
+    task_id = task_identity(task)
+    if lane in {LANE_URGENT, LANE_TIME_CRITICAL}:
+        return (
+            lane_rank,
+            0,
+            str(task.get("created_at") or ""),
+            task_id,
+        )
+    return (
+        lane_rank,
+        priority_sort_key(task.get("priority"), default=999),
+        "",
+        task_id,
+    )
+
+
+def is_immediate_dispatch_task(task: Mapping[str, Any]) -> bool:
+    """Whether the canonical worker menu places this task before scheduling."""
+
+    return classify_urgency(dict(task)) in {LANE_URGENT, LANE_TIME_CRITICAL}
 
 
 def is_pending_list_candidate(
@@ -456,6 +505,8 @@ __all__ = [
     "is_codex_owner",
     "is_pending_list_candidate",
     "normalized_task_type",
+    "dispatch_admission_rank_key",
+    "is_immediate_dispatch_task",
     "requires_supervisor_preassignment",
     "resolve_task_identity",
     "select_task_for_claim",
