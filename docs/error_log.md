@@ -5122,3 +5122,34 @@ trigger socket與health loop皆恢復。07:39自然Operations Core tick回
 GitHub successor run `30500807966` 最後以 **6645 passed、11 skipped** 完成；
 四道相鄰 gates全綠。此 bounded root class為
 **`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-07-30 — Operations Core Token 報表仍繞過 owned-email 且成功語意失真
+
+**證據化症狀**：`token_report_daily` 的排程 owner 已是 Operations Core，但
+`scripts/token_report_email.py` 仍直接建 `EmailNotifier`；呼叫後不驗
+`sent == true` 就印出 sent／exit 0。新 Token／Boss subject 也沒有新架構來源標示。
+所以「排程成功」不能證明 formal effect 已被 owner 接受或 Gmail Sent 已確認，
+而跨主機 retry 會重新 render，不具 immutable command replay。
+
+**根因層級（effect ownership／schedule identity contract）**：schedule clock cutover
+只改了觸發者，沒有把 caller 的外送、idempotency、recipient 與 acknowledgement
+一併納入 `email.ops_alert`。manual dedupe 又只綁日期，指定不同 recipient 會互相
+碰撞；`--force` 只靠 timestamp 也不能保證同微秒唯一。
+
+**底層修復與制度化**：Token 報表現在完整驗 canonical Operations Core fire identity，
+以 exact fire key 建 owned-email command；任一部分 identity、錯 job／generation／
+cron minute、scheduled `--force`／`--to`／`--calibrate` 均在 report、檔案或 provider
+effect 前 fail closed。retry 先讀 durable command，核對 idempotency、actor、recipient
+與 level 後原樣 replay；delivery 未獲 acknowledgement 回非零。manual daily key
+綁 recipient digest，force 加 UTC timestamp＋UUID4。AST regression 阻止 direct
+`EmailNotifier` 復活；Boss／Token 新 command 的 subject marker 恰好一次，歷史
+markerless command 則保持不可變。
+
+**回歸與狀態**：wrong identity、noncanonical minute、durable recipient drift、
+dry-run／calibrate 無 effect、同微秒 force 唯一、歷史 replay、unacknowledged
+delivery 等相鄰範圍 **107 passed**，Matt Standards／Spec 均 PASS。目前為
+**`contained`**：今天 08:00 natural fire 早於修正，不人工重送以免雙寄；須待下一個
+自然 08:00 fire 回讀 exact WorkItem／Effect、attempt 1 與 Gmail Sent evidence，
+且 Issue #13 的 24 小時通知頻率 audit 完成後，才可升級。

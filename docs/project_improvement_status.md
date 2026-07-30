@@ -3076,3 +3076,25 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
   `created=true, page_required=false`。
 - ⏳ 狀態 **`contained`**：待正式 push／GitHub CI；production 48 小時零再外送
   計時從本修正正式部署後開始，read-back 完成後才升級。
+
+## 2026-07-30 — Token／Boss 報表 owned-email 與來源標示收斂
+
+- ✅ `token_report_daily` 已移除 direct `EmailNotifier`，排程與手動寄送都經
+  `OwnedEmailCommand`／formal `email.ops_alert` owner。Operations Core fire
+  以 canonical generation、job、cron minute、scheduled time 與 exact fire key
+  fail-closed；部分 identity、錯 job／generation／minute 皆不得退化為 manual。
+- ✅ scheduled retry 先讀 immutable durable command 並原樣 replay，不重新產生
+  token snapshot；recipient、actor、level 或 idempotency drift 會拒送。
+  `sent != true` 回傳非零，scheduler 不再把未獲 acknowledgement 的外送誤記成功。
+- ✅ manual daily dedupe 綁定 recipient digest；`--force` 再綁 UTC timestamp 與
+  UUID4 nonce，即使同一微秒也不碰撞。scheduled mode 禁止 `--force`、`--to`、
+  `--calibrate`；dry-run／calibrate 不建立 effect。
+- ✅ 新建立的 Boss／Token subject 均恰好一次帶
+  `[新架構派發]`；歷史 markerless durable command 保持 bytes 不變並照原件 replay。
+- ✅ deterministic RED→GREEN 與相鄰回歸 **107 passed**；py_compile、diff check、
+  新測試 Ruff、Matt Standards／Spec 複審均 PASS。
+- ⏳ 狀態 **`contained`**：schedule owner audit 已為 0 conflict，formal
+  `email.ops_alert` owner 已為 Operations Core；今天 08:00 fire 早於修正，為避免
+  legacy／new 雙寄不做人工 canary。待下一個自然 08:00 fire 回讀 exact command、
+  WorkItem／Effect terminal receipt、attempt 1 與 Gmail Sent evidence，再決定是否
+  升級；Issue #13 的 24 小時頻率／資訊性 audit 仍須另行完成。

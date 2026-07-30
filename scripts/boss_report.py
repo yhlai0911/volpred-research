@@ -499,7 +499,7 @@ def build_html(daily_close: bool = False):
     mission = _mission_progress(commits, articles) if daily_close else {}
 
     edition = "每日日結" if daily_close else "平台運營報告"
-    title = f"[VolPred Boss Report] {NOW_TW.strftime('%Y-%m-%d %H:%M')} 台灣時間 {edition}"
+    title = f"[新架構派發][VolPred Boss Report] {NOW_TW.strftime('%Y-%m-%d %H:%M')} 台灣時間 {edition}"
     overall_color = {"ok": "#0a8a3a", "warn": "#d97706", "critical": "#b91c1c", "error": "#6b7280"}.get(dash.get("overall_status", "ok"), "#444")
 
     css = """<style>

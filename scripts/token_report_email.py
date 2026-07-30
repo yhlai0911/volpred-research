@@ -8,21 +8,25 @@ Angles (每個都有真數據支撐，來源 = token_usage_report.py 讀 ~/.clau
   - 當週 × 模型（by_model）
   - 週 cap 進度
 
-寄送：EmailNotifier.notify(html_body=...) 內嵌 HTML（非夾檔）。
+寄送：Operations Core owned-email（內嵌 HTML，非夾檔）。
 用法：
   uv run python scripts/token_report_email.py --dry-run   # 只 render 到檔，不寄
   uv run python scripts/token_report_email.py             # 寄給老闆
   uv run python scripts/token_report_email.py --to me@x   # 寄指定收件人
 """
 from __future__ import annotations
+
 import argparse
+import hashlib
 import html
 import json
 import logging
+import os
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
+from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -299,6 +303,84 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
     return html_body, text_body
 
 
+def _delivery_identity(
+    *,
+    now_tw: datetime,
+    recipient: str,
+    scheduled_mode: bool,
+    schedule_env: dict[str, str],
+    force: bool,
+) -> tuple[str, str]:
+    if scheduled_mode:
+        fire_key = schedule_env["fire_key"]
+        return (
+            fire_key,
+            f"schedule:token_report_daily:{fire_key}",
+        )
+
+    recipient_digest = hashlib.sha256(
+        recipient.encode("utf-8")
+    ).hexdigest()[:16]
+    idempotency_key = (
+        f"manual:token_report:{now_tw.strftime('%Y-%m-%d')}:"
+        f"{recipient_digest}"
+    )
+    if force:
+        idempotency_key = (
+            f"{idempotency_key}:force:"
+            f"{now_tw.astimezone(UTC).strftime('%Y%m%dT%H%M%S.%fZ')}:"
+            f"{uuid4().hex}"
+        )
+    return idempotency_key, f"manual:token_report:{idempotency_key}"
+
+
+def _durable_command_matches(
+    command,
+    *,
+    idempotency_key: str,
+    recipient: str,
+    actor_ref: str,
+) -> bool:
+    return (
+        command.idempotency_key == idempotency_key
+        and command.level == "info"
+        and command.recipient == recipient
+        and command.actor_ref == actor_ref
+    )
+
+
+def _dispatch_and_report(
+    command,
+    *,
+    dispatcher,
+    replay: bool,
+) -> int:
+    result = dispatcher(
+        command,
+        storage_dir=str(ROOT / "storage"),
+    )
+    if result.get("sent") is not True:
+        action = "durable replay" if replay else "owned delivery"
+        print(
+            f"[token-report] {action} was not acknowledged: "
+            f"owner={result.get('delivery_owner')} "
+            f"effect_status={result.get('effect_status')} "
+            f"error={result.get('send_error')}",
+            file=sys.stderr,
+        )
+        return 1
+    action = "replayed" if replay else "sent"
+    print(
+        f"[token-report] {action} "
+        f"id={result.get('notification_id')} "
+        f"owner={result.get('delivery_owner')} "
+        f"effect_status={result.get('effect_status')} "
+        f"evidence_ref={result.get('evidence_ref')} "
+        f"subject={command.title}"
+    )
+    return 0
+
+
 def main(argv: list) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true", help="render HTML to file, do not send")
@@ -309,6 +391,36 @@ def main(argv: list) -> int:
     args = ap.parse_args(argv)
 
     now_tw = datetime.now(TPE)
+    schedule_env = {
+        "owner": os.environ.get("VOLPRED_SCHEDULE_OWNER", ""),
+        "job_id": os.environ.get("VOLPRED_SCHEDULE_JOB_ID", ""),
+        "fire_key": os.environ.get("VOLPRED_SCHEDULE_FIRE_KEY", ""),
+        "scheduled_for": os.environ.get("VOLPRED_SCHEDULED_FOR", ""),
+        "generation": os.environ.get("VOLPRED_SCHEDULE_GENERATION", ""),
+    }
+    schedule_present = any(schedule_env.values())
+    scheduled_mode = schedule_env["owner"] == "operations_core"
+    if schedule_present and (
+        not scheduled_mode
+        or not all(schedule_env.values())
+        or schedule_env["job_id"] != "token_report_daily"
+    ):
+        print(
+            "[token-report] incomplete or invalid Operations Core fire identity",
+            file=sys.stderr,
+        )
+        return 1
+    if scheduled_mode and (
+        args.force
+        or args.to
+        or args.calibrate is not None
+    ):
+        print(
+            "[token-report] scheduled fire forbids "
+            "--force, --to, and --calibrate",
+            file=sys.stderr,
+        )
+        return 1
 
     if args.calibrate is not None:
         pct = args.calibrate
@@ -331,6 +443,70 @@ def main(argv: list) -> int:
         print(f"[token-report] calibrated: official {pct*100:.0f}% × billable {billable:,} -> weekly_cap {cap:,} ({cap/1e6:.0f}M), written {CALIB_PATH}")
         return 0
 
+    sys.path.insert(0, str(ROOT / "src"))
+    from volpred.config import load_runtime_schedules
+    from volpred.ops.alerts import ALERT_RECIPIENT
+    from volpred.ops.delivery.owned_email import (
+        OwnedEmailCommand,
+        dispatch_email_by_current_owner,
+        read_existing_owned_email_request,
+    )
+    from volpred.ops.schedule_materialization import (
+        ScheduleConfigurationError,
+        validate_schedule_fire_identity,
+    )
+
+    recipient = args.to or ALERT_RECIPIENT
+    if not recipient:
+        print("[token-report] no recipient", file=sys.stderr)
+        return 1
+    if scheduled_mode:
+        try:
+            validate_schedule_fire_identity(
+                load_runtime_schedules(),
+                fire_key=schedule_env["fire_key"],
+                generation=schedule_env["generation"],
+                job_id=schedule_env["job_id"],
+                scheduled_for=schedule_env["scheduled_for"],
+            )
+        except ScheduleConfigurationError as exc:
+            print(
+                f"[token-report] invalid Operations Core fire: {exc}",
+                file=sys.stderr,
+            )
+            return 1
+
+    idempotency_key, actor_ref = _delivery_identity(
+        now_tw=now_tw,
+        recipient=recipient,
+        scheduled_mode=scheduled_mode,
+        schedule_env=schedule_env,
+        force=args.force,
+    )
+    existing = (
+        None
+        if args.dry_run or args.force
+        else read_existing_owned_email_request(idempotency_key)
+    )
+    if existing is not None:
+        command = existing.command
+        if not _durable_command_matches(
+            command,
+            idempotency_key=idempotency_key,
+            recipient=recipient,
+            actor_ref=actor_ref,
+        ):
+            print(
+                "[token-report] durable command identity drifted",
+                file=sys.stderr,
+            )
+            return 1
+        return _dispatch_and_report(
+            command,
+            dispatcher=dispatch_email_by_current_owner,
+            replay=True,
+        )
+
     today = _report()
     week = _report("--weekly")
     html_body, text_body = build_html(today, week, now_tw)
@@ -341,29 +517,25 @@ def main(argv: list) -> int:
         print(f"[token-report] dry-run: wrote {out} ({len(html_body)} bytes)")
         return 0
 
-    sys.path.insert(0, str(ROOT / "src"))
-    from volpred.publisher.email_notifier import EmailNotifier
-    try:
-        from volpred.ops.alerts import ALERT_RECIPIENT
-    except Exception:
-        ALERT_RECIPIENT = None
-    recipients = [args.to] if args.to else ([ALERT_RECIPIENT] if ALERT_RECIPIENT else [])
-    if not recipients:
-        print("[token-report] no recipient", file=sys.stderr)
-        return 1
-    notifier = EmailNotifier()
-    title = f"[VolPred Token 報表] {now_tw.strftime('%Y-%m-%d')} — 本週 {m(_bill(week.get('totals',{})))} / {m(WEEKLY_CAP)} cap"
-    result = notifier.notify(
-        subject=title,
-        body=text_body,
-        html_body=html_body,
-        recipients=recipients,
-        dedupe_type="token_report",
-        dedupe_key=now_tw.strftime("%Y-%m-%d"),
-        force_send=args.force,
+    title = (
+        f"[新架構派發][VolPred Token 報表] "
+        f"{now_tw.strftime('%Y-%m-%d')} — 本週 "
+        f"{m(_bill(week.get('totals', {})))} / {m(WEEKLY_CAP)} cap"
     )
-    print(f"[token-report] sent id={result.get('notification_id') if isinstance(result, dict) else result} subject={title}")
-    return 0
+    command = OwnedEmailCommand(
+        idempotency_key=idempotency_key,
+        level="info",
+        title=title,
+        recipient=recipient,
+        text_body=text_body,
+        html_body=html_body,
+        actor_ref=actor_ref,
+    )
+    return _dispatch_and_report(
+        command,
+        dispatcher=dispatch_email_by_current_owner,
+        replay=False,
+    )
 
 
 if __name__ == "__main__":

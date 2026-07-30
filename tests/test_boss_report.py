@@ -4,8 +4,8 @@ import ast
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import subprocess
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -460,6 +460,8 @@ def test_plain_edition_skips_day_close_sections(monkeypatch) -> None:
     title, html_body, plain = boss_report.build_html(daily_close=False)
 
     assert called == []  # day-close collectors must not run on the 4h editions
+    assert title.startswith("[新架構派發][VolPred Boss Report]")
+    assert title.count("[新架構派發]") == 1
     assert "日結" not in html_body
     assert "Daily close" not in plain
 
@@ -548,7 +550,7 @@ def test_main_routes_scheduled_report_through_owned_email(
         boss_report,
         "build_html",
         lambda daily_close=False: (
-            "[VolPred Boss Report] Test",
+            "[新架構派發][VolPred Boss Report] Test",
             "<p>report</p>",
             "report",
         ),
@@ -563,7 +565,8 @@ def test_main_routes_scheduled_report_through_owned_email(
     assert command.actor_ref == (
         f"schedule:boss_report_4h:{fire_key}"
     )
-    assert command.title == "[VolPred Boss Report] Test"
+    assert command.title == "[新架構派發][VolPred Boss Report] Test"
+    assert command.title.count("[新架構派發]") == 1
     assert captured["storage_dir"] == str(
         boss_report.PROJECT_ROOT / "storage"
     )
@@ -581,7 +584,7 @@ def test_main_replays_same_fire_without_rebuilding_payload(
         nonlocal build_calls
         build_calls += 1
         return (
-            f"[VolPred Boss Report] build-{build_calls}",
+            f"[新架構派發][VolPred Boss Report] build-{build_calls}",
             f"<p>build-{build_calls}</p>",
             f"build-{build_calls}",
         )
@@ -612,7 +615,10 @@ def test_main_replays_same_fire_without_rebuilding_payload(
     assert build_calls == 1
     assert len(commands) == 2
     assert commands[0] == commands[1]
-    assert commands[0].title == "[VolPred Boss Report] build-1"
+    assert commands[0].title == (
+        "[新架構派發][VolPred Boss Report] build-1"
+    )
+    assert commands[0].title.count("[新架構派發]") == 1
     payloads = list(
         (tmp_path / "storage" / "ops" / "boss_report_payloads").glob(
             "*.json"
