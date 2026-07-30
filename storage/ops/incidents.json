@@ -1842,7 +1842,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-07-30T07:15:59.914874+00:00"
+     "last_seen_at": "2026-07-30T07:46:33.754253+00:00"
     },
     {
      "cleared_at": null,
@@ -1875,9 +1875,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-07-30T07:15:59.914874+00:00",
+   "last_seen_at": "2026-07-30T07:46:33.754253+00:00",
    "notified_at": null,
-   "occurrence_count": 5127,
+   "occurrence_count": 5129,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2524,13 +2524,25 @@
      "first_seen_at": "2026-07-30T07:00:50.628988+00:00",
      "key": "30520348750:1",
      "last_seen_at": "2026-07-30T07:00:50.628988+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-30T07:20:43.716780+00:00",
+     "key": "30521468798:1",
+     "last_seen_at": "2026-07-30T07:20:43.716780+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-30T07:45:31.948143+00:00",
+     "key": "30522929767:1",
+     "last_seen_at": "2026-07-30T07:45:31.948143+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-30T06:58:35.2938203Z E AssertionError: assert ('warn', 'sup...tcome=reaped') == ('warn', 'sup...work_timeout')",
-   "last_seen_at": "2026-07-30T07:00:50.628988+00:00",
+   "last_breach_detail": "2026-07-30T07:43:26.5761704Z E AssertionError: assert ('warn', 'sup...tcome=reaped') == ('warn', 'sup...work_timeout')",
+   "last_seen_at": "2026-07-30T07:45:31.948143+00:00",
    "notified_at": null,
-   "occurrence_count": 6,
+   "occurrence_count": 8,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2849,6 +2861,6 @@
    }
   }
  },
- "updated_at": "2026-07-30T07:15:59.937665+00:00",
+ "updated_at": "2026-07-30T07:46:52.872854+00:00",
  "version": 1
 }
