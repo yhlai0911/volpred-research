@@ -4708,6 +4708,90 @@ def test_dispatch_supervisor_email_title_identifies_new_architecture(
     command = calls[0]
     title_index = command.index("--title") + 1
     assert command[title_index] == "[新架構派發] supervisor restart"
+    assert "--force" not in command
+
+
+def test_loop_crash_transport_identity_groups_same_trace_and_separates_root(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    sends: list[str] = []
+    monkeypatch.setattr(
+        supervisor.alerts,
+        "_send",
+        lambda _level, title, _body: sends.append(title) or 0,
+    )
+
+    supervisor.alerts.send_loop_crash(
+        "health_loop",
+        "Traceback\nRuntimeError: database unavailable",
+        state_path=tmp_path / "first.json",
+    )
+    supervisor.alerts.send_loop_crash(
+        "health_loop",
+        "Traceback\nRuntimeError: database unavailable",
+        state_path=tmp_path / "same-root.json",
+    )
+    supervisor.alerts.send_loop_crash(
+        "health_loop",
+        "Traceback\nPermissionError: lease denied",
+        state_path=tmp_path / "different-root.json",
+    )
+
+    assert sends[0] == sends[1]
+    assert sends[2] != sends[0]
+    assert all("episode=" in title for title in sends)
+
+
+def test_hang_transport_identity_groups_same_outcome_and_separates_survivors(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    sends: list[str] = []
+    monkeypatch.setattr(
+        supervisor.alerts,
+        "_send",
+        lambda _level, title, _body: sends.append(title) or 0,
+    )
+
+    base_job = {
+        "pid": 101,
+        "pgid": 101,
+        "started_at": "2026-07-30T00:00:00+00:00",
+        "attempt": 1,
+        "model": "claude-opus-5",
+        "log_path": "",
+    }
+    supervisor.alerts.send_hang_alert(
+        job={**base_job, "job_id": "job-a"},
+        log_tail="same worker tail",
+        state_path=tmp_path / "job-a.json",
+    )
+    supervisor.alerts.send_hang_alert(
+        job={**base_job, "job_id": "job-b", "pid": 102, "pgid": 102},
+        log_tail="same worker tail",
+        state_path=tmp_path / "job-b.json",
+    )
+    supervisor.alerts.send_hang_alert(
+        job={
+            **base_job,
+            "job_id": "job-c",
+            "pid": 103,
+            "pgid": 103,
+            "survivors": [103],
+            "slot_quarantined": True,
+        },
+        log_tail="same worker tail",
+        state_path=tmp_path / "job-c.json",
+    )
+
+    assert sends[0] == sends[1]
+    assert sends[2] != sends[0]
+    assert sends == [
+        "supervisor hang_killed outcome=reaped",
+        "supervisor hang_killed outcome=reaped",
+        "supervisor hang_killed outcome=survivors",
+    ]
 
 
 def test_slot_prompt_labels_all_external_reports_and_preserves_incident_timeline(

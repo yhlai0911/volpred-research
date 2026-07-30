@@ -3,7 +3,7 @@
 All alert functions:
   1. Check `state.should_dedup_alert(key, window_s)` — if dedup hit, return early
   2. Build a structured markdown body for the `--body-md` path (HTML-rendered)
-  3. Subprocess `uv run volpred ops send-alert` with --force
+  3. Subprocess `uv run volpred ops send-alert` without a transport bypass
   4. Call `state.mark_alert_sent(key)` so the next dedup check sees this send
 
 Dedup windows match `refactor_plan_hourly_dispatch.md §3.3 alerts dedup table`:
@@ -25,13 +25,14 @@ two dedup stores by design, do not merge and do not add a third):
   layer throttles the burst before it reaches the `send-alert` CLI at all.
 - `volpred.ops.alerts` (`storage/ops/alert_dedup.json`, 24h per (level,title),
   30d retention) = anti-BOMBARDMENT: the same standing condition re-detected
-  across hourly runs must not re-email the boss for a day. We pass `--force`
-  deliberately: burst dedup (here) and standing-condition dedup (there) answer
-  different questions, and a daemon alert that survived its flood window must
-  not be silently swallowed by yesterday's ledger entry.
+  across hourly runs must not re-email the boss for a day. Supervisor callers
+  do not bypass it. Titles carry a stable root-shape identity where distinct
+  episodes must remain distinguishable, so the central layer suppresses the
+  same condition without hiding a different root class.
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 import subprocess
@@ -55,6 +56,15 @@ AUTH_HOTFIX_CMD = (
 )
 
 
+def _episode_fingerprint(value: str) -> str:
+    """Return one stable transport identity for a diagnostic root shape."""
+    normalized = "\n".join(
+        line.rstrip()
+        for line in str(value).strip().splitlines()
+    )
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:12]
+
+
 def _send(level: str, title: str, body_md: str) -> int:
     """Invoke `volpred ops send-alert --body-md <tmp>`. Return CLI exit code."""
     if not title.startswith(NEW_ARCHITECTURE_TITLE_PREFIX):
@@ -71,7 +81,6 @@ def _send(level: str, title: str, body_md: str) -> int:
             "--level", level,
             "--title", title,
             "--body-md", tmp.name,
-            "--force",
         ]
         try:
             result = subprocess.run(
@@ -338,7 +347,12 @@ def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path
         "```\n" + (tail[-2000:] if tail else "(empty)") + "\n```\n"
     )
     level = "warn" if work_timeout else "critical"
-    title = "supervisor work_timeout" if work_timeout else "supervisor hang_killed"
+    if work_timeout:
+        title = "supervisor work_timeout outcome=reaped"
+    elif survivors:
+        title = "supervisor hang_killed outcome=survivors"
+    else:
+        title = "supervisor hang_killed outcome=reaped"
     _send(level, title, body)
     state.mark_alert_sent(key, path=state_path)
     return True
@@ -415,7 +429,8 @@ def send_loop_crash(component: str, traceback_text: str, *, state_path: Path = s
     component so a crash-loop doesn't spam — but unlike the old
     `LOG.exception`-only behaviour (Codex review §10 #7), this is now
     ALWAYS visible outside the log file at least once per window."""
-    key = f"loop_crash:{component}"
+    episode = _episode_fingerprint(traceback_text)
+    key = f"loop_crash:{component}:{episode}"
     if state.should_dedup_alert(key, window_s=300, path=state_path):
         return False
     body = (
@@ -427,7 +442,11 @@ def send_loop_crash(component: str, traceback_text: str, *, state_path: Path = s
         "## Traceback\n\n"
         "```\n" + traceback_text[-3000:] + "\n```\n"
     )
-    _send("critical", f"supervisor loop_crash {component}", body)
+    _send(
+        "critical",
+        f"supervisor loop_crash {component} episode={episode}",
+        body,
+    )
     state.mark_alert_sent(key, path=state_path)
     return True
 
