@@ -64834,10 +64834,31 @@
         "to": "pending",
         "by": "hourly-slot-1-fd61bd497faf430385cfcd33549ec6ab",
         "note": "supervisor_kill_fd61bd49"
+      },
+      {
+        "ts": "2026-07-30T09:09:50.060884+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-6426974ed16149bda43c34af9d222855",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-30T09:09:50.060886+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-6426974ed16149bda43c34af9d222855",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-30T09:37:00.017292+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-6426974ed16149bda43c34af9d222855",
+        "note": "supervisor_kill_6426974e"
       }
     ],
-    "last_released_at": "2026-07-30T09:01:52.461428+00:00",
-    "last_release_reason": "supervisor_kill_fd61bd49"
+    "last_released_at": "2026-07-30T09:37:00.017274+00:00",
+    "last_release_reason": "supervisor_kill_6426974e"
   },
   {
     "id": "alert_dispatch_supervisor_stale_code_20260730",

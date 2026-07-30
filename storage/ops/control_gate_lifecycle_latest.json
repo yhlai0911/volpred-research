@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-30T09:03:42.849228+00:00",
+  "generated_at": "2026-07-30T09:18:42.958931+00:00",
   "registry_path": "/Users/yhlai0911/volpred-research/config/control_gate_registry.json",
   "registry_owner": "volpred.ops.control_gate_lifecycle",
   "inventory": {
     "window": {
       "hours": 168.0,
-      "start": "2026-07-23T09:03:42.849228+00:00",
-      "end": "2026-07-30T09:03:42.849228+00:00"
+      "start": "2026-07-23T09:18:42.958931+00:00",
+      "end": "2026-07-30T09:18:42.958931+00:00"
     },
-    "registered_gate_count": 13,
+    "registered_gate_count": 19,
     "observed_gate_count": 8,
     "observed_gates": [
       {
@@ -49,7 +49,7 @@
         "registered": true,
         "trigger_count": 249,
         "blocking_count": 62,
-        "distinct_candidates": 17,
+        "distinct_candidates": 78,
         "latest_at": "2026-07-30T07:08:38.283017+00:00"
       },
       {
@@ -57,7 +57,7 @@
         "registered": true,
         "trigger_count": 5,
         "blocking_count": 2,
-        "distinct_candidates": 1,
+        "distinct_candidates": 2,
         "latest_at": "2026-07-29T21:07:10.778362+00:00"
       },
       {
@@ -71,13 +71,14 @@
       {
         "gate_id": "task_generation",
         "registered": true,
-        "trigger_count": 930,
+        "trigger_count": 933,
         "blocking_count": 11,
         "distinct_candidates": 30,
-        "latest_at": "2026-07-30T09:00:31.512350+00:00"
+        "latest_at": "2026-07-30T09:15:24.083608+00:00"
       }
     ],
     "unregistered_gates": [],
+    "unregistered_incident_controls": [],
     "unclassified_blocking_count": 0,
     "unclassified_blocking": [],
     "source_health": [
@@ -85,9 +86,10 @@
         "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
         "ok": true,
         "error": null,
-        "row_count": 2932,
+        "row_count": 2935,
         "malformed_rows": 0,
-        "invalid_timestamps": 0
+        "invalid_timestamps": 0,
+        "identity_rewrites": 0
       },
       {
         "path": "/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl",
@@ -95,7 +97,14 @@
         "error": null,
         "row_count": 54,
         "malformed_rows": 0,
-        "invalid_timestamps": 0
+        "invalid_timestamps": 0,
+        "identity_rewrites": 0
+      },
+      {
+        "path": "/Users/yhlai0911/volpred-research/storage/ops/incidents.json",
+        "ok": true,
+        "error": null,
+        "source_role": "incident_inventory"
       }
     ],
     "newest_gap_at": null
@@ -126,9 +135,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -144,9 +153,10 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2932,
+            "row_count": 2935,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -219,9 +229,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
         "start": "2026-07-30T04:30:40.496467+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": "2026-07-30T04:30:40.496467+00:00",
         "newest_evidence_at": null
       },
@@ -237,9 +247,10 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2932,
+            "row_count": 2935,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -312,15 +323,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-30T04:07:39.599005+00:00"
       },
       "evidence": {
-        "trigger_count": 150,
-        "distinct_candidates": 87,
+        "trigger_count": 149,
+        "distinct_candidates": 86,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_occurrences": 0,
@@ -332,7 +343,8 @@
             "error": null,
             "row_count": 611,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/ops/dispatch_state.json",
@@ -357,7 +369,7 @@
         "queued": 0,
         "in_flight": 0,
         "blocked": 0,
-        "unjoined": 40,
+        "unjoined": 39,
         "candidate_outcomes": [
           {
             "candidate_id": "009197a07d84a795",
@@ -669,14 +681,6 @@
           },
           {
             "candidate_id": "6f2ccbcdddedcda7",
-            "decision_count": 1,
-            "task_ids": [],
-            "outcomes": [
-              "unjoined"
-            ]
-          },
-          {
-            "candidate_id": "6f49c6b2b095e60d",
             "decision_count": 1,
             "task_ids": [],
             "outcomes": [
@@ -1085,8 +1089,8 @@
       "review": {
         "due": true,
         "reasons": [
-          "raw_triggers=150>=100",
-          "distinct_candidates=87>=20"
+          "raw_triggers=149>=100",
+          "distinct_candidates=86>=20"
         ]
       },
       "pdca_phase": "act",
@@ -1122,9 +1126,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -1142,7 +1146,8 @@
             "error": null,
             "row_count": 54,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -1210,9 +1215,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
         "start": "2026-07-30T08:29:11.960683+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": "2026-07-30T08:29:11.960683+00:00",
         "newest_evidence_at": "2026-07-30T08:34:02.478137+00:00"
       },
@@ -1230,7 +1235,8 @@
             "error": null,
             "row_count": 54,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -1320,9 +1326,9 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-16T09:03:42.849228+00:00",
-        "start": "2026-07-16T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-16T09:18:42.958931+00:00",
+        "start": "2026-07-16T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-26T19:38:01.064738+00:00"
       },
@@ -1344,7 +1350,8 @@
             "error": null,
             "row_count": 2,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/ops/incidents.json",
@@ -1436,14 +1443,14 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
-        "newest_evidence_at": "2026-07-30T09:00:31.512350+00:00"
+        "newest_evidence_at": "2026-07-30T09:15:24.083608+00:00"
       },
       "evidence": {
-        "trigger_count": 930,
+        "trigger_count": 933,
         "distinct_candidates": 30,
         "malformed_rows": 0,
         "incident_count": 0,
@@ -1454,9 +1461,10 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2932,
+            "row_count": 2935,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -1505,7 +1513,7 @@
           },
           {
             "candidate_id": "event_article_fomc_2026-07-29_tplus0",
-            "decision_count": 465,
+            "decision_count": 468,
             "task_ids": [
               "event_article_fomc_2026-07-29_tplus0"
             ],
@@ -1792,7 +1800,7 @@
       "review": {
         "due": true,
         "reasons": [
-          "raw_triggers=930>=500"
+          "raw_triggers=933>=500"
         ]
       },
       "pdca_phase": "act",
@@ -1828,9 +1836,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-30T07:41:11.549238+00:00"
       },
@@ -1846,9 +1854,10 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2932,
+            "row_count": 2935,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -2322,9 +2331,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-30T07:08:39.091574+00:00"
       },
@@ -2340,9 +2349,10 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2932,
+            "row_count": 2935,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -2652,6 +2662,100 @@
       ]
     },
     {
+      "gate_id": "release_lazypack_completeness",
+      "owner": "volpred.ops.content",
+      "mode": "selection_constraint",
+      "identity_strength": "canonical_exact",
+      "invariant": "A general-reader article enters the release edge only after its evidence-bound lazy-pack section is installed; every hold remains attributable to one article and render state.",
+      "protected_graph": {
+        "nodes": [
+          "article_draft",
+          "lazypack_artifact",
+          "release_candidate"
+        ],
+        "edges": [
+          "article_draft -> release_candidate"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "release_candidate -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "scripts/check_alerts.py content_gate_deadlock / lazypack_missing remediation"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": null
+      },
+      "evidence": {
+        "trigger_count": 0,
+        "distinct_candidates": 0,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 54,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "plan",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
       "gate_id": "release_pool_arc_dedup",
       "owner": "volpred.ops.content",
       "mode": "selection_constraint",
@@ -2676,9 +2780,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-28T13:00:36.599538+00:00"
       },
@@ -2694,9 +2798,10 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2932,
+            "row_count": 2935,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -2776,39 +2881,39 @@
       ]
     },
     {
-      "gate_id": "publisher_arc_dedup",
+      "gate_id": "event_cross_stage_similarity",
       "owner": "volpred.publisher.publisher",
-      "mode": "selection_constraint",
+      "mode": "warn",
       "identity_strength": "heuristic",
-      "invariant": "Fuzzy narrative similarity is advisory; only a same-reference near-identical body may block publication.",
+      "invariant": "Similarity across distinct event-series stages remains advisory and cannot suppress a later information state.",
       "protected_graph": {
         "nodes": [
-          "article_candidate",
-          "dedup_verdict",
+          "event_article_candidate",
+          "event_series_stage",
           "feed"
         ],
         "edges": [
-          "article_candidate -> dedup_verdict"
+          "event_article_candidate -> event_series_stage"
         ]
       },
       "blocked_downstream_edges": [
-        "dedup_verdict -> feed",
+        "event_series_stage -> feed",
         "feed -> reader"
       ],
       "incident_refs": [
-        "docs/error_log_archive/2026-Q2.md 2026-06-23 dedup default-block black hole"
+        "docs/error_log.md event T-2/T+0/T+1 coverage and cross-stage dedup incidents"
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
-        "newest_evidence_at": "2026-07-30T07:08:38.283017+00:00"
+        "newest_evidence_at": null
       },
       "evidence": {
-        "trigger_count": 249,
-        "distinct_candidates": 17,
+        "trigger_count": 0,
+        "distinct_candidates": 0,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_occurrences": 0,
@@ -2818,9 +2923,10 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2932,
+            "row_count": 2935,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -2850,7 +2956,477 @@
         "queued": 0,
         "in_flight": 0,
         "blocked": 0,
-        "unjoined": 17,
+        "unjoined": 0,
+        "candidate_outcomes": [],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "plan",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "publisher_title_identity",
+      "owner": "volpred.publisher.publisher",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "invariant": "One exact non-event title may own at most one live publication inside the 24-hour identity window.",
+      "protected_graph": {
+        "nodes": [
+          "article_candidate",
+          "title_24h_identity",
+          "feed"
+        ],
+        "edges": [
+          "article_candidate -> title_24h_identity"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "title_24h_identity -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "src/volpred/publisher/publisher.py exact-title 24h gate"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": null
+      },
+      "evidence": {
+        "trigger_count": 0,
+        "distinct_candidates": 0,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2935,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "plan",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "publisher_content_depth",
+      "owner": "volpred.publisher.publisher",
+      "mode": "selection_constraint",
+      "identity_strength": "canonical_exact",
+      "invariant": "Reader-facing depth thresholds reject only content classes whose canonical length or evidence-table floor is unmet.",
+      "protected_graph": {
+        "nodes": [
+          "article_candidate",
+          "content_depth_verdict",
+          "feed"
+        ],
+        "edges": [
+          "article_candidate -> content_depth_verdict"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "content_depth_verdict -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-02 content depth enforcement"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": null
+      },
+      "evidence": {
+        "trigger_count": 0,
+        "distinct_candidates": 0,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2935,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "plan",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "publisher_digest_identity",
+      "owner": "volpred.publisher.publisher",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "invariant": "A Taipei calendar date may expose at most one live daily digest.",
+      "protected_graph": {
+        "nodes": [
+          "daily_digest_candidate",
+          "taipei_publish_date",
+          "feed"
+        ],
+        "edges": [
+          "daily_digest_candidate -> taipei_publish_date"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "taipei_publish_date -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-16 duplicate same-day daily digest"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": null
+      },
+      "evidence": {
+        "trigger_count": 0,
+        "distinct_candidates": 0,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2935,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "plan",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "publisher_digest_recap",
+      "owner": "volpred.publisher.publisher",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "invariant": "Daily-digest archive-span heuristics may hold only a recap-shaped draft while preserving explicit batch-migration warning evidence.",
+      "protected_graph": {
+        "nodes": [
+          "daily_digest_candidate",
+          "archive_span_verdict",
+          "feed"
+        ],
+        "edges": [
+          "daily_digest_candidate -> archive_span_verdict"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "archive_span_verdict -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-05 digest archive-span recurrence"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": null
+      },
+      "evidence": {
+        "trigger_count": 0,
+        "distinct_candidates": 0,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2935,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "plan",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "publisher_arc_dedup",
+      "owner": "volpred.publisher.publisher",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "invariant": "Fuzzy narrative similarity is advisory; only a same-reference near-identical body may block publication.",
+      "protected_graph": {
+        "nodes": [
+          "article_candidate",
+          "dedup_verdict",
+          "feed"
+        ],
+        "edges": [
+          "article_candidate -> dedup_verdict"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "dedup_verdict -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md 2026-06-23 dedup default-block black hole"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-30T07:08:38.283017+00:00"
+      },
+      "evidence": {
+        "trigger_count": 249,
+        "distinct_candidates": 78,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2935,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 78,
         "candidate_outcomes": [
           {
             "candidate_id": "K1208",
@@ -2981,8 +3557,496 @@
             ]
           },
           {
+            "candidate_id": "decision:502069edff7982b3",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "decision:7eb941e1b2bb8e59",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "decision:8244efc24e8aebce",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "decision:8836e3ff817fefad",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "decision:d6e681d627ac7a58",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "decision:db5a22fa0c5b1b11",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "decision:fff833b831bd4adb",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
             "candidate_id": "fomc_2026_07_29:T+0",
             "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:03ae578a94a7de84",
+            "decision_count": 3,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:04261c2a0402fd53",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:075fc8c77d2ffc55",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:0ca53cebfd28258e",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:1461eae7aef0f40e",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:167d3ca0a8052bc6",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:1702110307236d29",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:202955bf38a37c34",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:24bc9ae0fbe9af0f",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:258852c08a89a2e2",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:2d1df8657763a4df",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:2d711642b726b044",
+            "decision_count": 6,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:352fa204550fafa6",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:36a4187a7da58d98",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:3831a89d40b8d18c",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:41ae616098dc844b",
+            "decision_count": 8,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:44791a1d09311c2b",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:4ef9e6a991d52876",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:5071848efd0efca1",
+            "decision_count": 4,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:50fd2afd48eaa8ae",
+            "decision_count": 4,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:52334f32ff673f40",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:602994a746f3f15a",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:64969b9b31282490",
+            "decision_count": 8,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:67dea324e843c8fd",
+            "decision_count": 17,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:6989a6453045916d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:6c41671d9d644cb3",
+            "decision_count": 8,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:7a0066b8315bbdba",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:7d3939dfc2d314b6",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:8832d556fe3536b3",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:889c53deef4a50b3",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:925723c2c6aea7a0",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:9809187199424c1f",
+            "decision_count": 15,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:9c7838864fe3dd7d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:9e03ab88cc62a52a",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:a5a9d5b26010d15b",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:ab142bb8f616c8ba",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:ab6296769fb985a2",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:b9f33b4f2efe43af",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:bec13cba5e1c8d4a",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:c3d9c25f951cd3f4",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:c6c8155313d348c1",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:cdab56d81b52fcd2",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:d13b18e797597266",
+            "decision_count": 4,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:d34ed1ae9ef8eb2a",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:d67e9ae2186ad7e4",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:d748422ca47a014b",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:e29b1baa7dd54c76",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:e3056231809d60e1",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:e9b0b22f2df038a6",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:ea673229f63133c3",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:f3821bf8714b9afc",
+            "decision_count": 6,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:f3975146e9b353c7",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:f513ec4f6244bf5c",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "title:fdb97d0dee093e57",
+            "decision_count": 1,
             "task_ids": [],
             "outcomes": [
               "unjoined"
@@ -3030,15 +4094,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-29T21:07:10.778362+00:00"
       },
       "evidence": {
         "trigger_count": 5,
-        "distinct_candidates": 1,
+        "distinct_candidates": 2,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_occurrences": 0,
@@ -3048,9 +4112,10 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2932,
+            "row_count": 2935,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -3080,11 +4145,19 @@
         "queued": 0,
         "in_flight": 0,
         "blocked": 0,
-        "unjoined": 1,
+        "unjoined": 2,
         "candidate_outcomes": [
           {
             "candidate_id": "K1716",
             "decision_count": 3,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "decision:d3989dc5bf79c995",
+            "decision_count": 2,
             "task_ids": [],
             "outcomes": [
               "unjoined"
@@ -3132,9 +4205,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
-        "start": "2026-07-23T09:03:42.849228+00:00",
-        "end": "2026-07-30T09:03:42.849228+00:00",
+        "lookback_start": "2026-07-23T09:18:42.958931+00:00",
+        "start": "2026-07-23T09:18:42.958931+00:00",
+        "end": "2026-07-30T09:18:42.958931+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3150,9 +4223,10 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2932,
+            "row_count": 2935,
             "malformed_rows": 0,
-            "invalid_timestamps": 0
+            "invalid_timestamps": 0,
+            "identity_rewrites": 0
           },
           {
             "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
@@ -3202,26 +4276,26 @@
     }
   ],
   "summary": {
-    "gate_count": 13,
+    "gate_count": 19,
     "unregistered_gate_count": 0,
     "unclassified_blocking_count": 0,
     "review_due_count": 3,
-    "hard_gate_count": 5,
+    "hard_gate_count": 7,
     "unhealthy_source_count": 0
   },
   "review_tasks": {
-    "created_count": 2,
-    "created_ids": [
-      "control_gate_review_hourly_pregate_20260730T040739_df86bffb6358",
-      "control_gate_review_phase_z_baseline_ownership_20260726T193801_3f635b667b96"
-    ],
+    "created_count": 0,
+    "created_ids": [],
     "existing_ids": [
+      "control_gate_review_hourly_pregate_20260730T040739_df86bffb6358",
+      "control_gate_review_phase_z_baseline_ownership_20260726T193801_3f635b667b96",
       "control_gate_review_task_generation_20260730T090031_ec3b7176e81d"
     ]
   },
   "inventory_review_tasks": {
     "created_count": 0,
     "created_ids": [],
+    "refreshed_ids": [],
     "existing_ids": []
   },
   "audit_health": {
