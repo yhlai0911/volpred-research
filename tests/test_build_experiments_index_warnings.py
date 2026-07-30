@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -137,6 +139,39 @@ def test_git_first_commit_date_allows_untracked_paths_silently(
     assert capsys.readouterr().err == ""
 
 
+def test_scan_k_dirs_uses_one_bulk_git_date_snapshot(
+    tmp_path: Path, monkeypatch
+) -> None:
+    module = _load_build_experiments_index()
+    experiments_dir = tmp_path / "experiments"
+    for name in ("k1", "k2"):
+        directory = experiments_dir / name
+        directory.mkdir(parents=True)
+        (directory / "README.md").write_text(f"# {name}\n", encoding="utf-8")
+    calls = 0
+
+    def bulk_dates() -> dict[str, str]:
+        nonlocal calls
+        calls += 1
+        return {"k1": "2026-01-01", "k2": "2026-01-02"}
+
+    monkeypatch.setattr(module, "EXPERIMENTS_DIR", experiments_dir)
+    monkeypatch.setattr(module, "git_first_commit_date_map", bulk_dates)
+    monkeypatch.setattr(
+        module,
+        "git_first_commit_date",
+        lambda _path: (_ for _ in ()).throw(AssertionError("per-directory git probe")),
+    )
+
+    rows = module.scan_k_dirs()
+
+    assert calls == 1
+    assert {row["k_id"]: row["date"] for row in rows} == {
+        "k1": "2026-01-01",
+        "k2": "2026-01-02",
+    }
+
+
 def test_summarize_warns_on_invalid_explicit_date(capsys) -> None:
     module = _load_build_experiments_index()
 
@@ -157,3 +192,51 @@ def test_summarize_warns_on_invalid_explicit_date(capsys) -> None:
     assert summary["active_last_30d_readme_dated"] == 0
     assert summary["readme_has_explicit_date"] == 1
     assert "explicit README date parse failed in summary k_id=k999" in captured.err
+
+
+def test_research_metrics_projection_distinguishes_indexed_experiments_from_artifacts(
+    tmp_path: Path,
+) -> None:
+    module = _load_build_experiments_index()
+    experiments_dir = tmp_path / "experiments"
+    (experiments_dir / "k1").mkdir(parents=True)
+    (experiments_dir / "k2").mkdir()
+    (experiments_dir / "k1" / "K1_results.json").write_text("{}", encoding="utf-8")
+    (experiments_dir / "k1" / "K1_robustness_results.json").write_text(
+        "{}", encoding="utf-8"
+    )
+    (experiments_dir / "k2" / "K2_result.json").write_text("{}", encoding="utf-8")
+    generated_at = datetime(2026, 7, 30, 10, 0, tzinfo=timezone.utc)
+
+    payload = module.build_research_metrics_payload(
+        {"total": 2},
+        generated_at=generated_at,
+        experiments_dir=experiments_dir,
+    )
+
+    assert payload == {
+        "schema_version": 1,
+        "generated_at": "2026-07-30T10:00:00+00:00",
+        "source_index": "experiments/index.json",
+        "indexed_experiments": 2,
+        "result_artifacts": 3,
+    }
+
+
+def test_research_metrics_projection_writes_declared_frontend_target(
+    tmp_path: Path,
+) -> None:
+    module = _load_build_experiments_index()
+    target = tmp_path / "frontend" / "data" / "research_metrics.json"
+    payload = {
+        "schema_version": 1,
+        "generated_at": "2026-07-30T10:00:00+00:00",
+        "source_index": "experiments/index.json",
+        "indexed_experiments": 2,
+        "result_artifacts": 3,
+    }
+
+    written = module.write_research_metrics_projection(payload, [target])
+
+    assert written == [target]
+    assert json.loads(target.read_text(encoding="utf-8")) == payload

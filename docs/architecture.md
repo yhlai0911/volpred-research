@@ -789,8 +789,13 @@
   - **Draft 同步**：用 `published_at OR created_at` 過濾（支持 draft sync）
 - `scripts/daily_update.py` → 每日 08:03 台灣時間（crontab `3 8 * * 2-6`，美股收盤後）計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat
 - `scripts/recalc_metrics.py` → 從 paper_trading.json 重算 Sharpe/MDD 等（daily_update 自動呼叫）
-- `config/project_targets.json` + `src/volpred/config/runtime.py` → 控制 active frontend、Zeabur deploy service、paper public dir、strategy metrics local sync target、預設 remote/mirror URL
+- `config/project_targets.json` + `src/volpred/config/runtime.py` → 控制 active frontend、Zeabur deploy service、paper public dir、strategy/research metrics local sync target、預設 remote/mirror URL
 - `config/runtime_schedules.json` + `src/volpred/config/schedules.py` → 控制 canonical session cron / host crontab / `event_jobs` spec（v12 單主線程架構）
+- **研究數量 projection（2026-07-30）**：
+  - `experiments/index.json.summary.total` 是「已索引 K 實驗」的 canonical 口徑；K 最大編號、result 檔案數與 knowledge 條目數都不是同一指標。
+  - `scripts/build_experiments_index.py` 同次重建 index，並把已索引實驗數與獨立的 result artifact 數原子投影到 `research_metrics_targets`（目前 `frontend-v2-fix/data/research_metrics.json`）。
+  - `daily_update.py` 對該 projection 使用與 strategy metrics 相同的 nested-repo ownership／commit guard；首頁與 `/api/research/*` 以 projection 覆蓋 legacy `memory_entries(type=experiment)` 筆數，同時保留 legacy 筆數及 knowledge 筆數作診斷欄位。
+  - `verify-vnext-live.mjs` 把本地 projection、線上 API 及 original/v3 首屏 HTML 三方比對；`deploy-zeabur-safe.sh` 未通過此 read-back 不得宣稱部署完成。
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
   - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正

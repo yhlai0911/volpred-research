@@ -113,6 +113,10 @@ def get_strategy_metrics_sync_paths(*, active_only: bool = True) -> list[Path]:
     return _resolve_frontend_path_list("strategy_metrics_targets", active_only=active_only)
 
 
+def get_research_metrics_sync_paths(*, active_only: bool = True) -> list[Path]:
+    return _resolve_frontend_path_list("research_metrics_targets", active_only=active_only)
+
+
 def get_active_frontend_paper_dir() -> Path | None:
     return _resolve_single_frontend_path("paper_public_dir")
 

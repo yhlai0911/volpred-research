@@ -22,6 +22,7 @@ from volpred.config.runtime import (
     get_default_mirror_url,
     get_frontend_path,
     get_local_data_sync_dirs,
+    get_research_metrics_sync_paths,
     get_strategy_metrics_sync_paths,
 )
 from volpred.data.manager import DataManager
@@ -784,7 +785,9 @@ def main():
         label="daily_update",
     )
     frontend_root = get_frontend_path()
-    frontend_metrics = get_strategy_metrics_sync_paths(active_only=True)
+    frontend_strategy_metrics = get_strategy_metrics_sync_paths(active_only=True)
+    frontend_research_metrics = get_research_metrics_sync_paths(active_only=True)
+    frontend_metrics = [*frontend_strategy_metrics, *frontend_research_metrics]
     # The nested frontend repo is where this bug was worst. PHASE-Z's churn sweep
     # only reaches the parent checkout, so daily_update is the *only* thing that
     # ever commits data/strategy_metrics.json — and it was excluding it for being
@@ -822,6 +825,12 @@ def main():
         if frontend_metrics and frontend_root.is_dir()
         else []
     )
+    writable_frontend_strategy_metrics = [
+        path for path in writable_frontend_metrics if path in frontend_strategy_metrics
+    ]
+    writable_frontend_research_metrics = [
+        path for path in writable_frontend_metrics if path in frontend_research_metrics
+    ]
 
     # 2026-07-10 (boss「颱風休市網頁還顯示台股開盤中指示」): refresh the adhoc-closure
     # override BEFORE any content gating. exchange_calendars is blind to same-day
@@ -1660,7 +1669,7 @@ def main():
     try:
         from recalc_metrics import recalc_all
         print("\n--- Recalculating strategy metrics ---")
-        recalc_all(frontend_targets=writable_frontend_metrics)
+        recalc_all(frontend_targets=writable_frontend_strategy_metrics)
     except Exception as e:
         print(f"  Metrics recalc skipped: {e}")
 
@@ -1689,7 +1698,10 @@ def main():
     try:
         from build_experiments_index import build_experiments_index
         print("\n--- Rebuilding experiments index ---")
-        build_experiments_index(verbose=True)
+        build_experiments_index(
+            verbose=True,
+            research_metrics_targets=writable_frontend_research_metrics,
+        )
     except Exception as e:
         print(f"  Experiments index rebuild skipped: {e}")
 
@@ -1714,7 +1726,7 @@ def main():
             frontend_root,
             frontend_metrics,
             dirty_before=frontend_dirty_before,
-            message=f"data(strategies): refresh scheduled metrics for {today}",
+            message=f"data(metrics): refresh scheduled projections for {today}",
             label="daily_update_frontend",
         )
     print(f"\n✓ Done!")

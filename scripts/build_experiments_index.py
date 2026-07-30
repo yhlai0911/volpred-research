@@ -36,9 +36,12 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
+
+from volpred.config.runtime import get_research_metrics_sync_paths
 
 ROOT = Path(__file__).resolve().parent.parent
 EXPERIMENTS_DIR = ROOT / "experiments"
@@ -158,6 +161,61 @@ def git_first_commit_date(path: Path) -> Optional[str]:
     if not lines:
         return None
     return lines[-1]  # earliest (last line of reverse-chron log)
+
+
+def git_first_commit_date_map() -> dict[str, str]:
+    """Return all K-directory fallback dates using one Git history scan.
+
+    The previous implementation launched one ``git log --follow`` process for
+    every K directory. With 1,300+ indexed experiments that made the daily
+    projection take minutes and could starve its scheduled writer. Git output
+    is newest-first, so later assignments retain the earliest observed add.
+    """
+    marker = "__VOLPRED_COMMIT_DATE__"
+    try:
+        out = subprocess.check_output(
+            [
+                "git",
+                "-C",
+                str(ROOT),
+                "log",
+                "--diff-filter=A",
+                f"--format={marker}%ad",
+                "--date=short",
+                "--name-only",
+                "--",
+                "experiments",
+            ],
+            stderr=subprocess.DEVNULL,
+            timeout=30,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        return {}  # silent-ok: a new repo may have no committed experiment history yet.
+    except Exception as exc:
+        _warn_index(
+            "bulk git first-commit date lookup failed; using '-' fallback",
+            exc,
+            EXPERIMENTS_DIR,
+        )
+        return {}
+
+    dates: dict[str, str] = {}
+    current_date: str | None = None
+    for raw_line in out.splitlines():
+        line = raw_line.strip()
+        if line.startswith(marker):
+            current_date = line.removeprefix(marker).strip() or None
+            continue
+        if not line or current_date is None:
+            continue
+        parts = Path(line).parts
+        if len(parts) < 2 or parts[0] != "experiments":
+            continue
+        canonical = normalize_k(parts[1])
+        if canonical is not None:
+            dates[canonical] = current_date
+    return dates
 
 
 # ---------------------------------------------------------------------------
@@ -319,6 +377,7 @@ def scan_k_dirs() -> list[dict]:
     rows: list[dict] = []
     if not EXPERIMENTS_DIR.is_dir():
         return rows
+    fallback_dates = git_first_commit_date_map()
     for entry in sorted(EXPERIMENTS_DIR.iterdir()):
         if not entry.is_dir():
             continue
@@ -330,7 +389,7 @@ def scan_k_dirs() -> list[dict]:
         date = readme_date(readme) if readme.is_file() else None
         date_explicit = bool(date)
         if not date:
-            date = git_first_commit_date(entry)
+            date = fallback_dates.get(canonical)
         rows.append(
             {
                 "k_id": canonical,
@@ -523,26 +582,102 @@ def render_index(rows: list[dict], summary: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def build_experiments_index(verbose: bool = True) -> dict:
+def build_research_metrics_payload(
+    summary: dict,
+    *,
+    generated_at: datetime,
+    experiments_dir: Path = EXPERIMENTS_DIR,
+) -> dict:
+    """Build the public, traceable research-count projection.
+
+    ``indexed_experiments`` counts canonical K directories represented by
+    ``experiments/index.json``. ``result_artifacts`` deliberately remains a
+    separate count because one experiment may have several result files.
+    """
+    result_artifacts = sum(
+        1
+        for path in experiments_dir.rglob("*.json")
+        if path.is_file()
+        and (path.name.endswith("_results.json") or path.name.endswith("_result.json"))
+    )
+    return {
+        "schema_version": 1,
+        "generated_at": generated_at.isoformat(),
+        "source_index": "experiments/index.json",
+        "indexed_experiments": int(summary["total"]),
+        "result_artifacts": result_artifacts,
+    }
+
+
+def write_research_metrics_projection(
+    payload: dict,
+    targets: Iterable[Path],
+) -> list[Path]:
+    """Atomically write the generated metrics to declared frontend targets."""
+    written: list[Path] = []
+    rendered = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+    for target in targets:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=target.parent,
+            prefix=f".{target.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            handle.write(rendered)
+            temp_path = Path(handle.name)
+        os.replace(temp_path, target)
+        written.append(target)
+    return written
+
+
+def build_experiments_index(
+    verbose: bool = True,
+    *,
+    research_metrics_targets: Iterable[Path] | None = None,
+) -> dict:
     """Entry point reusable from daily_update.py."""
     rows = build_rows()
     summary = summarize(rows)
+    generated_at = datetime.now(timezone.utc)
     EXPERIMENTS_DIR.mkdir(parents=True, exist_ok=True)
     OUT_MD.write_text(render_index(rows, summary), encoding="utf-8")
     payload = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": generated_at.isoformat(),
         "summary": summary,
         "rows": rows,
     }
     OUT_JSON.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    metrics_payload = build_research_metrics_payload(
+        summary,
+        generated_at=generated_at,
+    )
+    targets = (
+        list(research_metrics_targets)
+        if research_metrics_targets is not None
+        else get_research_metrics_sync_paths(active_only=True)
+    )
+    written_metrics = write_research_metrics_projection(metrics_payload, targets)
     if verbose:
         print(
             f"[index] wrote {OUT_MD.relative_to(ROOT)} "
             f"({summary['total']} K rows; uncovered={summary['uncovered']}, "
             f"PASS={summary['pass']} FAIL={summary['fail']} NULL={summary['null']})"
         )
+        for target in written_metrics:
+            try:
+                target_label = target.relative_to(ROOT)
+            except ValueError:
+                target_label = target
+            print(
+                f"[index] projected {metrics_payload['indexed_experiments']} indexed "
+                f"experiments / {metrics_payload['result_artifacts']} result artifacts "
+                f"to {target_label}"
+            )
     return summary
 
 

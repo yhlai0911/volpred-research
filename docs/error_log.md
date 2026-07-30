@@ -5257,3 +5257,35 @@ collision、scan error、single/batch parity 與 merge-to-HEAD release 等相關
 此類為 **`root_cause_fixed_and_verified`**。制度化規則：**任何會縮窄候選的
 selection gate，都必須在截斷前共用 downstream admission 的機械可派工判定；
 不可先推薦、再讓下一層永久拒絕。**
+
+---
+
+## 2026-07-30 — 首頁把 115 筆 legacy memory 紀錄誤標為全部實驗
+
+**證據化症狀**：線上首頁與 `/api/research/stats` 顯示 115；該數字精確等於
+legacy `memory_entries(type=experiment)`／`storage/memory/experiments.json` 的紀錄
+數，卻與可重生的 `experiments/index.json.summary.total=1388` 不符。研究資料沒有
+被刪除；同一時點另有 1514 份 result artifacts，而 knowledge entries 是第三個獨立
+口徑，不能拿其中任一數字冒充「實驗總數」。
+
+**根因層級（projection semantic contract）**：首頁沿用舊 ResearchSummary，把
+legacy MemorySystem 的執行紀錄長度命名為 `n_experiments`；canonical K 實驗 index
+沒有正式前端 projection，Mirror 與 Supabase 路徑也都會把同一錯誤語意送到首頁。
+因此部署、同步與資料庫本身即使健康，畫面仍必然退回 115。
+
+**底層修復與制度化**：`build_experiments_index.py` 現在於同一 generation 產生
+indexed experiment 與 result artifact 的 versioned projection，目標由
+`config/project_targets.json.research_metrics_targets` 決定並原子 replace；
+`daily_update.py` 以既有 nested-repo dirty ownership／path-scoped commit 管理它。
+前端對 Supabase、Mirror 兩路 summary 都套用 schema-v1 canonical overlay，保留
+legacy record、knowledge 與 result artifact 為明確不同欄位，首頁標籤改成
+「已索引實驗」。索引的逐目錄 Git subprocess 同時收斂成一次 bulk history scan，
+完整重建由超過兩分鐘降至 1.7 秒。safe deploy 會以 release ID 綁定本地 projection、
+線上 API 與 original/v3 computed DOM，任一不一致即失敗。
+
+**回歸與 live read-back**：主專案相關 54 tests、frontend canonical full
+`npm run check`、Matt Standards／Spec review 均 PASS。Zeabur deployment
+`6a6b2cfa159a57c418d426a5`、release `vnext-experience-20260730.1` 已 RUNNING；
+production read-back 為 indexed experiments 1388、result artifacts 1514、
+legacy records 115、knowledge items 3198，兩個首屏可見 DOM 都等於 1388，
+`vnext-live` errors 為空。此類為 **`root_cause_fixed_and_verified`**。
