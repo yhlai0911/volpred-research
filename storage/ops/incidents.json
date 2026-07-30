@@ -1,5 +1,50 @@
 {
  "incidents": {
+  "inc_024accf46232": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
+   "current_task_id": "ci-red-30507270318",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-30T02:20:40.519862+00:00",
+   "escalation": null,
+   "fingerprint": "024accf4623290a4c570d29670d54929e8d30a60c4a7d4c76694a90b216ef636",
+   "fingerprint_parts": [
+    "ci-red-30507270318"
+   ],
+   "first_seen_at": "2026-07-30T02:20:40.519862+00:00",
+   "incident_id": "inc_024accf46232",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-30T02:20:40.519862+00:00",
+     "key": "30507270318:1",
+     "last_seen_at": "2026-07-30T02:20:40.519862+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-30T02:18:14.9639239Z scripts/tests/test_phase_z_foreign_incident.py:376: AssertionError",
+   "last_seen_at": "2026-07-30T02:20:40.519862+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-30T02:20:40.672179+00:00",
+     "task_id": "ci-red-30507270318"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_03e5a0637780": {
    "class": "ordinary",
    "clean_observations": [],
@@ -2625,6 +2670,6 @@
    }
   }
  },
- "updated_at": "2026-07-30T02:11:50.258137+00:00",
+ "updated_at": "2026-07-30T02:27:27.940120+00:00",
  "version": 1
 }
