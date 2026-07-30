@@ -79,10 +79,17 @@ NOW_TW = NOW.astimezone(TW)             # 顯示用台灣時間
 WINDOW = timedelta(hours=4)
 WINDOW_END = NOW
 SINCE = WINDOW_END - WINDOW
+ARTICLE_WINDOW_END = WINDOW_END
+ARTICLE_SINCE = SINCE
 _REPORT_WARNINGS: list[str] = []
 
 
-def _configure_window(hours: float, *, end: datetime | None = None) -> None:
+def _configure_window(
+    hours: float,
+    *,
+    end: datetime | None = None,
+    article_hours: float | None = None,
+) -> None:
     """Set the module-level half-open reporting window before build_html().
 
     Collectors read module globals WINDOW/SINCE at call time, so mutating them
@@ -92,7 +99,7 @@ def _configure_window(hours: float, *, end: datetime | None = None) -> None:
     same immutable interval and cannot silently skip an article merely because
     its worker started after the rolling window moved.
     """
-    global WINDOW, WINDOW_END, SINCE
+    global WINDOW, WINDOW_END, SINCE, ARTICLE_WINDOW_END, ARTICLE_SINCE
     WINDOW = timedelta(hours=hours)
     WINDOW_END = end or NOW
     if WINDOW_END.tzinfo is None:
@@ -100,6 +107,10 @@ def _configure_window(hours: float, *, end: datetime | None = None) -> None:
     else:
         WINDOW_END = WINDOW_END.astimezone(timezone.utc)
     SINCE = WINDOW_END - WINDOW
+    ARTICLE_WINDOW_END = WINDOW_END
+    ARTICLE_SINCE = ARTICLE_WINDOW_END - timedelta(
+        hours=article_hours if article_hours is not None else hours
+    )
 
 
 def _warn_report(source: str, exc: Exception) -> None:
@@ -318,8 +329,11 @@ def _articles_in_window():
 
     ``feed.json`` is the durable publication ledger. Operations Core persists
     each scheduled fire and ``materialize_boss_report_payload`` freezes its
-    rendered payload, so scanning ``[SINCE, WINDOW_END)`` is replay-safe
-    without introducing a second article-notification queue.
+    rendered payload, so scanning
+    ``[ARTICLE_SINCE, ARTICLE_WINDOW_END)`` is replay-safe without introducing
+    a second article-notification queue. The 20:10 report keeps 24-hour
+    operational sections but its article interval is only the six-hour delta
+    after 14:10, preventing duplicate article notices.
     """
     feed_path = PROJECT_ROOT / "storage" / "reports" / "feed.json"
     empty = {"published": [], "drafts": []}
@@ -350,13 +364,13 @@ def _articles_in_window():
                "audience": art.get("audience", "")}
         if (
             pub_dt
-            and SINCE <= pub_dt < WINDOW_END
+            and ARTICLE_SINCE <= pub_dt < ARTICLE_WINDOW_END
             and art.get("status") == "published"
         ):
             pub.append({**row, "ts": pub_dt.astimezone(TW).strftime("%H:%M")})
         elif (
             create_dt
-            and SINCE <= create_dt < WINDOW_END
+            and ARTICLE_SINCE <= create_dt < ARTICLE_WINDOW_END
             and art.get("status") == "draft"
         ):
             drafts.append({**row, "ts": create_dt.astimezone(TW).strftime("%H:%M")})
@@ -855,20 +869,27 @@ def main(argv=None):
             )
             scheduled_at = _parse_ts_utc(fire.scheduled_for)
             expected = {
-                8: (False, 12.0),
-                14: (False, 6.0),
-                20: (True, 24.0),
+                8: (False, 12.0, 12.0),
+                14: (False, 6.0, 6.0),
+                # Day-close operational sections cover 24h; article
+                # notifications cover only the post-14:10 delta so one article
+                # is never repeated in all three daily emails.
+                20: (True, 24.0, 6.0),
             }.get(scheduled_at.astimezone(TW).hour)
             actual = (
                 args.daily_close,
                 WINDOW.total_seconds() / 3600,
             )
-            if expected is None or actual != expected:
+            if expected is None or actual != expected[:2]:
                 raise RuntimeError(
                     "Operations Core Boss Report edition does not match "
                     f"scheduled_for: expected={expected} actual={actual}"
                 )
-            _configure_window(actual[1], end=scheduled_at)
+            _configure_window(
+                actual[1],
+                end=scheduled_at,
+                article_hours=expected[2],
+            )
             actor_ref = (
                 f"schedule:{schedule_job_id}:{fire_key}"
             )

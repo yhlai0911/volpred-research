@@ -498,6 +498,7 @@ def test_boss_report_is_the_only_scheduled_article_email_batch() -> None:
     assert job["cron"] == "10 8,14,20 * * *"
     assert "新文章通知唯一批次 owner" in job["description"]
     assert "禁止逐篇 Email" in job["description"]
+    assert "20:10 僅納入 14:10 後新增文章" in job["description"]
 
 
 def test_build_html_uses_one_program_snapshot(monkeypatch) -> None:
@@ -546,6 +547,8 @@ def test_configure_window_moves_since() -> None:
         assert boss_report.WINDOW.total_seconds() == 24 * 3600
         assert boss_report.SINCE == boss_report.NOW - boss_report.WINDOW
         assert boss_report.WINDOW_END == boss_report.NOW
+        assert boss_report.ARTICLE_SINCE == boss_report.SINCE
+        assert boss_report.ARTICLE_WINDOW_END == boss_report.WINDOW_END
     finally:
         boss_report._configure_window(4.0)
 
@@ -669,6 +672,8 @@ def test_scheduled_main_anchors_delayed_build_to_scheduled_for(
         observed["daily_close"] = daily_close
         observed["end"] = boss_report.WINDOW_END
         observed["since"] = boss_report.SINCE
+        observed["article_end"] = boss_report.ARTICLE_WINDOW_END
+        observed["article_since"] = boss_report.ARTICLE_SINCE
         return (
             "[新架構派發][VolPred Boss Report] anchored",
             "<p>anchored</p>",
@@ -695,6 +700,10 @@ def test_scheduled_main_anchors_delayed_build_to_scheduled_for(
     assert observed["daily_close"] is True
     assert observed["end"] == expected_end
     assert observed["since"] == expected_end - boss_report.timedelta(hours=24)
+    assert observed["article_end"] == expected_end
+    assert observed["article_since"] == (
+        expected_end - boss_report.timedelta(hours=6)
+    )
 
 
 def test_main_replays_same_fire_without_rebuilding_payload(
