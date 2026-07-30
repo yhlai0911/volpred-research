@@ -8185,6 +8185,7 @@ def test_admission_outbox_requeues_task_after_preassign_crash(
 
     assert result == [{"ok": True, "status": "pending"}]
     assert commands[1][0] == "dispatch-settle"
+    assert commands[1][commands[1].index("--job-id") + 1] == "dead-job"
     assert commands[1][commands[1].index("--disposition") + 1] == "retry"
 
 

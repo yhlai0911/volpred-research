@@ -902,7 +902,11 @@ def reconcile_admission_settlements(
             continue
         settled = _settle_mutating_task(
             repo_root=repo_root,
-            workspace={"task_id": key[0], "claim_session_id": key[1]},
+            workspace={
+                "task_id": key[0],
+                "claim_session_id": key[1],
+                "dispatch_job_id": str(item.get("dispatch_job_id") or ""),
+            },
             disposition="retry",
             result=(
                 "reconciled admission crash before workspace binding; "

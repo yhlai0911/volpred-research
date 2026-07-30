@@ -69,6 +69,7 @@ def _write_dispatch_state(
     job_id: str = "job-a",
     attempt: int = 2,
     started_wall: str | None = None,
+    producer_custody: dict | None = None,
 ) -> None:
     now = datetime.now(UTC).isoformat()
     job = {
@@ -87,6 +88,7 @@ def _write_dispatch_state(
         "started_wall": (
             _started_wall(proc.pid) if started_wall is None else started_wall
         ),
+        "producer_custody": producer_custody,
     }
     _write_state(path, [job])
 
@@ -195,6 +197,60 @@ def test_exact_dispatch_binding_records_identity_and_matches_worker_classifier(
     )
     assert matched is not None
     assert matched["target_id"] == pgid
+
+
+def test_custody_backed_dispatch_requires_full_cohort_termination(
+    tmp_path: Path,
+    spawn_process,
+    monkeypatch,
+) -> None:
+    state_path = tmp_path / "dispatch_state.json"
+    proc = spawn_process()
+    pgid = os.getpgid(proc.pid)
+    custody = {
+        "version": 2,
+        "host_uuid": "host-a",
+        "boot_session_uuid": "boot-a",
+        "resource_coalition_id": 42,
+        "trusted_unique_ids": [1, 2],
+    }
+    _write_dispatch_state(
+        state_path,
+        proc=proc,
+        producer_custody=custody,
+    )
+    calls: list[dict] = []
+
+    monkeypatch.setattr(
+        terminate_dispatch_job.procutil,
+        "kill_producer_cohort",
+        lambda observed, **kwargs: calls.append(
+            {"custody": observed, **kwargs}
+        ) or True,
+    )
+
+    partial = _run_formal_cli(
+        target_id=pgid,
+        state_path=state_path,
+        signal_name="TERM",
+    )
+    complete = _run_formal_cli(
+        target_id=pgid,
+        state_path=state_path,
+        signal_name="TERM_KILL",
+    )
+
+    assert partial.returncode == 2
+    assert "TERM_KILL" in partial.stderr
+    assert complete.returncode == 0, complete.stderr
+    assert calls[0]["custody"] == custody
+    assert calls[0]["grace_s"] == 0.05
+    assert calls[0]["intent"].job_id == "job-a"
+    assert calls[0]["intent"].attempt == 2
+    assert calls[0]["intent"].signal_sequence == (
+        signal.SIGTERM,
+        signal.SIGKILL,
+    )
 
 
 def test_formal_command_requires_complete_identity_before_arm(

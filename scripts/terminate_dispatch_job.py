@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import signal
 import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -13,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
+from scripts.dispatch_supervisor import procutil  # noqa: E402
 from scripts.dispatch_supervisor import state as supervisor_state  # noqa: E402
 from volpred.ops import termination, termination_command  # noqa: E402
 
@@ -142,6 +144,15 @@ def main(
             job_id=args.job_id,
             attempt=args.attempt,
         )
+        job = _assert_exact_current_job(binding)
+        if (
+            job.producer_custody is not None
+            and tuple(sequence) != (signal.SIGTERM, signal.SIGKILL)
+        ):
+            raise DispatchTerminationError(
+                "custody-backed dispatch termination requires "
+                "--signal TERM_KILL so every producer descendant is drained"
+            )
         intent = termination.arm(
             target_kind=binding.target_kind,
             target_id=binding.target_id,
@@ -156,13 +167,28 @@ def main(
         def verify_binding_before_first_signal() -> None:
             _assert_exact_current_job(binding)
 
-        result = termination_command.send_sequence(
-            intent,
-            sequence,
-            grace_seconds=args.grace_seconds,
-            ledger_path=binding.ledger_path,
-            first_pre_signal_verifier=verify_binding_before_first_signal,
-        )
+        if job.producer_custody is not None:
+            verify_binding_before_first_signal()
+            drained = procutil.kill_producer_cohort(
+                job.producer_custody,
+                intent=intent,
+                ledger_path=binding.ledger_path,
+                grace_s=args.grace_seconds,
+            )
+            if not drained:
+                raise DispatchTerminationError(
+                    "termination signals were attempted but producer custody "
+                    "did not return a positive drain proof"
+                )
+            result = "custody_drained"
+        else:
+            result = termination_command.send_sequence(
+                intent,
+                sequence,
+                grace_seconds=args.grace_seconds,
+                ledger_path=binding.ledger_path,
+                first_pre_signal_verifier=verify_binding_before_first_signal,
+            )
     except (
         DispatchTerminationError,
         termination.TerminationIntentError,
