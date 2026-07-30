@@ -28,6 +28,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from volpred.ops.foreign_disposition import (  # noqa: E402
     DispositionError,
+    _commit_message,
     apply_disposition,
     load_disposition,
     preflight,
@@ -65,6 +66,18 @@ def _spec(**paths: tuple[str, str]) -> dict:
 
 
 # ── disposition schema ───────────────────────────────────────────────────────
+
+def test_commit_message_identifies_codex_adjudication() -> None:
+    disposition = {
+        "adjudicated_by": "codex-vscode",
+        "incident": "phase-z-foreign-example",
+        "paths": {"artifact.txt": {"action": "commit", "reason": "verified output"}},
+    }
+
+    message = _commit_message(disposition, ["artifact.txt"])
+
+    assert message.startswith("[codex] chore(foreign):")
+
 
 def test_load_rejects_missing_signature_and_reason(tmp_path: Path) -> None:
     """A disposition with no author or no reason is state nobody can re-derive."""

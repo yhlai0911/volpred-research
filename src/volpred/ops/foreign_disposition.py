@@ -281,7 +281,12 @@ def apply_disposition(
 
 def _commit_message(disposition: dict[str, Any], paths: list[str]) -> str:
     incident = disposition.get("incident") or "n/a"
-    head = f"chore(foreign): 落地 {len(paths)} 個已裁決路徑 (incident {incident})"
+    adjudicated_by = str(disposition.get("adjudicated_by") or "")
+    prefix = "[codex] " if adjudicated_by.startswith("codex") else ""
+    head = (
+        f"{prefix}chore(foreign): 落地 {len(paths)} 個已裁決路徑 "
+        f"(incident {incident})"
+    )
     body = "\n".join(
         f"- {rel}: {disposition['paths'][rel]['reason']}" for rel in paths
     )

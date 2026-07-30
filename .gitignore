@@ -98,6 +98,10 @@ storage/logs/token_report_*.html
 storage/logs/hourly_pregate.jsonl
 storage/logs/dedup_decisions.jsonl
 storage/logs/trending_primary_source_verification.jsonl
+# Append-only PDCA audit trail for control gates/locks. Keep the live evidence on
+# disk for periodic lifecycle review, but do not turn every gate decision into
+# PHASE-Z ownership churn or Git history noise.
+storage/logs/control_gate_decisions.jsonl
 storage/ops/.last_email_immediate_dispatch
 storage/ops/dashboard_latest.json
 storage/ops/alert_dedup.json
