@@ -1,3 +1,19 @@
+---
+title: "把風險尺度換成 expectile，能更準抓到債券的尾部風險嗎？"
+audience: general
+status: draft
+phase: research
+tags:
+  - 尾部風險
+  - 債券
+  - VaR
+  - 模型比較
+  - 研究誠實
+experiment_refs:
+  - K1649
+image_url: "storage/drafts/article_images/K1649_coverage.png"
+---
+
 # 把風險尺度換成 expectile，能更準抓到債券的尾部風險嗎？
 
 每個投資組合都要回答同一個問題：明天最壞會賠多少？業界的標準答案叫 VaR，中文常譯成「風險值」。
@@ -27,6 +43,8 @@ expectile 換了一種量法。它不只看有沒有踩線，還把每一筆虧�
 
 看 TLT 5%：CARE-SAV 的罰分 0.000958，比分位數回歸的 0.000977 低了一點。HYG 1% 也一樣，0.000144 對 0.000148，expectile 家族排在前面。
 
+![四種模型在 TLT 與 HYG 的平均預測罰分比較](storage/drafts/article_images/K1649_pinball.png)
+
 先別急著開香檳。四個情境裡 expectile 只在其中兩個小贏，另外兩個反而略輸給分位數回歸。帳面上的勝負是散的，不是一面倒。
 
 ## 「小贏」跟「贏得夠穩」是兩回事
@@ -39,7 +57,7 @@ expectile 換了一種量法。它不只看有沒有踩線，還把每一筆虧�
 
 ## 校準這一關，大家都及格
 
-![債券 VaR 校準圖：各模型實際踩線率對照目標線](article_images/K1649_coverage.png)
+![債券 VaR 校準圖：各模型實際踩線率對照目標線](storage/drafts/article_images/K1649_coverage.png)
 
 這張圖看的是命中率。每根柱子是各模型實際踩線的比率，黑色虛線是目標：5% 那兩組對齊 0.05，1% 那兩組對齊 0.01。柱子越貼近虛線，代表這把尺校得越準。
 
