@@ -3138,8 +3138,16 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
   同步完成。retry 測試亦改寫到隔離 temp log，不再污染 production log。
 - ✅ 最終相關回歸 **353 passed、1 skipped**；Matt Standards／Spec 雙軸最終
   PASS。修正 commits `09588aee9` 至 `71d55be44` 已封裝成 immutable release
-  `41c5b86d…6466b5`，durable reload request
-  `5f3cad26…5457` 已交由 supervisor 在既有 worker drain 後安全啟用。
+  `41c5b86d…6466b5`；durable reload request `5f3cad26…5457` 已在既有 worker
+  drain 後完成，fresh supervisor 於 11:58 CST 以 PID 34807 啟動，
+  `current_release.activation_state=stable`、heartbeat／socket正常。
+- ✅ class sweep 另退役兩條 dormant bypass：root `volpred notify` 現保留既有
+  `milestone/alert/error` 語意映射但只走 formal alert router；manual
+  `send_daily_digest` 只走 owned-email，日期＋recipient logical key 先回讀並重播
+  immutable winner，並處理兩 caller 同時 materialize 的 conflict。舊
+  `EmailNotifier` article／digest convenience methods 改為 fail closed。新增／相鄰
+  notification suites **75 passed**；durable replay 在 dispatch 前逐欄驗 exact
+  key、recipient、actor、level、title，錯綁資料不得送出。
 - 🟡 狀態仍為 **`contained`**：不得以單元測試取代收件端驗證。尚待 fresh
   Telegram receive→process→reply、目標 Gmail ACK／CLOSE read-back、下一個自然
   Token 08:00 fire，以及完整 24 小時頻率／必要性 audit。Issue #13 保持 OPEN。

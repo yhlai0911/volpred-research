@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import json
 import os
-import smtplib
 import re
+import smtplib
 import sys
 from datetime import date, datetime, timezone
 from email.message import EmailMessage
@@ -11,10 +11,10 @@ from email.utils import formataddr
 from html import escape
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from volpred.canonical_write import guard_canonical_write
 from volpred.config.runtime import get_default_remote_url
-from zoneinfo import ZoneInfo
 
 # The guard owner deliberately lives below the eager volpred.ops package, so a
 # normal module-level import cannot recreate the 2026-07-11 circular import.
@@ -337,6 +337,88 @@ def _format_taipei_time(value: str | None) -> str:
     return local.strftime("%Y-%m-%d %H:%M 台灣時間")
 
 
+def render_daily_digest_message(
+    articles: list[dict[str, Any]],
+    *,
+    digest_date: date,
+    site_url: str,
+) -> dict[str, Any]:
+    """Render one immutable daily-digest command without delivering it."""
+
+    sections_html: list[str] = []
+    sections_text: list[str] = []
+    normalized_site_url = site_url.rstrip("/")
+    for index, article in enumerate(articles, start=1):
+        title = str(
+            article.get("title")
+            or article.get("id")
+            or f"文章 {index}"
+        )
+        article_id = str(article.get("id") or "")
+        article_url = (
+            f"{normalized_site_url}/reports/{article_id}"
+            if article_id
+            else normalized_site_url
+        )
+        body_markdown = _pick_body(article)
+        summary = _extract_summary(body_markdown, max_length=180)
+        published_at = str(
+            article.get("published_at")
+            or article.get("created_at")
+            or ""
+        )
+        published_at_local = _format_taipei_time(published_at)
+        sections_html.append(
+            "<section style=\"margin:0 0 36px;\">"
+            f"<h2 style=\"margin:0 0 8px;font-size:22px;\">"
+            f"{index}. {escape(title)}</h2>"
+            f"<p style=\"margin:0 0 10px;color:#6b7280;\">"
+            f"{escape(published_at_local)}</p>"
+            f"<p style=\"margin:0 0 10px;\"><strong>文章標題：</strong>"
+            f"{escape(title)}</p>"
+            f"<p style=\"margin:0 0 12px;line-height:1.7;\">"
+            f"{escape(summary)}</p>"
+            f"<p style=\"margin:0 0 14px;\"><a href=\"{escape(article_url)}\">"
+            "查看文章頁</a></p>"
+            "</section>"
+        )
+        sections_text.append(
+            "\n".join(
+                [
+                    f"{index}. {title}",
+                    f"文章標題：{title}",
+                    f"文章 ID：{article_id or '—'}",
+                    f"發布時間：{published_at_local}",
+                    f"摘要：{summary}",
+                    f"文章頁：{article_url}",
+                ]
+            ).strip()
+        )
+
+    digest_key = digest_date.isoformat()
+    html_body = _email_shell(
+        f"{digest_key} 當日發文摘要",
+        f"共 {len(articles)} 篇，格式比照管理通知電子報。",
+        "".join(sections_html),
+    )
+    text_body = (
+        f"{digest_key} 當日發文摘要\n"
+        f"共 {len(articles)} 篇文章\n\n"
+        + "\n\n---\n\n".join(sections_text)
+    )
+    return {
+        "date": digest_key,
+        "subject": f"[VolPred] {digest_key} 當日發文摘要",
+        "text_body": text_body,
+        "html_body": html_body,
+        "article_ids": [
+            str(article.get("id") or "")
+            for article in articles
+        ],
+        "count": len(articles),
+    }
+
+
 class EmailNotifier:
     """Email + file-backed notification system for platform operations."""
 
@@ -566,60 +648,10 @@ class EmailNotifier:
         reason: str = "published",
         force_send: bool = False,
     ) -> str:
-        body_markdown = _pick_body(article)
-        title = str(article.get("title") or article.get("id") or "未命名文章")
-        article_id = str(article.get("id") or "")
-        published_at = str(article.get("published_at") or article.get("created_at") or "")
-        published_at_local = _format_taipei_time(published_at)
-        tags = article.get("tags") or []
-        tag_line = ", ".join(str(tag) for tag in tags) if isinstance(tags, list) else ""
-        category = str(article.get("category") or "article")
-        audience = str(article.get("audience") or (article.get("details") or {}).get("audience") or "未分類")
-        summary = _extract_summary(body_markdown)
-        subtitle = f"{category} | {published_at_local}" if published_at else category
-        article_url = f"{self.site_url.rstrip('/')}/reports/{article_id}" if article_id else self.site_url
-
-        intro_html = (
-            f"<p><strong>文章標題：</strong>{escape(title)}</p>"
-            f"<p><strong>文章 ID：</strong>{escape(article_id)}</p>"
-            f"<p><strong>發布時間：</strong>{escape(published_at_local)}</p>"
-            f"<p><strong>Audience：</strong>{escape(audience)}</p>"
-            f"<p><strong>標籤：</strong>{escape(tag_line or '—')}</p>"
-            f"<p><strong>摘要：</strong>{escape(summary)}</p>"
-            f"<p><a href=\"{escape(article_url)}\">查看網站文章頁</a></p>"
-        )
-        html_body = _email_shell(
-            f"新文章發布：{title}",
-            subtitle,
-            intro_html,
-        )
-        text_body = "\n".join(
-            [
-                f"新文章發布：{title}",
-                f"文章標題：{title}",
-                f"文章 ID：{article_id}",
-                f"發布時間：{published_at_local}",
-                f"Audience：{audience}",
-                f"標籤：{tag_line or '—'}",
-                f"摘要：{summary}",
-                f"查看文章：{article_url}",
-            ]
-        ).strip()
-        return self.notify(
-            subject=f"[VolPred] 新文章發布：{title}",
-            body=text_body,
-            html_body=html_body,
-            level="milestone",
-            metadata={
-                "notification_type": "article_published",
-                "notification_key": article_id,
-                "article_id": article_id,
-                "reason": reason,
-                "status": article.get("status"),
-            },
-            dedupe_type="article_published",
-            dedupe_key=article_id,
-            force_send=force_send,
+        del article, reason, force_send
+        raise RuntimeError(
+            "direct article delivery is retired; use "
+            "Publisher.send_article_notification"
         )
 
     def send_daily_digest(
@@ -629,77 +661,8 @@ class EmailNotifier:
         digest_date: date | None = None,
         force_send: bool = False,
     ) -> dict[str, Any]:
-        target_date = digest_date or datetime.now().date()
-        digest_key = target_date.isoformat()
-        if not articles:
-            return {
-                "date": digest_key,
-                "sent": False,
-                "skipped": True,
-                "reason": "no_articles",
-                "count": 0,
-            }
-
-        sections_html: list[str] = []
-        sections_text: list[str] = []
-        for index, article in enumerate(articles, start=1):
-            title = str(article.get("title") or article.get("id") or f"文章 {index}")
-            article_id = str(article.get("id") or "")
-            article_url = f"{self.site_url.rstrip('/')}/reports/{article_id}" if article_id else self.site_url
-            body_markdown = _pick_body(article)
-            summary = _extract_summary(body_markdown, max_length=180)
-            published_at = str(article.get("published_at") or article.get("created_at") or "")
-            published_at_local = _format_taipei_time(published_at)
-            sections_html.append(
-                "<section style=\"margin:0 0 36px;\">"
-                f"<h2 style=\"margin:0 0 8px;font-size:22px;\">{index}. {escape(title)}</h2>"
-                f"<p style=\"margin:0 0 10px;color:#6b7280;\">{escape(published_at_local)}</p>"
-                f"<p style=\"margin:0 0 10px;\"><strong>文章標題：</strong>{escape(title)}</p>"
-                f"<p style=\"margin:0 0 12px;line-height:1.7;\">{escape(summary)}</p>"
-                f"<p style=\"margin:0 0 14px;\"><a href=\"{escape(article_url)}\">查看文章頁</a></p>"
-                "</section>"
-            )
-            sections_text.append(
-                "\n".join(
-                    [
-                        f"{index}. {title}",
-                        f"文章標題：{title}",
-                        f"發布時間：{published_at_local}",
-                        f"摘要：{summary}",
-                        f"文章頁：{article_url}",
-                    ]
-                ).strip()
-            )
-
-        html_body = _email_shell(
-            f"{target_date.isoformat()} 當日發文摘要",
-            f"共 {len(articles)} 篇，格式比照管理通知電子報。",
-            "".join(sections_html),
+        del articles, digest_date, force_send
+        raise RuntimeError(
+            "direct daily-digest delivery is retired; use "
+            "Publisher.send_daily_digest"
         )
-        text_body = (
-            f"{target_date.isoformat()} 當日發文摘要\n"
-            f"共 {len(articles)} 篇文章\n\n" + "\n\n" + ("\n\n---\n\n".join(sections_text))
-        )
-        notif_id = self.notify(
-            subject=f"[VolPred] {target_date.isoformat()} 當日發文摘要",
-            body=text_body,
-            html_body=html_body,
-            level="info",
-            metadata={
-                "notification_type": "daily_digest",
-                "notification_key": digest_key,
-                "date": digest_key,
-                "article_ids": [str(article.get("id") or "") for article in articles],
-                "count": len(articles),
-            },
-            dedupe_type="daily_digest",
-            dedupe_key=digest_key,
-            force_send=force_send,
-        )
-        return {
-            "date": digest_key,
-            "notification_id": notif_id,
-            "sent": self.already_sent("daily_digest", digest_key),
-            "skipped": False,
-            "count": len(articles),
-        }

@@ -5205,7 +5205,21 @@ private umask；retry tests 改用 temp log。
 Standards／Spec 均 PASS。production rotation canary 證明 archive inode 不再增長、
 current inode 收到新寫入且兩者均 `0600`；canonical 與 live rotator wrapper exact
 一致。immutable supervisor release `41c5b86d…6466b5` 已由 durable request
-`5f3cad26…5457` 排隊，等待既有 worker drain 後 activation。
+`5f3cad26…5457` 在 worker drain 後完成 activation；fresh release commit
+`71d55be44`、PID 34807、stable receipt、heartbeat／socket與空
+`phase_z_pending` 均已回讀。
+
+**class sweep follow-up**：production call graph 移除逐篇 Email 後，仍存在兩條可被
+未來 caller 復活的旁路：root `volpred notify` 直接建 `EmailNotifier`，manual
+`send_daily_digest` 也直接 SMTP。兩者現分別只走 formal alert router 與 owned-email；
+legacy `milestone/alert/error` 明確映射到 `info/warn/critical`。daily digest
+日期＋recipient logical key 先讀 durable command，feed 漂移只重播原件；兩 caller
+同時 read-none 時，loser 捕捉 payload conflict後回讀並重播 winner，`force_send`
+才建立 UUID command。回報不再反解析人類可讀 body；舊 notifier 的 article／digest
+高階 convenience methods直接 fail closed。changed-feed、concurrent winner、
+六種 level mapping、invalid level與五種 durable identity drift等相鄰範圍
+**75 passed**；任何 key／recipient／actor／level／title 錯綁都在 provider 前
+fail closed。
 
 **狀態：`contained`**。fresh Telegram receive→process→reply、目標 Gmail
 ACK／CLOSE、下一個自然 Token 08:00 fire與 24 小時通知頻率／必要性 audit 尚未完成；

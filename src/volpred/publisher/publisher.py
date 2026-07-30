@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 import os
 import re
@@ -2936,10 +2937,89 @@ class Publisher:
         )
         return {"found": True, "id": pub_id, **receipt}
 
-    def send_daily_digest(self, *, target_date: date | None = None, force_send: bool = False) -> dict:
-        from volpred.publisher.email_notifier import EmailNotifier
+    def send_daily_digest(
+        self,
+        *,
+        target_date: date | None = None,
+        force_send: bool = False,
+    ) -> dict:
+        import hashlib
+        from uuid import uuid4
+
+        from volpred.ops.alerts import ALERT_RECIPIENT
+        from volpred.ops.delivery.owned_email import (
+            OwnedEmailCommand,
+            OwnedEmailCommandConflict,
+            dispatch_email_by_current_owner,
+            read_existing_owned_email_request,
+        )
+        from volpred.publisher.email_notifier import (
+            render_daily_digest_message,
+        )
 
         target = target_date or datetime.now(timezone.utc).date()
+        recipient_digest = hashlib.sha256(
+            ALERT_RECIPIENT.encode("utf-8")
+        ).hexdigest()[:16]
+        base_idempotency_key = (
+            f"manual-daily-digest:{target.isoformat()}:"
+            f"to-{recipient_digest}"
+        )
+        expected_actor_ref = (
+            f"manual:daily-digest:{target.isoformat()}"
+        )
+        expected_title = (
+            "[新架構派發][VolPred] "
+            f"{target.isoformat()} 當日發文摘要"
+        )
+
+        def replay_existing(existing) -> dict:
+            command = existing.command
+            drifted_fields = [
+                field
+                for field, actual, expected in (
+                    (
+                        "idempotency_key",
+                        command.idempotency_key,
+                        base_idempotency_key,
+                    ),
+                    ("recipient", command.recipient, ALERT_RECIPIENT),
+                    ("actor_ref", command.actor_ref, expected_actor_ref),
+                    ("level", command.level, "info"),
+                    ("title", command.title, expected_title),
+                )
+                if actual != expected
+            ]
+            if drifted_fields:
+                raise RuntimeError(
+                    "durable daily-digest command drift: "
+                    + ",".join(drifted_fields)
+                )
+            receipt = dispatch_email_by_current_owner(
+                command,
+                storage_dir=str(self.reports_dir.parent),
+            )
+            request = getattr(existing, "request", None)
+            return {
+                "date": target.isoformat(),
+                "skipped": False,
+                "count": None,
+                "article_ids": None,
+                "replayed_existing": True,
+                "durable_request_sha256": getattr(
+                    request,
+                    "request_sha256",
+                    None,
+                ),
+                **receipt,
+            }
+
+        if not force_send:
+            existing = read_existing_owned_email_request(
+                base_idempotency_key
+            )
+            if existing is not None:
+                return replay_existing(existing)
         articles: list[dict] = []
         for item in self._load_feed():
             if item.get("status", "published") != "published":
@@ -2964,13 +3044,56 @@ class Publisher:
             full_article = self.get_report(str(item.get("id"))) or item
             articles.append(full_article)
 
-        result = EmailNotifier(storage_dir=str(self.reports_dir.parent)).send_daily_digest(
+        article_ids = [str(article.get("id") or "") for article in articles]
+        if not articles:
+            return {
+                "date": target.isoformat(),
+                "sent": False,
+                "skipped": True,
+                "reason": "no_articles",
+                "count": 0,
+                "article_ids": article_ids,
+            }
+        site_url = os.environ.get(
+            "NEXT_PUBLIC_SITE_URL",
+            get_default_remote_url(),
+        )
+        rendered = render_daily_digest_message(
             articles,
             digest_date=target,
-            force_send=force_send,
+            site_url=site_url,
         )
-        result["article_ids"] = [str(article.get("id") or "") for article in articles]
-        return result
+        force_suffix = f":{uuid4().hex}" if force_send else ""
+        command = OwnedEmailCommand(
+            idempotency_key=base_idempotency_key + force_suffix,
+            level="info",
+            title=expected_title,
+            recipient=ALERT_RECIPIENT,
+            text_body=str(rendered["text_body"]),
+            html_body=str(rendered["html_body"]),
+            actor_ref=expected_actor_ref,
+        )
+        try:
+            receipt = dispatch_email_by_current_owner(
+                command,
+                storage_dir=str(self.reports_dir.parent),
+            )
+        except OwnedEmailCommandConflict:
+            if force_send:
+                raise
+            existing = read_existing_owned_email_request(
+                base_idempotency_key
+            )
+            if existing is None:
+                raise
+            return replay_existing(existing)
+        return {
+            "date": target.isoformat(),
+            "skipped": False,
+            "count": rendered["count"],
+            "article_ids": article_ids,
+            **receipt,
+        }
 
     def _sync_report_to_remote(self, pub_id: str, item: dict) -> bool:
         """PUT a single article to the remote sync route.

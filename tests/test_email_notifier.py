@@ -38,6 +38,26 @@ def notifier(tmp_path: Path, monkeypatch) -> EmailNotifier:
     return EmailNotifier(storage_dir=str(tmp_path))
 
 
+def test_content_delivery_convenience_surfaces_fail_closed(
+    notifier: EmailNotifier,
+) -> None:
+    with pytest.raises(
+        RuntimeError,
+        match="Publisher.send_article_notification",
+    ):
+        notifier.notify_article_published(
+            {"id": "mile_retired", "title": "Retired direct path"}
+        )
+
+    with pytest.raises(
+        RuntimeError,
+        match="Publisher.send_daily_digest",
+    ):
+        notifier.send_daily_digest(
+            [{"id": "mile_retired", "title": "Retired direct path"}]
+        )
+
+
 def test_is_configured_reflects_env(notifier: EmailNotifier):
     assert notifier.is_configured() is True
     assert "alice@example.com" in notifier.admin_emails

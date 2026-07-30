@@ -1,14 +1,20 @@
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 import random
 import sys
 import types
 import urllib.request
+from dataclasses import replace
+from datetime import date
 from pathlib import Path
 
-from volpred.publisher.email_notifier import EmailNotifier
+import pytest
+
+from volpred.ops.alerts import ALERT_RECIPIENT
+from volpred.ops.delivery.owned_email import OwnedEmailCommand
 from volpred.publisher.publisher import Publisher
 
 
@@ -245,7 +251,6 @@ def test_manual_article_notification_uses_formal_owned_email(
         "volpred.ops.delivery.owned_email.dispatch_email_by_current_owner",
         fake_dispatch,
     )
-
     result = Publisher(storage_dir=str(tmp_path)).send_article_notification(
         "mile_manual"
     )
@@ -259,6 +264,283 @@ def test_manual_article_notification_uses_formal_owned_email(
     assert captured["storage_dir"] == str(tmp_path)
     assert result["delivery_owner"] == "operations_core"
     assert result["effect_status"] == "delivered"
+
+
+def test_manual_daily_digest_uses_formal_owned_email(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    reports_dir = tmp_path / "reports"
+    reports_dir.mkdir(parents=True)
+    (reports_dir / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_digest_a",
+                    "title": "Digest A",
+                    "description": "First summary",
+                    "status": "published",
+                    "published_at": "2026-07-30T01:00:00+00:00",
+                },
+                {
+                    "id": "mile_digest_other_day",
+                    "title": "Other day",
+                    "status": "published",
+                    "published_at": "2026-07-29T01:00:00+00:00",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    captured: dict[str, object] = {}
+
+    class ForbiddenLegacyNotifier:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("manual digest path used direct notifier")
+
+    def fake_dispatch(command, *, storage_dir):
+        captured["command"] = command
+        captured["storage_dir"] = storage_dir
+        return {
+            "delivery_owner": "operations_core",
+            "effect_status": "delivered",
+            "sent": True,
+        }
+
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        ForbiddenLegacyNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.dispatch_email_by_current_owner",
+        fake_dispatch,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.read_existing_owned_email_request",
+        lambda _key: None,
+    )
+
+    result = Publisher(storage_dir=str(tmp_path)).send_daily_digest(
+        target_date=date(2026, 7, 30)
+    )
+
+    command = captured["command"]
+    assert command.idempotency_key.startswith(
+        "manual-daily-digest:2026-07-30:to-"
+    )
+    assert command.title == (
+        "[新架構派發][VolPred] 2026-07-30 當日發文摘要"
+    )
+    assert command.actor_ref == "manual:daily-digest:2026-07-30"
+    assert "Digest A" in command.text_body
+    assert "Other day" not in command.text_body
+    assert command.html_body is not None
+    assert captured["storage_dir"] == str(tmp_path)
+    assert result["date"] == "2026-07-30"
+    assert result["count"] == 1
+    assert result["article_ids"] == ["mile_digest_a"]
+    assert result["delivery_owner"] == "operations_core"
+    assert result["effect_status"] == "delivered"
+
+
+def test_manual_daily_digest_replays_original_snapshot_when_feed_changes(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    reports_dir = tmp_path / "reports"
+    reports_dir.mkdir(parents=True)
+    feed_path = reports_dir / "feed.json"
+    first_article = {
+        "id": "mile_digest_original",
+        "title": "Original snapshot",
+        "description": "Original summary",
+        "status": "published",
+        "published_at": "2026-07-30T01:00:00+00:00",
+    }
+    later_article = {
+        "id": "mile_digest_later",
+        "title": "Later article",
+        "description": "Must wait for another owned batch",
+        "status": "published",
+        "published_at": "2026-07-30T02:00:00+00:00",
+    }
+    feed_path.write_text(json.dumps([first_article]), encoding="utf-8")
+    state: dict[str, object] = {}
+    dispatched: list[object] = []
+
+    class Existing:
+        def __init__(self, command):
+            self.command = command
+
+    def fake_read(_key):
+        command = state.get("command")
+        return Existing(command) if command is not None else None
+
+    def fake_dispatch(command, *, storage_dir):
+        dispatched.append(command)
+        state.setdefault("command", command)
+        return {
+            "delivery_owner": "operations_core",
+            "effect_status": "delivered",
+            "sent": True,
+        }
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.read_existing_owned_email_request",
+        fake_read,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.dispatch_email_by_current_owner",
+        fake_dispatch,
+    )
+
+    publisher = Publisher(storage_dir=str(tmp_path))
+    first = publisher.send_daily_digest(target_date=date(2026, 7, 30))
+    feed_path.write_text(
+        json.dumps([first_article, later_article]),
+        encoding="utf-8",
+    )
+    replay = publisher.send_daily_digest(target_date=date(2026, 7, 30))
+
+    assert len(dispatched) == 2
+    assert dispatched[1] == dispatched[0]
+    assert first["article_ids"] == ["mile_digest_original"]
+    assert replay["article_ids"] is None
+    assert replay["count"] is None
+    assert replay["replayed_existing"] is True
+    assert "Later article" not in dispatched[1].text_body
+
+
+def test_manual_daily_digest_concurrent_materialization_replays_winner(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    from volpred.ops.delivery.owned_email import (
+        OwnedEmailCommandConflict,
+    )
+
+    reports_dir = tmp_path / "reports"
+    reports_dir.mkdir(parents=True)
+    (reports_dir / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_digest_race",
+                    "title": "Race-safe snapshot",
+                    "description": "Only one immutable winner",
+                    "status": "published",
+                    "published_at": "2026-07-30T01:00:00+00:00",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    state: dict[str, object] = {}
+    dispatch_count = 0
+
+    class Existing:
+        def __init__(self, command):
+            self.command = command
+            self.request = type(
+                "Request",
+                (),
+                {"request_sha256": "winner-sha256"},
+            )()
+
+    def fake_read(_key):
+        command = state.get("winner")
+        return Existing(command) if command is not None else None
+
+    def fake_dispatch(command, *, storage_dir):
+        nonlocal dispatch_count
+        dispatch_count += 1
+        if dispatch_count == 1:
+            state["winner"] = command
+            raise OwnedEmailCommandConflict("concurrent winner committed")
+        assert command == state["winner"]
+        return {
+            "delivery_owner": "operations_core",
+            "effect_status": "delivered",
+            "sent": True,
+        }
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.read_existing_owned_email_request",
+        fake_read,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.dispatch_email_by_current_owner",
+        fake_dispatch,
+    )
+
+    result = Publisher(storage_dir=str(tmp_path)).send_daily_digest(
+        target_date=date(2026, 7, 30)
+    )
+
+    assert dispatch_count == 2
+    assert result["replayed_existing"] is True
+    assert result["durable_request_sha256"] == "winner-sha256"
+    assert result["sent"] is True
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("idempotency_key", "manual-daily-digest:wrong"),
+        ("recipient", "wrong-recipient@example.com"),
+        ("actor_ref", "manual:daily-digest:wrong-date"),
+        ("level", "critical"),
+        ("title", "[新架構派發][VolPred] wrong digest"),
+    ],
+)
+def test_manual_daily_digest_rejects_durable_command_identity_drift(
+    tmp_path: Path,
+    monkeypatch,
+    field: str,
+    value: str,
+) -> None:
+    recipient_digest = hashlib.sha256(
+        ALERT_RECIPIENT.encode("utf-8")
+    ).hexdigest()[:16]
+    command = OwnedEmailCommand(
+        idempotency_key=(
+            "manual-daily-digest:2026-07-30:"
+            f"to-{recipient_digest}"
+        ),
+        level="info",
+        title=(
+            "[新架構派發][VolPred] "
+            "2026-07-30 當日發文摘要"
+        ),
+        recipient=ALERT_RECIPIENT,
+        text_body="immutable",
+        html_body="<p>immutable</p>",
+        actor_ref="manual:daily-digest:2026-07-30",
+    )
+    drifted = replace(command, **{field: value})
+
+    class Existing:
+        def __init__(self):
+            self.command = drifted
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.read_existing_owned_email_request",
+        lambda _key: Existing(),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.dispatch_email_by_current_owner",
+        lambda *_args, **_kwargs: pytest.fail(
+            "drifted command reached provider router"
+        ),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="durable daily-digest command drift",
+    ):
+        Publisher(storage_dir=str(tmp_path)).send_daily_digest(
+            target_date=date(2026, 7, 30)
+        )
 
 
 def test_unpublish_supabase_sync_failure_is_queued(

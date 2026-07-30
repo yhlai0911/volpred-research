@@ -532,18 +532,51 @@ def publish(experiment_id: str, title: str | None) -> None:
 @cli.command()
 @click.option("--subject", required=True, help="Notification subject")
 @click.option("--body", required=True, help="Notification body")
-@click.option("--level", default="info", help="Level: info, milestone, alert, error")
+@click.option(
+    "--level",
+    type=click.Choice(
+        ["info", "milestone", "alert", "error", "warn", "critical"],
+        case_sensitive=False,
+    ),
+    default="info",
+    show_default=True,
+    help=(
+        "Legacy info/milestone/alert/error or formal "
+        "info/warn/critical level."
+    ),
+)
 def notify(subject: str, body: str, level: str) -> None:
-    """Send a notification."""
-    from volpred.publisher.email_notifier import EmailNotifier
+    """Route a notification through the formal owned-alert contract."""
+    from volpred.ops.alerts import send_alert
 
-    notifier = EmailNotifier()
-    notif_id = notifier.notify(subject=subject, body=body, level=level)
+    routed_level = {
+        "info": "info",
+        "milestone": "info",
+        "alert": "warn",
+        "error": "critical",
+        "warn": "warn",
+        "critical": "critical",
+    }[level.lower()]
+    result = send_alert(
+        level=routed_level,
+        title=subject,
+        body=body,
+    )
+    notif_id = str(
+        result.get("notification_id")
+        or result.get("id")
+        or result.get("work_id")
+        or "pending"
+    )
 
-    console.print(f"[green]Notification sent![/green] ID: {notif_id}")
+    console.print(f"[green]Notification routed[/green] ID: {notif_id}")
     console.print(f"  Subject: {subject}")
-    console.print(f"  Level: {level}")
-    console.print(f"  Log: storage/notifications/notification_log.json")
+    console.print(f"  Level: {routed_level}")
+    console.print(
+        "  Owner: "
+        f"{result.get('delivery_owner') or 'formal-router'}"
+    )
+    _print_json({"action": "notify", **result})
 
 
 @cli.group()
@@ -2980,6 +3013,11 @@ def ops_send_daily_digest(target_date: str | None, force_send: bool, storage_dir
     result = send_daily_digest(target_date=target_date, force_send=force_send, storage_dir=storage_dir)
     if result.get("skipped"):
         console.print("[yellow]Skipped[/yellow] daily digest")
+    elif result.get("replayed_existing"):
+        console.print(
+            "[green]Daily digest replayed from durable command[/green] "
+            f"{result['date']}"
+        )
     else:
         console.print(f"[green]Daily digest prepared[/green] {result['date']} ({result['count']} articles)")
     _print_json({"action": "send_daily_digest", **result})
