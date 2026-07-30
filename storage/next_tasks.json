@@ -44957,40 +44957,15 @@
   },
   {
     "id": "issue18_primary_lease_closure_audit_20260727",
-    "title": "[Issue #18] Primary Lease / Fencing 五步 closure audit",
-    "description": "依既有 Matt Issue #18 與 docs/refactor_plan_ops_master_2026_07.md，逐項驗證唯一 remote primary、commit/effect transaction 最新 fencing、stale/network-partition/double-primary fail closed、backend unavailable fail closed、renew/demote/expiry/reject durable receipts。先回讀現有 two-Mac production evidence；任何 acceptance 缺口以 implement→TDD→雙軸 code-review 補底層。未通過五步 Gate 不得關閉 Issue。",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[Issue #18] Primary Lease / Fencing 五步 closure audit",
+    "priority": 1,
     "source": "owner_interactive",
-    "created_by": "codex-vscode",
-    "issue_ref": "#18",
     "created_at": "2026-07-26T23:56:50.373268+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-26T23:56:50.679682+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-26T23:56:54.238466+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-27T01:01:11.290562+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-26T23:56:54.238453+00:00",
     "completed_at": "2026-07-27T01:01:11.290540+00:00",
-    "result": "Global Primary Authority底層、durable lifecycle與reconcile已部署；467 tests＋雙軸review PASS，production global-key canary回讀成功。Issue #18維持contained/OPEN：真實Git/email mutation-boundary partition canary與#24/#46 legacy cutover仍待完成。",
-    "issue_closed_at": "2026-07-27T01:02:14.004973+00:00",
-    "issue_closed_commit": "72beed8fab0ff91c4e3e4906c65d09d0802bea9e"
+    "tombstone": true,
+    "archived_at": "2026-07-30T01:07:38.809354+00:00"
   },
   {
     "id": "event_article_fomc_2026-07-29_tminus2",
@@ -61830,7 +61805,7 @@
   {
     "id": "assign_cf82928c",
     "title": "PHASE-Z 卡住檔案 incident（e72eebd41371417d）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 28 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 9 次觀察到這組）\n- .claude/rules/experiments.md — 28 班\n- experiments/k1630/README.md — 14 班\n- scripts/gen_k1585_general_charts.py — 22 班\n- scripts/gen_k1680_general_charts.py — 22 班\n- scripts/gen_k1705_general_charts.py — 22 班\n- storage/assets/k1585_general_effect_forest.png — 22 班\n- storage/assets/k1585_general_oos_cost.png — 22 班\n- storage/assets/k1609_general_gate_forest.png — 13 班\n- storage/assets/k1609_general_two_rulers.png — 13 班\n- storage/assets/k1623_general_ruler_flip.png — 22 班\n- storage/assets/k1623_general_survivor_funnel.png — 22 班\n- storage/assets/k1680_general_multiplicity.png — 22 班\n- storage/assets/k1680_general_per_firm.png — 22 班\n- storage/assets/k1698_general_rebuild_audit.png — 21 班\n- storage/assets/k1698_general_strength_flip.png — 21 班\n- storage/assets/k1698_general_two_targets.png — 21 班\n- storage/assets/k1705_general_sign_audit.png — 22 班\n- storage/assets/k1705_general_timing_flip.png — 22 班\n- storage/assets/k781_general_ranking.png — 27 班\n- storage/assets/k781_general_subperiod_regime.png — 27 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 24 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 24 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 24 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 24 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 24 班\n- storage/lazypack_plans/k1448_general_plan.json — 14 班\n- storage/lazypack_plans/k1585_general_plan.json — 22 班\n- storage/lazypack_plans/k1623_general_plan.json — 22 班\n- storage/lazypack_plans/k1680_general_plan.json — 22 班\n- storage/lazypack_plans/k1705_general_plan.json — 22 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T225456041958Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T232603826382Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T233710536512Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T002136765740Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T005012975128Z:<路徑>`",
+    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 29 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 10 次觀察到這組）\n- .claude/rules/experiments.md — 29 班\n- experiments/k1630/README.md — 15 班\n- scripts/gen_k1585_general_charts.py — 23 班\n- scripts/gen_k1680_general_charts.py — 23 班\n- scripts/gen_k1705_general_charts.py — 23 班\n- storage/assets/k1585_general_effect_forest.png — 23 班\n- storage/assets/k1585_general_oos_cost.png — 23 班\n- storage/assets/k1609_general_gate_forest.png — 14 班\n- storage/assets/k1609_general_two_rulers.png — 14 班\n- storage/assets/k1623_general_ruler_flip.png — 23 班\n- storage/assets/k1623_general_survivor_funnel.png — 23 班\n- storage/assets/k1680_general_multiplicity.png — 23 班\n- storage/assets/k1680_general_per_firm.png — 23 班\n- storage/assets/k1698_general_rebuild_audit.png — 22 班\n- storage/assets/k1698_general_strength_flip.png — 22 班\n- storage/assets/k1698_general_two_targets.png — 22 班\n- storage/assets/k1705_general_sign_audit.png — 23 班\n- storage/assets/k1705_general_timing_flip.png — 23 班\n- storage/assets/k781_general_ranking.png — 28 班\n- storage/assets/k781_general_subperiod_regime.png — 28 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 25 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 25 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 25 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 25 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 25 班\n- storage/lazypack_plans/k1448_general_plan.json — 15 班\n- storage/lazypack_plans/k1585_general_plan.json — 23 班\n- storage/lazypack_plans/k1623_general_plan.json — 23 班\n- storage/lazypack_plans/k1680_general_plan.json — 23 班\n- storage/lazypack_plans/k1705_general_plan.json — 23 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T232603826382Z:<路徑>`\n- `git show refs/volpred/quarantine/20260729T233710536512Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T002136765740Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T005012975128Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T013923154126Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -61873,37 +61848,37 @@
         "storage/lazypack_plans/k775_general_plan.json"
       ],
       "streaks": {
-        ".claude/rules/experiments.md": 28,
-        "experiments/k1630/README.md": 14,
-        "scripts/gen_k1585_general_charts.py": 22,
-        "scripts/gen_k1680_general_charts.py": 22,
-        "scripts/gen_k1705_general_charts.py": 22,
-        "storage/assets/k1585_general_effect_forest.png": 22,
-        "storage/assets/k1585_general_oos_cost.png": 22,
-        "storage/assets/k1609_general_gate_forest.png": 13,
-        "storage/assets/k1609_general_two_rulers.png": 13,
-        "storage/assets/k1623_general_ruler_flip.png": 22,
-        "storage/assets/k1623_general_survivor_funnel.png": 22,
-        "storage/assets/k1680_general_multiplicity.png": 22,
-        "storage/assets/k1680_general_per_firm.png": 22,
-        "storage/assets/k1698_general_rebuild_audit.png": 21,
-        "storage/assets/k1698_general_strength_flip.png": 21,
-        "storage/assets/k1698_general_two_targets.png": 21,
-        "storage/assets/k1705_general_sign_audit.png": 22,
-        "storage/assets/k1705_general_timing_flip.png": 22,
-        "storage/assets/k781_general_ranking.png": 27,
-        "storage/assets/k781_general_subperiod_regime.png": 27,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 24,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 24,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 24,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 24,
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 24,
-        "storage/lazypack_plans/k1448_general_plan.json": 14,
-        "storage/lazypack_plans/k1585_general_plan.json": 22,
-        "storage/lazypack_plans/k1623_general_plan.json": 22,
-        "storage/lazypack_plans/k1680_general_plan.json": 22,
-        "storage/lazypack_plans/k1705_general_plan.json": 22,
-        "storage/lazypack_plans/k775_general_plan.json": 16
+        ".claude/rules/experiments.md": 29,
+        "experiments/k1630/README.md": 15,
+        "scripts/gen_k1585_general_charts.py": 23,
+        "scripts/gen_k1680_general_charts.py": 23,
+        "scripts/gen_k1705_general_charts.py": 23,
+        "storage/assets/k1585_general_effect_forest.png": 23,
+        "storage/assets/k1585_general_oos_cost.png": 23,
+        "storage/assets/k1609_general_gate_forest.png": 14,
+        "storage/assets/k1609_general_two_rulers.png": 14,
+        "storage/assets/k1623_general_ruler_flip.png": 23,
+        "storage/assets/k1623_general_survivor_funnel.png": 23,
+        "storage/assets/k1680_general_multiplicity.png": 23,
+        "storage/assets/k1680_general_per_firm.png": 23,
+        "storage/assets/k1698_general_rebuild_audit.png": 22,
+        "storage/assets/k1698_general_strength_flip.png": 22,
+        "storage/assets/k1698_general_two_targets.png": 22,
+        "storage/assets/k1705_general_sign_audit.png": 23,
+        "storage/assets/k1705_general_timing_flip.png": 23,
+        "storage/assets/k781_general_ranking.png": 28,
+        "storage/assets/k781_general_subperiod_regime.png": 28,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 25,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 25,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 25,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 25,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 25,
+        "storage/lazypack_plans/k1448_general_plan.json": 15,
+        "storage/lazypack_plans/k1585_general_plan.json": 23,
+        "storage/lazypack_plans/k1623_general_plan.json": 23,
+        "storage/lazypack_plans/k1680_general_plan.json": 23,
+        "storage/lazypack_plans/k1705_general_plan.json": 23,
+        "storage/lazypack_plans/k775_general_plan.json": 17
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260729T192036201708Z",
@@ -61914,11 +61889,12 @@
         "refs/volpred/quarantine/20260729T232603826382Z",
         "refs/volpred/quarantine/20260729T233710536512Z",
         "refs/volpred/quarantine/20260730T002136765740Z",
-        "refs/volpred/quarantine/20260730T005012975128Z"
+        "refs/volpred/quarantine/20260730T005012975128Z",
+        "refs/volpred/quarantine/20260730T013923154126Z"
       ],
-      "fires": 9,
+      "fires": 10,
       "first_seen_at": "2026-07-29T19:20:59.027794+00:00",
-      "last_seen_at": "2026-07-30T00:50:13.079265+00:00",
+      "last_seen_at": "2026-07-30T01:39:23.249578+00:00",
       "derates": true,
       "derates_updated_at": "2026-07-29T23:26:04.063627+00:00",
       "deferred": [
@@ -61964,7 +61940,7 @@
       "family_page_delivered_by": "legacy_created_receipt_migration"
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-30T00:50:13.079265+00:00"
+    "updated_at": "2026-07-30T01:39:23.249578+00:00"
   },
   {
     "id": "assign_d5999f36",
@@ -62455,7 +62431,12 @@
         "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-30T00:31:17.881492+00:00"
+    "started_at": "2026-07-30T00:31:17.881492+00:00",
+    "implementation_commit": "c0b460fa86dc509aaa38f921c36801e2c4745870",
+    "bounded_status": "contained",
+    "live_gate_task": "issue45_termination_canary_20260730",
+    "review_status": "Matt Standards PASS; Matt Spec PASS",
+    "verification": "399 passed, 1 skipped; clean checkout 65 passed; production wrong-job fail-closed rc=2/process alive/ledger hash unchanged"
   },
   {
     "id": "K1221_article_general",
@@ -62514,5 +62495,110 @@
     "created_at": "2026-07-30T00:45:14.144956+00:00",
     "parent_task_id": "k1707_pseudo_stress_branch_path_collision_20260721",
     "created_by": "hourly-slot-1-f13bd3d43d3b4b8e9ab33720228d4234"
+  },
+  {
+    "id": "daily_digest_20260730",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T09:00:27.754146+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-30T01:07:59.770081+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fa5742ac116143f2bd6626aa82aef8a5"
+      },
+      {
+        "ts": "2026-07-30T01:08:07.410874+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-fa5742ac116143f2bd6626aa82aef8a5"
+      },
+      {
+        "ts": "2026-07-30T01:37:04.355141+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-fa5742ac116143f2bd6626aa82aef8a5"
+      }
+    ],
+    "started_at": "2026-07-30T01:08:07.410860+00:00",
+    "completed_at": "2026-07-30T01:37:04.355112+00:00",
+    "result": "第36期精選導讀已發佈 mile_6bf24727「VIX 跳到 20.66、模型只算 16.9%、SPY 一天跌 1.55%：波動率的三個時態，決定你今天該不該減碼」。10,389 字元、inline 引用 22 處、內文證據圖 8 張（沿用來源研究）+ 懶人包 poster 3 張（codex-primary 另生，未 fallback）。digest_articles 8 篇跨度 33 天（≥14 天 gate 過），與前三期來源零重疊。anti_ai_gate exit 0、editor-sop 9-checklist 全過、content_type=daily_digest。live HTTP 200 且標題相符；抽驗 14 個引用數字全數可回溯來源，無臆造。"
+  },
+  {
+    "id": "assign_01fac39d",
+    "title": "[Issue #45] controlled operator-termination canary",
+    "description": "Controlled live verification canary for Issue #45. Do not modify repository files, do not commit, do not complete or claim any other task. Immediately run sleep 900 and remain alive until the formal Operations Core operator-termination command ends this worker. A system_terminated completion and automatic task re-pend are the expected receipt. If this task is seen again after that receipt exists, stop and report the prior receipt instead of sleeping.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-30T01:15:58.360118+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#45",
+    "status_history": [
+      {
+        "ts": "2026-07-30T01:16:35.852364+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T01:16:39.087927+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T01:16:39.409454+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-30T01:16:39.087911+00:00",
+    "completed_at": "2026-07-30T01:16:39.409427+00:00",
+    "result": "superseded before execution: CLI legacy priority mapping produced P3; replaced by explicit canonical P1 canary for bounded live verification",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "issue45_termination_canary_20260730",
+    "title": "[Issue #45] controlled operator-termination canary",
+    "description": "Controlled live verification canary for Issue #45. Do not modify repository files, do not commit, and do not claim other work. Immediately run sleep 900 and remain alive until the formal Operations Core operator-termination command ends this worker. system_terminated plus automatic re-pend is the expected receipt.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "blocked",
+    "source": "user",
+    "created_by": "owner-directed-live-gate",
+    "created_at": "2026-07-30T01:16:50.813703+00:00",
+    "issue_ref": "#45",
+    "dispatch_lane": "agent",
+    "blocked_until": "2026-08-13T01:36:50+00:00",
+    "blocked_reason": "awaiting_interactive_session",
+    "blocked_at": "2026-07-30T01:36:50+00:00",
+    "blocked_note": "Formal command code/review/commit and no-effect production fail-closed read-back are complete. Actual system_terminated canary requires this interactive Codex session to observe exact job/attempt/PGID and issue the signal; blocked so it cannot consume the single production slot unattended while daily_digest_20260730 drains."
+  },
+  {
+    "id": "issue13_notification_policy_remaining_20260730",
+    "title": "[Issue #13] 收斂剩餘 notification bypass 與頻率洩漏",
+    "description": "Live notification audit 2026-07-30 found two unresolved production root classes: (1) dispatch_supervisor alert callers use --force and produced 13 same-topic loop_crash emails in about 63 minutes plus repeated hang_killed, bypassing central 24h dedupe; remove caller bypass and prove episode-aware useful escalation without suppressing distinct incidents. (2) new-article publication still calls direct EmailNotifier and emitted 11 per-article emails since 2026-07-29 00:00Z without [新架構派發] or formal WorkItem/Effect ownership; route through owned-email and define an explicit batching/frequency policy. Also repair Telegram daemon log rotation inode observability and record fresh Telegram receive-process-reply plus Gmail ACK-CLOSE E2E receipts. Acceptance: TDD, Matt Standards/Spec review, live read-back, 24h sustained audit; keep Issue #13 contained until Token 2026-07-31 08:00 natural receipt and all listed gates pass.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_by": "codex-vscode:notification_live_audit",
+    "created_at": "2026-07-30T01:27:39.499101+00:00",
+    "issue_ref": "#13",
+    "dispatch_lane": "agent"
   }
 ]
