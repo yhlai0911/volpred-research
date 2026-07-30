@@ -81,6 +81,7 @@ from volpred.ops.task_pool_selection import (  # noqa: E402
     normalized_task_type as _normalized_task_type,
     requires_supervisor_preassignment,
     resolve_task_identity,
+    single_flight_blocker_task_id,
     task_identity,
     task_rank_key,
 )
@@ -693,6 +694,15 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
                 "reason": "not_codex_eligible",
                 "task_type": task.get("task_type"),
                 "dispatch_lane": task.get("dispatch_lane"),
+                "status": existing_status,
+            }
+        active_task_id = single_flight_blocker_task_id(tasks, task)
+        if active_task_id is not None:
+            return {
+                "ok": False,
+                "reason": "task_type_single_flight",
+                "task_type": normalized_type,
+                "active_task_id": active_task_id,
                 "status": existing_status,
             }
         prev = existing_status or "pending"

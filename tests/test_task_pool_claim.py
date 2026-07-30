@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import multiprocessing
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -12,6 +13,7 @@ import pytest
 from volpred.ops.next_tasks import InvalidUnblockGate
 from volpred.ops.task_pool_selection import (
     evaluate_task_claim,
+    is_codex_eligible_task,
     requires_supervisor_preassignment,
     select_task_for_claim,
 )
@@ -25,6 +27,39 @@ SPEC.loader.exec_module(task_pool_claim)
 REPO_ROOT = MODULE_PATH.parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+
+def _claim_event_in_subprocess(
+    queue_path: str,
+    task_id: str,
+    start_event,
+    result_queue,
+) -> None:
+    """Exercise the real file lock from an independent worker process."""
+
+    import argparse as _argparse
+    import importlib.util as _importlib_util
+    from pathlib import Path as _Path
+
+    spec = _importlib_util.spec_from_file_location(
+        f"task_pool_claim_{task_id}",
+        str(MODULE_PATH),
+    )
+    module = _importlib_util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(module)
+    module.NEXT_TASKS = _Path(queue_path)
+    start_event.wait(timeout=10)
+    result_queue.put(
+        module.cmd_claim(
+            _argparse.Namespace(
+                id=task_id,
+                owner=f"hourly-{task_id}",
+                session=f"session-{task_id}",
+                main_thread=False,
+            )
+        )
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -1902,6 +1937,122 @@ def test_codex_owner_cannot_claim_claude_only_task(
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == status
     assert "claimed_by" not in saved[0]
+
+
+def test_event_article_is_hard_denied_to_codex_even_when_preferred_agent_drifts() -> None:
+    task = {
+        "id": "event_article_fomc_tplus0",
+        "task_type": "event_article",
+        "status": "pending",
+        "dispatch_lane": "agent",
+        "preferred_agent": "codex",
+    }
+
+    assert is_codex_eligible_task(task) is False
+    decision = evaluate_task_claim(
+        task,
+        owner="codex-vscode",
+        main_thread=False,
+        observed_at=datetime(2026, 7, 30, 6, 0, tzinfo=timezone.utc),
+    )
+    assert decision.eligible is False
+    assert decision.primary_reason == "not_codex_eligible"
+
+
+def test_event_article_claim_is_blocked_while_another_event_is_active(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "event_article_fomc_tplus0",
+                    "task_type": "event_article",
+                    "status": "in_progress",
+                    "claimed_by": "hourly-existing",
+                },
+                {
+                    "id": "event_article_cpi_tplus0",
+                    "task_type": "event_article",
+                    "status": "pending",
+                    "dispatch_lane": "agent",
+                    "preferred_agent": "claude",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result = task_pool_claim.cmd_claim(
+        argparse.Namespace(
+            id="event_article_cpi_tplus0",
+            owner="hourly-new",
+            session="new-session",
+            main_thread=False,
+        )
+    )
+
+    assert result["ok"] is False
+    assert result["reason"] == "task_type_single_flight"
+    assert result["active_task_id"] == "event_article_fomc_tplus0"
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[1]["status"] == "pending"
+
+
+def test_concurrent_event_claims_admit_exactly_one_worker(tmp_path) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "event_article_fomc_tplus0",
+                    "task_type": "event_article",
+                    "status": "pending",
+                    "dispatch_lane": "agent",
+                    "preferred_agent": "claude",
+                },
+                {
+                    "id": "event_article_cpi_tplus0",
+                    "task_type": "event_article",
+                    "status": "pending",
+                    "dispatch_lane": "agent",
+                    "preferred_agent": "claude",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    context = multiprocessing.get_context("spawn")
+    start_event = context.Event()
+    result_queue = context.Queue()
+    workers = [
+        context.Process(
+            target=_claim_event_in_subprocess,
+            args=(str(next_tasks), task_id, start_event, result_queue),
+        )
+        for task_id in (
+            "event_article_fomc_tplus0",
+            "event_article_cpi_tplus0",
+        )
+    ]
+    for worker in workers:
+        worker.start()
+    start_event.set()
+    results = [result_queue.get(timeout=20) for _ in workers]
+    for worker in workers:
+        worker.join(timeout=20)
+        assert worker.exitcode == 0
+
+    assert sum(bool(result["ok"]) for result in results) == 1
+    rejected = next(result for result in results if not result["ok"])
+    assert rejected["reason"] == "task_type_single_flight"
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert sum(row["status"] == "claimed" for row in saved) == 1
+    assert sum(row["status"] == "pending" for row in saved) == 1
 
 
 def test_non_codex_owner_can_claim_reader_facing_task(tmp_path, monkeypatch, capsys) -> None:

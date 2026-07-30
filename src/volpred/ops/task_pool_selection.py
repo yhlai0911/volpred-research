@@ -32,7 +32,9 @@ CODEX_ELIGIBLE_TASK_TYPES = frozenset(
         "daily_digest",
     }
 )
+CODEX_HARD_DENY_TASK_TYPES = frozenset({"event_article"})
 DISPATCH_MUTATING_TASK_TYPES = frozenset({"platform_ops", "governance"})
+SINGLE_FLIGHT_TASK_TYPES = frozenset({"event_article"})
 _ACTIVE_STATUSES = frozenset({"claimed", "in_progress"})
 _CLAIMABLE_STATUSES = frozenset(
     {"pending", "pending_main_thread", "claimed", "blocked", ""}
@@ -159,7 +161,10 @@ def is_codex_eligible_task(task: Mapping[str, Any]) -> bool:
     lane = normalize_dispatch_lane(dict(task))
     if lane in {"main_thread", "blocked"}:
         return False
-    if normalized_task_type(task) in CODEX_ELIGIBLE_TASK_TYPES:
+    task_type = normalized_task_type(task)
+    if task_type in CODEX_HARD_DENY_TASK_TYPES:
+        return False
+    if task_type in CODEX_ELIGIBLE_TASK_TYPES:
         return True
     preferred_agent = (
         str(task.get("preferred_agent") or task.get("target_agent") or "")
@@ -167,6 +172,31 @@ def is_codex_eligible_task(task: Mapping[str, Any]) -> bool:
         .lower()
     )
     return preferred_agent == "codex"
+
+
+def single_flight_blocker_task_id(
+    tasks: Iterable[Mapping[str, Any]],
+    target: Mapping[str, Any],
+) -> str | None:
+    """Return the active sibling that owns a serialized task-type lease.
+
+    The caller must invoke this while holding the canonical queue's exclusive
+    lock.  That makes the read-and-claim transition atomic across worker
+    processes instead of relying on the current production slot count.
+    """
+
+    task_type = normalized_task_type(target)
+    if task_type not in SINGLE_FLIGHT_TASK_TYPES:
+        return None
+    target_id = task_identity(target)
+    for candidate in tasks:
+        if task_identity(candidate) == target_id:
+            continue
+        if normalized_task_type(candidate) != task_type:
+            continue
+        if str(candidate.get("status") or "").strip().lower() in _ACTIVE_STATUSES:
+            return task_identity(candidate)
+    return None
 
 
 def task_rank_key(task: Mapping[str, Any]) -> tuple[int, str]:
@@ -414,8 +444,10 @@ def select_task_for_claim(
 
 
 __all__ = [
+    "CODEX_HARD_DENY_TASK_TYPES",
     "CODEX_ELIGIBLE_TASK_TYPES",
     "DISPATCH_MUTATING_TASK_TYPES",
+    "SINGLE_FLIGHT_TASK_TYPES",
     "LegacyClaimDecision",
     "LegacyClaimSelection",
     "TaskIdentityResolution",
@@ -427,6 +459,7 @@ __all__ = [
     "requires_supervisor_preassignment",
     "resolve_task_identity",
     "select_task_for_claim",
+    "single_flight_blocker_task_id",
     "task_identity",
     "task_rank_key",
 ]
