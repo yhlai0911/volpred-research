@@ -413,6 +413,21 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     } <= gates.keys()
     assert gates["hourly_pregate"]["mode"] == "shadow"
     assert gates["dispatch_starvation_lockout"]["mode"] == "selection_constraint"
+    publisher_arc = gates["publisher_arc_dedup"]
+    assert publisher_arc["mode"] == "warn"
+    assert publisher_arc["lifecycle"]["last_action"] == "downgrade_to_warn"
+    assert publisher_arc["lifecycle"]["review_task_id"] == (
+        "control_gate_review_publisher_arc_dedup_"
+        "20260730T070838_b933bcabf559"
+    )
+    # Historical block labels stay registered as resurrection detectors even
+    # though the live gate is advisory-only.
+    publisher_arc_actions = set(
+        publisher_arc["evidence_sources"][0]["match"]["action"]
+    )
+    assert {"block_arc_dup", "block_same_ref_recycle"} <= (
+        publisher_arc_actions
+    )
     for gate_id, gate in gates.items():
         review_task_id = gate["lifecycle"].get("review_task_id")
         if review_task_id:
