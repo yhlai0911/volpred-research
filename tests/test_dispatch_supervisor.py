@@ -4887,6 +4887,42 @@ def test_supervisor_transport_titles_separate_actionable_outcome_classes(
     assert "action=not_killed" in sends[5]
 
 
+def test_completion_failure_transport_identity_uses_stable_log_root(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    sends: list[str] = []
+    monkeypatch.setattr(
+        supervisor.alerts,
+        "_send",
+        lambda _level, title, _body: sends.append(title) or 0,
+    )
+    first = """Traceback (most recent call last):
+  File "/tmp/run-101/worker.py", line 10, in execute
+RuntimeError: task-101 failed
+"""
+    same_root = """Traceback (most recent call last):
+  File "/tmp/run-999/worker.py", line 88, in execute
+RuntimeError: task-999 failed
+"""
+    different_root = """Traceback (most recent call last):
+  File "/tmp/run-999/worker.py", line 88, in finalize
+RuntimeError: task-999 failed
+"""
+
+    for index, tail in enumerate((first, same_root, different_root)):
+        supervisor.alerts.send_completion_failure(
+            entry={"exit_code": 1, "outcome": "failure"},
+            log_tail=tail,
+            state_path=tmp_path / f"failure-{index}.json",
+        )
+
+    assert sends[0] == sends[1]
+    assert sends[2] != sends[0]
+    assert all("outcome=failure" in title for title in sends)
+    assert all("root=" in title for title in sends)
+
+
 def test_slot_prompt_labels_all_external_reports_and_preserves_incident_timeline(
     tmp_path: Path,
 ) -> None:

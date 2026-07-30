@@ -453,10 +453,15 @@ def send_completion_failure(*, entry: dict[str, Any], log_tail: str = "", state_
         entry.get("outcome"),
         default="unknown",
     )
+    root_fingerprint = _episode_fingerprint(
+        log_tail
+        or f"outcome={outcome_class} exit={entry.get('exit_code')}"
+    )
     _send(
         "critical",
         "supervisor completion_failure "
-        f"exit={entry.get('exit_code')} outcome={outcome_class}",
+        f"exit={entry.get('exit_code')} outcome={outcome_class} "
+        f"root={root_fingerprint}",
         body,
     )
     return True
