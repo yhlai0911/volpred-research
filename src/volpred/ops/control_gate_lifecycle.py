@@ -56,6 +56,8 @@ GATE_MODES = HARD_MODES | {
     "selection_constraint",
 }
 IDENTITY_STRENGTHS = EXACT_IDENTITY_STRENGTHS | {"heuristic"}
+INCIDENT_METRICS = {"raw_observations", "instance_transitions"}
+INSTANCE_TRANSITION_TYPES = {"opened", "reopened"}
 OUTCOME_JOIN_STRATEGIES = {
     "candidate_or_event_stage",
     "candidate_or_feed",
@@ -370,6 +372,14 @@ def _validate_registry(payload: Any) -> dict[str, Any]:
             raise ValueError(
                 f"gate {gate_id!r} requires review_policy."
                 "max_false_positive_signals"
+            )
+        if (
+            str(policy.get("incident_metric") or "raw_observations")
+            not in INCIDENT_METRICS
+        ):
+            raise ValueError(
+                f"gate {gate_id!r} review_policy.incident_metric must be "
+                f"one of {sorted(INCIDENT_METRICS)!r}"
             )
         harm_outcomes = policy.get("harm_outcomes")
         if (
@@ -1492,6 +1502,48 @@ def _review_due(
     return bool(reasons), reasons
 
 
+def _incident_occurrences_since(
+    row: dict[str, Any],
+    *,
+    window_start: datetime,
+    now: datetime,
+) -> tuple[int, list[str]]:
+    """Count failure-edge transitions, falling back for legacy incidents.
+
+    Instance-aware detectors poll open edges repeatedly.  Their raw
+    ``occurrence_count`` remains useful as an observation/noise metric, but
+    PDCA review frequency must follow graph transitions within this review
+    window or an unchanged incident will reopen a review forever.  Selecting
+    this metric in the registry is the migration boundary: legacy observations
+    before transition tracking are consumed by that adjudication, not guessed
+    into synthetic transitions.
+    """
+    if row.get("instance_transition_tracking") is not True:
+        return 0, []
+    transitions = row.get("instance_transitions")
+    if not isinstance(transitions, list):
+        return 0, ["instance_transitions_not_list"]
+    count = 0
+    diagnostics: list[str] = []
+    for index, transition in enumerate(transitions):
+        if not isinstance(transition, dict):
+            diagnostics.append(f"transition[{index}]_not_object")
+            continue
+        transition_type = str(transition.get("transition") or "")
+        if transition_type not in INSTANCE_TRANSITION_TYPES:
+            diagnostics.append(
+                f"transition[{index}]_invalid_type:{transition_type or '<missing>'}"
+            )
+            continue
+        at, malformed = _try_parse_time(transition.get("at"))
+        if malformed or at is None:
+            diagnostics.append(f"transition[{index}]_invalid_at")
+            continue
+        if window_start < at <= now:
+            count += 1
+    return count, diagnostics
+
+
 def _existing_open_review(
     tasks: list[dict[str, Any]], gate_id: str
 ) -> dict[str, Any] | None:
@@ -2291,7 +2343,38 @@ def audit_control_gates(
             for candidate in [_candidate_id(row)]
             if candidate
         }
-        incident_occurrences = sum(
+        incident_metric = str(
+            gate["review_policy"].get("incident_metric")
+            or "raw_observations"
+        )
+        transition_diagnostics: dict[str, list[str]] = {}
+        incident_occurrences = 0
+        for row in incident_hits:
+            if incident_metric == "instance_transitions":
+                count, diagnostics = _incident_occurrences_since(
+                    row,
+                    window_start=window_start,
+                    now=current,
+                )
+                incident_occurrences += count
+                if diagnostics:
+                    transition_diagnostics[
+                        str(row.get("incident_id") or "<missing>")
+                    ] = diagnostics
+            else:
+                incident_occurrences += int(
+                    row.get("occurrence_count") or 1
+                )
+        if transition_diagnostics:
+            source_health.append(
+                {
+                    **incidents_health,
+                    "ok": False,
+                    "error": "malformed_instance_transition_rows",
+                    "transition_diagnostics": transition_diagnostics,
+                }
+            )
+        incident_observations = sum(
             int(row.get("occurrence_count") or 1)
             for row in incident_hits
         )
@@ -2324,7 +2407,15 @@ def audit_control_gates(
         outcomes["incident_recurrence"] = sum(
             1
             for row in incident_hits
-            if int(row.get("occurrence_count") or 1) > 1
+            if (
+                _incident_occurrences_since(
+                    row,
+                    window_start=window_start,
+                    now=current,
+                )[0]
+                if incident_metric == "instance_transitions"
+                else int(row.get("occurrence_count") or 1)
+            ) > 1
             or int(row.get("episode_count") or 1) > 1
         )
         due, reasons = _review_due(
@@ -2381,7 +2472,9 @@ def audit_control_gates(
                 "distinct_candidates": len(candidates),
                 "malformed_rows": malformed,
                 "incident_count": len(incident_hits),
+                "incident_metric": incident_metric,
                 "incident_occurrences": incident_occurrences,
+                "incident_observations": incident_observations,
                 "incident_ids": sorted(
                     str(row.get("incident_id") or "") for row in incident_hits
                 ),

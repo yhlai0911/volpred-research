@@ -165,6 +165,71 @@ def test_g3_five_instances_one_incident_one_task(store, queue) -> None:
     assert len(tasks) == 1, "five instances must share ONE aggregate task"
 
 
+def test_instance_polling_records_one_graph_transition_but_all_observations(
+    store, queue
+) -> None:
+    """Repeated sweeps of one unchanged edge are observations, not incidents."""
+    for i in range(3):
+        incident.route_breach(
+            store,
+            kind="worker_orphaned",
+            instance_key="dispatch-slot-1-same",
+            instance_detail={"reason": "worker_orphaned", "branch": "same"},
+            now=T0 + timedelta(minutes=i),
+        )
+
+    row = _incident_row(store, "worker_orphaned")
+    assert row["occurrence_count"] == 3
+    assert row["instance_transitions"] == [
+        {
+            "at": T0.isoformat(),
+            "instance_key": "dispatch-slot-1-same",
+            "transition": "opened",
+        }
+    ]
+
+
+def test_only_instance_open_and_reopen_are_graph_transitions(
+    store, queue
+) -> None:
+    incident.route_breach(
+        store,
+        kind="worker_orphaned",
+        instance_key="dispatch-slot-1-changing",
+        instance_detail={"reason": "gate_red"},
+        now=T0,
+    )
+    incident.route_breach(
+        store,
+        kind="worker_orphaned",
+        instance_key="dispatch-slot-1-changing",
+        instance_detail={"reason": "undeclared_output_path"},
+        now=T0 + timedelta(hours=1),
+    )
+    incident.clear_instance(
+        store,
+        kind="worker_orphaned",
+        instance_key="dispatch-slot-1-changing",
+        now=T0 + timedelta(hours=2),
+    )
+    incident.route_breach(
+        store,
+        kind="worker_orphaned",
+        instance_key="dispatch-slot-1-changing",
+        instance_detail={"reason": "undeclared_output_path"},
+        now=T0 + timedelta(hours=3),
+    )
+
+    row = _incident_row(store, "worker_orphaned")
+    assert [
+        transition["transition"]
+        for transition in row["instance_transitions"]
+    ] == ["opened", "reopened"]
+    assert row["instances"][0]["detail"] == {
+        "reason": "undeclared_output_path"
+    }
+
+
 # ── G6 ───────────────────────────────────────────────────────────────────────
 
 

@@ -131,6 +131,7 @@ _CLEAN_OBS_LIMIT = 12
 _TASK_HISTORY_LIMIT = 24
 _EPISODE_FAILURE_LIMIT = 12
 _INSTANCE_LIMIT = 500
+_INSTANCE_TRANSITION_LIMIT = 1000
 
 DEFAULT_STORE_RELPATH = Path("ops") / "incidents.json"
 
@@ -299,17 +300,29 @@ def _new_row(kind: str, parts: Iterable[Any], now: datetime) -> dict[str, Any]:
     }
 
 
-def _upsert_instance(row: dict[str, Any], instance_key: str, now: datetime,
-                     detail: dict[str, Any] | None = None) -> None:
+def _upsert_instance(
+    row: dict[str, Any],
+    instance_key: str,
+    now: datetime,
+    detail: dict[str, Any] | None = None,
+) -> str | None:
+    """Update one instance and return the graph transition, if any.
+
+    A detector may observe the same still-open edge thousands of times.  Such
+    polling moves ``last_seen_at`` but is not a new lifecycle occurrence.
+    """
     instances = row.setdefault("instances", [])
     for item in instances:
         if isinstance(item, dict) and item.get("key") == instance_key:
+            was_cleared = bool(item.get("cleared_at"))
             item["last_seen_at"] = now.isoformat()
-            if item.get("cleared_at"):
+            if was_cleared:
                 item["cleared_at"] = None  # re-appeared ⇒ not cleared any more
             if detail:
                 item["detail"] = detail
-            return
+            if was_cleared:
+                return "reopened"
+            return None
     if len(instances) >= _INSTANCE_LIMIT:
         warn("incident_store", "instance limit reached; dropping oldest",
              incident_id=str(row.get("incident_id")), limit=_INSTANCE_LIMIT)
@@ -323,6 +336,29 @@ def _upsert_instance(row: dict[str, Any], instance_key: str, now: datetime,
     if detail:
         entry["detail"] = detail
     instances.append(entry)
+    return "opened"
+
+
+def _record_instance_transition(
+    row: dict[str, Any],
+    *,
+    instance_key: str,
+    transition: str | None,
+    now: datetime,
+) -> None:
+    """Persist failure-edge changes separately from raw detector polls."""
+    row["instance_transition_tracking"] = True
+    transitions = row.setdefault("instance_transitions", [])
+    if transition is None:
+        return
+    transitions.append(
+        {
+            "at": now.isoformat(),
+            "instance_key": instance_key,
+            "transition": transition,
+        }
+    )
+    del transitions[:-_INSTANCE_TRANSITION_LIMIT]
 
 
 def _open_new_episode(row: dict[str, Any], now: datetime) -> None:
@@ -445,11 +481,26 @@ def route_breach(
         if details:
             row["last_breach_detail"] = str(details)[:600]
         if instance_key:
-            _upsert_instance(row, str(instance_key), current, instance_detail)
+            key = str(instance_key)
+            _record_instance_transition(
+                row,
+                instance_key=key,
+                transition=_upsert_instance(
+                    row, key, current, instance_detail
+                ),
+                now=current,
+            )
         for key in instance_keys or ():
             text = str(key or "").strip()
             if text:
-                _upsert_instance(row, text, current, None)
+                _record_instance_transition(
+                    row,
+                    instance_key=text,
+                    transition=_upsert_instance(
+                        row, text, current, None
+                    ),
+                    now=current,
+                )
         # A breach breaks any clean streak — one clean is never enough (G7).
         row["clean_observations"] = []
         row["clean_streak_started_at"] = None

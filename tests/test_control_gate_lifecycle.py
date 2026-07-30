@@ -1908,6 +1908,179 @@ def test_missing_timestamp_bad_deadline_and_incident_time_are_unhealthy(
     assert "missing_or_malformed_incident_timestamp" in unhealthy_errors
 
 
+def test_instance_incident_reviews_count_only_new_graph_transitions(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    gate = registry["gates"][0]
+    gate["gate_id"] = "dispatch_worker_ownership"
+    gate["outcome_join"] = "incident_or_generation"
+    gate["deadline_required"] = False
+    gate["incident_kinds"] = ["worker_orphaned"]
+    gate["review_policy"]["incident_metric"] = "instance_transitions"
+    gate["evidence_sources"][0] = {
+        "kind": "jsonl",
+        "path": "logs/control_gate_decisions.jsonl",
+        "match": {"gate_id": ["dispatch_worker_ownership"]},
+    }
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(storage / "logs" / "control_gate_decisions.jsonl", [])
+    incident_path = storage / "ops" / "incidents.json"
+    _write_json(
+        incident_path,
+        {
+            "incidents": {
+                "inc-worker": {
+                    "incident_id": "inc-worker",
+                    "kind": "worker_orphaned",
+                    "state": "mitigating",
+                    "occurrence_count": 5139,
+                    "episode_count": 1,
+                    "last_seen_at": (NOW - timedelta(minutes=1)).isoformat(),
+                }
+            }
+        },
+    )
+
+    quiet = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    assert quiet["gates"][0]["evidence"]["incident_occurrences"] == 0
+    assert quiet["gates"][0]["evidence"]["incident_observations"] == 5139
+    assert quiet["gates"][0]["review"]["due"] is False
+
+    payload = json.loads(incident_path.read_text(encoding="utf-8"))
+    payload["incidents"]["inc-worker"]["instance_transition_tracking"] = True
+    payload["incidents"]["inc-worker"]["instance_transitions"] = [
+        {
+            "at": (NOW - timedelta(minutes=3)).isoformat(),
+            "instance_key": "slot-a",
+            "transition": "opened",
+        },
+        {
+            "at": (NOW - timedelta(minutes=2)).isoformat(),
+            "instance_key": "slot-b",
+            "transition": "opened",
+        },
+    ]
+    _write_json(incident_path, payload)
+    changed = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    assert changed["gates"][0]["evidence"]["incident_occurrences"] == 2
+    assert changed["gates"][0]["review"]["reasons"] == [
+        "incident_occurrences=2>=2"
+    ]
+
+
+def test_instance_transition_metric_has_exact_window_and_health_contract(
+    tmp_path: Path,
+) -> None:
+    start = NOW - timedelta(hours=1)
+    count, diagnostics = (
+        control_gate_lifecycle._incident_occurrences_since(
+            {
+                "instance_transition_tracking": True,
+                "instance_transitions": [
+                    {
+                        "at": start.isoformat(),
+                        "instance_key": "excluded-start",
+                        "transition": "opened",
+                    },
+                    {
+                        "at": (start + timedelta(microseconds=1)).isoformat(),
+                        "instance_key": "included-after-start",
+                        "transition": "opened",
+                    },
+                    {
+                        "at": NOW.isoformat(),
+                        "instance_key": "included-now",
+                        "transition": "reopened",
+                    },
+                    {
+                        "at": (NOW + timedelta(microseconds=1)).isoformat(),
+                        "instance_key": "excluded-future",
+                        "transition": "opened",
+                    },
+                    {
+                        "at": "not-a-time",
+                        "instance_key": "bad-time",
+                        "transition": "opened",
+                    },
+                    {
+                        "at": NOW.isoformat(),
+                        "instance_key": "bad-type",
+                        "transition": "evidence_changed",
+                    },
+                ],
+            },
+            window_start=start,
+            now=NOW,
+        )
+    )
+    assert count == 2
+    assert diagnostics == [
+        "transition[4]_invalid_at",
+        "transition[5]_invalid_type:evidence_changed",
+    ]
+
+    storage = tmp_path / "storage"
+    registry = _registry()
+    gate = registry["gates"][0]
+    gate["gate_id"] = "dispatch_worker_ownership"
+    gate["outcome_join"] = "incident_or_generation"
+    gate["deadline_required"] = False
+    gate["incident_kinds"] = ["worker_orphaned"]
+    gate["review_policy"]["incident_metric"] = "instance_transitions"
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(storage / "logs" / "dedup_decisions.jsonl", [])
+    _write_json(
+        storage / "ops" / "incidents.json",
+        {
+            "incidents": {
+                "inc-worker": {
+                    "incident_id": "inc-worker",
+                    "kind": "worker_orphaned",
+                    "state": "mitigating",
+                    "last_seen_at": (NOW - timedelta(minutes=1)).isoformat(),
+                    "instance_transition_tracking": True,
+                    "instance_transitions": [
+                        {
+                            "at": "not-a-time",
+                            "instance_key": "bad-time",
+                            "transition": "opened",
+                        }
+                    ],
+                }
+            }
+        },
+    )
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    assert verdict["audit_health"]["healthy"] is False
+    assert any(
+        row["error"] == "malformed_instance_transition_rows"
+        for row in verdict["audit_health"]["unhealthy_sources"]
+    )
+
+
 def test_completed_adjudication_consumes_old_evidence_until_new_trigger(
     tmp_path: Path,
 ) -> None:
