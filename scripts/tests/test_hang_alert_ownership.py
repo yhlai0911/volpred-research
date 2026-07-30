@@ -297,6 +297,8 @@ def test_work_cap_timeout_is_not_reported_as_a_hang(
     assert dedup_keys == ["work_timeout:deadline-job"]
     assert len(sent) == 1
     level, title, body = sent[0]
-    assert (level, title) == ("warn", "supervisor work_timeout")
+    # Transport dedup groups identical terminal outcomes by title.  A cleanly
+    # reaped deadline must not share identity with a survivor-bearing hang.
+    assert (level, title) == ("warn", "supervisor work_timeout outcome=reaped")
     assert "不證明 worker hang" in body
     assert "compute queue" in body
