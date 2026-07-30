@@ -21,8 +21,13 @@ import scripts.telegram_poll as poll
 
 
 @pytest.fixture(autouse=True)
-def _reset_backoff():
+def _reset_backoff(monkeypatch, tmp_path):
     poll._last_retry_spawn = None
+    monkeypatch.setattr(
+        poll,
+        "TELEGRAM_POLL_LOG",
+        tmp_path / "telegram_poll.log",
+    )
     yield
     poll._last_retry_spawn = None
 
@@ -59,6 +64,7 @@ def test_stuck_pending_reply_triggers_respawn(monkeypatch, tmp_path, spawned):
     poll._retry_stuck_replies()
 
     assert spawned == ["spawn"]
+    assert poll.TELEGRAM_POLL_LOG.parent == tmp_path
 
 
 def test_fresh_reply_is_left_alone(monkeypatch, tmp_path, spawned):
