@@ -798,6 +798,84 @@ def test_reaction_coverage_is_preserved_in_single_owner(tmp_path: Path, monkeypa
     assert "event_reaction_coverage" in audit
 
 
+def test_reaction_slot_contract_normalizes_tminus_zero_and_fails_open_unknown():
+    feed = [
+        {
+            "id": "mile_fomc_tplus0",
+            "status": "published",
+            "event_key": "FOMC_2026_07_29",
+            "event_series_slot": "T+0",
+        }
+    ]
+
+    hit = event_jobs.reaction_already_covered(
+        "FOMC",
+        datetime(2026, 7, 29, 18, 0, tzinfo=timezone.utc),
+        feed,
+        event_key="FOMC_2026_07_29",
+        requested_slot="T-0",
+        release_at=datetime(2026, 7, 29, 18, 0, tzinfo=timezone.utc),
+    )
+
+    assert event_jobs._slot_is_reaction("T-0") is True
+    assert event_jobs._slot_is_reaction("") is False
+    assert event_jobs._slot_is_reaction("unexpected") is False
+    assert hit == {"id": "mile_fomc_tplus0", "match": "metadata"}
+
+
+@pytest.mark.parametrize(
+    "feed_payload",
+    [
+        "{not-json",
+        json.dumps({"not": "a list"}),
+        json.dumps(
+            [
+                "not-an-object",
+                {
+                    "id": "mile_bad_time",
+                    "status": "published",
+                    "title": "美國 CPI 低於預期",
+                    "published_at": "not-a-time",
+                },
+            ],
+            ensure_ascii=False,
+        ),
+    ],
+)
+def test_reaction_coverage_feed_errors_fail_open_to_event_task(
+    tmp_path: Path,
+    monkeypatch,
+    feed_payload: str,
+):
+    now = datetime(2026, 7, 14, 14, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "cpi-us-2026-07-14-t0",
+        event_type="CPI_US",
+        event_date="2026-07-14",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=36)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = tmp_path / "storage"
+    feed_path = storage_dir / "reports" / "feed.json"
+    feed_path.parent.mkdir(parents=True, exist_ok=True)
+    feed_path.write_text(feed_payload, encoding="utf-8")
+
+    result = expand_due_event_jobs(storage_dir=str(storage_dir), now=now)
+
+    assert [row["task"]["id"] for row in result["created"]] == [
+        "event_article_cpi_us_2026-07-14_tplus0"
+    ]
+    assert not any(
+        row["reason"] == "reaction_already_covered"
+        for row in result["skipped"]
+    )
+
+
 def test_fomc_pre_event_article_cannot_cover_tplus0_reaction(
     tmp_path: Path,
     monkeypatch,

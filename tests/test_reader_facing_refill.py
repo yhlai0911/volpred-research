@@ -20,13 +20,12 @@ SPEC.loader.exec_module(MODULE)
 def _redirect_storage(tmp_path, monkeypatch):
     """Point every storage constant this module writes through at tmp_path.
 
-    Redirecting NEXT_TASKS alone leaves DEDUP_LOG (the coverage gate's audit
-    trail) and STORAGE (handed to build_pending_event_task, which logs through
-    topic_dedup) aimed at the live checkout, so the tests appended real decisions
-    to the shared audit trail. Autouse so a new test cannot forget one.
+    Redirecting NEXT_TASKS alone leaves STORAGE (handed to the canonical
+    event_jobs owner, which logs through topic_dedup) aimed at the live checkout,
+    so tests could append real decisions to the shared audit trail. Autouse so a
+    new test cannot forget the canonical storage boundary.
     """
     monkeypatch.setattr(MODULE, "STORAGE", tmp_path / "storage")
-    monkeypatch.setattr(MODULE, "DEDUP_LOG", tmp_path / "storage" / "logs" / "dedup_decisions.jsonl")
 
 
 def test_build_event_task_id_and_payload():
@@ -126,6 +125,11 @@ def test_refill_event_candidates_never_uses_legacy_append_writer(monkeypatch):
         "skipped": [],
         "expired": {"next_tasks": [], "legacy_receipts": []},
     }
+
+
+def test_refill_event_adapter_has_no_legacy_reaction_coverage_owner():
+    assert not hasattr(MODULE, "_reaction_already_covered")
+    assert not hasattr(MODULE, "_log_coverage_decision")
 
 
 def test_refill_trending_skips_arc_duplicate(tmp_path, monkeypatch):
@@ -392,107 +396,3 @@ def test_verified_trending_claim_is_persisted_with_receipt(tmp_path, monkeypatch
     task = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
     assert task["primary_source_verification"]["decision"] == "pass"
     assert task["primary_source_verification"]["checks"][0]["actual"] == -1.25
-
-
-# --- Slot-aware event coverage (2026-07-03 NFP T+0 stale-duplicate fix) --------
-
-def test_slot_is_reaction_classification():
-    # Reaction (result-known) slots
-    assert MODULE._slot_is_reaction("T+0") is True
-    assert MODULE._slot_is_reaction("T-0") is True
-    assert MODULE._slot_is_reaction("T+1") is True
-    # Forward (pre-event) slots
-    assert MODULE._slot_is_reaction("T-7") is False
-    assert MODULE._slot_is_reaction("T-2") is False
-    # Unknown / empty -> treated as forward (never gate on surprise labels)
-    assert MODULE._slot_is_reaction("") is False
-    assert MODULE._slot_is_reaction("weird") is False
-
-
-def test_reaction_already_covered_fuzzy_early_release():
-    """The NFP incident: reaction article published early (no event metadata)."""
-    feed = [{
-        "id": "mile_35eef830",
-        "status": "published",
-        "title": "6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%",
-        "tags": ["NFP", "非農就業", "VIX"],
-        "published_at": "2026-07-01T17:24:08+00:00",
-    }]
-    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
-    assert hit is not None
-    assert hit["id"] == "mile_35eef830"
-    assert hit["match"] == "title_keyword"
-
-
-def test_reaction_coverage_does_not_use_generic_tags_as_event_identity():
-    feed = [{
-        "id": "mile_5dd7c135",
-        "status": "published",
-        "title": "油價跳漲，金價卻連摔兩天：避風港有沒有上班",
-        "tags": ["黃金", "避險", "通膨"],
-        "published_at": "2026-07-14T03:24:06+00:00",
-    }]
-
-    hit = MODULE._reaction_already_covered("CPI_US", MODULE.date(2026, 7, 14), feed)
-
-    assert hit is None
-
-
-def test_reaction_already_covered_exact_event_metadata():
-    """New publisher writes top-level event metadata, so coverage can be exact."""
-    feed = [{
-        "id": "mile_exact",
-        "status": "published",
-        "title": "Unrelated title that should not matter",
-        "tags": [],
-        "event_key": "NFP_US_2026_07_03",
-        "event_type": "NFP_US",
-        "event_date": "2026-07-03",
-        "event_series_slot": "T+0",
-        "published_at": "2026-06-01T00:00:00+00:00",
-    }]
-
-    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
-
-    assert hit is not None
-    assert hit["id"] == "mile_exact"
-    assert hit["match"] == "metadata"
-
-
-def test_reaction_metadata_forward_slot_does_not_cover_reaction():
-    feed = [{
-        "id": "mile_forward_metadata",
-        "status": "published",
-        "title": "NFP T-2 preview",
-        "tags": ["NFP"],
-        "event_type": "NFP_US",
-        "event_date": "2026-07-03",
-        "event_series_slot": "T-2",
-        "published_at": "2026-07-01T00:00:00+00:00",
-    }]
-
-    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
-
-    assert hit is None
-
-
-def test_reaction_coverage_excludes_forward_preview():
-    """A forward preview (前7天) must NOT count as reaction coverage."""
-    feed = [{
-        "id": "mile_forward",
-        "status": "published",
-        "title": "非農就業報告前7天：勞動市場到底在哪個位置？",
-        "tags": ["NFP", "非農就業"],
-        "published_at": "2026-07-01T09:00:00+00:00",  # inside the reaction window
-    }]
-    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
-    assert hit is None  # forward title excluded even though it's in the date window
-
-
-def test_reaction_coverage_fails_open_on_bad_feed(monkeypatch):
-    """Any error in the coverage check returns None (never blocks a real task)."""
-    # non-dict feed entries are skipped; a malformed published_at just skips that row
-    feed = ["not-a-dict", {"id": "x", "status": "published", "title": "非農",
-                           "published_at": "garbage"}]
-    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
-    assert hit is None
