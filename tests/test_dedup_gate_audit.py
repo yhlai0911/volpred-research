@@ -342,6 +342,25 @@ def test_decision_logger_identifies_prewrite_decision_without_title(
     assert row["candidate_id"].startswith("decision:")
 
 
+def test_metadata_gap_warning_has_independent_gate_identity(
+    tmp_path: Path,
+) -> None:
+    _log_dedup_decision(
+        str(tmp_path),
+        "warn_coverage_metadata_gap",
+        "TBD",
+        "mile_legacy",
+        "legacy article has no extractable experiment ref; audience=general",
+        candidate_id="K1716",
+    )
+
+    row = json.loads(
+        (tmp_path / "logs" / "dedup_decisions.jsonl").read_text()
+    )
+    assert row["gate"] == "publisher_coverage_metadata_gap"
+    assert row["candidate_id"] == "K1716"
+
+
 # ---------------------------------------------------------------- healthy / edges
 
 

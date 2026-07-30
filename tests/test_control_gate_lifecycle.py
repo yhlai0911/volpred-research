@@ -409,6 +409,7 @@ def test_project_registry_lists_known_problematic_gates() -> None:
         "publisher_digest_recap",
         "publisher_arc_dedup",
         "publisher_k_coverage",
+        "publisher_coverage_metadata_gap",
         "publisher_cluster_cap",
     } <= gates.keys()
     assert gates["hourly_pregate"]["mode"] == "shadow"
@@ -419,6 +420,18 @@ def test_project_registry_lists_known_problematic_gates() -> None:
         "control_gate_review_task_generation_"
         "20260730T090031_ec3b7176e81d"
     )
+    exact_k = gates["publisher_k_coverage"]
+    assert exact_k["mode"] == "hard_block"
+    assert exact_k["identity_strength"] == "canonical_exact"
+    assert exact_k["evidence_sources"][0]["match"]["action"] == [
+        "block_k_coverage"
+    ]
+    metadata_gap = gates["publisher_coverage_metadata_gap"]
+    assert metadata_gap["mode"] == "warn"
+    assert metadata_gap["identity_strength"] == "heuristic"
+    assert metadata_gap["evidence_sources"][0]["match"]["action"] == [
+        "warn_coverage_metadata_gap"
+    ]
     publisher_arc = gates["publisher_arc_dedup"]
     assert publisher_arc["mode"] == "warn"
     assert publisher_arc["lifecycle"]["last_action"] == "downgrade_to_warn"

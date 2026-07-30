@@ -87,7 +87,7 @@ _DEDUP_ACTION_GATE_IDS = {
     "warn_event_arc_dup": "event_cross_stage_similarity",
     "warn_event_cross_stage_title": "event_cross_stage_similarity",
     "block_k_coverage": "publisher_k_coverage",
-    "warn_coverage_metadata_gap": "publisher_k_coverage",
+    "warn_coverage_metadata_gap": "publisher_coverage_metadata_gap",
     "block_cluster_hard_cap": "publisher_cluster_cap",
     "block_cluster_soft_cap": "publisher_cluster_cap",
     "block_duplicate_title_24h": "publisher_title_identity",

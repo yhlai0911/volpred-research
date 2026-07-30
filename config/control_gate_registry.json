@@ -48,7 +48,7 @@
           "warn_event_arc_dup": "event_cross_stage_similarity",
           "warn_event_cross_stage_title": "event_cross_stage_similarity",
           "block_k_coverage": "publisher_k_coverage",
-          "warn_coverage_metadata_gap": "publisher_k_coverage",
+          "warn_coverage_metadata_gap": "publisher_coverage_metadata_gap",
           "block_cluster_hard_cap": "publisher_cluster_cap",
           "block_cluster_soft_cap": "publisher_cluster_cap",
           "block_duplicate_title_24h": "publisher_title_identity",
@@ -1173,10 +1173,7 @@
           "path": "logs/dedup_decisions.jsonl",
           "match": {
             "gate": [null, "publisher_k_coverage"],
-            "action": [
-              "block_k_coverage",
-              "warn_coverage_metadata_gap"
-            ]
+            "action": ["block_k_coverage"]
           }
         }
       ],
@@ -1191,6 +1188,55 @@
         "max_harm_outcomes": 1,
         "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"],
+        "last_action": "recalibrate",
+        "last_reviewed_at": "2026-07-30T11:43:17.324680+00:00",
+        "review_task_id": "control_gate_review_publisher_k_coverage_20260729T210710_53608a95b196"
+      }
+    },
+    {
+      "gate_id": "publisher_coverage_metadata_gap",
+      "owner": "scripts.check_arc_dedup",
+      "invariant": "Missing legacy experiment_refs and lexical overlap are advisory evidence only and never own a publication lock.",
+      "mode": "warn",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["k_article_candidate", "legacy_metadata_hint", "writer"],
+        "edges": ["k_article_candidate -> legacy_metadata_hint"]
+      },
+      "blocked_downstream_edges": [
+        "legacy_metadata_hint -> writer",
+        "writer -> feed"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-29 K1716 metadata coverage gap"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "publisher_coverage_metadata_gap"],
+            "action": ["warn_coverage_metadata_gap"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 20,
+        "min_distinct_candidates": 10,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 2,
         "min_incident_occurrences": 2
       },
       "lifecycle": {
