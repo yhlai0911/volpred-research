@@ -1846,6 +1846,7 @@ def test_cleanup_never_repends_receipt_pending_collection(
     ("task_id", "task_type", "status"),
     [
         ("trending_repost_example", "trending_repost", "pending"),
+        ("event_article_example", "event_article", "pending"),
         ("email_reply_example", "email_reply", "pending"),
         ("paper_body_main_thread", "paper_body", "pending_main_thread"),
     ],

@@ -133,7 +133,10 @@ def test_expand_due_event_jobs_materializes_once(tmp_path: Path, monkeypatch):
     assert first["created"][0]["queue_created"] is True
     assert task["status"] == "pending"
     assert task["task_type"] == "event_article"
-    assert task["dispatch_lane"] == "main_thread"
+    assert task["dispatch_lane"] == "agent"
+    assert task["topology"] == "inline"
+    assert "claude-worker-only" in task["tags"]
+    assert "main-thread-only" not in task["tags"]
     assert task["deadline"] == (now + timedelta(hours=1)).isoformat()
     queue_path = tmp_path / "storage" / "next_tasks.json"
     queue = json.loads(queue_path.read_text(encoding="utf-8"))
@@ -144,8 +147,8 @@ def test_expand_due_event_jobs_materializes_once(tmp_path: Path, monkeypatch):
     pending = dispatcher.load_pending_tasks()
     assert [row["id"] for row in pending] == [task["id"]]
     categorized = dispatcher.categorize(pending)
-    assert [row["id"] for row in categorized["main_thread"]] == [task["id"]]
-    assert categorized["agentable"] == []
+    assert categorized["main_thread"] == []
+    assert [row["id"] for row in categorized["agentable"]] == [task["id"]]
 
     # New event work has one pending lifecycle.  The ledger is its audit receipt;
     # no second queued local-control-plane TaskRecord is created.
@@ -209,6 +212,52 @@ def test_existing_ledger_missing_queue_is_recovered(tmp_path: Path, monkeypatch)
     assert len(ledger_files) == 1
     ledger = json.loads(ledger_files[0].read_text(encoding="utf-8"))
     assert ledger["next_task_id"] == task_id
+
+
+def test_pending_generator_row_is_migrated_from_main_thread_to_claude_worker(
+    tmp_path: Path, monkeypatch
+) -> None:
+    now = datetime(2026, 7, 30, 4, 35, tzinfo=timezone.utc)
+    config_path = tmp_path / "runtime_schedules.json"
+    item = _event_item(
+        "fomc-2026-07-29-t0",
+        event_type="FOMC",
+        event_date="2026-07-29",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=24)).isoformat(),
+    )
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = str(tmp_path / "storage")
+
+    first = expand_due_event_jobs(storage_dir=storage_dir, now=now)
+    queue_path = tmp_path / "storage" / "next_tasks.json"
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    queue[0]["dispatch_lane"] = "main_thread"
+    queue[0].pop("topology", None)
+    queue[0]["tags"] = [
+        tag for tag in queue[0]["tags"] if tag != "claude-worker-only"
+    ] + ["main-thread-only"]
+    queue_path.write_text(json.dumps(queue), encoding="utf-8")
+
+    second = expand_due_event_jobs(
+        storage_dir=storage_dir,
+        now=now + timedelta(minutes=5),
+    )
+
+    assert first["created"][0]["task"]["id"] == (
+        "event_article_fomc_2026-07-29_tplus0"
+    )
+    assert second["created"] == []
+    assert second["skipped"][0]["queue_updated"] is True
+    migrated = json.loads(queue_path.read_text(encoding="utf-8"))[0]
+    assert migrated["dispatch_lane"] == "agent"
+    assert migrated["preferred_agent"] == "claude"
+    assert migrated["topology"] == "inline"
+    assert "claude-worker-only" in migrated["tags"]
+    assert "main-thread-only" not in migrated["tags"]
 
 
 def test_legacy_receipt_is_cancelled_before_canonical_row_becomes_pending(

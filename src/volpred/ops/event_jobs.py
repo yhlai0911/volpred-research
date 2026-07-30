@@ -496,7 +496,14 @@ def build_pending_event_task(
         "task_type": "event_article",
         "priority": 1,
         "status": "pending",
-        "dispatch_lane": "main_thread",
+        # Event windows are time-bounded production work.  Reserving them for
+        # an interactive main thread made a correctly materialized P1 row
+        # permanently undispatchable whenever no desktop session was open.
+        # The Operations Core worker is already Claude-only for this task type;
+        # keep the task inline inside that worker, while Codex eligibility
+        # remains independently denied by task_pool_selection.
+        "dispatch_lane": "agent",
+        "topology": "inline",
         "created_at": now.isoformat(),
         "source": "event_expander",
         "preferred_agent": str(template.get("preferred_agent") or item.get("preferred_agent") or "claude"),
@@ -509,7 +516,13 @@ def build_pending_event_task(
         "event_series_slot": slot,
         "not_before": not_before.isoformat() if not_before else None,
         "deadline": deadline.isoformat() if deadline else None,
-        "tags": ["event_article", "reader_facing", event_type, slot, "main-thread-only"],
+        "tags": [
+            "event_article",
+            "reader_facing",
+            event_type,
+            slot,
+            "claude-worker-only",
+        ],
     }
     # Warn-only: the event still ships, but the writer agent must differentiate
     # against these near misses. Never dropped silently.
@@ -616,7 +629,6 @@ def _ensure_next_task(
                     for key in (
                         "deadline",
                         "not_before",
-                        "dispatch_lane",
                         "ref_event_job_id",
                         "event_key",
                         "event_type",
@@ -625,6 +637,19 @@ def _ensure_next_task(
                     ):
                         if not existing.get(key) and task.get(key):
                             existing[key] = task[key]
+                            changed = True
+                    # Pending event rows remain generator-owned, so routing
+                    # migrations must replace obsolete values rather than only
+                    # fill missing fields.  Otherwise a main_thread-only row
+                    # survives every five-minute reconcile forever.
+                    for key in (
+                        "dispatch_lane",
+                        "preferred_agent",
+                        "topology",
+                        "tags",
+                    ):
+                        if existing.get(key) != task.get(key):
+                            existing[key] = task.get(key)
                             changed = True
                 if changed:
                     write_tasks_to_handle(handle, tasks)

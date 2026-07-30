@@ -94,7 +94,7 @@ TASK_TYPE_TO_TOPOLOGY: dict[str, str] = {
     "strategy_lifecycle": "inline",     # 固定 gate pipeline（evaluate → review → sensitivity → MDD）
     "daily_article":      "subagent",   # writer subagent（隔離 draft 檔，主線程串行 publish）
     "daily_digest":       "subagent",
-    "event_article":      "inline",     # 即時性需主線程判斷；直接 published
+    "event_article":      "inline",     # Operations Core Claude worker 內串行直發
     "member_qa":          "inline",
     "trending_repost":    "inline",
     "email_reply":        "inline",     # PHASE 0 orchestrator 自做（跨 tick mini-orchestrator）
