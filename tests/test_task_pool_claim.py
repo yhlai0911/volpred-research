@@ -2599,7 +2599,11 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
     monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
 
     assigned = task_pool_claim.cmd_dispatch_preassign(
-        argparse.Namespace(owner="hourly-slot-1-job", session="claim-123")
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-123",
+            job_id="job-123",
+        )
     )
 
     assert assigned["ok"] is True
@@ -2619,6 +2623,7 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
         argparse.Namespace(
             id="bound",
             session="wrong",
+            job_id="job-123",
             disposition="merged",
             result="no",
         )
@@ -2628,6 +2633,7 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
         argparse.Namespace(
             id="bound",
             session="claim-123",
+            job_id="job-123",
             disposition="merged",
             result="candidate merged and read back",
         )
@@ -2637,6 +2643,7 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
         argparse.Namespace(
             id="bound",
             session="claim-123",
+            job_id="job-123",
             disposition="merged",
             result="candidate merged and read back",
         )
@@ -2722,7 +2729,43 @@ def test_dispatch_preassign_rejects_observe_only_with_declared_outputs(
     assert assigned["blocked_contracts"] == [
         {
             "task_id": "dishonest-observer",
-            "reason": "observe_only_declared_output_paths_forbidden",
+            "reason": "observe_only_requires_explicit_empty_outputs",
+        }
+    ]
+
+
+@pytest.mark.parametrize("raw_outputs", [None, "omitted"])
+def test_dispatch_preassign_rejects_observe_only_without_explicit_empty_list(
+    tmp_path, monkeypatch, raw_outputs
+) -> None:
+    task = {
+        "id": "incomplete-observer",
+        "status": "pending",
+        "priority": 1,
+        "task_type": "platform_ops",
+        "write_intent": "observe_only",
+        "post_merge_actions": [],
+    }
+    if raw_outputs != "omitted":
+        task["declared_output_paths"] = raw_outputs
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(json.dumps([task]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="observe-session",
+            job_id="observe-job",
+        )
+    )
+
+    assert assigned["assigned"] is False
+    assert assigned["blocked_contracts"] == [
+        {
+            "task_id": "incomplete-observer",
+            "reason": "observe_only_requires_explicit_empty_outputs",
         }
     ]
 
@@ -2743,6 +2786,7 @@ def test_dispatch_settle_observed_marks_observe_only_task_succeeded(
                     "declared_output_paths": [],
                     "claimed_by": "hourly-slot-1-job",
                     "claim_session_id": "observe-session",
+                    "dispatch_job_id": "observe-job",
                     "dispatch_managed": True,
                 }
             ]
@@ -2755,6 +2799,7 @@ def test_dispatch_settle_observed_marks_observe_only_task_succeeded(
         argparse.Namespace(
             id="observe-only",
             session="observe-session",
+            job_id="observe-job",
             disposition="observed",
             result="read-only observation completed",
         )
@@ -2769,9 +2814,62 @@ def test_dispatch_settle_observed_marks_observe_only_task_succeeded(
     assert row["status"] == "succeeded"
     assert row["result"] == "read-only observation completed"
     assert "claimed_by" not in row
+    assert row["dispatch_settled_job_id"] == "observe-job"
     assert row["status_history"][-1]["note"] == (
         "supervisor_observation_settlement"
     )
+
+
+def test_dispatch_settle_rejects_wrong_job_or_disposition_intent_pair(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "repo-patch",
+                    "status": "in_progress",
+                    "task_type": "platform_ops",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "claimed_by": "hourly-slot-1-job",
+                    "claim_session_id": "patch-session",
+                    "dispatch_job_id": "patch-job",
+                    "dispatch_managed": True,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    wrong_job = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="repo-patch",
+            session="patch-session",
+            job_id="other-job",
+            disposition="merged",
+            result="must not settle",
+        )
+    )
+    wrong_disposition = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="repo-patch",
+            session="patch-session",
+            job_id="patch-job",
+            disposition="observed",
+            result="must not bypass merge",
+        )
+    )
+
+    assert wrong_job["reason"] == "dispatch_job_mismatch"
+    assert wrong_disposition["reason"] == (
+        "disposition_write_intent_mismatch"
+    )
+    row = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert row["status"] == "in_progress"
 
 
 def test_dispatch_remediation_settlement_uses_canonical_block_contract(
@@ -2836,24 +2934,36 @@ def test_dispatch_retry_settlement_is_idempotent_after_response_loss(
     )
     monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
     assigned = task_pool_claim.cmd_dispatch_preassign(
-        argparse.Namespace(owner="dispatch-supervisor", session="retry-session")
+        argparse.Namespace(
+            owner="dispatch-supervisor",
+            session="retry-session",
+            job_id="retry-job",
+        )
     )
     assert assigned["assigned"] is True
 
     args = argparse.Namespace(
         id="retry-bound",
         session="retry-session",
+        job_id="retry-job",
         disposition="retry",
         result="allocation unavailable",
     )
     first = task_pool_claim.cmd_dispatch_settle(args)
     replay = task_pool_claim.cmd_dispatch_settle(args)
+    wrong_job_replay = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            **{**vars(args), "job_id": "other-job"}
+        )
+    )
 
     assert first["status"] == "pending"
     assert replay["ok"] is True
     assert replay["already_settled"] is True
+    assert wrong_job_replay["reason"] == "dispatch_job_mismatch"
     row = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
     assert row["dispatch_settled_session_id"] == "retry-session"
+    assert row["dispatch_settled_job_id"] == "retry-job"
     assert row.get("dispatch_managed") is None
 
 

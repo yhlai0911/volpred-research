@@ -2077,6 +2077,7 @@ def allocate_workspace(
         or any(char in path for char in "*?[")
     ]
     write_intent = str(binding.get("write_intent") or "repo_patch")
+    bound_job_id = str(binding.get("dispatch_job_id") or "")
     invalid_binding = (
         not str(binding.get("task_id") or "").strip()
         or not str(binding.get("claim_session_id") or "").strip()
@@ -2084,11 +2085,19 @@ def allocate_workspace(
         or bool(invalid_declared)
         or (write_intent == "repo_patch" and not declared)
         or (write_intent == "observe_only" and bool(declared))
+        or (config.get("mode") == "enforce" and not bound_job_id)
+        or (bool(bound_job_id) and bound_job_id != job_id)
     )
-    if config.get("mode") == "enforce" and invalid_binding:
+    binding_rejected = (
+        (config.get("mode") == "enforce" and invalid_binding)
+        or (bool(bound_job_id) and bound_job_id != job_id)
+    )
+    if binding_rejected:
         _skip(
             "task_binding_invalid",
             task_id=binding.get("task_id"),
+            dispatch_job_id=bound_job_id,
+            actual_job_id=job_id,
             write_intent=write_intent,
             declared_output_paths=declared,
             invalid_declared_output_paths=invalid_declared,
@@ -2196,6 +2205,7 @@ def allocate_workspace(
         "write_intent": write_intent,
         "task_id": binding.get("task_id"),
         "claim_session_id": binding.get("claim_session_id"),
+        "dispatch_job_id": bound_job_id or job_id,
         "task_title": str(binding.get("title") or ""),
         "task_description": str(binding.get("description") or ""),
         "issue_ref": binding.get("issue_ref"),

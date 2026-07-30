@@ -691,6 +691,8 @@ def _settle_mutating_task(
             str(workspace["task_id"]),
             "--session",
             str(workspace["claim_session_id"]),
+            "--job-id",
+            str(workspace.get("dispatch_job_id") or ""),
             "--disposition",
             disposition,
             "--result",

@@ -725,8 +725,8 @@ def _dispatch_execution_contract(
         return None, "write_intent_missing_or_unsupported"
     raw_paths = task.get("declared_output_paths")
     if write_intent == "observe_only":
-        if raw_paths not in (None, []):
-            return None, "observe_only_declared_output_paths_forbidden"
+        if not isinstance(raw_paths, list) or raw_paths:
+            return None, "observe_only_requires_explicit_empty_outputs"
         declared: list[str] = []
     elif not isinstance(raw_paths, list) or not raw_paths:
         return None, "declared_output_paths_missing"
@@ -875,6 +875,8 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
         return {"ok": False, "reason": "supervisor_capability_required"}
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
+        supplied_job_id = str(getattr(args, "job_id", "") or "")
+        settled_job_id = str(task.get("dispatch_settled_job_id") or "")
         if (
             str(task.get("dispatch_settled_session_id") or "") == str(args.session)
             and (
@@ -885,6 +887,13 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
                 )
             )
         ):
+            if settled_job_id and supplied_job_id != settled_job_id:
+                return {
+                    "ok": False,
+                    "reason": "dispatch_job_mismatch",
+                    "task_id": args.id,
+                    "expected_job_id": settled_job_id,
+                }
             return {
                 "ok": True,
                 "task_id": args.id,
@@ -897,6 +906,20 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
                 "reason": "claim_session_mismatch",
                 "task_id": args.id,
             }
+        expected_job_id = str(task.get("dispatch_job_id") or "")
+        if task.get("dispatch_managed") is True and not expected_job_id:
+            return {
+                "ok": False,
+                "reason": "dispatch_job_identity_missing",
+                "task_id": args.id,
+            }
+        if expected_job_id and supplied_job_id != expected_job_id:
+            return {
+                "ok": False,
+                "reason": "dispatch_job_mismatch",
+                "task_id": args.id,
+                "expected_job_id": expected_job_id,
+            }
         current = (task.get("status") or "").lower()
         if current not in {"claimed", "in_progress"}:
             return {
@@ -905,6 +928,21 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
                 "status": current,
             }
         owner = str(task.get("claimed_by") or "dispatch-supervisor")
+        write_intent = str(task.get("write_intent") or "")
+        if (
+            args.disposition == "observed"
+            and write_intent != "observe_only"
+        ) or (
+            args.disposition == "merged"
+            and write_intent != "repo_patch"
+        ):
+            return {
+                "ok": False,
+                "reason": "disposition_write_intent_mismatch",
+                "task_id": args.id,
+                "disposition": args.disposition,
+                "write_intent": write_intent,
+            }
         if args.disposition in {"merged", "observed"}:
             task["status"] = "succeeded"
             task["completed_at"] = _now()
@@ -941,6 +979,9 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
             )
         else:
             task["dispatch_settled_session_id"] = str(args.session)
+            task["dispatch_settled_job_id"] = (
+                expected_job_id or supplied_job_id
+            )
             previous_owner = _repend_task(
                 task,
                 note=f"supervisor_settle_{args.disposition}",
@@ -953,6 +994,7 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
                 "released_from": previous_owner,
             }
         task["dispatch_settled_session_id"] = str(args.session)
+        task["dispatch_settled_job_id"] = expected_job_id or supplied_job_id
         task.pop("dispatch_managed", None)
         task.pop("dispatch_managed_owner", None)
         task.pop("dispatch_job_id", None)
@@ -1824,6 +1866,7 @@ def main() -> int:
     )
     p.add_argument("--id", required=True)
     p.add_argument("--session", required=True)
+    p.add_argument("--job-id", required=True)
     p.add_argument(
         "--disposition",
         required=True,

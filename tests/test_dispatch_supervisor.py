@@ -4802,6 +4802,7 @@ def _ws_allocate(repo: Path, *, job_id: str = "a" * 32, slot: str = "slot-1",
     binding = task_binding or {
         "task_id": f"task-{job_id[:8]}",
         "claim_session_id": f"claim-{job_id[:8]}",
+        "dispatch_job_id": job_id,
         "write_intent": "repo_patch",
         "declared_output_paths": [
             "scripts",
@@ -4847,6 +4848,7 @@ def test_observe_only_workspace_accepts_empty_output_contract(
         task_binding={
             "task_id": "observe-only",
             "claim_session_id": "observe-session",
+            "dispatch_job_id": "0" * 32,
             "write_intent": "observe_only",
             "declared_output_paths": [],
             "post_merge_actions": [],
@@ -4881,6 +4883,29 @@ def test_observe_only_settlement_requires_clean_success() -> None:
         write_intent="observe_only",
         worker_outcome="failure",
     ) == "retry"
+
+
+def test_workspace_rejects_task_binding_for_different_dispatch_job(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+
+    allocated = _ws_allocate(
+        repo,
+        job_id="actual-job",
+        task_binding={
+            "task_id": "wrong-job-binding",
+            "claim_session_id": "wrong-job-session",
+            "dispatch_job_id": "different-job",
+            "write_intent": "observe_only",
+            "declared_output_paths": [],
+            "post_merge_actions": [],
+        },
+    )
+
+    assert allocated is None
 
 
 def _ws_receipt_events(repo: Path) -> list[dict]:
@@ -11943,11 +11968,11 @@ def test_mutating_e2e_two_slots_different_paths_land_and_settle(
         )
     )
     ws_a = _ws_allocate(
-        repo, job_id="1" * 32, slot="slot-1",
+        repo, job_id="job-a", slot="slot-1",
         task_binding=first["contract"],
     )
     ws_b = _ws_allocate(
-        repo, job_id="2" * 32, slot="slot-2",
+        repo, job_id="job-b", slot="slot-2",
         task_binding=second["contract"],
     )
     assert ws_a is not None and ws_b is not None
@@ -11980,6 +12005,7 @@ def test_mutating_e2e_two_slots_different_paths_land_and_settle(
             argparse.Namespace(
                 id=contract["task_id"],
                 session=contract["claim_session_id"],
+                job_id=contract["dispatch_job_id"],
                 disposition="merged",
                 result=f"main_sha={outcome['main_sha']}",
             )
@@ -12114,7 +12140,7 @@ def test_mutating_e2e_worker_crash_routes_to_terminal_remediation(
         )
     )
     ws = _ws_allocate(
-        repo, job_id="6" * 32, task_binding=assigned["contract"]
+        repo, job_id="crash-job", task_binding=assigned["contract"]
     )
     assert ws is not None
     Path(ws["path"], "partial.py").write_text(
@@ -12129,6 +12155,7 @@ def test_mutating_e2e_worker_crash_routes_to_terminal_remediation(
         argparse.Namespace(
             id="worker-crash",
             session="crash-session",
+            job_id="crash-job",
             disposition="remediation",
             result=f"workspace={final['disposition']}",
         )
