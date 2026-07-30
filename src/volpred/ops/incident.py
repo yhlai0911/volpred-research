@@ -94,6 +94,21 @@ KIND_POLICY: dict[str, tuple[str, str]] = {
 }
 DEFAULT_POLICY: tuple[str, str] = (CLASS_ORDINARY, TASK_MODE_AUTO_REPAIR)
 
+# Exact control-graph classification.  Incident names are presentation
+# vocabulary, not a reliable way to infer whether an observation cut a graph
+# edge.  New control incidents must be added here (or carry an explicit
+# ``control_gate_id`` at creation); lifecycle inventory never guesses from
+# substrings.
+CONTROL_GATE_BY_KIND: dict[str, str] = {
+    "phase_z_test_gate_red": "phase_z_baseline_ownership",
+    "silent_fallback_new": "candidate_silent_fallback_audit",
+    "git_push_backup_hold": "worktree_merge_ownership",
+    "phase_z_baseline_missing": "phase_z_baseline_ownership",
+    "phase_z_generation_rejected": "phase_z_baseline_ownership",
+    "worker_orphaned": "dispatch_worker_ownership",
+    "worktree_unmerged": "worktree_merge_ownership",
+}
+
 #: Episode threshold at which a NEW episode escalates instead of opening yet
 #: another disposition (plan §5/§6).  machine_self uses 2 because these
 #: failures block everything else; ordinary uses the 3-strike number.
@@ -253,11 +268,15 @@ def list_incidents(path: str | Path) -> list[dict[str, Any]]:
 
 def _new_row(kind: str, parts: Iterable[Any], now: datetime) -> dict[str, Any]:
     class_, task_mode = policy_for(kind)
+    normalized_kind = str(kind).strip().lower()
+    control_gate_id = CONTROL_GATE_BY_KIND.get(normalized_kind)
     return {
         "incident_id": incident_id_for(kind, parts),
         "fingerprint": fingerprint(kind, parts),
         "fingerprint_parts": _normalize_parts(parts),
-        "kind": str(kind).strip().lower(),
+        "kind": normalized_kind,
+        "is_control_intervention": control_gate_id is not None,
+        "control_gate_id": control_gate_id,
         "class": class_,
         "task_mode": task_mode,
         "first_seen_at": now.isoformat(),
@@ -414,6 +433,10 @@ def route_breach(
         if not isinstance(row, dict):
             row = _new_row(normalized_kind, fingerprint_parts, current)
             incidents[iid] = row
+        else:
+            control_gate_id = CONTROL_GATE_BY_KIND.get(normalized_kind)
+            row["is_control_intervention"] = control_gate_id is not None
+            row["control_gate_id"] = control_gate_id
 
         row["occurrence_count"] = int(row.get("occurrence_count") or 0) + 1
         last_seen = _parse_iso(row.get("last_seen_at"))

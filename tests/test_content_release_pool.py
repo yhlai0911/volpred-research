@@ -1398,6 +1398,59 @@ def test_atomic_promotion_blocks_second_reader_visible_event_stage(tmp_path: Pat
     assert decisions[-1]["candidate_id"] == "fomc_2026_07_29:T+0"
 
 
+def test_event_stage_release_fails_open_without_durable_receipt(
+    tmp_path: Path,
+    monkeypatch,
+):
+    from volpred.publisher import publisher as publisher_module
+
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 30, 2, 0, tzinfo=timezone.utc)
+    identity = {
+        "event_key": "FOMC_2026_07_29",
+        "event_type": "FOMC",
+        "event_date": "2026-07-29",
+        "event_series_slot": "T+0",
+    }
+    published = {
+        "id": "mile_fomc_live",
+        "status": "published",
+        "audience": "event",
+        "category": "event_article",
+        "details": {"content_type": "event_article", **identity},
+        **identity,
+    }
+    draft = {
+        "id": "mile_fomc_draft",
+        "status": "draft",
+        "audience": "event",
+        "category": "event_article",
+        "details": {"content_type": "event_article", **identity},
+        **identity,
+    }
+    _write_json(storage_dir / "reports" / "feed.json", [published, draft])
+    monkeypatch.setattr(
+        publisher_module,
+        "_log_dedup_decision",
+        lambda *_args, **_kwargs: False,
+    )
+
+    outcome = content._atomic_promote_release_item(
+        draft,
+        now=now,
+        released_at=now.isoformat(),
+        storage_dir=str(storage_dir),
+        route="release_pool",
+        expected_item=draft,
+    )
+
+    assert outcome["outcome"] == "promoted"
+    feed_after = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )
+    assert feed_after[1]["status"] == "published"
+
+
 def test_metadata_patch_preserves_fresh_same_item_edit(tmp_path: Path):
     storage_dir = tmp_path / "storage"
     baseline = {

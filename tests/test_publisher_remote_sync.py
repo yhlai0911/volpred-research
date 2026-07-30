@@ -15,6 +15,7 @@ import pytest
 
 from volpred.ops.alerts import ALERT_RECIPIENT
 from volpred.ops.delivery.owned_email import OwnedEmailCommand
+from volpred.publisher import publisher as publisher_module
 from volpred.publisher.publisher import Publisher
 
 
@@ -616,3 +617,48 @@ def test_publish_milestone_bad_existing_timestamp_keeps_exact_title_gate(
     captured = capsys.readouterr()
     assert result == "mile_bad_timestamp"
     assert "Duplicate title timestamp parse failed" in captured.out
+    decision = json.loads(
+        (tmp_path / "logs" / "dedup_decisions.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()[-1]
+    )
+    assert decision["action"] == "block_duplicate_title_24h"
+    assert decision["gate"] == "publisher_title_identity"
+    assert decision["candidate_id"].startswith("title:")
+
+
+def test_exact_title_block_fails_open_when_receipt_is_not_durable(
+    tmp_path: Path,
+    monkeypatch,
+):
+    reports_dir = tmp_path / "reports"
+    reports_dir.mkdir(parents=True)
+    (reports_dir / "feed.json").write_text(
+        json.dumps([{
+            "id": "mile_existing",
+            "title": "Same Title",
+            "status": "published",
+            "published_at": "not-a-date",
+        }]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(
+        publisher_module,
+        "_log_dedup_decision",
+        lambda *_args, **_kwargs: False,
+    )
+    monkeypatch.setattr(
+        Publisher,
+        "_append_to_feed",
+        lambda self, item: item["id"],
+    )
+
+    result = Publisher(storage_dir=str(tmp_path)).publish_milestone(
+        title="Same Title",
+        description="body",
+        phase="research",
+        status="draft",
+    )
+
+    assert result != "mile_existing"

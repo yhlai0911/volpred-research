@@ -48,6 +48,10 @@ fail-closed，而不是退回標題猜測。此 invariant 必須同時存在於 
 ### 3. Default 必須 fail-open
 
 Gate 異常 / 資料缺失 / lookup table 不存在 → 預設 pass + WARN，不可預設 block。
+**No durable receipt, no block**：即使 gate 已算出 canonical exact duplicate，
+若實際決策點無法把 gate id、candidate id、reason 與 protected edge 寫入 canonical
+ledger，該次介入也必須 fail-open。不能先吞文、再寄一封「log 寫入失敗」通知補票；
+通知不是可 join 的 graph receipt。
 
 ```python
 # ❌ 禁止
@@ -109,6 +113,37 @@ watermark；receipt 必須同時具 task succeeded、四選一 decision、live r
 `task_pool_claim complete`
 必帶 `--gate-decision`、`--gate-live-readback`，且會回讀 registry 的
 `last_action/last_reviewed_at/review_task_id`，缺任一項拒絕結案。
+
+Inventory 不能只靠人工維護。所有 canonical decision log 都必須提供 `gate`／
+`gate_id`；歷史 action-only row 只可透過 registry 內明示的 lossless alias 回接。
+觀察窗內任一 blocking signal，或達 `discovery.high_frequency_threshold` 的 gate
+若未登記，`audit_control_gates` 必標 unhealthy 並 materialize **一張**帶 evidence
+watermark hash 的 inventory review task；無 identity 的 blocking row 亦同。禁止把
+不同 invariant／graph edge 的 action 為了消警報硬併成同一 alias。
+Inventory task 已被 claim／blocked 或保留給 `pending_main_thread` 後，新 gap 必在
+queue `LOCK_EX` 內合併進同一 task 的 snapshot + scope-update receipt；不得換 task
+ID、改 routing，亦不得只把 delta 留在當輪 verdict。這份 durable scope 即使超過
+discovery window 仍須 carry forward；未被 clean live-readback 消費前，terminal
+狀態必產生下一代 review，禁止因 evidence aging 靜默遺忘。
+Incident lifecycle 亦是 inventory input，但禁止從 kind 名稱猜測。會切斷 graph
+edge 的 incident 必帶 `is_control_intervention=true` 與 exact `control_gate_id`
+（既有 kind 由 `incident.CONTROL_GATE_BY_KIND` 做 forward-compatible 精確分類），
+且 registry 的 `incident_kinds` 必須一對一認領；未知或不一致者同樣視為 gap。
+任何 control producer 必在實際決策點寫 canonical decision receipt；不得只留自然
+語言 remediation receipt，否則 inventory 無法計算 trigger、candidate 與
+downstream outcome。
+
+每個 gate 的 lifecycle 必有 `review_anchor_at`，review policy 必有
+`max_review_age_hours`。所以 review 不只由 trigger／harm／waiver／incident 次數驅動；
+即使沒有新 evidence，到最長 review age 仍須重新做 retain／recalibrate／
+downgrade-to-warn／retire 裁決。review task identity 必含正確 gate id 與 lossless
+watermark hash；跨 gate receipt 在 registry validation 階段直接拒絕。
+這個循環採 PDCA／loop engineering／graph engineering 同一份契約：
+Plan 記 owner、invariant、protected/blocked edges 與 threshold；Do 留 stable
+candidate decision receipt；Check join task/feed/incident outcome；Act 只能四選一，
+並把裁決與 live read-back 寫回 lifecycle。未完成四段不得把 gate 從 review queue
+移除，也不得用 alias、手改狀態或刪 log 消警報。
+
 本 dedup audit 是內容子圖的細粒度 detector，不再兼任全域 lifecycle owner。
 
 ## Why

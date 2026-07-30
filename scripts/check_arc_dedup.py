@@ -145,7 +145,13 @@ def main() -> int:
 
     feed = json.loads((ROOT / "storage" / "reports" / "feed.json").read_text(encoding="utf-8"))
     storage_dir = str(ROOT / "storage")
-    candidate_id = _normalize_ref(args.k_id) if args.k_id else None
+    candidate_id = (
+        "k:"
+        f"{_normalize_ref(args.k_id)}"
+        f"|audience:{str(args.audience or 'any').strip().casefold()}"
+        if args.k_id
+        else None
+    )
     event_identity = (
         {
             "event_key": args.event_key,
@@ -252,8 +258,9 @@ def main() -> int:
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
     if event_stage_coverage:
+        receipt_persisted = False
         for hit in event_stage_coverage:
-            _log_dedup_decision(
+            receipt_persisted = _log_dedup_decision(
                 storage_dir,
                 "block_event_stage_coverage",
                 args.title,
@@ -263,7 +270,14 @@ def main() -> int:
                     f"slot={args.event_series_slot}"
                 ),
                 candidate_id=candidate_id,
+            ) or receipt_persisted
+        if not receipt_persisted:
+            print(
+                "\n⚠️ EVENT STAGE receipt failed — gate fails open; "
+                "do not suppress downstream work without an audit trail.",
+                file=sys.stderr,
             )
+            return 0
         listed = "\n".join(
             f"    - {h['id']} [{h['status']}/{h['audience']}] "
             f"{h['published_at']} {h['title']}"
@@ -277,13 +291,21 @@ def main() -> int:
         return 1
 
     if coverage and not event_identity:
+        receipt_persisted = False
         for hit in coverage:
-            _log_dedup_decision(
+            receipt_persisted = _log_dedup_decision(
                 storage_dir, "block_k_coverage", args.title, hit["id"],
                 f"{args.k_id} already covered for audience={hit['audience']} "
                 f"(status={hit['status']})",
                 candidate_id=candidate_id,
+            ) or receipt_persisted
+        if not receipt_persisted:
+            print(
+                "\n⚠️ K-COVERAGE receipt failed — gate fails open; "
+                "do not suppress downstream work without an audit trail.",
+                file=sys.stderr,
             )
+            return 0
         listed = "\n".join(
             f"    - {h['id']} [{h['status']}/{h['audience']}] {h['published_at']} {h['title']}"
             for h in coverage

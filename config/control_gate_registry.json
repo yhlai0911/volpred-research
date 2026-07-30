@@ -6,6 +6,78 @@
     "priority": 2,
     "source": "control_gate_lifecycle"
   },
+  "discovery": {
+    "window_hours": 168,
+    "high_frequency_threshold": 20,
+    "incidents_required": true,
+    "candidate_identity_required_after": "2026-07-30T09:27:50+00:00",
+    "sources": [
+      {
+        "kind": "jsonl",
+        "path": "logs/dedup_decisions.jsonl",
+        "required": true,
+        "identity_fields": ["gate_id", "gate"],
+        "decision_fields": ["decision", "action"],
+        "blocking_values": [
+          "block",
+          "blocked",
+          "hold",
+          "skip",
+          "constrain",
+          "block_arc_dup",
+          "block_same_ref_recycle",
+          "block_k_coverage",
+          "block_event_stage_coverage",
+          "block_cluster_hard_cap",
+          "block_cluster_soft_cap",
+          "block_duplicate_title_24h",
+          "block_depth_floor",
+          "block_duplicate_daily_digest",
+          "block_digest_recap",
+          "block_member_qa_identity",
+          "block_content_audit"
+        ],
+        "action_gate_aliases": {
+          "block_event_stage_coverage": "event_stage_idempotency",
+          "warn_event_k_coverage": "event_cross_stage_similarity",
+          "warn_event_arc_dup": "event_cross_stage_similarity",
+          "warn_event_cross_stage_title": "event_cross_stage_similarity",
+          "block_k_coverage": "publisher_k_coverage",
+          "warn_coverage_metadata_gap": "publisher_k_coverage",
+          "block_cluster_hard_cap": "publisher_cluster_cap",
+          "block_cluster_soft_cap": "publisher_cluster_cap",
+          "block_duplicate_title_24h": "publisher_title_identity",
+          "block_depth_floor": "publisher_content_depth",
+          "warn_depth": "publisher_content_depth",
+          "block_duplicate_daily_digest": "publisher_digest_identity",
+          "block_digest_recap": "publisher_digest_recap",
+          "warn_digest_recap": "publisher_digest_recap",
+          "block_member_qa_identity": "member_qa_publish_identity",
+          "block_content_audit": "release_content_audit",
+          "block_arc_dup": "publisher_arc_dedup",
+          "block_same_ref_recycle": "publisher_arc_dedup",
+          "warn_same_ref_similarity": "publisher_arc_dedup",
+          "allow_same_ref_companion": "publisher_arc_dedup",
+          "warn_near_dup": "publisher_arc_dedup",
+          "warn_arc_near_miss": "publisher_arc_dedup",
+          "warn_arc_dup": "publisher_arc_dedup",
+          "warn_arc_unjudged": "publisher_arc_dedup",
+          "warn_thin_signature": "publisher_arc_dedup",
+          "warn_semantic_dup": "publisher_arc_dedup",
+          "pass_prewrite": "publisher_arc_dedup"
+        }
+      },
+      {
+        "kind": "jsonl",
+        "path": "logs/control_gate_decisions.jsonl",
+        "required": true,
+        "identity_fields": ["gate_id", "gate"],
+        "decision_fields": ["decision", "action"],
+        "blocking_values": ["block", "hold", "skip", "constrain"],
+        "action_gate_aliases": {}
+      }
+    ]
+  },
   "gates": [
     {
       "gate_id": "event_stage_idempotency",
@@ -39,14 +111,17 @@
       "deadline_required": true,
       "review_policy": {
         "window_hours": 168,
+        "max_review_age_hours": 336,
         "max_raw_triggers": 10,
         "min_distinct_candidates": 5,
         "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 1,
         "min_incident_occurrences": 2
       },
       "lifecycle": {
         "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
       }
     },
@@ -81,14 +156,17 @@
       "deadline_required": true,
       "review_policy": {
         "window_hours": 168,
+        "max_review_age_hours": 168,
         "max_raw_triggers": 20,
         "min_distinct_candidates": 5,
         "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 1,
         "min_incident_occurrences": 2
       },
       "lifecycle": {
         "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"],
         "last_action": "recalibrate",
         "last_reviewed_at": "2026-07-30T08:47:41.250813+00:00",
@@ -126,14 +204,17 @@
       "deadline_required": false,
       "review_policy": {
         "window_hours": 168,
+        "max_review_age_hours": 168,
         "max_raw_triggers": 100,
         "min_distinct_candidates": 20,
         "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 2,
         "min_incident_occurrences": 2
       },
       "lifecycle": {
         "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
       }
     },
@@ -168,14 +249,17 @@
       "deadline_required": false,
       "review_policy": {
         "window_hours": 168,
+        "max_review_age_hours": 336,
         "max_raw_triggers": 10,
         "min_distinct_candidates": 3,
         "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 1,
         "min_incident_occurrences": 2
       },
       "lifecycle": {
         "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
       }
     },
@@ -210,14 +294,17 @@
       "deadline_required": false,
       "review_policy": {
         "window_hours": 168,
+        "max_review_age_hours": 168,
         "max_raw_triggers": 20,
         "min_distinct_candidates": 5,
         "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 2,
         "min_incident_occurrences": 2
       },
       "lifecycle": {
         "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"],
         "last_action": "retain",
         "last_reviewed_at": "2026-07-30T08:34:08.634012+00:00",
@@ -258,14 +345,855 @@
       "deadline_required": false,
       "review_policy": {
         "window_hours": 336,
+        "max_review_age_hours": 336,
         "max_raw_triggers": 5,
         "min_distinct_candidates": 3,
         "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 1,
         "min_incident_occurrences": 2
       },
       "lifecycle": {
         "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "candidate_silent_fallback_audit",
+      "owner": "scripts.dispatch_supervisor.phase_z",
+      "invariant": "A PHASE-Z candidate may reach git commit only after the trusted pre-commit auditor proves that its exact candidate bytes introduce no new silent fallback.",
+      "mode": "fail_closed",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["candidate_index", "trusted_pre_commit_audit", "git_commit"],
+        "edges": ["candidate_index -> trusted_pre_commit_audit", "trusted_pre_commit_audit -> git_commit"]
+      },
+      "blocked_downstream_edges": [
+        "candidate_index -> git_commit",
+        "git_commit -> push"
+      ],
+      "incident_refs": [
+        "silent_fallback_new incident lifecycle",
+        "scripts/dispatch_supervisor/phase_z.py trusted candidate pre-commit"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/control_gate_decisions.jsonl",
+          "match": {"gate_id": ["candidate_silent_fallback_audit"]}
+        }
+      ],
+      "incident_kinds": ["silent_fallback_new"],
+      "outcome_join": "incident_or_generation",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 336,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 20,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "worktree_merge_ownership",
+      "owner": "scripts.reclaim_stale_worktrees",
+      "invariant": "A worktree with unmerged bytes or an unresolved push-backup hold cannot be reclaimed until one explicit merge/discard adjudication owns the artifact.",
+      "mode": "fail_closed",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["agent_worktree", "unmerged_artifact", "main_branch"],
+        "edges": ["agent_worktree -> main_branch"]
+      },
+      "blocked_downstream_edges": [
+        "agent_worktree -> reclaim",
+        "main_branch -> push"
+      ],
+      "incident_refs": [
+        "worktree_unmerged incident lifecycle",
+        "git_push_backup_hold"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/control_gate_decisions.jsonl",
+          "match": {"gate_id": ["worktree_merge_ownership"]}
+        }
+      ],
+      "incident_kinds": ["worktree_unmerged", "git_push_backup_hold"],
+      "outcome_join": "incident_or_generation",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 336,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 20,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "dispatch_worker_ownership",
+      "owner": "dispatch_supervisor",
+      "invariant": "A worker process and its claimed task must have one live supervisor owner before orphan cleanup or redispatch may cut either edge.",
+      "mode": "fail_closed",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["task_claim", "worker_process", "dispatch_supervisor"],
+        "edges": ["task_claim -> worker_process"]
+      },
+      "blocked_downstream_edges": [
+        "worker_process -> completion_receipt",
+        "task_claim -> redispatch"
+      ],
+      "incident_refs": [
+        "worker_orphaned incident lifecycle"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/control_gate_decisions.jsonl",
+          "match": {"gate_id": ["dispatch_worker_ownership"]}
+        }
+      ],
+      "incident_kinds": ["worker_orphaned"],
+      "outcome_join": "incident_or_generation",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 336,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 100,
+        "min_distinct_candidates": 20,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "task_generation",
+      "owner": "volpred.ops.topic_dedup",
+      "invariant": "Generation-time topic screening may suppress only a canonical exact duplicate; fuzzy similarity remains advisory.",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["content_candidate", "next_task", "writer"],
+        "edges": ["content_candidate -> next_task"]
+      },
+      "blocked_downstream_edges": [
+        "next_task -> writer",
+        "writer -> feed"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md 2026-06-23 dedup content black hole"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {"gate": ["task_generation"]}
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_task",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 500,
+        "min_distinct_candidates": 50,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 2,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publish_throttle",
+      "owner": "volpred.publisher.throttle",
+      "invariant": "Rhythm-controlled content respects a bounded minimum interval without starving time-sensitive or exempt publication edges.",
+      "mode": "selection_constraint",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["publish_candidate", "publication_slot", "feed"],
+        "edges": ["publish_candidate -> publication_slot"]
+      },
+      "blocked_downstream_edges": [
+        "publication_slot -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md release pacing and content starvation incidents"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {"gate": ["publish_throttle"]}
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 200,
+        "min_distinct_candidates": 100,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 2,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "anti_ai_style",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Reader-facing prose quality checks apply only the correct content-mode contract and cannot structurally reject required formats.",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["article_draft", "style_verdict", "feed"],
+        "edges": ["article_draft -> style_verdict"]
+      },
+      "blocked_downstream_edges": [
+        "style_verdict -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-16 anti-AI FB mode blocked feed digest"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {"gate": ["anti_ai_style"]}
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 100,
+        "min_distinct_candidates": 50,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 2,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "release_content_audit",
+      "owner": "volpred.ops.content",
+      "invariant": "Reader-facing release eligibility applies the canonical audience/content contract and every hold is durably attributable to one article.",
+      "mode": "selection_constraint",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["article_draft", "content_audit", "release_candidate"],
+        "edges": ["article_draft -> release_candidate"]
+      },
+      "blocked_downstream_edges": [
+        "release_candidate -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "scripts/check_alerts.py content_gate_deadlock / audit remediation"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {"action": ["block_content_audit"]}
+        },
+        {
+          "kind": "jsonl",
+          "path": "logs/control_gate_decisions.jsonl",
+          "match": {"gate_id": ["release_content_audit"]}
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 20,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "release_lazypack_completeness",
+      "owner": "volpred.ops.content",
+      "invariant": "A general-reader article enters the release edge only after a lazy-pack heading with at least one Markdown image is installed; every hold remains attributable to one article.",
+      "mode": "selection_constraint",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["article_draft", "lazypack_section", "release_candidate"],
+        "edges": [
+          "article_draft -> lazypack_section",
+          "lazypack_section -> release_candidate"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "release_candidate -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "scripts/check_alerts.py content_gate_deadlock / lazypack_missing remediation"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/control_gate_decisions.jsonl",
+          "match": {"gate_id": ["release_lazypack_completeness"]}
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 20,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "member_qa_publish_identity",
+      "owner": "volpred.ops.content",
+      "invariant": "A member question owns at most one reader-visible answer unless every prior answer is explicitly superseded or the missing binding is formally waived.",
+      "mode": "fail_closed",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["member_question", "member_qa_draft", "reader_visible_answer"],
+        "edges": ["member_qa_draft -> reader_visible_answer"]
+      },
+      "blocked_downstream_edges": [
+        "reader_visible_answer -> feed",
+        "feed -> member"
+      ],
+      "incident_refs": [
+        "tests/test_member_qa_duplicate_gate.py 2026-07-19 STRIKE 2 duplicate-answer incident"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "member_qa_publish_identity"],
+            "action": ["block_member_qa_identity"]
+          }
+        },
+        {
+          "kind": "jsonl",
+          "path": "logs/control_gate_decisions.jsonl",
+          "match": {"gate_id": ["member_qa_publish_identity"]}
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 10,
+        "min_distinct_candidates": 3,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "release_pool_arc_dedup",
+      "owner": "volpred.ops.content",
+      "invariant": "Release-pool overlap may hold only evidence-backed exact coverage and must preserve a recoverable downstream publication path.",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["release_candidate", "release_pool", "publish_task"],
+        "edges": ["release_candidate -> release_pool"]
+      },
+      "blocked_downstream_edges": [
+        "release_pool -> publish_task",
+        "publish_task -> feed"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md 2026-06-24 arc_dedup over-match"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {"gate": ["release_pool_arc_dedup"]}
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 30,
+        "min_distinct_candidates": 15,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 2,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "event_cross_stage_similarity",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Similarity across distinct event-series stages remains advisory and cannot suppress a later information state.",
+      "mode": "warn",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["event_article_candidate", "event_series_stage", "feed"],
+        "edges": ["event_article_candidate -> event_series_stage"]
+      },
+      "blocked_downstream_edges": [
+        "event_series_stage -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md event T-2/T+0/T+1 coverage and cross-stage dedup incidents"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "event_cross_stage_similarity"],
+            "action": [
+              "warn_event_k_coverage",
+              "warn_event_arc_dup",
+              "warn_event_cross_stage_title"
+            ]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_event_stage",
+      "deadline_required": true,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 20,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_title_identity",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "One exact non-event title may own at most one live publication inside the 24-hour identity window.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["article_candidate", "title_24h_identity", "feed"],
+        "edges": ["article_candidate -> title_24h_identity"]
+      },
+      "blocked_downstream_edges": [
+        "title_24h_identity -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "src/volpred/publisher/publisher.py exact-title 24h gate"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "publisher_title_identity"],
+            "action": ["block_duplicate_title_24h"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 336,
+        "max_raw_triggers": 10,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_content_depth",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Reader-facing depth thresholds reject only content classes whose canonical length or evidence-table floor is unmet.",
+      "mode": "selection_constraint",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["article_candidate", "content_depth_verdict", "feed"],
+        "edges": ["article_candidate -> content_depth_verdict"]
+      },
+      "blocked_downstream_edges": [
+        "content_depth_verdict -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-02 content depth enforcement"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "publisher_content_depth"],
+            "action": ["block_depth_floor", "warn_depth"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 30,
+        "min_distinct_candidates": 15,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 2,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_digest_identity",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "A Taipei calendar date may expose at most one live daily digest.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["daily_digest_candidate", "taipei_publish_date", "feed"],
+        "edges": ["daily_digest_candidate -> taipei_publish_date"]
+      },
+      "blocked_downstream_edges": [
+        "taipei_publish_date -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-16 duplicate same-day daily digest"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "publisher_digest_identity"],
+            "action": ["block_duplicate_daily_digest"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": true,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 336,
+        "max_raw_triggers": 5,
+        "min_distinct_candidates": 3,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_digest_recap",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Daily-digest archive-span heuristics may hold only a recap-shaped draft while preserving explicit batch-migration warning evidence.",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["daily_digest_candidate", "archive_span_verdict", "feed"],
+        "edges": ["daily_digest_candidate -> archive_span_verdict"]
+      },
+      "blocked_downstream_edges": [
+        "archive_span_verdict -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-05 digest archive-span recurrence"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "publisher_digest_recap"],
+            "action": ["block_digest_recap", "warn_digest_recap"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 20,
+        "min_distinct_candidates": 10,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 2,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_arc_dedup",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Fuzzy narrative similarity is advisory; only a same-reference near-identical body may block publication.",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["article_candidate", "dedup_verdict", "feed"],
+        "edges": ["article_candidate -> dedup_verdict"]
+      },
+      "blocked_downstream_edges": [
+        "dedup_verdict -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md 2026-06-23 dedup default-block black hole"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "publisher_arc_dedup"],
+            "action": [
+              "block_arc_dup",
+            "block_same_ref_recycle",
+            "warn_same_ref_similarity",
+              "allow_same_ref_companion",
+              "warn_near_dup",
+              "warn_arc_near_miss",
+              "warn_arc_dup",
+              "warn_arc_unjudged",
+              "warn_thin_signature",
+              "warn_semantic_dup",
+              "pass_prewrite"
+            ]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 300,
+        "min_distinct_candidates": 100,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 2,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_k_coverage",
+      "owner": "scripts.check_arc_dedup",
+      "invariant": "One canonical K-id and audience pair owns at most one live article unless a distinct audience or explicit waiver is recorded.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["k_article_candidate", "k_audience_identity", "feed"],
+        "edges": ["k_article_candidate -> k_audience_identity"]
+      },
+      "blocked_downstream_edges": [
+        "k_audience_identity -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md §E dedup/K-id recurrent incidents"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "publisher_k_coverage"],
+            "action": [
+              "block_k_coverage",
+              "warn_coverage_metadata_gap"
+            ]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 336,
+        "max_raw_triggers": 10,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_cluster_cap",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Topic concentration caps preserve portfolio diversity without silently starving time-sensitive publication classes.",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "protected_graph": {
+        "nodes": ["article_candidate", "topic_cluster", "feed"],
+        "edges": ["article_candidate -> topic_cluster"]
+      },
+      "blocked_downstream_edges": [
+        "topic_cluster -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md cluster cooldown overshoot and content starvation"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": [null, "publisher_cluster_cap"],
+            "action": [
+              "block_cluster_hard_cap",
+              "block_cluster_soft_cap"
+            ]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 5,
+        "min_distinct_candidates": 3,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
       }
     }

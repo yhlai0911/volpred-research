@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -57,10 +58,100 @@ GATE_MODES = HARD_MODES | {
 IDENTITY_STRENGTHS = EXACT_IDENTITY_STRENGTHS | {"heuristic"}
 OUTCOME_JOIN_STRATEGIES = {
     "candidate_or_event_stage",
+    "candidate_or_feed",
     "candidate_task",
     "dispatch_signature",
     "incident_or_generation",
 }
+OUTCOME_NAMES = {
+    "published",
+    "succeeded",
+    "failed",
+    "missed_deadline",
+    "sequence_coverage_gap",
+    "retry",
+    "waiver",
+    "superseded",
+    "observed",
+    "dispatch_fire",
+    "task_claim",
+    "worker_failed",
+    "queued",
+    "in_flight",
+    "blocked",
+    "unjoined",
+}
+
+
+def control_gate_inventory_snapshot_payload(
+    *,
+    watermark: str,
+    gaps: list[dict[str, Any]],
+    unclassified: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Return the complete, deterministic inventory snapshot identity."""
+
+    def canonical_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        normalized = [
+            json.loads(
+                json.dumps(
+                    row,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+            )
+            for row in rows
+            if isinstance(row, dict)
+        ]
+        return sorted(
+            normalized,
+            key=lambda row: json.dumps(
+                row,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+        )
+
+    return {
+        "watermark": str(watermark),
+        "inventory_gaps": canonical_rows(gaps),
+        "inventory_unclassified_blocking": canonical_rows(unclassified),
+    }
+
+
+def control_gate_inventory_snapshot_hash(
+    *,
+    watermark: str,
+    gaps: list[dict[str, Any]],
+    unclassified: list[dict[str, Any]],
+) -> str:
+    """Hash the full canonical snapshot, not only gate IDs and row counts."""
+
+    payload = control_gate_inventory_snapshot_payload(
+        watermark=watermark,
+        gaps=gaps,
+        unclassified=unclassified,
+    )
+    return hashlib.sha256(
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()[:12]
+
+
+def _review_task_id(gate_id: str, cycle_at: datetime) -> str:
+    """Return the lossless gate + evidence-watermark task identity."""
+
+    cycle_hash = hashlib.sha256(
+        f"{gate_id}:{cycle_at.isoformat()}".encode("utf-8")
+    ).hexdigest()[:12]
+    cycle = f"{cycle_at.strftime('%Y%m%dT%H%M%S')}_{cycle_hash}"
+    return f"control_gate_review_{gate_id}_{cycle}"
 
 
 def _parse_time(raw: Any) -> datetime | None:
@@ -134,6 +225,56 @@ def _read_jsonl(
     }
 
 
+def _validate_discovery_policy(payload: dict[str, Any]) -> None:
+    discovery = payload.get("discovery")
+    if not isinstance(discovery, dict):
+        raise ValueError("control gate registry requires discovery policy")
+    if float(discovery.get("window_hours") or 0) <= 0:
+        raise ValueError("discovery.window_hours must be positive")
+    if int(discovery.get("high_frequency_threshold") or 0) <= 0:
+        raise ValueError(
+            "discovery.high_frequency_threshold must be positive"
+        )
+    if not isinstance(discovery.get("incidents_required"), bool):
+        raise ValueError("discovery.incidents_required must be boolean")
+    identity_required_after, malformed_identity_ratchet = _try_parse_time(
+        discovery.get("candidate_identity_required_after")
+    )
+    if malformed_identity_ratchet or identity_required_after is None:
+        raise ValueError(
+            "discovery.candidate_identity_required_after is required"
+        )
+    sources = discovery.get("sources")
+    if not isinstance(sources, list) or not sources:
+        raise ValueError("discovery.sources must be a non-empty list")
+    for source in sources:
+        if not isinstance(source, dict) or source.get("kind") != "jsonl":
+            raise ValueError("every discovery source must be a jsonl object")
+        if not str(source.get("path") or "").strip():
+            raise ValueError("every discovery source requires path")
+        for field in ("identity_fields", "decision_fields", "blocking_values"):
+            values = source.get(field)
+            if not isinstance(values, list) or not all(
+                isinstance(value, str) and value.strip()
+                for value in values
+            ):
+                raise ValueError(
+                    f"discovery source {source['path']!r} requires {field}"
+                )
+        aliases = source.get("action_gate_aliases", {})
+        if not isinstance(aliases, dict) or not all(
+            isinstance(key, str)
+            and key.strip()
+            and isinstance(value, str)
+            and value.strip()
+            for key, value in aliases.items()
+        ):
+            raise ValueError(
+                f"discovery source {source['path']!r} has invalid "
+                "action_gate_aliases"
+            )
+
+
 def _validate_registry(payload: Any) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError("control gate registry must be a JSON object")
@@ -144,11 +285,13 @@ def _validate_registry(payload: Any) -> dict[str, Any]:
     owner = payload.get("owner")
     if not isinstance(owner, str) or not owner.strip():
         raise ValueError("control gate registry requires one owner")
+    _validate_discovery_policy(payload)
     gates = payload.get("gates")
     if not isinstance(gates, list) or not gates:
         raise ValueError("control gate registry requires a non-empty gates list")
 
     seen: set[str] = set()
+    incident_kind_owners: dict[str, str] = {}
     for gate in gates:
         if not isinstance(gate, dict):
             raise ValueError("every gate registry row must be an object")
@@ -192,6 +335,21 @@ def _validate_registry(payload: Any) -> dict[str, Any]:
             )
         if not isinstance(gate.get("incident_refs"), list):
             raise ValueError(f"gate {gate_id!r} requires incident_refs")
+        incident_kinds = gate.get("incident_kinds")
+        if not isinstance(incident_kinds, list) or not all(
+            isinstance(kind, str) and kind.strip()
+            for kind in incident_kinds
+        ):
+            raise ValueError(f"gate {gate_id!r} requires valid incident_kinds")
+        for raw_kind in incident_kinds:
+            kind = raw_kind.strip()
+            prior_owner = incident_kind_owners.get(kind)
+            if prior_owner is not None:
+                raise ValueError(
+                    f"incident kind {kind!r} is owned by both "
+                    f"{prior_owner!r} and {gate_id!r}"
+                )
+            incident_kind_owners[kind] = gate_id
         sources = gate.get("evidence_sources")
         if not isinstance(sources, list) or not sources:
             raise ValueError(f"gate {gate_id!r} requires evidence_sources")
@@ -213,6 +371,24 @@ def _validate_registry(payload: Any) -> dict[str, Any]:
                 f"gate {gate_id!r} requires review_policy."
                 "max_false_positive_signals"
             )
+        harm_outcomes = policy.get("harm_outcomes")
+        if (
+            not isinstance(harm_outcomes, list)
+            or not harm_outcomes
+            or not all(
+                isinstance(name, str) and name in OUTCOME_NAMES
+                for name in harm_outcomes
+            )
+        ):
+            raise ValueError(
+                f"gate {gate_id!r} requires valid "
+                "review_policy.harm_outcomes"
+            )
+        if float(policy.get("max_review_age_hours") or 0) <= 0:
+            raise ValueError(
+                f"gate {gate_id!r} requires positive "
+                "review_policy.max_review_age_hours"
+            )
         lifecycle = gate.get("lifecycle")
         actions = (
             lifecycle.get("allowed_actions")
@@ -223,6 +399,15 @@ def _validate_registry(payload: Any) -> dict[str, Any]:
             raise ValueError(
                 f"gate {gate_id!r} lifecycle actions must be "
                 f"{list(REVIEW_ACTIONS)!r}"
+            )
+        review_anchor, malformed_anchor = _try_parse_time(
+            lifecycle.get("review_anchor_at")
+            if isinstance(lifecycle, dict)
+            else None
+        )
+        if malformed_anchor or review_anchor is None:
+            raise ValueError(
+                f"gate {gate_id!r} lifecycle.review_anchor_at is required"
             )
         reviewed_at = lifecycle.get("last_reviewed_at")
         if reviewed_at is not None:
@@ -238,6 +423,16 @@ def _validate_registry(payload: Any) -> dict[str, Any]:
             if not lifecycle.get("review_task_id"):
                 raise ValueError(
                     f"gate {gate_id!r} lifecycle.review_task_id is required"
+                )
+            review_task_id = str(lifecycle["review_task_id"])
+            pattern = (
+                rf"^control_gate_review_{re.escape(str(gate_id))}_"
+                r"\d{8}T\d{6}_[0-9a-f]{12}$"
+            )
+            if re.fullmatch(pattern, review_task_id) is None:
+                raise ValueError(
+                    f"gate {gate_id!r} lifecycle.review_task_id has wrong "
+                    "gate identity"
                 )
     return payload
 
@@ -261,6 +456,393 @@ def _matches(row: dict[str, Any], selector: dict[str, Any]) -> bool:
         if row.get(field) not in values:
             return False
     return True
+
+
+def _first_string(row: dict[str, Any], fields: list[str]) -> str:
+    for field in fields:
+        value = row.get(field)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def _canonicalize_decision_row(
+    row: dict[str, Any],
+    source: dict[str, Any],
+) -> tuple[dict[str, Any], bool]:
+    """Resolve one decision identity once for inventory and per-gate PDCA.
+
+    A producer-supplied gate identity is authoritative.  Action aliases exist
+    only to recover historical action-only rows; the same action vocabulary can
+    legitimately occur at a different graph layer (for example task-generation
+    arc screening versus publisher arc screening).
+    """
+
+    decision = _first_string(row, list(source["decision_fields"]))
+    explicit_values = [
+        str(row[field]).strip()
+        for field in source["identity_fields"]
+        if isinstance(row.get(field), str) and str(row[field]).strip()
+    ]
+    explicit = explicit_values[0] if explicit_values else ""
+    aliases = {
+        str(key).casefold(): str(value)
+        for key, value in source.get("action_gate_aliases", {}).items()
+    }
+    aliased = aliases.get(decision.casefold()) if decision else None
+    conflict = len(set(explicit_values)) > 1
+    gate_id = explicit or aliased
+    if not gate_id and decision:
+        gate_id = f"action:{decision.casefold()}"
+    normalized = dict(row)
+    if gate_id:
+        normalized["gate_id"] = gate_id
+        normalized["gate"] = gate_id
+    return normalized, conflict
+
+
+def _unclassified_signal_id(row: dict[str, Any]) -> str:
+    """Return a stable identity for one blocking signal lacking gate identity."""
+
+    payload = {
+        key: row.get(key)
+        for key in (
+            "source_path",
+            "timestamp",
+            "decision",
+            "candidate_id",
+            "raw_gate_id",
+            "raw_gate",
+        )
+    }
+    return (
+        "unclassified:"
+        + hashlib.sha256(
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        ).hexdigest()[:16]
+    )
+
+
+def _discovery_source_for_path(
+    registry: dict[str, Any],
+    relative_path: str,
+) -> dict[str, Any] | None:
+    for source in registry["discovery"]["sources"]:
+        if str(source.get("path") or "") == relative_path:
+            return source
+    return None
+
+
+def _discover_gate_inventory(
+    registry: dict[str, Any],
+    *,
+    storage_root: Path,
+    now: datetime,
+    incidents: list[dict[str, Any]],
+    incidents_health: dict[str, Any],
+) -> dict[str, Any]:
+    """Find control decisions that escaped the registered graph inventory."""
+
+    policy = registry["discovery"]
+    window_hours = float(policy["window_hours"])
+    window_start = now - timedelta(hours=window_hours)
+    registered = {
+        str(gate["gate_id"])
+        for gate in registry["gates"]
+    }
+    observed: dict[str, dict[str, Any]] = {}
+    source_health: list[dict[str, Any]] = []
+    unclassified_blocking: list[dict[str, Any]] = []
+
+    for source in policy["sources"]:
+        path = storage_root / str(source["path"])
+        rows, malformed, health = _read_jsonl(path)
+        if (
+            not source.get("required", True)
+            and not health["ok"]
+            and health.get("row_count") == 0
+            and str(health.get("error") or "").startswith("FileNotFoundError")
+        ):
+            health = {
+                **health,
+                "ok": True,
+                "error": None,
+                "optional_missing": True,
+            }
+        decision_fields = list(source["decision_fields"])
+        blocking_values = {
+            str(value).casefold()
+            for value in source["blocking_values"]
+        }
+        invalid_timestamps = 0
+        identity_conflicts = 0
+        for row in rows:
+            timestamp, malformed_timestamp = _try_parse_time(
+                _row_timestamp(row)
+            )
+            if malformed_timestamp or timestamp is None:
+                invalid_timestamps += 1
+                continue
+            if timestamp <= window_start or timestamp > now:
+                continue
+            normalized_row, identity_conflict = (
+                _canonicalize_decision_row(row, source)
+            )
+            identity_conflicts += int(identity_conflict)
+            if identity_conflict:
+                unclassified_blocking.append(
+                    {
+                        "source_path": str(path),
+                        "timestamp": timestamp.isoformat(),
+                        "decision": "identity_conflict",
+                        "candidate_id": _candidate_id(row),
+                        "raw_gate_id": row.get("gate_id"),
+                        "raw_gate": row.get("gate"),
+                    }
+                )
+                continue
+            decision = _first_string(normalized_row, decision_fields)
+            gate_id = _first_string(normalized_row, ["gate_id"])
+            normalized_decision = decision.casefold()
+            blocking = (
+                normalized_row.get("blocked") is True
+                or normalized_decision in blocking_values
+                or normalized_decision.startswith(
+                    ("block", "deny", "reject")
+                )
+            )
+            candidate = _candidate_id(normalized_row)
+            if not gate_id:
+                if blocking:
+                    unclassified_blocking.append(
+                        {
+                            "source_path": str(path),
+                            "timestamp": timestamp.isoformat(),
+                            "decision": decision,
+                            "candidate_id": candidate,
+                        }
+                    )
+                continue
+            bucket = observed.setdefault(
+                gate_id,
+                {
+                    "gate_id": gate_id,
+                    "trigger_count": 0,
+                    "blocking_count": 0,
+                    "candidate_ids": set(),
+                    "latest_at": timestamp,
+                },
+            )
+            bucket["trigger_count"] += 1
+            bucket["blocking_count"] += int(blocking)
+            if candidate:
+                bucket["candidate_ids"].add(candidate)
+            bucket["latest_at"] = max(bucket["latest_at"], timestamp)
+        health["invalid_timestamps"] = invalid_timestamps
+        health["identity_conflicts"] = identity_conflicts
+        health["malformed_rows"] = int(
+            health.get("malformed_rows") or malformed
+        ) + invalid_timestamps + identity_conflicts
+        if invalid_timestamps or identity_conflicts:
+            health["ok"] = False
+            health["error"] = (
+                "decision_identity_conflicts"
+                if identity_conflicts
+                else "malformed_timestamp_rows"
+            )
+        source_health.append(health)
+
+    threshold = int(policy["high_frequency_threshold"])
+    observed_rows: list[dict[str, Any]] = []
+    unregistered: list[dict[str, Any]] = []
+    for gate_id, bucket in observed.items():
+        row = {
+            "gate_id": gate_id,
+            "registered": gate_id in registered,
+            "trigger_count": bucket["trigger_count"],
+            "blocking_count": bucket["blocking_count"],
+            "distinct_candidates": len(bucket["candidate_ids"]),
+            "latest_at": bucket["latest_at"].isoformat(),
+        }
+        observed_rows.append(row)
+        reasons: list[str] = []
+        if gate_id not in registered and row["blocking_count"]:
+            reasons.append(
+                f"blocking_signals={row['blocking_count']}"
+            )
+        if (
+            gate_id not in registered
+            and row["trigger_count"] >= threshold
+        ):
+            reasons.append(
+                f"raw_triggers={row['trigger_count']}>={threshold}"
+            )
+        if reasons:
+            unregistered.append({**row, "reasons": reasons})
+
+    registered_incident_kinds = {
+        str(kind): str(gate["gate_id"])
+        for gate in registry["gates"]
+        for kind in gate.get("incident_kinds") or []
+        if isinstance(kind, str) and kind
+    }
+    incident_buckets: dict[str, dict[str, Any]] = {}
+    for incident in incidents:
+        kind = str(incident.get("kind") or "").strip()
+        control_gate_id = str(
+            incident.get("control_gate_id") or ""
+        ).strip()
+        is_control = (
+            incident.get("is_control_intervention") is True
+            or bool(control_gate_id)
+        )
+        last_seen, malformed_timestamp = _try_parse_time(
+            incident.get("last_seen_at")
+        )
+        expected_gate_id = registered_incident_kinds.get(kind)
+        explicit_gate_mismatch = bool(
+            control_gate_id
+            and expected_gate_id
+            and control_gate_id != expected_gate_id
+        )
+        registered_identity = bool(
+            expected_gate_id
+            and (
+                not control_gate_id
+                or control_gate_id == expected_gate_id
+            )
+        )
+        if (
+            not kind
+            or not is_control
+            or malformed_timestamp
+            or last_seen is None
+            or last_seen <= window_start
+            or last_seen > now
+            or registered_identity
+        ):
+            continue
+        inventory_gate_id = (
+            control_gate_id
+            if control_gate_id
+            else f"incident:{kind}"
+        )
+        bucket = incident_buckets.setdefault(
+            f"{kind}:{control_gate_id or '-'}",
+            {
+                "gate_id": inventory_gate_id,
+                "incident_kind": kind,
+                "incident_count": 0,
+                "occurrence_count": 0,
+                "latest_at": last_seen,
+                "incident_ids": set(),
+                "expected_gate_id": expected_gate_id,
+                "explicit_gate_mismatch": explicit_gate_mismatch,
+            },
+        )
+        bucket["incident_count"] += 1
+        bucket["occurrence_count"] += int(
+            incident.get("occurrence_count") or 1
+        )
+        bucket["latest_at"] = max(bucket["latest_at"], last_seen)
+        if incident.get("incident_id"):
+            bucket["incident_ids"].add(str(incident["incident_id"]))
+    unregistered_incident_controls = [
+        {
+            **bucket,
+            "latest_at": bucket["latest_at"].isoformat(),
+            "incident_ids": sorted(bucket["incident_ids"]),
+            "reasons": [
+                f"incident_occurrences={bucket['occurrence_count']}",
+                *(
+                    [
+                        "incident kind/gate mismatch: "
+                        f"expected={bucket['expected_gate_id']} "
+                        f"explicit={bucket['gate_id']}"
+                    ]
+                    if bucket["explicit_gate_mismatch"]
+                    else []
+                ),
+            ],
+        }
+        for bucket in incident_buckets.values()
+    ]
+    for incident_gap in unregistered_incident_controls:
+        unregistered.append(
+            {
+                "gate_id": incident_gap["gate_id"],
+                "registered": False,
+                "trigger_count": incident_gap["occurrence_count"],
+                "blocking_count": incident_gap["occurrence_count"],
+                "distinct_candidates": incident_gap["incident_count"],
+                "latest_at": incident_gap["latest_at"],
+                "reasons": incident_gap["reasons"],
+                "incident_kind": incident_gap["incident_kind"],
+                "incident_ids": incident_gap["incident_ids"],
+            }
+        )
+    incident_inventory_health = {
+        **incidents_health,
+        "source_role": "incident_inventory",
+    }
+    if (
+        policy.get("incidents_required", True) is False
+        and not incident_inventory_health["ok"]
+        and str(incident_inventory_health.get("error") or "").startswith(
+            "FileNotFoundError"
+        )
+    ):
+        incident_inventory_health.update(
+            {"ok": True, "error": None, "optional_missing": True}
+        )
+    source_health.append(incident_inventory_health)
+
+    for row in unclassified_blocking:
+        row["inventory_signal_id"] = _unclassified_signal_id(row)
+
+    newest_gap = max(
+        [
+            _parse_time(row["latest_at"])
+            for row in unregistered
+        ]
+        + [
+            _parse_time(row["timestamp"])
+            for row in unclassified_blocking
+        ],
+        default=None,
+    )
+    return {
+        "window": {
+            "hours": window_hours,
+            "start": window_start.isoformat(),
+            "end": now.isoformat(),
+        },
+        "registered_gate_count": len(registered),
+        "observed_gate_count": len(observed_rows),
+        "observed_gates": sorted(
+            observed_rows,
+            key=lambda row: row["gate_id"],
+        ),
+        "unregistered_gates": sorted(
+            unregistered,
+            key=lambda row: row["gate_id"],
+        ),
+        "unregistered_incident_controls": sorted(
+            unregistered_incident_controls,
+            key=lambda row: row["gate_id"],
+        ),
+        "unclassified_blocking_count": len(unclassified_blocking),
+        "unclassified_blocking": unclassified_blocking,
+        "source_health": source_health,
+        "newest_gap_at": (
+            newest_gap.isoformat() if newest_gap is not None else None
+        ),
+    }
 
 
 def _row_timestamp(row: dict[str, Any]) -> Any:
@@ -288,13 +870,122 @@ def _candidate_id(row: dict[str, Any]) -> str | None:
     ):
         value = row.get(field)
         if isinstance(value, str) and value.strip():
-            return value.strip()
+            candidate = value.strip()
+            if field == "candidate_id":
+                k_identity = _legacy_k_candidate_identity(candidate, row)
+                if k_identity:
+                    return k_identity
+            return candidate
     reasons = row.get("reasons")
     if isinstance(reasons, dict):
         signature = reasons.get("signature")
         if isinstance(signature, str) and signature.strip():
             return signature.strip()
+    title = row.get("new_title")
+    if isinstance(title, str) and title.strip():
+        return _title_identity(title)
+    reason_text = str(row.get("reason") or "")
+    k_match = re.search(r"\b[Kk](\d+[A-Za-z]?)\b", reason_text)
+    if k_match:
+        audience_match = re.search(
+            r"\baudience=([^\s,)]+)",
+            reason_text,
+            flags=re.IGNORECASE,
+        )
+        return _k_audience_identity(
+            f"K{k_match.group(1)}",
+            (
+                audience_match.group(1)
+                if audience_match
+                else row.get("audience_scope") or row.get("audience")
+            ),
+        )
+    # Historical pre-write decisions sometimes had no title or task id.  Keep
+    # their stable decision identity visible for PDCA (and explicitly marked
+    # lower-quality) instead of dropping the receipt from graph accounting.
+    action = row.get("action") or row.get("decision")
+    reason = row.get("reason")
+    matched_id = row.get("matched_id")
+    if any(value not in (None, "") for value in (action, reason, matched_id)):
+        material = json.dumps(
+            {
+                "action": action,
+                "matched_id": matched_id,
+                "reason": reason,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        digest = hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
+        return f"decision:{digest}"
     return None
+
+
+def _k_audience_identity(ref: Any, audience: Any) -> str | None:
+    match = re.fullmatch(r"[Kk](\d+[A-Za-z]?)", str(ref or "").strip())
+    scope = str(audience or "").strip().casefold()
+    if not match or not scope or scope == "any":
+        return None
+    return f"k:K{match.group(1)}|audience:{scope}"
+
+
+def _legacy_k_candidate_identity(
+    candidate: str,
+    row: dict[str, Any],
+) -> str | None:
+    if candidate.startswith("k:") and "|audience:" in candidate:
+        return candidate
+    reason = str(row.get("reason") or "")
+    audience_match = re.search(
+        r"\baudience=([^\s,)]+)",
+        reason,
+        flags=re.IGNORECASE,
+    )
+    return _k_audience_identity(
+        candidate,
+        (
+            audience_match.group(1)
+            if audience_match
+            else row.get("audience_scope") or row.get("audience")
+        ),
+    )
+
+
+def _title_identity(title: Any) -> str | None:
+    normalized = " ".join(str(title or "").casefold().split())
+    if not normalized:
+        return None
+    digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:16]
+    return f"title:{digest}"
+
+
+def _feed_identities(item: dict[str, Any]) -> set[str]:
+    """Typed identities by which a gate candidate can reach a feed row."""
+
+    identities: set[str] = set()
+    item_id = item.get("id")
+    if isinstance(item_id, str) and item_id.strip():
+        identities.add(item_id.strip())
+    title_identity = _title_identity(item.get("title"))
+    if title_identity:
+        identities.add(title_identity)
+    details = item.get("details") if isinstance(item.get("details"), dict) else {}
+    refs = [
+        *(item.get("experiment_refs") or []),
+        *(details.get("experiment_refs") or []),
+        *(item.get("tags") or []),
+    ]
+    for ref in refs:
+        identity = _k_audience_identity(
+            ref,
+            item.get("audience") or details.get("audience"),
+        )
+        if identity:
+            identities.add(identity)
+    question_id = item.get("question_id") or details.get("question_id")
+    if isinstance(question_id, str) and question_id.strip():
+        identities.add(question_id.strip())
+    return identities
 
 
 def _event_identity(item: dict[str, Any]) -> str | None:
@@ -326,17 +1017,30 @@ def _candidate_event_identity(raw: str) -> str | None:
 def _load_incidents(
     storage_root: Path,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    from .incident import CONTROL_GATE_BY_KIND
+
     payload, health = _load_json_with_health(
         storage_root / "ops" / "incidents.json", {}
     )
-    incidents = payload.get("incidents") if isinstance(payload, dict) else {}
+    incidents = (
+        payload.get("incidents", {})
+        if isinstance(payload, dict)
+        else {}
+    )
     if not isinstance(incidents, dict):
         return [], {**health, "ok": False, "error": "invalid_incident_schema"}
-    rows = [
-        {"incident_id": incident_id, **row}
-        for incident_id, row in incidents.items()
-        if isinstance(row, dict)
-    ]
+    rows = []
+    for incident_id, raw_row in incidents.items():
+        if not isinstance(raw_row, dict):
+            continue
+        row = {"incident_id": incident_id, **raw_row}
+        kind = str(row.get("kind") or "").strip().lower()
+        classified_gate = CONTROL_GATE_BY_KIND.get(kind)
+        if row.get("control_gate_id") in (None, "") and classified_gate:
+            row["control_gate_id"] = classified_gate
+            row["is_control_intervention"] = True
+            row["control_classification_source"] = "incident_kind_policy"
+        rows.append(row)
     invalid_timestamps = sum(
         1
         for row in rows
@@ -415,6 +1119,7 @@ def _load_dispatch_completions(
 def _collect_evidence(
     gate: dict[str, Any],
     *,
+    registry: dict[str, Any],
     storage_root: Path,
     window_start: datetime,
     now: datetime,
@@ -436,6 +1141,11 @@ def _collect_evidence(
         malformed += bad
         invalid_timestamps = 0
         selector = source.get("match") if isinstance(source.get("match"), dict) else {}
+        discovery_source = _discovery_source_for_path(
+            registry,
+            str(source.get("path") or ""),
+        )
+        identity_conflicts = 0
         for row in rows:
             raw_timestamp = _row_timestamp(row)
             ts, bad_timestamp = _try_parse_time(raw_timestamp)
@@ -447,14 +1157,32 @@ def _collect_evidence(
             # The lower boundary is therefore exclusive.
             if ts <= window_start or ts > now:
                 continue
-            if selector and not _matches(row, selector):
+            normalized_row = row
+            if discovery_source is not None:
+                normalized_row, conflict = _canonicalize_decision_row(
+                    row,
+                    discovery_source,
+                )
+                identity_conflicts += int(conflict)
+                if conflict:
+                    continue
+            if selector and not _matches(normalized_row, selector):
                 continue
-            evidence.append({"source_path": str(path), **row})
+            evidence.append({"source_path": str(path), **normalized_row})
         health["invalid_timestamps"] = invalid_timestamps
-        health["malformed_rows"] = int(health["malformed_rows"]) + invalid_timestamps
-        if invalid_timestamps:
+        health["identity_conflicts"] = identity_conflicts
+        health["malformed_rows"] = (
+            int(health["malformed_rows"])
+            + invalid_timestamps
+            + identity_conflicts
+        )
+        if invalid_timestamps or identity_conflicts:
             health["ok"] = False
-            health["error"] = "malformed_timestamp_rows"
+            health["error"] = (
+                "decision_identity_conflicts"
+                if identity_conflicts
+                else "malformed_timestamp_rows"
+            )
         source_health.append(health)
 
     kinds = {
@@ -497,6 +1225,10 @@ def _join_outcomes(
         for row in feed
         if row.get("status") in (None, "published") and row.get("id")
     }
+    feed_by_identity: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for item in feed:
+        for identity in _feed_identities(item):
+            feed_by_identity[identity].append(item)
     published_event_stages = {
         identity
         for row in feed
@@ -512,25 +1244,7 @@ def _join_outcomes(
             by_candidate[candidate].append(row)
 
     outcome_sets: dict[str, set[str]] = {
-        name: set()
-        for name in (
-            "published",
-            "succeeded",
-            "failed",
-            "missed_deadline",
-            "sequence_coverage_gap",
-            "retry",
-            "waiver",
-            "superseded",
-            "observed",
-            "dispatch_fire",
-            "task_claim",
-            "worker_failed",
-            "queued",
-            "in_flight",
-            "blocked",
-            "unjoined",
-        )
+        name: set() for name in OUTCOME_NAMES
     }
     malformed_task_deadlines: set[str] = set()
     details: list[dict[str, Any]] = []
@@ -553,6 +1267,23 @@ def _join_outcomes(
             if strategy == "candidate_or_event_stage"
             else None
         )
+        if strategy == "candidate_or_feed":
+            for feed_item in feed_by_identity.get(candidate, []):
+                status = str(
+                    feed_item.get("status") or "published"
+                ).casefold()
+                if status == "published":
+                    joined.add("published")
+                elif status in {"draft", "scheduled"}:
+                    joined.add("queued")
+                elif status in {
+                    "archived",
+                    "retracted",
+                    "unpublished",
+                }:
+                    joined.add("superseded")
+                else:
+                    joined.add("observed")
         if (
             strategy == "candidate_or_event_stage"
             and (
@@ -570,6 +1301,12 @@ def _join_outcomes(
             joined.add("retry")
         if explicit_decisions & {"waive", "waiver", "unlock", "bypass"}:
             joined.add("waiver")
+        if any(
+            decision in {"block", "blocked", "hold", "constrain"}
+            or decision.startswith(("block", "deny", "reject"))
+            for decision in explicit_decisions
+        ):
+            joined.add("blocked")
         if strategy == "incident_or_generation":
             matching_jobs = [
                 item
@@ -685,7 +1422,7 @@ def _join_outcomes(
             if task_event and task_event in published_event_stages:
                 joined.add("published")
 
-        if not joined:
+        if not (joined - {"blocked"}):
             joined.add("unjoined")
         for outcome in joined:
             outcome_sets[outcome].add(candidate)
@@ -709,6 +1446,8 @@ def _join_outcomes(
 def _review_due(
     gate: dict[str, Any],
     *,
+    now: datetime,
+    review_anchor_at: datetime,
     trigger_count: int,
     distinct_candidates: int,
     incident_occurrences: int,
@@ -726,7 +1465,7 @@ def _review_due(
         )
     harm = sum(
         int(outcomes.get(name) or 0)
-        for name in ("missed_deadline", "sequence_coverage_gap", "failed")
+        for name in policy["harm_outcomes"]
     )
     max_harm = int(policy.get("max_harm_outcomes") or 0)
     if max_harm and harm >= max_harm:
@@ -743,6 +1482,12 @@ def _review_due(
     if min_occurrences and incident_occurrences >= min_occurrences:
         reasons.append(
             f"incident_occurrences={incident_occurrences}>={min_occurrences}"
+        )
+    max_review_age = float(policy["max_review_age_hours"])
+    review_age = (now - review_anchor_at).total_seconds() / 3600.0
+    if review_age >= max_review_age:
+        reasons.append(
+            f"review_age_hours={review_age:.1f}>={max_review_age:g}"
         )
     return bool(reasons), reasons
 
@@ -806,6 +1551,7 @@ def _review_watermark(
             or watermark is None
             or watermark > registry_time
             or registry_time > completed_at
+            or registry_task_id != _review_task_id(gate_id, watermark)
         ):
             continue
         candidates.append(watermark)
@@ -830,11 +1576,7 @@ def _materialize_review_task(
     if existing is not None:
         return existing, False
     cycle_at = review_cycle_at or now
-    cycle_hash = hashlib.sha256(
-        f"{gate_id}:{cycle_at.isoformat()}".encode("utf-8")
-    ).hexdigest()[:12]
-    cycle = f"{cycle_at.strftime('%Y%m%dT%H%M%S')}_{cycle_hash}"
-    task_id = f"control_gate_review_{gate_id}_{cycle}"
+    task_id = _review_task_id(gate_id, cycle_at)
     defaults = registry.get("review_task") or {}
     record = {
         "id": task_id,
@@ -891,6 +1633,486 @@ def _materialize_review_task(
     return stored, created
 
 
+def _carry_forward_inventory_scope(
+    inventory: dict[str, Any],
+    *,
+    registry: dict[str, Any],
+    tasks: list[dict[str, Any]],
+) -> None:
+    """Keep unresolved inventory identities beyond the discovery window.
+
+    This runs in the read model, not only in task materialization, so alerts,
+    dashboards, and the task-completion contract all see the same durable
+    inventory scope.
+    """
+
+    active_inventory = next(
+        (
+            row
+            for row in tasks
+            if row.get("control_gate_inventory_review") is True
+            and str(row.get("status") or "") in ACTIVE_TASK_STATUSES
+        ),
+        None,
+    )
+    terminal_inventory = next(
+        (
+            row
+            for row in reversed(tasks)
+            if row.get("control_gate_inventory_review") is True
+            and str(row.get("status") or "") not in ACTIVE_TASK_STATUSES
+        ),
+        None,
+    )
+    scope_carrier = active_inventory or terminal_inventory
+    if scope_carrier is None:
+        return
+    carrier_readback = scope_carrier.get("inventory_live_readback")
+    carrier_consumed = bool(
+        isinstance(carrier_readback, dict)
+        and carrier_readback.get("audit_healthy") is True
+        and int(carrier_readback.get("unregistered_gate_count") or 0) == 0
+        and int(
+            carrier_readback.get("unclassified_blocking_count") or 0
+        )
+        == 0
+    )
+    if carrier_consumed:
+        return
+
+    registered_gate_ids = {
+        str(row["gate_id"]) for row in registry["gates"]
+    }
+    valid_unclassified_resolutions: set[str] = set()
+    for resolution in (
+        scope_carrier.get("inventory_unclassified_resolutions") or []
+    ):
+        if not isinstance(resolution, dict):
+            continue
+        signal_id = str(resolution.get("signal_id") or "").strip()
+        disposition = str(resolution.get("disposition") or "").strip()
+        rationale = str(resolution.get("rationale") or "").strip()
+        live_readback = str(resolution.get("live_readback") or "").strip()
+        mapped_gate_id = str(resolution.get("gate_id") or "").strip()
+        if (
+            not signal_id.startswith("unclassified:")
+            or disposition
+            not in {
+                "mapped_to_registered_gate",
+                "producer_fixed",
+                "invalid_signal",
+            }
+            or not rationale
+            or not live_readback
+            or (
+                disposition == "mapped_to_registered_gate"
+                and mapped_gate_id not in registered_gate_ids
+            )
+        ):
+            continue
+        valid_unclassified_resolutions.add(signal_id)
+
+    gap_by_id = {
+        str(row["gate_id"]): row
+        for row in inventory["unregistered_gates"]
+    }
+    carried_forward = False
+    for carried in scope_carrier.get("inventory_gaps") or []:
+        if not isinstance(carried, dict) or not carried.get("gate_id"):
+            continue
+        gate_id = str(carried["gate_id"])
+        if gate_id in registered_gate_ids or gate_id in gap_by_id:
+            continue
+        gap_by_id[gate_id] = {
+            **carried,
+            "registered": False,
+            "carried_from_inventory_task_id": scope_carrier.get("id"),
+            "reasons": sorted(
+                {
+                    *(
+                        str(reason)
+                        for reason in carried.get("reasons") or []
+                    ),
+                    "durable inventory scope not yet consumed",
+                }
+            ),
+        }
+        carried_forward = True
+
+    unclassified_by_id = {
+        str(
+            row.get("inventory_signal_id")
+            or _unclassified_signal_id(row)
+        ): {
+            **row,
+            "inventory_signal_id": str(
+                row.get("inventory_signal_id")
+                or _unclassified_signal_id(row)
+            ),
+        }
+        for row in inventory["unclassified_blocking"]
+        if (
+            str(
+                row.get("inventory_signal_id")
+                or _unclassified_signal_id(row)
+            )
+            not in valid_unclassified_resolutions
+        )
+    }
+    for carried in (
+        scope_carrier.get("inventory_unclassified_blocking") or []
+    ):
+        if not isinstance(carried, dict):
+            continue
+        signal_id = str(
+            carried.get("inventory_signal_id")
+            or _unclassified_signal_id(carried)
+        )
+        if (
+            signal_id in valid_unclassified_resolutions
+            or signal_id in unclassified_by_id
+        ):
+            continue
+        unclassified_by_id[signal_id] = {
+            **carried,
+            "inventory_signal_id": signal_id,
+            "carried_from_inventory_task_id": scope_carrier.get("id"),
+        }
+        carried_forward = True
+
+    inventory["unregistered_gates"] = [
+        gap_by_id[gate_id] for gate_id in sorted(gap_by_id)
+    ]
+    inventory["unclassified_blocking"] = [
+        unclassified_by_id[signal_id]
+        for signal_id in sorted(unclassified_by_id)
+    ]
+    inventory["unclassified_blocking_count"] = len(unclassified_by_id)
+    if carried_forward:
+        inventory["carried_forward_task_id"] = scope_carrier.get("id")
+    carrier_watermark = _parse_time(scope_carrier.get("inventory_watermark"))
+    newest_gap = _parse_time(inventory.get("newest_gap_at"))
+    watermark = max(
+        (
+            candidate
+            for candidate in (carrier_watermark, newest_gap)
+            if candidate is not None
+        ),
+        default=None,
+    )
+    if watermark is not None:
+        inventory["newest_gap_at"] = watermark.isoformat()
+
+
+def _materialize_inventory_review_task(
+    inventory: dict[str, Any],
+    *,
+    registry: dict[str, Any],
+    queue_path: Path,
+    tasks: list[dict[str, Any]],
+    now: datetime,
+) -> tuple[dict[str, Any] | None, bool, bool, bool]:
+    """Create one canonical registration task for all current inventory gaps."""
+
+    from .next_tasks import (
+        append_task_record,
+        rollover_active_task_record,
+    )
+    gaps = inventory["unregistered_gates"]
+    unclassified = inventory["unclassified_blocking"]
+    if not gaps and not unclassified:
+        return None, False, False, False
+
+    active_inventory = next(
+        (
+            row
+            for row in tasks
+            if row.get("control_gate_inventory_review") is True
+            and str(row.get("status") or "") in ACTIVE_TASK_STATUSES
+        ),
+        None,
+    )
+    terminal_inventory = next(
+        (
+            row
+            for row in reversed(tasks)
+            if row.get("control_gate_inventory_review") is True
+            and str(row.get("status") or "") not in ACTIVE_TASK_STATUSES
+        ),
+        None,
+    )
+    watermark = _parse_time(inventory.get("newest_gap_at")) or now
+    identity = {
+        "gate_ids": sorted(
+            str(row["gate_id"]) for row in gaps
+        ),
+    }
+    digest = control_gate_inventory_snapshot_hash(
+        watermark=watermark.isoformat(),
+        gaps=gaps,
+        unclassified=unclassified,
+    )
+    cycle = f"{watermark.strftime('%Y%m%dT%H%M%S')}_{digest}"
+    defaults = registry.get("review_task") or {}
+    def description(
+        gap_rows: list[dict[str, Any]],
+        unclassified_rows: list[dict[str, Any]],
+    ) -> str:
+        return "\n".join(
+            [
+                "Control-gate inventory completeness audit found graph "
+                "interventions outside the registry.",
+                f"unregistered_gates: {gap_rows}",
+                f"unclassified_blocking: {unclassified_rows}",
+                "",
+                "For each signal choose and record gate_id, owner, invariant, "
+                "protected graph nodes/edges, blocked downstream edges, mode, "
+                "identity strength, evidence source, outcome join, review "
+                "thresholds, review anchor, and incident refs.",
+                "Do not suppress the inventory alert by adding an alias unless "
+                "the aliased decisions protect the same invariant and graph edge.",
+                "For every unclassified signal, annotate "
+                "inventory_unclassified_resolutions with signal_id, disposition "
+                "(mapped_to_registered_gate/producer_fixed/invalid_signal), "
+                "rationale, live_readback, and gate_id when mapped.",
+            ]
+        )
+
+    record = {
+        "id": f"control_gate_inventory_review_{cycle}",
+        "title": "[Gate PDCA] register untracked control points",
+        "description": description(gaps, unclassified),
+        "task_type": str(defaults.get("task_type") or "platform_ops"),
+        "priority": int(defaults.get("priority") or 2),
+        "status": "pending",
+        "source": str(defaults.get("source") or "control_gate_lifecycle"),
+        "dispatch_lane": "agent",
+        "created_at": now.isoformat(),
+        "control_gate_inventory_review": True,
+        "inventory_watermark": watermark.isoformat(),
+        "inventory_snapshot_hash": digest,
+        "inventory_gate_ids": identity["gate_ids"],
+        "inventory_gaps": gaps,
+        "inventory_unclassified_blocking": unclassified,
+        "inventory_refresh_count": 0,
+        "acceptance": [
+            "register every blocking or high-frequency gate identity",
+            "record owner/invariant/protected and blocked graph edges",
+            "set trigger, harm, false-positive, and maximum review-age policy",
+            "add an outcome join and live read-back test",
+            "resolve each unclassified signal with a typed live-readback receipt",
+            "rerun inventory audit with zero unregistered/unclassified gaps",
+        ],
+    }
+    if active_inventory is None and terminal_inventory is not None:
+        record["supersedes_inventory_task_id"] = terminal_inventory.get("id")
+    stored, created = append_task_record(
+        record,
+        path=queue_path,
+        if_exists="skip",
+        semantic_dedupe=False,
+        active_unique_fields=("control_gate_inventory_review",),
+    )
+    if created:
+        return stored, True, False, False
+    if str(stored.get("status") or "") not in ACTIVE_TASK_STATUSES:
+        # The previous inventory task reached a terminal state without closing
+        # the live gap.  Reusing its id would make append_task_record return the
+        # terminal row forever, so start a new generation while retaining the
+        # original evidence watermark in the payload.
+        generation_identity = {
+            **identity,
+            "generation_at": now.isoformat(),
+        }
+        generation_digest = hashlib.sha256(
+            json.dumps(
+                generation_identity,
+                ensure_ascii=False,
+                sort_keys=True,
+            ).encode("utf-8")
+        ).hexdigest()[:12]
+        retry_record = {
+            **record,
+            "id": (
+                "control_gate_inventory_review_"
+                f"{now.strftime('%Y%m%dT%H%M%S')}_{generation_digest}"
+            ),
+            "inventory_snapshot_hash": digest,
+            "inventory_generation_at": now.isoformat(),
+            "supersedes_inventory_task_id": stored.get("id"),
+        }
+        stored, created = append_task_record(
+            retry_record,
+            path=queue_path,
+            if_exists="skip",
+            semantic_dedupe=False,
+            active_unique_fields=("control_gate_inventory_review",),
+        )
+        if created:
+            return stored, True, False, False
+
+    def build_rollover_replacement(
+        current_task: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        """Merge evidence against the lock-protected current queue row."""
+
+        existing_gaps = {
+            str(row.get("gate_id")): row
+            for row in current_task.get("inventory_gaps") or []
+            if isinstance(row, dict) and row.get("gate_id")
+        }
+        existing_gaps.update(
+            {
+                str(row["gate_id"]): row
+                for row in gaps
+            }
+        )
+        merged_gaps = [
+            existing_gaps[gate_id]
+            for gate_id in sorted(existing_gaps)
+        ]
+        unclassified_by_key = {
+            json.dumps(row, ensure_ascii=False, sort_keys=True): row
+            for row in [
+                *(
+                    current_task.get(
+                        "inventory_unclassified_blocking"
+                    )
+                    or []
+                ),
+                *unclassified,
+            ]
+            if isinstance(row, dict)
+        }
+        merged_unclassified = [
+            unclassified_by_key[key]
+            for key in sorted(unclassified_by_key)
+        ]
+        existing_watermark = _parse_time(
+            current_task.get("inventory_watermark")
+        )
+        merged_watermark = max(
+            candidate
+            for candidate in (existing_watermark, watermark)
+            if candidate is not None
+        )
+        merged_digest = control_gate_inventory_snapshot_hash(
+            watermark=merged_watermark.isoformat(),
+            gaps=merged_gaps,
+            unclassified=merged_unclassified,
+        )
+        if (
+            current_task.get("inventory_snapshot_hash")
+            == merged_digest
+            and current_task.get("inventory_gaps") == merged_gaps
+            and current_task.get("inventory_unclassified_blocking")
+            == merged_unclassified
+        ):
+            return None
+        cycle = (
+            f"{merged_watermark.strftime('%Y%m%dT%H%M%S')}_"
+            f"{merged_digest}"
+        )
+        return {
+            **record,
+            "id": f"control_gate_inventory_review_{cycle}",
+            "created_at": now.isoformat(),
+            "description": description(
+                merged_gaps,
+                merged_unclassified,
+            ),
+            "inventory_watermark": merged_watermark.isoformat(),
+            "inventory_snapshot_hash": merged_digest,
+            "inventory_gate_ids": sorted(existing_gaps),
+            "inventory_gaps": merged_gaps,
+            "inventory_unclassified_blocking": merged_unclassified,
+            "inventory_refresh_count": int(
+                current_task.get("inventory_refresh_count") or 0
+            )
+            + 1,
+            "inventory_refreshed_at": now.isoformat(),
+        }
+
+    replacement, superseded_id = rollover_active_task_record(
+        path=queue_path,
+        active_unique_fields=("control_gate_inventory_review",),
+        identity={"control_gate_inventory_review": True},
+        replacement_builder=build_rollover_replacement,
+    )
+    if superseded_id:
+        return replacement or stored, True, False, False
+    from .next_tasks import refresh_active_task_record
+
+    def build_running_refresh(
+        current_task: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        proposal = build_rollover_replacement(current_task)
+        if proposal is None:
+            return None
+        prior_updates = list(
+            current_task.get("inventory_scope_updates") or []
+        )
+        prior_updates.append(
+            {
+                "observed_at": now.isoformat(),
+                "previous_snapshot_hash": str(
+                    current_task.get("inventory_snapshot_hash") or ""
+                ),
+                "new_snapshot_hash": proposal[
+                    "inventory_snapshot_hash"
+                ],
+                "added_gate_ids": sorted(
+                    set(proposal["inventory_gate_ids"])
+                    - set(current_task.get("inventory_gate_ids") or [])
+                ),
+                "added_unclassified_count": max(
+                    0,
+                    len(
+                        proposal[
+                            "inventory_unclassified_blocking"
+                        ]
+                    )
+                    - len(
+                        current_task.get(
+                            "inventory_unclassified_blocking"
+                        )
+                        or []
+                    ),
+                ),
+            }
+        )
+        return {
+            **current_task,
+            "description": proposal["description"],
+            "inventory_watermark": proposal["inventory_watermark"],
+            "inventory_snapshot_hash": proposal[
+                "inventory_snapshot_hash"
+            ],
+            "inventory_gate_ids": proposal["inventory_gate_ids"],
+            "inventory_gaps": proposal["inventory_gaps"],
+            "inventory_unclassified_blocking": proposal[
+                "inventory_unclassified_blocking"
+            ],
+            "inventory_refresh_count": proposal[
+                "inventory_refresh_count"
+            ],
+            "inventory_refreshed_at": proposal[
+                "inventory_refreshed_at"
+            ],
+            "inventory_scope_updates": prior_updates,
+        }
+
+    refreshed_task, refreshed = refresh_active_task_record(
+        path=queue_path,
+        active_unique_fields=("control_gate_inventory_review",),
+        identity={"control_gate_inventory_review": True},
+        refresh_builder=build_running_refresh,
+    )
+    if refreshed:
+        return refreshed_task or stored, False, True, False
+    return refreshed_task or replacement or stored, False, False, False
+
+
 def _write_state(path: Path, payload: dict[str, Any]) -> None:
     guard_canonical_write(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -932,9 +2154,21 @@ def audit_control_gates(
         else storage_root / DEFAULT_STATE_RELATIVE_PATH
     )
     registry = load_gate_registry(registry_path)
-    tasks, tasks_health = _load_tasks(queue)
-    feed, feed_health = _load_feed(storage_root)
     incidents, incidents_health = _load_incidents(storage_root)
+    inventory = _discover_gate_inventory(
+        registry,
+        storage_root=storage_root,
+        now=current,
+        incidents=incidents,
+        incidents_health=incidents_health,
+    )
+    tasks, tasks_health = _load_tasks(queue)
+    _carry_forward_inventory_scope(
+        inventory,
+        registry=registry,
+        tasks=tasks,
+    )
+    feed, feed_health = _load_feed(storage_root)
     dispatch_completions, dispatch_health = _load_dispatch_completions(
         storage_root
     )
@@ -946,6 +2180,16 @@ def audit_control_gates(
         window_hours = float(gate["review_policy"]["window_hours"])
         lookback_start = current - timedelta(hours=window_hours)
         reviewed_through = _review_watermark(gate, tasks)
+        lifecycle = gate["lifecycle"]
+        review_anchor_at = (
+            _parse_time(lifecycle.get("last_reviewed_at"))
+            if reviewed_through is not None
+            else _parse_time(lifecycle["review_anchor_at"])
+        )
+        if review_anchor_at is None:  # guarded by registry validation
+            raise ValueError(
+                f"gate {gate['gate_id']!r} has no valid review anchor"
+            )
         window_start = max(
             candidate
             for candidate in (lookback_start, reviewed_through)
@@ -953,15 +2197,89 @@ def audit_control_gates(
         )
         evidence, malformed, incident_hits, source_health = _collect_evidence(
             gate,
+            registry=registry,
             storage_root=storage_root,
             window_start=window_start,
             now=current,
             incidents=incidents,
         )
         outcome_join = str(gate["outcome_join"])
-        if outcome_join in {"candidate_task", "candidate_or_event_stage"}:
+        if outcome_join in {
+            "candidate_task",
+            "candidate_or_event_stage",
+            "candidate_or_feed",
+        }:
+            identity_required_after = _parse_time(
+                registry["discovery"][
+                    "candidate_identity_required_after"
+                ]
+            )
+            missing_candidate_identity = sum(
+                1 for row in evidence if _candidate_id(row) is None
+            )
+            synthetic_candidate_identity = sum(
+                1
+                for row in evidence
+                for timestamp, malformed_timestamp in [
+                    _try_parse_time(_row_timestamp(row))
+                ]
+                if (
+                    not malformed_timestamp
+                    and timestamp is not None
+                    and identity_required_after is not None
+                    and timestamp > identity_required_after
+                    and not any(
+                        isinstance(row.get(field), str)
+                        and str(row.get(field) or "").strip()
+                        and not str(row.get(field) or "").startswith(
+                            ("title:", "decision:")
+                        )
+                        for field in (
+                            "candidate_id",
+                            "target_id",
+                            "task_id",
+                            "job_id",
+                            "rejection_id",
+                            "generation_id",
+                            "signature",
+                        )
+                    )
+                )
+            )
+            if missing_candidate_identity:
+                source_health.append(
+                    {
+                        "path": "<control-gate-evidence>",
+                        "ok": False,
+                        "error": "missing_candidate_identity",
+                        "row_count": len(evidence),
+                        "missing_candidate_identity_count": (
+                            missing_candidate_identity
+                        ),
+                    }
+                )
+            if synthetic_candidate_identity:
+                source_health.append(
+                    {
+                        "path": "<control-gate-evidence>",
+                        "ok": False,
+                        "error": "synthetic_candidate_identity_after_ratchet",
+                        "row_count": len(evidence),
+                        "synthetic_candidate_identity_count": (
+                            synthetic_candidate_identity
+                        ),
+                        "required_after": (
+                            identity_required_after.isoformat()
+                            if identity_required_after is not None
+                            else None
+                        ),
+                    }
+                )
             source_health.append(tasks_health)
-        if outcome_join == "candidate_or_event_stage":
+        if outcome_join in {
+            "candidate_or_event_stage",
+            "candidate_or_feed",
+        }:
             source_health.append(feed_health)
         if outcome_join == "incident_or_generation":
             source_health.append(incidents_health)
@@ -1011,6 +2329,8 @@ def audit_control_gates(
         )
         due, reasons = _review_due(
             gate,
+            now=current,
+            review_anchor_at=review_anchor_at,
             trigger_count=len(evidence),
             distinct_candidates=len(candidates),
             incident_occurrences=incident_occurrences,
@@ -1088,7 +2408,7 @@ def audit_control_gates(
                 tasks=tasks,
                 window_start=window_start,
                 now=current,
-                review_cycle_at=newest_evidence_at,
+                review_cycle_at=newest_evidence_at or current,
             )
             review_id = str(stored.get("id") or "")
             if created:
@@ -1097,14 +2417,56 @@ def audit_control_gates(
             elif review_id:
                 existing_reviews.append(review_id)
 
+    inventory_review_ids: list[str] = []
+    inventory_review_existing_ids: list[str] = []
+    inventory_review_refreshed_ids: list[str] = []
+    inventory_review_deferred_ids: list[str] = []
+    if materialize_reviews:
+        (
+            inventory_task,
+            inventory_created,
+            inventory_refreshed,
+            inventory_deferred,
+        ) = (
+            _materialize_inventory_review_task(
+                inventory,
+                registry=registry,
+                queue_path=queue,
+                tasks=tasks,
+                now=current,
+            )
+        )
+        if inventory_task is not None:
+            inventory_task_id = str(inventory_task.get("id") or "")
+            if inventory_created:
+                inventory_review_ids.append(inventory_task_id)
+                tasks.append(inventory_task)
+            elif inventory_refreshed:
+                inventory_review_refreshed_ids.append(
+                    inventory_task_id
+                )
+            elif inventory_deferred:
+                inventory_review_deferred_ids.append(
+                    inventory_task_id
+                )
+            elif inventory_task_id:
+                inventory_review_existing_ids.append(inventory_task_id)
+
     result = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": current.isoformat(),
         "registry_path": str(Path(registry_path)),
         "registry_owner": registry["owner"],
+        "inventory": inventory,
         "gates": gate_verdicts,
         "summary": {
             "gate_count": len(gate_verdicts),
+            "unregistered_gate_count": len(
+                inventory["unregistered_gates"]
+            ),
+            "unclassified_blocking_count": inventory[
+                "unclassified_blocking_count"
+            ],
             "review_due_count": sum(
                 1 for verdict in gate_verdicts if verdict["review"]["due"]
             ),
@@ -1123,6 +2485,29 @@ def audit_control_gates(
             "created_ids": created_reviews,
             "existing_ids": sorted(set(existing_reviews)),
         },
+        "inventory_review_tasks": {
+            "created_count": len(inventory_review_ids),
+            "created_ids": inventory_review_ids,
+            "refreshed_ids": inventory_review_refreshed_ids,
+            "deferred_ids": inventory_review_deferred_ids,
+            "pending_delta": (
+                {
+                    "gate_ids": [
+                        str(row["gate_id"])
+                        for row in inventory["unregistered_gates"]
+                    ],
+                    "unclassified_blocking_count": inventory[
+                        "unclassified_blocking_count"
+                    ],
+                    "watermark": inventory.get("newest_gap_at"),
+                }
+                if inventory_review_deferred_ids
+                else None
+            ),
+            "existing_ids": sorted(
+                set(inventory_review_existing_ids)
+            ),
+        },
     }
     unhealthy_sources = [
         {
@@ -1133,6 +2518,34 @@ def audit_control_gates(
         for source in verdict["evidence"]["source_health"]
         if not source["ok"]
     ]
+    unhealthy_sources.extend(
+        {
+            "gate_id": "__inventory__",
+            **source,
+        }
+        for source in inventory["source_health"]
+        if not source["ok"]
+    )
+    if inventory["unregistered_gates"]:
+        unhealthy_sources.append(
+            {
+                "gate_id": "__inventory__",
+                "path": str(Path(registry_path)),
+                "ok": False,
+                "error": "unregistered_control_gates",
+                "gates": inventory["unregistered_gates"],
+            }
+        )
+    if inventory["unclassified_blocking_count"]:
+        unhealthy_sources.append(
+            {
+                "gate_id": "__inventory__",
+                "path": str(Path(registry_path)),
+                "ok": False,
+                "error": "unclassified_blocking_decisions",
+                "decisions": inventory["unclassified_blocking"],
+            }
+        )
     result["audit_health"] = {
         "healthy": not unhealthy_sources,
         "unhealthy_sources": unhealthy_sources,
@@ -1155,6 +2568,31 @@ def _append_control_decisions(
         with path.open("a", encoding="utf-8") as handle:
             for row in rows:
                 handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def record_control_gate_decision(
+    *,
+    gate_id: str,
+    decision: str,
+    candidate_id: str,
+    reason: str,
+    protected_edge: str,
+    storage_dir: str = "storage",
+    timestamp: str | None = None,
+) -> None:
+    """Append one canonical graph-intervention receipt."""
+
+    _append_control_decisions(
+        [{
+            "ts": timestamp or datetime.now(timezone.utc).isoformat(),
+            "gate_id": gate_id,
+            "decision": decision,
+            "candidate_id": candidate_id,
+            "reason": reason,
+            "protected_edge": protected_edge,
+        }],
+        storage_dir=storage_dir,
+    )
 
 
 def record_dispatch_gate_decisions(

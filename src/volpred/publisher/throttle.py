@@ -109,18 +109,19 @@ def _log_throttle_decision(
     previous_id: str | None,
     gap_minutes: float | None,
     reason: str,
-) -> None:
+) -> bool:
     """Append throttle decision to storage/logs/dedup_decisions.jsonl.
 
     Per `.claude/rules/dedup-gate-audit.md`: every gate decision (pass / block /
     warn) must leave an audit trail so a non-publish is never silent.
-    Fail-safe — logging never breaks a publish.
+    Returns whether the receipt was durable. A blocking caller may raise only
+    when this returns ``True``; pass/advisory callers may ignore ``False``.
     """
     from volpred.canonical_write import guard_canonical_write
 
-    path = Path(storage_dir) / "logs" / "dedup_decisions.jsonl"
-    guard_canonical_write(path)
     try:
+        path = Path(storage_dir) / "logs" / "dedup_decisions.jsonl"
+        guard_canonical_write(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         rec = {
             "ts": datetime.now(timezone.utc).isoformat(),
@@ -133,7 +134,8 @@ def _log_throttle_decision(
         }
         with path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    except OSError as exc:
+        return True
+    except Exception as exc:  # noqa: BLE001 - audit failure must fail open
         try:
             from volpred.ops.diagnostics import warn
 
@@ -144,6 +146,7 @@ def _log_throttle_decision(
             )
         except ImportError:
             pass  # silent-ok: diagnostics optional in early import contexts
+        return False
 
 
 def check_publish_throttle(
@@ -233,7 +236,7 @@ def check_publish_throttle(
             reason="gap_above_threshold",
         )
         return
-    _log_throttle_decision(
+    receipt_persisted = _log_throttle_decision(
         storage_dir,
         decision="block",
         target_id=target_id,
@@ -241,6 +244,8 @@ def check_publish_throttle(
         gap_minutes=gap_min,
         reason=f"burst_gap_{gap_min}min_lt_{min_gap_min}min",
     )
+    if not receipt_persisted:
+        return
     raise PublishThrottleError(
         f"publish_throttle: would create burst — gap={gap_min}min < "
         f"threshold={min_gap_min}min (new={target_id}, previous={prev.get('id')})",

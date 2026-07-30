@@ -1451,6 +1451,130 @@ def _gate_review_completion_contract(
     }, None
 
 
+def _audit_inventory_completion() -> dict[str, Any]:
+    """Read the canonical inventory loop without materializing more work."""
+
+    from volpred.ops.control_gate_lifecycle import audit_control_gates
+
+    return audit_control_gates(
+        storage_dir=str(NEXT_TASKS.parent),
+        queue_path=NEXT_TASKS,
+        materialize_reviews=False,
+        write_state=False,
+    )
+
+
+def _inventory_review_completion_contract(
+    task: dict[str, Any],
+    args: argparse.Namespace,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Refuse a false-green inventory close while any control point is unseen."""
+
+    if (
+        task.get("control_gate_inventory_review") is not True
+        or args.status != "succeeded"
+    ):
+        return None, None
+    inventory_watermark = str(
+        task.get("inventory_watermark") or ""
+    ).strip()
+    inventory_snapshot_hash = str(
+        task.get("inventory_snapshot_hash") or ""
+    ).strip()
+    from volpred.ops.control_gate_lifecycle import (
+        control_gate_inventory_snapshot_hash,
+    )
+
+    expected_snapshot_hash = control_gate_inventory_snapshot_hash(
+        watermark=inventory_watermark,
+        gaps=[
+            row
+            for row in task.get("inventory_gaps") or []
+            if isinstance(row, dict)
+        ],
+        unclassified=[
+            row
+            for row in task.get("inventory_unclassified_blocking") or []
+            if isinstance(row, dict)
+        ],
+    )
+    if (
+        not inventory_watermark
+        or not inventory_snapshot_hash
+        or inventory_snapshot_hash != expected_snapshot_hash
+    ):
+        return None, {
+            "ok": False,
+            "reason": "control_gate_inventory_snapshot_mismatch",
+            "task_id": args.id,
+            "inventory_watermark": inventory_watermark or None,
+            "inventory_snapshot_hash": inventory_snapshot_hash or None,
+            "expected_snapshot_hash": expected_snapshot_hash,
+        }
+    try:
+        verdict = _audit_inventory_completion()
+    except Exception as exc:  # noqa: BLE001 - an unreadable audit cannot prove clean
+        return None, {
+            "ok": False,
+            "reason": "control_gate_inventory_audit_unavailable",
+            "task_id": args.id,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+    inventory = (
+        verdict.get("inventory")
+        if isinstance(verdict.get("inventory"), dict)
+        else {}
+    )
+    audit_health = (
+        verdict.get("audit_health")
+        if isinstance(verdict.get("audit_health"), dict)
+        else {}
+    )
+    gaps = [
+        row
+        for row in inventory.get("unregistered_gates") or []
+        if isinstance(row, dict)
+    ]
+    unclassified = int(
+        inventory.get("unclassified_blocking_count") or 0
+    )
+    healthy = audit_health.get("healthy") is True
+    if gaps or unclassified or not healthy:
+        return None, {
+            "ok": False,
+            "reason": "control_gate_inventory_not_clean",
+            "task_id": args.id,
+            "unregistered_gate_ids": sorted(
+                str(row.get("gate_id") or "")
+                for row in gaps
+                if row.get("gate_id")
+            ),
+            "unclassified_blocking_count": unclassified,
+            "audit_healthy": healthy,
+            "audit_unhealthy_sources": audit_health.get(
+                "unhealthy_sources"
+            ),
+        }
+    summary = (
+        verdict.get("summary")
+        if isinstance(verdict.get("summary"), dict)
+        else {}
+    )
+    return {
+        "inventory_live_readback": {
+            "generated_at": verdict.get("generated_at"),
+            "consumed_inventory_watermark": inventory_watermark,
+            "consumed_inventory_snapshot_hash": (
+                inventory_snapshot_hash
+            ),
+            "gate_count": int(summary.get("gate_count") or 0),
+            "unregistered_gate_count": 0,
+            "unclassified_blocking_count": 0,
+            "audit_healthy": True,
+        }
+    }, None
+
+
 def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
     out, burst = _complete_locked(
         args,
@@ -1534,6 +1658,13 @@ def _complete_locked(
             return gate_error, None
         if gate_receipt is not None:
             task.update(gate_receipt)
+        inventory_receipt, inventory_error = (
+            _inventory_review_completion_contract(task, args)
+        )
+        if inventory_error is not None:
+            return inventory_error, None
+        if inventory_receipt is not None:
+            task.update(inventory_receipt)
         task["status"] = args.status
         task["completed_at"] = _now()
         _record_status_history(

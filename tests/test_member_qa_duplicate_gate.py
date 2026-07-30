@@ -766,6 +766,53 @@ def test_publish_milestone_refuses_the_real_incident_pair(monkeypatch, tmp_path)
             audience="member_qa",
             category="member_qa",
         )
+    decision = json.loads(
+        (tmp_path / "logs" / "dedup_decisions.jsonl").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert decision["gate"] == "member_qa_publish_identity"
+    assert decision["candidate_id"] == ID_15PCT
+
+
+def test_member_qa_block_fails_open_when_receipt_is_not_durable(
+    monkeypatch,
+    tmp_path,
+):
+    from volpred.publisher import publisher as publisher_module
+    from volpred.publisher.publisher import Publisher
+
+    _no_remote(monkeypatch)
+    pub = Publisher(storage_dir=str(tmp_path))
+    monkeypatch.setattr(
+        Publisher,
+        "_load_feed",
+        lambda self: [_published_answer(ART_15PCT, ID_15PCT)],
+    )
+    monkeypatch.setattr(
+        publisher_module,
+        "_log_dedup_decision",
+        lambda *_args, **_kwargs: False,
+    )
+    monkeypatch.setattr(
+        Publisher,
+        "_append_to_feed",
+        lambda self, item: item["id"],
+    )
+
+    result = pub.publish_milestone(
+        title="會員提問｜想要30 年每年賺 7%",
+        description="body",
+        phase="member_qa",
+        details={
+            "question_id": ID_15PCT,
+            "content_type": "member_qa",
+        },
+        audience="member_qa",
+        category="member_qa",
+    )
+
+    assert result != ART_15PCT
 
 
 # --- G1b: missing question_id is FAIL-CLOSED (2026-07-22 residual 1) --------
@@ -1265,6 +1312,56 @@ def test_release_promotion_blocks_a_duplicate_member_qa_answer(tmp_path, monkeyp
     assert "member_qa_duplicate_publish_blocked" in outcome["reason"]
     # Fail-closed means the draft stays a draft, not that the whole run dies.
     assert json.loads(feed_path.read_text(encoding="utf-8"))[1]["status"] == "scheduled"
+    decision = json.loads(
+        (
+            tmp_path
+            / "storage"
+            / "logs"
+            / "control_gate_decisions.jsonl"
+        ).read_text(encoding="utf-8")
+    )
+    assert decision["gate_id"] == "member_qa_publish_identity"
+    assert decision["candidate_id"] == ART_7PCT
+
+
+def test_release_member_qa_fails_open_without_durable_receipt(
+    tmp_path,
+    monkeypatch,
+):
+    from volpred.ops import control_gate_lifecycle
+
+    prior = {
+        "id": ART_15PCT,
+        "title": "會員提問｜已回答",
+        "status": "published",
+        "audience": "member_qa",
+        "published_at": "2026-07-12T00:00:00+00:00",
+        "details": {"question_id": ID_15PCT},
+    }
+    draft = {
+        "id": ART_7PCT,
+        "title": "會員提問｜再問一次",
+        "status": "scheduled",
+        "audience": "member_qa",
+        "created_at": "2026-07-19T00:00:00+00:00",
+        "details": {"question_id": ID_15PCT},
+    }
+    feed_path = _member_qa_feed(tmp_path, [prior, draft])
+    monkeypatch.setattr(
+        content, "_member_qa_remote_prior_answers", lambda qid: ([], None)
+    )
+    monkeypatch.setattr(
+        control_gate_lifecycle,
+        "record_control_gate_decision",
+        lambda **_kwargs: (_ for _ in ()).throw(OSError("disk full")),
+    )
+
+    outcome = _promote(draft, tmp_path / "storage")
+
+    assert outcome["outcome"] == "promoted"
+    assert json.loads(feed_path.read_text(encoding="utf-8"))[1][
+        "status"
+    ] == "published"
 
 
 def test_release_promotion_blocks_member_qa_without_a_question_id(tmp_path):

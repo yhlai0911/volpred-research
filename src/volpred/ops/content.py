@@ -1814,7 +1814,7 @@ def _atomic_promote_release_item(
                 from volpred.publisher.publisher import _log_dedup_decision
 
                 existing_id = str(other_hits[0].get("id") or "")
-                _log_dedup_decision(
+                receipt_persisted = _log_dedup_decision(
                     storage_dir,
                     "block_event_stage_coverage",
                     str(prospective.get("title") or ""),
@@ -1829,11 +1829,12 @@ def _atomic_promote_release_item(
                         f"{event_identity['event_series_slot']}"
                     ),
                 )
-                return {
-                    "outcome": "event_stage_coverage_blocked",
-                    "id": item_id,
-                    "existing_id": existing_id,
-                }
+                if receipt_persisted:
+                    return {
+                        "outcome": "event_stage_coverage_blocked",
+                        "id": item_id,
+                        "existing_id": existing_id,
+                    }
 
         # G1 on the release path (2026-07-22, residual 5). This function is the
         # ONLY place release_pool rewrites status to 'published', so hooking the
@@ -1851,11 +1852,28 @@ def _atomic_promote_release_item(
             MemberQaDuplicatePublishError,
             MemberQaPublishGateIndeterminate,
         ) as exc:
-            return {
-                "outcome": "member_qa_publish_blocked",
-                "id": item_id,
-                "reason": f"{type(exc).__name__}: {str(exc).splitlines()[0]}",
-            }
+            from .control_gate_lifecycle import record_control_gate_decision
+
+            try:
+                record_control_gate_decision(
+                    gate_id="member_qa_publish_identity",
+                    decision="block",
+                    candidate_id=item_id,
+                    reason=f"{type(exc).__name__}: {str(exc).splitlines()[0]}",
+                    protected_edge="member_qa_draft -> reader_visible_answer",
+                    storage_dir=storage_dir,
+                )
+            except Exception as receipt_exc:  # noqa: BLE001
+                print(
+                    "  ⚠️ member-QA block receipt failed; release gate "
+                    f"fails open: {type(receipt_exc).__name__}: {receipt_exc}"
+                )
+            else:
+                return {
+                    "outcome": "member_qa_publish_blocked",
+                    "id": item_id,
+                    "reason": f"{type(exc).__name__}: {str(exc).splitlines()[0]}",
+                }
 
         throttle_block = _release_publish_throttle(
             prospective,
@@ -2338,13 +2356,36 @@ def release_content_gate_issues(
         or item.get("summary")
         or ""
     )
-    issues = list(
+    audit_issues = list(
         _audit_general_content(
             audience,
             list(item.get("tags") or []),
             str(body_text),
         )
     )
+    issues: list[str] = []
+    if audit_issues:
+        if record:
+            from .control_gate_lifecycle import record_control_gate_decision
+
+            try:
+                record_control_gate_decision(
+                    gate_id="release_content_audit",
+                    decision="block",
+                    candidate_id=str(item.get("id") or ""),
+                    reason="; ".join(audit_issues)[:1000],
+                    protected_edge="article_draft -> release_candidate",
+                    storage_dir=storage_dir,
+                )
+            except Exception as exc:  # no receipt means no durable block
+                _warn_release_pool(
+                    "content audit block receipt failed; fail-open",
+                    exc,
+                )
+            else:
+                issues.extend(audit_issues)
+        else:
+            issues.extend(audit_issues)
 
     if audience == "general":
         try:
@@ -2353,12 +2394,39 @@ def release_content_gate_issues(
             # "description" is the <=200-char SEO snippet.
             _lz_text = item.get("content") or item.get("description") or ""
             if not has_lazypack_section(str(_lz_text)):
-                issues.append(
-                    _lazypack_gate_issue(
-                        str(item.get("id") or ""), storage_dir,
-                        may_enqueue=record
-                    )
+                article_id = str(item.get("id") or "")
+                lazypack_issue = _lazypack_gate_issue(
+                    article_id,
+                    storage_dir,
+                    may_enqueue=record,
                 )
+                if record:
+                    from .control_gate_lifecycle import (
+                        record_control_gate_decision,
+                    )
+
+                    try:
+                        record_control_gate_decision(
+                            gate_id="release_lazypack_completeness",
+                            decision="block",
+                            candidate_id=article_id,
+                            reason=lazypack_issue,
+                            protected_edge=(
+                                "lazypack_section -> release_candidate"
+                            ),
+                            storage_dir=storage_dir,
+                        )
+                    except Exception as exc:  # no receipt means no durable block
+                        _warn_release_pool(
+                            "lazypack block receipt failed; fail-open",
+                            exc,
+                        )
+                    else:
+                        issues.append(lazypack_issue)
+                else:
+                    # Preview is an observation, not the release decision.  It
+                    # reports the blocker without mutating the receipt ledger.
+                    issues.append(lazypack_issue)
         except Exception as exc:  # fail-open: never block release on a broken check
             _warn_release_pool("lazypack release gate check failed; fail-open", exc)
 

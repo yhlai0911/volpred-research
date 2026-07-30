@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -14,9 +15,13 @@ from volpred.ops.alerts import (
 from volpred.ops.control_gate_lifecycle import (
     DEFAULT_REGISTRY_PATH,
     audit_control_gates,
+    control_gate_inventory_snapshot_hash,
     load_gate_registry,
     record_dispatch_gate_decisions,
 )
+from volpred.ops.incident import CONTROL_GATE_BY_KIND
+from volpred.ops.next_tasks import rollover_active_task_record
+from volpred.publisher.publisher import _DEDUP_ACTION_GATE_IDS
 
 NOW = datetime(2026, 7, 30, 6, 0, tzinfo=timezone.utc)
 
@@ -44,6 +49,28 @@ def _registry(*, mode: str = "hard_block", identity: str = "canonical_exact") ->
             "task_type": "platform_ops",
             "priority": 2,
             "source": "control_gate_lifecycle",
+        },
+        "discovery": {
+            "window_hours": 168,
+            "high_frequency_threshold": 20,
+            "incidents_required": False,
+            "candidate_identity_required_after": NOW.isoformat(),
+            "sources": [
+                {
+                    "kind": "jsonl",
+                    "path": "logs/control_gate_discovery.jsonl",
+                    "required": False,
+                    "identity_fields": ["gate_id", "gate"],
+                    "decision_fields": ["decision", "action"],
+                    "blocking_values": [
+                        "block",
+                        "hold",
+                        "skip",
+                        "block_event_stage_coverage",
+                    ],
+                    "action_gate_aliases": {},
+                }
+            ],
         },
         "gates": [
             {
@@ -75,13 +102,24 @@ def _registry(*, mode: str = "hard_block", identity: str = "canonical_exact") ->
                 "deadline_required": True,
                 "review_policy": {
                     "window_hours": 168,
+                    "max_review_age_hours": 336,
                     "min_distinct_candidates": 2,
                     "max_harm_outcomes": 1,
+                    "harm_outcomes": [
+                        "failed",
+                        "missed_deadline",
+                        "sequence_coverage_gap",
+                        "worker_failed",
+                        "unjoined",
+                    ],
                     "max_false_positive_signals": 1,
                     "min_incident_occurrences": 2,
                 },
                 "lifecycle": {
                     "phase": "check",
+                    "review_anchor_at": (
+                        NOW - timedelta(hours=1)
+                    ).isoformat(),
                     "allowed_actions": [
                         "retain",
                         "recalibrate",
@@ -100,6 +138,201 @@ def test_registry_rejects_heuristic_hard_block(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="heuristic.*hard_block"):
         load_gate_registry(path)
+
+
+def test_registry_rejects_cross_gate_review_receipt_identity(
+    tmp_path: Path,
+) -> None:
+    registry = _registry()
+    registry["gates"][0]["lifecycle"].update(
+        {
+            "last_action": "retain",
+            "last_reviewed_at": NOW.isoformat(),
+            "review_task_id": (
+                "control_gate_review_another_gate_20260730_bad"
+            ),
+        }
+    )
+    path = tmp_path / "registry.json"
+    _write_json(path, registry)
+
+    with pytest.raises(ValueError, match="wrong gate identity"):
+        load_gate_registry(path)
+
+
+def test_registry_rejects_non_hashed_review_receipt_identity(
+    tmp_path: Path,
+) -> None:
+    registry = _registry()
+    registry["gates"][0]["lifecycle"].update(
+        {
+            "last_action": "retain",
+            "last_reviewed_at": NOW.isoformat(),
+            "review_task_id": (
+                "control_gate_review_event_stage_idempotency_manual"
+            ),
+        }
+    )
+    path = tmp_path / "registry.json"
+    _write_json(path, registry)
+
+    with pytest.raises(ValueError, match="wrong gate identity"):
+        load_gate_registry(path)
+
+
+def test_review_watermark_rejects_syntactic_but_wrong_hash() -> None:
+    watermark = NOW - timedelta(hours=2)
+    reviewed_at = NOW - timedelta(hours=1)
+    valid_id = control_gate_lifecycle._review_task_id(
+        "event_stage_idempotency",
+        watermark,
+    )
+    forged_id = valid_id[:-1] + ("0" if valid_id[-1] != "0" else "1")
+    gate = _registry()["gates"][0]
+    gate["lifecycle"].update(
+        {
+            "last_action": "retain",
+            "last_reviewed_at": reviewed_at.isoformat(),
+            "review_task_id": forged_id,
+        }
+    )
+    task = {
+        "id": forged_id,
+        "status": "succeeded",
+        "gate_review_id": "event_stage_idempotency",
+        "gate_decision": "retain",
+        "completed_at": NOW.isoformat(),
+        "gate_live_readback": "verified",
+        "gate_registry_reviewed_at": reviewed_at.isoformat(),
+        "gate_review_watermark": watermark.isoformat(),
+    }
+
+    assert control_gate_lifecycle._review_watermark(gate, [task]) is None
+
+
+def test_review_harm_policy_includes_worker_failure() -> None:
+    gate = _registry(mode="shadow", identity="heuristic")["gates"][0]
+    gate["review_policy"].update(
+        {
+            "max_raw_triggers": 999,
+            "min_distinct_candidates": 999,
+            "max_harm_outcomes": 1,
+            "harm_outcomes": ["worker_failed"],
+        }
+    )
+
+    due, reasons = control_gate_lifecycle._review_due(
+        gate,
+        now=NOW,
+        review_anchor_at=NOW - timedelta(hours=1),
+        trigger_count=1,
+        distinct_candidates=1,
+        incident_occurrences=0,
+        outcomes={"worker_failed": 1},
+    )
+
+    assert due is True
+    assert reasons == ["harm_outcomes=1>=1"]
+
+
+@pytest.mark.parametrize(
+    ("evidence", "feed_item", "expected"),
+    [
+        (
+            {"candidate_id": "mile_candidate"},
+            {"id": "mile_candidate", "status": "published"},
+            "published",
+        ),
+        (
+            {"new_title": "Same   Research Title"},
+            {
+                "id": "mile_title",
+                "title": "same research title",
+                "status": "published",
+            },
+            "published",
+        ),
+        (
+            {"reason": "K1719 already covered for audience=general"},
+            {
+                "id": "mile_k",
+                "status": "draft",
+                "audience": "general",
+                "details": {"experiment_refs": ["K1719"]},
+            },
+            "queued",
+        ),
+        (
+            {"candidate_id": "question-7"},
+            {
+                "id": "mile_qa",
+                "status": "published",
+                "details": {"question_id": "question-7"},
+            },
+            "published",
+        ),
+    ],
+)
+def test_candidate_or_feed_joins_typed_publisher_identity(
+    evidence: dict,
+    feed_item: dict,
+    expected: str,
+) -> None:
+    outcomes, health = control_gate_lifecycle._join_outcomes(
+        [evidence],
+        tasks=[],
+        feed=[feed_item],
+        dispatch_completions=[],
+        now=NOW,
+        strategy="candidate_or_feed",
+        deadline_required=False,
+    )
+
+    assert health["malformed_task_deadlines"] == []
+    assert outcomes[expected] == 1
+    assert outcomes["unjoined"] == 0
+
+
+def test_k_coverage_does_not_join_across_audience_scope() -> None:
+    outcomes, _ = control_gate_lifecycle._join_outcomes(
+        [{
+            "candidate_id": "K1719",
+            "reason": "K1719 already covered for audience=general",
+            "action": "warn_coverage_metadata_gap",
+        }],
+        tasks=[],
+        feed=[{
+            "id": "mile_research",
+            "status": "published",
+            "audience": "research",
+            "details": {"experiment_refs": ["K1719"]},
+        }],
+        dispatch_completions=[],
+        now=NOW,
+        strategy="candidate_or_feed",
+        deadline_required=False,
+    )
+
+    assert outcomes["published"] == 0
+    assert outcomes["unjoined"] == 1
+
+
+def test_blocked_publisher_candidate_is_classified_not_unjoined() -> None:
+    outcomes, _ = control_gate_lifecycle._join_outcomes(
+        [{
+            "candidate_id": "mile_never_written",
+            "action": "block_depth_floor",
+        }],
+        tasks=[],
+        feed=[],
+        dispatch_completions=[],
+        now=NOW,
+        strategy="candidate_or_feed",
+        deadline_required=False,
+    )
+
+    assert outcomes["blocked"] == 1
+    assert outcomes["unjoined"] == 1
 
 
 @pytest.mark.parametrize(
@@ -160,6 +393,23 @@ def test_project_registry_lists_known_problematic_gates() -> None:
         "dispatch_collision",
         "dispatch_starvation_lockout",
         "phase_z_baseline_ownership",
+        "worktree_merge_ownership",
+        "dispatch_worker_ownership",
+        "task_generation",
+        "publish_throttle",
+        "anti_ai_style",
+        "release_content_audit",
+        "release_lazypack_completeness",
+        "member_qa_publish_identity",
+        "release_pool_arc_dedup",
+        "event_cross_stage_similarity",
+        "publisher_title_identity",
+        "publisher_content_depth",
+        "publisher_digest_identity",
+        "publisher_digest_recap",
+        "publisher_arc_dedup",
+        "publisher_k_coverage",
+        "publisher_cluster_cap",
     } <= gates.keys()
     assert gates["hourly_pregate"]["mode"] == "shadow"
     assert gates["dispatch_starvation_lockout"]["mode"] == "selection_constraint"
@@ -172,6 +422,904 @@ def test_project_registry_lists_known_problematic_gates() -> None:
         for row in gates.values()
         if row["mode"] in {"hard_block", "fail_closed", "mutex"}
     )
+    assert all(
+        row["review_policy"]["max_review_age_hours"] > 0
+        for row in gates.values()
+    )
+    dedup_source = next(
+        source
+        for source in registry["discovery"]["sources"]
+        if source["path"] == "logs/dedup_decisions.jsonl"
+    )
+    assert dedup_source["action_gate_aliases"] == _DEDUP_ACTION_GATE_IDS
+    incident_gate_by_kind = {
+        kind: gate["gate_id"]
+        for gate in gates.values()
+        for kind in gate["incident_kinds"]
+    }
+    assert incident_gate_by_kind == CONTROL_GATE_BY_KIND
+
+
+def test_registry_rejects_duplicate_incident_kind_ownership(
+    tmp_path: Path,
+) -> None:
+    registry = _registry()
+    first = registry["gates"][0]
+    first["incident_kinds"] = ["shared_control_kind"]
+    second = json.loads(json.dumps(first))
+    second["gate_id"] = "second_gate"
+    registry["gates"].append(second)
+    path = tmp_path / "registry.json"
+    _write_json(path, registry)
+
+    with pytest.raises(ValueError, match="owned by both"):
+        load_gate_registry(path)
+
+
+def test_inventory_rejects_registered_but_wrong_explicit_incident_gate(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    expected = registry["gates"][0]
+    expected["incident_kinds"] = ["phase_z_baseline_missing"]
+    wrong = json.loads(json.dumps(expected))
+    wrong["gate_id"] = "wrong_but_registered_gate"
+    wrong["incident_kinds"] = []
+    registry["gates"].append(wrong)
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(
+        storage / "ops" / "incidents.json",
+        {
+            "incidents": {
+                "inc-mismatch": {
+                    "kind": "phase_z_baseline_missing",
+                    "is_control_intervention": True,
+                    "control_gate_id": "wrong_but_registered_gate",
+                    "last_seen_at": (
+                        NOW - timedelta(minutes=1)
+                    ).isoformat(),
+                }
+            }
+        },
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+        materialize_reviews=True,
+    )
+
+    gaps = verdict["inventory"]["unregistered_incident_controls"]
+    assert len(gaps) == 1
+    assert gaps[0]["explicit_gate_mismatch"] is True
+    assert gaps[0]["expected_gate_id"] == "event_stage_idempotency"
+    assert "expected=event_stage_idempotency" in " ".join(
+        gaps[0]["reasons"]
+    )
+    assert verdict["inventory_review_tasks"]["created_count"] == 1
+    assert verdict["audit_health"]["healthy"] is False
+
+
+def test_inventory_snapshot_hash_covers_full_evidence_rows() -> None:
+    common = {
+        "gate_id": "same_gate",
+        "registered": False,
+        "trigger_count": 1,
+        "blocking_count": 1,
+        "distinct_candidates": 1,
+        "latest_at": NOW.isoformat(),
+    }
+    first = control_gate_inventory_snapshot_hash(
+        watermark=NOW.isoformat(),
+        gaps=[{**common, "reasons": ["first evidence"]}],
+        unclassified=[],
+    )
+    second = control_gate_inventory_snapshot_hash(
+        watermark=NOW.isoformat(),
+        gaps=[{**common, "reasons": ["changed evidence"]}],
+        unclassified=[],
+    )
+
+    assert first != second
+
+
+def test_inventory_discovers_unregistered_blocking_and_high_frequency_gates(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    registry["discovery"]["high_frequency_threshold"] = 3
+    registry["discovery"]["sources"][0]["path"] = (
+        "logs/dedup_decisions.jsonl"
+    )
+    registry["discovery"]["sources"][0]["action_gate_aliases"] = {
+        "block_event_stage_coverage": "event_stage_idempotency",
+    }
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _append_jsonl(
+        storage / "logs" / "dedup_decisions.jsonl",
+        [
+            {
+                "ts": (NOW - timedelta(minutes=5)).isoformat(),
+                "gate": "unknown_blocker",
+                "action": "block_new_guard",
+                "target_id": "blocked-1",
+            },
+            *[
+                {
+                    "ts": (NOW - timedelta(minutes=index)).isoformat(),
+                    "gate": "unknown_frequent_warn",
+                    "decision": "warn",
+                    "target_id": f"warn-{index}",
+                }
+                for index in range(1, 4)
+            ],
+            {
+                "ts": (NOW - timedelta(minutes=1)).isoformat(),
+                "gate": "low_frequency_warn",
+                "decision": "warn",
+                "target_id": "warn-once",
+            },
+            {
+                "ts": (NOW - timedelta(minutes=1)).isoformat(),
+                "action": "block_event_stage_coverage",
+                "candidate_id": "registered-alias:T+0",
+            },
+        ],
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+        materialize_reviews=True,
+    )
+
+    gaps = {
+        row["gate_id"]: row
+        for row in verdict["inventory"]["unregistered_gates"]
+    }
+    assert set(gaps) == {"unknown_blocker", "unknown_frequent_warn"}
+    assert gaps["unknown_blocker"]["blocking_count"] == 1
+    assert gaps["unknown_frequent_warn"]["trigger_count"] == 3
+    registered_alias = next(
+        row
+        for row in verdict["inventory"]["observed_gates"]
+        if row["gate_id"] == "event_stage_idempotency"
+    )
+    assert registered_alias["blocking_count"] == 1
+    assert verdict["audit_health"]["healthy"] is False
+    source_state = _parse_control_gate_source_health_state(
+        {"details": {"audit_health": verdict["audit_health"]}}
+    )
+    assert source_state["breached"] is True
+    assert "inventory" in source_state["title"]
+    assert verdict["inventory_review_tasks"]["created_count"] == 1
+    queue = json.loads(
+        (storage / "next_tasks.json").read_text(encoding="utf-8")
+    )
+    inventory_tasks = [
+        row
+        for row in queue
+        if row.get("control_gate_inventory_review") is True
+    ]
+    assert len(inventory_tasks) == 1
+    assert inventory_tasks[0]["inventory_watermark"]
+    assert inventory_tasks[0]["id"].startswith(
+        "control_gate_inventory_review_"
+    )
+
+
+def test_inventory_refreshes_active_task_and_reopens_terminal_gap(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    registry["discovery"]["sources"][0]["path"] = (
+        "logs/dedup_decisions.jsonl"
+    )
+    registry_path = tmp_path / "registry.json"
+    queue_path = storage / "next_tasks.json"
+    _write_json(registry_path, registry)
+    _write_json(queue_path, [])
+    _write_json(storage / "reports" / "feed.json", [])
+    decision_path = storage / "logs" / "dedup_decisions.jsonl"
+    _append_jsonl(
+        decision_path,
+        [{
+            "ts": (NOW - timedelta(minutes=2)).isoformat(),
+            "gate": "unknown_a",
+            "action": "block_a",
+            "target_id": "candidate-a",
+        }],
+    )
+
+    first = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW,
+        materialize_reviews=True,
+    )
+    first_id = first["inventory_review_tasks"]["created_ids"][0]
+    _append_jsonl(
+        decision_path,
+        [{
+            "ts": (NOW + timedelta(seconds=30)).isoformat(),
+            "gate": "unknown_b",
+            "action": "deny_b",
+            "target_id": "candidate-b",
+        }],
+    )
+
+    rolled = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW + timedelta(minutes=1),
+        materialize_reviews=True,
+    )
+
+    assert rolled["inventory_review_tasks"]["created_count"] == 1
+    assert rolled["inventory_review_tasks"]["refreshed_ids"] == []
+    rolled_id = rolled["inventory_review_tasks"]["created_ids"][0]
+    assert rolled_id != first_id
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    superseded = next(row for row in queue if row["id"] == first_id)
+    assert superseded["status"] == "superseded"
+    assert superseded["superseded_by"] == rolled_id
+    active = next(row for row in queue if row["id"] == rolled_id)
+    assert active["inventory_gate_ids"] == ["unknown_a", "unknown_b"]
+    assert active["inventory_refresh_count"] == 1
+    refreshed_hash = active["inventory_snapshot_hash"]
+
+    active["status"] = "succeeded"
+    _write_json(queue_path, queue)
+    reopened = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW + timedelta(minutes=2),
+        materialize_reviews=True,
+    )
+
+    assert reopened["inventory_review_tasks"]["created_count"] == 1
+    reopened_id = reopened["inventory_review_tasks"]["created_ids"][0]
+    assert reopened_id != rolled_id
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    reopened_task = next(row for row in queue if row["id"] == reopened_id)
+    assert reopened_task["status"] == "pending"
+    assert reopened_task["inventory_gate_ids"] == ["unknown_a", "unknown_b"]
+    assert reopened_task["inventory_snapshot_hash"] == refreshed_hash
+
+
+def test_active_inventory_rollover_merges_inside_queue_lock(
+    tmp_path: Path,
+) -> None:
+    queue_path = tmp_path / "storage" / "next_tasks.json"
+    _write_json(
+        queue_path,
+        [{
+            "id": "inventory",
+            "status": "pending",
+            "control_gate_inventory_review": True,
+            "inventory_gate_ids": ["x"],
+        }],
+    )
+
+    def add_gate(gate_id: str) -> None:
+        def replacement_builder(current: dict) -> dict:
+            gate_ids = sorted({
+                *(current.get("inventory_gate_ids") or []),
+                gate_id,
+            })
+            return {
+                **current,
+                "id": "inventory-" + "-".join(gate_ids),
+                "status": "pending",
+                "inventory_gate_ids": gate_ids,
+            }
+
+        _, superseded_id = rollover_active_task_record(
+            path=queue_path,
+            active_unique_fields=("control_gate_inventory_review",),
+            identity={"control_gate_inventory_review": True},
+            replacement_builder=replacement_builder,
+        )
+        assert superseded_id is not None
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        list(executor.map(add_gate, ["y", "z"]))
+
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    active = next(row for row in queue if row["status"] == "pending")
+    assert active["inventory_gate_ids"] == ["x", "y", "z"]
+
+
+@pytest.mark.parametrize(
+    "owned_status",
+    [
+        "pending_main_thread",
+        "claimed",
+        "in_progress",
+        "awaiting_agent_job",
+        "blocked",
+    ],
+)
+def test_inventory_rollover_preserves_owned_or_blocked_task(
+    tmp_path: Path,
+    owned_status: str,
+) -> None:
+    queue_path = tmp_path / "storage" / "next_tasks.json"
+    original = {
+        "id": "inventory-owned",
+        "status": owned_status,
+        "claimed_by": "worker-1",
+        "control_gate_inventory_review": True,
+        "inventory_gate_ids": ["x"],
+    }
+    _write_json(queue_path, [original])
+
+    replacement, superseded_id = rollover_active_task_record(
+        path=queue_path,
+        active_unique_fields=("control_gate_inventory_review",),
+        identity={"control_gate_inventory_review": True},
+        replacement_builder=lambda current: {
+            **current,
+            "id": "inventory-new",
+            "status": "pending",
+            "inventory_gate_ids": ["x", "y"],
+        },
+    )
+
+    assert replacement is None
+    assert superseded_id is None
+    assert json.loads(queue_path.read_text(encoding="utf-8")) == [original]
+
+
+@pytest.mark.parametrize("owned_status", ["pending_main_thread", "in_progress"])
+def test_owned_inventory_task_persists_new_gap_past_window_and_reopens(
+    tmp_path: Path,
+    owned_status: str,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    registry["discovery"]["sources"][0]["path"] = (
+        "logs/dedup_decisions.jsonl"
+    )
+    registry_path = tmp_path / "registry.json"
+    queue_path = storage / "next_tasks.json"
+    _write_json(registry_path, registry)
+    _write_json(queue_path, [])
+    _write_json(storage / "reports" / "feed.json", [])
+    decision_path = storage / "logs" / "dedup_decisions.jsonl"
+    _append_jsonl(
+        decision_path,
+        [{
+            "ts": (NOW - timedelta(minutes=2)).isoformat(),
+            "gate": "unknown_a",
+            "action": "block_a",
+            "target_id": "candidate-a",
+        }],
+    )
+    first = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW,
+        materialize_reviews=True,
+    )
+    first_id = first["inventory_review_tasks"]["created_ids"][0]
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    queue[0].update({"status": owned_status})
+    if owned_status == "in_progress":
+        queue[0]["claimed_by"] = "worker-1"
+    else:
+        queue[0]["dispatch_lane"] = "main_thread"
+    _write_json(queue_path, queue)
+    _append_jsonl(
+        decision_path,
+        [{
+            "ts": (NOW + timedelta(seconds=30)).isoformat(),
+            "gate": "unknown_b",
+            "action": "block_b",
+            "target_id": "candidate-b",
+        }],
+    )
+
+    deferred = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW + timedelta(minutes=1),
+        materialize_reviews=True,
+    )
+
+    actuation = deferred["inventory_review_tasks"]
+    assert actuation["created_count"] == 0
+    assert actuation["refreshed_ids"] == [first_id]
+    assert actuation["deferred_ids"] == []
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    assert len(queue) == 1
+    assert queue[0]["status"] == owned_status
+    if owned_status == "pending_main_thread":
+        assert queue[0]["dispatch_lane"] == "main_thread"
+    assert queue[0]["inventory_gate_ids"] == ["unknown_a", "unknown_b"]
+    assert queue[0]["inventory_scope_updates"][-1]["added_gate_ids"] == [
+        "unknown_b"
+    ]
+
+    # Both source rows have aged outside the 168h discovery window, but the
+    # lock-protected task snapshot remains the durable handoff.
+    expired = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW + timedelta(days=8),
+        materialize_reviews=False,
+    )
+    assert [
+        row["gate_id"]
+        for row in expired["inventory"]["unregistered_gates"]
+    ] == ["unknown_a", "unknown_b"]
+    assert expired["inventory"]["carried_forward_task_id"] == first_id
+
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    queue[0]["status"] = "succeeded"
+    _write_json(queue_path, queue)
+    next_generation = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW + timedelta(days=8, minutes=1),
+        materialize_reviews=True,
+    )
+    assert next_generation["inventory_review_tasks"]["created_count"] == 1
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    active = next(row for row in queue if row["status"] == "pending")
+    assert active["inventory_gate_ids"] == ["unknown_a", "unknown_b"]
+
+
+def test_unclassified_scope_survives_expiry_until_typed_resolution(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    registry["discovery"]["sources"][0]["path"] = (
+        "logs/dedup_decisions.jsonl"
+    )
+    registry_path = tmp_path / "registry.json"
+    queue_path = storage / "next_tasks.json"
+    _write_json(registry_path, registry)
+    _write_json(queue_path, [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(storage / "ops" / "incidents.json", {"incidents": {}})
+    _append_jsonl(
+        storage / "logs" / "dedup_decisions.jsonl",
+        [{
+            "ts": (NOW - timedelta(minutes=1)).isoformat(),
+            "gate_id": "conflicting_a",
+            "gate": "conflicting_b",
+            "action": "block_conflict",
+            "target_id": "candidate-conflict",
+        }],
+    )
+
+    first = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW,
+        materialize_reviews=True,
+    )
+    task_id = first["inventory_review_tasks"]["created_ids"][0]
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    task = next(row for row in queue if row["id"] == task_id)
+    task["status"] = "in_progress"
+    signal_id = task["inventory_unclassified_blocking"][0][
+        "inventory_signal_id"
+    ]
+    _write_json(queue_path, queue)
+
+    expired = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW + timedelta(days=8),
+        materialize_reviews=False,
+    )
+    assert expired["inventory"]["unclassified_blocking_count"] == 1
+    assert expired["inventory"]["unclassified_blocking"][0][
+        "inventory_signal_id"
+    ] == signal_id
+
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    task = next(row for row in queue if row["id"] == task_id)
+    task["inventory_unclassified_resolutions"] = [{
+        "signal_id": signal_id,
+        "disposition": "producer_fixed",
+        "rationale": "producer now emits one exact gate_id",
+        "live_readback": "new decision receipt has gate_id=conflicting_a only",
+    }]
+    _write_json(queue_path, queue)
+    resolved = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=queue_path,
+        now=NOW + timedelta(days=8, minutes=1),
+        materialize_reviews=False,
+    )
+    assert resolved["inventory"]["unclassified_blocking_count"] == 0
+    assert resolved["audit_health"]["healthy"] is True
+
+
+def test_inventory_keeps_high_frequency_action_only_signals(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    registry["discovery"]["high_frequency_threshold"] = 3
+    registry["discovery"]["sources"][0]["path"] = (
+        "logs/dedup_decisions.jsonl"
+    )
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _append_jsonl(
+        storage / "logs" / "dedup_decisions.jsonl",
+        [
+            {
+                "ts": (NOW - timedelta(minutes=index)).isoformat(),
+                "action": "warn_unknown_pressure",
+                "target_id": f"candidate-{index}",
+            }
+            for index in range(1, 4)
+        ],
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+
+    assert verdict["inventory"]["unregistered_gates"] == [
+        {
+            "gate_id": "action:warn_unknown_pressure",
+            "registered": False,
+            "trigger_count": 3,
+            "blocking_count": 0,
+            "distinct_candidates": 3,
+            "latest_at": (NOW - timedelta(minutes=1)).isoformat(),
+            "reasons": ["raw_triggers=3>=3"],
+        }
+    ]
+    assert verdict["audit_health"]["healthy"] is False
+
+
+def test_explicit_gate_identity_wins_over_historical_action_alias() -> None:
+    source = {
+        "identity_fields": ["gate_id", "gate"],
+        "decision_fields": ["decision", "action"],
+        "action_gate_aliases": {
+            "block_arc_dup": "publisher_arc_dedup",
+        },
+    }
+
+    normalized, conflict = (
+        control_gate_lifecycle._canonicalize_decision_row(
+            {
+                "gate": "task_generation",
+                "action": "block_arc_dup",
+            },
+            source,
+        )
+    )
+
+    assert normalized["gate_id"] == "task_generation"
+    assert conflict is False
+
+
+def test_conflicting_explicit_gate_fields_are_unhealthy_and_not_joined(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    registry["discovery"]["sources"][0]["path"] = (
+        "logs/dedup_decisions.jsonl"
+    )
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _append_jsonl(
+        storage / "logs" / "dedup_decisions.jsonl",
+        [{
+            "ts": (NOW - timedelta(minutes=1)).isoformat(),
+            "gate_id": "event_stage_idempotency",
+            "gate": "publisher_arc_dedup",
+            "action": "block_event_stage_coverage",
+            "candidate_id": "conflicted",
+        }],
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+        materialize_reviews=True,
+    )
+
+    assert verdict["audit_health"]["healthy"] is False
+    assert verdict["inventory"]["unclassified_blocking_count"] == 1
+    assert verdict["inventory_review_tasks"]["created_count"] == 1
+    assert verdict["gates"][0]["evidence"]["trigger_count"] == 0
+    assert any(
+        row["error"] == "decision_identity_conflicts"
+        for row in verdict["audit_health"]["unhealthy_sources"]
+    )
+
+
+def test_inventory_discovers_incident_only_control_and_materializes_once(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(
+        storage / "ops" / "incidents.json",
+        {
+            "incidents": {
+                "inc-release": {
+                    "kind": "content_gate_deadlock",
+                    "is_control_intervention": True,
+                    "control_gate_id": "release_content_quality",
+                    "state": "open",
+                    "occurrence_count": 2,
+                    "last_seen_at": (
+                        NOW - timedelta(minutes=5)
+                    ).isoformat(),
+                }
+            }
+        },
+    )
+
+    first = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+        materialize_reviews=True,
+    )
+    second = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+        materialize_reviews=True,
+    )
+
+    assert first["inventory"]["unregistered_incident_controls"] == [
+        {
+            "gate_id": "release_content_quality",
+            "incident_kind": "content_gate_deadlock",
+            "incident_count": 1,
+            "occurrence_count": 2,
+            "latest_at": (NOW - timedelta(minutes=5)).isoformat(),
+                "incident_ids": ["inc-release"],
+                "expected_gate_id": None,
+                "explicit_gate_mismatch": False,
+                "reasons": ["incident_occurrences=2"],
+            }
+    ]
+    assert first["inventory_review_tasks"]["created_count"] == 1
+    assert second["inventory_review_tasks"]["created_count"] == 0
+    assert second["inventory_review_tasks"]["existing_ids"]
+    assert first["audit_health"]["healthy"] is False
+
+
+def test_inventory_gap_reopens_after_terminal_task_without_false_suppression(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    registry["discovery"]["sources"][0]["path"] = (
+        "logs/dedup_decisions.jsonl"
+    )
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(storage / "next_tasks.json", [])
+    _append_jsonl(
+        storage / "logs" / "dedup_decisions.jsonl",
+        [{
+            "ts": (NOW - timedelta(minutes=5)).isoformat(),
+            "gate": "unknown_lock",
+            "decision": "block",
+            "candidate_id": "candidate-1",
+        }],
+    )
+
+    first = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+        materialize_reviews=True,
+    )
+    queue = json.loads(
+        (storage / "next_tasks.json").read_text(encoding="utf-8")
+    )
+    terminal_id = first["inventory_review_tasks"]["created_ids"][0]
+    queue[0]["status"] = "failed"
+    _write_json(storage / "next_tasks.json", queue)
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW + timedelta(seconds=1),
+        materialize_reviews=True,
+    )
+
+    assert verdict["inventory_review_tasks"]["created_count"] == 1
+    assert verdict["inventory_review_tasks"]["existing_ids"] == []
+    queue = json.loads(
+        (storage / "next_tasks.json").read_text(encoding="utf-8")
+    )
+    active = [
+        row
+        for row in queue
+        if row.get("control_gate_inventory_review") is True
+        and row.get("status") == "pending"
+    ]
+    assert len(active) == 1
+    assert (
+        active[0]["supersedes_inventory_task_id"]
+        == terminal_id
+    )
+
+
+def test_action_alias_is_reused_by_gate_evidence_and_outcome_join(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    source = registry["discovery"]["sources"][0]
+    source["path"] = "logs/dedup_decisions.jsonl"
+    source["action_gate_aliases"] = {
+        "legacy_event_stage_block": "event_stage_idempotency"
+    }
+    registry["gates"][0]["evidence_sources"][0]["match"] = {
+        "gate_id": ["event_stage_idempotency"]
+    }
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(
+        storage / "reports" / "feed.json",
+        [
+            {
+                "id": "event-live",
+                "status": "published",
+                "event_key": "FOMC_2026_07_29",
+                "event_series_slot": "T+0",
+            }
+        ],
+    )
+    _append_jsonl(
+        storage / "logs" / "dedup_decisions.jsonl",
+        [{
+            "ts": (NOW - timedelta(minutes=5)).isoformat(),
+            "action": "legacy_event_stage_block",
+            "candidate_id": "fomc_2026_07_29:T0",
+        }],
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+
+    gate = verdict["gates"][0]
+    assert gate["evidence"]["trigger_count"] == 1
+    assert gate["outcomes"]["published"] == 1
+    assert gate["outcomes"]["unjoined"] == 0
+
+
+def test_synthetic_candidate_identity_after_ratchet_is_unhealthy(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    registry["discovery"]["candidate_identity_required_after"] = (
+        NOW - timedelta(hours=1)
+    ).isoformat()
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _append_jsonl(
+        storage / "logs" / "dedup_decisions.jsonl",
+        [{
+            "ts": (NOW - timedelta(minutes=5)).isoformat(),
+            "action": "block_event_stage_coverage",
+            "candidate_id": "title:synthetic",
+        }],
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+
+    unhealthy = verdict["audit_health"]["unhealthy_sources"]
+    assert any(
+        row["error"] == "synthetic_candidate_identity_after_ratchet"
+        for row in unhealthy
+    )
+
+
+def test_periodic_review_becomes_due_without_new_gate_evidence(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    gate = registry["gates"][0]
+    gate["review_policy"]["max_review_age_hours"] = 168
+    gate["lifecycle"]["review_anchor_at"] = (
+        NOW - timedelta(hours=169)
+    ).isoformat()
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    for relative in (
+        "logs/dedup_decisions.jsonl",
+        "logs/control_gate_discovery.jsonl",
+    ):
+        path = storage / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("", encoding="utf-8")
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+        materialize_reviews=True,
+    )
+
+    gate_verdict = verdict["gates"][0]
+    assert gate_verdict["review"] == {
+        "due": True,
+        "reasons": ["review_age_hours=169.0>=168"],
+    }
+    queue = json.loads(
+        (storage / "next_tasks.json").read_text(encoding="utf-8")
+    )
+    assert len(queue) == 1
+    assert queue[0]["gate_review_watermark"] == NOW.isoformat()
 
 
 def test_audit_joins_harm_outcomes_and_materializes_one_review_task(
@@ -773,14 +1921,18 @@ def test_completed_adjudication_consumes_old_evidence_until_new_trigger(
             "phase": "check",
             "last_action": "retain",
             "last_reviewed_at": reviewed_at.isoformat(),
-            "review_task_id": "review-old",
+            "review_task_id": control_gate_lifecycle._review_task_id(
+                "event_stage_idempotency",
+                consumed_through,
+            ),
         }
     )
+    review_task_id = registry["gates"][0]["lifecycle"]["review_task_id"]
     _write_json(registry_path, registry)
     _write_json(
         storage / "next_tasks.json",
         [{
-            "id": "review-old",
+            "id": review_task_id,
             "status": "succeeded",
             "gate_review_id": "event_stage_idempotency",
             "gate_decision": "retain",
@@ -837,27 +1989,30 @@ def test_registry_act_without_complete_review_receipt_does_not_consume_evidence(
     storage = tmp_path / "storage"
     registry_path = tmp_path / "registry.json"
     reviewed_at = NOW - timedelta(hours=1)
+    task_watermark = NOW - timedelta(hours=2)
     registry = _registry()
     registry["gates"][0]["lifecycle"].update(
         {
             "last_action": "retain",
             "last_reviewed_at": reviewed_at.isoformat(),
-            "review_task_id": "review-crashed-before-complete",
+            "review_task_id": control_gate_lifecycle._review_task_id(
+                "event_stage_idempotency",
+                task_watermark,
+            ),
         }
     )
+    review_task_id = registry["gates"][0]["lifecycle"]["review_task_id"]
     _write_json(registry_path, registry)
     _write_json(
         storage / "next_tasks.json",
         [{
-            "id": "review-crashed-before-complete",
+            "id": review_task_id,
             "status": "in_progress",
             "gate_review_id": "event_stage_idempotency",
             "gate_decision": "retain",
             "gate_live_readback": "not yet accepted",
             "gate_registry_reviewed_at": reviewed_at.isoformat(),
-            "gate_review_watermark": (
-                NOW - timedelta(hours=2)
-            ).isoformat(),
+            "gate_review_watermark": task_watermark.isoformat(),
         }],
     )
     _write_json(storage / "reports" / "feed.json", [])

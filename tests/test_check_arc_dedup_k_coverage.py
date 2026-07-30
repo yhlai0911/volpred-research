@@ -144,7 +144,7 @@ def test_cli_logs_normalized_k_as_stable_candidate_id(
     monkeypatch.setattr(
         cli,
         "_log_dedup_decision",
-        lambda *_a, **kwargs: logged.append(kwargs),
+        lambda *_a, **kwargs: logged.append(kwargs) or True,
     )
     monkeypatch.setattr(
         sys,
@@ -161,7 +161,55 @@ def test_cli_logs_normalized_k_as_stable_candidate_id(
     )
 
     assert cli.main() == 1
-    assert logged == [{"candidate_id": "K1366"}]
+    assert logged == [
+        {"candidate_id": "k:K1366|audience:general"}
+    ]
+
+
+def test_k_coverage_fails_open_without_durable_receipt(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    (tmp_path / "storage" / "reports").mkdir(parents=True)
+    (tmp_path / "storage" / "reports" / "feed.json").write_text(
+        "[]",
+        encoding="utf-8",
+    )
+    experiment = tmp_path / "experiments" / "k1366"
+    experiment.mkdir(parents=True)
+    (experiment / "README.md").write_text("VIX result", encoding="utf-8")
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        cli,
+        "find_k_coverage",
+        lambda *_a, **_k: [{
+            "id": "mile_prior",
+            "audience": "general",
+            "status": "published",
+            "published_at": "2026-07-01",
+            "title": "prior",
+        }],
+    )
+    monkeypatch.setattr(
+        cli,
+        "_log_dedup_decision",
+        lambda *_a, **_k: False,
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "check_arc_dedup.py",
+            "--k-id",
+            "k1366",
+            "--audience",
+            "general",
+            "--title",
+            "TBD",
+        ],
+    )
+
+    assert cli.main() == 0
 
 
 def test_coverage_gap_hints_only_consider_unreferenced_same_audience_articles():

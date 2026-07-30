@@ -623,6 +623,94 @@ def test_release_gate_holds_general_draft_without_lazypack(tmp_path, monkeypatch
     feed = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
     assert feed[0]["status"] == "draft"
     assert feed[0]["details"]["release_audit_skipped_count"] == 1
+    decisions = [
+        json.loads(line)
+        for line in (
+            storage_dir / "logs" / "control_gate_decisions.jsonl"
+        ).read_text(encoding="utf-8").splitlines()
+    ]
+    assert decisions[-1]["gate_id"] == "release_lazypack_completeness"
+    assert decisions[-1]["decision"] == "block"
+    assert decisions[-1]["candidate_id"] == "mile_wait_lz"
+    assert (
+        decisions[-1]["protected_edge"]
+        == "lazypack_section -> release_candidate"
+    )
+
+
+def test_release_gate_fails_open_when_block_receipt_is_not_durable(
+    tmp_path,
+    monkeypatch,
+):
+    from volpred.ops import content
+    from volpred.ops import control_gate_lifecycle
+
+    monkeypatch.setattr(content, "_audit_general_content", lambda *_a: [])
+    monkeypatch.setattr(content, "has_lazypack_section", lambda _text: False)
+    monkeypatch.setattr(
+        content,
+        "_lazypack_gate_issue",
+        lambda *_a, **_k: "missing lazypack",
+    )
+    monkeypatch.setattr(
+        content,
+        "_run_publish_anti_ai_gate",
+        lambda *_a, **_k: [],
+    )
+    monkeypatch.setattr(
+        control_gate_lifecycle,
+        "record_control_gate_decision",
+        lambda **_kwargs: (_ for _ in ()).throw(OSError("disk full")),
+    )
+
+    issues = content.release_content_gate_issues(
+        {
+            "id": "mile-no-receipt",
+            "audience": "general",
+            "content": "body",
+        },
+        storage_dir=str(tmp_path / "storage"),
+        record=True,
+    )
+
+    assert issues == []
+
+
+def test_content_audit_gate_fails_open_when_receipt_is_not_durable(
+    tmp_path,
+    monkeypatch,
+):
+    from volpred.ops import content
+    from volpred.ops import control_gate_lifecycle
+
+    monkeypatch.setattr(
+        content,
+        "_audit_general_content",
+        lambda *_a: ["audience mismatch"],
+    )
+    monkeypatch.setattr(content, "has_lazypack_section", lambda _text: True)
+    monkeypatch.setattr(
+        content,
+        "_run_publish_anti_ai_gate",
+        lambda *_a, **_k: [],
+    )
+    monkeypatch.setattr(
+        control_gate_lifecycle,
+        "record_control_gate_decision",
+        lambda **_kwargs: (_ for _ in ()).throw(OSError("disk full")),
+    )
+
+    issues = content.release_content_gate_issues(
+        {
+            "id": "mile-no-audit-receipt",
+            "audience": "general",
+            "content": "body",
+        },
+        storage_dir=str(tmp_path / "storage"),
+        record=True,
+    )
+
+    assert issues == []
 
 
 def test_release_gate_releases_after_section_installed(tmp_path, monkeypatch):

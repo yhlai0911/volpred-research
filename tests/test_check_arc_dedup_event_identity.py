@@ -92,7 +92,7 @@ def test_same_event_stage_is_hard_blocked(
 ) -> None:
     _write_feed(tmp_path, [_event_article("T+0")])
     monkeypatch.setattr(cli, "ROOT", tmp_path)
-    monkeypatch.setattr(cli, "_log_dedup_decision", lambda *_a, **_k: None)
+    monkeypatch.setattr(cli, "_log_dedup_decision", lambda *_a, **_k: True)
     monkeypatch.setattr(
         sys,
         "argv",
@@ -113,6 +113,32 @@ def test_same_event_stage_is_hard_blocked(
     report = json.loads(capsys.readouterr().out)
     assert report["verdict"] == "block_event_stage_coverage"
     assert [row["id"] for row in report["event_stage_coverage"]] == ["mile_fomc_T+0"]
+
+
+def test_same_event_stage_fails_open_without_durable_receipt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write_feed(tmp_path, [_event_article("T+0")])
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.setattr(cli, "_log_dedup_decision", lambda *_a, **_k: False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "check_arc_dedup.py",
+            "--title",
+            "事件溫度計｜FOMC 利率決議後",
+            "--audience",
+            "event",
+            "--event-key",
+            "FOMC_2026_07_29",
+            "--event-series-slot",
+            "T+0",
+        ],
+    )
+
+    assert cli.main() == 0
 
 
 def test_cross_stage_k_coverage_is_advisory(
@@ -197,7 +223,7 @@ def test_event_slot_spelling_cannot_bypass_exact_stage_lock(
 ) -> None:
     _write_feed(tmp_path, [_event_article(canonical)])
     monkeypatch.setattr(cli, "ROOT", tmp_path)
-    monkeypatch.setattr(cli, "_log_dedup_decision", lambda *_a, **_k: None)
+    monkeypatch.setattr(cli, "_log_dedup_decision", lambda *_a, **_k: True)
     monkeypatch.setattr(
         sys,
         "argv",

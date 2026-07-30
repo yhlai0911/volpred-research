@@ -50,7 +50,7 @@ import re
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import IO, Any
+from typing import IO, Any, Callable
 
 from volpred.canonical_write import guard_canonical_write
 
@@ -1304,6 +1304,149 @@ def append_task_record(
     # 急件不進排班：入池成功後（鎖已釋放）立刻請 supervisor 派工。
     record["fire_requested"] = _request_urgent_fire(record, p)
     return record, True
+
+
+def rollover_active_task_record(
+    *,
+    path: str | Path,
+    active_unique_fields: tuple[str, ...],
+    identity: dict[str, Any],
+    replacement_builder: Callable[[dict[str, Any]], dict[str, Any] | None],
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Atomically supersede one active aggregate and append its new hash ID."""
+
+    p = Path(path)
+    guard_canonical_write(p)
+    # pending_main_thread is already a routing reservation.  Replacing it with
+    # the generic record would silently hand it back to an agent lane.
+    rollover_statuses = {"pending"}
+    with p.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            raw = handle.read()
+            tasks = json.loads(raw) if raw.strip() else []
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks.json root is not a list")
+            active_index = next(
+                (
+                    index
+                    for index, row in enumerate(tasks)
+                    if isinstance(row, dict)
+                    and str(row.get("status") or "") in rollover_statuses
+                    and all(
+                        row.get(field) == identity.get(field)
+                        for field in active_unique_fields
+                    )
+                ),
+                None,
+            )
+            if active_index is None:
+                return None, None
+            current = tasks[active_index]
+            replacement = replacement_builder(dict(current))
+            if replacement is None:
+                return current, None
+            replacement_id = str(replacement.get("id") or "")
+            if not replacement_id:
+                raise ValueError("replacement requires id")
+            if any(
+                isinstance(row, dict) and row.get("id") == replacement_id
+                for row in tasks
+            ):
+                raise ValueError(
+                    f"replacement task id already exists: {replacement_id}"
+                )
+            now = str(
+                replacement.get("created_at")
+                or datetime.now(timezone.utc).isoformat()
+            )
+            history = list(current.get("status_history") or [])
+            history.append(
+                {
+                    "ts": now,
+                    "from": current.get("status"),
+                    "to": "superseded",
+                    "by": "control_gate_lifecycle",
+                    "reason": "inventory_scope_changed",
+                    "superseded_by": replacement_id,
+                }
+            )
+            tasks[active_index] = {
+                **current,
+                "status": "superseded",
+                "completed_at": now,
+                "superseded_by": replacement_id,
+                "status_history": history,
+            }
+            replacement_row = {
+                **replacement,
+                "supersedes_inventory_task_id": current.get("id"),
+            }
+            tasks.append(replacement_row)
+            write_tasks_to_handle(handle, tasks)
+            return replacement_row, str(current.get("id") or "")
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def refresh_active_task_record(
+    *,
+    path: str | Path,
+    active_unique_fields: tuple[str, ...],
+    identity: dict[str, Any],
+    refresh_builder: Callable[[dict[str, Any]], dict[str, Any] | None],
+) -> tuple[dict[str, Any] | None, bool]:
+    """Atomically merge new aggregate scope into one running task.
+
+    Unreserved pending aggregates can be rolled to a new hash-addressed task
+    ID.  Once a worker owns the task *or it is reserved for the main thread*,
+    changing its ID would sever ownership/routing.  This helper instead
+    appends a consumable scope-delta receipt to the same queue row; the
+    completion contract then reads the refreshed snapshot and refuses a stale
+    close until the live inventory is clean.
+    """
+
+    p = Path(path)
+    guard_canonical_write(p)
+    with p.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            raw = handle.read()
+            tasks = json.loads(raw) if raw.strip() else []
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks.json root is not a list")
+            active_index = next(
+                (
+                    index
+                    for index, row in enumerate(tasks)
+                    if isinstance(row, dict)
+                    and str(row.get("status") or "") in {
+                        "pending_main_thread",
+                        "claimed",
+                        "in_progress",
+                        "awaiting_agent_job",
+                        "blocked",
+                    }
+                    and all(
+                        row.get(field) == identity.get(field)
+                        for field in active_unique_fields
+                    )
+                ),
+                None,
+            )
+            if active_index is None:
+                return None, False
+            current = tasks[active_index]
+            refreshed = refresh_builder(dict(current))
+            if refreshed is None:
+                return current, False
+            if refreshed.get("id") != current.get("id"):
+                raise ValueError("running task refresh cannot change id")
+            tasks[active_index] = refreshed
+            write_tasks_to_handle(handle, tasks)
+            return refreshed, True
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def append_next_task(

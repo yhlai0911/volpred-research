@@ -175,6 +175,33 @@ def test_block_when_gap_below_threshold(tmp_path: Path):
     assert rec["previous_id"] == "mile_first"
 
 
+def test_throttle_fails_open_without_durable_block_receipt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    from volpred import canonical_write
+
+    now = datetime(2026, 6, 30, 2, 56, 42, tzinfo=timezone.utc)
+    prev = _entry(id_="mile_first", ts=now - timedelta(minutes=2))
+    new = {
+        "id": "mile_second",
+        "audience": "general",
+        "category": "general",
+    }
+    monkeypatch.setattr(
+        canonical_write,
+        "guard_canonical_write",
+        lambda _path: (_ for _ in ()).throw(OSError("disk unavailable")),
+    )
+
+    check_publish_throttle(
+        new,
+        [prev],
+        storage_dir=tmp_path,
+        now=now,
+    )
+
+
 def test_draft_ingestion_bypasses_even_within_window(tmp_path: Path):
     """Draft entering the pool is not reader-facing — release_pool gates its
     release. A published rhythm article 5 min ago must NOT block a draft.

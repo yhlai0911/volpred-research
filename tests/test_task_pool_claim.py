@@ -11,6 +11,9 @@ from pathlib import Path
 import pytest
 
 from volpred.ops.next_tasks import InvalidUnblockGate
+from volpred.ops.control_gate_lifecycle import (
+    control_gate_inventory_snapshot_hash,
+)
 from volpred.ops.task_pool_selection import (
     evaluate_task_claim,
     is_codex_eligible_task,
@@ -767,6 +770,286 @@ def test_gate_review_completion_rejects_unsafe_registry_watermark(
     assert json.loads(next_tasks.read_text(encoding="utf-8"))[0][
         "status"
     ] == "in_progress"
+
+
+def test_inventory_review_completion_rejects_remaining_registry_gaps(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    watermark = "2026-07-30T04:00:00+00:00"
+    snapshot_hash = control_gate_inventory_snapshot_hash(
+        watermark=watermark,
+        gaps=[],
+        unclassified=[],
+    )
+    next_tasks.write_text(
+        json.dumps([
+            {
+                "id": "control-gate-inventory-review",
+                "status": "in_progress",
+                "control_gate_inventory_review": True,
+                "inventory_watermark": watermark,
+                "inventory_snapshot_hash": snapshot_hash,
+                "inventory_gate_ids": [],
+                "inventory_unclassified_blocking": [],
+            }
+        ]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        task_pool_claim,
+        "_audit_inventory_completion",
+        lambda: {
+            "audit_health": {"healthy": False},
+            "inventory": {
+                "unregistered_gates": [{"gate_id": "unknown_lock"}],
+                "unclassified_blocking_count": 0,
+            },
+        },
+        raising=False,
+    )
+
+    out, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="control-gate-inventory-review",
+            status="succeeded",
+            result="registered everything",
+        )
+    )
+
+    assert out["ok"] is False
+    assert out["reason"] == "control_gate_inventory_not_clean"
+    assert out["unregistered_gate_ids"] == ["unknown_lock"]
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "in_progress"
+
+
+def test_inventory_review_completion_persists_clean_live_readback(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    watermark = "2026-07-30T04:00:00+00:00"
+    snapshot_hash = control_gate_inventory_snapshot_hash(
+        watermark=watermark,
+        gaps=[],
+        unclassified=[],
+    )
+    next_tasks.write_text(
+        json.dumps([
+            {
+                "id": "control-gate-inventory-review",
+                "status": "in_progress",
+                "control_gate_inventory_review": True,
+                "inventory_watermark": watermark,
+                "inventory_snapshot_hash": snapshot_hash,
+                "inventory_gate_ids": [],
+                "inventory_unclassified_blocking": [],
+            }
+        ]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        task_pool_claim,
+        "_audit_inventory_completion",
+        lambda: {
+            "generated_at": "2026-07-30T06:00:00+00:00",
+            "audit_health": {"healthy": True},
+            "summary": {"gate_count": 13},
+            "inventory": {
+                "unregistered_gates": [],
+                "unclassified_blocking_count": 0,
+            },
+        },
+        raising=False,
+    )
+
+    out, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="control-gate-inventory-review",
+            status="succeeded",
+            result="inventory clean",
+        )
+    )
+
+    assert out["ok"] is True
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "succeeded"
+    assert saved["inventory_live_readback"] == {
+        "generated_at": "2026-07-30T06:00:00+00:00",
+        "consumed_inventory_watermark": watermark,
+        "consumed_inventory_snapshot_hash": snapshot_hash,
+        "gate_count": 13,
+        "unregistered_gate_count": 0,
+        "unclassified_blocking_count": 0,
+        "audit_healthy": True,
+    }
+
+
+def test_inventory_review_completion_rejects_stale_snapshot_hash(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps([{
+            "id": "inventory-stale",
+            "status": "in_progress",
+            "control_gate_inventory_review": True,
+            "inventory_watermark": "2026-07-30T04:00:00+00:00",
+            "inventory_snapshot_hash": "stale-hash",
+            "inventory_gate_ids": ["new-gap"],
+            "inventory_unclassified_blocking": [],
+        }]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    out, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="inventory-stale",
+            status="succeeded",
+            result="claimed clean",
+        )
+    )
+
+    assert out["ok"] is False
+    assert out["reason"] == "control_gate_inventory_snapshot_mismatch"
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "in_progress"
+
+
+def test_inventory_completion_rejects_expired_durable_gap_until_registered(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    from datetime import datetime, timedelta, timezone
+
+    from volpred.ops.control_gate_lifecycle import (
+        DEFAULT_REGISTRY_PATH,
+        audit_control_gates,
+    )
+
+    storage = tmp_path / "storage"
+    next_tasks = storage / "next_tasks.json"
+    now = datetime(2026, 7, 30, 6, tzinfo=timezone.utc)
+    watermark = (now - timedelta(days=8)).isoformat()
+    gap = {
+        "gate_id": "unknown_expired_lock",
+        "registered": False,
+        "trigger_count": 1,
+        "blocking_count": 1,
+        "distinct_candidates": 1,
+        "latest_at": watermark,
+        "reasons": ["blocking_signals=1"],
+    }
+    snapshot_hash = control_gate_inventory_snapshot_hash(
+        watermark=watermark,
+        gaps=[gap],
+        unclassified=[],
+    )
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps([{
+            "id": "inventory-expired",
+            "status": "in_progress",
+            "control_gate_inventory_review": True,
+            "inventory_watermark": watermark,
+            "inventory_snapshot_hash": snapshot_hash,
+            "inventory_gate_ids": ["unknown_expired_lock"],
+            "inventory_gaps": [gap],
+            "inventory_unclassified_blocking": [],
+        }]),
+        encoding="utf-8",
+    )
+    for relative_path in (
+        "logs/control_gate_decisions.jsonl",
+        "logs/dedup_decisions.jsonl",
+        "logs/hourly_pregate.jsonl",
+        "ops/phase_z_rejections.jsonl",
+    ):
+        path = storage / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("", encoding="utf-8")
+    (storage / "reports").mkdir(parents=True)
+    (storage / "reports" / "feed.json").write_text("[]", encoding="utf-8")
+    (storage / "ops" / "incidents.json").write_text(
+        json.dumps({"incidents": {}}),
+        encoding="utf-8",
+    )
+    (storage / "ops" / "dispatch_state.json").write_text(
+        json.dumps({"completions": []}),
+        encoding="utf-8",
+    )
+    registry = json.loads(DEFAULT_REGISTRY_PATH.read_text(encoding="utf-8"))
+    registry_path = tmp_path / "registry.json"
+    registry_path.write_text(json.dumps(registry), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        task_pool_claim,
+        "_audit_inventory_completion",
+        lambda: audit_control_gates(
+            storage_dir=str(storage),
+            registry_path=registry_path,
+            queue_path=next_tasks,
+            now=now,
+            materialize_reviews=False,
+        ),
+    )
+
+    args = argparse.Namespace(
+        id="inventory-expired",
+        status="succeeded",
+        result="claimed clean",
+    )
+    rejected, _burst = task_pool_claim._complete_locked(args)
+    assert rejected["ok"] is False
+    assert rejected["reason"] == "control_gate_inventory_not_clean"
+    assert rejected["unregistered_gate_ids"] == ["unknown_expired_lock"]
+
+    registered = json.loads(json.dumps(registry["gates"][0]))
+    registered.update({
+        "gate_id": "unknown_expired_lock",
+        "owner": "tests.inventory",
+        "invariant": "expired control identity remains registered",
+        "mode": "shadow",
+        "identity_strength": "canonical_exact",
+        "protected_graph": {
+            "nodes": ["candidate", "downstream"],
+            "edges": ["candidate -> downstream"],
+        },
+        "blocked_downstream_edges": ["downstream -> reader"],
+        "incident_refs": [],
+        "incident_kinds": [],
+        "evidence_sources": [{
+            "kind": "jsonl",
+            "path": "logs/control_gate_decisions.jsonl",
+            "match": {"gate_id": ["unknown_expired_lock"]},
+        }],
+        "outcome_join": "candidate_or_feed",
+        "deadline_required": False,
+        "lifecycle": {
+            "phase": "check",
+            "review_anchor_at": now.isoformat(),
+            "allowed_actions": [
+                "retain",
+                "recalibrate",
+                "downgrade_to_warn",
+                "retire",
+            ],
+        },
+    })
+    registry["gates"].append(registered)
+    registry_path.write_text(json.dumps(registry), encoding="utf-8")
+
+    completed, _burst = task_pool_claim._complete_locked(args)
+    assert completed["ok"] is True, completed
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "succeeded"
+    assert saved["inventory_live_readback"]["audit_healthy"] is True
 
 
 def test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task(

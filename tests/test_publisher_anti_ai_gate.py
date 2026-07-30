@@ -86,6 +86,26 @@ def test_anti_ai_gate_strict_blocks_and_logs(
     assert any("[MUST]" in failure for failure in decision["failures"])
 
 
+def test_anti_ai_gate_fails_open_when_block_receipt_is_not_durable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    storage = tmp_path / "storage"
+    _init_storage(storage)
+    monkeypatch.setenv("VOLPRED_ANTI_AI_GATE_MODE", "strict")
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(
+        publisher_module,
+        "_log_anti_ai_gate_decision_impl",
+        lambda *_args, **_kwargs: False,
+    )
+
+    result = Publisher(storage_dir=str(storage))._append_to_feed(_bad_item())
+
+    assert result == "mile_ai_bad"
+    assert [item["id"] for item in _feed(storage)] == ["mile_ai_bad"]
+
+
 def test_anti_ai_gate_checker_exception_fail_open_with_alert(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

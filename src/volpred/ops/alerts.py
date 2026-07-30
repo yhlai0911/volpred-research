@@ -5551,20 +5551,44 @@ def _parse_control_gate_source_health_state(
             "body": "",
             "details": {"unhealthy_sources": []},
         }
+    errors = {
+        str(source.get("error") or "")
+        for source in unhealthy_sources
+        if isinstance(source, dict)
+    }
+    inventory_errors = errors & {
+        "unregistered_control_gates",
+        "unclassified_blocking_decisions",
+    }
+    source_errors = errors - inventory_errors
+    if inventory_errors and source_errors:
+        title = "控制閘 inventory / evidence 異常"
+    elif inventory_errors:
+        title = "控制閘 inventory 有未納管控制點"
+    else:
+        title = "控制閘 evidence source 失明"
+    trigger_lines = []
+    if inventory_errors:
+        trigger_lines.append(
+            f"- {len(inventory_errors)} 類未登記或無 identity 的 blocking/high-frequency signal。"
+        )
+    if source_errors:
+        trigger_lines.append(
+            f"- {len(source_errors)} 類 evidence source 缺失、損壞或含無效時間戳。"
+        )
     return {
         "id": "control_gate_source_health",
         "breached": True,
         "level": "warn",
-        "title": "控制閘 evidence source 失明",
+        "title": title,
         "body": "\n".join(
             [
                 "## 觸發條件",
-                f"{len(unhealthy_sources)} 個 gate evidence source "
-                "缺失、損壞或含無效時間戳。",
+                *trigger_lines,
                 "",
                 "## 影響",
-                "本輪不把缺失證據當成零次觸發；PDCA outcome join "
-                "健康狀態不可判定。",
+                "本輪不把未納管控制點或缺失證據當成零次觸發；"
+                "PDCA graph/outcome join 健康狀態不可判定。",
                 "",
                 "## 修復入口",
                 "`uv run python scripts/audit_control_gate_lifecycle.py`",
@@ -5676,6 +5700,27 @@ def check_alert_conditions(
                 and (
                     int(review_tasks.get("created_count") or 0) > 0
                     or bool(review_tasks.get("existing_ids"))
+                )
+            )
+            details["self_materialized_review"] = materialized
+            condition["details"] = details
+        elif condition.get("id") == "control_gate_source_health":
+            details = (
+                condition.setdefault("details", {})
+                if isinstance(condition.get("details"), dict)
+                else {}
+            )
+            inventory_tasks = gate_lifecycle_receipt.get(
+                "inventory_review_tasks"
+            )
+            details["inventory_actuation"] = inventory_tasks
+            materialized = (
+                isinstance(inventory_tasks, dict)
+                and (
+                    int(inventory_tasks.get("created_count") or 0) > 0
+                    or bool(inventory_tasks.get("refreshed_ids"))
+                    or bool(inventory_tasks.get("deferred_ids"))
+                    or bool(inventory_tasks.get("existing_ids"))
                 )
             )
             details["self_materialized_review"] = materialized

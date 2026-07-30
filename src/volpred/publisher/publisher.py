@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -71,25 +72,65 @@ def _make_excerpt(body: str | None, max_chars: int = _EXCERPT_MAX_CHARS) -> str:
 # A missed publish is ranked WORSE than a duplicate, so the dedup gates change
 # from "default block, carve per-category exemptions" (the whack-a-mole that
 # silently dropped daily/digest/event content all session) to "default publish,
-# hard-block ONLY a provable byte-level recycle, WARN+log everything else".
-#   - _RECYCLE_SIM: char-bigram body similarity above which a same-experiment-ref
-#     republish is judged a true recycle (K1054 ghost was byte-for-byte ≈ 1.0).
-#     Below it, a same-K article is a legitimate companion/different-angle piece
-#     and now PUBLISHES instead of being silently swallowed.
+# hard-block only canonical exact identities; WARN+log heuristics".
+#   - _RECYCLE_SIM: char-bigram similarity is review evidence only.  Even a
+#     byte-identical same-ref body cannot own a publish lock because it is not a
+#     canonical article identity.
 #   - _log_dedup_decision: every block OR downgraded-warn is appended to
 #     storage/logs/dedup_decisions.jsonl so a non-publish is NEVER silent —
 #     it can be audited and (cheaply) retracted, which is the lesser evil.
 _RECYCLE_SIM = 0.62
+
+_DEDUP_ACTION_GATE_IDS = {
+    "block_event_stage_coverage": "event_stage_idempotency",
+    "warn_event_k_coverage": "event_cross_stage_similarity",
+    "warn_event_arc_dup": "event_cross_stage_similarity",
+    "warn_event_cross_stage_title": "event_cross_stage_similarity",
+    "block_k_coverage": "publisher_k_coverage",
+    "warn_coverage_metadata_gap": "publisher_k_coverage",
+    "block_cluster_hard_cap": "publisher_cluster_cap",
+    "block_cluster_soft_cap": "publisher_cluster_cap",
+    "block_duplicate_title_24h": "publisher_title_identity",
+    "block_depth_floor": "publisher_content_depth",
+    "warn_depth": "publisher_content_depth",
+    "block_duplicate_daily_digest": "publisher_digest_identity",
+    "block_digest_recap": "publisher_digest_recap",
+    "warn_digest_recap": "publisher_digest_recap",
+    "block_member_qa_identity": "member_qa_publish_identity",
+    "block_content_audit": "release_content_audit",
+    "block_arc_dup": "publisher_arc_dedup",
+    "block_same_ref_recycle": "publisher_arc_dedup",
+    "warn_same_ref_similarity": "publisher_arc_dedup",
+    "allow_same_ref_companion": "publisher_arc_dedup",
+    "warn_near_dup": "publisher_arc_dedup",
+    "warn_arc_dup": "publisher_arc_dedup",
+    "warn_arc_near_miss": "publisher_arc_dedup",
+    "warn_arc_unjudged": "publisher_arc_dedup",
+    "warn_thin_signature": "publisher_arc_dedup",
+    "warn_semantic_dup": "publisher_arc_dedup",
+    "pass_prewrite": "publisher_arc_dedup",
+}
+
+
+class DedupDecisionReceiptError(RuntimeError):
+    """Compatibility name retained for callers of the former fail-closed API."""
+
+
+def _title_candidate_id(title: str) -> str:
+    normalized = " ".join(str(title or "").casefold().split())
+    return (
+        "title:"
+        + hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:16]
+    )
 
 
 def _dup_body_similarity(a_title: str, a_body: str | None,
                          b_title: str, b_body: str | None) -> float:
     """Char-bigram Jaccard over normalized title+body (first 2000 chars of body).
 
-    Distinguishes a true byte-level recycle (≥ _RECYCLE_SIM) from a same-topic /
-    same-experiment companion piece with a genuinely different writeup. CJK-aware
+    Produces warn-only review evidence for same-ref similarity. CJK-aware
     (strips latin/digits/punctuation so bigrams are content characters). Returns
-    0.0 when either side is too short to judge (never blocks on thin input).
+    0.0 when either side is too short to judge and never owns a publish block.
     """
     def _prof(title: str, body: str | None) -> set[str]:
         s = re.sub(r"[\s0-9A-Za-z，,。.：:；;？?！!（）()「」、\-—~%]+", "",
@@ -110,31 +151,59 @@ def _log_dedup_decision(
     reason: str,
     *,
     candidate_id: str | None = None,
-) -> None:
+) -> bool:
     """Append a structured dedup decision so a BLOCK is never silent.
 
-    action ∈ {block_same_ref_recycle, allow_same_ref_companion, warn_near_dup,
-    warn_arc_dup}. Fail-safe: logging must never break a publish.
+    A blocking caller may suppress content only when this returns ``True``.
+    Receipt failure returns ``False`` so the caller must fail open: no durable
+    receipt means there is no auditable graph intervention.
     """
     # Imported here, not at module scope: volpred.ops's __init__ pulls in
     # ops.content, which imports this module (test_no_circular_imports).
     path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
-    guard_canonical_write(path)
     try:
+        guard_canonical_write(path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         rec = {
             "ts": datetime.now(timezone.utc).isoformat(),
+            "gate": _DEDUP_ACTION_GATE_IDS.get(
+                action,
+                f"unclassified:{action}",
+            ),
             "action": action,
             "new_title": (new_title or "")[:120],
             "matched_id": matched_id,
             "reason": reason,
         }
-        if candidate_id:
-            rec["candidate_id"] = str(candidate_id)
+        stable_candidate_id = candidate_id
+        if not stable_candidate_id and new_title:
+            stable_candidate_id = _title_candidate_id(new_title)
+        if not stable_candidate_id:
+            # Some pre-write callers intentionally have no reader title yet.
+            # Preserve a deterministic decision identity instead of emitting
+            # an unjoinable anonymous gate receipt.  The ``decision:`` prefix
+            # makes the fallback quality explicit to lifecycle review.
+            material = json.dumps(
+                {
+                    "action": action,
+                    "matched_id": matched_id,
+                    "reason": reason,
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            stable_candidate_id = (
+                "decision:"
+                + hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
+            )
+        if stable_candidate_id:
+            rec["candidate_id"] = str(stable_candidate_id)
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    except Exception:
-        pass  # silent-ok: dedup logging must never break a publish
+        return True
+    except Exception as exc:
+        print(f"  ⚠️ decision receipt failed; gate fails open: {exc}")
+        return False
 
 
 def _semantic_dup_warn(storage_dir: str, item: dict, feed: list[dict]) -> None:
@@ -153,7 +222,6 @@ def _semantic_dup_warn(storage_dir: str, item: dict, feed: list[dict]) -> None:
         from datetime import datetime, timezone
 
         from volpred.ops.topic_similarity import (
-            DEFAULT_NEAR_DUP_THRESHOLD,
             _is_daily_templated,
             article_topic_text,
             cosine,
@@ -213,10 +281,11 @@ def _semantic_dup_warn(storage_dir: str, item: dict, feed: list[dict]) -> None:
                     if gap_hours is not None
                     else f"threshold={threshold} (baseline)"
                 )
-                _log_dedup_decision(
+                _receipt_persisted = _log_dedup_decision(
                     storage_dir, "warn_semantic_dup", item.get("title"), x.get("id"),
                     f"whole-topic semantic similarity {round(sim, 3)} >= {threshold} "
                     f"vs {x.get('id')} ({gap_text}; warn-only per dedup-gate-audit)",
+                    candidate_id=str(item.get("id") or "") or None,
                 )
                 break  # one warning per publish is enough
     except Exception as exc:
@@ -382,7 +451,7 @@ def _log_anti_ai_gate_decision_impl(
     failures: list[str] | None = None,
     fixes: list[str] | None = None,
     mode: str | None = None,
-) -> None:
+) -> bool:
     """Append the anti-AI gate audit record; logging is fail-open."""
     path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
     guard_canonical_write(path)
@@ -404,9 +473,11 @@ def _log_anti_ai_gate_decision_impl(
         }
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        return True
     except Exception as e:
         # fail-open per dedup-gate-audit.md（log 失敗不可炸 publish），但 swallow 必須可觀測
         print(f"⚠️ anti_ai_gate_decision_log_failed (fail-open): {e}")
+        return False
 
 
 def _send_anti_ai_gate_degraded_alert(storage_dir: str, item: dict, exc: Exception) -> None:
@@ -458,7 +529,7 @@ def _run_publish_anti_ai_gate(
     def _log_anti_ai_gate_decision(*args, **kwargs):  # noqa: WPS430
         if log_decision:
             return _log_anti_ai_gate_decision_impl(*args, **kwargs)
-        return None
+        return True
 
     warn_only, mode_reason = _anti_ai_gate_warn_only()
     try:
@@ -536,7 +607,7 @@ def _run_publish_anti_ai_gate(
         )
         return []
 
-    _log_anti_ai_gate_decision(
+    receipt_persisted = _log_anti_ai_gate_decision(
         storage_dir,
         item,
         decision="block",
@@ -545,6 +616,12 @@ def _run_publish_anti_ai_gate(
         fixes=fixes,
         mode=mode_reason,
     )
+    if log_decision and not receipt_persisted:
+        print(
+            f"  [feed_publisher] WARN anti-AI block receipt failed; "
+            f"fail-open for {item.get('id', 'unknown')}"
+        )
+        return []
     issue = (
         f"anti_ai_style publish gate failed: {summary}. "
         "Rewrite per .claude/skills/anti-ai-style/references/editor-sop.md"
@@ -1578,6 +1655,9 @@ class Publisher:
         """
         import uuid
         import re
+        # Allocate the immutable candidate identity before any gate runs so
+        # every decision can join to the eventual feed row.
+        pub_id = f"mile_{uuid.uuid4().hex[:8]}"
         # --- Dedupe check: reject exact title + warn similar topics ---
         feed = self._load_feed()
         _is_event_article_input = category == 'event_article' or audience == 'event'
@@ -1623,7 +1703,7 @@ class Publisher:
             )
             if _event_stage_hits:
                 _hit = _event_stage_hits[0]
-                _log_dedup_decision(
+                _receipt_persisted = _log_dedup_decision(
                     str(self.reports_dir.parent),
                     "block_event_stage_coverage",
                     title,
@@ -1638,12 +1718,14 @@ class Publisher:
                         f"{_event_details.get('event_series_slot')}"
                     ),
                 )
-                print(
-                    "  🚫 BLOCKED exact event stage duplicate of "
-                    f"{_hit.get('id')} (event_key={_event_details.get('event_key')}, "
-                    f"slot={_event_details.get('event_series_slot')})."
-                )
-                return _hit.get("id")
+                if _receipt_persisted:
+                    print(
+                        "  🚫 BLOCKED exact event stage duplicate of "
+                        f"{_hit.get('id')} "
+                        f"(event_key={_event_details.get('event_key')}, "
+                        f"slot={_event_details.get('event_series_slot')})."
+                    )
+                    return _hit.get("id")
 
         # --- G1: member_qa publish-time duplicate gate (2026-07-19 STRIKE 2) ---
         # The ONLY gate standing on the reader-visible artifact. Every other
@@ -1660,6 +1742,8 @@ class Publisher:
         # release-pool status-rewrite path via member_qa_publish_gate_applies,
         # so the two publish paths cannot drift on WHICH articles are gated.
         from volpred.ops.content import (
+            MemberQaDuplicatePublishError,
+            MemberQaPublishGateIndeterminate,
             assert_member_qa_publish_allowed,
             member_qa_publish_gate_applies,
         )
@@ -1671,14 +1755,31 @@ class Publisher:
             'phase': phase,
             'details': details or {},
         }):
-            assert_member_qa_publish_allowed(
-                (details or {}).get('question_id'),
-                feed=feed,
-                supersedes=(details or {}).get('supersedes'),
-                title=title,
-                storage_dir=str(self.reports_dir.parent),
-                waiver=(details or {}).get('question_id_waiver'),
-            )
+            try:
+                assert_member_qa_publish_allowed(
+                    (details or {}).get('question_id'),
+                    feed=feed,
+                    supersedes=(details or {}).get('supersedes'),
+                    title=title,
+                    storage_dir=str(self.reports_dir.parent),
+                    waiver=(details or {}).get('question_id_waiver'),
+                )
+            except (
+                MemberQaDuplicatePublishError,
+                MemberQaPublishGateIndeterminate,
+            ) as exc:
+                _receipt_persisted = _log_dedup_decision(
+                    str(self.reports_dir.parent),
+                    "block_member_qa_identity",
+                    title,
+                    None,
+                    f"{type(exc).__name__}: {str(exc).splitlines()[0]}",
+                    candidate_id=str(
+                        (details or {}).get("question_id") or ""
+                    ) or pub_id,
+                )
+                if _receipt_persisted:
+                    raise
         from datetime import timedelta
         cutoff_exact = datetime.now(timezone.utc) - timedelta(hours=24)
         for existing in feed:
@@ -1696,14 +1797,31 @@ class Publisher:
                             "same title on a different structured event stage; "
                             "publishing continues"
                         ),
+                        candidate_id=(
+                            f"{str(_event_details.get('event_key')).strip().casefold()}:"
+                            f"{_event_details.get('event_series_slot')}"
+                        ),
                     )
                     continue
                 existing_time = existing.get('published_at') or existing.get('created_at', '')
                 try:
                     from dateutil.parser import parse as dtparse
                     if dtparse(existing_time) > cutoff_exact:
-                        print(f"  ⚠️ Duplicate title within 24h: '{title[:50]}' (existing: {existing['id']}). Skipping.")
-                        return existing['id']
+                        _receipt_persisted = _log_dedup_decision(
+                            str(self.reports_dir.parent),
+                            "block_duplicate_title_24h",
+                            title,
+                            existing.get("id"),
+                            "exact title already published within 24 hours",
+                            candidate_id=_title_candidate_id(title),
+                        )
+                        if _receipt_persisted:
+                            print(
+                                "  ⚠️ Duplicate title within 24h: "
+                                f"'{title[:50]}' "
+                                f"(existing: {existing['id']}). Skipping."
+                            )
+                            return existing['id']
                 except Exception as exc:
                     existing_id = existing.get('id', '?')
                     print(
@@ -1711,7 +1829,19 @@ class Publisher:
                         f"'{title[:50]}' (existing: {existing_id}): {exc}. Skipping."
                     )
                     if existing.get('status') not in {'retracted', 'unpublished'}:
-                        return existing_id
+                        _receipt_persisted = _log_dedup_decision(
+                            str(self.reports_dir.parent),
+                            "block_duplicate_title_24h",
+                            title,
+                            existing_id,
+                            (
+                                "exact title matched and existing timestamp "
+                                "could not be parsed; conservative hold"
+                            ),
+                            candidate_id=_title_candidate_id(title),
+                        )
+                        if _receipt_persisted:
+                            return existing_id
 
         # --- Similar topic check: warn if keyword overlap with existing ---
         similar = self._find_similar_articles(title, feed, audience)
@@ -1781,28 +1911,28 @@ class Publisher:
                     continue
                 if existing.get('audience') != inferred_aud:
                     continue
-                # Same audience + same K. Only block if the BODY is near-identical
-                # (a true recycle); otherwise let the companion piece publish.
+                # Same audience + same K remains heuristic even with high body
+                # similarity.  It is review evidence, never a publish lock.
                 body_sim = _dup_body_similarity(
                     title, description,
                     existing.get('title', ''),
                     existing.get('content') or existing.get('description') or '',
                 )
                 if body_sim >= _RECYCLE_SIM:
-                    print(f"  🚫 BLOCKED same-experiment-ref recycle of {existing.get('id')} "
+                    print(f"  ⚠️ WARN same-experiment-ref similarity to {existing.get('id')} "
                           f"'{existing.get('title','')[:50]}' (shared_refs={sorted(shared)}, "
-                          f"audience={inferred_aud}, body_sim={body_sim:.0%}) — skipping publish. "
-                          f"Set details['dup_waiver'] to override or use a different audience.")
-                    _log_dedup_decision(_dedup_storage_dir, "block_same_ref_recycle",
+                          f"audience={inferred_aud}, body_sim={body_sim:.0%}) — publishing.")
+                    _log_dedup_decision(_dedup_storage_dir, "warn_same_ref_similarity",
                                         title, existing.get('id'),
-                                        f"shared_refs={sorted(shared)} aud={inferred_aud} body_sim={body_sim:.2f}")
-                    return existing.get('id')
+                                        f"shared_refs={sorted(shared)} aud={inferred_aud} body_sim={body_sim:.2f}",
+                                        candidate_id=pub_id)
                 else:
                     # Same K, different writeup → publish, but record the call so
                     # an over-publishing pattern is auditable (never silent).
                     _log_dedup_decision(_dedup_storage_dir, "allow_same_ref_companion",
                                         title, existing.get('id'),
-                                        f"shared_refs={sorted(shared)} aud={inferred_aud} body_sim={body_sim:.2f}")
+                                        f"shared_refs={sorted(shared)} aud={inferred_aud} body_sim={body_sim:.2f}",
+                                        candidate_id=pub_id)
 
         # --- WARN-only near-duplicate (title similarity). 2026-06-23: downgraded
         # from HARD BLOCK to warn+log+publish. Title-token similarity is a fuzzy
@@ -1827,7 +1957,8 @@ class Publisher:
                           f"shared_ref={shared} of {s['id']} '{existing.get('title','')[:50]}'.")
                     _log_dedup_decision(_dedup_storage_dir, "warn_near_dup",
                                         title, s['id'],
-                                        f"title_sim={s['similarity']:.2f} shared_ref={shared}")
+                                        f"title_sim={s['similarity']:.2f} shared_ref={shared}",
+                                        candidate_id=pub_id)
                     break
 
         # --- WARN-only narrative-arc duplicate. 2026-06-23: downgraded from HARD
@@ -1858,7 +1989,8 @@ class Publisher:
                           f"conclusion_class={d['conclusion_class']}).")
                     _log_dedup_decision(_dedup_storage_dir, "warn_arc_dup",
                                         title, d['id'],
-                                        f"entities={d['shared_entities']} class={d['conclusion_class']}")
+                                        f"entities={d['shared_entities']} class={d['conclusion_class']}",
+                                        candidate_id=pub_id)
                 elif arc_near_misses:
                     d = arc_near_misses[0]
                     print(f"  ⚠️ ARC NEAR-MISS (publishing) of {d['id']} "
@@ -1869,6 +2001,7 @@ class Publisher:
                         title,
                         d['id'],
                         f"reason={d.get('match_reason')} entities={d.get('shared_entities')}",
+                        candidate_id=pub_id,
                     )
                 elif is_arc_anchorless(arc_signature(title, description or ''), new_refs):
                     print("  ⚠️ ARC UNJUDGED (publishing) — signature has no "
@@ -1879,6 +2012,7 @@ class Publisher:
                         title,
                         None,
                         "anchorless signature; empty match list is not a clean clearance",
+                        candidate_id=pub_id,
                     )
             except ImportError:
                 pass  # silent-ok: optional arc-dedup module; absent → skip arc-dup check
@@ -1965,18 +2099,22 @@ class Publisher:
                 topic_30d["soft_cap"] = _gate_soft_cap
             details.setdefault("topic_cluster_30d", topic_30d)
         if cluster_gate["blocked"] and not is_type_locked and not details.get("cluster_waiver"):
-            _log_dedup_decision(
+            _receipt_persisted = _log_dedup_decision(
                 str(self.reports_dir.parent),
                 "block_cluster_hard_cap",
                 title,
                 None,
                 f"cluster={cluster} count_30d={cluster_gate['count']} cap={cluster_gate['cap']}",
+                candidate_id=pub_id,
             )
-            raise ValueError(
-                "topic_cluster_cooldown_blocked: "
-                f"cluster={cluster} count_30d={cluster_gate['count']} cap={cluster_gate['cap']}. "
-                "Pick another topic or set details['cluster_waiver']=<reason>."
-            )
+            if _receipt_persisted:
+                raise ValueError(
+                    "topic_cluster_cooldown_blocked: "
+                    f"cluster={cluster} "
+                    f"count_30d={cluster_gate['count']} "
+                    f"cap={cluster_gate['cap']}. Pick another topic or set "
+                    "details['cluster_waiver']=<reason>."
+                )
         # 2026-06-29 soft cap (hard_cap × SOFT_CAP_MULTIPLIER): even timely /
         # topic-bound types (event_article / trending_repost / member_qa /
         # daily_*) stop here, because "exempt" was a free pass that let vix grow
@@ -1990,7 +2128,7 @@ class Publisher:
             and is_type_locked
             and not details.get("cluster_waiver")
         ):
-            _log_dedup_decision(
+            _receipt_persisted = _log_dedup_decision(
                 str(self.reports_dir.parent),
                 "block_cluster_soft_cap",
                 title,
@@ -2001,15 +2139,18 @@ class Publisher:
                     f"(hard_cap={cluster_gate['cap']} × {_gate_soft_mult}) "
                     f"content_type={_ct or '?'} audience={audience or '?'}"
                 ),
+                candidate_id=pub_id,
             )
-            raise ValueError(
-                "topic_cluster_soft_cap_blocked: "
-                f"cluster={cluster} count_30d={cluster_gate['count']} "
-                f"soft_cap={_gate_soft_cap} (hard_cap×{_gate_soft_mult}). "
-                "Even timely / topic-bound types stop here; pick another cluster, "
-                "wait for the 30d window to roll, or set details['cluster_waiver']="
-                "'<reason>' for a genuinely critical real-world event."
-            )
+            if _receipt_persisted:
+                raise ValueError(
+                    "topic_cluster_soft_cap_blocked: "
+                    f"cluster={cluster} count_30d={cluster_gate['count']} "
+                    f"soft_cap={_gate_soft_cap} "
+                    f"(hard_cap×{_gate_soft_mult}). Even timely / topic-bound "
+                    "types stop here; pick another cluster, wait for the 30d "
+                    "window to roll, or set details['cluster_waiver']="
+                    "'<reason>' for a genuinely critical real-world event."
+                )
 
         # --- Pre-publish content-vs-source provenance gate (2026-06-03 3-strike) ---
         # Refactor plan: docs/refactor_plan_prepublish_content_gate.md.
@@ -2201,7 +2342,6 @@ class Publisher:
             except Exception as _t2_exc:
                 print(f"  [prepublish_audit] Tier-2 skipped (degrading): {_t2_exc}")
 
-        pub_id = f"mile_{uuid.uuid4().hex[:8]}"
         now = datetime.now(timezone.utc).isoformat()
         normalized_status = status if status in {'published', 'draft', 'scheduled', 'unpublished', 'archived'} else 'published'
         # Determine audience and category — _infer_audience is the enforce mechanism.
@@ -2287,11 +2427,21 @@ class Publisher:
         # the item so we fail fast and avoid writing a polluted record.
         audit_issues = _audit_general_content(audience, tag_list, description)
         if audit_issues and audit_strict:
-            issue_text = '\n  - '.join(audit_issues)
-            raise ValueError(
-                f"audience='general' content consistency violations:\n  - {issue_text}\n"
-                f"Fix the brief or set audit_strict=False (batch migrations only)."
+            _receipt_persisted = _log_dedup_decision(
+                str(self.reports_dir.parent),
+                "block_content_audit",
+                title,
+                None,
+                "; ".join(audit_issues)[:300],
+                candidate_id=pub_id,
             )
+            if _receipt_persisted:
+                issue_text = '\n  - '.join(audit_issues)
+                raise ValueError(
+                    "audience='general' content consistency violations:"
+                    f"\n  - {issue_text}\nFix the brief or set "
+                    "audit_strict=False (batch migrations only)."
+                )
         elif audit_issues:
             print(f"  ⚠️ general audit issues (audit_strict=False bypass):")
             for issue in audit_issues:
@@ -2309,12 +2459,13 @@ class Publisher:
         for _dw in depth_warnings:
             print(f"  ⚠️ content depth warning: {_dw}")
         if depth_issues:
-            _log_dedup_decision(
+            _receipt_persisted = _log_dedup_decision(
                 str(self.reports_dir.parent),
                 "block_depth_floor" if audit_strict else "warn_depth",
                 title, None, "; ".join(depth_issues)[:300],
+                candidate_id=pub_id,
             )
-            if audit_strict:
+            if audit_strict and _receipt_persisted:
                 issue_text = '\n  - '.join(depth_issues)
                 raise ValueError(
                     f"content depth below publish floor:\n  - {issue_text}\n"
@@ -2344,18 +2495,21 @@ class Publisher:
                         and existing_date == candidate_date
                     ):
                         existing_id = str(existing.get('id') or '')
-                        _log_dedup_decision(
+                        _receipt_persisted = _log_dedup_decision(
                             str(self.reports_dir.parent),
                             'block_duplicate_daily_digest',
                             title,
                             existing_id or None,
                             f"Taipei date {candidate_date.isoformat()} already has a published daily_digest",
+                            candidate_id=pub_id,
                         )
-                        print(
-                            "  ⚠️ Daily digest already published for "
-                            f"TPE {candidate_date.isoformat()} (existing: {existing_id}). Skipping."
-                        )
-                        return existing_id
+                        if _receipt_persisted:
+                            print(
+                                "  ⚠️ Daily digest already published for "
+                                f"TPE {candidate_date.isoformat()} "
+                                f"(existing: {existing_id}). Skipping."
+                            )
+                            return existing_id
 
         # 2026-07-05 (boss): daily_digest must curate ACROSS THE ARCHIVE by a
         # current-event-driven theme, not recap the last week or two. This
@@ -2373,12 +2527,13 @@ class Publisher:
             for _sw in span_warnings:
                 print(f"  ⚠️ digest archive-span warning: {_sw}")
             if span_issues:
-                _log_dedup_decision(
+                _receipt_persisted = _log_dedup_decision(
                     str(self.reports_dir.parent),
                     "block_digest_recap" if audit_strict else "warn_digest_recap",
                     title, None, "; ".join(span_issues)[:300],
+                    candidate_id=pub_id,
                 )
-                if audit_strict:
+                if audit_strict and _receipt_persisted:
                     issue_text = '\n  - '.join(span_issues)
                     raise ValueError(
                         f"daily_digest 是本週 recap 不是跨庫策展:\n  - {issue_text}\n"
@@ -2788,7 +2943,7 @@ class Publisher:
                         log_record_id = existing_id
                         _event_key = _event_identity["event_key"]
                         _event_slot = _event_identity["event_series_slot"]
-                        _log_dedup_decision(
+                        _receipt_persisted = _log_dedup_decision(
                             storage_dir,
                             "block_event_stage_coverage",
                             str(item.get("title") or ""),
@@ -2802,7 +2957,8 @@ class Publisher:
                                 f"{_event_slot.strip().upper().replace(' ', '')}"
                             ),
                         )
-                        return str(existing_id)
+                        if _receipt_persisted:
+                            return str(existing_id)
                 duplicate = (
                     None
                     if _item_is_digest or _item_is_event
@@ -2810,14 +2966,19 @@ class Publisher:
                 )
                 if duplicate is not None:
                     existing_id = duplicate.get("id") or item.get("id")
-                    result_label = f"duplicate_same_ref:{existing_id}"[:200]
-                    log_record_id = existing_id
                     print(
-                        "  🚫 BLOCKED same-experiment-ref duplicate at feed append "
+                        "  ⚠️ WARN same-experiment-ref similarity at feed append "
                         f"(new={item.get('id')}, existing={existing_id}, "
                         f"refs={sorted(_item_experiment_refs(item) & _item_experiment_refs(duplicate))})"
                     )
-                    return str(existing_id)
+                    _log_dedup_decision(
+                        storage_dir,
+                        "warn_same_ref_similarity",
+                        str(item.get("title") or ""),
+                        str(existing_id),
+                        "append choke observed same-ref body similarity; warn-only",
+                        candidate_id=str(item.get("id") or "") or None,
+                    )
                 # Semantic near-dup WARN (boss email-12139): catches same-topic
                 # rehashes the keyword gate above misses. Warn-only + fail-open —
                 # never blocks (per dedup-gate-audit fuzzy rule).

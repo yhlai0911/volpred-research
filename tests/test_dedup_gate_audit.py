@@ -24,8 +24,12 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from volpred.ops.alerts import _parse_dedup_gate_health_state
+from volpred.ops.control_gate_lifecycle import DEFAULT_REGISTRY_PATH
 from volpred.ops.dedup_gate_audit import audit_dedup_decisions
-from volpred.publisher.publisher import _log_dedup_decision
+from volpred.publisher.publisher import (
+    _DEDUP_ACTION_GATE_IDS,
+    _log_dedup_decision,
+)
 
 NOW = datetime(2026, 7, 20, 4, 0, tzinfo=timezone.utc)
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +78,33 @@ def _taskgen(hours_ago: float, blocked: bool, matched_ids: list[str]) -> dict:
         "theme_terms": [],
         "matched_ids": matched_ids,
     }
+
+
+def test_publisher_action_registry_has_lossless_inventory_parity() -> None:
+    registry = json.loads(DEFAULT_REGISTRY_PATH.read_text(encoding="utf-8"))
+    gates = {
+        str(row["gate_id"]): row
+        for row in registry["gates"]
+    }
+    source = next(
+        row
+        for row in registry["discovery"]["sources"]
+        if row["path"] == "logs/dedup_decisions.jsonl"
+    )
+    aliases = source["action_gate_aliases"]
+
+    for action, gate_id in _DEDUP_ACTION_GATE_IDS.items():
+        assert gate_id in gates, (action, gate_id)
+        assert aliases[action] == gate_id
+        selectors = [
+            evidence.get("match") or {}
+            for evidence in gates[gate_id]["evidence_sources"]
+            if evidence.get("path") == "logs/dedup_decisions.jsonl"
+        ]
+        assert any(
+            action in (selector.get("action") or [])
+            for selector in selectors
+        ), (action, gate_id)
 
 
 # ---------------------------------------------------------------- §4-2 black hole
@@ -290,6 +321,25 @@ def test_decision_logger_persists_stable_candidate_identity(
         (tmp_path / "logs" / "dedup_decisions.jsonl").read_text()
     )
     assert row["candidate_id"] == "K1366"
+    assert row["gate"] == "publisher_arc_dedup"
+
+
+def test_decision_logger_identifies_prewrite_decision_without_title(
+    tmp_path: Path,
+) -> None:
+    _log_dedup_decision(
+        str(tmp_path),
+        "block_k_coverage",
+        "",
+        "mile_existing",
+        "K1719 already covered for audience=general",
+    )
+
+    row = json.loads(
+        (tmp_path / "logs" / "dedup_decisions.jsonl").read_text()
+    )
+    assert row["gate"] == "publisher_k_coverage"
+    assert row["candidate_id"].startswith("decision:")
 
 
 # ---------------------------------------------------------------- healthy / edges
