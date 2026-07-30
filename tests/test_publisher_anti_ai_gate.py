@@ -106,6 +106,38 @@ def test_anti_ai_gate_fails_open_when_block_receipt_is_not_durable(
     assert [item["id"] for item in _feed(storage)] == ["mile_ai_bad"]
 
 
+def test_anti_ai_gate_fails_open_when_canonical_guard_rejects_receipt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The real receipt guard boundary belongs inside the fail-open try."""
+    storage = tmp_path / "storage"
+    _init_storage(storage)
+    monkeypatch.setenv("VOLPRED_ANTI_AI_GATE_MODE", "strict")
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    real_guard = publisher_module.guard_canonical_write
+
+    def reject_decision_receipt(path: str | Path) -> None:
+        if str(path).endswith("logs/dedup_decisions.jsonl"):
+            raise OSError("simulated canonical receipt guard failure")
+        real_guard(path)
+
+    monkeypatch.setattr(
+        publisher_module,
+        "guard_canonical_write",
+        reject_decision_receipt,
+    )
+
+    result = Publisher(storage_dir=str(storage))._append_to_feed(_bad_item())
+
+    assert result == "mile_ai_bad"
+    assert [item["id"] for item in _feed(storage)] == ["mile_ai_bad"]
+    assert not any(
+        item.get("gate") == "anti_ai_style"
+        for item in _decisions(storage)
+    )
+
+
 def test_anti_ai_gate_checker_exception_fail_open_with_alert(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

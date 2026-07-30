@@ -7,7 +7,10 @@ has regressed to the title-similarity blind spot.
 
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from threading import Barrier
+import sys
+import types
 
 import pytest
 
@@ -25,6 +28,44 @@ from volpred.publisher.arc_dedup import (
 
 def _ts(days_ago: int = 0) -> str:
     return (datetime.now(timezone.utc) - timedelta(days=days_ago)).isoformat()
+
+
+def _install_publisher_runtime_stubs(monkeypatch) -> None:
+    """Keep publisher integration tests independent of developer-only env."""
+    original_exists = Path.exists
+
+    def clean_checkout_exists(path: Path) -> bool:
+        if path.name in {".env", ".env.local"}:
+            return False
+        return original_exists(path)
+
+    monkeypatch.setattr(Path, "exists", clean_checkout_exists)
+
+    sync_stub = types.ModuleType("supabase_sync")
+    sync_stub.sync_article = lambda *_args, **_kwargs: True
+    monkeypatch.setitem(sys.modules, "supabase_sync", sync_stub)
+
+    live_stub = types.ModuleType("volpred.publisher.live_verify")
+    live_stub.verify_article_live = lambda *_args, **_kwargs: True
+    live_stub.stamp_verified = lambda *_args, **_kwargs: None
+    live_stub.emit_verify_alert = lambda *_args, **_kwargs: None
+    monkeypatch.setitem(sys.modules, "volpred.publisher.live_verify", live_stub)
+
+    email_stub = types.ModuleType("volpred.publisher.email_notifier")
+
+    class _EmailNotifier:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def notify_article_published(self, *_args, **_kwargs):
+            return None
+
+    email_stub.EmailNotifier = _EmailNotifier
+    monkeypatch.setitem(
+        sys.modules,
+        "volpred.publisher.email_notifier",
+        email_stub,
+    )
 
 
 # --- The actual K1091 article (2026-05-16) that K1449 duplicated -------------
@@ -606,6 +647,7 @@ class TestPublisherGateWiring:
         )
         from volpred.publisher.publisher import Publisher
 
+        _install_publisher_runtime_stubs(monkeypatch)
         pub = Publisher(storage_dir=str(storage))
         returned = pub.publish_milestone(
             title=K1449_TITLE,
@@ -631,7 +673,7 @@ class TestPublisherGateWiring:
         ]
         assert "warn_arc_dup" in actions
 
-    def test_dup_waiver_overrides(self, tmp_path):
+    def test_dup_waiver_overrides(self, tmp_path, monkeypatch):
         import json as _json
 
         storage = tmp_path / "storage"
@@ -641,6 +683,7 @@ class TestPublisherGateWiring:
         )
         from volpred.publisher.publisher import Publisher
 
+        _install_publisher_runtime_stubs(monkeypatch)
         pub = Publisher(storage_dir=str(storage))
         returned = pub.publish_milestone(
             title=K1449_TITLE,
@@ -829,9 +872,12 @@ class TestK1054GhostRecycle:
         dups = find_arc_duplicates(spacex_title, spacex_content, [big_tech_vol], days=90)
         assert dups == [], "SpaceX must remain unblocked under descriptive-strict path"
 
-    def test_publish_milestone_blocks_same_ref_recycle(self, tmp_path):
-        """End-to-end vuln-2 gate: publish_milestone refuses a same-K,
-        same-audience republish even when the arc class is descriptive."""
+    def test_publish_milestone_warns_same_ref_recycle(
+        self,
+        tmp_path,
+        monkeypatch,
+    ):
+        """Heuristic same-K similarity is auditable but cannot own a lock."""
         import json as _json
 
         storage = tmp_path / "storage"
@@ -840,8 +886,27 @@ class TestK1054GhostRecycle:
             _json.dumps([self.C481_ARTICLE], ensure_ascii=False), encoding="utf-8"
         )
         from volpred.publisher.publisher import Publisher
+        from volpred.publisher import publisher as publisher_module
 
         pub = Publisher(storage_dir=str(storage))
+        monkeypatch.setattr(
+            Publisher,
+            "_sync_to_remote",
+            lambda *_args, **_kwargs: None,
+        )
+        monkeypatch.setattr(
+            Publisher,
+            "_notify_article_published",
+            lambda *_args, **_kwargs: None,
+        )
+        monkeypatch.setattr(
+            publisher_module,
+            "_semantic_dup_warn",
+            lambda *_args, **_kwargs: None,
+        )
+        sync_stub = types.ModuleType("supabase_sync")
+        sync_stub.sync_article = lambda *_args, **_kwargs: True
+        monkeypatch.setitem(sys.modules, "supabase_sync", sync_stub)
         returned = pub.publish_milestone(
             title=self.BB520_TITLE,
             description=self.BB520_CONTENT,
@@ -851,11 +916,26 @@ class TestK1054GhostRecycle:
             details={"experiment_refs": ["K1054"]},
             audit_strict=False,
         )
-        assert returned == "mile_c481c8cf", "same-ref recycle was not blocked"
+        assert returned != "mile_c481c8cf"
         feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
-        assert len(feed) == 1, "blocked publish must not append a new article"
+        assert len(feed) == 2
+        decisions = [
+            _json.loads(line)
+            for line in (
+                storage / "logs" / "dedup_decisions.jsonl"
+            ).read_text(encoding="utf-8").splitlines()
+        ]
+        assert any(
+            row.get("action") == "warn_same_ref_similarity"
+            and row.get("matched_id") == "mile_c481c8cf"
+            for row in decisions
+        )
 
-    def test_publish_milestone_allows_different_audience_companion(self, tmp_path):
+    def test_publish_milestone_allows_different_audience_companion(
+        self,
+        tmp_path,
+        monkeypatch,
+    ):
         """A research companion to an existing general article on the same K is
         a legitimate dual-audience piece, not a recycle. Must be allowed."""
         import json as _json
@@ -867,6 +947,7 @@ class TestK1054GhostRecycle:
         )
         from volpred.publisher.publisher import Publisher
 
+        _install_publisher_runtime_stubs(monkeypatch)
         pub = Publisher(storage_dir=str(storage))
         returned = pub.publish_milestone(
             title="K1054 proxy-robustness 模型比較：研究版完整檢定",
@@ -915,6 +996,7 @@ class TestK1054GhostRecycle:
         )
         from volpred.publisher.publisher import Publisher
 
+        _install_publisher_runtime_stubs(monkeypatch)
         monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None)
         pub = Publisher(storage_dir=str(storage))
         returned = pub.publish_experiment(

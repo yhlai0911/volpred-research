@@ -1458,6 +1458,7 @@ def _audit_inventory_completion() -> dict[str, Any]:
 
     return audit_control_gates(
         storage_dir=str(NEXT_TASKS.parent),
+        registry_path=CONTROL_GATE_REGISTRY,
         queue_path=NEXT_TASKS,
         materialize_reviews=False,
         write_state=False,

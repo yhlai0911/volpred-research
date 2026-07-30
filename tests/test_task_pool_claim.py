@@ -928,11 +928,6 @@ def test_inventory_completion_rejects_expired_durable_gap_until_registered(
 ) -> None:
     from datetime import datetime, timedelta, timezone
 
-    from volpred.ops.control_gate_lifecycle import (
-        DEFAULT_REGISTRY_PATH,
-        audit_control_gates,
-    )
-
     storage = tmp_path / "storage"
     next_tasks = storage / "next_tasks.json"
     now = datetime(2026, 7, 30, 6, tzinfo=timezone.utc)
@@ -984,20 +979,84 @@ def test_inventory_completion_rejects_expired_durable_gap_until_registered(
         json.dumps({"completions": []}),
         encoding="utf-8",
     )
-    registry = json.loads(DEFAULT_REGISTRY_PATH.read_text(encoding="utf-8"))
+    registry = {
+        "schema_version": 1,
+        "owner": "tests.control_gate_lifecycle",
+        "review_task": {
+            "task_type": "platform_ops",
+            "priority": 2,
+            "source": "control_gate_lifecycle",
+        },
+        "discovery": {
+            "window_hours": 168,
+            "high_frequency_threshold": 20,
+            "incidents_required": True,
+            "candidate_identity_required_after": now.isoformat(),
+            "sources": [{
+                "kind": "jsonl",
+                "path": "logs/control_gate_decisions.jsonl",
+                "required": True,
+                "identity_fields": ["gate_id"],
+                "decision_fields": ["decision"],
+                "blocking_values": ["block"],
+                "action_gate_aliases": {},
+            }],
+        },
+        "gates": [{
+            "gate_id": "known_control",
+            "owner": "tests.inventory",
+            "invariant": "known candidate owns its downstream edge",
+            "mode": "shadow",
+            "identity_strength": "canonical_exact",
+            "protected_graph": {
+                "nodes": ["candidate", "downstream"],
+                "edges": ["candidate -> downstream"],
+            },
+            "blocked_downstream_edges": ["downstream -> reader"],
+            "incident_refs": [],
+            "incident_kinds": [],
+            "evidence_sources": [{
+                "kind": "jsonl",
+                "path": "logs/control_gate_decisions.jsonl",
+                "match": {"gate_id": ["known_control"]},
+            }],
+            "outcome_join": "candidate_or_feed",
+            "deadline_required": False,
+            "review_policy": {
+                "window_hours": 168,
+                "max_review_age_hours": 336,
+                "max_raw_triggers": 20,
+                "min_distinct_candidates": 5,
+                "max_harm_outcomes": 1,
+                "harm_outcomes": [
+                    "failed",
+                    "missed_deadline",
+                    "sequence_coverage_gap",
+                    "worker_failed",
+                    "unjoined",
+                ],
+                "max_false_positive_signals": 1,
+                "min_incident_occurrences": 2,
+            },
+            "lifecycle": {
+                "phase": "check",
+                "review_anchor_at": now.isoformat(),
+                "allowed_actions": [
+                    "retain",
+                    "recalibrate",
+                    "downgrade_to_warn",
+                    "retire",
+                ],
+            },
+        }],
+    }
     registry_path = tmp_path / "registry.json"
     registry_path.write_text(json.dumps(registry), encoding="utf-8")
     monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
     monkeypatch.setattr(
         task_pool_claim,
-        "_audit_inventory_completion",
-        lambda: audit_control_gates(
-            storage_dir=str(storage),
-            registry_path=registry_path,
-            queue_path=next_tasks,
-            now=now,
-            materialize_reviews=False,
-        ),
+        "CONTROL_GATE_REGISTRY",
+        registry_path,
     )
 
     args = argparse.Namespace(

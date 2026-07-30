@@ -584,7 +584,7 @@ def test_unpublish_supabase_sync_failure_is_queued(
     assert "recorded to .failed_supabase_syncs.json" in captured.out
 
 
-def test_publish_milestone_bad_existing_timestamp_keeps_exact_title_gate(
+def test_publish_milestone_bad_existing_timestamp_warns_and_fails_open(
     tmp_path: Path,
     monkeypatch,
     capsys,
@@ -606,23 +606,38 @@ def test_publish_milestone_bad_existing_timestamp_keeps_exact_title_gate(
         encoding="utf-8",
     )
     monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(
+        Publisher,
+        "_append_to_feed",
+        lambda self, item: item["id"],
+    )
 
     result = Publisher(storage_dir=str(tmp_path)).publish_milestone(
         title="Same Title",
         description="新的文章不應穿過 exact-title duplicate gate。",
         phase="research",
         status="draft",
+        audience="research",
+        category="milestone",
+        audit_strict=False,
     )
 
     captured = capsys.readouterr()
-    assert result == "mile_bad_timestamp"
+    assert result != "mile_bad_timestamp"
     assert "Duplicate title timestamp parse failed" in captured.out
-    decision = json.loads(
-        (tmp_path / "logs" / "dedup_decisions.jsonl")
+    assert "Publishing continues" in captured.out
+    decisions = [
+        json.loads(line)
+        for line in (tmp_path / "logs" / "dedup_decisions.jsonl")
         .read_text(encoding="utf-8")
-        .splitlines()[-1]
+        .splitlines()
+    ]
+    decision = next(
+        item
+        for item in decisions
+        if item.get("action") == "warn_duplicate_title_timestamp_unknown"
     )
-    assert decision["action"] == "block_duplicate_title_24h"
+    assert decision["action"] == "warn_duplicate_title_timestamp_unknown"
     assert decision["gate"] == "publisher_title_identity"
     assert decision["candidate_id"].startswith("title:")
 
@@ -662,3 +677,116 @@ def test_exact_title_block_fails_open_when_receipt_is_not_durable(
     )
 
     assert result != "mile_existing"
+
+
+@pytest.mark.parametrize(
+    ("contract", "expected_action"),
+    [
+        ("provenance", "block_provenance_contract"),
+        ("image_url", "block_image_url_contract"),
+        ("cjk_font", "block_cjk_font_contract"),
+    ],
+)
+@pytest.mark.parametrize("receipt_persisted", [True, False])
+def test_prepublish_contracts_block_only_after_durable_receipt(
+    tmp_path: Path,
+    monkeypatch,
+    contract: str,
+    expected_action: str,
+    receipt_persisted: bool,
+) -> None:
+    """Every deterministic pre-publish hold obeys no-receipt/no-block."""
+    from volpred.publisher import prepublish_audit
+
+    reports_dir = tmp_path / "reports"
+    reports_dir.mkdir(parents=True)
+    (reports_dir / "feed.json").write_text("[]", encoding="utf-8")
+
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(
+        Publisher,
+        "_find_similar_articles",
+        lambda self, *_args, **_kwargs: [],
+    )
+    monkeypatch.setattr(
+        publisher_module,
+        "classify_topic_cluster",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        Publisher,
+        "_append_to_feed",
+        lambda self, item: item["id"],
+    )
+
+    monkeypatch.setattr(
+        prepublish_audit,
+        "audit_content_provenance",
+        lambda *_args, **_kwargs: {"tier1_findings": [], "skipped": False},
+    )
+    monkeypatch.setattr(
+        prepublish_audit,
+        "audit_image_urls",
+        lambda *_args, **_kwargs: {"broken": [], "total": 0},
+    )
+    monkeypatch.setattr(
+        prepublish_audit,
+        "audit_chart_cjk_fonts",
+        lambda *_args, **_kwargs: {"violations": []},
+    )
+    if contract == "provenance":
+        monkeypatch.setattr(
+            prepublish_audit,
+            "audit_content_provenance",
+            lambda *_args, **_kwargs: {
+                "tier1_findings": [{"raw": "9.99", "context": "unverified"}],
+                "skipped": False,
+            },
+        )
+    elif contract == "image_url":
+        monkeypatch.setattr(
+            prepublish_audit,
+            "audit_image_urls",
+            lambda *_args, **_kwargs: {
+                "broken": [{"url": "/experiments/k1/chart.png", "reason": "unserved"}],
+                "total": 1,
+            },
+        )
+    else:
+        monkeypatch.setattr(
+            prepublish_audit,
+            "audit_chart_cjk_fonts",
+            lambda *_args, **_kwargs: {
+                "violations": [{"path": "experiments/k1/k1.py", "reason": "font missing"}],
+            },
+        )
+
+    actions: list[str] = []
+
+    def fake_receipt(_storage, action, *_args, **_kwargs):
+        actions.append(action)
+        return receipt_persisted
+
+    monkeypatch.setattr(publisher_module, "_log_dedup_decision", fake_receipt)
+    description = (
+        "本研究完整交代資料來源、樣本期間、方法設計與穩健性檢查，"
+        "並將結果整理成表格供讀者驗證，附錄提供重現步驟。"
+    ) * 55 + "\n\n| 項目 | 結果 |\n|---|---|\n| 檢核 | 完成 |\n"
+
+    invoke = lambda: Publisher(storage_dir=str(tmp_path)).publish_milestone(
+        title=f"{contract} durable receipt contract",
+        description=description,
+        phase="research",
+        details={"experiment_refs": ["K1"]},
+        tags=["研究"],
+        audience="research",
+        status="draft",
+        audit_strict=True,
+    )
+
+    if receipt_persisted:
+        with pytest.raises(ValueError):
+            invoke()
+    else:
+        assert invoke().startswith("mile_")
+    assert expected_action in actions

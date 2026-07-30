@@ -1,10 +1,10 @@
 """Dedup policy（2026-06-23 boss directive「沒發文比重複發文嚴重」）+ daily_digest 豁免。
 
-預設從「default block, 逐類豁免」反轉成「default publish, 只 hard-block 真正的
-byte-level recycle」。三條契約：
+預設從「default block, 逐類豁免」反轉成「default publish, 只讓 canonical exact
+identity 擁有 hard block」。三條契約：
 
-1. 同 experiment_ref + 同 audience + 內文**近乎逐字相同**（K1054 ghost 那種）→ 仍被擋
-   （唯一保留的 hard block，擋它零成本）。
+1. 同 experiment_ref + 同 audience + 內文**近乎逐字相同**（K1054 ghost 那種）→ 警告後發佈；
+   Jaccard 相似度不是 canonical identity。
 2. 同 experiment_ref 但**不同角度/不同寫法**（body_sim < _RECYCLE_SIM）→ 現在照常發佈，
    不再被靜默吞掉（這是 boss directive 的核心）。
 3. content_type='daily_digest' → 即使內文與被策展來源近乎相同也照常發佈（curation 本就
@@ -19,6 +19,8 @@ MOVE-VIX 專題導讀被它自己 curate 的來源文章（mile_671d4c75）判�
 from __future__ import annotations
 
 import json
+import sys
+import types
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -37,8 +39,8 @@ _SEED_DESC = (
     "但 MOVE/VIX 絕對水位比值 3.99 仍落在歷史 P38，動作同步、水位分歧。"
 )
 
-# (A) TRUE RECYCLE: byte-for-byte body, title only slightly reworded (the K1054
-# ghost pattern). body_sim ≈ 0.95 ≥ _RECYCLE_SIM → must be blocked.
+# (A) HIGH-SIMILARITY REUSE: byte-for-byte body, title only slightly reworded
+# (the K1054 ghost pattern). body_sim ≈ 0.95 → warn-only and publish.
 _RECYCLE_TITLE = "債市和股市同時在怕，但怕的不是同一件事（更新版）"
 _RECYCLE_DESC = _SEED_DESC
 
@@ -132,6 +134,14 @@ def _stub_network(monkeypatch, tmp_path: Path) -> None:
     """
     for var in ("SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_KEY"):
         monkeypatch.delenv(var, raising=False)
+    original_exists = Path.exists
+
+    def clean_checkout_exists(path: Path) -> bool:
+        if path.name in {".env", ".env.local"}:
+            return False
+        return original_exists(path)
+
+    monkeypatch.setattr(Path, "exists", clean_checkout_exists)
     monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
 
     monkeypatch.setattr(Publisher, "_sync_to_remote", lambda *a, **k: None, raising=False)
@@ -139,21 +149,37 @@ def _stub_network(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda *a, **k: None, raising=False)
     monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda *a, **k: None, raising=False)
 
-    try:
-        from volpred.publisher import live_verify  # type: ignore
-        for fn, ret in (("verify_article_live", True), ("stamp_verified", None), ("emit_verify_alert", None)):
-            monkeypatch.setattr(live_verify, fn, (lambda *a, **k: ret), raising=False)
-    except Exception:  # silent-ok: optional live-verify module is absent in some test installs
-        pass
+    live_verify_stub = types.ModuleType("volpred.publisher.live_verify")
+    live_verify_stub.verify_article_live = lambda *a, **k: True
+    live_verify_stub.stamp_verified = lambda *a, **k: None
+    live_verify_stub.emit_verify_alert = lambda *a, **k: None
+    monkeypatch.setitem(
+        sys.modules,
+        "volpred.publisher.live_verify",
+        live_verify_stub,
+    )
 
-    import importlib
+    email_stub = types.ModuleType("volpred.publisher.email_notifier")
+
+    class _EmailNotifier:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def notify_article_published(self, *args, **kwargs):
+            return None
+
+    email_stub.EmailNotifier = _EmailNotifier
+    monkeypatch.setitem(
+        sys.modules,
+        "volpred.publisher.email_notifier",
+        email_stub,
+    )
+
+    sync_stub = types.ModuleType("supabase_sync")
+    sync_stub.sync_article = lambda *a, **k: True
+    sync_stub._post = lambda *a, **k: False
     for mod_name in ("supabase_sync", "scripts.supabase_sync"):
-        try:
-            mod = importlib.import_module(mod_name)
-        except ModuleNotFoundError:  # silent-ok: both optional sync import paths are probed
-            continue
-        monkeypatch.setattr(mod, "sync_article", lambda *a, **k: True, raising=False)
-        monkeypatch.setattr(mod, "_post", lambda *a, **k: False, raising=False)
+        monkeypatch.setitem(sys.modules, mod_name, sync_stub)
 
     # Isolate the topic-cluster cooldown gate to the tmp feed (otherwise it reads
     # the REAL feed.json and may raise topic_cluster_cooldown_blocked first).
@@ -172,8 +198,11 @@ def _feed_ids(reports: Path) -> list[str]:
     return [a.get("id") for a in json.loads((reports / "feed.json").read_text())]
 
 
-def test_non_digest_recycle_is_blocked(tmp_path: Path, monkeypatch) -> None:
-    """契約 1：同 ref + 同 audience + 內文近乎逐字相同 → 被擋（K1054 ghost 防線仍在）。"""
+def test_non_digest_recycle_warns_and_publishes(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """契約 1：同 ref 高相似度只產生可審計 warning，不吞文。"""
     reports = _seed_storage(tmp_path)
     _stub_network(monkeypatch, tmp_path)
     pub = Publisher(storage_dir=str(tmp_path))
@@ -189,10 +218,21 @@ def test_non_digest_recycle_is_blocked(tmp_path: Path, monkeypatch) -> None:
         tags=["一般讀者", "MOVE", "VIX"],
         status="published",
         audience="general",
+        audit_strict=False,
     )
-    # 被擋 → 回傳既有 dup 的 id，feed 不新增
-    assert ret == _SEED_ID
-    assert _feed_ids(reports) == [_SEED_ID]
+    assert ret != _SEED_ID
+    assert set(_feed_ids(reports)) == {_SEED_ID, ret}
+    decisions = [
+        json.loads(line)
+        for line in (
+            tmp_path / "logs" / "dedup_decisions.jsonl"
+        ).read_text(encoding="utf-8").splitlines()
+    ]
+    assert any(
+        row.get("action") == "warn_same_ref_similarity"
+        and row.get("matched_id") == _SEED_ID
+        for row in decisions
+    )
 
 
 def test_same_ref_different_angle_publishes(tmp_path: Path, monkeypatch) -> None:

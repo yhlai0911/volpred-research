@@ -16,6 +16,7 @@ from volpred.publisher.publisher import (
     _audit_general_content,
     _extract_experiment_refs,
 )
+from volpred.publisher import publisher as publisher_module
 
 # A valid general-audience article must carry a 懶人包圖組 (publishing.md §4,
 # enforced by publish_milestone). These audit tests are about the audience-content
@@ -292,6 +293,34 @@ def test_publish_milestone_blocks_immediate_publish_general_without_lazypack(
             tags=["一般讀者", "教學"],
             status="published",
         )
+
+
+def test_publish_milestone_lazypack_block_fails_open_without_receipt(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _patch_remote(monkeypatch)
+    monkeypatch.setattr(
+        publisher_module,
+        "_log_dedup_decision",
+        lambda *_args, **_kwargs: False,
+    )
+    monkeypatch.setattr(
+        Publisher,
+        "_append_to_feed",
+        lambda self, item: item["id"],
+    )
+
+    pub_id = Publisher(storage_dir=str(tmp_path)).publish_milestone(
+        title="懶人包 receipt 故障仍保留候選",
+        description="一個白話故事，沒有 jargon，但 receipt ledger 暫時故障。" + _PAD_GENERAL,
+        phase="research",
+        audience="general",
+        tags=["一般讀者", "教學"],
+        status="published",
+    )
+
+    assert pub_id.startswith("mile_")
 
 
 def test_publish_milestone_draft_without_lazypack_defers_to_async(
