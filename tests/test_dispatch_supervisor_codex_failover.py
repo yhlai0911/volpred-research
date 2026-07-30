@@ -518,7 +518,7 @@ def test_active_descendant_hands_auth_lease_to_reaper_before_return(
     )
     monkeypatch.setattr(
         codex_failover.termination,
-        "_target_identity",
+        "capture_target_identity",
         lambda kind, target: f"{kind}:{target}:start",
     )
     monkeypatch.setattr(
@@ -855,7 +855,7 @@ def test_tracked_failover_keeps_pid_attached_when_timeout_kill_is_unverified(
     monkeypatch.setattr(codex_failover.subprocess, "Popen", lambda *a, **k: FakeProc())
     monkeypatch.setattr(codex_failover.os, "getpgid", lambda pid: 888)
     monkeypatch.setattr(
-        codex_failover.termination, "_target_identity",
+        codex_failover.termination, "capture_target_identity",
         lambda kind, target: f"{kind}:{target}:start",
     )
     monkeypatch.setattr(

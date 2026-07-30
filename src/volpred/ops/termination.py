@@ -100,7 +100,7 @@ def _validate_signal_sequence(values: list[int] | tuple[int, ...]) -> tuple[int,
     return normalized
 
 
-def _target_identity(target_kind: TargetKind, target_id: int) -> str:
+def capture_target_identity(target_kind: TargetKind, target_id: int) -> str:
     """Start-time fingerprint for the pid that pins this pid/pgid generation."""
     try:
         result = subprocess.run(
@@ -129,7 +129,7 @@ def _pgid_has_members(pgid: int) -> bool:
 
 
 def _root_identity_matches(intent: TerminationIntent) -> bool:
-    current = _target_identity(intent.target_kind, intent.target_id)
+    current = capture_target_identity(intent.target_kind, intent.target_id)
     if current == intent.target_identity:
         return True
     if (
@@ -311,7 +311,7 @@ def arm(
         target_identity=(
             str(target_identity)
             if target_identity is not None
-            else _target_identity(target_kind, int(target_id))
+            else capture_target_identity(target_kind, int(target_id))
         ),
         job_id=str(job_id) if job_id else None,
         attempt=int(attempt) if attempt is not None else None,
@@ -333,6 +333,7 @@ def _send(
     sender: Callable[[int, int], None],
     require_root_kind: TargetKind | None,
     identity_verifier: Callable[[TerminationIntent], bool] | None,
+    pre_signal_verifier: Callable[[], None] | None,
 ) -> str:
     if intent is None:
         raise TerminationIntentRequired("termination requires a durable intent")
@@ -362,6 +363,8 @@ def _send(
         reject_duplicate_attempt=True,
     )
     try:
+        if pre_signal_verifier is not None:
+            pre_signal_verifier()
         sender(int(actual_id), int(signum))
     except ProcessLookupError:
         _append_event(
@@ -404,6 +407,7 @@ def send_pgid(
     *,
     ledger_path: Path | str | None = None,
     sender: Callable[[int, int], None] | None = None,
+    pre_signal_verifier: Callable[[], None] | None = None,
 ) -> str:
     return _send(
         intent,
@@ -414,6 +418,7 @@ def send_pgid(
         sender=sender or os.killpg,
         require_root_kind="pgid",
         identity_verifier=_root_identity_matches,
+        pre_signal_verifier=pre_signal_verifier,
     )
 
 
@@ -423,6 +428,7 @@ def send_pid(
     *,
     ledger_path: Path | str | None = None,
     sender: Callable[[int, int], None] | None = None,
+    pre_signal_verifier: Callable[[], None] | None = None,
 ) -> str:
     return _send(
         intent,
@@ -433,6 +439,7 @@ def send_pid(
         sender=sender or os.kill,
         require_root_kind="pid",
         identity_verifier=_root_identity_matches,
+        pre_signal_verifier=pre_signal_verifier,
     )
 
 
@@ -459,6 +466,7 @@ def send_member_pid(
         sender=sender or os.kill,
         require_root_kind=None,
         identity_verifier=None,
+        pre_signal_verifier=None,
     )
 
 

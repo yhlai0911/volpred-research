@@ -309,7 +309,9 @@ def test_root_identity_drift_blocks_signal(tmp_path: Path, monkeypatch) -> None:
         target_identity="old-generation",
     )
     monkeypatch.setattr(
-        termination, "_target_identity", lambda _kind, _target: "new-generation",
+        termination,
+        "capture_target_identity",
+        lambda _kind, _target: "new-generation",
     )
     calls: list[tuple[int, int]] = []
     with pytest.raises(termination.TerminationIntentMismatch):
@@ -318,6 +320,58 @@ def test_root_identity_drift_blocks_signal(tmp_path: Path, monkeypatch) -> None:
             sender=lambda pid, sig: calls.append((pid, sig)),
         )
     assert calls == []
+
+
+def test_pre_signal_authorization_drift_is_receipted_without_syscall(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ledger = tmp_path / "termination_intents.jsonl"
+    intent = termination.arm(
+        target_kind="pid",
+        target_id=9876,
+        reason="operator-drain",
+        actor="pytest",
+        signal_sequence=[signal.SIGTERM],
+        ledger_path=ledger,
+        target_identity="same-generation",
+        job_id="job-a",
+        attempt=2,
+    )
+    monkeypatch.setattr(
+        termination,
+        "capture_target_identity",
+        lambda _kind, _target: "same-generation",
+    )
+    calls: list[tuple[int, int]] = []
+
+    def reject_stale_binding() -> None:
+        raise termination.TerminationIntentMismatch(
+            "dispatch identity changed after intent arm"
+        )
+
+    with pytest.raises(
+        termination.TerminationIntentMismatch,
+        match="dispatch identity changed",
+    ):
+        termination.send_pid(
+            intent,
+            signal.SIGTERM,
+            ledger_path=ledger,
+            sender=lambda pid, sig: calls.append((pid, sig)),
+            pre_signal_verifier=reject_stale_binding,
+        )
+
+    assert calls == []
+    events = _events(ledger)
+    assert [event["event"] for event in events] == [
+        "intent_armed",
+        "signal_attempted",
+        "signal_result",
+    ]
+    assert events[-1]["status"] == "error"
+    assert events[-1]["job_id"] == "job-a"
+    assert events[-1]["attempt"] == 2
 
 
 def test_exact_intent_target_signal_is_one_use(tmp_path: Path) -> None:
@@ -348,7 +402,9 @@ def test_pgid_escalation_survives_leader_exit_while_group_remains(
     )
     identities = iter(["leader-start", "absent:pgid:777"])
     monkeypatch.setattr(
-        termination, "_target_identity", lambda _kind, _target: next(identities),
+        termination,
+        "capture_target_identity",
+        lambda _kind, _target: next(identities),
     )
     monkeypatch.setattr(termination, "_pgid_has_members", lambda _pgid: True)
     sent: list[int] = []
