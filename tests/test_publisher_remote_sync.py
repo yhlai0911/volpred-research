@@ -197,6 +197,7 @@ def test_article_notification_is_deferred_to_owned_boss_batch(
     assert result == {
         "article_id": "mile_batch",
         "delivery": "boss_report_4h",
+        "coverage": "schedule_anchored_feed_scan",
         "reason": "publish_milestone",
         "status": "deferred",
     }

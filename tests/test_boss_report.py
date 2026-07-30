@@ -545,8 +545,54 @@ def test_configure_window_moves_since() -> None:
     try:
         assert boss_report.WINDOW.total_seconds() == 24 * 3600
         assert boss_report.SINCE == boss_report.NOW - boss_report.WINDOW
+        assert boss_report.WINDOW_END == boss_report.NOW
     finally:
         boss_report._configure_window(4.0)
+
+
+def test_articles_window_is_schedule_anchored_and_half_open(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    end = boss_report.datetime(
+        2026, 7, 30, 6, 10, tzinfo=boss_report.timezone.utc,
+    )
+    monkeypatch.setattr(boss_report, "PROJECT_ROOT", tmp_path)
+    reports = tmp_path / "storage" / "reports"
+    reports.mkdir(parents=True)
+    (reports / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "before",
+                    "title": "before",
+                    "status": "published",
+                    "published_at": "2026-07-29T18:09:59+00:00",
+                },
+                {
+                    "id": "inside",
+                    "title": "inside",
+                    "status": "published",
+                    "published_at": "2026-07-29T18:10:00+00:00",
+                },
+                {
+                    "id": "after-fire",
+                    "title": "after-fire",
+                    "status": "published",
+                    "published_at": "2026-07-30T06:10:00+00:00",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    boss_report._configure_window(12.0, end=end)
+    try:
+        articles = boss_report._articles_in_window()
+    finally:
+        boss_report._configure_window(4.0)
+
+    assert [item["id"] for item in articles["published"]] == ["inside"]
 
 
 def test_main_routes_scheduled_report_through_owned_email(
@@ -605,6 +651,50 @@ def test_main_routes_scheduled_report_through_owned_email(
         boss_report.PROJECT_ROOT / "storage"
     )
     assert exit_code == 0
+
+
+def test_scheduled_main_anchors_delayed_build_to_scheduled_for(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    observed: dict[str, object] = {}
+    scheduled_for = "2026-07-26T12:10:00Z"
+    _set_scheduled_boss_environment(
+        monkeypatch,
+        scheduled_for=scheduled_for,
+    )
+    monkeypatch.setattr(boss_report, "PROJECT_ROOT", tmp_path)
+
+    def capture_build(*, daily_close=False):
+        observed["daily_close"] = daily_close
+        observed["end"] = boss_report.WINDOW_END
+        observed["since"] = boss_report.SINCE
+        return (
+            "[新架構派發][VolPred Boss Report] anchored",
+            "<p>anchored</p>",
+            "anchored",
+        )
+
+    monkeypatch.setattr(boss_report, "build_html", capture_build)
+    monkeypatch.setattr(
+        boss_report,
+        "dispatch_email_by_current_owner",
+        lambda *_args, **_kwargs: {
+            "notification_id": "effect-anchored",
+            "sent": True,
+            "delivery_owner": "operations_core",
+            "effect_status": "delivered",
+            "evidence_ref": "imap-sent:anchored",
+        },
+    )
+
+    assert boss_report.main(["--daily-close"]) == 0
+    expected_end = boss_report.datetime(
+        2026, 7, 26, 12, 10, tzinfo=boss_report.timezone.utc,
+    )
+    assert observed["daily_close"] is True
+    assert observed["end"] == expected_end
+    assert observed["since"] == expected_end - boss_report.timedelta(hours=24)
 
 
 def test_main_replays_same_fire_without_rebuilding_payload(

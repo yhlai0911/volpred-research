@@ -77,19 +77,29 @@ TW = timezone(timedelta(hours=8))
 NOW = datetime.now(timezone.utc)        # 內部比較仍用 UTC（git log / ISO 比對）
 NOW_TW = NOW.astimezone(TW)             # 顯示用台灣時間
 WINDOW = timedelta(hours=4)
-SINCE = NOW - WINDOW
+WINDOW_END = NOW
+SINCE = WINDOW_END - WINDOW
 _REPORT_WARNINGS: list[str] = []
 
 
-def _configure_window(hours: float) -> None:
-    """Set the module-level reporting window before build_html().
+def _configure_window(hours: float, *, end: datetime | None = None) -> None:
+    """Set the module-level half-open reporting window before build_html().
 
     Collectors read module globals WINDOW/SINCE at call time, so mutating them
     once at startup (main/argparse) reconfigures every section consistently.
+    Scheduled fires anchor ``end`` to canonical ``scheduled_for`` rather than
+    process wall time. A delayed Operations Core retry therefore rebuilds the
+    same immutable interval and cannot silently skip an article merely because
+    its worker started after the rolling window moved.
     """
-    global WINDOW, SINCE
+    global WINDOW, WINDOW_END, SINCE
     WINDOW = timedelta(hours=hours)
-    SINCE = NOW - WINDOW
+    WINDOW_END = end or NOW
+    if WINDOW_END.tzinfo is None:
+        WINDOW_END = WINDOW_END.replace(tzinfo=timezone.utc)
+    else:
+        WINDOW_END = WINDOW_END.astimezone(timezone.utc)
+    SINCE = WINDOW_END - WINDOW
 
 
 def _warn_report(source: str, exc: Exception) -> None:
@@ -304,7 +314,13 @@ def _work_log_entries():
 
 
 def _articles_in_window():
-    """Feed articles published (or drafted) inside the window."""
+    """Feed articles in the schedule-anchored half-open window.
+
+    ``feed.json`` is the durable publication ledger. Operations Core persists
+    each scheduled fire and ``materialize_boss_report_payload`` freezes its
+    rendered payload, so scanning ``[SINCE, WINDOW_END)`` is replay-safe
+    without introducing a second article-notification queue.
+    """
     feed_path = PROJECT_ROOT / "storage" / "reports" / "feed.json"
     empty = {"published": [], "drafts": []}
     if not feed_path.exists():
@@ -332,9 +348,17 @@ def _articles_in_window():
             create_dt = None  # silent-ok: same free-form historical timestamp tolerance as published_at above
         row = {"id": art.get("id"), "title": str(art.get("title", ""))[:100],
                "audience": art.get("audience", "")}
-        if pub_dt and pub_dt >= SINCE and art.get("status") == "published":
+        if (
+            pub_dt
+            and SINCE <= pub_dt < WINDOW_END
+            and art.get("status") == "published"
+        ):
             pub.append({**row, "ts": pub_dt.astimezone(TW).strftime("%H:%M")})
-        elif create_dt and create_dt >= SINCE and art.get("status") == "draft":
+        elif (
+            create_dt
+            and SINCE <= create_dt < WINDOW_END
+            and art.get("status") == "draft"
+        ):
             drafts.append({**row, "ts": create_dt.astimezone(TW).strftime("%H:%M")})
     return {"published": pub, "drafts": drafts}
 
@@ -844,6 +868,7 @@ def main(argv=None):
                     "Operations Core Boss Report edition does not match "
                     f"scheduled_for: expected={expected} actual={actual}"
                 )
+            _configure_window(actual[1], end=scheduled_at)
             actor_ref = (
                 f"schedule:{schedule_job_id}:{fire_key}"
             )

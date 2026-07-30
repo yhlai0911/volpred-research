@@ -1312,14 +1312,18 @@ class Publisher:
 
         Publication is already a formal content effect.  Starting a second,
         direct SMTP effect here produced one message per article and bypassed
-        Operations Core ownership.  The three daily ``boss_report_4h`` windows
-        now read the canonical feed and carry every article in their window
-        through the durable ``email.ops_alert`` owner.
+        Operations Core ownership. The canonical feed is already the durable
+        publication ledger. Each persisted ``boss_report_4h`` fire scans a
+        schedule-anchored half-open feed interval and freezes the resulting
+        payload before carrying it through the durable ``email.ops_alert``
+        owner. Delayed retries therefore replay the same article set without a
+        second notification queue or a rolling-wall-clock gap.
         """
         del force_send  # automatic publication has no transport bypass
         return {
             "article_id": str(item.get("id") or ""),
             "delivery": "boss_report_4h",
+            "coverage": "schedule_anchored_feed_scan",
             "reason": reason,
             "status": "deferred",
         }
