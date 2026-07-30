@@ -36,7 +36,7 @@ def signal_sequence(name: str) -> tuple[int, ...]:
     return (SIGNALS[name],)
 
 
-def _target_still_exists(
+def target_still_exists(
     target_kind: termination.TargetKind,
     target_id: int,
 ) -> bool:
@@ -77,7 +77,7 @@ def send_sequence(
     )
     if len(sequence) == 2:
         time.sleep(max(0.0, grace_seconds))
-        if _target_still_exists(intent.target_kind, intent.target_id):
+        if target_still_exists(intent.target_kind, intent.target_id):
             # The first signal can retire a dispatch state row while descendants
             # retain the original PGID. The same intent + generation capability
             # authorizes this exact escalation.

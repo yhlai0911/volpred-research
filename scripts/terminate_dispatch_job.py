@@ -134,6 +134,11 @@ def main(
 
     if os.environ.get(termination.LEDGER_PATH_ENV):
         parser.error("formal dispatch command refuses a termination ledger override")
+    if args.target_kind != "pgid":
+        parser.error(
+            "formal dispatch command requires a PGID target because the worker "
+            "classifier attributes system termination by exact PGID lineage"
+        )
     sequence = termination_command.signal_sequence(args.signal)
     canonical_state = Path(state_path).expanduser().absolute()
     try:
@@ -168,6 +173,14 @@ def main(
             _assert_exact_current_job(binding)
 
         if job.producer_custody is not None:
+            members_before = procutil.producer_custody_all_members_checked(
+                job.producer_custody,
+            )
+            if members_before is None or job.pid not in members_before:
+                raise DispatchTerminationError(
+                    "bound dispatch generation is not a verified member of "
+                    "the saved producer custody"
+                )
             verify_binding_before_first_signal()
             drained = procutil.kill_producer_cohort(
                 job.producer_custody,
@@ -179,6 +192,21 @@ def main(
                 raise DispatchTerminationError(
                     "termination signals were attempted but producer custody "
                     "did not return a positive drain proof"
+                )
+            members_after = procutil.producer_custody_all_members_checked(
+                job.producer_custody,
+            )
+            if (
+                members_after is None
+                or job.pid in members_after
+                or termination_command.target_still_exists(
+                    binding.target_kind,
+                    binding.target_id,
+                )
+            ):
+                raise DispatchTerminationError(
+                    "producer custody reported drained but the bound PGID "
+                    "generation remains live or unverifiable"
                 )
             result = "custody_drained"
         else:

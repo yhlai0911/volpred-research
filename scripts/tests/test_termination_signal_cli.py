@@ -118,6 +118,7 @@ def _run_formal_cli(
     *,
     target_id: int,
     state_path: Path,
+    target_kind: str = "pgid",
     job_id: str | None = "job-a",
     attempt: int | None = 2,
     signal_name: str = "TERM",
@@ -127,7 +128,7 @@ def _run_formal_cli(
 ) -> CliResult:
     argv = [
         "--target-kind",
-        "pgid",
+        target_kind,
         "--target-id",
         str(target_id),
         "--signal",
@@ -220,13 +221,22 @@ def test_custody_backed_dispatch_requires_full_cohort_termination(
         producer_custody=custody,
     )
     calls: list[dict] = []
+    membership_reads = iter([[proc.pid], []])
 
     monkeypatch.setattr(
         terminate_dispatch_job.procutil,
         "kill_producer_cohort",
-        lambda observed, **kwargs: calls.append(
-            {"custody": observed, **kwargs}
-        ) or True,
+        lambda observed, **kwargs: (
+            calls.append({"custody": observed, **kwargs}),
+            os.killpg(pgid, signal.SIGTERM),
+            proc.wait(timeout=5),
+            True,
+        )[-1],
+    )
+    monkeypatch.setattr(
+        terminate_dispatch_job.procutil,
+        "producer_custody_all_members_checked",
+        lambda _custody: next(membership_reads),
     )
 
     partial = _run_formal_cli(
@@ -251,6 +261,48 @@ def test_custody_backed_dispatch_requires_full_cohort_termination(
         signal.SIGTERM,
         signal.SIGKILL,
     )
+
+
+def test_custody_success_refuses_live_bound_target(
+    tmp_path: Path,
+    spawn_process,
+    monkeypatch,
+) -> None:
+    state_path = tmp_path / "dispatch_state.json"
+    proc = spawn_process()
+    pgid = os.getpgid(proc.pid)
+    custody = {
+        "version": 2,
+        "host_uuid": "host-a",
+        "boot_session_uuid": "boot-a",
+        "resource_coalition_id": 42,
+        "trusted_unique_ids": [1, 2],
+    }
+    _write_dispatch_state(
+        state_path,
+        proc=proc,
+        producer_custody=custody,
+    )
+    monkeypatch.setattr(
+        terminate_dispatch_job.procutil,
+        "producer_custody_all_members_checked",
+        lambda _custody: [proc.pid],
+    )
+    monkeypatch.setattr(
+        terminate_dispatch_job.procutil,
+        "kill_producer_cohort",
+        lambda *_args, **_kwargs: True,
+    )
+
+    result = _run_formal_cli(
+        target_id=pgid,
+        state_path=state_path,
+        signal_name="TERM_KILL",
+    )
+
+    assert result.returncode == 2
+    assert "bound PGID generation remains live" in result.stderr
+    assert proc.poll() is None
 
 
 def test_formal_command_requires_complete_identity_before_arm(
@@ -278,6 +330,26 @@ def test_formal_command_requires_complete_identity_before_arm(
     assert partial.returncode == 2
     assert "--job-id" in missing.stderr
     assert "--attempt" in partial.stderr
+    assert proc.poll() is None
+    assert not termination.ledger_for_state(state_path).exists()
+
+
+def test_formal_dispatch_command_rejects_pid_target_before_arm(
+    tmp_path: Path,
+    spawn_process,
+) -> None:
+    state_path = tmp_path / "dispatch_state.json"
+    proc = spawn_process()
+    _write_dispatch_state(state_path, proc=proc)
+
+    result = _run_formal_cli(
+        target_kind="pid",
+        target_id=proc.pid,
+        state_path=state_path,
+    )
+
+    assert result.returncode == 2
+    assert "PGID" in result.stderr
     assert proc.poll() is None
     assert not termination.ledger_for_state(state_path).exists()
 
