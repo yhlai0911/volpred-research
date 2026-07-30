@@ -74,6 +74,16 @@ _DYNAMIC_FALLBACK_REPLACEMENTS = (
 )
 
 
+def _title_token(value: object, *, default: str) -> str:
+    """Bound an internal classifier for use in a transport identity."""
+    token = re.sub(
+        r"[^a-z0-9_.-]+",
+        "_",
+        str(value or "").strip().lower(),
+    ).strip("_.-")
+    return (token or default)[:64]
+
+
 def _episode_fingerprint(value: str) -> str:
     """Return a stable transport identity for one diagnostic root shape.
 
@@ -414,7 +424,15 @@ def send_silent_death_alert(*, job: dict[str, Any], state_path: Path = state.STA
         f"- pgid: {job.get('pgid')} started_at: {job.get('started_at')}\n"
         "- 已強制 record_completion(exit=-1, outcome=failure) 釋放 supervisor slot\n"
     )
-    _send("warn", "supervisor silent_death", body)
+    schedule_class = _title_token(
+        job.get("schedule_id"),
+        default="unknown",
+    )
+    _send(
+        "warn",
+        f"supervisor silent_death schedule={schedule_class}",
+        body,
+    )
     state.mark_alert_sent(key, path=state_path)
     return True
 
@@ -431,7 +449,16 @@ def send_completion_failure(*, entry: dict[str, Any], log_tail: str = "", state_
         "## Worker log tail\n\n"
         "```\n" + (log_tail[-2000:] if log_tail else "(empty)") + "\n```\n"
     )
-    _send("critical", f"supervisor completion_failure exit={entry.get('exit_code')}", body)
+    outcome_class = _title_token(
+        entry.get("outcome"),
+        default="unknown",
+    )
+    _send(
+        "critical",
+        "supervisor completion_failure "
+        f"exit={entry.get('exit_code')} outcome={outcome_class}",
+        body,
+    )
     return True
 
 
@@ -527,6 +554,13 @@ def send_orphan_restart_alert(
             if "unverified" in (outcome or "") else ""
         )
     )
-    _send("warn", "supervisor orphan_restart", body)
+    outcome_class = _title_token(outcome, default="unspecified")
+    action_class = "killed" if killed else "not_killed"
+    _send(
+        "warn",
+        "supervisor orphan_restart "
+        f"outcome={outcome_class} action={action_class}",
+        body,
+    )
     state.mark_alert_sent(key, path=state_path)
     return True

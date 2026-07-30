@@ -4838,6 +4838,55 @@ def test_hang_transport_identity_groups_same_outcome_and_separates_survivors(
     ]
 
 
+def test_supervisor_transport_titles_separate_actionable_outcome_classes(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    sends: list[str] = []
+    monkeypatch.setattr(
+        supervisor.alerts,
+        "_send",
+        lambda _level, title, _body: sends.append(title) or 0,
+    )
+
+    supervisor.alerts.send_silent_death_alert(
+        job={"job_id": "a", "schedule_id": "hourly_dispatch"},
+        state_path=tmp_path / "silent-hourly.json",
+    )
+    supervisor.alerts.send_silent_death_alert(
+        job={"job_id": "b", "schedule_id": "maintenance"},
+        state_path=tmp_path / "silent-maintenance.json",
+    )
+    supervisor.alerts.send_completion_failure(
+        entry={"exit_code": 1, "outcome": "auth_blocked"},
+        state_path=tmp_path / "failure-auth.json",
+    )
+    supervisor.alerts.send_completion_failure(
+        entry={"exit_code": 1, "outcome": "test_failure"},
+        state_path=tmp_path / "failure-test.json",
+    )
+    supervisor.alerts.send_orphan_restart_alert(
+        job={"job_id": "c"},
+        killed=False,
+        outcome="orphan_gone_or_reused",
+        state_path=tmp_path / "orphan-gone.json",
+    )
+    supervisor.alerts.send_orphan_restart_alert(
+        job={"job_id": "d"},
+        killed=False,
+        outcome="orphan_unverified_not_killed",
+        state_path=tmp_path / "orphan-unverified.json",
+    )
+
+    assert sends[0] != sends[1]
+    assert sends[2] != sends[3]
+    assert sends[4] != sends[5]
+    assert "schedule=hourly_dispatch" in sends[0]
+    assert "outcome=auth_blocked" in sends[2]
+    assert "outcome=orphan_unverified_not_killed" in sends[5]
+    assert "action=not_killed" in sends[5]
+
+
 def test_slot_prompt_labels_all_external_reports_and_preserves_incident_timeline(
     tmp_path: Path,
 ) -> None:
