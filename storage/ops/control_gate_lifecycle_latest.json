@@ -1,8 +1,105 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-30T08:01:27.535517+00:00",
+  "generated_at": "2026-07-30T09:03:42.849228+00:00",
   "registry_path": "/Users/yhlai0911/volpred-research/config/control_gate_registry.json",
   "registry_owner": "volpred.ops.control_gate_lifecycle",
+  "inventory": {
+    "window": {
+      "hours": 168.0,
+      "start": "2026-07-23T09:03:42.849228+00:00",
+      "end": "2026-07-30T09:03:42.849228+00:00"
+    },
+    "registered_gate_count": 13,
+    "observed_gate_count": 8,
+    "observed_gates": [
+      {
+        "gate_id": "anti_ai_style",
+        "registered": true,
+        "trigger_count": 37,
+        "blocking_count": 0,
+        "distinct_candidates": 26,
+        "latest_at": "2026-07-30T07:08:39.091574+00:00"
+      },
+      {
+        "gate_id": "dispatch_starvation_lockout",
+        "registered": true,
+        "trigger_count": 54,
+        "blocking_count": 54,
+        "distinct_candidates": 10,
+        "latest_at": "2026-07-30T08:34:02.478137+00:00"
+      },
+      {
+        "gate_id": "event_reaction_coverage",
+        "registered": true,
+        "trigger_count": 407,
+        "blocking_count": 407,
+        "distinct_candidates": 1,
+        "latest_at": "2026-07-30T04:30:40.496467+00:00"
+      },
+      {
+        "gate_id": "publish_throttle",
+        "registered": true,
+        "trigger_count": 58,
+        "blocking_count": 0,
+        "distinct_candidates": 40,
+        "latest_at": "2026-07-30T07:41:11.549238+00:00"
+      },
+      {
+        "gate_id": "publisher_arc_dedup",
+        "registered": true,
+        "trigger_count": 249,
+        "blocking_count": 62,
+        "distinct_candidates": 17,
+        "latest_at": "2026-07-30T07:08:38.283017+00:00"
+      },
+      {
+        "gate_id": "publisher_k_coverage",
+        "registered": true,
+        "trigger_count": 5,
+        "blocking_count": 2,
+        "distinct_candidates": 1,
+        "latest_at": "2026-07-29T21:07:10.778362+00:00"
+      },
+      {
+        "gate_id": "release_pool_arc_dedup",
+        "registered": true,
+        "trigger_count": 3,
+        "blocking_count": 0,
+        "distinct_candidates": 3,
+        "latest_at": "2026-07-28T13:00:36.599538+00:00"
+      },
+      {
+        "gate_id": "task_generation",
+        "registered": true,
+        "trigger_count": 930,
+        "blocking_count": 11,
+        "distinct_candidates": 30,
+        "latest_at": "2026-07-30T09:00:31.512350+00:00"
+      }
+    ],
+    "unregistered_gates": [],
+    "unclassified_blocking_count": 0,
+    "unclassified_blocking": [],
+    "source_health": [
+      {
+        "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+        "ok": true,
+        "error": null,
+        "row_count": 2932,
+        "malformed_rows": 0,
+        "invalid_timestamps": 0
+      },
+      {
+        "path": "/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl",
+        "ok": true,
+        "error": null,
+        "row_count": 54,
+        "malformed_rows": 0,
+        "invalid_timestamps": 0
+      }
+    ],
+    "newest_gap_at": null
+  },
   "gates": [
     {
       "gate_id": "event_stage_idempotency",
@@ -29,9 +126,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T08:01:27.535517+00:00",
-        "start": "2026-07-23T08:01:27.535517+00:00",
-        "end": "2026-07-30T08:01:27.535517+00:00",
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -47,7 +144,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2920,
+            "row_count": 2932,
             "malformed_rows": 0,
             "invalid_timestamps": 0
           },
@@ -122,15 +219,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T08:01:27.535517+00:00",
-        "start": "2026-07-23T08:01:27.535517+00:00",
-        "end": "2026-07-30T08:01:27.535517+00:00",
-        "last_reviewed_at": null,
-        "newest_evidence_at": "2026-07-30T04:30:40.496467+00:00"
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-30T04:30:40.496467+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
+        "last_reviewed_at": "2026-07-30T04:30:40.496467+00:00",
+        "newest_evidence_at": null
       },
       "evidence": {
-        "trigger_count": 407,
-        "distinct_candidates": 1,
+        "trigger_count": 0,
+        "distinct_candidates": 0,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_occurrences": 0,
@@ -140,7 +237,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2920,
+            "row_count": 2932,
             "malformed_rows": 0,
             "invalid_timestamps": 0
           },
@@ -157,8 +254,8 @@
         ]
       },
       "outcomes": {
-        "published": 1,
-        "succeeded": 1,
+        "published": 0,
+        "succeeded": 0,
         "failed": 0,
         "missed_deadline": 0,
         "sequence_coverage_gap": 0,
@@ -173,30 +270,16 @@
         "in_flight": 0,
         "blocked": 0,
         "unjoined": 0,
-        "candidate_outcomes": [
-          {
-            "candidate_id": "event_article_fomc_2026-07-29_tplus0",
-            "decision_count": 407,
-            "task_ids": [
-              "event_article_fomc_2026-07-29_tplus0"
-            ],
-            "outcomes": [
-              "published",
-              "succeeded"
-            ]
-          }
-        ],
+        "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": true,
-        "reasons": [
-          "raw_triggers=407>=20"
-        ]
+        "due": false,
+        "reasons": []
       },
-      "pdca_phase": "act",
+      "pdca_phase": "plan",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -229,15 +312,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T08:01:27.535517+00:00",
-        "start": "2026-07-23T08:01:27.535517+00:00",
-        "end": "2026-07-30T08:01:27.535517+00:00",
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-30T04:07:39.599005+00:00"
       },
       "evidence": {
-        "trigger_count": 151,
-        "distinct_candidates": 88,
+        "trigger_count": 150,
+        "distinct_candidates": 87,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_occurrences": 0,
@@ -268,7 +351,7 @@
         "waiver": 0,
         "superseded": 0,
         "observed": 0,
-        "dispatch_fire": 48,
+        "dispatch_fire": 47,
         "task_claim": 8,
         "worker_failed": 14,
         "queued": 0,
@@ -403,7 +486,7 @@
             "decision_count": 1,
             "task_ids": [],
             "outcomes": [
-              "dispatch_fire"
+              "unjoined"
             ]
           },
           {
@@ -718,14 +801,6 @@
             ]
           },
           {
-            "candidate_id": "9ea3bd3bac3156e7",
-            "decision_count": 1,
-            "task_ids": [],
-            "outcomes": [
-              "unjoined"
-            ]
-          },
-          {
             "candidate_id": "a16e2c8f348100ba",
             "decision_count": 1,
             "task_ids": [],
@@ -1010,8 +1085,8 @@
       "review": {
         "due": true,
         "reasons": [
-          "raw_triggers=151>=100",
-          "distinct_candidates=88>=20"
+          "raw_triggers=150>=100",
+          "distinct_candidates=87>=20"
         ]
       },
       "pdca_phase": "act",
@@ -1047,9 +1122,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T08:01:27.535517+00:00",
-        "start": "2026-07-23T08:01:27.535517+00:00",
-        "end": "2026-07-30T08:01:27.535517+00:00",
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -1065,7 +1140,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 50,
+            "row_count": 54,
             "malformed_rows": 0,
             "invalid_timestamps": 0
           },
@@ -1135,15 +1210,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T08:01:27.535517+00:00",
-        "start": "2026-07-23T08:01:27.535517+00:00",
-        "end": "2026-07-30T08:01:27.535517+00:00",
-        "last_reviewed_at": null,
-        "newest_evidence_at": "2026-07-30T06:23:31.031374+00:00"
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-30T08:29:11.960683+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
+        "last_reviewed_at": "2026-07-30T08:29:11.960683+00:00",
+        "newest_evidence_at": "2026-07-30T08:34:02.478137+00:00"
       },
       "evidence": {
-        "trigger_count": 50,
-        "distinct_candidates": 10,
+        "trigger_count": 2,
+        "distinct_candidates": 2,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_occurrences": 0,
@@ -1153,7 +1228,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 50,
+            "row_count": 54,
             "malformed_rows": 0,
             "invalid_timestamps": 0
           },
@@ -1177,14 +1252,14 @@
         "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
-        "queued": 10,
+        "queued": 2,
         "in_flight": 0,
         "blocked": 0,
         "unjoined": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "K1735",
-            "decision_count": 5,
+            "decision_count": 1,
             "task_ids": [
               "K1735"
             ],
@@ -1194,89 +1269,9 @@
           },
           {
             "candidate_id": "K1737",
-            "decision_count": 5,
+            "decision_count": 1,
             "task_ids": [
               "K1737"
-            ],
-            "outcomes": [
-              "queued"
-            ]
-          },
-          {
-            "candidate_id": "K1738",
-            "decision_count": 5,
-            "task_ids": [
-              "K1738"
-            ],
-            "outcomes": [
-              "queued"
-            ]
-          },
-          {
-            "candidate_id": "K1739",
-            "decision_count": 5,
-            "task_ids": [
-              "K1739"
-            ],
-            "outcomes": [
-              "queued"
-            ]
-          },
-          {
-            "candidate_id": "K1741",
-            "decision_count": 5,
-            "task_ids": [
-              "K1741"
-            ],
-            "outcomes": [
-              "queued"
-            ]
-          },
-          {
-            "candidate_id": "K1742",
-            "decision_count": 5,
-            "task_ids": [
-              "K1742"
-            ],
-            "outcomes": [
-              "queued"
-            ]
-          },
-          {
-            "candidate_id": "K1743",
-            "decision_count": 5,
-            "task_ids": [
-              "K1743"
-            ],
-            "outcomes": [
-              "queued"
-            ]
-          },
-          {
-            "candidate_id": "K1744",
-            "decision_count": 5,
-            "task_ids": [
-              "K1744"
-            ],
-            "outcomes": [
-              "queued"
-            ]
-          },
-          {
-            "candidate_id": "K1745",
-            "decision_count": 5,
-            "task_ids": [
-              "K1745"
-            ],
-            "outcomes": [
-              "queued"
-            ]
-          },
-          {
-            "candidate_id": "K1746",
-            "decision_count": 5,
-            "task_ids": [
-              "K1746"
             ],
             "outcomes": [
               "queued"
@@ -1288,13 +1283,10 @@
         "incident_recurrence": 0
       },
       "review": {
-        "due": true,
-        "reasons": [
-          "raw_triggers=50>=20",
-          "distinct_candidates=10>=5"
-        ]
+        "due": false,
+        "reasons": []
       },
-      "pdca_phase": "act",
+      "pdca_phase": "check",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -1328,9 +1320,9 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-16T08:01:27.535517+00:00",
-        "start": "2026-07-16T08:01:27.535517+00:00",
-        "end": "2026-07-30T08:01:27.535517+00:00",
+        "lookback_start": "2026-07-16T09:03:42.849228+00:00",
+        "start": "2026-07-16T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-26T19:38:01.064738+00:00"
       },
@@ -1418,23 +1410,1819 @@
         "downgrade_to_warn",
         "retire"
       ]
+    },
+    {
+      "gate_id": "task_generation",
+      "owner": "volpred.ops.topic_dedup",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "invariant": "Generation-time topic screening may suppress only a canonical exact duplicate; fuzzy similarity remains advisory.",
+      "protected_graph": {
+        "nodes": [
+          "content_candidate",
+          "next_task",
+          "writer"
+        ],
+        "edges": [
+          "content_candidate -> next_task"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "next_task -> writer",
+        "writer -> feed"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md 2026-06-23 dedup content black hole"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-30T09:00:31.512350+00:00"
+      },
+      "evidence": {
+        "trigger_count": 930,
+        "distinct_candidates": 30,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2932,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 1,
+        "succeeded": 4,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 26,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "event_article_fomc_2026-07-29_tminus2",
+            "decision_count": 430,
+            "task_ids": [
+              "event_article_fomc_2026-07-29_tminus2"
+            ],
+            "outcomes": [
+              "succeeded"
+            ]
+          },
+          {
+            "candidate_id": "event_article_fomc_2026-07-29_tminus7",
+            "decision_count": 2,
+            "task_ids": [
+              "event_article_fomc_2026-07-29_tminus7"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "event_article_fomc_2026-07-29_tplus0",
+            "decision_count": 465,
+            "task_ids": [
+              "event_article_fomc_2026-07-29_tplus0"
+            ],
+            "outcomes": [
+              "published",
+              "succeeded"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_24_ai資本支出",
+            "decision_count": 4,
+            "task_ids": [
+              "trending_repost_2026_07_24_ai資本支出"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_24_fed利率決策",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_24_fed利率決策"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_24_台股尾部風險",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_24_台股尾部風險"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_24_台股權值股",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_24_台股權值股"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_24_台股避險",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_24_台股避險"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_24_地緣風險",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_24_地緣風險"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_24_美聯儲利率",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_24_美聯儲利率"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_24_美聯儲降息",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_24_美聯儲降息"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_24_聯準會降息",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_24_聯準會降息"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_25_ai資本支出",
+            "decision_count": 3,
+            "task_ids": [
+              "trending_repost_2026_07_25_ai資本支出"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_25_fed利率",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_25_fed利率"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_25_台股半導體",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_25_台股半導體"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_25_台股尾部風險",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_25_台股尾部風險"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_25_地緣避險",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_25_地緣避險"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_25_總經與油價",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_25_總經與油價"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_25_降息預期",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_25_降息預期"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_26_ai資本支出",
+            "decision_count": 2,
+            "task_ids": [
+              "trending_repost_2026_07_26_ai資本支出"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_26_fed降息",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_26_fed降息"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_26_fed降息預期",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_26_fed降息預期"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_26_台股尾部風險",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_26_台股尾部風險"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_26_地緣政治",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_26_地緣政治"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_27_ai資本支出",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_27_ai資本支出"
+            ],
+            "outcomes": [
+              "succeeded"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_27_fed降息",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_27_fed降息"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_27_台股波動",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_27_台股波動"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_28_ai資本支出",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_28_ai資本支出"
+            ],
+            "outcomes": [
+              "succeeded"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_28_fed降息",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_28_fed降息"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "trending_repost_2026_07_28_台股對沖",
+            "decision_count": 1,
+            "task_ids": [
+              "trending_repost_2026_07_28_台股對沖"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          }
+        ],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": true,
+        "reasons": [
+          "raw_triggers=930>=500"
+        ]
+      },
+      "pdca_phase": "act",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "publish_throttle",
+      "owner": "volpred.publisher.throttle",
+      "mode": "selection_constraint",
+      "identity_strength": "canonical_exact",
+      "invariant": "Rhythm-controlled content respects a bounded minimum interval without starving time-sensitive or exempt publication edges.",
+      "protected_graph": {
+        "nodes": [
+          "publish_candidate",
+          "publication_slot",
+          "feed"
+        ],
+        "edges": [
+          "publish_candidate -> publication_slot"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "publication_slot -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md release pacing and content starvation incidents"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-30T07:41:11.549238+00:00"
+      },
+      "evidence": {
+        "trigger_count": 58,
+        "distinct_candidates": 40,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2932,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 36,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 4,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "mile_08b69f7c",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_08b69f7c"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_08d47597",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_08d47597"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "mile_0fdba89d",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_0fdba89d"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_169bec4e",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_169bec4e"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_17f41578",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_17f41578"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_1ef77049",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_1ef77049"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_21498beb",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_21498beb"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_258c14cb",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_258c14cb"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_289dfd8a",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_289dfd8a"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "mile_35863986",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_35863986"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_35d8941b",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_35d8941b"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_3c83e665",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_3c83e665"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_45d354f0",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_45d354f0"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_496e7dce",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_496e7dce"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_5e1aa1aa",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_5e1aa1aa"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_5e94126b",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_5e94126b"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_62fa3fbc",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_62fa3fbc"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_6bf24727",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_6bf24727"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_6c6fa752",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_6c6fa752"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "mile_6e35e47d",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_6e35e47d"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_7c894f46",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_7c894f46"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_822317c3",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_822317c3"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_973f9a0c",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_973f9a0c"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_9adf8925",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_9adf8925"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_a8006dd2",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_a8006dd2"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_a87265ab",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_a87265ab"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_ac1390e7",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_ac1390e7"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_ac2bdbc7",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_ac2bdbc7"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_bbd72c0b",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_bbd72c0b"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_be7666e2",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_be7666e2"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_beee535c",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_beee535c"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_c53932a1",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_c53932a1"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_cdade7c8",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_cdade7c8"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_dd7e7aa4",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_dd7e7aa4"
+            ],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "mile_e9325f74",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_e9325f74"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_e9623067",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_e9623067"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_ea920f7f",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_ea920f7f"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_eaacd072",
+            "decision_count": 2,
+            "task_ids": [
+              "mile_eaacd072"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_ef00add4",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_ef00add4"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_f00be77f",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_f00be77f"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          }
+        ],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "check",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "anti_ai_style",
+      "owner": "volpred.publisher.publisher",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "invariant": "Reader-facing prose quality checks apply only the correct content-mode contract and cannot structurally reject required formats.",
+      "protected_graph": {
+        "nodes": [
+          "article_draft",
+          "style_verdict",
+          "feed"
+        ],
+        "edges": [
+          "article_draft -> style_verdict"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "style_verdict -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-16 anti-AI FB mode blocked feed digest"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-30T07:08:39.091574+00:00"
+      },
+      "evidence": {
+        "trigger_count": 37,
+        "distinct_candidates": 26,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2932,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 26,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "mile_08b69f7c",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_08b69f7c"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_0fdba89d",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_0fdba89d"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_169bec4e",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_169bec4e"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_1ef77049",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_1ef77049"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_258c14cb",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_258c14cb"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_35863986",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_35863986"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_35d8941b",
+            "decision_count": 3,
+            "task_ids": [
+              "mile_35d8941b"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_3c83e665",
+            "decision_count": 4,
+            "task_ids": [
+              "mile_3c83e665"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_45d354f0",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_45d354f0"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_496e7dce",
+            "decision_count": 3,
+            "task_ids": [
+              "mile_496e7dce"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_62fa3fbc",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_62fa3fbc"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_6bf24727",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_6bf24727"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_6e35e47d",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_6e35e47d"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_7c894f46",
+            "decision_count": 3,
+            "task_ids": [
+              "mile_7c894f46"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_822317c3",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_822317c3"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_a8006dd2",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_a8006dd2"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_a87265ab",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_a87265ab"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_ac1390e7",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_ac1390e7"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_bbd72c0b",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_bbd72c0b"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_be7666e2",
+            "decision_count": 3,
+            "task_ids": [
+              "mile_be7666e2"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_beee535c",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_beee535c"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_c53932a1",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_c53932a1"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_cdade7c8",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_cdade7c8"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_e9325f74",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_e9325f74"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_ea920f7f",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_ea920f7f"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_eaacd072",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_eaacd072"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          }
+        ],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "check",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "release_pool_arc_dedup",
+      "owner": "volpred.ops.content",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "invariant": "Release-pool overlap may hold only evidence-backed exact coverage and must preserve a recoverable downstream publication path.",
+      "protected_graph": {
+        "nodes": [
+          "release_candidate",
+          "release_pool",
+          "publish_task"
+        ],
+        "edges": [
+          "release_candidate -> release_pool"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "release_pool -> publish_task",
+        "publish_task -> feed"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md 2026-06-24 arc_dedup over-match"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-28T13:00:36.599538+00:00"
+      },
+      "evidence": {
+        "trigger_count": 3,
+        "distinct_candidates": 3,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2932,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 3,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "mile_258c14cb",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_258c14cb"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_35d8941b",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_35d8941b"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_eaacd072",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_eaacd072"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          }
+        ],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "check",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "publisher_arc_dedup",
+      "owner": "volpred.publisher.publisher",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "invariant": "Fuzzy narrative similarity is advisory; only a same-reference near-identical body may block publication.",
+      "protected_graph": {
+        "nodes": [
+          "article_candidate",
+          "dedup_verdict",
+          "feed"
+        ],
+        "edges": [
+          "article_candidate -> dedup_verdict"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "dedup_verdict -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md 2026-06-23 dedup default-block black hole"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-30T07:08:38.283017+00:00"
+      },
+      "evidence": {
+        "trigger_count": 249,
+        "distinct_candidates": 17,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2932,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 17,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "K1208",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1221",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1448",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1450",
+            "decision_count": 3,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1477",
+            "decision_count": 4,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1585",
+            "decision_count": 34,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1609",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1623",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1630",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1680",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1698",
+            "decision_count": 3,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1705",
+            "decision_count": 44,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1713",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K1716",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K775",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "K781",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "fomc_2026_07_29:T+0",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          }
+        ],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "check",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "publisher_k_coverage",
+      "owner": "scripts.check_arc_dedup",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "invariant": "One canonical K-id and audience pair owns at most one live article unless a distinct audience or explicit waiver is recorded.",
+      "protected_graph": {
+        "nodes": [
+          "k_article_candidate",
+          "k_audience_identity",
+          "feed"
+        ],
+        "edges": [
+          "k_article_candidate -> k_audience_identity"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "k_audience_identity -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log.md §E dedup/K-id recurrent incidents"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-29T21:07:10.778362+00:00"
+      },
+      "evidence": {
+        "trigger_count": 5,
+        "distinct_candidates": 1,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2932,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 1,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "K1716",
+            "decision_count": 3,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          }
+        ],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "check",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "publisher_cluster_cap",
+      "owner": "volpred.publisher.publisher",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "invariant": "Topic concentration caps preserve portfolio diversity without silently starving time-sensitive publication classes.",
+      "protected_graph": {
+        "nodes": [
+          "article_candidate",
+          "topic_cluster",
+          "feed"
+        ],
+        "edges": [
+          "article_candidate -> topic_cluster"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "topic_cluster -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/error_log_archive/2026-Q2.md cluster cooldown overshoot and content starvation"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T09:03:42.849228+00:00",
+        "start": "2026-07-23T09:03:42.849228+00:00",
+        "end": "2026-07-30T09:03:42.849228+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": null
+      },
+      "evidence": {
+        "trigger_count": 0,
+        "distinct_candidates": 0,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2932,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "plan",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
     }
   ],
   "summary": {
-    "gate_count": 6,
-    "review_due_count": 4,
-    "hard_gate_count": 4,
+    "gate_count": 13,
+    "unregistered_gate_count": 0,
+    "unclassified_blocking_count": 0,
+    "review_due_count": 3,
+    "hard_gate_count": 5,
     "unhealthy_source_count": 0
   },
   "review_tasks": {
+    "created_count": 2,
+    "created_ids": [
+      "control_gate_review_hourly_pregate_20260730T040739_df86bffb6358",
+      "control_gate_review_phase_z_baseline_ownership_20260726T193801_3f635b667b96"
+    ],
+    "existing_ids": [
+      "control_gate_review_task_generation_20260730T090031_ec3b7176e81d"
+    ]
+  },
+  "inventory_review_tasks": {
     "created_count": 0,
     "created_ids": [],
-    "existing_ids": [
-      "control_gate_review_dispatch_starvation_lockout_20260730T003255",
-      "control_gate_review_event_reaction_coverage_20260723",
-      "control_gate_review_hourly_pregate_20260723",
-      "control_gate_review_phase_z_baseline_ownership_20260716"
-    ]
+    "existing_ids": []
   },
   "audit_health": {
     "healthy": true,

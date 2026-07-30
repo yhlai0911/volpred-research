@@ -1842,7 +1842,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-07-30T08:25:41.796368+00:00"
+     "last_seen_at": "2026-07-30T09:05:53.406565+00:00"
     },
     {
      "cleared_at": null,
@@ -1888,10 +1888,10 @@
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-6653962e unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-07-30T08:25:46.421019+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_kill_failed_orphan_drained)",
+   "last_seen_at": "2026-07-30T09:05:53.406565+00:00",
    "notified_at": null,
-   "occurrence_count": 5133,
+   "occurrence_count": 5135,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2491,7 +2491,7 @@
    "class": "ordinary",
    "clean_observations": [],
    "clean_streak_started_at": null,
-   "current_task_id": "ci-root-30512704467",
+   "current_task_id": "ci-red-30526999259",
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-30T04:20:47.298603+00:00",
@@ -2556,13 +2556,19 @@
      "first_seen_at": "2026-07-30T08:20:42.258587+00:00",
      "key": "30524976922:1",
      "last_seen_at": "2026-07-30T08:20:42.258587+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-30T08:50:32.686677+00:00",
+     "key": "30526999259:1",
+     "last_seen_at": "2026-07-30T08:50:32.686677+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-30T08:19:35.1297552Z E AssertionError: assert ('warn', 'sup...tcome=reaped') == ('warn', 'sup...work_timeout')",
-   "last_seen_at": "2026-07-30T08:20:42.258587+00:00",
+   "last_breach_detail": "2026-07-30T08:48:48.0470642Z ValueError on issues — K-id tags in user-facing list are",
+   "last_seen_at": "2026-07-30T08:50:32.686677+00:00",
    "notified_at": null,
-   "occurrence_count": 9,
+   "occurrence_count": 10,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2572,6 +2578,11 @@
      "episode": 1,
      "opened_at": "2026-07-30T04:20:47.523045+00:00",
      "task_id": "ci-root-30512704467"
+    },
+    {
+     "episode": 1,
+     "opened_at": "2026-07-30T08:50:32.944777+00:00",
+     "task_id": "ci-red-30526999259"
     }
    ],
    "task_mode": "external",
@@ -2881,6 +2892,6 @@
    }
   }
  },
- "updated_at": "2026-07-30T08:25:58.395880+00:00",
+ "updated_at": "2026-07-30T09:06:06.625594+00:00",
  "version": 1
 }
