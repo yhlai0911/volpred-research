@@ -1,0 +1,197 @@
+{
+  "schema_version": "volpred.reproduce_report.v1",
+  "generated_at": "2026-07-30T07:36:11.801470+00:00",
+  "experiment_id": "k1630",
+  "engine": {
+    "name": "scripts/reproduce_check.py",
+    "schema": "volpred.reproduce_report.v1",
+    "path": "scripts/reproduce_check.py",
+    "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+    "committed_at_repo_head": true
+  },
+  "repo_head": "ebd2990a1b031cab7d52e07d7264499b6885e643",
+  "methodology_references": [
+    {
+      "citation": "Peng (2011), Reproducible Research in Computational Science",
+      "doi": "10.1126/science.1213847",
+      "principle": "computational reproducibility is a minimum standard, not a validity verdict"
+    },
+    {
+      "citation": "Sandve et al. (2013), Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "principle": "record provenance and preserve the exact workflow behind every result"
+    },
+    {
+      "citation": "Stodden et al. (2016), Enhancing Reproducibility for Computational Methods",
+      "doi": "10.1126/science.aah6168",
+      "principle": "disclose code, data, workflow, and computational environment"
+    }
+  ],
+  "discovery": {
+    "inventory_record": {
+      "experiment": "k1630",
+      "path": "experiments/k1630",
+      "priority_sources": [],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "k1630.py",
+      "result_file": "k1630_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    "subject_files": [
+      {
+        "path": "experiments/k1630/data/0050TW_snapshot.csv",
+        "sha256": "20f9c9ff53dd8760a64a41c860cbdb0b70b3e9fce04eed5930515e64bb1dcb90",
+        "size": 198698
+      },
+      {
+        "path": "experiments/k1630/data/GSPC_snapshot.csv",
+        "sha256": "eed6ec5eb86a6d31a5a2aa6f87c93ec316c56b85e4706ee3512d25fad16879fd",
+        "size": 708646
+      },
+      {
+        "path": "experiments/k1630/data/SPY_snapshot.csv",
+        "sha256": "b13bb59740e19cd1b9b2a3b9580b6e2afcdd9ee933242742ea6750f40cdfa10d",
+        "size": 125831
+      },
+      {
+        "path": "experiments/k1630/data/TWII_snapshot.csv",
+        "sha256": "ce73a28de9d0a56aa963efe334217ca514702bea8cb3190a3c5e3465e9ac85b1",
+        "size": 188296
+      },
+      {
+        "path": "experiments/k1630/k1630.py",
+        "sha256": "ae9ebcd4c8f2166b4534be2c52a4d036f5010beba9c9a052291dfdd606b31ae0",
+        "size": 16891
+      },
+      {
+        "path": "experiments/k1630/k1630_results.json",
+        "sha256": "ac85cf93a35f71194de5722a0dc027f9d0221022197002ea5de022d540f38c6e",
+        "size": 20786
+      },
+      {
+        "path": "experiments/k1630/reproduce_spec.json",
+        "sha256": "01f108caff774cd6396fd7d1f18a8f85a77f95ca97273d03cbb37427c4868115",
+        "size": 2443
+      },
+      {
+        "path": "scripts/reproduce_check.py",
+        "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+        "size": 65995
+      }
+    ],
+    "entrypoint": "experiments/k1630/k1630.py",
+    "canonical_result": "experiments/k1630/k1630_results.json",
+    "spec_sha256": "01f108caff774cd6396fd7d1f18a8f85a77f95ca97273d03cbb37427c4868115",
+    "subject_sha256": "662955f332c2ba9dab3b64242ac065da74254b66d6c67626838ca6446c30f524"
+  },
+  "environment": {
+    "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "uv_lock_sha256": "340b8dc87c7b1e0f1fc852bab3f62e2d084582c77831cee59a3729064706edf0",
+    "pythonhashseed": "0",
+    "package_versions": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "arch": "8.0.0",
+      "yfinance": "1.2.0",
+      "scikit-learn": "1.8.0"
+    },
+    "seed_evidence": [
+      "experiments/k1630/k1630.py:28: 6. Circular block bootstrap (block=12 months, seed=1630, 2000 reps) 95% CI for mean diff.",
+      "experiments/k1630/k1630.py:39: All random procedures use a fixed seed (1630).",
+      "experiments/k1630/k1630.py:56: SEED = 1630",
+      "experiments/k1630/k1630.py:58: np.random.seed(SEED)",
+      "experiments/k1630/k1630.py:141: def block_bootstrap_meandiff(df, block=12, reps=2000, seed=SEED):",
+      "experiments/k1630/k1630.py:147: rng = np.random.default_rng(seed)",
+      "experiments/k1630/k1630.py:272: \"seed\": SEED,",
+      "experiments/k1630/k1630.py:278: \"bootstrap\": \"circular block bootstrap, block=12 months, 2000 reps, seed=1630\",",
+      "experiments/k1630/k1630.py:315: seeds=[(\"numpy\", SEED)],",
+      "scripts/reproduce_check.py:76: SEED_RE = re.compile(r\"\\b(seed|random_state|default_rng|RandomState)\\b\", re.IGNORECASE)",
+      "scripts/reproduce_check.py:360: raise ValueError(\"declared randomness requires at least one seed\")",
+      "scripts/reproduce_check.py:361: for index, seed in enumerate(seeds):",
+      "scripts/reproduce_check.py:362: if not isinstance(seed, dict) or not isinstance(seed.get(\"library\"), str):",
+      "scripts/reproduce_check.py:364: value = seed.get(\"value\")",
+      "scripts/reproduce_check.py:886: # An empty list reads as \"this experiment sets no seed\" — a real audit verdict.",
+      "scripts/reproduce_check.py:887: warn(\"reproduce_check\", \"seed scan could not read entrypoint\", path=str(entrypoint), err=str(exc))",
+      "scripts/reproduce_check.py:1197: seed[\"value\"]",
+      "scripts/reproduce_check.py:1198: for seed in randomness[\"seeds\"]",
+      "scripts/reproduce_check.py:1199: if str(seed[\"value\"]) not in \"\\n\".join(seed_evidence)",
+      "scripts/reproduce_check.py:1208: summary=f\"declared seed values lack code evidence: {missing_seed_values}\","
+    ],
+    "declared_randomness": {
+      "status": "declared",
+      "seeds": [
+        {
+          "library": "numpy",
+          "value": 1630
+        }
+      ]
+    }
+  },
+  "execution": {
+    "command": [
+      "/Users/yhlai0911/volpred-research/.venv/bin/python3",
+      "experiments/k1630/k1630.py"
+    ],
+    "backend": "macos_sandbox_exec",
+    "network": "deny",
+    "exit_code": 0,
+    "timeout_seconds": 64,
+    "duration_seconds": 38.595,
+    "stdout_sha256": "6ab39871390d614e7b7085d6edb02d43592845a1185c3a39960fb81a597a6cc5",
+    "stderr_sha256": "7587e3e156482a9811ae26a18825aba2703c4ff5ed5d76295a17e4a2ed4e6d46",
+    "stdout_tail": "figures written\nresults and reproduce_spec written\nUS full     beta=+0.404pp/mo p_HAC=0.141 sig=False NovApr=+0.859 MayOct=+0.455 N=1181\nUS last15y  beta=+0.235pp/mo p_HAC=0.669 sig=False NovApr=+1.175 MayOct=+0.940 N=185\nTW full     beta=+2.089pp/mo p_HAC=0.005 sig=True NovApr=+1.682 MayOct=-0.407 N=347\nTW last15y  beta=+1.063pp/mo p_HAC=0.147 sig=False NovApr=+1.516 MayOct=+0.453 N=186\n",
+    "stderr_tail": "Matplotlib is building the font cache; this may take a moment.\n[reproduce_spec] wrote k1630_results.json + reproduce_spec.json (entrypoint ae9ebcd4c8f2, 16891 bytes)\n",
+    "clean_snapshot": true,
+    "sandbox_removed_after_run": true
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/generated_at",
+      "/runtime_env",
+      "/runtime_seconds"
+    ],
+    "archived_scalar_count": 411,
+    "rerun_scalar_count": 411,
+    "numeric_compared": 276,
+    "matched_scalars": 411,
+    "mismatch_count": 0,
+    "mismatches_truncated": false,
+    "mismatches": [],
+    "ignore_reasons": {
+      "/generated_at": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions; machine-dependent by construction."
+    }
+  },
+  "integrity": {
+    "canonical_unchanged": true,
+    "changed_paths": []
+  },
+  "canonical_results": [
+    {
+      "archived_result": "experiments/k1630/k1630_results.json",
+      "archived_sha256": "ac85cf93a35f71194de5722a0dc027f9d0221022197002ea5de022d540f38c6e",
+      "rerun_sha256": "3cc645500fb0401046235bc15b8ce87f81fe3299c45662dce2e810b3145d6a71",
+      "bit_identical": false
+    }
+  ],
+  "outcome": {
+    "status": "pass_tolerated",
+    "reason_code": "WITHIN_PREDECLARED_TOLERANCE",
+    "severity": "info",
+    "reproducible": true,
+    "summary": "all scalar values match within predeclared tolerance"
+  }
+}
