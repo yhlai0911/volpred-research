@@ -1,0 +1,1458 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-30T06:05:23.003901+00:00",
+  "registry_path": "/Users/yhlai0911/volpred-research/config/control_gate_registry.json",
+  "registry_owner": "volpred.ops.control_gate_lifecycle",
+  "gates": [
+    {
+      "gate_id": "event_stage_idempotency",
+      "owner": "volpred.publisher.publisher",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "invariant": "At most one active feed row owns an exact event_key + event_series_slot identity.",
+      "protected_graph": {
+        "nodes": [
+          "event_task",
+          "feed_event_stage"
+        ],
+        "edges": [
+          "event_task -> feed_event_stage"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "feed_event_stage -> supabase",
+        "feed_event_stage -> mirror",
+        "feed_event_stage -> reader"
+      ],
+      "incident_refs": [
+        "2026-07-30 FOMC T+0 pre-event suppression"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
+        "start": "2026-07-23T06:05:23.003901+00:00",
+        "end": "2026-07-30T06:05:23.003901+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": null
+      },
+      "evidence": {
+        "trigger_count": 0,
+        "distinct_candidates": 0,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2890,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "plan",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "event_reaction_coverage",
+      "owner": "volpred.ops.event_jobs",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "invariant": "Only structured exact same-stage coverage may retire an event task; legacy title evidence is advisory.",
+      "protected_graph": {
+        "nodes": [
+          "event_schedule_slot",
+          "event_task",
+          "feed_event_stage"
+        ],
+        "edges": [
+          "event_schedule_slot -> event_task"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "event_task -> writer",
+        "writer -> feed_event_stage"
+      ],
+      "incident_refs": [
+        "2026-07-30 FOMC T+0 reaction_already_covered false positive"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
+        "start": "2026-07-23T06:05:23.003901+00:00",
+        "end": "2026-07-30T06:05:23.003901+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-30T04:30:40.496467+00:00"
+      },
+      "evidence": {
+        "trigger_count": 407,
+        "distinct_candidates": 1,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2890,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/reports/feed.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 1,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "event_article_fomc_2026-07-29_tplus0",
+            "decision_count": 407,
+            "task_ids": [
+              "event_article_fomc_2026-07-29_tplus0"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          }
+        ],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": true,
+        "reasons": [
+          "raw_triggers=407>=20"
+        ]
+      },
+      "pdca_phase": "act",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "hourly_pregate",
+      "owner": "scripts.hourly_dispatch_pregate",
+      "mode": "shadow",
+      "identity_strength": "heuristic",
+      "invariant": "A repeated unchanged dispatch observation should not spend another model cold-start when no capacity exists.",
+      "protected_graph": {
+        "nodes": [
+          "dispatch_tick",
+          "dispatch_fire",
+          "agent_capacity"
+        ],
+        "edges": [
+          "dispatch_tick -> dispatch_fire"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "dispatch_fire -> worker",
+        "worker -> task_claim"
+      ],
+      "incident_refs": [
+        "Issue #46 pregate/dispatch reachability audit"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
+        "start": "2026-07-23T06:05:23.003901+00:00",
+        "end": "2026-07-30T06:05:23.003901+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-30T04:07:39.599005+00:00"
+      },
+      "evidence": {
+        "trigger_count": 153,
+        "distinct_candidates": 90,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/hourly_pregate.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 611,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/ops/dispatch_state.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 49,
+        "task_claim": 8,
+        "worker_failed": 14,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 41,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "009197a07d84a795",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "04809059853ee47d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "09aa71f86e4b2841",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "0c7999627caff6c8",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "0d50d45ba0751512",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "1432daf743bef2fa",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "15078239fd3ef69d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "1585ba52c545ddbd",
+            "decision_count": 12,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "16fab6c3eb4ced5d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "1b1e3558abc301f7",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "1bffc17bb7dd1d6f",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "200b3ff5bc30d61b",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "28c803582dc9ec5b",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "2c3ab5039124f720",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "2d7e690d6423982b",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "task_claim"
+            ]
+          },
+          {
+            "candidate_id": "2dd813770d679468",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "3125e920b55e09cf",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "3588b40575bbcdf4",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "38b135ddfdf30de9",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "38f1cd54f2cf6f5d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "3d76cc581f86032e",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "3f724de4bb4fdd58",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "4114dc07ac0f94ad",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "43af39974f185e6b",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "4437eb0ecb9e2b08",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "45a09faf483f86ca",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "461a2288490e758c",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "4f1b73969d00d863",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "535c91a92f3d00c3",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "561728425b850c42",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "5c7bbcb0a4a7b0fc",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "5cda1070af009d0c",
+            "decision_count": 28,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "684ee9007d091d0e",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "6a47a99524ca4019",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "6aeb46ed98647ace",
+            "decision_count": 7,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "6b3bfc4a4e27cdd1",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "6cd8c8342be337a2",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "6d6624b4860fc0ac",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "6f2ccbcdddedcda7",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "6f49c6b2b095e60d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "74b5b6e1b3924e9e",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "755ebe87b80cd16e",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "7b67c798cca9354d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "task_claim"
+            ]
+          },
+          {
+            "candidate_id": "7d7916cad9447cf6",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "7f923d74e68b825c",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "task_claim",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "83649605078f3c33",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "86b16cd0bb8506b0",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "874e184978fc8bc0",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "task_claim",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "892656e8694b59a4",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "893692f7b55a4164",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "8f0df31fee694801",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "8fb4ed2cfad027a3",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "948d93ff285539b8",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "962325153bb5afcb",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "98b922b0ed333944",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "9ea3bd3bac3156e7",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "a16e2c8f348100ba",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "a8e8a0a2f1c8fbbf",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "b02743787e705c34",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "task_claim",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "b824af23d0b20062",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "be93c3a970b00302",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "task_claim",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "c02e1747d75cdc7d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "c435aa1449e1c769",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "task_claim",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "c5cb4505c234550f",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "c6dead67c6d49b4d",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "c74a4350157e74fa",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "cf876b3369c30345",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "d1e6bfdf558f1c6d",
+            "decision_count": 15,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "d83baf263df94d78",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "d8f4b5543a0f29a4",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "d99913986c5cb02a",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "da2248e0fe93c5a7",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "db13ea5746ef3017",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "db57abbe8c1aefad",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "dd5c9e1e10a3824c",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "df461109173be9fd",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "task_claim",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "e10b36c735a913f5",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "e10d57c081812134",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "e38f4fb14c416361",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "e4a58f6e882c7845",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "ebf9e7a3250e23c1",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "ee9b1b29e7411bbd",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "ef06c8370e68c074",
+            "decision_count": 3,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "f0ac8f516ae2dc5c",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "f3e5dc757c576366",
+            "decision_count": 2,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "f52069edeeeda459",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "f94677c3d82a6809",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "f9cb3a6dc0ae346b",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "worker_failed"
+            ]
+          },
+          {
+            "candidate_id": "fc3b85105d485b5c",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire"
+            ]
+          },
+          {
+            "candidate_id": "feaef14e22d2c2f3",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "dispatch_fire",
+              "worker_failed"
+            ]
+          }
+        ],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": true,
+        "reasons": [
+          "raw_triggers=153>=100",
+          "distinct_candidates=90>=20"
+        ]
+      },
+      "pdca_phase": "act",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "dispatch_collision",
+      "owner": "volpred.ops.task_dispatch_collision",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "invariant": "One task identity may not own two active worktrees or divergent delivery paths.",
+      "protected_graph": {
+        "nodes": [
+          "pending_task",
+          "git_commit",
+          "agent_workspace"
+        ],
+        "edges": [
+          "pending_task -> agent_workspace"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "agent_workspace -> agent_job",
+        "agent_job -> merge"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-30 starvation/collision deadlock"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
+        "start": "2026-07-23T06:05:23.003901+00:00",
+        "end": "2026-07-30T06:05:23.003901+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": null
+      },
+      "evidence": {
+        "trigger_count": 0,
+        "distinct_candidates": 0,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 30,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": false,
+        "reasons": []
+      },
+      "pdca_phase": "plan",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "dispatch_starvation_lockout",
+      "owner": "scripts.continue_task_dispatch",
+      "mode": "selection_constraint",
+      "identity_strength": "heuristic",
+      "invariant": "Aged scheduled work receives a bounded dispatch seat without suppressing urgent, time-critical, or collision-free alternatives.",
+      "protected_graph": {
+        "nodes": [
+          "pending_task",
+          "dispatch_candidate",
+          "worker_slot"
+        ],
+        "edges": [
+          "pending_task -> dispatch_candidate"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "non_starved_task -> dispatch_candidate",
+        "dispatch_candidate -> worker_slot"
+      ],
+      "incident_refs": [
+        "docs/error_log.md 2026-07-30 starvation/collision deadlock"
+      ],
+      "window": {
+        "hours": 168.0,
+        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
+        "start": "2026-07-23T06:05:23.003901+00:00",
+        "end": "2026-07-30T06:05:23.003901+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-30T06:04:25.789476+00:00"
+      },
+      "evidence": {
+        "trigger_count": 30,
+        "distinct_candidates": 10,
+        "malformed_rows": 0,
+        "incident_count": 0,
+        "incident_occurrences": 0,
+        "incident_ids": [],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 30,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 10,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 0,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "K1735",
+            "decision_count": 3,
+            "task_ids": [
+              "K1735"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          },
+          {
+            "candidate_id": "K1737",
+            "decision_count": 3,
+            "task_ids": [
+              "K1737"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          },
+          {
+            "candidate_id": "K1738",
+            "decision_count": 3,
+            "task_ids": [
+              "K1738"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          },
+          {
+            "candidate_id": "K1739",
+            "decision_count": 3,
+            "task_ids": [
+              "K1739"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          },
+          {
+            "candidate_id": "K1741",
+            "decision_count": 3,
+            "task_ids": [
+              "K1741"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          },
+          {
+            "candidate_id": "K1742",
+            "decision_count": 3,
+            "task_ids": [
+              "K1742"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          },
+          {
+            "candidate_id": "K1743",
+            "decision_count": 3,
+            "task_ids": [
+              "K1743"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          },
+          {
+            "candidate_id": "K1744",
+            "decision_count": 3,
+            "task_ids": [
+              "K1744"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          },
+          {
+            "candidate_id": "K1745",
+            "decision_count": 3,
+            "task_ids": [
+              "K1745"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          },
+          {
+            "candidate_id": "K1746",
+            "decision_count": 3,
+            "task_ids": [
+              "K1746"
+            ],
+            "outcomes": [
+              "queued"
+            ]
+          }
+        ],
+        "incident_open": 0,
+        "incident_resolved": 0,
+        "incident_recurrence": 0
+      },
+      "review": {
+        "due": true,
+        "reasons": [
+          "raw_triggers=30>=20",
+          "distinct_candidates=10>=5"
+        ]
+      },
+      "pdca_phase": "act",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    },
+    {
+      "gate_id": "phase_z_baseline_ownership",
+      "owner": "scripts.dispatch_supervisor.phase_z",
+      "mode": "fail_closed",
+      "identity_strength": "canonical_exact",
+      "invariant": "PHASE-Z may commit only bytes proven to have appeared after the same fire generation baseline.",
+      "protected_graph": {
+        "nodes": [
+          "fire_generation",
+          "pre_fire_baseline",
+          "git_commit"
+        ],
+        "edges": [
+          "pre_fire_baseline -> git_commit"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "git_commit -> push",
+        "push -> main_ci"
+      ],
+      "incident_refs": [
+        "incident inc_537a3ff3304f",
+        "phase_z_generation_rejected"
+      ],
+      "window": {
+        "hours": 336.0,
+        "lookback_start": "2026-07-16T06:05:23.003901+00:00",
+        "start": "2026-07-16T06:05:23.003901+00:00",
+        "end": "2026-07-30T06:05:23.003901+00:00",
+        "last_reviewed_at": null,
+        "newest_evidence_at": "2026-07-26T19:38:01.064738+00:00"
+      },
+      "evidence": {
+        "trigger_count": 2,
+        "distinct_candidates": 2,
+        "malformed_rows": 0,
+        "incident_count": 3,
+        "incident_occurrences": 8,
+        "incident_ids": [
+          "inc_407e6c77f250",
+          "inc_537a3ff3304f",
+          "inc_7af47e56b999"
+        ],
+        "source_health": [
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/ops/phase_z_rejections.jsonl",
+            "ok": true,
+            "error": null,
+            "row_count": 2,
+            "malformed_rows": 0,
+            "invalid_timestamps": 0
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/ops/incidents.json",
+            "ok": true,
+            "error": null
+          },
+          {
+            "path": "/Users/yhlai0911/volpred-research/storage/ops/dispatch_state.json",
+            "ok": true,
+            "error": null
+          }
+        ]
+      },
+      "outcomes": {
+        "published": 0,
+        "succeeded": 0,
+        "failed": 0,
+        "missed_deadline": 0,
+        "sequence_coverage_gap": 0,
+        "retry": 0,
+        "waiver": 0,
+        "superseded": 0,
+        "observed": 0,
+        "dispatch_fire": 0,
+        "task_claim": 0,
+        "worker_failed": 0,
+        "queued": 0,
+        "in_flight": 0,
+        "blocked": 0,
+        "unjoined": 2,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "03148540bd1f4e09936eeee66024ecb9",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "a4fe4570d70f472b819776bd664f0037",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          }
+        ],
+        "incident_open": 2,
+        "incident_resolved": 1,
+        "incident_recurrence": 2
+      },
+      "review": {
+        "due": true,
+        "reasons": [
+          "incident_occurrences=8>=2"
+        ]
+      },
+      "pdca_phase": "act",
+      "allowed_actions": [
+        "retain",
+        "recalibrate",
+        "downgrade_to_warn",
+        "retire"
+      ]
+    }
+  ],
+  "summary": {
+    "gate_count": 6,
+    "review_due_count": 4,
+    "hard_gate_count": 4,
+    "unhealthy_source_count": 0
+  },
+  "review_tasks": {
+    "created_count": 0,
+    "created_ids": [],
+    "existing_ids": [
+      "control_gate_review_dispatch_starvation_lockout_20260730T003255",
+      "control_gate_review_event_reaction_coverage_20260723",
+      "control_gate_review_hourly_pregate_20260723",
+      "control_gate_review_phase_z_baseline_ownership_20260716"
+    ]
+  },
+  "audit_health": {
+    "healthy": true,
+    "unhealthy_sources": []
+  }
+}

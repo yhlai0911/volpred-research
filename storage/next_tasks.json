@@ -62929,10 +62929,31 @@
         "to": "pending",
         "by": "hourly-slot-1-89b599a0553c4287a4d5109a878e52d9",
         "note": "supervisor_kill_89b599a0"
+      },
+      {
+        "ts": "2026-07-30T05:21:37.632450+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-99a9caea1dc54795a1ab0b99c9857a0b",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-30T05:21:37.632453+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-99a9caea1dc54795a1ab0b99c9857a0b",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-30T05:27:09.880434+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-99a9caea1dc54795a1ab0b99c9857a0b",
+        "note": "supervisor_kill_99a9caea"
       }
     ],
-    "last_released_at": "2026-07-30T04:53:32.572278+00:00",
-    "last_release_reason": "supervisor_kill_89b599a0"
+    "last_released_at": "2026-07-30T05:27:09.880412+00:00",
+    "last_release_reason": "supervisor_kill_99a9caea"
   },
   {
     "id": "alert_dispatch_supervisor_stale_code_20260730",
@@ -63001,7 +63022,7 @@
     "task_type": "event_article",
     "priority": 1,
     "status": "pending",
-    "dispatch_lane": "main_thread",
+    "dispatch_lane": "agent",
     "created_at": "2026-07-30T04:35:43.740346+00:00",
     "source": "event_expander",
     "preferred_agent": "claude",
@@ -63027,7 +63048,7 @@
       "reader_facing",
       "fomc",
       "T+0",
-      "main-thread-only"
+      "claude-worker-only"
     ],
     "dedup_screen": {
       "verdict": "warn_arc_near_miss",
@@ -63087,7 +63108,7 @@
     "description": "Owner directive 2026-07-30: 所有曾造成 incident 或高頻觸發的鎖/gate 都必須正式登記並觀察一段時間。\n建立單一 Operations Core gate registry，記錄 gate_id/owner/invariant/mode/protected node-edge/blocked downstream edges/incident refs/review window/false-positive threshold。整合 dedup_decisions、hourly pregate、dispatch collision、PHASE-Z、task blockers 等 decision evidence，並 join published/missed deadline/sequence coverage gap/retry/waiver/superseded 等 outcome。\nAcceptance: (1) PDCA Plan/Do/Check/Act 狀態可機械讀取；(2) 新 heuristic 預設 shadow/warn，exact identity 才可 hard-block；(3) 達 threshold 自動 materialize 單一 review item，不建第二 pending queue；(4) review 必裁決 retain/recalibrate/downgrade/retire，禁止永久 observing；(5) hourly alert/dashboard readback + tests；(6) 先登記已知事件 dedup、event coverage、hourly pregate、dispatch collision/starvation、PHASE-Z baseline locks。\nparent_task_id: fomc_t0_stage_contract_20260730",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "dispatch_lane": "agent",
     "preferred_agent": "codex",
@@ -63099,10 +63120,6 @@
       "operations-core"
     ],
     "created_at": "2026-07-30T04:44:09.205010+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-30T05:08:43.731323+00:00",
-    "claim_expires_at": "2026-07-30T07:08:43.731323+00:00",
-    "claim_session_id": "47df7187794b",
     "status_history": [
       {
         "ts": "2026-07-30T05:08:43.731341+00:00",
@@ -63115,14 +63132,22 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T05:56:23.594671+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-30T05:08:44.145365+00:00"
+    "started_at": "2026-07-30T05:08:44.145365+00:00",
+    "completed_at": "2026-07-30T05:56:23.594643+00:00",
+    "result": "root_cause=problematic locks/gates had fragmented trigger logs without graph outcome joins, source-health enforcement, consumed review watermarks, or atomic one-review-per-gate Act contracts; repair_commit=8fb26f50d; verification=317 scoped tests PASS, dual independent review PASS, live audit 6 gates/4 due/0 unhealthy sources with four canonical review tasks and no duplicate creation"
   },
   {
     "id": "phase-z-foreign-e72eebd41371417d-e2",
     "title": "PHASE-Z 卡住檔案 incident（e72eebd41371417d）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 38 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- .claude/rules/experiments.md — 38 班\n- experiments/k1630/README.md — 24 班\n- scripts/gen_k1585_general_charts.py — 32 班\n- scripts/gen_k1680_general_charts.py — 32 班\n- scripts/gen_k1705_general_charts.py — 32 班\n- storage/assets/k1585_general_effect_forest.png — 32 班\n- storage/assets/k1585_general_oos_cost.png — 32 班\n- storage/assets/k1609_general_gate_forest.png — 23 班\n- storage/assets/k1609_general_two_rulers.png — 23 班\n- storage/assets/k1623_general_ruler_flip.png — 32 班\n- storage/assets/k1623_general_survivor_funnel.png — 32 班\n- storage/assets/k1680_general_multiplicity.png — 32 班\n- storage/assets/k1680_general_per_firm.png — 32 班\n- storage/assets/k1698_general_rebuild_audit.png — 31 班\n- storage/assets/k1698_general_strength_flip.png — 31 班\n- storage/assets/k1698_general_two_targets.png — 31 班\n- storage/assets/k1705_general_sign_audit.png — 32 班\n- storage/assets/k1705_general_timing_flip.png — 32 班\n- storage/assets/k781_general_ranking.png — 37 班\n- storage/assets/k781_general_subperiod_regime.png — 37 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 34 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 34 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 34 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 34 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 34 班\n- storage/lazypack_plans/k1448_general_plan.json — 24 班\n- storage/lazypack_plans/k1585_general_plan.json — 32 班\n- storage/lazypack_plans/k1623_general_plan.json — 32 班\n- storage/lazypack_plans/k1680_general_plan.json — 32 班\n- storage/lazypack_plans/k1705_general_plan.json — 32 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260730T044526519019Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T052011831216Z:<路徑>`",
+    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 39 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- .claude/rules/experiments.md — 39 班\n- experiments/k1630/README.md — 25 班\n- scripts/gen_k1585_general_charts.py — 33 班\n- scripts/gen_k1680_general_charts.py — 33 班\n- scripts/gen_k1705_general_charts.py — 33 班\n- storage/assets/k1585_general_effect_forest.png — 33 班\n- storage/assets/k1585_general_oos_cost.png — 33 班\n- storage/assets/k1609_general_gate_forest.png — 24 班\n- storage/assets/k1609_general_two_rulers.png — 24 班\n- storage/assets/k1623_general_ruler_flip.png — 33 班\n- storage/assets/k1623_general_survivor_funnel.png — 33 班\n- storage/assets/k1680_general_multiplicity.png — 33 班\n- storage/assets/k1680_general_per_firm.png — 33 班\n- storage/assets/k1698_general_rebuild_audit.png — 32 班\n- storage/assets/k1698_general_strength_flip.png — 32 班\n- storage/assets/k1698_general_two_targets.png — 32 班\n- storage/assets/k1705_general_sign_audit.png — 33 班\n- storage/assets/k1705_general_timing_flip.png — 33 班\n- storage/assets/k781_general_ranking.png — 38 班\n- storage/assets/k781_general_subperiod_regime.png — 38 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 35 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 35 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 35 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 35 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 35 班\n- storage/lazypack_plans/k1448_general_plan.json — 25 班\n- storage/lazypack_plans/k1585_general_plan.json — 33 班\n- storage/lazypack_plans/k1623_general_plan.json — 33 班\n- storage/lazypack_plans/k1680_general_plan.json — 33 班\n- storage/lazypack_plans/k1705_general_plan.json — 33 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260730T044526519019Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T052011831216Z:<路徑>`\n- `git show refs/volpred/quarantine/20260730T061758625202Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -63165,45 +63190,46 @@
         "storage/lazypack_plans/k775_general_plan.json"
       ],
       "streaks": {
-        ".claude/rules/experiments.md": 38,
-        "experiments/k1630/README.md": 24,
-        "scripts/gen_k1585_general_charts.py": 32,
-        "scripts/gen_k1680_general_charts.py": 32,
-        "scripts/gen_k1705_general_charts.py": 32,
-        "storage/assets/k1585_general_effect_forest.png": 32,
-        "storage/assets/k1585_general_oos_cost.png": 32,
-        "storage/assets/k1609_general_gate_forest.png": 23,
-        "storage/assets/k1609_general_two_rulers.png": 23,
-        "storage/assets/k1623_general_ruler_flip.png": 32,
-        "storage/assets/k1623_general_survivor_funnel.png": 32,
-        "storage/assets/k1680_general_multiplicity.png": 32,
-        "storage/assets/k1680_general_per_firm.png": 32,
-        "storage/assets/k1698_general_rebuild_audit.png": 31,
-        "storage/assets/k1698_general_strength_flip.png": 31,
-        "storage/assets/k1698_general_two_targets.png": 31,
-        "storage/assets/k1705_general_sign_audit.png": 32,
-        "storage/assets/k1705_general_timing_flip.png": 32,
-        "storage/assets/k781_general_ranking.png": 37,
-        "storage/assets/k781_general_subperiod_regime.png": 37,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 34,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 34,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 34,
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 34,
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 34,
-        "storage/lazypack_plans/k1448_general_plan.json": 24,
-        "storage/lazypack_plans/k1585_general_plan.json": 32,
-        "storage/lazypack_plans/k1623_general_plan.json": 32,
-        "storage/lazypack_plans/k1680_general_plan.json": 32,
-        "storage/lazypack_plans/k1705_general_plan.json": 32,
-        "storage/lazypack_plans/k775_general_plan.json": 26
+        ".claude/rules/experiments.md": 39,
+        "experiments/k1630/README.md": 25,
+        "scripts/gen_k1585_general_charts.py": 33,
+        "scripts/gen_k1680_general_charts.py": 33,
+        "scripts/gen_k1705_general_charts.py": 33,
+        "storage/assets/k1585_general_effect_forest.png": 33,
+        "storage/assets/k1585_general_oos_cost.png": 33,
+        "storage/assets/k1609_general_gate_forest.png": 24,
+        "storage/assets/k1609_general_two_rulers.png": 24,
+        "storage/assets/k1623_general_ruler_flip.png": 33,
+        "storage/assets/k1623_general_survivor_funnel.png": 33,
+        "storage/assets/k1680_general_multiplicity.png": 33,
+        "storage/assets/k1680_general_per_firm.png": 33,
+        "storage/assets/k1698_general_rebuild_audit.png": 32,
+        "storage/assets/k1698_general_strength_flip.png": 32,
+        "storage/assets/k1698_general_two_targets.png": 32,
+        "storage/assets/k1705_general_sign_audit.png": 33,
+        "storage/assets/k1705_general_timing_flip.png": 33,
+        "storage/assets/k781_general_ranking.png": 38,
+        "storage/assets/k781_general_subperiod_regime.png": 38,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 35,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 35,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 35,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 35,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 35,
+        "storage/lazypack_plans/k1448_general_plan.json": 25,
+        "storage/lazypack_plans/k1585_general_plan.json": 33,
+        "storage/lazypack_plans/k1623_general_plan.json": 33,
+        "storage/lazypack_plans/k1680_general_plan.json": 33,
+        "storage/lazypack_plans/k1705_general_plan.json": 33,
+        "storage/lazypack_plans/k775_general_plan.json": 27
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260730T044526519019Z",
-        "refs/volpred/quarantine/20260730T052011831216Z"
+        "refs/volpred/quarantine/20260730T052011831216Z",
+        "refs/volpred/quarantine/20260730T061758625202Z"
       ],
-      "fires": 2,
+      "fires": 3,
       "first_seen_at": "2026-07-30T04:45:26.630988+00:00",
-      "last_seen_at": "2026-07-30T05:20:11.962495+00:00",
+      "last_seen_at": "2026-07-30T06:17:58.728037+00:00",
       "family_page_claim_schema": 2,
       "episode_generation": 2,
       "family_transport_id": "assign_dc879467",
@@ -63247,6 +63273,148 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-30T05:20:11.962495+00:00"
+    "updated_at": "2026-07-30T06:17:58.728037+00:00"
+  },
+  {
+    "id": "control_gate_review_event_reaction_coverage_20260723",
+    "title": "[Gate PDCA] event_reaction_coverage lifecycle review",
+    "description": "gate_id: event_reaction_coverage\nowner: volpred.ops.event_jobs\nmode: hard_block\ninvariant: Only structured exact same-stage coverage may retire an event task; legacy title evidence is advisory.\nprotected_edges: ['event_schedule_slot -> event_task']\nblocked_downstream_edges: ['event_task -> writer', 'writer -> feed_event_stage']\nreview_reasons: ['raw_triggers=407>=20']\nevidence: {'trigger_count': 407, 'distinct_candidates': 1, 'malformed_rows': 0, 'incident_count': 0, 'incident_occurrences': 0, 'incident_ids': []}\noutcomes: {'published': 0, 'succeeded': 0, 'failed': 0, 'missed_deadline': 0, 'sequence_coverage_gap': 0, 'retry': 1, 'waiver': 0, 'superseded': 0, 'unjoined': 0, 'candidate_outcomes': [{'candidate_id': 'event_article_fomc_2026-07-29_tplus0', 'decision_count': 407, 'task_ids': ['event_article_fomc_2026-07-29_tplus0'], 'outcomes': ['retry']}], 'incident_open': 0, 'incident_resolved': 0, 'incident_recurrence': 0}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle + tests + live read-back。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T05:21:26.520268+00:00",
+    "gate_review_id": "event_reaction_coverage",
+    "gate_review_window_start": "2026-07-23T05:21:26.520268+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update config/control_gate_registry.json lifecycle",
+      "attach downstream outcome read-back"
+    ]
+  },
+  {
+    "id": "control_gate_review_hourly_pregate_20260723",
+    "title": "[Gate PDCA] hourly_pregate lifecycle review",
+    "description": "gate_id: hourly_pregate\nowner: scripts.hourly_dispatch_pregate\nmode: shadow\ninvariant: A repeated unchanged dispatch observation should not spend another model cold-start when no capacity exists.\nprotected_edges: ['dispatch_tick -> dispatch_fire']\nblocked_downstream_edges: ['dispatch_fire -> worker', 'worker -> task_claim']\nreview_reasons: ['raw_triggers=153>=100', 'distinct_candidates=90>=20']\nevidence: {'trigger_count': 153, 'distinct_candidates': 90, 'malformed_rows': 0, 'incident_count': 0, 'incident_occurrences': 0, 'incident_ids': []}\noutcomes: {'published': 0, 'succeeded': 0, 'failed': 0, 'missed_deadline': 0, 'sequence_coverage_gap': 0, 'retry': 8, 'waiver': 0, 'superseded': 0, 'unjoined': 82, 'candidate_outcomes': [{'candidate_id': '009197a07d84a795', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '04809059853ee47d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '09aa71f86e4b2841', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '0c7999627caff6c8', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '0d50d45ba0751512', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '1432daf743bef2fa', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '15078239fd3ef69d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '1585ba52c545ddbd', 'decision_count': 12, 'task_ids': [], 'outcomes': ['retry']}, {'candidate_id': '16fab6c3eb4ced5d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '1b1e3558abc301f7', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '1bffc17bb7dd1d6f', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '200b3ff5bc30d61b', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '28c803582dc9ec5b', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '2c3ab5039124f720', 'decision_count': 2, 'task_ids': [], 'outcomes': ['retry']}, {'candidate_id': '2d7e690d6423982b', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '2dd813770d679468', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '3125e920b55e09cf', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '3588b40575bbcdf4', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '38b135ddfdf30de9', 'decision_count': 2, 'task_ids': [], 'outcomes': ['retry']}, {'candidate_id': '38f1cd54f2cf6f5d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '3d76cc581f86032e', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '3f724de4bb4fdd58', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '4114dc07ac0f94ad', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '43af39974f185e6b', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '4437eb0ecb9e2b08', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '45a09faf483f86ca', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '461a2288490e758c', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '4f1b73969d00d863', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '535c91a92f3d00c3', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '561728425b850c42', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '5c7bbcb0a4a7b0fc', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '5cda1070af009d0c', 'decision_count': 28, 'task_ids': [], 'outcomes': ['retry']}, {'candidate_id': '684ee9007d091d0e', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '6a47a99524ca4019', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '6aeb46ed98647ace', 'decision_count': 7, 'task_ids': [], 'outcomes': ['retry']}, {'candidate_id': '6b3bfc4a4e27cdd1', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '6cd8c8342be337a2', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '6d6624b4860fc0ac', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '6f2ccbcdddedcda7', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '6f49c6b2b095e60d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '74b5b6e1b3924e9e', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '755ebe87b80cd16e', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '7b67c798cca9354d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '7d7916cad9447cf6', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '7f923d74e68b825c', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '83649605078f3c33', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '86b16cd0bb8506b0', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '874e184978fc8bc0', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '892656e8694b59a4', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '893692f7b55a4164', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '8f0df31fee694801', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '8fb4ed2cfad027a3', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '948d93ff285539b8', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '962325153bb5afcb', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '98b922b0ed333944', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': '9ea3bd3bac3156e7', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'a16e2c8f348100ba', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'a8e8a0a2f1c8fbbf', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'b02743787e705c34', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'b824af23d0b20062', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'be93c3a970b00302', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'c02e1747d75cdc7d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'c435aa1449e1c769', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'c5cb4505c234550f', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'c6dead67c6d49b4d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'c74a4350157e74fa', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'cf876b3369c30345', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'd1e6bfdf558f1c6d', 'decision_count': 15, 'task_ids': [], 'outcomes': ['retry']}, {'candidate_id': 'd83baf263df94d78', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'd8f4b5543a0f29a4', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'd99913986c5cb02a', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'da2248e0fe93c5a7', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'db13ea5746ef3017', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'db57abbe8c1aefad', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'dd5c9e1e10a3824c', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'df461109173be9fd', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'e10b36c735a913f5', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'e10d57c081812134', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'e38f4fb14c416361', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'e4a58f6e882c7845', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'ebf9e7a3250e23c1', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'ee9b1b29e7411bbd', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'ef06c8370e68c074', 'decision_count': 3, 'task_ids': [], 'outcomes': ['retry']}, {'candidate_id': 'f0ac8f516ae2dc5c', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'f3e5dc757c576366', 'decision_count': 2, 'task_ids': [], 'outcomes': ['retry']}, {'candidate_id': 'f52069edeeeda459', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'f94677c3d82a6809', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'f9cb3a6dc0ae346b', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'fc3b85105d485b5c', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'feaef14e22d2c2f3', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}], 'incident_open': 0, 'incident_resolved': 0, 'incident_recurrence': 0}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle + tests + live read-back。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T05:21:26.520268+00:00",
+    "gate_review_id": "hourly_pregate",
+    "gate_review_window_start": "2026-07-23T05:21:26.520268+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update config/control_gate_registry.json lifecycle",
+      "attach downstream outcome read-back"
+    ]
+  },
+  {
+    "id": "control_gate_review_phase_z_baseline_ownership_20260716",
+    "title": "[Gate PDCA] phase_z_baseline_ownership lifecycle review",
+    "description": "gate_id: phase_z_baseline_ownership\nowner: scripts.dispatch_supervisor.phase_z\nmode: fail_closed\ninvariant: PHASE-Z may commit only bytes proven to have appeared after the same fire generation baseline.\nprotected_edges: ['pre_fire_baseline -> git_commit']\nblocked_downstream_edges: ['git_commit -> push', 'push -> main_ci']\nreview_reasons: ['incident_occurrences=8>=2']\nevidence: {'trigger_count': 0, 'distinct_candidates': 0, 'malformed_rows': 0, 'incident_count': 3, 'incident_occurrences': 8, 'incident_ids': ['inc_407e6c77f250', 'inc_537a3ff3304f', 'inc_7af47e56b999']}\noutcomes: {'published': 0, 'succeeded': 0, 'failed': 0, 'missed_deadline': 0, 'sequence_coverage_gap': 0, 'retry': 0, 'waiver': 0, 'superseded': 0, 'unjoined': 0, 'candidate_outcomes': [], 'incident_open': 2, 'incident_resolved': 1, 'incident_recurrence': 2}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle + tests + live read-back。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T05:21:26.520268+00:00",
+    "gate_review_id": "phase_z_baseline_ownership",
+    "gate_review_window_start": "2026-07-16T05:21:26.520268+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update config/control_gate_registry.json lifecycle",
+      "attach downstream outcome read-back"
+    ]
+  },
+  {
+    "id": "control_gate_review_dispatch_starvation_lockout_20260730T003255",
+    "title": "[Gate PDCA] dispatch_starvation_lockout lifecycle review",
+    "description": "gate_id: dispatch_starvation_lockout\nowner: scripts.continue_task_dispatch\nmode: selection_constraint\ninvariant: Aged scheduled work receives a bounded dispatch seat without suppressing urgent, time-critical, or collision-free alternatives.\nprotected_edges: ['pending_task -> dispatch_candidate']\nblocked_downstream_edges: ['non_starved_task -> dispatch_candidate', 'dispatch_candidate -> worker_slot']\nreview_reasons: ['distinct_candidates=10>=5']\nevidence: {'trigger_count': 10, 'distinct_candidates': 10, 'malformed_rows': 0, 'incident_count': 0, 'incident_occurrences': 0, 'incident_ids': [], 'source_health': [{'path': '/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl', 'ok': True, 'error': None, 'row_count': 10, 'malformed_rows': 0, 'invalid_timestamps': 0}, {'path': '/Users/yhlai0911/volpred-research/storage/next_tasks.json', 'ok': True, 'error': None}]}\noutcomes: {'published': 0, 'succeeded': 0, 'failed': 0, 'missed_deadline': 0, 'sequence_coverage_gap': 0, 'retry': 0, 'waiver': 0, 'superseded': 0, 'observed': 0, 'queued': 10, 'in_flight': 0, 'blocked': 0, 'unjoined': 0, 'candidate_outcomes': [{'candidate_id': 'K1735', 'decision_count': 1, 'task_ids': ['K1735'], 'outcomes': ['queued']}, {'candidate_id': 'K1737', 'decision_count': 1, 'task_ids': ['K1737'], 'outcomes': ['queued']}, {'candidate_id': 'K1738', 'decision_count': 1, 'task_ids': ['K1738'], 'outcomes': ['queued']}, {'candidate_id': 'K1739', 'decision_count': 1, 'task_ids': ['K1739'], 'outcomes': ['queued']}, {'candidate_id': 'K1741', 'decision_count': 1, 'task_ids': ['K1741'], 'outcomes': ['queued']}, {'candidate_id': 'K1742', 'decision_count': 1, 'task_ids': ['K1742'], 'outcomes': ['queued']}, {'candidate_id': 'K1743', 'decision_count': 1, 'task_ids': ['K1743'], 'outcomes': ['queued']}, {'candidate_id': 'K1744', 'decision_count': 1, 'task_ids': ['K1744'], 'outcomes': ['queued']}, {'candidate_id': 'K1745', 'decision_count': 1, 'task_ids': ['K1745'], 'outcomes': ['queued']}, {'candidate_id': 'K1746', 'decision_count': 1, 'task_ids': ['K1746'], 'outcomes': ['queued']}], 'incident_open': 0, 'incident_resolved': 0, 'incident_recurrence': 0}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle 的 last_action/last_reviewed_at/review_task_id + tests + live read-back。\ncomplete 時必傳 --gate-decision 與 --gate-live-readback；task_pool_claim 會回讀 registry Act receipt，不一致則拒絕結案。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T05:35:17.901807+00:00",
+    "gate_review_id": "dispatch_starvation_lockout",
+    "gate_review_window_start": "2026-07-23T05:35:17.901807+00:00",
+    "gate_review_watermark": "2026-07-30T00:32:55.549116+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update registry lifecycle last_action/last_reviewed_at/review_task_id",
+      "attach downstream outcome read-back",
+      "complete with --gate-decision and --gate-live-readback"
+    ]
+  },
+  {
+    "id": "K1221_article_general_v2",
+    "title": "K1221: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1221 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K1221 [CONDITIONAL_PASS]：Paper 6（prg-periodic-garch，main.tex commit 7d35418b，投稿目標 Finance Research Letters）投稿前 checklist 稽核，2026-04-17 完成。對照 docs/paper-guide.md replication-package 硬規則逐項檢查 24 項：PASS 17、FAIL(blocker) 3、WARN(remediable) 3、N/A 1，readiness=NEEDS-MINOR-FIX，估計修復時間 bloc Canonical evidence: experiments/k1221/k1221_checklist_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1221",
+    "evidence_source_paths": [
+      "experiments/k1221/k1221_checklist_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1221/k1221_checklist_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-30T06:00:17+00:00"
+  },
+  {
+    "id": "K1450_article_general_v2",
+    "title": "K1450: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1450 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K1450 CONDITIONAL_PASS：檢驗VNQ在升息/降息regime（^TNX 63日落後變化訊號）下的未來21日已實現波動與相關性差異，2005-01-01至2026-06-09（有效樣本2005-04-06至2026-05-07，n=5,301，regime almost balanced：rate_down 2,651/rate_up 2,650）。HAC(21) OLS檢定：VNQ forward RV rate_down 23.85% vs rate_up 19.76%（p=0.0599，未過多重檢定）；SPY forward RV Canonical evidence: experiments/k1450/k1450_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1450",
+    "evidence_source_paths": [
+      "experiments/k1450/k1450_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1450/k1450_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-30T06:00:17+00:00"
+  },
+  {
+    "id": "K1701_article_general",
+    "title": "K1701: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1701 has verdict signal (score=0, reasons=['paradigm/decisive null', 'inconclusive (data limit)']) but no general article in feed.json.  Verdict preview: K1701 [INCONCLUSIVE]: SPX/TW50成分股realized dispersion對指數波動預測力，改用Giacomini-White(2006) bounded-window(756筆固定)test取代原有巢狀模型下失效的expanding raw DM，樣本2010-01-04至2026-07-10。正式2資產×3horizon(h=1/5/22)家族6格：正向GW discovery gate(改善>0,GW z<-3,BH q<0.05)0/6通過；1%material-gain exclusion(Holm校正)0/6排除 Canonical evidence: experiments/k1701/k1701_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1701",
+    "evidence_source_paths": [
+      "experiments/k1701/k1701_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1701/k1701_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-30T06:04:19+00:00"
   }
 ]

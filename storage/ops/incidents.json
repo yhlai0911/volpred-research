@@ -1842,14 +1842,28 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-07-30T05:19:31.855822+00:00"
+     "last_seen_at": "2026-07-30T06:17:29.580187+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "c8e05e158974055b1b31854bcdf353b71a864445",
+      "branch": "worktree-dispatch-slot-1-99a9caea",
+      "checkpoint_commit": "5afc8aa274257133e1876cb2df3dfe1b80f2cb03",
+      "detail_tail": "fire ended with outcome=kill_failed_orphan_drained; dirty=True unique_commits=0",
+      "reason": "worker_kill_failed_orphan_drained",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-99a9caea"
+     },
+     "first_seen_at": "2026-07-30T06:17:32.795960+00:00",
+     "key": "dispatch-slot-1-99a9caea",
+     "last_seen_at": "2026-07-30T06:17:32.795960+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-07-30T05:19:31.855822+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-99a9caea unmergeable (worker_kill_failed_orphan_drained)",
+   "last_seen_at": "2026-07-30T06:17:32.795960+00:00",
    "notified_at": null,
-   "occurrence_count": 5117,
+   "occurrence_count": 5120,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2472,13 +2486,25 @@
      "first_seen_at": "2026-07-30T04:55:30.550971+00:00",
      "key": "30514307719:1",
      "last_seen_at": "2026-07-30T04:55:30.550971+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-30T05:30:43.706278+00:00",
+     "key": "30515892576:1",
+     "last_seen_at": "2026-07-30T05:30:43.706278+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-30T05:50:22.308135+00:00",
+     "key": "30516830943:1",
+     "last_seen_at": "2026-07-30T05:50:22.308135+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-30T04:53:29.7526646Z E AssertionError: assert ('warn', 'sup...tcome=reaped') == ('warn', 'sup...work_timeout')",
-   "last_seen_at": "2026-07-30T04:55:30.550971+00:00",
+   "last_breach_detail": "2026-07-30T05:48:29.8094843Z E AssertionError: assert ('warn', 'sup...tcome=reaped') == ('warn', 'sup...work_timeout')",
+   "last_seen_at": "2026-07-30T05:50:22.308135+00:00",
    "notified_at": null,
-   "occurrence_count": 2,
+   "occurrence_count": 4,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2797,6 +2823,6 @@
    }
   }
  },
- "updated_at": "2026-07-30T05:19:42.450305+00:00",
+ "updated_at": "2026-07-30T06:17:44.074716+00:00",
  "version": 1
 }
