@@ -1,6 +1,6 @@
 {
   "schema": "observation_ledger.v1",
-  "updated_at": "2026-07-30T11:31:33.480577+00:00",
+  "updated_at": "2026-07-30T11:58:35.742923+00:00",
   "items": [
     {
       "id": "pregate_shadow",
@@ -70,6 +70,15 @@
       "action_on_expiry": "執行 task_generation gate lifecycle audit：確認同 target 相同裁決未重複追加、transition trigger/candidate 比例合理、無 publication starvation；若 raw polling flood 或 unjoined harm 復發，重開 gate review 並修 producer identity，不得只調高 threshold。",
       "status": "observing",
       "note": "PDCA/loop/graph engineering：保留歷史 930 raw receipts；新時間窗改以狀態轉移計數，legacy action 復活仍由 control_gate_registry 偵測。"
+    },
+    {
+      "id": "worktree_merge_transition_monitor",
+      "what": "worktree_merge_ownership gate: compare raw detector observations, instance opened/reopened transitions, migration baselines, and unresolved active worktree edges in storage/ops/incidents.json plus control_gate_lifecycle_latest.json",
+      "started_at": "2026-07-30T11:58:35.742607+00:00",
+      "deadline": "2026-08-06T20:00:00+08:00",
+      "action_on_expiry": "Run the lifecycle audit and read back incident instances: verify unchanged polling produced zero extra transitions, every migration-time open edge received exactly one baseline, and active worktrees were explicitly merged/discarded or remain visibly pending. Recalibrate if useful warning reviews recur; open a root-cause task for real recurring edges. Do not close from threshold counts alone.",
+      "status": "observing",
+      "note": "PDCA Check/Act follow-up for task control_gate_review_worktree_merge_ownership_20260730T042622_57946e78b34e; graph metric cutover retains fail-closed gate."
     }
   ]
 }

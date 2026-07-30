@@ -315,12 +315,13 @@ def _upsert_instance(
     for item in instances:
         if isinstance(item, dict) and item.get("key") == instance_key:
             was_cleared = bool(item.get("cleared_at"))
+            was_resolved = row.get("state") == STATE_RESOLVED
             item["last_seen_at"] = now.isoformat()
-            if was_cleared:
+            if was_cleared or was_resolved:
                 item["cleared_at"] = None  # re-appeared ⇒ not cleared any more
             if detail:
                 item["detail"] = detail
-            if was_cleared:
+            if was_cleared or was_resolved:
                 return "reopened"
             return None
     if len(instances) >= _INSTANCE_LIMIT:
@@ -359,6 +360,44 @@ def _record_instance_transition(
         }
     )
     del transitions[:-_INSTANCE_TRANSITION_LIMIT]
+
+
+def _ensure_instance_transition_tracking(
+    row: dict[str, Any],
+    *,
+    now: datetime,
+) -> None:
+    """Start edge-transition tracking without hiding live legacy risk.
+
+    Legacy incident rows only counted detector polls.  On the first
+    instance-aware observation after the metric cutover, snapshot each edge
+    that is *currently* open exactly once.  Cleared historical edges are not
+    replayed, and later polls see ``instance_transition_tracking`` and remain
+    observation-only.
+    """
+    if row.get("instance_transition_tracking") is True:
+        return
+    at = now.isoformat()
+    transitions: list[dict[str, Any]] = []
+    for item in row.get("instances") or []:
+        if not isinstance(item, dict) or item.get("cleared_at"):
+            continue
+        if row.get("state") == STATE_RESOLVED:
+            continue
+        key = str(item.get("key") or "").strip()
+        if not key:
+            continue
+        transitions.append(
+            {
+                "at": at,
+                "instance_key": key,
+                "transition": "opened",
+                "migration_baseline": True,
+            }
+        )
+    row["instance_transition_tracking"] = True
+    row["instance_transition_baselined_at"] = at
+    row["instance_transitions"] = transitions[-_INSTANCE_TRANSITION_LIMIT:]
 
 
 def _open_new_episode(row: dict[str, Any], now: datetime) -> None:
@@ -482,6 +521,7 @@ def route_breach(
             row["last_breach_detail"] = str(details)[:600]
         if instance_key:
             key = str(instance_key)
+            _ensure_instance_transition_tracking(row, now=current)
             _record_instance_transition(
                 row,
                 instance_key=key,
@@ -493,6 +533,7 @@ def route_breach(
         for key in instance_keys or ():
             text = str(key or "").strip()
             if text:
+                _ensure_instance_transition_tracking(row, now=current)
                 _record_instance_transition(
                     row,
                     instance_key=text,

@@ -449,6 +449,50 @@ def test_wrapper_sends_first_notification_then_stays_silent(pool, monkeypatch) -
     assert _tasks(pool) == []
 
 
+def test_git_push_hold_has_one_stable_edge_and_records_recurrence(
+    pool,
+) -> None:
+    from volpred.ops import incident
+
+    def fire(now):
+        return ar.remediate_internal_alert(
+            {
+                "id": "git_push_backup_hold",
+                "level": "warn",
+                "title": "push held",
+                "body": "silent fallback gate held main",
+                "fingerprint": ["file-a:10", "file-b:20"],
+            },
+            alert_key="git_push_backup_hold",
+            storage_dir=str(pool),
+            now=now,
+        )
+
+    fire(NOW)
+    fire(NOW + timedelta(hours=1))
+    row = incident.list_incidents(_store(pool))[0]
+    assert [
+        transition["transition"]
+        for transition in row["instance_transitions"]
+    ] == ["opened"]
+    assert row["instance_transitions"][0]["instance_key"] == "main_branch->push"
+
+    for hours in (2, 14, 27):
+        ar.resolve_internal_alert(
+            alert_key="git_push_backup_hold",
+            storage_dir=str(pool),
+            now=NOW + timedelta(hours=hours),
+        )
+    assert incident.list_incidents(_store(pool))[0]["state"] == incident.STATE_RESOLVED
+
+    fire(NOW + timedelta(hours=40))
+    row = incident.list_incidents(_store(pool))[0]
+    assert [
+        transition["transition"]
+        for transition in row["instance_transitions"]
+    ] == ["opened", "reopened"]
+
+
 def test_wrapper_escalation_opens_one_root_cause_task_and_one_mail(pool, monkeypatch) -> None:
     from volpred.ops import alerts, incident
 

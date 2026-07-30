@@ -108,6 +108,13 @@ _REVALIDATION_INSTRUCTION = (
     "警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。"
 )
 
+# Coarse control edges still need a canonical graph identity.  Their detector
+# has no per-finding fingerprint by design; without this mapping repeated polls
+# cannot be distinguished from a real close→reopen transition.
+_COARSE_INCIDENT_INSTANCE_KEYS = {
+    "git_push_backup_hold": "main_branch->push",
+}
+
 
 def _tasks_path(storage_dir: str) -> Path:
     root = Path(storage_dir)
@@ -357,11 +364,19 @@ def remediate_internal_alert(
     }
     store = incident.store_path_for(storage_dir)
     queue = _tasks_path(storage_dir)
+    coarse_key = _COARSE_INCIDENT_INSTANCE_KEYS.get(
+        str(alert_key or "").strip().lower()
+    )
+    instance_keys = (
+        [coarse_key]
+        if coarse_key
+        else sorted(_normalize_fingerprint(condition.get("fingerprint")))
+    )
     try:
         outcome = incident.route_breach(
             store,
             kind=alert_key,
-            instance_keys=sorted(_normalize_fingerprint(condition.get("fingerprint"))),
+            instance_keys=instance_keys,
             details=str(condition.get("title") or ""),
             now=current,
             task_status_probe=incident.next_tasks_status_probe(queue),

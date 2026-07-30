@@ -414,6 +414,10 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     } <= gates.keys()
     assert gates["hourly_pregate"]["mode"] == "shadow"
     assert gates["dispatch_starvation_lockout"]["mode"] == "selection_constraint"
+    assert (
+        gates["worktree_merge_ownership"]["review_policy"]["incident_metric"]
+        == "instance_transitions"
+    )
     task_generation = gates["task_generation"]
     assert task_generation["lifecycle"]["last_action"] == "recalibrate"
     assert task_generation["lifecycle"]["review_task_id"] == (

@@ -230,6 +230,149 @@ def test_only_instance_open_and_reopen_are_graph_transitions(
     }
 
 
+def test_legacy_instance_incident_baselines_only_open_edges_once(
+    store,
+) -> None:
+    """Metric migration preserves current risk without replaying old polls."""
+    incident_id = incident.incident_id_for("worktree_unmerged", ())
+    store.parent.mkdir(parents=True, exist_ok=True)
+    store.write_text(
+        json.dumps(
+            {
+                "incidents": {
+                    incident_id: {
+                        "incident_id": incident_id,
+                        "fingerprint": "legacy",
+                        "fingerprint_parts": [],
+                        "kind": "worktree_unmerged",
+                        "class": incident.CLASS_ORDINARY,
+                        "task_mode": incident.TASK_MODE_ADJUDICATION,
+                        "first_seen_at": (T0 - timedelta(days=2)).isoformat(),
+                        "last_seen_at": (T0 - timedelta(minutes=1)).isoformat(),
+                        "occurrence_count": 300,
+                        "episode_count": 1,
+                        "state": incident.STATE_MITIGATING,
+                        "current_task_id": "legacy-adjudication",
+                        "task_history": [],
+                        "episode_failures": [],
+                        "instances": [
+                            {
+                                "key": "active-a",
+                                "first_seen_at": (T0 - timedelta(days=2)).isoformat(),
+                                "last_seen_at": (T0 - timedelta(minutes=2)).isoformat(),
+                                "cleared_at": None,
+                            },
+                            {
+                                "key": "active-b",
+                                "first_seen_at": (T0 - timedelta(days=1)).isoformat(),
+                                "last_seen_at": (T0 - timedelta(minutes=2)).isoformat(),
+                                "cleared_at": None,
+                            },
+                            {
+                                "key": "already-cleared",
+                                "first_seen_at": (T0 - timedelta(days=2)).isoformat(),
+                                "last_seen_at": (T0 - timedelta(hours=4)).isoformat(),
+                                "cleared_at": (T0 - timedelta(hours=3)).isoformat(),
+                            },
+                        ],
+                        "clean_observations": [],
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    incident.route_breach(
+        store,
+        kind="worktree_unmerged",
+        instance_key="active-a",
+        now=T0,
+    )
+    incident.route_breach(
+        store,
+        kind="worktree_unmerged",
+        instance_key="active-a",
+        now=T0 + timedelta(minutes=1),
+    )
+
+    row = _incident_row(store, "worktree_unmerged")
+    assert row["instance_transition_tracking"] is True
+    assert row["instance_transition_baselined_at"] == T0.isoformat()
+    assert row["instance_transitions"] == [
+        {
+            "at": T0.isoformat(),
+            "instance_key": "active-a",
+            "transition": "opened",
+            "migration_baseline": True,
+        },
+        {
+            "at": T0.isoformat(),
+            "instance_key": "active-b",
+            "transition": "opened",
+            "migration_baseline": True,
+        },
+    ]
+    assert row["occurrence_count"] == 302
+
+
+def test_legacy_cleared_instance_reopens_after_transition_baseline(
+    store,
+) -> None:
+    incident_id = incident.incident_id_for("worktree_unmerged", ())
+    store.parent.mkdir(parents=True, exist_ok=True)
+    store.write_text(
+        json.dumps(
+            {
+                "incidents": {
+                    incident_id: {
+                        "incident_id": incident_id,
+                        "fingerprint": "legacy",
+                        "fingerprint_parts": [],
+                        "kind": "worktree_unmerged",
+                        "class": incident.CLASS_ORDINARY,
+                        "task_mode": incident.TASK_MODE_ADJUDICATION,
+                        "first_seen_at": (T0 - timedelta(days=2)).isoformat(),
+                        "last_seen_at": (T0 - timedelta(hours=1)).isoformat(),
+                        "occurrence_count": 20,
+                        "episode_count": 1,
+                        "state": incident.STATE_MITIGATING,
+                        "current_task_id": "legacy-adjudication",
+                        "task_history": [],
+                        "episode_failures": [],
+                        "instances": [
+                            {
+                                "key": "returning",
+                                "first_seen_at": (T0 - timedelta(days=2)).isoformat(),
+                                "last_seen_at": (T0 - timedelta(hours=2)).isoformat(),
+                                "cleared_at": (T0 - timedelta(hours=1)).isoformat(),
+                            }
+                        ],
+                        "clean_observations": [],
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    incident.route_breach(
+        store,
+        kind="worktree_unmerged",
+        instance_key="returning",
+        now=T0,
+    )
+
+    row = _incident_row(store, "worktree_unmerged")
+    assert row["instance_transitions"] == [
+        {
+            "at": T0.isoformat(),
+            "instance_key": "returning",
+            "transition": "reopened",
+        }
+    ]
+
+
 # ── G6 ───────────────────────────────────────────────────────────────────────
 
 

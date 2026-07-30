@@ -1514,9 +1514,9 @@ def _incident_occurrences_since(
     ``occurrence_count`` remains useful as an observation/noise metric, but
     PDCA review frequency must follow graph transitions within this review
     window or an unchanged incident will reopen a review forever.  Selecting
-    this metric in the registry is the migration boundary: legacy observations
-    before transition tracking are consumed by that adjudication, not guessed
-    into synthetic transitions.
+    this metric in the registry is the migration boundary: legacy poll counts
+    are not replayed; :mod:`volpred.ops.incident` records one explicit baseline
+    transition for each edge that is still open at migration time.
     """
     if row.get("instance_transition_tracking") is not True:
         return 0, []

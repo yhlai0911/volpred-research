@@ -459,11 +459,15 @@
         "max_harm_outcomes": 1,
         "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 1,
-        "min_incident_occurrences": 2
+        "min_incident_occurrences": 2,
+        "incident_metric": "instance_transitions"
       },
       "lifecycle": {
         "phase": "check",
         "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "last_action": "recalibrate",
+        "last_reviewed_at": "2026-07-30T11:57:00+00:00",
+        "review_task_id": "control_gate_review_worktree_merge_ownership_20260730T042622_57946e78b34e",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
       }
     },
