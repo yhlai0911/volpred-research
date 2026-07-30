@@ -224,9 +224,12 @@
         "min_incident_occurrences": 2
       },
       "lifecycle": {
-        "phase": "check",
+        "phase": "retired",
         "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
-        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"],
+        "last_action": "retire",
+        "last_reviewed_at": "2026-07-30T10:59:31.600000+00:00",
+        "review_task_id": "control_gate_review_hourly_pregate_20260730T040739_df86bffb6358"
       }
     },
     {

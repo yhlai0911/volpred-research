@@ -2156,6 +2156,87 @@ def test_completed_adjudication_consumes_old_evidence_until_new_trigger(
     assert next_cycle["review_tasks"]["created_count"] == 1
 
 
+def test_retired_gate_stays_quiet_until_new_evidence_resurrects_it(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    watermark = NOW - timedelta(days=10)
+    reviewed_at = NOW - timedelta(days=9)
+    completed_at = NOW - timedelta(days=8)
+    registry = _registry(mode="shadow", identity="heuristic")
+    gate = registry["gates"][0]
+    gate["gate_id"] = "hourly_pregate"
+    gate["outcome_join"] = "dispatch_signature"
+    gate["deadline_required"] = False
+    gate["evidence_sources"][0] = {
+        "kind": "jsonl",
+        "path": "logs/hourly_pregate.jsonl",
+        "match": {"mode": ["shadow", "real"]},
+    }
+    review_task_id = control_gate_lifecycle._review_task_id(
+        "hourly_pregate",
+        watermark,
+    )
+    gate["lifecycle"].update(
+        {
+            "phase": "retired",
+            "last_action": "retire",
+            "last_reviewed_at": reviewed_at.isoformat(),
+            "review_task_id": review_task_id,
+        }
+    )
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(
+        storage / "next_tasks.json",
+        [{
+            "id": review_task_id,
+            "status": "succeeded",
+            "gate_review_id": "hourly_pregate",
+            "gate_decision": "retire",
+            "completed_at": completed_at.isoformat(),
+            "gate_live_readback": "runtime producer absent",
+            "gate_registry_reviewed_at": reviewed_at.isoformat(),
+            "gate_review_watermark": watermark.isoformat(),
+        }],
+    )
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(storage / "ops" / "dispatch_state.json", {"completions": []})
+    evidence_path = storage / "logs" / "hourly_pregate.jsonl"
+    _write_json(evidence_path, [])
+
+    quiet = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    gate_verdict = quiet["gates"][0]
+    assert gate_verdict["review"] == {"due": False, "reasons": []}
+    assert gate_verdict["pdca_phase"] == "retired"
+
+    _append_jsonl(
+        evidence_path,
+        [{
+            "ts": (NOW - timedelta(minutes=1)).isoformat(),
+            "mode": "shadow",
+            "would_skip": True,
+            "reasons": {"signature": "legacy-resurrection"},
+        }],
+    )
+    resurrected = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    assert resurrected["gates"][0]["review"] == {
+        "due": True,
+        "reasons": ["retired_gate_evidence=1"],
+    }
+    assert resurrected["gates"][0]["pdca_phase"] == "act"
+
+
 def test_registry_act_without_complete_review_receipt_does_not_consume_evidence(
     tmp_path: Path,
 ) -> None:

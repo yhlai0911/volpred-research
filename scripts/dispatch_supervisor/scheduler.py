@@ -1319,85 +1319,6 @@ async def _run_reserved_fire(
     }
 
 
-PREGATE_SCRIPT = ROOT / "scripts" / "hourly_dispatch_pregate.py"
-PREGATE_TIMEOUT_S = 60
-PREGATE_MODES = ("off", "shadow", "enforce")
-
-
-def load_pregate_config(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = SCHEDULE_ID) -> dict[str, Any]:
-    """Read the pregate config from the canonical schedule entry.
-
-    2026-07-10 rewire: scripts/hourly_dispatch_pregate.py (zero-token "is this
-    cron slot worth the ~95K claude -p cold-load?" triage) was orphaned by the
-    7/4 supervisor cutover — it was only wired into the legacy shell. This
-    reads `pregate: {mode, window_hours}` from the volpred-hourly-dispatch
-    entry so the flip shadow→enforce is a config edit, no daemon restart
-    (scheduler_loop re-reads config every tick).
-
-    Fail-open: missing/invalid config → mode "off" (never skip on uncertainty).
-    """
-    fallback = {"mode": "off", "window_hours": 3.0}
-    try:
-        data = json.loads(schedules_path.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError) as exc:
-        LOG.warning("load_pregate_config fail-open mode=off: %s", exc)
-        return fallback
-    for key in ("cron_jobs", "items"):
-        entries = data.get(key) or []
-        if not isinstance(entries, list):
-            continue
-        for item in entries:
-            if not isinstance(item, dict) or item.get("id") != schedule_id:
-                continue
-            cfg = item.get("pregate")
-            if not isinstance(cfg, dict):
-                return fallback
-            mode = str(cfg.get("mode", "off")).lower()
-            if mode not in PREGATE_MODES:
-                LOG.warning("pregate mode %r invalid — fail-open mode=off", mode)
-                mode = "off"
-            try:
-                window_hours = float(cfg.get("window_hours", 3.0))
-            except (TypeError, ValueError):
-                LOG.warning("pregate window_hours %r invalid — using 3.0", cfg.get("window_hours"))
-                window_hours = 3.0
-            return {"mode": mode, "window_hours": window_hours}
-    return fallback
-
-
-def _run_pregate(*, mode: str, window_hours: float) -> bool:
-    """Run the zero-token pregate as a subprocess. Returns True = SKIP this fire.
-
-    Subprocess (not import) so a pregate crash can never take down the daemon.
-    Pregate CLI exit semantics: 0 = SKIP, anything else = PROCEED — a crash
-    (exit≠0) or timeout is therefore inherently fail-open. In shadow mode we
-    pass --shadow: pregate always exits 1 (proceed) but appends the would-be
-    decision to storage/logs/hourly_pregate.jsonl for the observation window.
-    """
-    cmd = [sys.executable, str(PREGATE_SCRIPT), "--window-hours", str(window_hours),
-           "--invoker", "supervisor"]
-    if mode == "shadow":
-        cmd.append("--shadow")
-    try:
-        proc = subprocess.run(
-            cmd, capture_output=True, text=True,
-            timeout=PREGATE_TIMEOUT_S, cwd=str(ROOT), check=False,
-            env=external_child_environment(),
-        )
-    except subprocess.TimeoutExpired:
-        LOG.warning("pregate timeout after %ss — fail-open PROCEED", PREGATE_TIMEOUT_S)
-        return False
-    except OSError as exc:
-        LOG.warning("pregate spawn failed (%s) — fail-open PROCEED", exc)
-        return False
-    if proc.returncode == 0:
-        return True
-    if proc.returncode != 1:
-        LOG.warning("pregate unexpected exit=%s stderr=%s — fail-open PROCEED",
-                    proc.returncode, (proc.stderr or "")[-300:])
-    return False
-
-
 def _prev_fire(cron_expr: str, *, now: datetime | None = None) -> datetime:
     base = now or datetime.now()
     return croniter(cron_expr, base).get_prev(datetime)
@@ -1785,7 +1706,6 @@ async def _tick_once(
     )
     capacity = max_slots if max_slots is not None else load_max_slots(schedules_path=schedules_path)
     due, prev_fire = _due_to_fire(cron_expr=cron_expr, last_fire_at=snap.get("last_fire_at"))
-    pregate_cfg = load_pregate_config(schedules_path=schedules_path)
     # Peek (not consume) the out-of-band request: a request deliberately
     # survives auth / full-pool / bootstrap skips, so consumption may only
     # happen after the admission gates pass (below).
@@ -1799,7 +1719,7 @@ async def _tick_once(
         due=due,
         prev_fire=prev_fire.isoformat(),
         fire_request=peeked_request,
-        pregate_mode=pregate_cfg["mode"],
+        pregate_mode="retired",
     )
     dec = decision.decide(dec_input)
     if dec.action == decision.ACTION_SKIP:
@@ -1831,11 +1751,10 @@ async def _tick_once(
     # cron_hourly_dispatch.sh, while the concurrent-writer risk it backstops
     # (dispatcher + always-on codex_loop on one branch) never went away.
     #
-    # Ordered BEFORE the pregate, exactly as the legacy shell had it ("run the
-    # watchdog FIRST so every hourly slot starts on a clean, valid tree"): the
-    # files it repairs are read by the live site AND by the pregate itself, not
-    # only by the dispatched agent, so a pregate-skipped slot still deserves a
-    # clean tree. dry_run touches no repo → never guards.
+    # Ordered before worker reservation, preserving the invariant that every
+    # real hourly slot starts from a clean, valid tree. Files repaired by the
+    # guard are read by both the live site and the dispatched agent.
+    # dry_run touches no repo → never guards.
     #
     # try/except is belt-and-suspenders: run_pre_fire_guard is already no-raise
     # and fail-open, but a guard must never be able to veto the dispatch it
@@ -1860,34 +1779,10 @@ async def _tick_once(
             LOG.info("pre_fire_guard outcome=%s", guard_outcome)
         except Exception as exc:  # noqa: BLE001
             LOG.warning("pre_fire_guard failed (non-fatal, firing anyway): %s", exc)
-    # Zero-token pregate (2026-07-10 rewire; see load_pregate_config docstring).
-    # Gates ONLY plain cron fires — requested fires always run. Shadow mode
-    # never skips (pregate exits 1) but logs the would-be decision for the
-    # observation window before the config flip to enforce.
-    #
-    # WS-H4 (2026-07-20): dry-run used to bypass the pregate entirely, which made
-    # "--dry-run output == real fire decision" structurally impossible whenever
-    # mode != off (docs/dispatch-decision-pipeline-design.md §1.1). Both paths
-    # now collect the demand signal here and hand it to the SAME decide(); only
-    # the write boundary (reserve_fire / worker spawn) differs.
-    if dec.action == decision.ACTION_COLLECT_DEMAND:
-        pregate_skip = await asyncio.to_thread(
-            _run_pregate,
-            mode=pregate_cfg["mode"], window_hours=pregate_cfg["window_hours"],
-        )
-        dec_input = dataclasses.replace(dec_input, demand={"pregate_skip": bool(pregate_skip)})
-        dec = decision.decide(dec_input)
-        if dec.action == decision.ACTION_SKIP:  # reason=pregate_skip, enforce mode only
-            LOG.info("pregate SKIP — no work worth the cold-load; slot consumed (prev_scheduled=%s)",
-                     prev_fire.isoformat())
-            # consume the slot like dry_run does, so we don't re-evaluate
-            # every tick for the rest of the hour
-            with state._locked_state(state_path) as (_fh, data):
-                data["last_fire_at"] = state._now()
-            result = {"action": "pregate_skip", "prev_fire": prev_fire.isoformat()}
-            if dry_run:
-                result["dry_run"] = True
-            return result
+    # H4-4 retirement: the old heuristic pregate never obtained an acceptable
+    # shadow result (2/2 skip candidates discarded substantive work).  It no
+    # longer participates in this formal fire path.  Capacity, ownership and
+    # due-ness are decided above by the single Operations Core pipeline.
     if dec.action != decision.ACTION_FIRE:  # decide() contract: fire is all that remains
         LOG.error("decision pipeline returned unexpected action=%r reason=%r — skipping tick",
                   dec.action, dec.reason)
@@ -1960,16 +1855,6 @@ async def _tick_once(
                             "action": "skip",
                             "reason": "not_due",
                             "prev_fire": prev_fire.isoformat(),
-                        }
-                    if final_dec.action == decision.ACTION_COLLECT_DEMAND:
-                        # The original request bypassed pregate, but it no
-                        # longer exists. Do not run slow subprocess I/O while
-                        # holding both admission locks and do not fire an
-                        # ungated plain cron. Leave last_fire_at unchanged so
-                        # the next tick evaluates the full pregate path.
-                        return {
-                            "action": "skip",
-                            "reason": "fire_request_changed",
                         }
                     if final_dec.action != decision.ACTION_FIRE:
                         LOG.error(

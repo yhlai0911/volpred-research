@@ -83,21 +83,10 @@ def test_request_on_due_cron_merges_and_bypasses_pregate() -> None:
     assert (dec.action, dec.fire_reason) == ("fire", "cron+requested:boss-email")
 
 
-def test_plain_cron_with_gated_mode_demands_collection() -> None:
-    for mode in decision.PREGATE_GATED_MODES:
-        dec = decision.decide(_inp(pregate_mode=mode, demand=None))
-        assert (dec.action, dec.fire_reason) == ("collect_demand", "cron"), mode
-
-
-def test_demand_proceed_fires() -> None:
-    dec = decision.decide(_inp(pregate_mode="shadow", demand={"pregate_skip": False}))
-    assert (dec.action, dec.fire_reason) == ("fire", "cron")
-
-
-def test_demand_skip_skips_and_consumes_slot() -> None:
+def test_retired_pregate_fields_cannot_veto_due_cron() -> None:
     dec = decision.decide(_inp(pregate_mode="enforce", demand={"pregate_skip": True}))
-    assert (dec.action, dec.reason) == ("skip", "pregate_skip")
-    assert dec.fire_reason is None
+    assert (dec.action, dec.fire_reason) == ("fire", "cron")
+    assert dec.reason == "due"
 
 
 # ──────────────────────────────────────────────────────────── purity locks ──
@@ -210,7 +199,6 @@ def consistency_env(tmp_path: Path, monkeypatch):
 def test_dry_run_and_fire_consume_the_same_decision(consistency_env, monkeypatch) -> None:
     env = consistency_env
     schedules_path = env.schedules({"mode": "shadow", "window_hours": 3.0})
-    monkeypatch.setattr(scheduler, "_run_pregate", lambda **kw: False)
 
     dry = env.tick(dry_run=True, schedules_path=schedules_path)
     assert dry["action"] == "dry_run_fire"
@@ -232,25 +220,26 @@ def test_dry_run_and_fire_consume_the_same_decision(consistency_env, monkeypatch
     assert d_dry.inputs_digest == d_fire.inputs_digest
 
 
-def test_dry_run_and_fire_agree_on_pregate_skip(consistency_env, monkeypatch) -> None:
+def test_legacy_pregate_config_cannot_change_dry_run_or_fire(
+    consistency_env, monkeypatch
+) -> None:
     env = consistency_env
     schedules_path = env.schedules({"mode": "enforce", "window_hours": 3.0})
-    monkeypatch.setattr(scheduler, "_run_pregate", lambda **kw: True)
 
     dry = env.tick(dry_run=True, schedules_path=schedules_path)
-    assert dry["action"] == "pregate_skip"
+    assert dry["action"] == "dry_run_fire"
     d_dry = env.decisions[-1]
     assert env.reserve_calls == []
 
     env.reset_state()
     env.decisions.clear()
     fire = env.tick(dry_run=False, schedules_path=schedules_path)
-    assert fire["action"] == "pregate_skip"
+    assert fire["action"] == "fired"
     d_fire = env.decisions[-1]
-    assert env.reserve_calls == []  # a pregate skip never reserves either
+    assert len(env.reserve_calls) == 1
 
     assert d_dry == d_fire
-    assert (d_dry.action, d_dry.reason) == ("skip", "pregate_skip")
+    assert (d_dry.action, d_dry.reason) == ("fire", "due")
 
 
 def test_requested_fire_consistency_and_request_consumption(consistency_env, monkeypatch) -> None:
@@ -258,10 +247,6 @@ def test_requested_fire_consistency_and_request_consumption(consistency_env, mon
     only a real atomic reservation consumes the owner request."""
     env = consistency_env
     schedules_path = env.schedules({"mode": "enforce", "window_hours": 3.0})
-    monkeypatch.setattr(
-        scheduler, "_run_pregate",
-        lambda **kw: (_ for _ in ()).throw(AssertionError("requested fire must bypass pregate")),
-    )
     monkeypatch.setattr(scheduler, "_due_to_fire",
                         lambda **kw: (False, datetime(2026, 7, 20, 10, 7)))
     state_path = env.state_path
@@ -310,13 +295,6 @@ def test_real_fire_retries_same_reason_replacement_by_request_identity(
     """A same-reason owner replacement is distinct even when Decision is equal."""
     env = consistency_env
     schedules_path = env.schedules({"mode": "enforce", "window_hours": 3.0})
-    monkeypatch.setattr(
-        scheduler,
-        "_run_pregate",
-        lambda **_kwargs: (_ for _ in ()).throw(
-            AssertionError("requested fire must bypass pregate")
-        ),
-    )
     monkeypatch.setattr(
         scheduler,
         "_due_to_fire",

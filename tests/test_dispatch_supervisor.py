@@ -205,38 +205,8 @@ def _seed_due(state_path: Path) -> None:
         data["last_fire_at"] = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
 
 
-_REAL_RUN_PREGATE = scheduler._run_pregate
-
-
-def _stub_pregate(monkeypatch) -> None:
-    """Keep fire-path tests off the REAL scripts/hourly_dispatch_pregate.py.
-
-    `_run_pregate` resolves the script from the module-level ROOT (the real
-    checkout), not from the test's `repo_root`. The pregate is live in
-    mode=shadow, so an un-stubbed fire-path test spawns it for real and appends
-    a synthetic decision to storage/logs/hourly_pregate.jsonl — the very log the
-    shadow→enforce flip is judged on. Observed 2026-07-10: 4 rows within 2s per
-    pytest run. Returns False = "do not skip".
-    """
-    monkeypatch.setattr(scheduler, "_run_pregate", lambda **_kwargs: False)
-
-
 @pytest.fixture(autouse=True)
-def _never_spawn_the_real_pregate(monkeypatch) -> None:
-    """Autouse, because opt-in protection is not protection.
-
-    2026-07-10: `_stub_pregate()` landed as a helper each fire-path test had to
-    remember to call. Five did. The integration test added later that same day
-    (`test_heartbeat_advances_while_worker_in_flight`) did not, and every run of
-    it appended a row to the production shadow log — stamped `invoker=supervisor`,
-    because `_run_pregate` hardcodes that flag, so the row was indistinguishable
-    from a real dispatch decision except by its parent pid. Proven by running
-    that single test and watching the log grow by one.
-
-    The existing explicit `_stub_pregate(monkeypatch)` calls stay valid (they
-    just re-apply the same patch); a new test can no longer forget.
-    """
-    _stub_pregate(monkeypatch)
+def _stub_external_alerts_and_custody(monkeypatch) -> None:
     monkeypatch.setattr(
         scheduler.phase_z, "_default_internal_alert",
         lambda **_kwargs: {"sent": True, "test_stub": True},
@@ -277,18 +247,6 @@ def _never_touch_the_real_task_pool(monkeypatch, tmp_path: Path) -> Path:
     pool.write_text("[]", encoding="utf-8")
     monkeypatch.setattr(health._task_pool_claim(), "NEXT_TASKS", pool)
     return pool
-
-
-def test_pregate_is_stubbed_for_every_test_in_this_module() -> None:
-    """If `_never_spawn_the_real_pregate` ever loses `autouse=True`, this fails
-    here instead of quietly resuming writes to the production shadow log — the
-    failure mode is invisible otherwise: tests pass, the log just grows.
-    """
-    assert scheduler._run_pregate is not _REAL_RUN_PREGATE, (
-        "the real _run_pregate is live during tests — a fire-path test will spawn "
-        "scripts/hourly_dispatch_pregate.py and append a synthetic row to "
-        "storage/logs/hourly_pregate.jsonl, the log the shadow→enforce flip is judged on"
-    )
 
 
 def test_worker_transient_retry_then_success(tmp_path: Path, monkeypatch) -> None:
@@ -480,7 +438,6 @@ def test_scheduler_fire_runs_worker_when_due(tmp_path: Path, monkeypatch) -> Non
     _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
-    _stub_pregate(monkeypatch)
     received: list[dict] = []
 
     def fake_run_worker(**kwargs):
@@ -677,28 +634,17 @@ def test_atomic_reservation_failure_cannot_consume_pending_fire_request(
     assert snapshot["current_jobs"] == []
 
 
-def test_request_cas_loss_never_bypasses_plain_cron_pregate(
+def test_request_cas_loss_retries_under_single_decision_contract(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A disappeared request turns the verdict back into COLLECT_DEMAND."""
+    """A disappeared request is re-decided without invoking a retired gate."""
     state_path = _tmp_state(tmp_path)
     _seed_due(state_path)
     state.request_fire("owner-urgent-task", path=state_path)
     last_fire_before = state.read_state(state_path)["last_fire_at"]
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
-    monkeypatch.setattr(
-        scheduler,
-        "load_pregate_config",
-        lambda **_kwargs: {"mode": "shadow", "window_hours": 3.0},
-    )
-    pregate_calls: list[dict] = []
-    monkeypatch.setattr(
-        scheduler,
-        "_run_pregate",
-        lambda **kwargs: pregate_calls.append(kwargs) or False,
-    )
     monkeypatch.setattr(
         scheduler.phase_z,
         "run_pre_fire_guard",
@@ -713,7 +659,8 @@ def test_request_cas_loss_never_bypasses_plain_cron_pregate(
 
     def request_disappears_before_reservation(**_kwargs):
         reserve_calls["count"] += 1
-        assert state.consume_fire_request(state_path) == "owner-urgent-task"
+        if reserve_calls["count"] == 1:
+            assert state.consume_fire_request(state_path) == "owner-urgent-task"
         raise state.FireRequestChanged(None)
 
     monkeypatch.setattr(state, "reserve_fire", request_disappears_before_reservation)
@@ -733,8 +680,7 @@ def test_request_cas_loss_never_bypasses_plain_cron_pregate(
         "action": "skip",
         "reason": "fire_request_changed",
     }
-    assert reserve_calls["count"] == 1
-    assert pregate_calls == []
+    assert reserve_calls["count"] == 2
     snapshot = state.read_state(state_path)
     assert snapshot["current_jobs"] == []
     assert snapshot["last_fire_at"] == last_fire_before
@@ -745,7 +691,6 @@ def test_scheduler_scratch_failure_releases_reserved_slot(tmp_path: Path, monkey
     _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
-    _stub_pregate(monkeypatch)
     monkeypatch.setattr(
         scheduler,
         "_slot_workdir",
@@ -1041,7 +986,6 @@ def test_scheduler_phase_z_runs_even_if_worker_raises(tmp_path: Path, monkeypatc
     _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt", encoding="utf-8")
-    _stub_pregate(monkeypatch)
     ran = {"phase_z": 0}
 
     def boom(**kwargs):
@@ -1101,7 +1045,6 @@ def test_scheduler_post_fire_hook_invokes_phase_z(tmp_path: Path, monkeypatch) -
     _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
-    _stub_pregate(monkeypatch)
 
     monkeypatch.setattr(
         scheduler.phase_z, "run_pre_fire_guard",
@@ -1182,7 +1125,6 @@ def test_scheduler_pre_fire_guard_runs_once_before_worker(tmp_path: Path, monkey
     _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
-    _stub_pregate(monkeypatch)
     order: list[str] = []
 
     monkeypatch.setattr(
@@ -1227,7 +1169,6 @@ def test_scheduler_closeout_recovery_crash_does_not_suppress_guard(
     _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
-    _stub_pregate(monkeypatch)
     called = {"guard": 0, "worker": 0}
 
     monkeypatch.setattr(
@@ -1275,7 +1216,6 @@ def test_scheduler_pre_fire_guard_crash_does_not_prevent_fire(tmp_path: Path, mo
     _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt-body", encoding="utf-8")
-    _stub_pregate(monkeypatch)
     ran = {"guard": 0, "worker": 0}
 
     def exploding_guard(**_kwargs):
@@ -1360,21 +1300,15 @@ def test_scheduler_pre_fire_guard_not_run_on_undue_tick(tmp_path: Path, monkeypa
     assert called["guard"] == 0
 
 
-def test_scheduler_pre_fire_guard_runs_even_when_pregate_skips(tmp_path: Path, monkeypatch) -> None:
-    # Deliberate ordering (guard BEFORE pregate), mirroring the legacy shell:
-    # the files the guard repairs are read by the live site and by the pregate
-    # itself, so a slot the pregate declines still deserves a clean tree.
+def test_retired_pregate_config_cannot_skip_scheduler_fire(
+    tmp_path: Path, monkeypatch
+) -> None:
     state_path = _tmp_state(tmp_path)
     _seed_due(state_path)
     prompt_path = tmp_path / "prompt.md"
     prompt_path.write_text("prompt", encoding="utf-8")
     called = {"guard": 0, "worker": 0}
 
-    monkeypatch.setattr(
-        scheduler, "load_pregate_config",
-        lambda **_kwargs: {"mode": "enforce", "window_hours": 3.0},
-    )
-    monkeypatch.setattr(scheduler, "_run_pregate", lambda **_kwargs: True)  # SKIP this fire
     monkeypatch.setattr(
         scheduler.phase_z, "run_pre_fire_guard",
         lambda **kwargs: called.__setitem__("guard", called["guard"] + 1) or {"ran": True, "reason": "ok"},
@@ -1393,9 +1327,9 @@ def test_scheduler_pre_fire_guard_runs_even_when_pregate_skips(tmp_path: Path, m
         repo_root=tmp_path,
     ))
 
-    assert decision["action"] == "pregate_skip"
-    assert called["guard"] == 1   # tree still cleaned...
-    assert called["worker"] == 0  # ...even though no agent ran
+    assert decision["action"] == "fired"
+    assert called["guard"] == 1
+    assert called["worker"] == 1
 
 
 def test_pre_fire_guard_invokes_script_quietly_under_timeout(tmp_path: Path) -> None:
@@ -8541,36 +8475,6 @@ def test_task_pool_cli_child_does_not_inherit_release_identity(
     assert "ModuleNotFoundError" not in result["detail"]
 
 
-def test_pregate_child_scrubs_supervisor_private_environment(
-    monkeypatch,
-) -> None:
-    captured: dict[str, str] = {}
-    monkeypatch.setenv("VOLPRED_SUPERVISOR_RELEASE_ID", "release")
-    monkeypatch.setenv("VOLPRED_SUPERVISOR_FUTURE_MARKER", "future")
-    monkeypatch.setenv("VOLPRED_DEFERRED_RELOAD_ROOT", "/tmp/reload")
-    monkeypatch.setenv("VOLPRED_CANONICAL_REPO_ROOT", "/repo")
-    monkeypatch.setenv("VOLPRED_ACTOR", "dispatch-supervisor")
-
-    def run(*_args, **kwargs):
-        captured.update(kwargs["env"])
-        return subprocess.CompletedProcess(
-            args=["python", "hourly_dispatch_pregate.py"],
-            returncode=1,
-            stdout="",
-            stderr="",
-        )
-
-    monkeypatch.setattr(scheduler.subprocess, "run", run)
-
-    assert _REAL_RUN_PREGATE(mode="enforce", window_hours=3.0) is False
-    assert captured["VOLPRED_ACTOR"] == "dispatch-supervisor"
-    assert not any(
-        key.startswith(("VOLPRED_SUPERVISOR_", "VOLPRED_DEFERRED_RELOAD_"))
-        for key in captured
-    )
-    assert "VOLPRED_CANONICAL_REPO_ROOT" not in captured
-
-
 def test_admission_outbox_waits_for_live_job_or_workspace_owner(
     tmp_path: Path, monkeypatch,
 ) -> None:
@@ -11770,7 +11674,6 @@ def test_scheduler_binds_guard_generation_before_worker_and_closes_with_it(
             "writer_isolation": {"mode": "off"},
         }],
     }), encoding="utf-8")
-    _stub_pregate(monkeypatch)
     monkeypatch.setattr(
         scheduler.phase_z, "recover_failed_closeout",
         lambda **_kwargs: {"committed": False, "reason": "no_failed_closeout"},
@@ -11829,7 +11732,6 @@ def test_in_process_fire_without_lifecycle_rejects_instead_of_reading_singleton(
             "writer_isolation": {"mode": "off"},
         }],
     }), encoding="utf-8")
-    _stub_pregate(monkeypatch)
     monkeypatch.setattr(
         scheduler.phase_z, "recover_failed_closeout",
         lambda **_kwargs: {"committed": False, "reason": "no_failed_closeout"},

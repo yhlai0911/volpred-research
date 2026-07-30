@@ -3,7 +3,7 @@
 `decide()` is the ONE place the supervisor's admission verdict lives
 (docs/dispatch-decision-pipeline-design.md §3.5). `scheduler._tick_once()`
 collects every input (state snapshot, capacity, cron due-ness, pending fire
-request, pregate demand) and consumes the returned `Decision`; the dry-run and
+request) and consumes the returned `Decision`; the dry-run and
 real-fire paths walk the SAME `decide()` on the SAME `DecisionInput`, so their
 verdicts cannot diverge by construction — the only difference left is what the
 caller does with a FIRE verdict (reserve_fire + worker spawn vs a log line).
@@ -29,16 +29,6 @@ from typing import Any, Mapping
 
 ACTION_FIRE = "fire"
 ACTION_SKIP = "skip"
-# decide() cannot finalize a plain-cron verdict while the pregate demand signal
-# is uncollected: running the pregate is I/O (a subprocess), so the caller runs
-# it and re-invokes decide() with `demand` filled. Both dry-run and fire pass
-# through this same two-phase protocol.
-ACTION_COLLECT_DEMAND = "collect_demand"
-
-# Modes in which the pregate subprocess runs at all. Shadow logs the would-be
-# verdict but never skips (the subprocess exits 1 by construction); only
-# enforce may turn demand into a skip.
-PREGATE_GATED_MODES = ("shadow", "enforce")
 
 
 @dataclass(frozen=True)
@@ -60,8 +50,10 @@ class DecisionInput:
     due: bool                      # _due_to_fire(...) verdict, pre-computed
     prev_fire: str | None          # ISO prev scheduled slot (receipt only)
     fire_request: str | None       # pending request reason, or None
-    pregate_mode: str              # "off" | "shadow" | "enforce"
-    demand: Mapping[str, Any] | None = None   # {"pregate_skip": bool} once collected
+    # Legacy receipt fields retained while old replay fixtures age out. They
+    # are deliberately ignored by decide(): H4-4 retired pregate authority.
+    pregate_mode: str = "retired"
+    demand: Mapping[str, Any] | None = None
     candidates: tuple[Mapping[str, Any], ...] = ()  # ctd library outputs (unused yet)
 
     def digest(self) -> str:
@@ -87,7 +79,7 @@ class DecisionInput:
 class Decision:
     """The verdict. `fire_reason` is set only when action == "fire"."""
 
-    action: str                    # ACTION_FIRE | ACTION_SKIP | ACTION_COLLECT_DEMAND
+    action: str                    # ACTION_FIRE | ACTION_SKIP
     reason: str                    # machine-readable why (skip reason / "due")
     fire_reason: str | None        # "cron" | "requested:<r>" | "cron+requested:<r>"
     inputs_digest: str
@@ -107,8 +99,8 @@ def _fire_reason(inp: DecisionInput) -> str | None:
 def decide(inp: DecisionInput) -> Decision:
     """Pure function: same DecisionInput → same Decision, no side effects.
 
-    Ladder order mirrors the pre-H4 `_tick_once` exactly (auth → capacity →
-    bootstrap → due/request → pregate), so the extraction changes no verdict.
+    Ladder order is auth → capacity → bootstrap → due/request. H4-4 retired the
+    heuristic pregate, so no legacy receipt field may append another veto.
     """
     digest = inp.digest()
     if inp.auth_blocked:
@@ -124,12 +116,4 @@ def decide(inp: DecisionInput) -> Decision:
     fire_reason = _fire_reason(inp)
     if fire_reason is None:
         return Decision(ACTION_SKIP, "not_due", None, digest)
-    # Pregate gates ONLY plain cron fires — any requested component bypasses it
-    # (the boss asked for it). Demand is an input, not an I/O call: when it has
-    # not been collected yet the verdict is "collect it and ask me again".
-    if fire_reason == "cron" and inp.pregate_mode in PREGATE_GATED_MODES:
-        if inp.demand is None:
-            return Decision(ACTION_COLLECT_DEMAND, "pregate_demand_required", fire_reason, digest)
-        if inp.demand.get("pregate_skip"):  # only reachable in enforce mode
-            return Decision(ACTION_SKIP, "pregate_skip", None, digest)
     return Decision(ACTION_FIRE, "due", fire_reason, digest)

@@ -142,7 +142,7 @@ def test_repository_has_physically_retired_hourly_dispatch_surfaces() -> None:
     )
     assert row["status"] == "retired"
     assert row["schedule"] == "7 * * * *"
-    assert isinstance(row.get("pregate"), dict)
+    assert "pregate" not in row
     assert {"command", "canonical_script", "tcc_bypass_copy"}.isdisjoint(row)
 
     ownership = json.loads(

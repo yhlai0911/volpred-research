@@ -1507,8 +1507,8 @@ def run_pre_fire_guard(
         function has no failure mode that can return "don't dispatch".
       - **idempotent** — the guard no-ops on a clean tree.
       - **subprocess, not import** — a guard crash (or a hang in `git`) can
-        never take down the daemon, and the hard timeout bounds it. Mirrors
-        `scheduler._run_pregate`.
+        never take down the daemon, and the hard timeout bounds it. This is an
+        independent safety property; the old scheduler pregate was retired.
 
     Invoked with `sys.executable` rather than the legacy `uv run python`: the
     guard is pure-stdlib, so no venv resolution is needed, and this sidesteps

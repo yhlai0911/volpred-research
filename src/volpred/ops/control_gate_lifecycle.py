@@ -2418,15 +2418,28 @@ def audit_control_gates(
             ) > 1
             or int(row.get("episode_count") or 1) > 1
         )
-        due, reasons = _review_due(
-            gate,
-            now=current,
-            review_anchor_at=review_anchor_at,
-            trigger_count=len(evidence),
-            distinct_candidates=len(candidates),
-            incident_occurrences=incident_occurrences,
-            outcomes=outcomes,
+        retirement_effective = (
+            lifecycle.get("last_action") == "retire"
+            and reviewed_through is not None
         )
+        if retirement_effective:
+            retired_evidence_count = len(evidence) + len(incident_hits)
+            due = retired_evidence_count > 0
+            reasons = (
+                [f"retired_gate_evidence={retired_evidence_count}"]
+                if due
+                else []
+            )
+        else:
+            due, reasons = _review_due(
+                gate,
+                now=current,
+                review_anchor_at=review_anchor_at,
+                trigger_count=len(evidence),
+                distinct_candidates=len(candidates),
+                incident_occurrences=incident_occurrences,
+                outcomes=outcomes,
+            )
         evidence_times = [
             parsed
             for row in evidence
@@ -2485,6 +2498,8 @@ def audit_control_gates(
             "pdca_phase": (
                 "act"
                 if due
+                else "retired"
+                if retirement_effective
                 else "check"
                 if evidence or incident_hits
                 else "plan"
