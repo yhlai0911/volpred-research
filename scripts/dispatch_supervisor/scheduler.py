@@ -699,8 +699,28 @@ def _settle_mutating_task(
     )
 
 
-def _settlement_disposition(workspace_outcome: dict[str, Any]) -> str | None:
+def _settlement_disposition(
+    workspace_outcome: dict[str, Any],
+    *,
+    write_intent: str = "repo_patch",
+    worker_outcome: str = "",
+) -> str | None:
     disposition = str(workspace_outcome.get("disposition") or "")
+    if write_intent == "observe_only":
+        if disposition == "remediation_opened":
+            if bool((workspace_outcome.get("checkpoint") or {}).get("released")):
+                return "remediation"
+            return None
+        if disposition != "empty_removed":
+            return None
+        if worker_outcome in {"success", "codex_failover_recovered"}:
+            return "observed"
+        if worker_outcome == "system_terminated":
+            # The worker already atomically re-pended the exact job claim after
+            # matching the durable sent receipt. A second settlement would race
+            # that ownership transition and turn the canary into a false pass.
+            return None
+        return "retry"
     if disposition == "merged":
         return "merged"
     if (
@@ -774,7 +794,11 @@ def reconcile_task_settlements(
                 )
             ),
         )
-        disposition = _settlement_disposition(final)
+        disposition = _settlement_disposition(
+            final,
+            write_intent=str(workspace.get("write_intent") or "repo_patch"),
+            worker_outcome=str(pending.get("worker_outcome") or "failure"),
+        )
         if disposition is None:
             results.append({
                 "ok": False,
@@ -1134,7 +1158,11 @@ async def _run_reserved_fire(
                     (workspace_outcome or {}).get("disposition") or "failure"
                 )
                 settlement_disposition = _settlement_disposition(
-                    workspace_outcome or {}
+                    workspace_outcome or {},
+                    write_intent=str(
+                        fire_workspace.get("write_intent") or "repo_patch"
+                    ),
+                    worker_outcome=worker_outcome,
                 )
                 settlement = {"ok": False, "reason": "workspace_not_terminal"}
                 if settlement_disposition is not None:
@@ -2081,7 +2109,13 @@ async def _tick_once(
                     worker_outcome="reservation_lost",
                     job_id=job_id,
                 )
-                attach_disposition = _settlement_disposition(attach_final)
+                attach_disposition = _settlement_disposition(
+                    attach_final,
+                    write_intent=str(
+                        task_binding.get("write_intent") or "repo_patch"
+                    ),
+                    worker_outcome="reservation_lost",
+                )
                 if attach_disposition is not None:
                     lost_settlement = await asyncio.to_thread(
                         _settle_mutating_task,
@@ -2124,6 +2158,10 @@ async def _tick_once(
                     job_id=job_id,
                     profile_root=Path(tempfile.gettempdir())
                     / "volpred-dispatch-isolation",
+                    allow_workspace_write=(
+                        str(fire_workspace.get("write_intent") or "")
+                        == "repo_patch"
+                    ),
                 )
                 fire_workspace.update({
                     f"isolation_{key}": value
@@ -2149,7 +2187,13 @@ async def _tick_once(
                     worker_outcome="isolation_preflight_failed",
                     job_id=job_id,
                 )
-                preflight_disposition = _settlement_disposition(preflight_final)
+                preflight_disposition = _settlement_disposition(
+                    preflight_final,
+                    write_intent=str(
+                        fire_workspace.get("write_intent") or "repo_patch"
+                    ),
+                    worker_outcome="isolation_preflight_failed",
+                )
                 settlement: dict[str, Any] = {
                     "ok": False,
                     "reason": "workspace_finalize_pending",

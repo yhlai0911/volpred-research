@@ -2607,7 +2607,10 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
     assert assigned["contract"]["task_id"] == "bound"
     assert assigned["contract"]["claim_session_id"] == "claim-123"
     assert assigned["blocked_contracts"] == [
-        {"task_id": "missing-contract", "reason": "write_intent_missing_or_not_repo_patch"}
+        {
+            "task_id": "missing-contract",
+            "reason": "write_intent_missing_or_unsupported",
+        }
     ]
     rows = {row["id"]: row for row in json.loads(next_tasks.read_text())}
     assert rows["bound"]["status"] == "in_progress"
@@ -2639,6 +2642,136 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
         )
     )
     assert replay["already_settled"] is True
+
+
+def test_dispatch_preassign_accepts_observe_only_without_fake_output_paths(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "observe-only",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "platform_ops",
+                    "write_intent": "observe_only",
+                    "declared_output_paths": [],
+                    "post_merge_actions": [],
+                    "title": "Observe a controlled termination",
+                    "description": "Do not modify repository files.",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="observe-session",
+            job_id="observe-job",
+        )
+    )
+
+    assert assigned["ok"] is True
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "observe-only"
+    assert assigned["contract"]["write_intent"] == "observe_only"
+    assert assigned["contract"]["declared_output_paths"] == []
+    row = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert row["status"] == "in_progress"
+    assert row["dispatch_job_id"] == "observe-job"
+
+
+def test_dispatch_preassign_rejects_observe_only_with_declared_outputs(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "dishonest-observer",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "platform_ops",
+                    "write_intent": "observe_only",
+                    "declared_output_paths": ["docs/fake-output.md"],
+                    "post_merge_actions": [],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="observe-session",
+            job_id="observe-job",
+        )
+    )
+
+    assert assigned["assigned"] is False
+    assert assigned["blocked_contracts"] == [
+        {
+            "task_id": "dishonest-observer",
+            "reason": "observe_only_declared_output_paths_forbidden",
+        }
+    ]
+
+
+def test_dispatch_settle_observed_marks_observe_only_task_succeeded(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "observe-only",
+                    "status": "in_progress",
+                    "task_type": "platform_ops",
+                    "write_intent": "observe_only",
+                    "declared_output_paths": [],
+                    "claimed_by": "hourly-slot-1-job",
+                    "claim_session_id": "observe-session",
+                    "dispatch_managed": True,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    settled = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="observe-only",
+            session="observe-session",
+            disposition="observed",
+            result="read-only observation completed",
+        )
+    )
+
+    assert settled == {
+        "ok": True,
+        "task_id": "observe-only",
+        "status": "succeeded",
+    }
+    row = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert row["status"] == "succeeded"
+    assert row["result"] == "read-only observation completed"
+    assert "claimed_by" not in row
+    assert row["status_history"][-1]["note"] == (
+        "supervisor_observation_settlement"
+    )
 
 
 def test_dispatch_remediation_settlement_uses_canonical_block_contract(

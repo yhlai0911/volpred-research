@@ -1303,7 +1303,10 @@ def _task_binding_missing(workspace: dict[str, Any]) -> bool:
     return (
         not str(workspace.get("task_id") or "").strip()
         or not str(workspace.get("claim_session_id") or "").strip()
-        or workspace.get("write_intent") != "repo_patch"
+        or workspace.get("write_intent") not in {
+            "repo_patch",
+            "observe_only",
+        }
     )
 
 
@@ -1845,7 +1848,9 @@ def record_allocation_deferred(
             "slot_id": slot_id,
             "reason": reason,
             "error": error[:300],
-            "write_intent": "repo_patch",
+            "write_intent": str(
+                binding.get("write_intent") or "repo_patch"
+            ),
             "task_id": binding.get("task_id"),
             "claim_session_id": binding.get("claim_session_id"),
             "disposition": "settlement_pending",
@@ -2071,16 +2076,20 @@ def allocate_workspace(
         or path.startswith("storage/")
         or any(char in path for char in "*?[")
     ]
-    if config.get("mode") == "enforce" and (
+    write_intent = str(binding.get("write_intent") or "repo_patch")
+    invalid_binding = (
         not str(binding.get("task_id") or "").strip()
         or not str(binding.get("claim_session_id") or "").strip()
-        or binding.get("write_intent") != "repo_patch"
-        or not declared
-        or invalid_declared
-    ):
+        or write_intent not in {"repo_patch", "observe_only"}
+        or bool(invalid_declared)
+        or (write_intent == "repo_patch" and not declared)
+        or (write_intent == "observe_only" and bool(declared))
+    )
+    if config.get("mode") == "enforce" and invalid_binding:
         _skip(
             "task_binding_invalid",
             task_id=binding.get("task_id"),
+            write_intent=write_intent,
             declared_output_paths=declared,
             invalid_declared_output_paths=invalid_declared,
         )
@@ -2184,7 +2193,7 @@ def allocate_workspace(
         "base_sha": base_sha,
         "lanes": list(config.get("lanes") or _DEFAULT_LANES),
         "isolation_mode": str(config.get("mode") or "pilot"),
-        "write_intent": str(binding.get("write_intent") or "repo_patch"),
+        "write_intent": write_intent,
         "task_id": binding.get("task_id"),
         "claim_session_id": binding.get("claim_session_id"),
         "task_title": str(binding.get("title") or ""),
@@ -2321,13 +2330,16 @@ def _output_contract_violations(
         for path in (workspace.get("declared_output_paths") or [])
         if str(path).strip()
     ]
-    undeclared = sorted(
-        path
-        for path in changed
-        if declared
-        and not any(path == allowed or path.startswith(f"{allowed}/")
-                    for allowed in declared)
-    )
+    if workspace.get("write_intent") == "observe_only":
+        undeclared = sorted(changed)
+    else:
+        undeclared = sorted(
+            path
+            for path in changed
+            if declared
+            and not any(path == allowed or path.startswith(f"{allowed}/")
+                        for allowed in declared)
+        )
     return {
         "declared": declared,
         "denied": denied,
@@ -2370,7 +2382,11 @@ def _run_merge_gate(*, repo_root: Path, workspace: dict[str, Any],
             "duration_s": 0.0,
         }
     declared = contract["declared"]
-    if workspace.get("isolation_mode") == "enforce" and not declared:
+    if (
+        workspace.get("isolation_mode") == "enforce"
+        and workspace.get("write_intent") == "repo_patch"
+        and not declared
+    ):
         return {
             "verdict": "red",
             "reason": "task_binding_missing",

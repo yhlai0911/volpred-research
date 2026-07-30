@@ -4834,6 +4834,55 @@ def _ws_allocate(repo: Path, *, job_id: str = "a" * 32, slot: str = "slot-1",
     )
 
 
+def test_observe_only_workspace_accepts_empty_output_contract(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+
+    allocated = _ws_allocate(
+        repo,
+        job_id="0" * 32,
+        task_binding={
+            "task_id": "observe-only",
+            "claim_session_id": "observe-session",
+            "write_intent": "observe_only",
+            "declared_output_paths": [],
+            "post_merge_actions": [],
+            "title": "Observe only",
+            "description": "Do not modify repository files.",
+        },
+    )
+
+    assert allocated is not None
+    assert allocated["write_intent"] == "observe_only"
+    assert allocated["declared_output_paths"] == []
+    assert workspace._output_contract_violations(
+        allocated, ["unexpected.txt"]
+    )["undeclared"] == ["unexpected.txt"]
+
+
+def test_observe_only_settlement_requires_clean_success() -> None:
+    clean = {"disposition": "empty_removed"}
+
+    assert scheduler._settlement_disposition(
+        clean,
+        write_intent="observe_only",
+        worker_outcome="success",
+    ) == "observed"
+    assert scheduler._settlement_disposition(
+        clean,
+        write_intent="observe_only",
+        worker_outcome="system_terminated",
+    ) is None
+    assert scheduler._settlement_disposition(
+        clean,
+        write_intent="observe_only",
+        worker_outcome="failure",
+    ) == "retry"
+
+
 def _ws_receipt_events(repo: Path) -> list[dict]:
     dest = repo / workspace.RECEIPTS_RELPATH
     if not dest.exists():
@@ -8817,6 +8866,57 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
         close_receipt = codex_auth_lease.close()
         assert close_receipt.ok is True
         assert close_receipt.cleaned is True
+
+
+def test_observe_only_sandbox_denies_workspace_writes(
+    tmp_path: Path,
+) -> None:
+    if sys.platform != "darwin" or not isolation.SANDBOX_EXEC.is_file():
+        pytest.skip("production isolation substrate is macOS sandbox-exec")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo, job_id="0" * 32, slot="slot-1")
+    assert ws is not None
+    wt = Path(ws["path"])
+    prepared = isolation.prepare(
+        canonical_root=repo,
+        workspace=wt,
+        job_id="observe-only-sandbox-test",
+        profile_root=tmp_path / "profiles",
+        allow_workspace_write=False,
+    )
+
+    denied_workspace = subprocess.run(
+        [
+            str(isolation.SANDBOX_EXEC),
+            "-f",
+            prepared.profile_path,
+            "/bin/sh",
+            "-c",
+            f"printf denied > {wt / 'forbidden-observer-output.txt'}",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    allowed_tmp = subprocess.run(
+        [
+            str(isolation.SANDBOX_EXEC),
+            "-f",
+            prepared.profile_path,
+            "/bin/sh",
+            "-c",
+            f"printf allowed > {Path(prepared.tmp_dir) / 'scratch.txt'}",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert denied_workspace.returncode != 0
+    assert not (wt / "forbidden-observer-output.txt").exists()
+    assert allowed_tmp.returncode == 0
 
 
 def test_workspace_os_sandbox_allows_worker_to_terminate_its_own_child(

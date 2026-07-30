@@ -720,12 +720,20 @@ def _dispatch_execution_contract(
     """Validate the fail-closed contract required before mutating dispatch."""
     if not requires_supervisor_preassignment(task):
         return None, "not_mutating_dispatch_type"
-    if str(task.get("write_intent") or "") != "repo_patch":
-        return None, "write_intent_missing_or_not_repo_patch"
+    write_intent = str(task.get("write_intent") or "")
+    if write_intent not in {"repo_patch", "observe_only"}:
+        return None, "write_intent_missing_or_unsupported"
     raw_paths = task.get("declared_output_paths")
-    if not isinstance(raw_paths, list) or not raw_paths:
+    if write_intent == "observe_only":
+        if raw_paths not in (None, []):
+            return None, "observe_only_declared_output_paths_forbidden"
+        declared: list[str] = []
+    elif not isinstance(raw_paths, list) or not raw_paths:
         return None, "declared_output_paths_missing"
-    declared = [str(path).strip() for path in raw_paths if str(path).strip()]
+    else:
+        declared = [
+            str(path).strip() for path in raw_paths if str(path).strip()
+        ]
     invalid = [
         path
         for path in declared
@@ -736,7 +744,7 @@ def _dispatch_execution_contract(
         or path.startswith("storage/")
         or any(char in path for char in "*?[")
     ]
-    if not declared or invalid:
+    if invalid or (write_intent == "repo_patch" and not declared):
         return None, "declared_output_paths_invalid"
     post_actions = task.get("post_merge_actions") or []
     if not isinstance(post_actions, list):
@@ -745,7 +753,7 @@ def _dispatch_execution_contract(
         return None, "post_merge_actions_require_separate_task"
     return {
         "task_id": _task_key(task),
-        "write_intent": "repo_patch",
+        "write_intent": write_intent,
         "declared_output_paths": declared,
         "post_merge_actions": post_actions,
         "title": str(task.get("title") or ""),
@@ -897,13 +905,21 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
                 "status": current,
             }
         owner = str(task.get("claimed_by") or "dispatch-supervisor")
-        if args.disposition == "merged":
+        if args.disposition in {"merged", "observed"}:
             task["status"] = "succeeded"
             task["completed_at"] = _now()
-            task["result"] = args.result or "workspace merged and read back"
+            task["result"] = args.result or (
+                "read-only observation completed"
+                if args.disposition == "observed"
+                else "workspace merged and read back"
+            )
             _record_status_history(
                 task, frm=current, to="succeeded", by=owner,
-                note="supervisor_post_merge_settlement",
+                note=(
+                    "supervisor_observation_settlement"
+                    if args.disposition == "observed"
+                    else "supervisor_post_merge_settlement"
+                ),
             )
         elif args.disposition == "remediation":
             diagnostic = args.result or "workspace remediation opened"
@@ -1811,7 +1827,9 @@ def main() -> int:
     p.add_argument(
         "--disposition",
         required=True,
-        choices=["merged", "remediation", "retry", "empty", "failure"],
+        choices=[
+            "merged", "observed", "remediation", "retry", "empty", "failure"
+        ],
     )
     p.add_argument("--result")
     p.set_defaults(fn=cmd_dispatch_settle)

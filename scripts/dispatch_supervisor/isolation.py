@@ -107,6 +107,7 @@ def _workspace_write_roots(
     canonical_root: Path,
     workspace: Path,
     run_dir: Path,
+    allow_workspace_write: bool = True,
 ) -> tuple[Path, ...]:
     canonical = canonical_root.resolve()
     workspace = workspace.resolve()
@@ -142,7 +143,11 @@ def _workspace_write_roots(
     # Producer tools edit working-tree bytes only. Git index/object/ref
     # mutations are supervisor-finalizer responsibilities, so the shared
     # common object database and branch refs are intentionally read-only.
-    explicit = (workspace, run_dir.resolve(), Path("/dev"))
+    explicit = (
+        (workspace, run_dir.resolve(), Path("/dev"))
+        if allow_workspace_write
+        else (run_dir.resolve(), Path("/dev"))
+    )
     return tuple(dict.fromkeys(explicit))
 
 
@@ -151,12 +156,14 @@ def sandbox_profile(
     canonical_root: Path,
     workspace: Path,
     run_dir: Path,
+    allow_workspace_write: bool = True,
 ) -> str:
     """Return a deny-by-default macOS profile for one exact workspace."""
     roots = _workspace_write_roots(
         canonical_root=canonical_root,
         workspace=workspace,
         run_dir=run_dir,
+        allow_workspace_write=allow_workspace_write,
     )
     lines = [
         "(version 1)",
@@ -247,6 +254,7 @@ def prepare(
     workspace: Path,
     job_id: str,
     profile_root: Path,
+    allow_workspace_write: bool = True,
 ) -> PreparedIsolation:
     """Preflight and persist the substrate before state is bound/spawned."""
     if platform.system() != "Darwin" or not SANDBOX_EXEC.is_file():
@@ -266,6 +274,7 @@ def prepare(
         canonical_root=canonical_root,
         workspace=workspace,
         run_dir=run_dir,
+        allow_workspace_write=allow_workspace_write,
     )
     profile.write_text(payload, encoding="utf-8")
     os.chmod(profile, 0o600)
