@@ -199,9 +199,10 @@ def main(
             if (
                 members_after is None
                 or job.pid in members_after
-                or termination_command.target_still_exists(
+                or not termination_command.wait_for_target_absent(
                     binding.target_kind,
                     binding.target_id,
+                    timeout_seconds=max(2.0, args.grace_seconds),
                 )
             ):
                 raise DispatchTerminationError(

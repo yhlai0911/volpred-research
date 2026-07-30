@@ -54,6 +54,21 @@ def target_still_exists(
     return probe.returncode == 0 and bool(probe.stdout.strip())
 
 
+def wait_for_target_absent(
+    target_kind: termination.TargetKind,
+    target_id: int,
+    *,
+    timeout_seconds: float,
+) -> bool:
+    """Wait through the parent-reap race, then require positive target absence."""
+    deadline = time.monotonic() + max(0.0, timeout_seconds)
+    while target_still_exists(target_kind, target_id):
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(min(0.05, max(0.0, deadline - time.monotonic())))
+    return True
+
+
 def send_sequence(
     intent: termination.TerminationIntent,
     sequence: Sequence[int],

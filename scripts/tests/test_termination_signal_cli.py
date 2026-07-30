@@ -293,6 +293,11 @@ def test_custody_success_refuses_live_bound_target(
         "kill_producer_cohort",
         lambda *_args, **_kwargs: True,
     )
+    monkeypatch.setattr(
+        terminate_dispatch_job.termination_command,
+        "wait_for_target_absent",
+        lambda *_args, **_kwargs: False,
+    )
 
     result = _run_formal_cli(
         target_id=pgid,
