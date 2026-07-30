@@ -11,6 +11,7 @@ from contextlib import contextmanager
 
 import pytest
 
+from volpred.publisher import publisher as publisher_module
 from volpred.publisher.publisher import Publisher
 
 
@@ -118,6 +119,35 @@ def test_append_to_feed_lock_file_created(tmp_path: Path, monkeypatch):
 
     lock_file = tmp_path / "ops" / "locks" / "publisher_feed.lock"
     assert lock_file.exists(), "publisher_feed.lock should be created under storage/ops/locks"
+
+
+def test_identityless_event_append_fails_open_without_durable_receipt(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _install_test_stubs(monkeypatch)
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
+    monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+    monkeypatch.setattr(
+        publisher_module,
+        "_log_dedup_decision",
+        lambda *_args, **_kwargs: False,
+    )
+
+    item = {
+        "id": "mile_identity_receipt_failure",
+        "title": "FOMC event",
+        "content": "Event body.",
+        "audience": "event",
+        "category": "event_article",
+        "status": "draft",
+        "details": {"content_type": "event_article"},
+    }
+
+    assert Publisher(storage_dir=str(tmp_path))._append_to_feed(item) == item["id"]
+    feed = json.loads((tmp_path / "reports" / "feed.json").read_text())
+    assert [row["id"] for row in feed] == [item["id"]]
 
 
 def _make_png(path: Path) -> Path:
@@ -295,3 +325,35 @@ def test_live_event_publish_requires_complete_canonical_metadata(tmp_path: Path,
         )
 
     assert not (tmp_path / "reports" / "feed.json").exists()
+
+
+def test_event_metadata_block_fails_open_without_receipt(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _install_test_stubs(monkeypatch)
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(
+        publisher_module,
+        "_log_dedup_decision",
+        lambda *_args, **_kwargs: False,
+    )
+    monkeypatch.setattr(
+        Publisher,
+        "_append_to_feed",
+        lambda self, item: item["id"],
+    )
+
+    pub_id = Publisher(storage_dir=str(tmp_path)).publish_milestone(
+        title="CPI identity receipt outage",
+        description="event-driven analysis",
+        phase="event_article",
+        details={"content_type": "event_article", "event_type": "CPI_US"},
+        tags=["event_article", "CPI"],
+        audience="event",
+        category="event_article",
+        status="published",
+        audit_strict=True,
+    )
+
+    assert pub_id.startswith("mile_")

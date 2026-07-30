@@ -1341,6 +1341,47 @@ def test_atomic_promotion_keeps_identityless_event_as_draft(tmp_path: Path):
     assert feed_after == [draft]
 
 
+def test_identityless_event_release_fails_open_without_durable_receipt(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    from volpred.publisher import publisher as publisher_module
+
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 30, 2, 0, tzinfo=timezone.utc)
+    draft = {
+        "id": "mile_legacy_event_receipt_failure",
+        "status": "draft",
+        "audience": "event",
+        "category": "event_article",
+        "phase": "event",
+        "title": "FOMC reaction draft",
+        "content": "Legacy draft without event identity.",
+        "details": {"content_type": "event_article"},
+    }
+    _write_json(storage_dir / "reports" / "feed.json", [draft])
+    monkeypatch.setattr(
+        publisher_module,
+        "_log_dedup_decision",
+        lambda *_args, **_kwargs: False,
+    )
+
+    outcome = content._atomic_promote_release_item(
+        draft,
+        now=now,
+        released_at=now.isoformat(),
+        storage_dir=str(storage_dir),
+        route="release_pool",
+        expected_item=draft,
+    )
+
+    assert outcome["outcome"] == "promoted"
+    persisted = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )[0]
+    assert persisted["status"] == "published"
+
+
 def test_atomic_promotion_blocks_second_reader_visible_event_stage(tmp_path: Path):
     storage_dir = tmp_path / "storage"
     now = datetime(2026, 7, 30, 2, 0, tzinfo=timezone.utc)

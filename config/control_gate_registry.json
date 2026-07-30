@@ -31,6 +31,11 @@
           "block_cluster_hard_cap",
           "block_cluster_soft_cap",
           "block_duplicate_title_24h",
+          "block_event_metadata_contract",
+          "block_provenance_contract",
+          "block_image_url_contract",
+          "block_cjk_font_contract",
+          "block_lazypack_completeness",
           "block_depth_floor",
           "block_duplicate_daily_digest",
           "block_digest_recap",
@@ -47,6 +52,7 @@
           "block_cluster_hard_cap": "publisher_cluster_cap",
           "block_cluster_soft_cap": "publisher_cluster_cap",
           "block_duplicate_title_24h": "publisher_title_identity",
+          "warn_duplicate_title_timestamp_unknown": "publisher_title_identity",
           "block_depth_floor": "publisher_content_depth",
           "warn_depth": "publisher_content_depth",
           "block_duplicate_daily_digest": "publisher_digest_identity",
@@ -54,6 +60,11 @@
           "warn_digest_recap": "publisher_digest_recap",
           "block_member_qa_identity": "member_qa_publish_identity",
           "block_content_audit": "release_content_audit",
+          "block_event_metadata_contract": "event_metadata_contract",
+          "block_provenance_contract": "publisher_provenance_contract",
+          "block_image_url_contract": "publisher_image_url_contract",
+          "block_cjk_font_contract": "publisher_cjk_font_contract",
+          "block_lazypack_completeness": "release_lazypack_completeness",
           "block_arc_dup": "publisher_arc_dedup",
           "block_same_ref_recycle": "publisher_arc_dedup",
           "warn_same_ref_similarity": "publisher_arc_dedup",
@@ -400,7 +411,10 @@
       "lifecycle": {
         "phase": "check",
         "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
-        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"],
+        "last_action": "retain",
+        "last_reviewed_at": "2026-07-30T10:17:21.889049+00:00",
+        "review_task_id": "control_gate_review_candidate_silent_fallback_audit_20260727T120838_ec1abd4ba074"
       }
     },
     {
@@ -670,24 +684,42 @@
     {
       "gate_id": "release_lazypack_completeness",
       "owner": "volpred.ops.content",
-      "invariant": "A general-reader article enters the release edge only after a lazy-pack heading with at least one Markdown image is installed; every hold remains attributable to one article.",
+      "invariant": "A general-reader article reaches the feed through either the immediate-publish or draft-release entry only after a lazy-pack heading with at least one Markdown image is installed; every hold remains attributable to one article.",
       "mode": "selection_constraint",
       "identity_strength": "canonical_exact",
       "protected_graph": {
-        "nodes": ["article_draft", "lazypack_section", "release_candidate"],
+        "nodes": [
+          "article_candidate",
+          "article_draft",
+          "lazypack_section",
+          "release_candidate",
+          "feed"
+        ],
         "edges": [
+          "article_candidate -> lazypack_section",
+          "lazypack_section -> feed",
           "article_draft -> lazypack_section",
           "lazypack_section -> release_candidate"
         ]
       },
       "blocked_downstream_edges": [
+        "article_candidate -> feed",
         "release_candidate -> feed",
         "feed -> reader"
       ],
       "incident_refs": [
-        "scripts/check_alerts.py content_gate_deadlock / lazypack_missing remediation"
+        "scripts/check_alerts.py content_gate_deadlock / lazypack_missing remediation",
+        "volpred.publisher.publisher immediate-publish lazypack contract"
       ],
       "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": ["release_lazypack_completeness"],
+            "action": ["block_lazypack_completeness"]
+          }
+        },
         {
           "kind": "jsonl",
           "path": "logs/control_gate_decisions.jsonl",
@@ -880,7 +912,10 @@
           "path": "logs/dedup_decisions.jsonl",
           "match": {
             "gate": [null, "publisher_title_identity"],
-            "action": ["block_duplicate_title_24h"]
+            "action": [
+              "block_duplicate_title_24h",
+              "warn_duplicate_title_timestamp_unknown"
+            ]
           }
         }
       ],
@@ -1044,8 +1079,8 @@
     {
       "gate_id": "publisher_arc_dedup",
       "owner": "volpred.publisher.publisher",
-      "invariant": "Fuzzy narrative similarity is advisory; only a same-reference near-identical body may block publication.",
-      "mode": "selection_constraint",
+      "invariant": "All fuzzy narrative and same-reference similarity signals are advisory review evidence and never own a publication lock.",
+      "mode": "warn",
       "identity_strength": "heuristic",
       "protected_graph": {
         "nodes": ["article_candidate", "dedup_verdict", "feed"],
@@ -1186,6 +1221,201 @@
         "max_review_age_hours": 168,
         "max_raw_triggers": 5,
         "min_distinct_candidates": 3,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "event_metadata_contract",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Every event article carries event_key, event_type, event_date, and event_series_slot before it enters the event publication graph.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": [
+          "event_article_candidate",
+          "event_article_draft",
+          "event_metadata_identity",
+          "feed_event_stage"
+        ],
+        "edges": [
+          "event_article_candidate -> event_metadata_identity",
+          "event_article_draft -> event_metadata_identity",
+          "event_metadata_identity -> feed_event_stage"
+        ]
+      },
+      "blocked_downstream_edges": [
+        "event_metadata_identity -> feed_event_stage",
+        "feed_event_stage -> reader"
+      ],
+      "incident_refs": [
+        "2026-07-30 FOMC stage dispatch identity audit",
+        "Publisher._append_to_feed and release-promotion metadata receipts"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": ["event_metadata_contract"],
+            "action": ["block_event_metadata_contract"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_event_stage",
+      "deadline_required": true,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 10,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_provenance_contract",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Every cited statistic in an audited article is present in its declared canonical experiment result before the article enters the feed.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["article_candidate", "experiment_result", "feed"],
+        "edges": ["experiment_result -> article_candidate"]
+      },
+      "blocked_downstream_edges": [
+        "article_candidate -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "docs/refactor_plan_prepublish_content_gate.md"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": ["publisher_provenance_contract"],
+            "action": ["block_provenance_contract"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 10,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_image_url_contract",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Every embedded article image uses a canonical reader-served URL before the article enters the feed.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["article_candidate", "served_image_asset", "feed"],
+        "edges": ["served_image_asset -> article_candidate"]
+      },
+      "blocked_downstream_edges": [
+        "article_candidate -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "2026-06-08 published broken-image URL incident"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": ["publisher_image_url_contract"],
+            "action": ["block_image_url_contract"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 10,
+        "min_distinct_candidates": 5,
+        "max_harm_outcomes": 1,
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "max_false_positive_signals": 1,
+        "min_incident_occurrences": 2
+      },
+      "lifecycle": {
+        "phase": "check",
+        "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
+        "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"]
+      }
+    },
+    {
+      "gate_id": "publisher_cjk_font_contract",
+      "owner": "volpred.publisher.publisher",
+      "invariant": "Every cited chart generated with CJK labels establishes a readable CJK font before the article enters the feed.",
+      "mode": "hard_block",
+      "identity_strength": "canonical_exact",
+      "protected_graph": {
+        "nodes": ["article_candidate", "chart_generator", "reader_visible_chart"],
+        "edges": ["chart_generator -> reader_visible_chart"]
+      },
+      "blocked_downstream_edges": [
+        "reader_visible_chart -> article_candidate",
+        "article_candidate -> feed",
+        "feed -> reader"
+      ],
+      "incident_refs": [
+        "2026-07-14 k1703 CJK tofu chart incident"
+      ],
+      "evidence_sources": [
+        {
+          "kind": "jsonl",
+          "path": "logs/dedup_decisions.jsonl",
+          "match": {
+            "gate": ["publisher_cjk_font_contract"],
+            "action": ["block_cjk_font_contract"]
+          }
+        }
+      ],
+      "incident_kinds": [],
+      "outcome_join": "candidate_or_feed",
+      "deadline_required": false,
+      "review_policy": {
+        "window_hours": 168,
+        "max_review_age_hours": 168,
+        "max_raw_triggers": 10,
+        "min_distinct_candidates": 5,
         "max_harm_outcomes": 1,
         "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 1,

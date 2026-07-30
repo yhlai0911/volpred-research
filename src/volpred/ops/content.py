@@ -1798,11 +1798,28 @@ def _atomic_promote_release_item(
         try:
             event_identity = stamp_canonical_event_identity(prospective)
         except (TypeError, ValueError) as exc:
-            return {
-                "outcome": "event_identity_blocked",
-                "id": item_id,
-                "reason": f"{type(exc).__name__}: {str(exc).splitlines()[0]}",
-            }
+            from volpred.publisher.publisher import _log_dedup_decision
+
+            reason = f"{type(exc).__name__}: {str(exc).splitlines()[0]}"
+            receipt_persisted = _log_dedup_decision(
+                storage_dir,
+                "block_event_metadata_contract",
+                str(prospective.get("title") or ""),
+                None,
+                f"atomic release-promotion event metadata contract: {reason}",
+                candidate_id=item_id,
+            )
+            if receipt_persisted:
+                return {
+                    "outcome": "event_identity_blocked",
+                    "id": item_id,
+                    "reason": reason,
+                }
+            print(
+                "  ⚠️ event metadata contract receipt unavailable at release "
+                "promotion; publishing continues fail-open"
+            )
+            event_identity = None
         if event_identity is not None:
             stage_hits = find_event_stage_coverage(
                 event_identity["event_key"],

@@ -91,6 +91,7 @@ _DEDUP_ACTION_GATE_IDS = {
     "block_cluster_hard_cap": "publisher_cluster_cap",
     "block_cluster_soft_cap": "publisher_cluster_cap",
     "block_duplicate_title_24h": "publisher_title_identity",
+    "warn_duplicate_title_timestamp_unknown": "publisher_title_identity",
     "block_depth_floor": "publisher_content_depth",
     "warn_depth": "publisher_content_depth",
     "block_duplicate_daily_digest": "publisher_digest_identity",
@@ -98,6 +99,11 @@ _DEDUP_ACTION_GATE_IDS = {
     "warn_digest_recap": "publisher_digest_recap",
     "block_member_qa_identity": "member_qa_publish_identity",
     "block_content_audit": "release_content_audit",
+    "block_event_metadata_contract": "event_metadata_contract",
+    "block_provenance_contract": "publisher_provenance_contract",
+    "block_image_url_contract": "publisher_image_url_contract",
+    "block_cjk_font_contract": "publisher_cjk_font_contract",
+    "block_lazypack_completeness": "release_lazypack_completeness",
     "block_arc_dup": "publisher_arc_dedup",
     "block_same_ref_recycle": "publisher_arc_dedup",
     "warn_same_ref_similarity": "publisher_arc_dedup",
@@ -454,8 +460,8 @@ def _log_anti_ai_gate_decision_impl(
 ) -> bool:
     """Append the anti-AI gate audit record; logging is fail-open."""
     path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
-    guard_canonical_write(path)
     try:
+        guard_canonical_write(path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         rec = {
             "ts": datetime.now(timezone.utc).isoformat(),
@@ -1680,9 +1686,24 @@ class Publisher:
                 "future T-series dedup can match event_key/type/date/slot exactly."
             )
             # Event identity is a storage invariant, not a content-audit
-            # preference. Draft/scheduled rows can later be promoted by another
-            # process, so audit_strict=False is not a valid escape hatch.
-            raise ValueError(_event_identity_issue)
+            # preference.  But a graph intervention without a durable receipt
+            # is worse: the candidate would disappear without an attributable
+            # edge.  Therefore the hard block exists only after the receipt
+            # lands; ledger failure is an explicit fail-open.
+            _receipt_persisted = _log_dedup_decision(
+                str(self.reports_dir.parent),
+                "block_event_metadata_contract",
+                title,
+                None,
+                _event_identity_issue,
+                candidate_id=pub_id,
+            )
+            if _receipt_persisted:
+                raise ValueError(_event_identity_issue)
+            print(
+                "  ⚠️ event metadata contract receipt unavailable; "
+                "publishing continues fail-open"
+            )
         if _is_event_article_input and not _missing_event_fields:
             from volpred.publisher.arc_dedup import normalize_event_series_slot
 
@@ -1826,22 +1847,22 @@ class Publisher:
                     existing_id = existing.get('id', '?')
                     print(
                         f"  ⚠️ Duplicate title timestamp parse failed: "
-                        f"'{title[:50]}' (existing: {existing_id}): {exc}. Skipping."
+                        f"'{title[:50]}' (existing: {existing_id}): {exc}. "
+                        "Publishing continues because the 24h identity is unknowable."
                     )
                     if existing.get('status') not in {'retracted', 'unpublished'}:
-                        _receipt_persisted = _log_dedup_decision(
+                        _log_dedup_decision(
                             str(self.reports_dir.parent),
-                            "block_duplicate_title_24h",
+                            "warn_duplicate_title_timestamp_unknown",
                             title,
                             existing_id,
                             (
                                 "exact title matched and existing timestamp "
-                                "could not be parsed; conservative hold"
+                                "could not be parsed; 24h identity is unknowable "
+                                "so publishing continues"
                             ),
                             candidate_id=_title_candidate_id(title),
                         )
-                        if _receipt_persisted:
-                            return existing_id
 
         # --- Similar topic check: warn if keyword overlap with existing ---
         similar = self._find_similar_articles(title, feed, audience)
@@ -2239,7 +2260,21 @@ class Publisher:
                 "audit_strict=False (batch migrations only)."
             )
             if audit_strict:
-                raise ValueError(msg)
+                _receipt_persisted = _log_dedup_decision(
+                    str(self.reports_dir.parent),
+                    "block_provenance_contract",
+                    title,
+                    None,
+                    msg,
+                    candidate_id=pub_id,
+                )
+                if _receipt_persisted:
+                    raise ValueError(msg)
+                content_audit_flagged = True
+                print(
+                    "  ⚠️ provenance contract receipt unavailable; "
+                    "publishing continues fail-open"
+                )
             print(f"  ⚠️ prepublish_audit Tier-1 findings (audit_strict=False bypass):\n  - {issue_text}")
 
         # --- Pre-publish image-URL gate (2026-06-08 缺圖 incident) ---
@@ -2270,7 +2305,20 @@ class Publisher:
                 "NOT served by the frontend → 404 broken images."
             )
             if audit_strict:
-                raise ValueError(img_msg)
+                _receipt_persisted = _log_dedup_decision(
+                    str(self.reports_dir.parent),
+                    "block_image_url_contract",
+                    title,
+                    None,
+                    img_msg,
+                    candidate_id=pub_id,
+                )
+                if _receipt_persisted:
+                    raise ValueError(img_msg)
+                print(
+                    "  ⚠️ image URL contract receipt unavailable; "
+                    "publishing continues fail-open"
+                )
             content_audit_flagged = True
             print(f"  ⚠️ prepublish_audit image-URL findings (audit_strict=False bypass):\n  - {img_lines}")
 
@@ -2300,7 +2348,20 @@ class Publisher:
                 "重跑腳本產圖，再用 scripts/upsert_article_image.py 覆蓋線上同名圖檔。"
             )
             if audit_strict:
-                raise ValueError(cjk_msg)
+                _receipt_persisted = _log_dedup_decision(
+                    str(self.reports_dir.parent),
+                    "block_cjk_font_contract",
+                    title,
+                    None,
+                    cjk_msg,
+                    candidate_id=pub_id,
+                )
+                if _receipt_persisted:
+                    raise ValueError(cjk_msg)
+                print(
+                    "  ⚠️ CJK font contract receipt unavailable; "
+                    "publishing continues fail-open"
+                )
             content_audit_flagged = True
             print(f"  ⚠️ prepublish_audit CJK font findings (audit_strict=False bypass):\n  - {cjk_lines}")
 
@@ -2557,7 +2618,7 @@ class Publisher:
         if audience == 'general' and not has_lazypack_section(description):
             if lazypack_required_at(status):
                 if audit_strict:
-                    raise ValueError(
+                    _lazypack_issue = (
                         "audience='general' is missing a 懶人包圖組 (lazypack) section.\n"
                         "Per .claude/rules/publishing.md §4 + lazypack-infographic skill, "
                         "immediate-publish reader articles must carry a `## 懶人包圖組` "
@@ -2566,6 +2627,20 @@ class Publisher:
                         "status='draft' and enqueue the async render "
                         "(scripts/lazypack_async_render.py enqueue).\n"
                         "Set audit_strict=False only for genuinely non-reader pieces / batch migrations."
+                    )
+                    _receipt_persisted = _log_dedup_decision(
+                        str(self.reports_dir.parent),
+                        "block_lazypack_completeness",
+                        title,
+                        None,
+                        _lazypack_issue,
+                        candidate_id=pub_id,
+                    )
+                    if _receipt_persisted:
+                        raise ValueError(_lazypack_issue)
+                    print(
+                        "  ⚠️ lazypack contract receipt unavailable; "
+                        "publishing continues fail-open"
                     )
                 print("  ⚠️ lazypack missing (audit_strict=False bypass, status=published)")
             else:
@@ -2929,14 +3004,42 @@ class Publisher:
                     # here under the same lock as the exact-stage lookup so a
                     # direct caller, release-path drift, or stale precheck
                     # cannot persist an event row with an unknowable identity.
-                    _event_identity = stamp_canonical_event_identity(item)
-                    assert _event_identity is not None
-                    _item_details = item["details"]
-                    _stage_hits = find_event_stage_coverage(
-                        _event_identity["event_key"],
-                        _event_identity["event_series_slot"],
-                        feed,
-                    )
+                    try:
+                        _event_identity = stamp_canonical_event_identity(item)
+                    except (TypeError, ValueError) as identity_exc:
+                        _identity_reason = (
+                            "atomic feed-append event metadata contract: "
+                            f"{type(identity_exc).__name__}: "
+                            f"{str(identity_exc).splitlines()[0]}"
+                        )
+                        _receipt_persisted = _log_dedup_decision(
+                            storage_dir,
+                            "block_event_metadata_contract",
+                            str(item.get("title") or ""),
+                            None,
+                            _identity_reason,
+                            candidate_id=str(item.get("id") or ""),
+                        )
+                        if _receipt_persisted:
+                            result_label = (
+                                f"event_identity_blocked:{item.get('id') or 'unknown'}"
+                            )[:200]
+                            log_record_id = item.get("id")
+                            raise
+                        print(
+                            "  ⚠️ event metadata contract receipt unavailable "
+                            "at feed append; publishing continues fail-open"
+                        )
+                        _event_identity = None
+                    if _event_identity is not None:
+                        _item_details = item["details"]
+                        _stage_hits = find_event_stage_coverage(
+                            _event_identity["event_key"],
+                            _event_identity["event_series_slot"],
+                            feed,
+                        )
+                    else:
+                        _stage_hits = []
                     if _stage_hits:
                         existing_id = _stage_hits[0].get("id") or item.get("id")
                         result_label = f"duplicate_event_stage:{existing_id}"[:200]
