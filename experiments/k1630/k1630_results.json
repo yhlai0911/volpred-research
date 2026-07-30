@@ -1,7 +1,7 @@
 {
   "experiment_id": "k1630",
-  "title": "Sell in May / Halloween Indicator \u2014 TW & US, full sample vs last 15 years",
-  "generated_at": "2026-07-04T18:17:02.530725+00:00",
+  "title": "Sell in May / Halloween Indicator — TW & US, full sample vs last 15 years",
+  "generated_at": "2026-07-30T07:35:10.120729+00:00",
   "seed": 1630,
   "method": {
     "return_type": "simple calendar-month returns (month-end resample, pct_change)",
@@ -335,7 +335,7 @@
     },
     "US_SPY_ETF_robustness": {
       "asset": "US_SPY_ETF",
-      "series_label": "SPY ETF total-return (AdjClose) \u2014 2016+ only",
+      "series_label": "SPY ETF total-return (AdjClose) — 2016+ only",
       "data_start": "2016-02-29",
       "data_end": "2026-07-31",
       "full": {
@@ -463,7 +463,7 @@
     },
     "TW_0050_ETF_robustness": {
       "asset": "TW_0050_ETF",
-      "series_label": "0050.TW ETF total-return (AdjClose) \u2014 2009+",
+      "series_label": "0050.TW ETF total-return (AdjClose) — 2009+",
       "data_start": "2009-02-28",
       "data_end": "2026-07-31",
       "full": {
@@ -589,5 +589,25 @@
         "halloween_significant_5pct": false
       }
     }
+  },
+  "code_trace": {
+    "path": "experiments/k1630/k1630.py",
+    "sha256": "ae9ebcd4c8f2166b4534be2c52a4d036f5010beba9c9a052291dfdd606b31ae0",
+    "size_bytes": 16891
+  },
+  "runtime_seconds": 1.504,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1630
+      }
+    ]
   }
 }

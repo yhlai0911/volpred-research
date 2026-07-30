@@ -39,8 +39,8 @@ Lookahead / timing legality
 All random procedures use a fixed seed (1630).
 """
 
-import json
 import os
+import time
 from datetime import datetime, timezone
 
 import numpy as np
@@ -48,11 +48,13 @@ import pandas as pd
 import scipy.stats as sstats
 import statsmodels.api as sm
 import matplotlib
+from volpred.research.reproduce_spec import finalize_experiment
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 SEED = 1630
+T0 = time.time()
 np.random.seed(SEED)
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data")
@@ -292,12 +294,40 @@ def main():
         },
     }
 
-    with open(os.path.join(HERE, "k1630_results.json"), "w") as f:
-        json.dump(results, f, indent=2)
-    print("results written")
-
     make_figures(us_full, tw_full, us_15, tw_15, us_res, tw_res)
     print("figures written")
+
+    finalize_experiment(
+        results=results,
+        entrypoint=__file__,
+        canonical_result="k1630_results.json",
+        inputs=[
+            os.path.join(DATA, "GSPC_snapshot.csv"),
+            os.path.join(DATA, "TWII_snapshot.csv"),
+            os.path.join(DATA, "SPY_snapshot.csv"),
+            os.path.join(DATA, "0050TW_snapshot.csv"),
+        ],
+        outputs=[
+            "fig_a_monthly_bars.png",
+            "fig_b_cumulative.png",
+            "fig_c_full_vs_15y.png",
+        ],
+        seeds=[("numpy", SEED)],
+        started_at=T0,
+        comparison={
+            "ignore_pointers": [
+                "/generated_at",
+                "/runtime_seconds",
+                "/runtime_env",
+            ],
+            "ignore_reasons": {
+                "/generated_at": "Execution timestamp; not an input to any estimate or verdict.",
+                "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+                "/runtime_env": "Interpreter and library versions; machine-dependent by construction.",
+            },
+        },
+    )
+    print("results and reproduce_spec written")
 
     # console summary
     for mk, r in [("US", us_res), ("TW", tw_res)]:

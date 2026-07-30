@@ -1,0 +1,88 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "k1630.py",
+    "args": [],
+    "sha256": "ae9ebcd4c8f2166b4534be2c52a4d036f5010beba9c9a052291dfdd606b31ae0",
+    "size_bytes": 16891
+  },
+  "canonical_result": "k1630_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1630/data/GSPC_snapshot.csv",
+      "sha256": "eed6ec5eb86a6d31a5a2aa6f87c93ec316c56b85e4706ee3512d25fad16879fd",
+      "size_bytes": 708646
+    },
+    {
+      "path": "experiments/k1630/data/TWII_snapshot.csv",
+      "sha256": "ce73a28de9d0a56aa963efe334217ca514702bea8cb3190a3c5e3465e9ac85b1",
+      "size_bytes": 188296
+    },
+    {
+      "path": "experiments/k1630/data/SPY_snapshot.csv",
+      "sha256": "b13bb59740e19cd1b9b2a3b9580b6e2afcdd9ee933242742ea6750f40cdfa10d",
+      "size_bytes": 125831
+    },
+    {
+      "path": "experiments/k1630/data/0050TW_snapshot.csv",
+      "sha256": "20f9c9ff53dd8760a64a41c860cbdb0b70b3e9fce04eed5930515e64bb1dcb90",
+      "size_bytes": 198698
+    }
+  ],
+  "outputs": [
+    "fig_a_monthly_bars.png",
+    "fig_b_cumulative.png",
+    "fig_c_full_vs_15y.png",
+    "k1630_results.json"
+  ],
+  "timeout_seconds": 64,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1630
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 1.504,
+    "recorded_at": "2026-07-30T07:35:10Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1630
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/generated_at",
+      "/runtime_seconds",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/generated_at": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "k1630_results.json",
+    "sha256": "ac85cf93a35f71194de5722a0dc027f9d0221022197002ea5de022d540f38c6e",
+    "size_bytes": 20786
+  }
+}
