@@ -21,12 +21,12 @@
     "K1649"
   ],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queue_priority": 1,
   "queued_at": "2026-07-30T07:43:33Z",
   "started_at": "2026-07-30T07:45:28Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-30T07:48:27Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_08d47597.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_08d47597.stderr",
   "result_artifact": "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels",
@@ -34,9 +34,10 @@
     "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/plan.json",
     "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels/panel_question.png",
     "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels/panel_scorecard.png",
-    "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels/panel_takeaway.png"
+    "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels/panel_takeaway.png",
+    "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels/render_lazypack.py"
   ],
-  "output_paths_updated_at": null,
+  "output_paths_updated_at": "2026-07-30T07:48:12Z",
   "job_metadata": null,
   "kind": "compute",
   "cwd": null,
@@ -54,5 +55,20 @@
     "fire_key": "operations-core-v1:volpred-compute-worker:99a4abb85b63fb80c5f26315",
     "scheduled_for": "2026-07-30T07:45:00Z"
   },
-  "claimed_by_pid_start_wall": "Thu Jul 30 15:45:27 2026"
+  "claimed_by_pid_start_wall": "Thu Jul 30 15:45:27 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "62b091d8fee05ddb4bbc1753e96f623bd7571167",
+  "delivered_paths": [
+    "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels/panel_question.png",
+    "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels/panel_scorecard.png",
+    "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels/panel_takeaway.png",
+    "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/panels/render_lazypack.py",
+    "storage/lazypack_jobs/mile_08d47597/runs/lazypack-mile_08d47597/plan.json"
+  ],
+  "delivered_at": "2026-07-30T07:51:45.121602+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }
