@@ -63984,6 +63984,25 @@
         "to": "pending",
         "by": "codex-vscode",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-30T10:14:07.082100+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:14:10.707802+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:14:27.032421+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "manual_release"
       }
     ],
     "progress_status": "contained",
@@ -63995,7 +64014,7 @@
       "token_report_natural_fire",
       "notification_24h_audit"
     ],
-    "last_released_at": "2026-07-30T04:15:09.239574+00:00"
+    "last_released_at": "2026-07-30T10:14:27.032405+00:00"
   },
   {
     "id": "phase-z-foreign-541ed787b3bbc7b3-e1",
@@ -64855,10 +64874,31 @@
         "to": "pending",
         "by": "hourly-slot-1-6426974ed16149bda43c34af9d222855",
         "note": "supervisor_kill_6426974e"
+      },
+      {
+        "ts": "2026-07-30T09:39:47.927055+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-87a43952048a4274ad39451a32aa9bab",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-30T09:39:47.927058+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-87a43952048a4274ad39451a32aa9bab",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-30T10:30:43.755461+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-87a43952048a4274ad39451a32aa9bab",
+        "note": "supervisor_kill_87a43952"
       }
     ],
-    "last_released_at": "2026-07-30T09:37:00.017274+00:00",
-    "last_release_reason": "supervisor_kill_6426974e"
+    "last_released_at": "2026-07-30T10:30:43.755444+00:00",
+    "last_release_reason": "supervisor_kill_87a43952"
   },
   {
     "id": "alert_dispatch_supervisor_stale_code_20260730",
@@ -66224,7 +66264,7 @@
     "description": "Owner directive: every lock/gate that caused an incident or crosses a high-frequency threshold must be recorded and periodically adjudicated. Extend the canonical control_gate_lifecycle owner; do not create a parallel queue. Include graph edges, downstream outcomes, review cadence, and unregistered-gate detection.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "dispatch_lane": "agent",
     "preferred_agent": "codex",
@@ -66236,10 +66276,6 @@
       "single canonical next_tasks review queue and hashed watermark identity remain enforced",
       "TDD, dual code review, live read-back, and exact-path commit"
     ],
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-30T08:52:03.570047+00:00",
-    "claim_expires_at": "2026-07-30T10:52:03.570047+00:00",
-    "claim_session_id": "db99adb0ad68",
     "status_history": [
       {
         "ts": "2026-07-30T08:52:03.570071+00:00",
@@ -66252,9 +66288,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:12:23.929777+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-30T08:52:03.946780+00:00"
+    "started_at": "2026-07-30T08:52:03.946780+00:00",
+    "completed_at": "2026-07-30T10:12:23.929745+00:00",
+    "result": "root_cause_fixed_and_verified: registered 24 control gates with owner/invariant/graph edges and automatic discovery; durable PDCA review tasks survive ownership/routing and evidence expiry; hard blocks require durable receipts. commit=98322ce81; 530 scoped tests passed; live audit 0 gaps/0 unhealthy."
   },
   {
     "id": "control_gate_inventory_pdca_20260730",
@@ -66262,7 +66306,7 @@
     "description": "所有曾造成 incident 或達高頻 threshold 的 lock/gate 必須自動納入 control_gate_registry，記錄 protected graph 與 downstream harm，並在 review age/trigger/harm threshold 到達時走 retain/recalibrate/downgrade_to_warn/retire 閉環；未登記 gate 不得靜默。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "dispatch_lane": "agent",
     "created_at": "2026-07-30T08:52:03.793064+00:00",
@@ -66273,10 +66317,6 @@
       "materialize exactly one hashed-watermark review task per gate cycle",
       "tests and live read-back prove no silent unregistered high-frequency gate"
     ],
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-30T08:52:04.227834+00:00",
-    "claim_expires_at": "2026-07-30T10:52:04.227834+00:00",
-    "claim_session_id": "02b75404f9bb",
     "status_history": [
       {
         "ts": "2026-07-30T08:52:04.227851+00:00",
@@ -66289,9 +66329,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:12:24.301616+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-30T08:52:04.627300+00:00"
+    "started_at": "2026-07-30T08:52:04.627300+00:00",
+    "completed_at": "2026-07-30T10:12:24.301590+00:00",
+    "result": "root_cause_fixed_and_verified: canonical registry + closed-loop outcome joins + max-age/frequency/harm review actuation implemented. 8 due gates materialized one active review each; dual code review PASS; commit=98322ce81."
   },
   {
     "id": "control_gate_review_task_generation_20260730T090031_ec3b7176e81d",
@@ -66352,5 +66400,265 @@
       "attach downstream outcome read-back",
       "complete with --gate-decision and --gate-live-readback"
     ]
+  },
+  {
+    "id": "control_gate_review_candidate_silent_fallback_audit_20260727T120838_ec1abd4ba074",
+    "title": "[Gate PDCA] candidate_silent_fallback_audit lifecycle review",
+    "description": "gate_id: candidate_silent_fallback_audit\nowner: scripts.dispatch_supervisor.phase_z\nmode: fail_closed\ninvariant: A PHASE-Z candidate may reach git commit only after the trusted pre-commit auditor proves that its exact candidate bytes introduce no new silent fallback.\nprotected_edges: ['candidate_index -> trusted_pre_commit_audit', 'trusted_pre_commit_audit -> git_commit']\nblocked_downstream_edges: ['candidate_index -> git_commit', 'git_commit -> push']\nreview_reasons: ['incident_occurrences=59>=2']\nevidence: {'trigger_count': 0, 'distinct_candidates': 0, 'malformed_rows': 0, 'incident_count': 1, 'incident_occurrences': 59, 'incident_ids': ['inc_c67bec28dd29'], 'source_health': [{'path': '/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl', 'ok': True, 'error': None, 'row_count': 54, 'malformed_rows': 0, 'invalid_timestamps': 0, 'identity_conflicts': 0}, {'path': '/Users/yhlai0911/volpred-research/storage/ops/incidents.json', 'ok': True, 'error': None}, {'path': '/Users/yhlai0911/volpred-research/storage/ops/dispatch_state.json', 'ok': True, 'error': None}]}\noutcomes: {'in_flight': 0, 'waiver': 0, 'task_claim': 0, 'blocked': 0, 'failed': 0, 'worker_failed': 0, 'observed': 0, 'queued': 0, 'superseded': 0, 'unjoined': 0, 'succeeded': 0, 'sequence_coverage_gap': 0, 'published': 0, 'dispatch_fire': 0, 'retry': 0, 'missed_deadline': 0, 'candidate_outcomes': [], 'incident_open': 0, 'incident_resolved': 1, 'incident_recurrence': 1}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle 的 last_action/last_reviewed_at/review_task_id + tests + live read-back。\ncomplete 時必傳 --gate-decision 與 --gate-live-readback；task_pool_claim 會回讀 registry Act receipt，不一致則拒絕結案。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "succeeded",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T09:56:18.799395+00:00",
+    "gate_review_id": "candidate_silent_fallback_audit",
+    "gate_review_window_start": "2026-07-16T09:56:18.799395+00:00",
+    "gate_review_watermark": "2026-07-27T12:08:38.236464+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update registry lifecycle last_action/last_reviewed_at/review_task_id",
+      "attach downstream outcome read-back",
+      "complete with --gate-decision and --gate-live-readback"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-30T10:14:27.465471+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:14:27.809653+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:21:08.785411+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-30T10:14:27.809634+00:00",
+    "gate_decision": "retain",
+    "gate_live_readback": "2026-07-30T10:17Z strict audit: findings=60 baseline=60 new=0 resolved=0; trusted precommit/PHASE-Z/auditor regressions 74 passed; lifecycle/task contract regressions 177 passed; incident inc_c67bec28dd29 state=resolved by clean_streak_k3_24h; PHASE-Z remains active so exact fail-closed edge retained.",
+    "gate_registry_reviewed_at": "2026-07-30T10:17:21.889049+00:00",
+    "completed_at": "2026-07-30T10:21:08.785404+00:00",
+    "result": "root_cause_fixed_and_verified: reviewed 59-occurrence silent-fallback gate; historical scope false positives are already recalibrated to scripts/src/.claude hooks, exact candidate audit now clean and effective. Decision=retain; 251 focused tests PASS; Matt Spec PASS and Standards content PASS. Commit will be co-owned with same-file late-arrival inventory task to avoid swallowing unowned config hunks."
+  },
+  {
+    "id": "control_gate_review_worktree_merge_ownership_20260730T042622_57946e78b34e",
+    "title": "[Gate PDCA] worktree_merge_ownership lifecycle review",
+    "description": "gate_id: worktree_merge_ownership\nowner: scripts.reclaim_stale_worktrees\nmode: fail_closed\ninvariant: A worktree with unmerged bytes or an unresolved push-backup hold cannot be reclaimed until one explicit merge/discard adjudication owns the artifact.\nprotected_edges: ['agent_worktree -> main_branch']\nblocked_downstream_edges: ['agent_worktree -> reclaim', 'main_branch -> push']\nreview_reasons: ['incident_occurrences=292>=2']\nevidence: {'trigger_count': 0, 'distinct_candidates': 0, 'malformed_rows': 0, 'incident_count': 1, 'incident_occurrences': 292, 'incident_ids': ['inc_776caf84f125'], 'source_health': [{'path': '/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl', 'ok': True, 'error': None, 'row_count': 54, 'malformed_rows': 0, 'invalid_timestamps': 0, 'identity_conflicts': 0}, {'path': '/Users/yhlai0911/volpred-research/storage/ops/incidents.json', 'ok': True, 'error': None}, {'path': '/Users/yhlai0911/volpred-research/storage/ops/dispatch_state.json', 'ok': True, 'error': None}]}\noutcomes: {'in_flight': 0, 'waiver': 0, 'task_claim': 0, 'blocked': 0, 'failed': 0, 'worker_failed': 0, 'observed': 0, 'queued': 0, 'superseded': 0, 'unjoined': 0, 'succeeded': 0, 'sequence_coverage_gap': 0, 'published': 0, 'dispatch_fire': 0, 'retry': 0, 'missed_deadline': 0, 'candidate_outcomes': [], 'incident_open': 1, 'incident_resolved': 0, 'incident_recurrence': 1}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle 的 last_action/last_reviewed_at/review_task_id + tests + live read-back。\ncomplete 時必傳 --gate-decision 與 --gate-live-readback；task_pool_claim 會回讀 registry Act receipt，不一致則拒絕結案。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T09:56:18.799395+00:00",
+    "gate_review_id": "worktree_merge_ownership",
+    "gate_review_window_start": "2026-07-16T09:56:18.799395+00:00",
+    "gate_review_watermark": "2026-07-30T04:26:22.583520+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update registry lifecycle last_action/last_reviewed_at/review_task_id",
+      "attach downstream outcome read-back",
+      "complete with --gate-decision and --gate-live-readback"
+    ]
+  },
+  {
+    "id": "control_gate_review_dispatch_worker_ownership_20260730T093941_48e26abbabfd",
+    "title": "[Gate PDCA] dispatch_worker_ownership lifecycle review",
+    "description": "gate_id: dispatch_worker_ownership\nowner: dispatch_supervisor\nmode: fail_closed\ninvariant: A worker process and its claimed task must have one live supervisor owner before orphan cleanup or redispatch may cut either edge.\nprotected_edges: ['task_claim -> worker_process']\nblocked_downstream_edges: ['worker_process -> completion_receipt', 'task_claim -> redispatch']\nreview_reasons: ['incident_occurrences=5138>=2']\nevidence: {'trigger_count': 0, 'distinct_candidates': 0, 'malformed_rows': 0, 'incident_count': 1, 'incident_occurrences': 5138, 'incident_ids': ['inc_792a94b0ecf4'], 'source_health': [{'path': '/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl', 'ok': True, 'error': None, 'row_count': 54, 'malformed_rows': 0, 'invalid_timestamps': 0, 'identity_conflicts': 0}, {'path': '/Users/yhlai0911/volpred-research/storage/ops/incidents.json', 'ok': True, 'error': None}, {'path': '/Users/yhlai0911/volpred-research/storage/ops/dispatch_state.json', 'ok': True, 'error': None}]}\noutcomes: {'in_flight': 0, 'waiver': 0, 'task_claim': 0, 'blocked': 0, 'failed': 0, 'worker_failed': 0, 'observed': 0, 'queued': 0, 'superseded': 0, 'unjoined': 0, 'succeeded': 0, 'sequence_coverage_gap': 0, 'published': 0, 'dispatch_fire': 0, 'retry': 0, 'missed_deadline': 0, 'candidate_outcomes': [], 'incident_open': 1, 'incident_resolved': 0, 'incident_recurrence': 1}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle 的 last_action/last_reviewed_at/review_task_id + tests + live read-back。\ncomplete 時必傳 --gate-decision 與 --gate-live-readback；task_pool_claim 會回讀 registry Act receipt，不一致則拒絕結案。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "in_progress",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T09:56:18.799395+00:00",
+    "gate_review_id": "dispatch_worker_ownership",
+    "gate_review_window_start": "2026-07-16T09:56:18.799395+00:00",
+    "gate_review_watermark": "2026-07-30T09:39:41.370175+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update registry lifecycle last_action/last_reviewed_at/review_task_id",
+      "attach downstream outcome read-back",
+      "complete with --gate-decision and --gate-live-readback"
+    ],
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-30T10:32:25.488110+00:00",
+    "claim_expires_at": "2026-07-30T12:32:25.488110+00:00",
+    "claim_session_id": "aa1b22583414",
+    "status_history": [
+      {
+        "ts": "2026-07-30T10:32:25.488125+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:32:25.935536+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-30T10:32:25.935523+00:00"
+  },
+  {
+    "id": "control_gate_review_publisher_arc_dedup_20260730T070838_b933bcabf559",
+    "title": "[Gate PDCA] publisher_arc_dedup lifecycle review",
+    "description": "gate_id: publisher_arc_dedup\nowner: volpred.publisher.publisher\nmode: selection_constraint\ninvariant: Fuzzy narrative similarity is advisory; only a same-reference near-identical body may block publication.\nprotected_edges: ['article_candidate -> dedup_verdict']\nblocked_downstream_edges: ['dedup_verdict -> feed', 'feed -> reader']\nreview_reasons: ['harm_outcomes=59>=1']\nevidence: {'trigger_count': 249, 'distinct_candidates': 78, 'malformed_rows': 0, 'incident_count': 0, 'incident_occurrences': 0, 'incident_ids': [], 'source_health': [{'path': '/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl', 'ok': True, 'error': None, 'row_count': 2943, 'malformed_rows': 0, 'invalid_timestamps': 0, 'identity_conflicts': 0}, {'path': '/Users/yhlai0911/volpred-research/storage/next_tasks.json', 'ok': True, 'error': None}, {'path': '/Users/yhlai0911/volpred-research/storage/reports/feed.json', 'ok': True, 'error': None}]}\noutcomes: {'in_flight': 0, 'waiver': 0, 'task_claim': 0, 'blocked': 22, 'failed': 0, 'worker_failed': 0, 'observed': 0, 'queued': 4, 'superseded': 0, 'unjoined': 59, 'succeeded': 0, 'sequence_coverage_gap': 0, 'published': 15, 'dispatch_fire': 0, 'retry': 0, 'missed_deadline': 0, 'candidate_outcomes': [{'candidate_id': 'K1208', 'decision_count': 2, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'K1450', 'decision_count': 3, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'K1477', 'decision_count': 4, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'K1585', 'decision_count': 34, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'K1705', 'decision_count': 44, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'decision:502069edff7982b3', 'decision_count': 2, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'decision:8244efc24e8aebce', 'decision_count': 1, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'decision:d6e681d627ac7a58', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'decision:db5a22fa0c5b1b11', 'decision_count': 1, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'fomc_2026_07_29:T+0', 'decision_count': 2, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'k:K1221|audience:general', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'k:K1420|audience:general', 'decision_count': 2, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'k:K1443|audience:general', 'decision_count': 2, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'k:K1448|audience:general', 'decision_count': 1, 'task_ids': [], 'outcomes': ['queued']}, {'candidate_id': 'k:K1609|audience:general', 'decision_count': 2, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'k:K1623|audience:general', 'decision_count': 1, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'k:K1630|audience:general', 'decision_count': 1, 'task_ids': [], 'outcomes': ['queued']}, {'candidate_id': 'k:K1680|audience:general', 'decision_count': 2, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'k:K1698|audience:general', 'decision_count': 3, 'task_ids': [], 'outcomes': ['queued']}, {'candidate_id': 'k:K1710|audience:general', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'k:K1713|audience:general', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'k:K1716|audience:general', 'decision_count': 2, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'k:K775|audience:general', 'decision_count': 2, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'k:K781|audience:general', 'decision_count': 2, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:03ae578a94a7de84', 'decision_count': 3, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:04261c2a0402fd53', 'decision_count': 1, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:075fc8c77d2ffc55', 'decision_count': 1, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:0ca53cebfd28258e', 'decision_count': 1, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:1461eae7aef0f40e', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:167d3ca0a8052bc6', 'decision_count': 2, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:1702110307236d29', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:202955bf38a37c34', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:24bc9ae0fbe9af0f', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:258852c08a89a2e2', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:2d1df8657763a4df', 'decision_count': 1, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:2d711642b726b044', 'decision_count': 6, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:352fa204550fafa6', 'decision_count': 2, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:36a4187a7da58d98', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:3831a89d40b8d18c', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:41ae616098dc844b', 'decision_count': 8, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:44791a1d09311c2b', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:4ef9e6a991d52876', 'decision_count': 1, 'task_ids': [], 'outcomes': ['queued']}, {'candidate_id': 'title:5071848efd0efca1', 'decision_count': 4, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:50fd2afd48eaa8ae', 'decision_count': 4, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:52334f32ff673f40', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:602994a746f3f15a', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:64969b9b31282490', 'decision_count': 8, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:67dea324e843c8fd', 'decision_count': 17, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:6989a6453045916d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:6c41671d9d644cb3', 'decision_count': 8, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:7a0066b8315bbdba', 'decision_count': 2, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:7d3939dfc2d314b6', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:8832d556fe3536b3', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:889c53deef4a50b3', 'decision_count': 1, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:925723c2c6aea7a0', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:9809187199424c1f', 'decision_count': 15, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:9c7838864fe3dd7d', 'decision_count': 1, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:9e03ab88cc62a52a', 'decision_count': 2, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:a5a9d5b26010d15b', 'decision_count': 1, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:ab142bb8f616c8ba', 'decision_count': 1, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:ab6296769fb985a2', 'decision_count': 2, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:b9f33b4f2efe43af', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:bec13cba5e1c8d4a', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:c3d9c25f951cd3f4', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:c6c8155313d348c1', 'decision_count': 2, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:cdab56d81b52fcd2', 'decision_count': 1, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:d13b18e797597266', 'decision_count': 4, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:d34ed1ae9ef8eb2a', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:d67e9ae2186ad7e4', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:d748422ca47a014b', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:e29b1baa7dd54c76', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:e3056231809d60e1', 'decision_count': 1, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:e9b0b22f2df038a6', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:ea673229f63133c3', 'decision_count': 1, 'task_ids': [], 'outcomes': ['published']}, {'candidate_id': 'title:f3821bf8714b9afc', 'decision_count': 6, 'task_ids': [], 'outcomes': ['blocked', 'unjoined']}, {'candidate_id': 'title:f3975146e9b353c7', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:f513ec4f6244bf5c', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'title:fdb97d0dee093e57', 'decision_count': 1, 'task_ids': [], 'outcomes': ['unjoined']}], 'incident_open': 0, 'incident_resolved': 0, 'incident_recurrence': 0}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle 的 last_action/last_reviewed_at/review_task_id + tests + live read-back。\ncomplete 時必傳 --gate-decision 與 --gate-live-readback；task_pool_claim 會回讀 registry Act receipt，不一致則拒絕結案。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T09:56:18.799395+00:00",
+    "gate_review_id": "publisher_arc_dedup",
+    "gate_review_window_start": "2026-07-23T09:56:18.799395+00:00",
+    "gate_review_watermark": "2026-07-30T07:08:38.283017+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update registry lifecycle last_action/last_reviewed_at/review_task_id",
+      "attach downstream outcome read-back",
+      "complete with --gate-decision and --gate-live-readback"
+    ]
+  },
+  {
+    "id": "control_gate_review_publisher_k_coverage_20260729T210710_53608a95b196",
+    "title": "[Gate PDCA] publisher_k_coverage lifecycle review",
+    "description": "gate_id: publisher_k_coverage\nowner: scripts.check_arc_dedup\nmode: hard_block\ninvariant: One canonical K-id and audience pair owns at most one live article unless a distinct audience or explicit waiver is recorded.\nprotected_edges: ['k_article_candidate -> k_audience_identity']\nblocked_downstream_edges: ['k_audience_identity -> feed', 'feed -> reader']\nreview_reasons: ['harm_outcomes=1>=1']\nevidence: {'trigger_count': 5, 'distinct_candidates': 2, 'malformed_rows': 0, 'incident_count': 0, 'incident_occurrences': 0, 'incident_ids': [], 'source_health': [{'path': '/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl', 'ok': True, 'error': None, 'row_count': 2943, 'malformed_rows': 0, 'invalid_timestamps': 0, 'identity_conflicts': 0}, {'path': '/Users/yhlai0911/volpred-research/storage/next_tasks.json', 'ok': True, 'error': None}, {'path': '/Users/yhlai0911/volpred-research/storage/reports/feed.json', 'ok': True, 'error': None}]}\noutcomes: {'in_flight': 0, 'waiver': 0, 'task_claim': 0, 'blocked': 1, 'failed': 0, 'worker_failed': 0, 'observed': 0, 'queued': 0, 'superseded': 0, 'unjoined': 1, 'succeeded': 0, 'sequence_coverage_gap': 0, 'published': 1, 'dispatch_fire': 0, 'retry': 0, 'missed_deadline': 0, 'candidate_outcomes': [{'candidate_id': 'k:K1716|audience:general', 'decision_count': 3, 'task_ids': [], 'outcomes': ['unjoined']}, {'candidate_id': 'k:K1719|audience:general', 'decision_count': 2, 'task_ids': [], 'outcomes': ['blocked', 'published']}], 'incident_open': 0, 'incident_resolved': 0, 'incident_recurrence': 0}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle 的 last_action/last_reviewed_at/review_task_id + tests + live read-back。\ncomplete 時必傳 --gate-decision 與 --gate-live-readback；task_pool_claim 會回讀 registry Act receipt，不一致則拒絕結案。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T09:56:18.799395+00:00",
+    "gate_review_id": "publisher_k_coverage",
+    "gate_review_window_start": "2026-07-23T09:56:18.799395+00:00",
+    "gate_review_watermark": "2026-07-29T21:07:10.778362+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update registry lifecycle last_action/last_reviewed_at/review_task_id",
+      "attach downstream outcome read-back",
+      "complete with --gate-decision and --gate-live-readback"
+    ]
+  },
+  {
+    "id": "alert_host_cron_fail_20260730",
+    "title": "[alert] Host cron failure detected",
+    "description": "由 alert `host_cron_fail` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=1；non_hang_failure=False）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- failing_logs:\n  - storage/logs/cron/check_alerts.log exit=142 at unknown recency=unknown_exited_at\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "succeeded",
+    "created_at": "2026-07-30T10:01:45.678034+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "host_cron_fail"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-30T10:31:37.997792+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:31:38.435795+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:32:25.017288+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-30T10:31:38.435779+00:00",
+    "completed_at": "2026-07-30T10:32:25.017251+00:00",
+    "result": "fresh_noop: original detector re-read at 2026-07-30T10:32Z returned host_cron_fail breached=false/failing_logs=[] after the same Operations Core check_alerts schedule recovered from exit=142 at 17:05 CST to exit=0 at 18:02 CST. crontab contains only canonical empty marker; no legacy host cron execution found. Per task contract no external mutation or manual rerun performed."
+  },
+  {
+    "id": "control_gate_inventory_late_arrivals_20260730",
+    "title": "[Gate PDCA] 納管同檔 late-arrival publisher control gates",
+    "description": "Ownership reconciliation for pre-existing uncommitted config/control_gate_registry.json hunks discovered during candidate_silent_fallback_audit review. Verify and formally own the four newly registered publisher/event gates plus action aliases/lazypack evidence; require schema/live audit/tests and commit jointly with the completed review task. Do not include unrelated test/runtime WIP.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "succeeded",
+    "source": "user",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-30T10:21:36.341912+00:00",
+    "acceptance": [
+      "identify every non-review hunk in control_gate_registry.json",
+      "validate owners/invariants/graph/evidence aliases",
+      "live audit has zero gaps and healthy sources",
+      "dual Matt review PASS",
+      "commit exact config path with both completed task IDs"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-30T10:21:36.795402+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:21:37.146744+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:29:08.189237+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-30T10:21:37.146726+00:00",
+    "completed_at": "2026-07-30T10:29:08.189192+00:00",
+    "result": "root_cause_fixed_and_verified: formally owned and validated late-arrival publisher/event gates; repaired two unreceipted event-metadata hard-lock paths at canonical append and release promotion; expanded event/lazypack graph contracts with single owners. 413 scoped tests PASS, silent audit new=0, Matt Spec/Standards PASS, live 28 registered / 0 gaps / 0 unclassified / 0 unhealthy."
+  },
+  {
+    "id": "homepage_canonical_experiment_metrics_20260730",
+    "title": "修正首頁實驗數：canonical index 投影與三口徑語意",
+    "description": "首頁目前把 legacy memory experiments 115 誤標為全部實驗。以 experiments/index.json 為 canonical，建立可重生前端投影，分清 indexed experiments、result artifacts、knowledge entries，加入 deploy/live invariant，禁止硬編碼。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "dispatch_lane": "agent",
+    "acceptance": [
+      "首頁不再讀 legacy experiments.json 作為總實驗數",
+      "數字從 canonical experiments/index.json 可重生投影取得",
+      "公開 API 欄位語意清楚且保留相容性",
+      "測試與 build 綠",
+      "部署後 live API/HTML 等於 canonical projection"
+    ],
+    "created_at": "2026-07-30T10:33:10.661391+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-30T10:33:16.564455+00:00",
+    "claim_expires_at": "2026-07-30T12:33:16.564455+00:00",
+    "claim_session_id": "334075f7b8f9",
+    "status_history": [
+      {
+        "ts": "2026-07-30T10:33:16.564474+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-30T10:33:21.579282+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-30T10:33:21.579269+00:00"
   }
 ]
