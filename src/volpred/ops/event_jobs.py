@@ -503,7 +503,6 @@ def build_pending_event_task(
         # keep the task inline inside that worker, while Codex eligibility
         # remains independently denied by task_pool_selection.
         "dispatch_lane": "agent",
-        "topology": "inline",
         "created_at": now.isoformat(),
         "source": "event_expander",
         "preferred_agent": str(template.get("preferred_agent") or item.get("preferred_agent") or "claude"),
@@ -645,12 +644,17 @@ def _ensure_next_task(
                     for key in (
                         "dispatch_lane",
                         "preferred_agent",
-                        "topology",
                         "tags",
                     ):
                         if existing.get(key) != task.get(key):
                             existing[key] = task.get(key)
                             changed = True
+                    if "topology" in existing:
+                        # Topology is mechanically derived by model_router.
+                        # Remove the pre-migration duplicate field so that a
+                        # later router change has one canonical owner.
+                        existing.pop("topology")
+                        changed = True
                 if changed:
                     write_tasks_to_handle(handle, tasks)
                 return {

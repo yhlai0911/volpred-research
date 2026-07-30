@@ -134,7 +134,7 @@ def test_expand_due_event_jobs_materializes_once(tmp_path: Path, monkeypatch):
     assert task["status"] == "pending"
     assert task["task_type"] == "event_article"
     assert task["dispatch_lane"] == "agent"
-    assert task["topology"] == "inline"
+    assert "topology" not in task
     assert "claude-worker-only" in task["tags"]
     assert "main-thread-only" not in task["tags"]
     assert task["deadline"] == (now + timedelta(hours=1)).isoformat()
@@ -255,7 +255,7 @@ def test_pending_generator_row_is_migrated_from_main_thread_to_claude_worker(
     migrated = json.loads(queue_path.read_text(encoding="utf-8"))[0]
     assert migrated["dispatch_lane"] == "agent"
     assert migrated["preferred_agent"] == "claude"
-    assert migrated["topology"] == "inline"
+    assert "topology" not in migrated
     assert "claude-worker-only" in migrated["tags"]
     assert "main-thread-only" not in migrated["tags"]
 

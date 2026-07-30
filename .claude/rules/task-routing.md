@@ -30,7 +30,7 @@ copying that mapping into prose. Codex eligibility is enforced by
 | **paper_decision** | ✅ only | ❌ | one at a time | `paper-stage-classifier` | 需 ≥3 互補實驗 + user confirm 才進 `decision_made_awaiting_body_rewrite` |
 | **daily_article** | ✅ | ✅ | up to 2 | `feed-publisher` + `anti-ai-style` | reader-facing 3-canonical 必讀；publication-candidates 選題；3-layer dedup（規則本體見 `.claude/rules/publishing.md` §選題三層查重）|
 | **daily_digest** | ✅ | ✅ | 1/day | `feed-publisher` + `anti-ai-style` | 每日精選導讀＝**專題策展**（選一 theme + 撈 archive 同主題 3-6 篇舊文 + 時事 hook + 串敘事弧，**非逐篇 recap 當天文章**）；立即 published；`details.content_type='daily_digest'`；curated slug 寫 `details.digest_articles`；title 用專題式標題且**不可**以 `每日精選導讀｜` 起頭（前端已顯示此區塊標頭）；tags 含 `精選導讀`；勿混 EMAIL 用 `send-daily-digest` |
-| **event_article** | ✅ Operations Core worker only | ❌ | one at a time | `feed-publisher` + event templates | `dispatch_lane=agent`、`topology=inline`；由 Claude subscription worker 直接完成，不能依賴互動 session 常駐；直接 `published` 不入 draft pool；**FB 雙發佈強制**（2026-05-25 起；共用 trending-repost FB SOP，不算 trending daily cap） |
+| **event_article** | ✅ only | ❌ | one at a time | `feed-publisher` + event templates | 即時性需要主線程判斷；直接 `published` 不入 draft pool；**FB 雙發佈強制**（2026-05-25 起；共用 trending-repost FB SOP，不算 trending daily cap） |
 | **member_qa** | ✅ only | ❌ | one at a time | `member-questions` | 4 維度評分 → question-rerank → research → publish；每 6h cron |
 | **trending_repost** | ✅ only | ❌ | **daily cap = 2/day** | `trending-repost` | VolPred angle 改寫 + 無 source citation；雙發佈 feed + Ivan Lai FB（**同 event_article 共用 FB SOP**） |
 | **strategy_lifecycle** | ✅ only | ⚠️ (review 子任務) | one at a time | strategy-registry + `scripts/evaluate_new_strategy.py` | 同期間比較 + cross-OOS + Codex review + sensitivity + MDD gate |
@@ -60,10 +60,7 @@ tree below and then to free-text markers. Do not encode ownership solely in
   ├─ task_type in {email_reply, telegram_reply}
   │     └─ owner-message responder / Claude only（最高優先；Codex skip）
   │
-  ├─ task_type == event_article
-  │     └─ Claude Operations Core worker only（agent lane + inline；Codex skip）
-  │
-  ├─ task_type in {paper_body, paper_decision, member_qa, trending_repost, strategy_lifecycle}
+  ├─ task_type in {paper_body, paper_decision, event_article, member_qa, trending_repost, strategy_lifecycle}
   │     └─ Claude only（主線程紀律 / API 一致性需求）
   │
   ├─ task_type == "paper_review"
