@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Auto-injected: TCC bypass — self-redirect to Desktop log avoids launchd-process-level TCC denial
-exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/log_rotate.log 2>&1
+LOG_ROTATE_STDIO_PATH=${VOLPRED_LOG_ROTATE_STDIO_PATH:-/Users/yhlai0911/volpred-research/storage/logs/cron/log_rotate.log}
+exec >> "$LOG_ROTATE_STDIO_PATH" 2>&1
 # Canonical source for the host-cron wrapper.
 # IMPORTANT: host cron does NOT exec files under Desktop/ (macOS TCC/FDA blocks
 # the cron daemon). The cron-exec target lives at ~/.volpred/bin/cron_log_rotate.sh.
@@ -13,6 +14,7 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/log_rotate.log 2>&1
 # 此 job 每日把超過 MAX_BYTES 的 log 截斷為最後 KEEP_LINES 行（原子替換，保留近期可觀測性）。
 
 set -u
+umask 077
 
 # Portable file size in bytes. BSD/macOS is `stat -f %z`; GNU/Linux is `stat -c %s`.
 # GNU accepts `-f` with a wholly different meaning (--file-system) and prints a
@@ -32,13 +34,35 @@ file_size_bytes() {
   printf '%s\n' "$value"
 }
 
-MAX_BYTES=$((5 * 1024 * 1024))   # 5 MB 門檻
-KEEP_LINES=4000                   # 截斷後保留最後 N 行
+# Portable permission bits. A replaced log inode must not inherit the shell's
+# default umask and become world-readable between rotation and the daemon's
+# next append (Telegram logs can contain boss-message excerpts).
+file_mode_bits() {
+  local target=$1 value
+  value=$(stat -c %a "$target" 2>/dev/null || true)
+  case "$value" in
+    ""|*[!0-9]*) value=$(stat -f %Lp "$target" 2>/dev/null || true) ;;
+  esac
+  case "$value" in
+    ""|*[!0-9]*|*[!0-7]*) return 1 ;;
+  esac
+  printf '%s\n' "$value"
+}
 
-LOG_DIRS=(
-  "/Users/yhlai0911/volpred-research/storage/logs/cron"
-  "/Users/yhlai0911/.volpred/logs"
-)
+MAX_BYTES=${VOLPRED_LOG_ROTATE_MAX_BYTES:-$((5 * 1024 * 1024))}   # 5 MB 門檻
+KEEP_LINES=${VOLPRED_LOG_ROTATE_KEEP_LINES:-4000}                   # 截斷後保留最後 N 行
+case "$MAX_BYTES:$KEEP_LINES" in
+  *[!0-9:]*|:*|*:) echo "ERROR: invalid log rotation numeric override"; exit 2 ;;
+esac
+
+if [ -n "${VOLPRED_LOG_ROTATE_LOG_DIR:-}" ]; then
+  LOG_DIRS=("$VOLPRED_LOG_ROTATE_LOG_DIR")
+else
+  LOG_DIRS=(
+    "/Users/yhlai0911/volpred-research/storage/logs/cron"
+    "/Users/yhlai0911/.volpred/logs"
+  )
+fi
 
 echo "=== [log_rotate] $(date '+%Y-%m-%d %H:%M:%S %Z') start ==="
 rotated=0
@@ -52,7 +76,13 @@ for dir in "${LOG_DIRS[@]}"; do
     fi
     if [ "$size" -gt "$MAX_BYTES" ]; then
       tmp="${f}.rotate.$$"
+      mode=$(file_mode_bits "$f" || printf '600\n')
       if tail -n "$KEEP_LINES" "$f" > "$tmp" 2>/dev/null; then
+        if ! chmod "$mode" "$tmp"; then
+          rm -f "$tmp"
+          echo "WARN: rotate chmod failed for $f"
+          continue
+        fi
         mv "$tmp" "$f"
         echo "rotated: $f (was $((size/1024/1024))MB -> last ${KEEP_LINES} lines)"
         rotated=$((rotated + 1))
@@ -71,7 +101,9 @@ done
 RB_DIR="/Users/yhlai0911/volpred-research/storage/ops/rollback_points"
 HOOKS_LOG_DIR="/Users/yhlai0911/volpred-research/storage/logs/hooks"
 
-if [ -d "$RB_DIR" ]; then
+if [ "${VOLPRED_LOG_ROTATE_SKIP_RETENTION:-0}" = "1" ]; then
+  echo "retention: skipped by explicit test override"
+elif [ -d "$RB_DIR" ]; then
   rb_n=$(find "$RB_DIR" -mindepth 1 -maxdepth 1 -type d -mtime +14 | wc -l | tr -d ' ')
   if [ "$rb_n" -gt 0 ]; then
     find "$RB_DIR" -mindepth 1 -maxdepth 1 -type d -mtime +14 -exec rm -rf {} +
@@ -79,7 +111,7 @@ if [ -d "$RB_DIR" ]; then
   fi
 fi
 
-if [ -d "$HOOKS_LOG_DIR" ]; then
+if [ "${VOLPRED_LOG_ROTATE_SKIP_RETENTION:-0}" != "1" ] && [ -d "$HOOKS_LOG_DIR" ]; then
   hk_n=$(find "$HOOKS_LOG_DIR" -type f -mtime +7 | wc -l | tr -d ' ')
   if [ "$hk_n" -gt 0 ]; then
     find "$HOOKS_LOG_DIR" -type f -mtime +7 -delete
