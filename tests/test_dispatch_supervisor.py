@@ -4743,6 +4743,50 @@ def test_loop_crash_transport_identity_groups_same_trace_and_separates_root(
     assert all("episode=" in title for title in sends)
 
 
+def test_loop_crash_transport_identity_ignores_occurrence_values(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    sends: list[str] = []
+    monkeypatch.setattr(
+        supervisor.alerts,
+        "_send",
+        lambda _level, title, _body: sends.append(title) or 0,
+    )
+    first = """Traceback (most recent call last):
+  File "/private/var/folders/aa/run-101/scheduler.py", line 417, in health_tick
+    await check_task("task-101")
+RuntimeError: task task-101 failed at 2026-07-30T03:20:01Z
+"""
+    same_root_new_occurrence = """Traceback (most recent call last):
+  File "/private/var/folders/bb/run-999/scheduler.py", line 611, in health_tick
+    await check_task("task-999")
+RuntimeError: task task-999 failed at 2026-07-30T03:24:59Z
+"""
+    different_frame = """Traceback (most recent call last):
+  File "/private/var/folders/bb/run-999/scheduler.py", line 611, in scheduler_tick
+    await check_task("task-999")
+RuntimeError: task task-999 failed at 2026-07-30T03:24:59Z
+"""
+
+    supervisor.alerts.send_loop_crash(
+        "health_loop", first, state_path=tmp_path / "first.json",
+    )
+    supervisor.alerts.send_loop_crash(
+        "health_loop",
+        same_root_new_occurrence,
+        state_path=tmp_path / "same-root.json",
+    )
+    supervisor.alerts.send_loop_crash(
+        "health_loop",
+        different_frame,
+        state_path=tmp_path / "different-frame.json",
+    )
+
+    assert sends[0] == sends[1]
+    assert sends[2] != sends[0]
+
+
 def test_hang_transport_identity_groups_same_outcome_and_separates_survivors(
     tmp_path: Path,
     monkeypatch,

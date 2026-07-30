@@ -35,6 +35,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -56,12 +57,56 @@ AUTH_HOTFIX_CMD = (
 )
 
 
+_TRACEBACK_FRAME_RE = re.compile(
+    r'^\s*File ["\'](?P<path>.+?)["\'], line \d+'
+    r"(?:, in (?P<function>.+?))?\s*$"
+)
+_EXCEPTION_TYPE_RE = re.compile(
+    r"^\s*(?P<type>[A-Za-z_][A-Za-z0-9_.]*"
+    r"(?:Error|Exception|Failure|Exit|Interrupt|Warning|ExceptionGroup))"
+    r"(?::|$)"
+)
+_DYNAMIC_FALLBACK_REPLACEMENTS = (
+    (re.compile(r"\b\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z?\b"), "<timestamp>"),
+    (re.compile(r"\b[0-9a-fA-F]{8,}\b"), "<hex>"),
+    (re.compile(r"(?:[A-Za-z]:)?[/~][^\s\"']+"), "<path>"),
+    (re.compile(r"\b\d+\b"), "<number>"),
+)
+
+
 def _episode_fingerprint(value: str) -> str:
-    """Return one stable transport identity for a diagnostic root shape."""
-    normalized = "\n".join(
-        line.rstrip()
-        for line in str(value).strip().splitlines()
-    )
+    """Return a stable transport identity for one diagnostic root shape.
+
+    Occurrence text is intentionally excluded: task ids, timestamps, temporary
+    directories and traceback line numbers change on every retry and would
+    turn central 24-hour dedup into a no-op.  Python traceback frame basenames
+    plus function names and the terminal exception type identify the reusable
+    code/root shape.  Non-traceback diagnostics use a conservative normalized
+    fallback so the alert remains classifiable without hashing raw ids.
+    """
+    lines = str(value).strip().splitlines()
+    frames: list[str] = []
+    exception_type = ""
+    for line in lines:
+        frame_match = _TRACEBACK_FRAME_RE.match(line)
+        if frame_match:
+            raw_path = frame_match.group("path")
+            basename = raw_path.rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
+            function = (frame_match.group("function") or "<module>").strip()
+            frames.append(f"{basename}:{function}")
+        exception_match = _EXCEPTION_TYPE_RE.match(line)
+        if exception_match:
+            exception_type = exception_match.group("type")
+
+    if frames or exception_type:
+        normalized = (
+            f"exception={exception_type or '<unknown>'}\n"
+            f"frames={'>'.join(frames) or '<none>'}"
+        )
+    else:
+        normalized = "\n".join(line.rstrip() for line in lines)
+        for pattern, replacement in _DYNAMIC_FALLBACK_REPLACEMENTS:
+            normalized = pattern.sub(replacement, normalized)
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:12]
 
 
