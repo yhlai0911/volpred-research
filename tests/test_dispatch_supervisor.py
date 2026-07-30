@@ -11815,6 +11815,9 @@ def test_restart_never_executes_closeout_without_matching_generation(
     assert {item["job_id"] for item in rejected} == {"job-a", "job-b"}
     assert {item["rejection_reason"] for item in rejected} == {"generation_mismatch"}
     assert alerts[0]["alert_key"] == "phase_z_generation_rejected"
+    assert alerts[0]["fingerprint"] == [
+        "phase_z_generation_rejected:generation_mismatch"
+    ]
 
 
 def test_closeout_failure_restart_reuses_same_generation_until_terminal(

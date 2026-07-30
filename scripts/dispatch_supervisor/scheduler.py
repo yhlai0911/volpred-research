@@ -269,7 +269,7 @@ def _reject_unmatched_generation(
             "依 rejection receipt 的 job_id / cohort_id 查明原 generation；"
             "不得用目前工作區的 singleton baseline 代替。",
         ]),
-        fingerprint=f"phase_z_generation_rejected:{reason}",
+        fingerprint=[f"phase_z_generation_rejected:{reason}"],
     )
     return {
         "committed": False,
@@ -1719,7 +1719,6 @@ async def _tick_once(
         due=due,
         prev_fire=prev_fire.isoformat(),
         fire_request=peeked_request,
-        pregate_mode="retired",
     )
     dec = decision.decide(dec_input)
     if dec.action == decision.ACTION_SKIP:
@@ -1780,7 +1779,7 @@ async def _tick_once(
         except Exception as exc:  # noqa: BLE001
             LOG.warning("pre_fire_guard failed (non-fatal, firing anyway): %s", exc)
     # H4-4 retirement: the old heuristic pregate never obtained an acceptable
-    # shadow result (2/2 skip candidates discarded substantive work).  It no
+    # shadow result (9/10 skip candidates discarded substantive work).  It no
     # longer participates in this formal fire path.  Capacity, ownership and
     # due-ness are decided above by the single Operations Core pipeline.
     if dec.action != decision.ACTION_FIRE:  # decide() contract: fire is all that remains
