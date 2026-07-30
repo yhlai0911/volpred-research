@@ -4768,6 +4768,11 @@ RuntimeError: task task-999 failed at 2026-07-30T03:24:59Z
     await check_task("task-999")
 RuntimeError: task task-999 failed at 2026-07-30T03:24:59Z
 """
+    different_reason_same_frame = """Traceback (most recent call last):
+  File "/private/var/folders/cc/run-777/scheduler.py", line 733, in health_tick
+    await check_task("task-777")
+RuntimeError: task-pool schema corrupt
+"""
 
     supervisor.alerts.send_loop_crash(
         "health_loop", first, state_path=tmp_path / "first.json",
@@ -4782,9 +4787,15 @@ RuntimeError: task task-999 failed at 2026-07-30T03:24:59Z
         different_frame,
         state_path=tmp_path / "different-frame.json",
     )
+    supervisor.alerts.send_loop_crash(
+        "health_loop",
+        different_reason_same_frame,
+        state_path=tmp_path / "different-reason.json",
+    )
 
     assert sends[0] == sends[1]
     assert sends[2] != sends[0]
+    assert sends[3] != sends[0]
 
 
 def test_hang_transport_identity_groups_same_outcome_and_separates_survivors(
@@ -4906,8 +4917,8 @@ RuntimeError: task-101 failed
 RuntimeError: task-999 failed
 """
     different_root = """Traceback (most recent call last):
-  File "/tmp/run-999/worker.py", line 88, in finalize
-RuntimeError: task-999 failed
+  File "/tmp/run-999/worker.py", line 88, in execute
+RuntimeError: task-pool schema corrupt
 """
 
     for index, tail in enumerate((first, same_root, different_root)):

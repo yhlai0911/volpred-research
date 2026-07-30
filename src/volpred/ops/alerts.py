@@ -12,8 +12,10 @@ Alert dedup has exactly TWO stores with an explicit division of labor
   (60s-3600s) kept inside dispatch_state = anti-FLOOD: a crash-looping daemon
   may hit the same failure several times a minute; its dedup throttles the
   burst *before* it even reaches `send-alert`. Alerts that pass the daemon's
-  flood gate still land here (it calls `send-alert --force` because burst
-  semantics differ from standing-condition semantics).
+  flood gate still land here without a transport bypass. Supervisor titles
+  include a normalized root/outcome identity, so this 24-hour layer suppresses
+  repeated occurrences of the same cause while preserving distinct actionable
+  failures.
 
 Telegram progress/interaction has one separate owner (`scripts/progress_report.py`);
 this module must not mirror alerts into that channel. Enforcement Layer Map

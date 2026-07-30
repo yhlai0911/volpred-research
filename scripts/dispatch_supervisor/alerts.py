@@ -64,10 +64,11 @@ _TRACEBACK_FRAME_RE = re.compile(
 _EXCEPTION_TYPE_RE = re.compile(
     r"^\s*(?P<type>[A-Za-z_][A-Za-z0-9_.]*"
     r"(?:Error|Exception|Failure|Exit|Interrupt|Warning|ExceptionGroup))"
-    r"(?::|$)"
+    r"(?::\s*(?P<message>.*))?$"
 )
 _DYNAMIC_FALLBACK_REPLACEMENTS = (
     (re.compile(r"\b\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z?\b"), "<timestamp>"),
+    (re.compile(r"\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\b"), "<uuid>"),
     (re.compile(r"\b[0-9a-fA-F]{8,}\b"), "<hex>"),
     (re.compile(r"(?:[A-Za-z]:)?[/~][^\s\"']+"), "<path>"),
     (re.compile(r"\b\d+\b"), "<number>"),
@@ -84,6 +85,14 @@ def _title_token(value: object, *, default: str) -> str:
     return (token or default)[:64]
 
 
+def _normalize_occurrence_text(value: object) -> str:
+    """Remove retry-specific values while preserving a stable reason."""
+    normalized = " ".join(str(value or "").strip().split())
+    for pattern, replacement in _DYNAMIC_FALLBACK_REPLACEMENTS:
+        normalized = pattern.sub(replacement, normalized)
+    return normalized or "<none>"
+
+
 def _episode_fingerprint(value: str) -> str:
     """Return a stable transport identity for one diagnostic root shape.
 
@@ -96,7 +105,7 @@ def _episode_fingerprint(value: str) -> str:
     """
     lines = str(value).strip().splitlines()
     frames: list[str] = []
-    exception_type = ""
+    exception_chain: list[str] = []
     for line in lines:
         frame_match = _TRACEBACK_FRAME_RE.match(line)
         if frame_match:
@@ -106,17 +115,20 @@ def _episode_fingerprint(value: str) -> str:
             frames.append(f"{basename}:{function}")
         exception_match = _EXCEPTION_TYPE_RE.match(line)
         if exception_match:
-            exception_type = exception_match.group("type")
+            exception_chain.append(
+                f"{exception_match.group('type')}:"
+                f"{_normalize_occurrence_text(exception_match.group('message'))}"
+            )
 
-    if frames or exception_type:
+    if frames or exception_chain:
         normalized = (
-            f"exception={exception_type or '<unknown>'}\n"
+            f"exceptions={'>'.join(exception_chain) or '<unknown>'}\n"
             f"frames={'>'.join(frames) or '<none>'}"
         )
     else:
-        normalized = "\n".join(line.rstrip() for line in lines)
-        for pattern, replacement in _DYNAMIC_FALLBACK_REPLACEMENTS:
-            normalized = pattern.sub(replacement, normalized)
+        normalized = _normalize_occurrence_text(
+            "\n".join(line.rstrip() for line in lines)
+        )
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:12]
 
 
