@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-30T06:05:23.003901+00:00",
+  "generated_at": "2026-07-30T07:01:12.170545+00:00",
   "registry_path": "/Users/yhlai0911/volpred-research/config/control_gate_registry.json",
   "registry_owner": "volpred.ops.control_gate_lifecycle",
   "gates": [
@@ -29,9 +29,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
-        "start": "2026-07-23T06:05:23.003901+00:00",
-        "end": "2026-07-30T06:05:23.003901+00:00",
+        "lookback_start": "2026-07-23T07:01:12.170545+00:00",
+        "start": "2026-07-23T07:01:12.170545+00:00",
+        "end": "2026-07-30T07:01:12.170545+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -47,7 +47,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2890,
+            "row_count": 2904,
             "malformed_rows": 0,
             "invalid_timestamps": 0
           },
@@ -122,9 +122,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
-        "start": "2026-07-23T06:05:23.003901+00:00",
-        "end": "2026-07-30T06:05:23.003901+00:00",
+        "lookback_start": "2026-07-23T07:01:12.170545+00:00",
+        "start": "2026-07-23T07:01:12.170545+00:00",
+        "end": "2026-07-30T07:01:12.170545+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-30T04:30:40.496467+00:00"
       },
@@ -140,7 +140,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 2890,
+            "row_count": 2904,
             "malformed_rows": 0,
             "invalid_timestamps": 0
           },
@@ -169,8 +169,8 @@
         "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
-        "queued": 1,
-        "in_flight": 0,
+        "queued": 0,
+        "in_flight": 1,
         "blocked": 0,
         "unjoined": 0,
         "candidate_outcomes": [
@@ -181,7 +181,7 @@
               "event_article_fomc_2026-07-29_tplus0"
             ],
             "outcomes": [
-              "queued"
+              "in_flight"
             ]
           }
         ],
@@ -228,15 +228,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
-        "start": "2026-07-23T06:05:23.003901+00:00",
-        "end": "2026-07-30T06:05:23.003901+00:00",
+        "lookback_start": "2026-07-23T07:01:12.170545+00:00",
+        "start": "2026-07-23T07:01:12.170545+00:00",
+        "end": "2026-07-30T07:01:12.170545+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-30T04:07:39.599005+00:00"
       },
       "evidence": {
-        "trigger_count": 153,
-        "distinct_candidates": 90,
+        "trigger_count": 152,
+        "distinct_candidates": 89,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_occurrences": 0,
@@ -273,7 +273,7 @@
         "queued": 0,
         "in_flight": 0,
         "blocked": 0,
-        "unjoined": 41,
+        "unjoined": 40,
         "candidate_outcomes": [
           {
             "candidate_id": "009197a07d84a795",
@@ -593,14 +593,6 @@
           },
           {
             "candidate_id": "6f49c6b2b095e60d",
-            "decision_count": 1,
-            "task_ids": [],
-            "outcomes": [
-              "unjoined"
-            ]
-          },
-          {
-            "candidate_id": "74b5b6e1b3924e9e",
             "decision_count": 1,
             "task_ids": [],
             "outcomes": [
@@ -1025,8 +1017,8 @@
       "review": {
         "due": true,
         "reasons": [
-          "raw_triggers=153>=100",
-          "distinct_candidates=90>=20"
+          "raw_triggers=152>=100",
+          "distinct_candidates=89>=20"
         ]
       },
       "pdca_phase": "act",
@@ -1062,9 +1054,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
-        "start": "2026-07-23T06:05:23.003901+00:00",
-        "end": "2026-07-30T06:05:23.003901+00:00",
+        "lookback_start": "2026-07-23T07:01:12.170545+00:00",
+        "start": "2026-07-23T07:01:12.170545+00:00",
+        "end": "2026-07-30T07:01:12.170545+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -1080,7 +1072,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 30,
+            "row_count": 50,
             "malformed_rows": 0,
             "invalid_timestamps": 0
           },
@@ -1150,14 +1142,14 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-23T06:05:23.003901+00:00",
-        "start": "2026-07-23T06:05:23.003901+00:00",
-        "end": "2026-07-30T06:05:23.003901+00:00",
+        "lookback_start": "2026-07-23T07:01:12.170545+00:00",
+        "start": "2026-07-23T07:01:12.170545+00:00",
+        "end": "2026-07-30T07:01:12.170545+00:00",
         "last_reviewed_at": null,
-        "newest_evidence_at": "2026-07-30T06:04:25.789476+00:00"
+        "newest_evidence_at": "2026-07-30T06:23:31.031374+00:00"
       },
       "evidence": {
-        "trigger_count": 30,
+        "trigger_count": 50,
         "distinct_candidates": 10,
         "malformed_rows": 0,
         "incident_count": 0,
@@ -1168,7 +1160,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 30,
+            "row_count": 50,
             "malformed_rows": 0,
             "invalid_timestamps": 0
           },
@@ -1199,7 +1191,7 @@
         "candidate_outcomes": [
           {
             "candidate_id": "K1735",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1735"
             ],
@@ -1209,7 +1201,7 @@
           },
           {
             "candidate_id": "K1737",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1737"
             ],
@@ -1219,7 +1211,7 @@
           },
           {
             "candidate_id": "K1738",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1738"
             ],
@@ -1229,7 +1221,7 @@
           },
           {
             "candidate_id": "K1739",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1739"
             ],
@@ -1239,7 +1231,7 @@
           },
           {
             "candidate_id": "K1741",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1741"
             ],
@@ -1249,7 +1241,7 @@
           },
           {
             "candidate_id": "K1742",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1742"
             ],
@@ -1259,7 +1251,7 @@
           },
           {
             "candidate_id": "K1743",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1743"
             ],
@@ -1269,7 +1261,7 @@
           },
           {
             "candidate_id": "K1744",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1744"
             ],
@@ -1279,7 +1271,7 @@
           },
           {
             "candidate_id": "K1745",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1745"
             ],
@@ -1289,7 +1281,7 @@
           },
           {
             "candidate_id": "K1746",
-            "decision_count": 3,
+            "decision_count": 5,
             "task_ids": [
               "K1746"
             ],
@@ -1305,7 +1297,7 @@
       "review": {
         "due": true,
         "reasons": [
-          "raw_triggers=30>=20",
+          "raw_triggers=50>=20",
           "distinct_candidates=10>=5"
         ]
       },
@@ -1343,9 +1335,9 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-16T06:05:23.003901+00:00",
-        "start": "2026-07-16T06:05:23.003901+00:00",
-        "end": "2026-07-30T06:05:23.003901+00:00",
+        "lookback_start": "2026-07-16T07:01:12.170545+00:00",
+        "start": "2026-07-16T07:01:12.170545+00:00",
+        "end": "2026-07-30T07:01:12.170545+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-26T19:38:01.064738+00:00"
       },

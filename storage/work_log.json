@@ -32129,5 +32129,26 @@
     "owner": "hourly-slot-1-fa5742ac116143f2bd6626aa82aef8a5",
     "commit": null,
     "summary": "第 36 期每日精選導讀已發佈：`mile_6bf24727`「VIX 跳到 20.66、模型只算 16.9%、SPY 一天跌 1.55%：波動率的三個時態，決定你今天該不該減碼」。\n\n**時事骨幹（真實讀數，取自 archive daily_update，非臆造）**：依 2026-07-29 收盤，SPY $729.46 (-1.55%)、VIX 由 07-29 的 18.21 跳到 20.66（+2.45 點 / +13.5%，跨進 20-25「偏高」帶）、GJR-GARCH 條件年化波動率 16.9%（前一日 12.8%）。VIX 減模型 = 3.76 個百分點的落差，本篇論證那是保費而非「誰比誰聰明」。\n\n**具名可帶走框架**：「波動率的三個時態」— 過去式（已實現/GARCH，結構性落後 → 只能決定部位大小）、現在式（今天已發生的跌幅，零延遲但不可交易 → 只能決定去看恐懼寄到哪裡）、未來式（VIX 是 30 天保險報價而非預測 → 只能決定避險價碼貴不貴）。配「三時態對帳表」放在開場後第一個區塊當骨幹，非塞在結尾。\n\n**策展合規（cross-archive 專欄，非本週 recap）**：digest_articles 8 篇 = mile_886193e6(06-26) / mile_4d67163f(07-05) / mile_0f710450(07-14) / mile_e58dc338(07-16) / mile_badbc47b(07-17) / mile_9291c34c(07-21) / mile_35d8941b(07-27) / mile_6e35e47d(07-29)，發佈日**跨度 33 天** ≥ 14 天門檻，`publisher._audit_digest_archive_span` 未擋（僅 informative-span warn）。與 07-27/07-28/07-29 三期 digest 來源**零重疊**。\n\n**主線程前置（未外包給單一 gate）**：`check_arc_dedup.py --audience general` exit 0（verdict `unjudged_thin_signature` — digest 無單一 K 錨點，屬預期，gate 明示需人工補查）；主線程另跑全庫 grep（三個時態 / 該不該減碼 / 現在該做什麼 / 決策指南 / 對帳），唯一近似者 `mile_67b6a9a6`（2026-04-19、research audience、VIX 等級對照 playbook）切法與 audience 皆不同，判定不撞。\n\n**輸出規格**：正文 10,389 字元（扣圖 markdown 後約 8,602 字，對標金標竿 mile_bbd72c0b 的 9,539）；inline 引用連結 22 處（每段當場標源，非文末列清單）；**圖表分工正確** — 內文 8 張沿用來源研究既有圖表 URL 放在對應論證段旁，文末懶人包 3 張是另生的框架摘要 poster（codex-primary `gen_lazypack_codex.py` 成功，2 輪 bounded repair，**未 fallback**），plan 存 `storage/lazypack_plans/daily_digest_20260730_plan.json` 且過 `lazypack_render.py --validate-only`。published 路徑依 publishing.md L183 先同步渲染+上傳+append 才 publish。\n\n**Gate**：`anti_ai_gate.py` exit 0（PASS，warn 1/3 僅長段落；未用 --force）；editor-sop 三階段 9-checklist 全過；額外禁用語 0 命中。`details.content_type='daily_digest'`（首頁 getDigestColumn 依賴）。\n\n**主線程獨立驗證（未只採信 agent 回報）**：local feed 回讀 status/audience/content_type/digest_articles 皆正確；live `https://volpred.zeabur.app/v3/reports/mile_6bf24727` HTTP 200 且 <title> 與 feed 標題相符；抽驗 5 篇來源的 14 個引用數字（6.56% / 2.1555→2.0141 / 1,610 天 / 34.6 倍 / +17.3% / +8.7% / +18.4% / 12.61pp / 3,557 天 / 11.62% / 1,325 天 / 749 天）**全數逐字存在於被引用的來源文章**，無臆造。\n\n**順手修的 reader-visible 缺陷**：首頁編按導言取 content[:200]，原開場段的 inline markdown 連結會以原始語法露出；已走正式 update gateway（`--update mile_6bf24727 --update-action digest_excerpt_fix`）把連結移到第二段，讀數與來源對應不變。"
+  },
+  {
+    "timestamp": "2026-07-30T15:09:51+08:00",
+    "task_id": "event_article_fomc_2026-07-29_tplus0",
+    "task_type": "event_article",
+    "actor": "hourly-slot-1-41b42ccace404217a80d2c5e43c3102d",
+    "owner": "hourly-slot-1-41b42ccace404217a80d2c5e43c3102d",
+    "title": "FOMC 2026-07-29 T+0 事件文章 + publish_draft 事件身分轉發修復",
+    "artifacts": [
+      "storage/event_articles/fomc_2026_07_29_t0/analysis.py",
+      "storage/event_articles/fomc_2026_07_29_t0/evidence.json",
+      "storage/event_articles/fomc_2026_07_29_t0/article.md",
+      "storage/event_articles/fomc_2026_07_29_t0/fb_draft.md",
+      "storage/event_articles/fomc_2026_07_29_t0/fig1_fomc_day_vix.png",
+      "storage/event_articles/fomc_2026_07_29_t0/fig2_implied_vs_realized.png",
+      "scripts/publish_draft.py"
+    ],
+    "published": "mile_45d354f0",
+    "result": "發佈 FOMC T+0 事件文章（mile_45d354f0，live HTTP 200）。證據：2019 起 60 次排定 FOMC 決議日，VIX 下跌僅 58.3%（符號檢定 p=0.123 不顯著）、平均 -0.046 點（t p=0.899）、中位數 -0.53 點（Wilcoxon p=0.038）；本次 +2.45 點居第 95 百分位、實際/隱含 1.34 倍居第 87 百分位。另修根因：publish_draft.py 的 parse_draft/details_payload 從未轉發 event_key/type/date/slot，而 publisher 對 audience=event 硬性要求，導致 canonical path 無法發佈任何事件文章。",
+    "fb_post_status": "fb_post_not_executed",
+    "fb_note": "FB 文案已產出並過 anti_ai_gate（FB mode exit 0），但本班 50min cap 已到，未執行 claude-in-chrome 發文；已建 follow-up task。"
   }
 ]
