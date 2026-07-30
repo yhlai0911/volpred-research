@@ -36,8 +36,6 @@ def _inp(**overrides) -> decision.DecisionInput:
         due=True,
         prev_fire="2026-07-20T10:07:00",
         fire_request=None,
-        pregate_mode="off",
-        demand=None,
         candidates=(),
     )
     base.update(overrides)
@@ -68,32 +66,25 @@ def test_not_due_without_request_skips() -> None:
     assert (dec.action, dec.reason) == ("skip", "not_due")
 
 
-def test_due_cron_mode_off_fires_without_demand() -> None:
-    dec = decision.decide(_inp(pregate_mode="off"))
+def test_due_cron_fires() -> None:
+    dec = decision.decide(_inp())
     assert (dec.action, dec.fire_reason) == ("fire", "cron")
 
 
-def test_requested_off_cadence_fires_and_bypasses_pregate() -> None:
-    dec = decision.decide(_inp(due=False, fire_request="boss-email", pregate_mode="enforce"))
+def test_requested_off_cadence_fires() -> None:
+    dec = decision.decide(_inp(due=False, fire_request="boss-email"))
     assert (dec.action, dec.fire_reason) == ("fire", "requested:boss-email")
 
 
-def test_request_on_due_cron_merges_and_bypasses_pregate() -> None:
-    dec = decision.decide(_inp(due=True, fire_request="boss-email", pregate_mode="enforce"))
+def test_request_on_due_cron_merges() -> None:
+    dec = decision.decide(_inp(due=True, fire_request="boss-email"))
     assert (dec.action, dec.fire_reason) == ("fire", "cron+requested:boss-email")
-
-
-def test_retired_pregate_fields_cannot_veto_due_cron() -> None:
-    dec = decision.decide(_inp(pregate_mode="enforce", demand={"pregate_skip": True}))
-    assert (dec.action, dec.fire_reason) == ("fire", "cron")
-    assert dec.reason == "due"
 
 
 # ──────────────────────────────────────────────────────────── purity locks ──
 
 def test_decide_is_deterministic_over_repeated_calls() -> None:
-    inp = _inp(pregate_mode="shadow", demand={"pregate_skip": False},
-               fire_request=None, candidates=({"id": "t1", "priority": 1},))
+    inp = _inp(fire_request=None, candidates=({"id": "t1", "priority": 1},))
     first = decision.decide(inp)
     for _ in range(100):
         assert decision.decide(inp) == first

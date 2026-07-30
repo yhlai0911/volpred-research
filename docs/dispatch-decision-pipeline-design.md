@@ -62,7 +62,11 @@
 
 ### 1.3 Owner C — pregate
 
-檔案：`scripts/hourly_dispatch_pregate.py`（360 行）
+> **Pre-retirement inventory snapshot（2026-07-20）**：本節描述 H4-4
+> 切換前狀態；終態以 §3.3 與 Q3 的 2026-07-30 決議為準。
+
+當時檔案：`scripts/hourly_dispatch_pregate.py`（現已移至
+`scripts/_legacy/hourly_dispatch_pregate.py`）
 
 | 裁決 | 證據 |
 | --- | --- |
@@ -76,7 +80,7 @@
 
 **自帶寫入路徑**：有，但僅 append-only 觀測 log — `scripts/hourly_dispatch_pregate.py:266-278` 寫 `storage/logs/hourly_pregate.jsonl`。不碰 `next_tasks.json`。
 
-**但它現在確實會裁決**：`scripts/dispatch_supervisor/scheduler.py:781-788` 在 enforce 模式下依 pregate 退出碼直接 `pregate_skip` 並消耗 slot。故現況與 D3「明文 observational」**尚未一致**——pregate 具有真實否決權，取決於 `schedules.json` 的 mode 值（`scheduler.py:457-497` `load_pregate_config`）。
+**當時確實會裁決**：`scripts/dispatch_supervisor/scheduler.py:781-788` 在 enforce 模式下依 pregate 退出碼直接 `pregate_skip` 並消耗 slot。此 pre-cutover 缺陷已由 §3.3 的 H4-4 終態消除。
 
 ### 1.4 Owner D — `scripts/dispatch_slot_budget.py`（289 行）
 
@@ -190,10 +194,19 @@
 
 ### 3.3 pregate 明文 observational（呼應 D3）
 
-- `scripts/hourly_dispatch_pregate.py` 的 `decide()`（`:280`）輸出降級為 **pipeline 的一個輸入欄位**（`demand_signals`），不再具備退出碼否決權。
-- 移除 `scripts/dispatch_supervisor/scheduler.py:774-788` 中「pregate 回傳 skip → 直接 return + 吃 slot」的分支；改為把 pregate 結果放進 `DecisionInput.demand`，由 pipeline 統一裁決是否 skip。
-- `scripts/hourly_dispatch_pregate.py` 的 `--shadow` 旗標（`:326`）與 `schedules.json` 的 `mode` 欄位（`scheduler.py:457-497`）在收斂後只剩「是否寫 log」的意義，enforce 模式應退場。
-- shell 內的 pregate 註解（`scripts/cron_hourly_dispatch.sh:158-176`）依 D3 改為「刻意 observational」。
+> **2026-07-30 H4-4 最終裁定（取代本節原 observational-transfer 草案）**：
+> production crosscheck 的 10 個 skip candidates 有 9 個仍產生實質工作，
+> 因此 demand heuristic 本身不具安全裁決價值。保留它作 `DecisionInput`
+> 不是 ownership transfer，而是把錯誤判準搬入新 owner。
+
+- `scripts/dispatch_supervisor/scheduler.py` 移除 pregate subprocess 與所有 skip
+  分支；`DecisionInput` 不再有 `pregate_mode` / `demand` 欄位。
+- `config/runtime_schedules.json` 移除 pregate config，防止單一熱重載字串恢復否決權。
+- evaluator 移至 `scripts/_legacy/hourly_dispatch_pregate.py`；CLI 只回報
+  `retired/no-decision`，不讀寫 production state/log。
+- `storage/logs/hourly_pregate.jsonl` 與
+  `scripts/crosscheck_pregate_outcomes.py` 依 S9 保留為歷史 audit baseline；
+  共享 substantive taxonomy 由 `volpred.ops.dispatch_outcomes` 擁有。
 
 ### 3.4 四項裁決集中，其餘退化為輸入
 
@@ -204,7 +217,7 @@
 | **cluster budget** | `decision.py`；`dispatch_slot_budget.budget()` 保持純函數，其 `cap` / `p1_only_slots` 成為輸入 | slot_budget 已是純函數，**不需改**（唯一乾淨的 owner）；prompt.md 的 cap 段落刪除 |
 | **burst** | `decision.py`；`dispatch_burst.active()` / `read_window()` 成為輸入 | `task_pool_claim._request_burst_fire`（`:660-678`）保留（那是 ingress 喚醒，不是裁決）；`task_urgency.dispatch_lane()` 降為候選排序輸入 |
 
-其餘一律為 **inputs**：`auth_blocked`、`quota_derate`、`occupancy`、`recent_type_counts`、`open_incident`、`demand_signals`。
+其餘一律為 **inputs**：`auth_blocked`、`quota_derate`、`occupancy`、`recent_type_counts`、`open_incident`。`demand_signals` 已由 2026-07-30 H4-4 最終裁定退役。
 
 ### 3.5 介面草案（signature 級）
 
@@ -223,7 +236,6 @@ class DecisionInput:
     fire_capacity: int              # scheduler.load_max_slots()
     active_jobs: list[dict]         # state snapshot current_jobs
     burst: dict | None              # volpred.ops.dispatch_burst.status()
-    demand: dict                    # hourly_dispatch_pregate.decide()  ← observational
     recent_type_counts: Counter
     fire_reason: str                # "cron" | "requested:<r>" | "cron+requested:<r>"
 
@@ -340,12 +352,20 @@ def decide(inp: DecisionInput) -> Decision: ...
 
 ### R3 — pregate 從 enforce 降為 observational 造成 token 成本回升（中）
 
-pregate 的存在理由是省下 ~95K 的 cold-load（`scripts/hourly_dispatch_pregate.py:6-8`）。降為 observational 後，若 `decision.py` 沒有等價的「無值得做的事就 skip」判斷，每小時都會 fire。
+**2026-07-30 最終裁定：本風險的原假設被 production evidence 推翻。**
+pregate 想省下 cold-load，但最終 crosscheck 的 10 個 skip candidates 有 9 個
+仍產生實質工作；把同一 heuristic 搬進 `decision.py` 會保留 90% false-skip
+風險，並非安全的等價功能。
 
 **緩解**：
-- `decision.py` 必須把 `demand` 納入 `action="skip"` 的判準之一（§4.1 測項 9 的措辭是「不得**單獨**把 fire 變 skip」，而非「不得影響」）——語意是所有權轉移，不是功能移除。
-- H4-4 上線後 7 天監控 `dispatch_state.json` 的 fire 次數與 token 用量；若相較 H4-4 前基準上升 > 20%，回滾 H4-4 單一 commit。
-- 保留 `storage/logs/hourly_pregate.jsonl`（`hourly_dispatch_pregate.py:266-278`）作為對照基準線，不隨 H4-4 一併移除。
+- 不把已證偽的 `demand` 搬入 `DecisionInput`；若未來要省 token，須以新的
+  可歸因 signals 另立設計與 shadow gate，不得復活 legacy evaluator。
+- H4-4 上線後 7 日監控仍保留，canonical item =
+  `observation_ledger.hourly_pregate_retirement_monitor`，deadline
+  `2026-08-06T19:30:00+08:00`。比較 fire frequency 與可得 provider-usage
+  proxy；回退門檻仍為 >20%。
+- 回退只能切回 H4-4 前 immutable release 以調查 regression；不得恢復 legacy
+  executable owner 或 pregate 否決權。歷史 log 與 crosscheck 依 S9 保留。
 
 ### R4 — `continue_task_dispatch.py` 目前無生產 caller，改動缺乏實戰回歸信號（中）
 
@@ -423,6 +443,13 @@ pregate 的存在理由是省下 ~95K 的 cold-load（`scripts/hourly_dispatch_p
 **推薦 (b)**。理由：診斷入口有實際價值（17h member_qa 餓死事故就是靠人跑這支發現的，`continue_task_dispatch.py:70-77`），但必須先修 §1.2 的 `--dry-run` 假旗標，否則「診斷」動作本身會改 state。
 
 ### Q3 — pregate 的 enforce 分支：移除還是保留？
+
+**2026-07-30 決議：採 (a)，並進一步完整 retire。** Production shadow
+在 capacity + novelty rewire 後最終累積 10 個 skip candidates，其中 9 班有實質
+產出（90% false skips，門檻 ≤10%）。`runtime_schedules.json` 已移除 pregate config，
+`decision.py` / `scheduler.py` 已移除 collect/enforce 分支；保留的 evaluator
+CLI 只回報 `retired/no-decision`，不再寫入 gate evidence。歷史 log 與 crosscheck 儀器依 S9
+保留，僅供退役前後對照，不是 runtime authority。
 
 生產 mode 已是 `shadow`（§7 item 4），但 enforce 分支仍在 `scheduler.py:781-788`，改一個 config 字串即生效；而 token_ops_waste gate 已裁定「刻意不翻 enforce」。
 

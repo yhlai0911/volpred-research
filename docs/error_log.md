@@ -5289,3 +5289,36 @@ legacy record、knowledge 與 result artifact 為明確不同欄位，首頁標�
 production read-back 為 indexed experiments 1388、result artifacts 1514、
 legacy records 115、knowledge items 3198，兩個首屏可見 DOM 都等於 1388，
 `vnext-live` errors 為空。此類為 **`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-07-30 — H4-4 pregate 退役後，活規格與 observation ledger 仍宣稱 permanent shadow
+
+**證據化症狀**：`hourly_pregate` 已從 scheduler 與 runtime schedule 移除，
+但 `observation_ledger.pregate_shadow` 仍是 `permanent`；設計文件 §3.3/R3
+仍要求把 heuristic demand 搬入 `DecisionInput`，active `scripts/` namespace
+也仍保留可直接呼叫的 evaluator。三個 surface 與 control-gate registry 的
+`last_action=retire` 相互矛盾。
+
+**根因層級（retirement／living-spec contract）**：第一輪只切斷 runtime
+caller，沒有沿 downstream authority graph 清除 ledger、interface schema 與
+active executable namespace；而 task completion 在這些 read-back 前過早寫成
+`root_cause_fixed_and_verified`。
+
+**底層修復與制度化**：最終 production crosscheck 共 229 班、10 個
+would-skip candidates，其中 9 班仍有可歸因的實質產出（90% false skip，
+門檻 ≤10%），故不把已證偽 heuristic 搬入新 owner。已移除
+`DecisionInput.pregate_mode/demand`，evaluator 移至
+`scripts/_legacy/hourly_dispatch_pregate.py` 並只回報
+`retired/no-decision`；共享 substantive taxonomy 抽至
+`volpred.ops.dispatch_outcomes`，crosscheck 仍可重現歷史母體。
+repository tests 鎖住 active script 不存在、schedule 無 pregate、ledger
+shadow 已結案及 time-bound monitor 存在。
+
+**下游 read-back 與狀態**：`pregate_shadow` 已透過 canonical
+`volpred ops observation resolve` 結案，另立
+`hourly_pregate_retirement_monitor`，deadline =
+`2026-08-06T19:30:00+08:00`。在 7 日 post-cutover fire／provider-usage
+read-back 與 rollback rehearsal receipt 完成前，本 H4-4 slice 為
+**`contained`**；不得沿用先前過早的
+`root_cause_fixed_and_verified` 口徑。

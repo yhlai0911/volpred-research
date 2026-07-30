@@ -1,6 +1,6 @@
 {
   "schema": "observation_ledger.v1",
-  "updated_at": "2026-07-29T22:52:42.921354+00:00",
+  "updated_at": "2026-07-30T11:17:39.763113+00:00",
   "items": [
     {
       "id": "pregate_shadow",
@@ -8,8 +8,10 @@
       "started_at": "2026-07-01T00:00:00+08:00",
       "deadline": null,
       "action_on_expiry": null,
-      "status": "permanent",
-      "note": "token_ops_waste gate 裁定（WS1a，commit 5ff007b98）：刻意不翻 enforce — strict_mismatch 50%、12 班 would-skip 有 6 班有實質產出；且 07-12 起池常有 P1/P2、would_skip=0%，skip 節省前提不成立。enforce 前提 = pregate demand heuristic 重設計，暫不立案 → permanent-observational，免 deadline"
+      "status": "decided",
+      "note": "token_ops_waste gate 裁定（WS1a，commit 5ff007b98）：刻意不翻 enforce — strict_mismatch 50%、12 班 would-skip 有 6 班有實質產出；且 07-12 起池常有 P1/P2、would_skip=0%，skip 節省前提不成立。enforce 前提 = pregate demand heuristic 重設計，暫不立案 → permanent-observational，免 deadline",
+      "decided_at": "2026-07-30T11:17:39.471301+00:00",
+      "resolution": "H4-4 retired hourly_pregate on 2026-07-30 after the final production crosscheck found 9 substantive-work false skips among 10 candidates; runtime config, decision authority, and active executable surface were removed."
     },
     {
       "id": "hourly_dispatch_deliverable8_legacy_retirement",
@@ -50,6 +52,15 @@
       "action_on_expiry": "zero unknown-author incidents -> add governance to writer_isolation.lanes and open recognizer retirement case; any incident -> set writer_isolation.mode=off and file root-cause task",
       "status": "observing",
       "note": "refactor_plan_ops_master_2026_07 WS-B; commits 5d0cc4fb0 + 4f95639c5"
+    },
+    {
+      "id": "hourly_pregate_retirement_monitor",
+      "what": "H4-4 post-cutover monitor: compare Operations Core dispatch fire frequency and available provider-usage proxy against the pre-retirement baseline; verify no hourly_pregate evidence or executable authority reappears.",
+      "started_at": "2026-07-30T19:07:15+08:00",
+      "deadline": "2026-08-06T19:30:00+08:00",
+      "action_on_expiry": "Run the H4-4 post-cutover audit and record a rollback rehearsal receipt; if dispatch fire or provider-usage proxy regresses by more than 20 percent, rollback the immutable H4-4 release without restoring any legacy executable owner, then reopen the control-gate review.",
+      "status": "observing",
+      "note": "Required by docs/dispatch-decision-pipeline-design.md R3 and Issue #46 rollback/sustained-clean gate."
     }
   ]
 }

@@ -3,7 +3,7 @@
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
     "updated_at": "2026-07-30T19:10:00+08:00",
-    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the Operations Core shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本評估曾依賴 hourly_pregate；demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，估算 15min 約為 hourly 的 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。【2026-07-30 H4-4 最終裁定】2026-07-20 後 production shadow 觀察中，新 gate 於 162 班僅產生 2 班 would_skip（1.2%），且 2/2 皆有實質產出（100% 誤判，門檻 ≤10%）。因此不是延長 shadow 或補更多 heuristic，而是正式 retire：runtime schedule 移除 pregate config，decision/scheduler 移除 collect/enforce 分支。歷史 log、舊 CLI 與 scripts/crosscheck_pregate_outcomes.py 僅保留為 retirement 前後稽核工具；不屬於 runtime execution graph，亦不得重新取得派工否決權。"
+    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the Operations Core shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本評估曾依賴 hourly_pregate；demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，估算 15min 約為 hourly 的 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。【2026-07-30 H4-4 最終裁定】2026-07-20 後 production shadow 最終 crosscheck 共 229 班，產生 10 班 would_skip；其中 9 班仍有可歸因的實質產出（90% 誤判，門檻 ≤10%）。因此不是延長 shadow 或補更多 heuristic，而是正式 retire：runtime schedule 移除 pregate config，decision/scheduler 移除 collect/enforce 分支，舊 CLI 只回報 retired/no-decision 且不寫證據。歷史 log 與 scripts/crosscheck_pregate_outcomes.py 僅保留為 retirement 前後稽核基線；不得重新取得派工否決權。"
   },
   "schedule_materialization": {
     "schema": 1,
@@ -1797,7 +1797,7 @@
       "status": "retired",
       "retired_at": "2026-07-04T16:36:00+08:00",
       "physically_retired_at": "2026-07-30T06:45:00+08:00",
-      "reason": "Deliverable 8 physically retired the legacy executable surfaces. Operations Core agent_dispatch_tick invokes the executor through a Unix socket; this row remains only as canonical hourly schedule policy. H4-4 retired the heuristic pregate after its production shadow window produced 2/2 substantive-work false skips.",
+      "reason": "Deliverable 8 physically retired the legacy executable surfaces. Operations Core agent_dispatch_tick invokes the executor through a Unix socket; this row remains only as canonical hourly schedule policy. H4-4 retired the heuristic pregate after its final production crosscheck found 9 substantive-work false skips among 10 skip candidates.",
       "host_crontab_managed": false,
       "note_schedule_still_canonical": "Operations Core ticks the executor every minute; dispatch_supervisor/scheduler.py load_cron_expr() reads this row's `schedule` to decide whether that tick represents the hourly business slot. The executable, live copy, LaunchAgent, and pregate authority no longer exist."
     },

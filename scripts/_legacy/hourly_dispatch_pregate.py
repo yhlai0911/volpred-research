@@ -1,10 +1,14 @@
-#!/usr/bin/env python3
-"""Hourly-dispatch pre-gate.
+"""Retired hourly-dispatch pre-gate evaluator.
 
-Cheaply decide (pure Python, NO LLM, zero token) whether this hourly fire has
-work worth the ~95K `claude -p` cold-load. Most hourly fires are stubs (loaded
-context, found no high-priority work, exited) yet still pay the ~95K boot cost
-(~18/22 fires on 2026-07-01). This gate skips those.
+This module is retained only so historical evidence and the crosscheck tooling
+remain reproducible. H4-4 retired its scheduler authority on 2026-07-30 after
+the final production crosscheck found 9 substantive-work false skips among 10
+skip candidates (90%, versus the 10% ceiling). ``main()`` is therefore
+fail-inert: direct invocation never evaluates, writes state/logs, or returns
+the former SKIP/PROCEED exit codes.
+
+The historical evaluator implementation below includes its former readers and
+writers for reproducibility. None of them is a runtime dispatch interface.
 
 Signals (all local reads, fail-open):
   A. email backlog      — pending email_reply tasks (PHASE 0, highest priority)
@@ -42,28 +46,26 @@ Both are VETOES on the `high_prio` path only, never on hard demand:
   - `cadence_due` (substantive research starved >= window_hours) also bypasses
     both vetoes, so a static pool can never starve research indefinitely.
   - fail-open throughout: ANY read error -> treat as demand / capacity / novel.
-  - every decision logged to storage/logs/hourly_pregate.jsonl (observable).
+  - historically, every decision was logged to
+    storage/logs/hourly_pregate.jsonl (observable).
 
-Exit code: 0 = SKIP (real mode only), 1 = PROCEED (run claude -p).
-  --shadow : never skip (always exit 1); just LOG the would-be decision.
-             Run this way for ~1 week to validate that "would-skip" fires truly
-             produced nothing, before enabling real skipping.
-
-Usage:
-  uv run python scripts/hourly_dispatch_pregate.py --window-hours 3 --shadow
-  uv run python scripts/hourly_dispatch_pregate.py --window-hours 3   # real
+Direct CLI exit code: 2 = RETIRED. No decision or evidence is written.
 """
 from __future__ import annotations
-import argparse
+
 import hashlib
 import json
 import logging
 import os
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "src"))
+
+from volpred.ops.dispatch_outcomes import SUBSTANTIVE_TASK_TYPES
+
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 DASHBOARD = ROOT / "storage" / "ops" / "dashboard_latest.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
@@ -80,11 +82,7 @@ _HOST_TZ = timezone(timedelta(hours=8))
 # SINGLE SOURCE: scripts/crosscheck_pregate_outcomes.py imports this set —
 # do not fork a second copy (2026-07-10: the two had already drifted on
 # daily_digest).
-SUBSTANTIVE_TYPES = {
-    "daily_article", "daily_digest", "experiment", "paper_body", "paper_review",
-    "paper_decision", "event_article", "member_qa", "trending_repost",
-    "strategy_lifecycle",
-}
+SUBSTANTIVE_TYPES = SUBSTANTIVE_TASK_TYPES
 
 
 def _warn(tag: str, msg: str, **ctx) -> None:
@@ -477,51 +475,12 @@ def decide(window_hours: float) -> dict:
 
 
 def main(argv: list) -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--window-hours", type=float, default=3.0)
-    ap.add_argument("--shadow", action="store_true", help="never skip; only log the would-be decision")
-    # 2026-07-10 歸因欄位：不帶 --invoker 的呼叫（手動 / 測試 / 不明來源）記 "manual"，
-    # supervisor 呼叫記 "supervisor" — skip-vs-產出交叉核對只採 supervisor entries，
-    # 解決 13:34:58 三筆一秒內不明來源 entries 污染觀察資料的問題。
-    ap.add_argument("--invoker", default="manual",
-                    help="who invoked this run (supervisor|shell|manual|test); logged for attribution")
-    args = ap.parse_args(argv)
-
-    try:
-        d = decide(args.window_hours)
-        proceed = d["proceed"]
-        reasons = d["reasons"]
-        signature = d.get("signature")
-    except Exception as e:
-        # top-level fail-open: never skip on an unexpected error
-        _warn("pregate_fatal", "decide() crashed, fail-open PROCEED", err=str(e))
-        _log_decision({"ts": _now().isoformat(), "mode": "shadow" if args.shadow else "real",
-                       "invoker": args.invoker,
-                       "decision": "proceed", "reason": "fail_open_exception", "err": str(e)})
-        return 1
-
-    would_skip = not proceed
-    # Advance the novelty baseline exactly when the DECISION was proceed — a
-    # skip must not advance it, or the next fire would compare against a world
-    # nobody looked at, and a static pool would alternate skip/proceed forever.
-    # Note this keys on the decision, not on whether the process exits 1: in
-    # shadow mode a would-skip fire still runs (and still consumes a task), so
-    # the baseline stays where real mode would have left it. Shadow therefore
-    # slightly OVER-estimates novelty — the proceed-leaning direction, which is
-    # the safe way for an observation window to be wrong.
-    if proceed and signature:
-        _write_signature(signature)
-
-    if args.shadow:
-        _log_decision({"ts": _now().isoformat(), "mode": "shadow", "invoker": args.invoker,
-                       "would_skip": would_skip,
-                       "window_hours": args.window_hours, "reasons": reasons})
-        return 1  # shadow: always proceed (zero behavior change)
-
-    _log_decision({"ts": _now().isoformat(), "mode": "real", "invoker": args.invoker,
-                   "decision": "skip" if would_skip else "proceed",
-                   "window_hours": args.window_hours, "reasons": reasons})
-    return 0 if would_skip else 1
+    del argv
+    sys.stderr.write(
+        "hourly_dispatch_pregate is retired; Operations Core owns dispatch "
+        "admission and no pregate decision was emitted.\n"
+    )
+    return 2
 
 
 if __name__ == "__main__":

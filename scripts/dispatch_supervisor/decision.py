@@ -24,8 +24,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any
 
 ACTION_FIRE = "fire"
 ACTION_SKIP = "skip"
@@ -50,10 +51,6 @@ class DecisionInput:
     due: bool                      # _due_to_fire(...) verdict, pre-computed
     prev_fire: str | None          # ISO prev scheduled slot (receipt only)
     fire_request: str | None       # pending request reason, or None
-    # Legacy receipt fields retained while old replay fixtures age out. They
-    # are deliberately ignored by decide(): H4-4 retired pregate authority.
-    pregate_mode: str = "retired"
-    demand: Mapping[str, Any] | None = None
     candidates: tuple[Mapping[str, Any], ...] = ()  # ctd library outputs (unused yet)
 
     def digest(self) -> str:
@@ -67,8 +64,6 @@ class DecisionInput:
             "due": self.due,
             "prev_fire": self.prev_fire,
             "fire_request": self.fire_request,
-            "pregate_mode": self.pregate_mode,
-            "demand": dict(self.demand) if self.demand is not None else None,
             "candidates": [dict(c) for c in self.candidates],
         }
         blob = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str)

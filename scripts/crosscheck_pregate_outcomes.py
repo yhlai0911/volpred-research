@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-"""Pregate skip-vs-outcome 交叉核對 — enforce flip 重評的 canonical 儀器。
+"""Retired pregate skip-vs-outcome historical audit.
 
-2026-07-10 topology-audit 教訓：flip criteria 必須連同「歸因儀器」一起設計。
+This tool preserves the evidence that justified H4-4 retirement. Its output
+must never authorize an enforce flip or restore dispatch authority; any future
+admission heuristic requires a new design, identity, and observation window.
+
+2026-07-10 topology-audit 教訓：當時的 flip criteria 必須連同「歸因儀器」一起設計。
 本 script 回答三個問題：
 
   1. would_skip=true 的班，實際 fire 是否產出實質工作？（誤判率）
@@ -12,13 +16,14 @@
   2. 歸因儀器健康度：落在 hourly fire active window（dispatch_state completions
      的 [fire_at, fire_at+duration_s]）內的 substantive work_log entries 有 hourly
      蓋章（actor 或 owner）的比例 —— 這是 strict detector 依賴的族群。
-     （window-scoped coverage 低 → fire 產出未可靠蓋章 → strict 可能漏判 → 不可 flip）
+     （window-scoped coverage 低 → fire 產出未可靠蓋章 → strict 可能漏判）
      並列 all-population coverage 作資訊性下界：它把 concurrent codex-loop /
      interactive work 也算進分母，故遠低於 window-scoped，不作 gate。
   3. 資料衛生：非 supervisor invoker 的 entries 數（手動/測試污染）
 
-Flip 重評門檻（見 next_tasks topology-audit-20260710-pregate-observability）：
+Historical acceptance ceiling（不是復活條件）：
   invoker=supervisor 資料 ≥24h、attribution coverage 高、strict 誤判率 ≤10%。
+The final production result was 9/10 false skips, so the gate was retired.
 
 Usage:
     uv run python scripts/crosscheck_pregate_outcomes.py [--since 2026-07-10T00:00:00+00:00]
@@ -38,11 +43,13 @@ PREGATE_LOG = ROOT / "storage" / "logs" / "hourly_pregate.jsonl"
 WORK_LOG = ROOT / "storage" / "work_log.json"
 DISPATCH_STATE = ROOT / "storage" / "ops" / "dispatch_state.json"
 
-# Single source (2026-07-10): this file kept its own copy of the type set and it
-# had already drifted from the gate's. An audit tool measuring a different
-# population than the gate it audits is worse than no audit.
-sys.path.insert(0, str(ROOT / "scripts"))
-from hourly_dispatch_pregate import SUBSTANTIVE_TYPES as SUBSTANTIVE  # noqa: E402
+# Single source (2026-07-10): this file once kept its own copy of the type set
+# and drifted from the gate's.  The evaluator is now retired, so the shared
+# taxonomy lives in the active domain module rather than under a legacy CLI.
+sys.path.insert(0, str(ROOT / "src"))
+from volpred.ops.dispatch_outcomes import (
+    SUBSTANTIVE_TASK_TYPES as SUBSTANTIVE,
+)
 
 
 def _parse(s) -> datetime | None:

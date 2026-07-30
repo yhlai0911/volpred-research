@@ -22,6 +22,11 @@ def test_scheduler_tick_has_no_pregate_execution_edge() -> None:
     assert "pregate_skip" not in source
 
 
+def test_retired_pregate_has_no_active_executable_surface() -> None:
+    assert not (ROOT / "scripts" / "hourly_dispatch_pregate.py").exists()
+    assert (ROOT / "scripts" / "_legacy" / "hourly_dispatch_pregate.py").is_file()
+
+
 def test_canonical_schedule_has_no_pregate_authority() -> None:
     payload = json.loads(
         (ROOT / "config" / "runtime_schedules.json").read_text(
@@ -38,22 +43,19 @@ def test_canonical_schedule_has_no_pregate_authority() -> None:
     assert "pregate" not in row["description"].lower()
 
 
-def test_legacy_pregate_receipt_fields_are_observational_only() -> None:
-    inp = decision.DecisionInput(
-        auth_blocked=False,
-        active_slots=0,
-        capacity=1,
-        quota_derated=False,
-        last_fire_known=True,
-        due=True,
-        prev_fire="2026-07-30T10:07:00",
-        fire_request=None,
-        pregate_mode="enforce",
-        demand={"pregate_skip": True},
+def test_observation_ledger_closes_shadow_and_tracks_retirement_window() -> None:
+    payload = json.loads(
+        (ROOT / "storage" / "ops" / "observation_ledger.json").read_text(
+            encoding="utf-8"
+        )
     )
-    verdict = decision.decide(inp)
-    assert (verdict.action, verdict.reason, verdict.fire_reason) == (
-        "fire",
-        "due",
-        "cron",
-    )
+    items = {item["id"]: item for item in payload["items"]}
+    assert items["pregate_shadow"]["status"] == "decided"
+    monitor = items["hourly_pregate_retirement_monitor"]
+    assert monitor["status"] == "observing"
+    assert monitor["deadline"] == "2026-08-06T19:30:00+08:00"
+
+
+def test_decision_input_has_no_retired_pregate_fields() -> None:
+    parameters = inspect.signature(decision.DecisionInput).parameters
+    assert {"pregate_mode", "demand"}.isdisjoint(parameters)

@@ -8,7 +8,7 @@ The honest answer depends entirely on the pregate. With a demand-only gate
 ("is there work?") it IS ~4x: the pool always holds P1/P2, so `high_prio` was
 true on 164/164 fires over the preceding week and would_skip was 0 — every one
 of the 4 fires/hour pays the full ~95K cold-load. With the novelty gate added
-to scripts/hourly_dispatch_pregate.py the question becomes "how often does the
+to the now-retired scripts/_legacy/hourly_dispatch_pregate.py the question becomes "how often did the
 actionable world actually CHANGE?", and that is measurable from data we already
 keep, without running a 2-hour live A/B.
 

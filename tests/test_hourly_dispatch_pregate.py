@@ -6,9 +6,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ROOT / "scripts"
-if str(SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS))
+LEGACY_SCRIPTS = ROOT / "scripts" / "_legacy"
+if str(LEGACY_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(LEGACY_SCRIPTS))
 
 import hourly_dispatch_pregate as pregate  # type: ignore
 
@@ -102,6 +102,7 @@ def test_decide_would_skip_true_when_all_signals_quiet(tmp_path, monkeypatch):
     # compute queue / alerts module
     monkeypatch.setattr(pregate, "COMPUTE_QUEUE", tmp_path / "no_queue")
     monkeypatch.setattr(pregate, "has_publish_drought", lambda: False)
+    monkeypatch.setattr(pregate, "free_slots", lambda: 4)
 
     result = pregate.decide(window_hours=3.0)
     assert result["proceed"] is False
@@ -172,23 +173,6 @@ def _isolate_main(tmp_path, monkeypatch):
     monkeypatch.setattr(pregate, "COMPUTE_QUEUE", tmp_path / "no_queue")
     monkeypatch.setattr(pregate, "has_publish_drought", lambda: False)
     return log
-
-
-def test_main_logs_invoker_supervisor(tmp_path, monkeypatch):
-    log = _isolate_main(tmp_path, monkeypatch)
-    rc = pregate.main(["--shadow", "--invoker", "supervisor"])
-    assert rc == 1  # shadow never skips
-    entry = json.loads(log.read_text().strip().splitlines()[-1])
-    assert entry["invoker"] == "supervisor"
-    assert entry["mode"] == "shadow"
-
-
-def test_main_default_invoker_is_manual(tmp_path, monkeypatch):
-    log = _isolate_main(tmp_path, monkeypatch)
-    rc = pregate.main(["--shadow"])
-    assert rc == 1
-    entry = json.loads(log.read_text().strip().splitlines()[-1])
-    assert entry["invoker"] == "manual"
 
 
 # ── 2026-07-10 root-cause fix: cadence was structurally always-due ──────────
@@ -461,20 +445,16 @@ def test_slot_read_failure_fails_open_to_capacity_available(tmp_path, monkeypatc
     assert result["proceed"] is True
 
 
-def test_skip_does_not_advance_the_novelty_baseline(tmp_path, monkeypatch):
-    """A skipped fire looked at nothing --- it must not claim it did."""
+def test_retired_cli_cannot_emit_a_gate_decision(tmp_path, monkeypatch, capsys):
+    """The retained evaluator is evidence-only; its CLI cannot resurrect authority."""
     log = _isolate_main(tmp_path, monkeypatch)
     state = tmp_path / "pregate_state.json"
     _write_json(state, {"last_proceed_signature": "stale-baseline"})
-    # _isolate_main ships an EMPTY task file, which reads as "cadence unknown"
-    # -> due -> proceed. Give it a recent substantive completion so cadence is
-    # quiet and the capacity veto is what actually decides here.
-    recent = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat()
-    _write_json(tmp_path / "next_tasks.json", [_task(completed_at=recent)])
-    monkeypatch.setattr(pregate, "free_slots", lambda: 0)
-    monkeypatch.setattr(pregate, "has_high_prio", lambda tasks: True)
 
     rc = pregate.main(["--invoker", "test"])  # real mode
-    assert rc == 0  # skip
+    captured = capsys.readouterr()
+
+    assert rc == 2
+    assert "retired" in captured.err.lower()
     assert json.loads(state.read_text())["last_proceed_signature"] == "stale-baseline"
-    assert json.loads(log.read_text().strip().splitlines()[-1])["decision"] == "skip"
+    assert not log.exists()
