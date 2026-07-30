@@ -1,0 +1,73 @@
+{
+  "as_of": {
+    "digest_date": "2026-07-30",
+    "us_market_close": "2026-07-29",
+    "tw_market_close": "2026-07-28"
+  },
+  "today": {
+    "vix": 20.66,
+    "vix_prev_day": 18.21,
+    "vix_jump_points": 2.45,
+    "vix_jump_pct": 13.5,
+    "model_annualized_vol_pct": 16.9,
+    "model_annualized_vol_prev_pct": 12.8,
+    "premium_gap_pp": 3.76,
+    "spy_close_usd": 729.46,
+    "spy_change_pct": -1.55,
+    "gld_change_pct": 0.46,
+    "tw0050_close_twd": 97.15,
+    "vix12_spy_weight_pct": 58,
+    "vix12_spy_weight_prev_pct": 66,
+    "conservative_vt_exposure_pct": 0,
+    "conservative_vt_exposure_prev_pct": 22
+  },
+  "future_tense": {
+    "vix_low_band_improvement_pct": 8.7,
+    "vix_mid_band_improvement_pct": 0.5,
+    "vix_high_band_improvement_pct": 17.3,
+    "window_daily_improvement_pct": 6.4,
+    "window_weekly_improvement_pct": 18.4,
+    "window_monthly_improvement_pct": -5.7,
+    "term_structure_error_cut_pct": 6.56,
+    "term_structure_oos_days": 1610,
+    "term_structure_recent_cut_pct": 5.64,
+    "threshold_days_sample": 8413,
+    "crossings_above_30": 50,
+    "unconditional_winrate_60d_pct": 71.9,
+    "excess_return_60d_after_30_pct": 2.55,
+    "horizon_months_sample": 244
+  },
+  "past_tense": {
+    "promised_breach_rate_pct": 1.0,
+    "worst_actual_breach_rate_pct": 9.06,
+    "worst_breach_count": 120,
+    "best_actual_breach_rate_pct": 1.06,
+    "best_breach_count": 14,
+    "evaluation_days": 1325,
+    "vix_fed_error_cut_pct": 5.55,
+    "vix_fed_test_days": 1890,
+    "vix_fed_error_base": 1.516,
+    "vix_fed_error_with_vix": 1.432
+  },
+  "cut_decision": {
+    "headline_drawdown_gain_pp": 12.61,
+    "risk_matched_drawdown_gain_pp": -0.87,
+    "markets_tested": 13,
+    "markets_drawdown_improved": 13,
+    "markets_risk_reward_improved": 0,
+    "avg_equity_weight_pct": 73,
+    "vol_reduction_low_pct": 32,
+    "vol_reduction_high_pct": 39,
+    "trading_cost_pct": 1.9,
+    "common_period_days": 3557
+  },
+  "ruler": {
+    "markets": 5,
+    "oos_days_each": 749,
+    "comparisons_run": 40,
+    "champion_flips": 3,
+    "survivors_target_comparison": 0,
+    "ci_understated_low_x": 1.21,
+    "ci_understated_high_x": 1.33
+  }
+}
