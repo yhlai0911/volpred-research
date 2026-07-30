@@ -212,13 +212,21 @@ PHASE B — 派新工:
 
    ```bash
    uv run python scripts/check_arc_dedup.py --k-id <kXXXX> --audience <general|research> --title "<planned title>"
+   # event_article：必從 task payload 傳入正式階段身分
+   uv run python scripts/check_arc_dedup.py --audience event --title "<planned title>" \
+     --event-key <event_key> --event-series-slot <event_series_slot>
    ```
 
    （無對應 K 就 `--text-file` 餵主題摘要）。**`--audience` 不可省**（2026-07-11 起）：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成重複、且是永久性誤判。
 
    兩道 gate，依確定性排序：
    - **exit 1 + `🚫 K-COVERAGE`** = 這個 K 在這個 audience **已經有現成文章**（含 draft — 草稿池裡那篇會被 release cron 發出去，等於已覆蓋）。精確比對、無模糊判斷 → **絕對不寫**，換 K。
-   - **exit 1 + `🚫 ARC DUPLICATE`** = 同 narrative arc 已有文章（資產×結論同構，標題不同、方向相反也算）→ 不寫，換題或回報 arc-covered。標題字面不像 ≠ 不重複 —「銅博士 vol」與「銅銀吃不到 VIX 紅利」是同一篇故事。
+   - **exit 0 + `⚠️ ARC DUPLICATE`** = fuzzy narrative-arc 警示，不再 hard-block。先人工/agent
+     比對差異化與下游 sequence coverage；能提出新 evidence／information state 就繼續，
+     否則主動換題。禁止把這個 heuristic 警示重新包成另一個 hard lock。
+   - **event_article 例外不是 waiver，而是不同 identity contract**：只有 `🚫 EVENT STAGE COVERED`
+     （同 `event_key + event_series_slot`）停止；跨 T-7／T-2／T+0／T+1 的 K／arc／標題相似
+     一律 warn + 繼續，並依 slot 寫出不同資訊狀態。
 
    ⚠️ publisher publish 端的 arc-dedup 已於 2026-06-23 降級為 **warn-only**（false-positive 造成內容黑洞後降級，見 dedup-gate-audit.md）— **沒有 hard block 兜底，寫前這一跑就是唯一防線，絕不可跳過**。
 

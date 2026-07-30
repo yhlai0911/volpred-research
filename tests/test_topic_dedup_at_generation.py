@@ -28,9 +28,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from volpred.ops.topic_dedup import (  # noqa: E402
-    BLOCK_ARC_DUP,
     BLOCK_K_COVERAGE,
-    BLOCK_THEME_SATURATED,
     CLEAN,
     GATE_ERROR,
     UNJUDGED_THIN_SIGNATURE,
@@ -137,44 +135,44 @@ def test_theme_saturation_catches_the_incident_family(crowded_feed):
     assert result["theme_terms"], "gate must expose the theme it judged on"
 
 
-def test_theme_gate_is_load_bearing_when_arc_is_blind(monkeypatch, crowded_feed):
-    """Pins the INCIDENT'S ACTUAL CONDITION: arc returns nothing, theme must catch it.
+def test_theme_gate_surfaces_incident_when_arc_is_blind(monkeypatch, crowded_feed):
+    """Pins the incident condition: arc returns nothing, theme must still warn.
 
     On the real feed the arc gate returned [] for this topic (measured), because
     it is entity-anchored and the descriptive path demands a strong same-article
     signal. So we force arc to be blind — exactly as it was — and require the
-    theme gate to block anyway. If the theme gate were removed, this fails.
+    theme gate to expose the crowding without suppressing production.
     """
     import volpred.ops.topic_dedup as td
 
     monkeypatch.setattr(td, "find_arc_duplicates", lambda *a, **kw: [])
     screen = td.screen_topic(INCIDENT_TITLE, INCIDENT_DESC, feed=crowded_feed, mode="block")
 
-    assert screen.blocked is True, "arc was blind and nothing else caught it — the incident recurs"
-    assert screen.verdict == BLOCK_THEME_SATURATED
+    assert screen.blocked is False
+    assert screen.verdict == WARN_THEME_SATURATED
     # Not a silent skip: the reason must name the evidence.
     assert screen.reason, "a block with no reason is a silent skip"
     assert str(screen.saturation) in screen.reason
-    assert screen.matches, "block must expose the articles it matched against"
-    assert screen.theme_terms, "block must expose the theme it judged on"
+    assert screen.matches, "warning must expose the articles it matched against"
+    assert screen.theme_terms, "warning must expose the theme it judged on"
 
 
-def test_incident_topic_is_blocked_with_reason(crowded_feed):
-    """Whichever gate fires, the topic must not become a task, and must say why."""
+def test_incident_topic_warns_with_reason(crowded_feed):
+    """Whichever fuzzy gate fires, the task continues with visible evidence."""
     screen = screen_topic(INCIDENT_TITLE, INCIDENT_DESC, feed=crowded_feed, mode="block")
 
-    assert screen.blocked is True
-    assert screen.verdict in (BLOCK_ARC_DUP, BLOCK_THEME_SATURATED)
-    assert screen.reason, "a block with no reason is a silent skip"
-    assert screen.matches, "block must expose the articles it matched against"
+    assert screen.blocked is False
+    assert screen.verdict in (WARN_ARC_DUP, WARN_THEME_SATURATED)
+    assert screen.reason
+    assert screen.matches
 
 
-def test_blocked_topic_exposes_audit_blob(crowded_feed):
+def test_warned_topic_exposes_audit_blob(crowded_feed):
     """as_task_field() is what downstream sees — it must carry the why."""
     screen = screen_topic(INCIDENT_TITLE, INCIDENT_DESC, feed=crowded_feed, mode="block")
     blob = screen.as_task_field()
-    assert blob["verdict"] in (BLOCK_ARC_DUP, BLOCK_THEME_SATURATED)
-    assert blob["blocked"] is True
+    assert blob["verdict"] in (WARN_ARC_DUP, WARN_THEME_SATURATED)
+    assert blob["blocked"] is False
     assert blob["reason"]
     assert blob["near_misses"]
     assert blob["screened_at"]
@@ -454,7 +452,7 @@ def test_recurring_fomc_identity_survives_incidental_axis_terms():
     assert screen.verdict == WARN_THEME_SATURATED
 
 
-def test_one_off_announcement_cannot_use_recurring_macro_exemption(crowded_feed):
+def test_one_off_announcement_is_warned_without_fuzzy_hard_block(crowded_feed):
     screen = screen_topic(
         "AI 資本支出財報公告前：科技巨頭的定價分歧",
         "財報公告前後，分析 AI 資本支出與科技股風險定價。",
@@ -463,8 +461,8 @@ def test_one_off_announcement_cannot_use_recurring_macro_exemption(crowded_feed)
         mode="block",
     )
     assert screen.saturation >= THEME_SATURATION_THRESHOLD
-    assert screen.blocked is True
-    assert screen.verdict == BLOCK_THEME_SATURATED
+    assert screen.blocked is False
+    assert screen.verdict == WARN_THEME_SATURATED
 
 
 @pytest.mark.parametrize(
@@ -485,8 +483,8 @@ def test_incidental_macro_control_in_description_cannot_grant_exemption(
         mode="block",
     )
     assert screen.saturation >= THEME_SATURATION_THRESHOLD
-    assert screen.blocked is True
-    assert screen.verdict == BLOCK_THEME_SATURATED
+    assert screen.blocked is False
+    assert screen.verdict == WARN_THEME_SATURATED
 
 
 # --- every generator path is actually wired to the screen ---------------------
@@ -516,6 +514,10 @@ def test_event_task_is_screened_when_feed_supplied(crowded_feed, tmp_path):
     assert task["priority"] == 1, "event tasks stay P1 time-sensitive"
     assert "dedup_screen" in task, "saturated event topic must be annotated for the writer"
     assert task["dedup_screen"]["near_misses"], "annotation must name the near misses"
+    assert (
+        "--event-key ai_capex --event-series-slot T-2"
+        in task["description"]
+    ), "event writer must use stage-aware pre-write dedup instead of generic arc blocking"
 
 
 def test_event_task_without_feed_is_gate_error_annotated_but_still_built(tmp_path):
@@ -581,8 +583,8 @@ def test_arc_gate_cannot_catch_the_incident_family():
     )
 
 
-def test_arc_dup_still_blocks_when_signature_is_rich():
-    """The arc gate is still wired in and still does its job when it CAN anchor."""
+def test_arc_dup_warns_when_signature_is_rich():
+    """A rich fuzzy signature stays visible without becoming a hard lock."""
     feed = [
         _article(
             "mile_arc",
@@ -596,5 +598,5 @@ def test_arc_dup_still_blocks_when_signature_is_rich():
         feed=feed,
         mode="block",
     )
-    assert screen.verdict in (BLOCK_ARC_DUP, BLOCK_THEME_SATURATED)
-    assert screen.blocked is True
+    assert screen.verdict in (WARN_ARC_DUP, WARN_THEME_SATURATED)
+    assert screen.blocked is False

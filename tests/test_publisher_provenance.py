@@ -268,4 +268,30 @@ def test_live_event_publish_requires_complete_canonical_metadata(tmp_path: Path,
             audit_strict=True,
         )
 
+    with pytest.raises(ValueError, match="event article is missing canonical metadata"):
+        Publisher(storage_dir=str(tmp_path)).publish_milestone(
+            title="CPI reaction article migration bypass attempt",
+            description="event-driven analysis",
+            phase="event_article",
+            details={"content_type": "event_article", "event_type": "CPI_US"},
+            tags=["event_article", "CPI"],
+            audience="event",
+            category="event_article",
+            status="published",
+            audit_strict=False,
+        )
+
+    with pytest.raises(ValueError, match="event article is missing canonical metadata"):
+        Publisher(storage_dir=str(tmp_path)).publish_milestone(
+            title="CPI identity-less draft bypass attempt",
+            description="event-driven draft",
+            phase="event_article",
+            details={"content_type": "event_article", "event_type": "CPI_US"},
+            tags=["event_article", "CPI"],
+            audience="event",
+            category="event_article",
+            status="draft",
+            audit_strict=False,
+        )
+
     assert not (tmp_path / "reports" / "feed.json").exists()

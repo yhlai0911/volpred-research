@@ -22,8 +22,9 @@ import argparse
 import json
 import logging
 import sys
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEDULE_PATH = ROOT / "config" / "runtime_schedules.json"
@@ -134,43 +135,82 @@ def gen_tsmc_revenue(start: date, end: date) -> list[tuple[date, str]]:
 
 
 SLOT_CONFIG = {
-    # event_type → list of (slot_label, days_before, priority, announce_hour_cst)
-    # announce_hour: T+0 not_before time-of-day CST
+    # event_type → list of (slot_label, days_before, priority, source-local hour)
+    # T+0 clocks are interpreted in EVENT_SOURCE_TIMEZONES, then converted to
+    # Asia/Taipei.  Hard-coding "CST" silently loses both the date rollover and
+    # US daylight-saving offset.
     "FOMC": [
         ("T-7", 7, 30, None),
         ("T-2", 2, 20, None),
-        ("T+0", 0, 15, 2.5),  # FOMC announces 14:00 ET = CST 02:30 next day
+        ("T+0", 0, 15, 14),  # 14:00 America/New_York
     ],
     "CPI_US": [
         ("T-2", 2, 20, None),
-        ("T+0", 0, 15, 21.5),  # 08:30 ET = CST 21:30 same day
+        ("T+0", 0, 15, 8.5),  # 08:30 America/New_York
     ],
     "NFP_US": [
         ("T-7", 7, 30, None),
         ("T-2", 2, 20, None),
-        ("T+0", 0, 15, 21.5),
+        ("T+0", 0, 15, 8.5),
     ],
     "TSMC_REVENUE": [
-        ("T+0", 0, 15, 15),  # 15:00 CST typical
+        ("T+0", 0, 15, 15),  # 15:00 Asia/Taipei typical
     ],
 }
 
+EVENT_SOURCE_TIMEZONES = {
+    "FOMC": "America/New_York",
+    "CPI_US": "America/New_York",
+    "NFP_US": "America/New_York",
+    "TSMC_REVENUE": "Asia/Taipei",
+}
+RUNTIME_TIMEZONE = ZoneInfo("Asia/Taipei")
 
-def slot_to_iso(event_date: date, slot: str, days_before: int, announce_hour: float | None) -> tuple[str, str]:
+
+def slot_to_iso(
+    event_date: date,
+    event_type: str,
+    slot: str,
+    days_before: int,
+    announce_hour: float | None,
+) -> tuple[str, str]:
     """Return (not_before_iso, deadline_iso) for a slot."""
     if slot == "T+0" and announce_hour is not None:
         h = int(announce_hour)
         m = int((announce_hour - h) * 60)
-        not_before = datetime(event_date.year, event_date.month, event_date.day, h, m, tzinfo=timezone(timedelta(hours=8)))
+        source_timezone = ZoneInfo(
+            EVENT_SOURCE_TIMEZONES.get(event_type, "Asia/Taipei")
+        )
+        not_before = datetime(
+            event_date.year,
+            event_date.month,
+            event_date.day,
+            h,
+            m,
+            tzinfo=source_timezone,
+        ).astimezone(RUNTIME_TIMEZONE)
     else:
         target = event_date - timedelta(days=days_before)
-        not_before = datetime(target.year, target.month, target.day, 8, 0, tzinfo=timezone(timedelta(hours=8)))
+        not_before = datetime(
+            target.year,
+            target.month,
+            target.day,
+            8,
+            0,
+            tzinfo=RUNTIME_TIMEZONE,
+        )
     deadline = not_before + timedelta(hours=36)
     return not_before.isoformat(), deadline.isoformat()
 
 
 def build_event_item(event_date: date, event_type: str, slot: str, days_before: int, priority: int, announce_hour: float | None) -> dict:
-    not_before, deadline = slot_to_iso(event_date, slot, days_before, announce_hour)
+    not_before, deadline = slot_to_iso(
+        event_date,
+        event_type,
+        slot,
+        days_before,
+        announce_hour,
+    )
     event_key = f"{event_type}_{event_date.strftime('%Y_%m_%d')}"
     slot_id = slot.lower().replace("+", "").replace("-", "minus")
     if slot == "T+0":
@@ -204,7 +244,13 @@ def build_event_item(event_date: date, event_type: str, slot: str, days_before: 
         "public_effect": "published",
         "task_template": {
             "title": f"Event article: {event_type} {event_date.isoformat()} {slot}",
-            "description": f"Auto-populated by populate_upcoming_events.py. {event_type} {event_date.isoformat()} {slot} slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+            "description": (
+                "Auto-populated by populate_upcoming_events.py. "
+                f"{event_type} {event_date.isoformat()} {slot} slot. "
+                "Run the feed-publisher event template and stage-aware dedup; "
+                "exact event_key + slot blocks, cross-stage semantic overlap warns. "
+                "audience=general (T-7 may use research)."
+            ),
             "task_family": "content",
             "priority": priority,
             "preferred_agent": "claude",

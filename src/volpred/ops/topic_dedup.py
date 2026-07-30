@@ -15,17 +15,14 @@ Why it exists (2026-07-13 incident, root-caused 2026-07-14):
     PRODUCTION step had no check at all: `_build_trending_task` and
     `build_pending_event_task` created rows without ever looking at the feed.
 
-Policy differs from the publish gate ON PURPOSE. At publish time a false
-positive is a content hole (the article is already written), so fuzzy signals
-must fail open. At GENERATION time a false positive costs one swapped topic, so
-the trending lane may block on a fuzzy signal. Per `.claude/rules/dedup-gate-audit.md`
-this is the sanctioned asymmetry.
+Fuzzy signals fail open at every stage.  The earlier generation-time exception
+("a false positive only costs one swapped topic") produced silent sequence gaps
+when no replacement actually shipped.  Exact K coverage may still block;
+narrative arc and theme saturation only annotate a candidate for differentiation.
 
 Per-lane modes (deliberate, see `screen_topic`):
-    mode="block" (trending) — a high-confidence arc/K or non-recurring
-    saturated theme prevents task creation. Recurring event-window theme-only
-    hits remain warnings because the counter cannot distinguish event episodes.
-    mode="warn"  (event)    — a hit ANNOTATES the task but never blocks it.
+    mode="block" (trending) — exact K coverage blocks; fuzzy arc/theme hits warn.
+    mode="warn"  (event)    — every hit annotates the task and never blocks it.
 
 Why event is warn-only: event articles are a designed T-7 / T-2 / T+0 series
 about one event, and every FOMC resembles the last FOMC. Feed event markers are
@@ -199,9 +196,9 @@ def screen_topic(
     entity-anchored and the incident's five siblings do not even arc-match each
     other (see arc_dedup.theme_saturation docstring for the measurement).
 
-    `mode="warn"` downgrades every hit to a warning (used by the event lane).
-    In block mode, recurring event-window theme hits are also advisory; exact
-    K/arc duplicates still block before the theme gate.
+    `mode="warn"` also downgrades exact K coverage (used by the event lane).
+    In block mode only exact K coverage blocks. Arc and theme classifiers are
+    heuristic and therefore always advisory.
     Gate errors fail OPEN but are logged — never silently.
     """
     if mode not in {"block", "warn"}:
@@ -258,8 +255,8 @@ def screen_topic(
         if dups:
             ids = ", ".join(str(d.get("id")) for d in dups[:3])
             return TopicScreen(
-                verdict=WARN_ARC_DUP if warn_only else BLOCK_ARC_DUP,
-                blocked=not warn_only,
+                verdict=WARN_ARC_DUP,
+                blocked=False,
                 reason=f"narrative-arc duplicate of {ids}",
                 matches=dups,
             )
@@ -280,19 +277,15 @@ def screen_topic(
                 description,
             )
             return TopicScreen(
-                verdict=(
-                    WARN_THEME_SATURATED
-                    if warn_only or recurring_event
-                    else BLOCK_THEME_SATURATED
-                ),
-                blocked=not warn_only and not recurring_event,
+                verdict=WARN_THEME_SATURATED,
+                blocked=False,
                 reason=(
                     f"theme already covered by {saturation} live article(s) in "
                     f"{days}d (threshold {saturation_threshold}); closest: {ids}"
                     + (
                         "; recurring event-window macro theme is advisory, not a hard block"
                         if recurring_event
-                        else ""
+                        else "; fuzzy theme saturation is advisory, not a hard block"
                     )
                 ),
                 matches=theme["matches"],
@@ -477,11 +470,11 @@ def audit_topic_dedup_calibration(
             f"known AI-capex duplicate margin is only {margin} above threshold"
         )
     if (
-        not incident_screen.blocked
-        or incident_screen.verdict != BLOCK_THEME_SATURATED
+        incident_screen.blocked
+        or incident_screen.verdict not in {WARN_ARC_DUP, WARN_THEME_SATURATED}
     ):
         issues.append(
-            "known AI-capex duplicate did not retain its calibrated theme block "
+            "known AI-capex duplicate did not retain its calibrated fuzzy warning "
             f"(verdict {incident_screen.verdict}, blocked={incident_screen.blocked})"
         )
     if int(nfp_control.get("saturation") or 0) >= THEME_SATURATION_THRESHOLD:

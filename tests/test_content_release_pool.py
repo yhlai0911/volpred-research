@@ -1310,6 +1310,94 @@ def test_atomic_promotion_preserves_fresh_same_item_edit(tmp_path: Path):
     assert persisted == fresh_edit
 
 
+def test_atomic_promotion_keeps_identityless_event_as_draft(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 30, 2, 0, tzinfo=timezone.utc)
+    draft = {
+        "id": "mile_legacy_event_without_identity",
+        "status": "draft",
+        "audience": "event",
+        "category": "event_article",
+        "phase": "event",
+        "title": "FOMC reaction draft",
+        "content": "Legacy draft without event_key and event_series_slot.",
+        "details": {"content_type": "event_article"},
+    }
+    _write_json(storage_dir / "reports" / "feed.json", [draft])
+
+    outcome = content._atomic_promote_release_item(
+        draft,
+        now=now,
+        released_at=now.isoformat(),
+        storage_dir=str(storage_dir),
+        route="release_pool",
+        expected_item=draft,
+    )
+
+    assert outcome["outcome"] == "event_identity_blocked"
+    feed_after = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )
+    assert feed_after == [draft]
+
+
+def test_atomic_promotion_blocks_second_reader_visible_event_stage(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 30, 2, 0, tzinfo=timezone.utc)
+    identity = {
+        "event_key": "FOMC_2026_07_29",
+        "event_type": "FOMC",
+        "event_date": "2026-07-29",
+        "event_series_slot": "T+0",
+    }
+    published = {
+        "id": "mile_fomc_tplus0_live",
+        "status": "published",
+        "audience": "event",
+        "category": "event_article",
+        "title": "FOMC immediate reaction",
+        "details": {"content_type": "event_article", **identity},
+        **identity,
+    }
+    draft = {
+        "id": "mile_fomc_tplus0_migration_draft",
+        "status": "draft",
+        "audience": "event",
+        "category": "event_article",
+        "title": "Duplicate migration draft",
+        "details": {"content_type": "event_article", **identity},
+        **identity,
+    }
+    _write_json(storage_dir / "reports" / "feed.json", [published, draft])
+
+    outcome = content._atomic_promote_release_item(
+        draft,
+        now=now,
+        released_at=now.isoformat(),
+        storage_dir=str(storage_dir),
+        route="release_pool",
+        expected_item=draft,
+    )
+
+    assert outcome == {
+        "outcome": "event_stage_coverage_blocked",
+        "id": draft["id"],
+        "existing_id": published["id"],
+    }
+    feed_after = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )
+    assert feed_after == [published, draft]
+    decisions = [
+        json.loads(line)
+        for line in (storage_dir / "logs" / "dedup_decisions.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    assert decisions[-1]["action"] == "block_event_stage_coverage"
+    assert decisions[-1]["candidate_id"] == "fomc_2026_07_29:T+0"
+
+
 def test_metadata_patch_preserves_fresh_same_item_edit(tmp_path: Path):
     storage_dir = tmp_path / "storage"
     baseline = {

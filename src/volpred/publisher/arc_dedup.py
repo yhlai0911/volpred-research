@@ -1434,6 +1434,172 @@ DEAD_STATUSES = ("unpublished", "retracted")
 LEXICAL_HINT_THRESHOLD = 0.18
 LEXICAL_HINT_LIMIT = 5
 K_COVERAGE_GAP_MIN_SHARED_TOKENS = 3
+EVENT_SERIES_SLOTS = frozenset({"T-7", "T-2", "T+0", "T+1"})
+EVENT_IDENTITY_FIELDS = (
+    "event_key",
+    "event_type",
+    "event_date",
+    "event_series_slot",
+)
+
+
+def normalize_event_series_slot(raw: str) -> str:
+    """Return the canonical event stage or raise for an unsupported stage.
+
+    Normalizing before identity comparison prevents spelling variants such as
+    ``T0``, ``T-0`` and ``T+00`` from creating separate idempotency keys.
+    """
+
+    text = str(raw or "").strip().upper().replace(" ", "")
+    match = re.fullmatch(r"T([+-]?)(\d+)", text)
+    if match is None:
+        raise ValueError(f"invalid event_series_slot: {raw!r}")
+    sign, digits = match.groups()
+    number = int(digits)
+    if number == 0:
+        canonical = "T+0"
+    elif sign == "-":
+        canonical = f"T-{number}"
+    elif sign == "+":
+        canonical = f"T+{number}"
+    else:
+        raise ValueError(f"event_series_slot requires +/- for nonzero stage: {raw!r}")
+    if canonical not in EVENT_SERIES_SLOTS:
+        raise ValueError(
+            f"unsupported event_series_slot {canonical!r}; "
+            f"allowed={sorted(EVENT_SERIES_SLOTS)}"
+        )
+    return canonical
+
+
+def require_canonical_event_identity(item: dict) -> dict[str, str] | None:
+    """Return a normalized event identity, or raise when an event row is unsafe.
+
+    This is the canonical writer invariant shared by initial feed append and
+    draft/scheduled promotion.  Entry-point validation is useful feedback, but
+    cannot protect the feed from alternate callers or a stale precheck.  Event
+    identity therefore has to be re-established at the write choke point.
+
+    Non-event rows return ``None``.  Event rows must carry all four fields.
+    Top-level and ``details`` values may coexist, but they may not disagree.
+    """
+
+    if not isinstance(item, dict):
+        raise TypeError("feed item must be a dict")
+    details = item.get("details") if isinstance(item.get("details"), dict) else {}
+    is_event = (
+        str(details.get("content_type") or "") == "event_article"
+        or item.get("category") == "event_article"
+        or item.get("audience") == "event"
+    )
+    if not is_event:
+        return None
+
+    identity: dict[str, str] = {}
+    missing: list[str] = []
+    for field in EVENT_IDENTITY_FIELDS:
+        top_raw = item.get(field)
+        detail_raw = details.get(field)
+        top = str(top_raw).strip() if top_raw not in (None, "") else ""
+        nested = str(detail_raw).strip() if detail_raw not in (None, "") else ""
+        if field == "event_series_slot":
+            top = normalize_event_series_slot(top) if top else ""
+            nested = normalize_event_series_slot(nested) if nested else ""
+        if top and nested and top != nested:
+            raise ValueError(
+                f"event identity conflict for {field}: "
+                f"top-level={top!r} details={nested!r}"
+            )
+        value = top or nested
+        if not value:
+            missing.append(field)
+        else:
+            identity[field] = value
+    if missing:
+        raise ValueError(
+            "event article is missing canonical metadata: " + ", ".join(missing)
+        )
+    return identity
+
+
+def stamp_canonical_event_identity(item: dict) -> dict[str, str] | None:
+    """Validate and mirror canonical event identity at both storage locations."""
+
+    identity = require_canonical_event_identity(item)
+    if identity is None:
+        return None
+    details = dict(item.get("details") or {})
+    details.update(identity)
+    details["content_type"] = "event_article"
+    item["details"] = details
+    item.update(identity)
+    return identity
+
+
+def find_event_stage_coverage(
+    event_key: str,
+    event_series_slot: str,
+    feed: list[dict],
+) -> list[dict]:
+    """Return active feed rows with the exact event-stage identity.
+
+    Event articles deliberately reuse entities, evidence and narrative shape
+    across T-7/T-2/T+0/T+1.  Fuzzy similarity therefore cannot own their hard
+    idempotency decision.  The only blocking identity is the structured pair
+    ``event_key + event_series_slot``; legacy articles without both fields are
+    not evidence of exact stage coverage.
+
+    Top-level fields are canonical for new publisher writes.  ``details`` is
+    also read so structured rows from the migration period do not become
+    invisible to the lock. Draft/scheduled rows count because they already own
+    the stage and must be updated through the formal update gateway, not cloned.
+    """
+
+    normalized_key = str(event_key or "").strip().casefold()
+    if not normalized_key:
+        return []
+    normalized_slot = normalize_event_series_slot(event_series_slot)
+
+    hits: list[dict] = []
+    for item in feed:
+        if not isinstance(item, dict) or item.get("status") in DEAD_STATUSES:
+            continue
+        details = item.get("details") if isinstance(item.get("details"), dict) else {}
+        item_key = str(
+            item.get("event_key") or details.get("event_key") or ""
+        ).strip().casefold()
+        raw_item_slot = (
+            item.get("event_series_slot")
+            or details.get("event_series_slot")
+            or ""
+        )
+        try:
+            item_slot = normalize_event_series_slot(str(raw_item_slot))
+        except ValueError:  # silent-ok: malformed legacy slot cannot prove coverage
+            # Malformed legacy metadata cannot prove exact coverage. The normal
+            # live publisher rejects invalid stages before persistence.
+            continue
+        if item_key == normalized_key and item_slot == normalized_slot:
+            hits.append(
+                {
+                    "id": str(item.get("id") or ""),
+                    "title": str(item.get("title") or ""),
+                    "status": str(item.get("status") or "published"),
+                    "audience": str(item.get("audience") or ""),
+                    "published_at": str(
+                        item.get("published_at") or item.get("created_at") or ""
+                    ),
+                    "event_key": str(
+                        item.get("event_key") or details.get("event_key") or ""
+                    ),
+                    "event_series_slot": str(
+                        item.get("event_series_slot")
+                        or details.get("event_series_slot")
+                        or ""
+                    ),
+                }
+            )
+    return hits
 
 
 def tokenize(text: str) -> set[str]:

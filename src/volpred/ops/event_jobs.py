@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,7 @@ from zoneinfo import ZoneInfo
 from volpred.config import get_optional_schedule_items, load_runtime_schedules
 
 from volpred.canonical_write import guard_canonical_write
+from volpred.publisher.arc_dedup import normalize_event_series_slot
 from .common import project_path
 from .local_control_plane import expire_queued_task, supersede_queued_task
 from .next_tasks import write_tasks_to_handle
@@ -39,6 +41,18 @@ FORWARD_TITLE_SIGNALS = (
     "t-2",
     "t-3",
     "t-5",
+    "今晚",
+    "明天",
+    "明日",
+    "稍後",
+    "將在",
+    "將於",
+    "等待",
+    "等消息",
+    "尚未",
+    "還沒",
+    "會前",
+    "宣布前",
 )
 EVENT_TYPE_ALIASES = {
     "nfp": ("非農", "非農就業", "nonfarm", "payroll", "就業報告", "nfp"),
@@ -154,25 +168,32 @@ def reaction_already_covered(
     event_type: str,
     event_date: datetime,
     feed: list[dict[str, Any]],
+    *,
+    event_key: str,
+    requested_slot: str,
+    release_at: datetime,
 ) -> dict[str, str] | None:
     """Return an existing published reaction article, conservatively.
 
-    Exact event metadata wins.  Legacy articles without metadata may cover the
-    event only when an event alias appears in the *title*.  Tags are deliberately
-    excluded: broad portfolio tags such as ``通膨`` describe many unrelated
-    articles and previously let an oil/gold digest suppress a CPI T+0 article.
-    The fallback is fail-open because a false positive would suppress a
-    time-sensitive article, while a false negative is still caught by the
-    publisher's arc-dedup gate.
+    Exact ``event_key + requested_slot`` metadata wins. Cross-stage articles
+    never count as coverage. Legacy articles without metadata may cover only a
+    T+0 request, and only when an event alias appears in the *title*. Tags are
+    deliberately excluded: broad portfolio tags such as ``通膨`` describe many
+    unrelated articles and previously let an oil/gold digest suppress a CPI
+    T+0 article. The fallback is fail-open because a false positive would
+    suppress a time-sensitive article, while a false negative is still caught
+    by the publisher's exact-stage gate.
     """
 
     try:
         aliases = _event_type_aliases(event_type)
         if not aliases:
             return None
-        normalized_type = str(event_type or "").strip().lower()
+        normalized_key = str(event_key or "").strip().casefold()
+        canonical_requested_slot = normalize_event_series_slot(requested_slot)
+        if not normalized_key:
+            return None
         event_day = event_date.astimezone(_runtime_timezone()).date()
-        event_iso = event_day.isoformat()
         lower = event_day - timedelta(days=REACTION_EARLY_RELEASE_DAYS)
         upper = event_day + timedelta(days=REACTION_POST_DAYS)
         for article in feed:
@@ -180,18 +201,52 @@ def reaction_already_covered(
                 continue
             if article.get("status") not in (None, "published"):
                 continue
-            article_type = str(article.get("event_type") or "").strip().lower()
+            details = (
+                article.get("details")
+                if isinstance(article.get("details"), dict)
+                else {}
+            )
+            article_key = str(
+                article.get("event_key") or details.get("event_key") or ""
+            ).strip().casefold()
+            raw_article_slot = (
+                article.get("event_series_slot")
+                or details.get("event_series_slot")
+                or ""
+            )
+            article_slot = ""
+            if raw_article_slot:
+                try:
+                    article_slot = normalize_event_series_slot(
+                        str(raw_article_slot)
+                    )
+                except ValueError:
+                    article_slot = ""
             if (
-                article_type
-                and article_type == normalized_type
-                and article.get("event_date") == event_iso
-                and _slot_is_reaction(str(article.get("event_series_slot") or ""))
+                article_key == normalized_key
+                and article_slot == canonical_requested_slot
             ):
                 return {"id": str(article.get("id") or ""), "match": "metadata"}
+            # Structured metadata proves this is either another event or another
+            # stage. Never reinterpret it through the ambiguous title fallback.
+            if article_key or raw_article_slot:
+                continue
+            # Legacy rows have no stage identity. They can conservatively stand
+            # in for the immediate reaction only, never for T+1 or another stage.
+            if canonical_requested_slot != "T+0":
+                continue
 
             title = str(article.get("title") or "")
             title_lower = title.lower()
-            if not any(alias in title_lower for alias in aliases) or _looks_forward(title):
+            body_lead = str(
+                article.get("description")
+                or article.get("content")
+                or article.get("summary")
+                or ""
+            )[:800]
+            if not any(alias in title_lower for alias in aliases) or _looks_forward(
+                f"{title}\n{body_lead}"
+            ):
                 continue
             published_raw = article.get("published_at") or article.get("created_at")
             if not published_raw:
@@ -207,6 +262,8 @@ def reaction_already_covered(
             if published is None:
                 continue
             published_day = published.astimezone(_runtime_timezone()).date()
+            if published < release_at:
+                continue
             if lower <= published_day <= upper:
                 return {
                     "id": str(article.get("id") or ""),
@@ -271,7 +328,24 @@ def _coverage_for_item(
             TypeError(type(feed).__name__),
         )
         return None
-    covered = reaction_already_covered(event_type, event_date, feed)
+    try:
+        release_at = _coerce_datetime(item.get("not_before"))
+    except (TypeError, ValueError) as exc:
+        _warn_event_jobs(
+            f"invalid not_before for coverage item={item.get('id')!r}",
+            exc,
+        )
+        return None
+    if release_at is None:
+        return None
+    covered = reaction_already_covered(
+        event_type,
+        event_date,
+        feed,
+        event_key=str(payload.get("event_key") or item.get("event_key") or ""),
+        requested_slot=slot,
+        release_at=release_at,
+    )
     if covered:
         _log_coverage_decision(
             storage_dir=storage_dir,
@@ -392,7 +466,15 @@ def build_pending_event_task(
             f"event_type: {event_type}\n"
             f"event_date: {event_date}\n"
             f"event_series_slot: {slot}\n\n"
-            f"{description}"
+            f"{description}\n\n"
+            "Stage-aware pre-write dedup (exact same stage blocks; cross-stage "
+            "semantic overlap only warns):\n"
+            "uv run python scripts/check_arc_dedup.py "
+            f"--title {shlex.quote(title)} --audience event "
+            f"--event-key {shlex.quote(str(item.get('event_key') or ''))} "
+            f"--event-series-slot {shlex.quote(slot)}\n"
+            "This stage-aware verdict supersedes legacy generic ARC DUPLICATE "
+            "instructions in the source template."
         ),
         "task_type": "event_article",
         "priority": 1,
@@ -502,19 +584,31 @@ def _ensure_next_task(
                             "covered_by": covered,
                         }
                 changed = False
-                for key in (
-                    "deadline",
-                    "not_before",
-                    "dispatch_lane",
-                    "ref_event_job_id",
-                    "event_key",
-                    "event_type",
-                    "event_date",
-                    "event_series_slot",
+                if (
+                    status in {"pending", "pending_main_thread"}
+                    and existing.get("description") != task.get("description")
                 ):
-                    if not existing.get(key) and task.get(key):
-                        existing[key] = task[key]
-                        changed = True
+                    # Pending rows are still generator-owned. Refresh the brief
+                    # when the event contract changes so a row materialized one
+                    # minute before a hotfix cannot keep executing obsolete
+                    # dedup instructions. Claimed/in-progress rows are worker-
+                    # owned and must never be rewritten underneath them.
+                    existing["description"] = task["description"]
+                    changed = True
+                if status in {"pending", "pending_main_thread"}:
+                    for key in (
+                        "deadline",
+                        "not_before",
+                        "dispatch_lane",
+                        "ref_event_job_id",
+                        "event_key",
+                        "event_type",
+                        "event_date",
+                        "event_series_slot",
+                    ):
+                        if not existing.get(key) and task.get(key):
+                            existing[key] = task[key]
+                            changed = True
                 if changed:
                     write_tasks_to_handle(handle, tasks)
                 return {

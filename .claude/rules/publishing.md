@@ -240,11 +240,19 @@ uv run volpred ops publication-candidates-summary
 ```bash
 # 機械檢查：這個 K 在這個 audience 是否已有現成文章（含 draft — 池裡那篇會被 release cron 發出去）
 uv run python scripts/check_arc_dedup.py --k-id <kXXXX> --audience <general|research> --title "<planned title>"
+# 事件文章必帶正式階段身分；只有同 event_key + slot 會 hard-block
+uv run python scripts/check_arc_dedup.py --audience event --title "<planned title>" \
+  --event-key <event_key> --event-series-slot <T-7|T-2|T+0|T+1>
 # 人工檢查：既有文章標題與 tags，不是只看自家剛派的幾篇
 grep -i "核心關鍵詞" storage/reports/INDEX.md | head
 grep -i "K<id>" storage/reports/feed.json | grep title
 ```
 **`--audience` 不可省**：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成永久重複。
+
+事件文章不可使用 generic arc exit 1 作為跨階段拒稿依據。T-7／T-2／T+0／T+1
+本來就會共享主題與敘事；formal event workflow 必把 `event_key`、`event_series_slot`
+傳給 gate。精確同階段 coverage 才停止，跨階段 K／arc／標題相似只提示 writer
+依該 slot 的 information-state contract 做差異化。
 
 **機械 gate 不取代這一層**（2026-07-11 教訓）：K1586 / K1605 兩篇當時 gate 都回 exit 0，但線上早有同 K 同 audience 的文章（`mile_c1ce6550` / `mile_3a7bd6f6`），兩個 writer agent 被派上去白做工——CLI 從沒把 `--audience` / `new_refs` 傳進 `find_arc_duplicates`。K-COVERAGE gate 已補上這個確定性檢查，但**主線程仍要親自 grep feed**：gate 只知道 K 編號對不對得上，不知道兩個不同 K 是不是在講同一件事。
 

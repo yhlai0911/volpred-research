@@ -469,6 +469,10 @@ def test_queue_written_before_ledger_is_healed_without_duplicate(tmp_path: Path,
     storage_dir = str(tmp_path / "storage")
     first = expand_due_event_jobs(storage_dir=storage_dir, now=now)
     task_id = first["created"][0]["task"]["id"]
+    queue_path = tmp_path / "storage" / "next_tasks.json"
+    queued = json.loads(queue_path.read_text(encoding="utf-8"))
+    queued[0]["description"] = "obsolete generic 3-layer dedup brief"
+    queue_path.write_text(json.dumps(queued), encoding="utf-8")
     ledger_files = list((tmp_path / "storage" / "ops" / "event_ledger").glob("*.json"))
     assert len(ledger_files) == 1
     ledger_files[0].unlink()
@@ -479,6 +483,7 @@ def test_queue_written_before_ledger_is_healed_without_duplicate(tmp_path: Path,
     assert healed["created"][0]["queue_created"] is False
     queue = json.loads((tmp_path / "storage" / "next_tasks.json").read_text(encoding="utf-8"))
     assert [row["id"] for row in queue] == [task_id]
+    assert "--event-key FOMC_2026_07_29 --event-series-slot T-2" in queue[0]["description"]
     assert len(list((tmp_path / "storage" / "ops" / "event_ledger").glob("*.json"))) == 1
 
 
@@ -715,7 +720,7 @@ def test_reaction_coverage_is_preserved_in_single_owner(tmp_path: Path, monkeypa
                     "status": "published",
                     "title": "6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%",
                     "tags": ["NFP", "非農就業"],
-                    "published_at": "2026-07-01T17:24:08+00:00",
+                    "published_at": "2026-07-03T00:00:00+00:00",
                 }
             ],
             ensure_ascii=False,
@@ -738,6 +743,74 @@ def test_reaction_coverage_is_preserved_in_single_owner(tmp_path: Path, monkeypa
         encoding="utf-8"
     )
     assert "event_reaction_coverage" in audit
+
+
+def test_fomc_pre_event_article_cannot_cover_tplus0_reaction(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """2026-07-29 live regression: future-tense preview suppressed the decision."""
+
+    release_at = datetime(
+        2026,
+        7,
+        29,
+        18,
+        0,
+        tzinfo=timezone.utc,
+    )
+    item = _event_item(
+        "fomc-2026-07-29-t0",
+        event_type="FOMC",
+        event_date="2026-07-29",
+        slot="T+0",
+        not_before=release_at.isoformat(),
+        deadline=(release_at + timedelta(hours=36)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(
+        schedule_config,
+        "RUNTIME_SCHEDULES_PATH",
+        config_path,
+    )
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = tmp_path / "storage"
+    feed_path = storage_dir / "reports" / "feed.json"
+    feed_path.parent.mkdir(parents=True, exist_ok=True)
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_bbd72c0b",
+                    "status": "published",
+                    "title": (
+                        "Fed 拍板加四大雲端交卷的這一週，"
+                        "幣圈那盞燈到底能不能看"
+                    ),
+                    "description": "聯準會今晚就要拍板利率，市場等消息。",
+                    "tags": ["Fed", "事件週"],
+                    "published_at": "2026-07-29T02:01:34+00:00",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    result = expand_due_event_jobs(
+        storage_dir=str(storage_dir),
+        now=release_at,
+    )
+
+    assert len(result["created"]) == 1
+    assert result["created"][0]["task"]["id"] == (
+        "event_article_fomc_2026-07-29_tplus0"
+    )
+    assert not any(
+        row["reason"] == "reaction_already_covered"
+        for row in result["skipped"]
+    )
 
 
 def test_unrelated_article_tag_cannot_cover_cpi_reaction(tmp_path: Path, monkeypatch):
@@ -794,10 +867,100 @@ def test_explicit_cpi_title_keyword_still_covers_legacy_reaction():
     ]
 
     hit = event_jobs.reaction_already_covered(
-        "CPI_US", datetime(2026, 7, 14, 12, 30, tzinfo=timezone.utc), feed,
+        "CPI_US",
+        datetime(2026, 7, 14, 12, 30, tzinfo=timezone.utc),
+        feed,
+        event_key="CPI_US_2026_07_14",
+        requested_slot="T+0",
+        release_at=datetime(2026, 7, 14, 12, 30, tzinfo=timezone.utc),
     )
 
     assert hit == {"id": "mile_cpi_reaction", "match": "title_keyword"}
+
+
+def test_legacy_event_title_before_release_cannot_cover_reaction():
+    release_at = datetime(2026, 7, 29, 18, 0, tzinfo=timezone.utc)
+    feed = [
+        {
+            "id": "mile_fomc_scenario",
+            "status": "published",
+            "title": "FOMC 情境分析",
+            "published_at": "2026-07-29T02:01:00+00:00",
+        }
+    ]
+
+    hit = event_jobs.reaction_already_covered(
+        "FOMC",
+        datetime(2026, 7, 29, 0, 0, tzinfo=timezone.utc),
+        feed,
+        event_key="FOMC_2026_07_29",
+        requested_slot="T+0",
+        release_at=release_at,
+    )
+
+    assert hit is None
+
+
+def test_structured_tplus0_cannot_cover_tplus1():
+    feed = [
+        {
+            "id": "mile_fomc_tplus0",
+            "status": "published",
+            "title": "FOMC 決議與即時市場反應",
+            "event_key": "FOMC_2026_07_29",
+            "event_type": "FOMC",
+            "event_date": "2026-07-29",
+            "event_series_slot": "T+0",
+            "published_at": "2026-07-29T18:05:00+00:00",
+        }
+    ]
+
+    hit = event_jobs.reaction_already_covered(
+        "FOMC",
+        datetime(2026, 7, 29, 18, 0, tzinfo=timezone.utc),
+        feed,
+        event_key="FOMC_2026_07_29",
+        requested_slot="T+1",
+        release_at=datetime(2026, 7, 29, 18, 0, tzinfo=timezone.utc),
+    )
+
+    assert hit is None
+
+
+def test_claimed_event_task_is_immutable_during_reconcile(
+    tmp_path: Path,
+    monkeypatch,
+):
+    now = datetime(2026, 7, 10, 7, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "fomc-2026-07-29-t2",
+        event_type="FOMC",
+        event_date="2026-07-29",
+        slot="T-2",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=6)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = str(tmp_path / "storage")
+    first = expand_due_event_jobs(storage_dir=storage_dir, now=now)
+    assert first["created"]
+    queue_path = tmp_path / "storage" / "next_tasks.json"
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    queue[0]["status"] = "claimed"
+    queue[0]["claimed_by"] = "worker-1"
+    queue[0]["description"] = "worker-owned brief"
+    queue[0].pop("event_series_slot")
+    queue_path.write_text(json.dumps(queue), encoding="utf-8")
+
+    expand_due_event_jobs(storage_dir=storage_dir, now=now + timedelta(minutes=1))
+
+    saved = json.loads(queue_path.read_text(encoding="utf-8"))[0]
+    assert saved["description"] == "worker-owned brief"
+    assert "event_series_slot" not in saved
+    assert saved["claimed_by"] == "worker-1"
 
 
 def test_reaction_coverage_supersedes_existing_pending_row(tmp_path: Path, monkeypatch):

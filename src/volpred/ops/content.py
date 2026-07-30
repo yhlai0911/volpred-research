@@ -1785,6 +1785,56 @@ def _atomic_promote_release_item(
         prospective["status"] = "published"
         prospective["published_at"] = released_at
 
+        # Event drafts can be created by migration/batch paths that predate the
+        # structured identity contract.  Promotion is a second canonical
+        # reader-visible write route, so it must fail closed instead of turning
+        # an identity-less draft into a live article that later suppresses (or
+        # duplicates) another event stage.
+        from volpred.publisher.arc_dedup import (
+            find_event_stage_coverage,
+            stamp_canonical_event_identity,
+        )
+
+        try:
+            event_identity = stamp_canonical_event_identity(prospective)
+        except (TypeError, ValueError) as exc:
+            return {
+                "outcome": "event_identity_blocked",
+                "id": item_id,
+                "reason": f"{type(exc).__name__}: {str(exc).splitlines()[0]}",
+            }
+        if event_identity is not None:
+            stage_hits = find_event_stage_coverage(
+                event_identity["event_key"],
+                event_identity["event_series_slot"],
+                fresh_feed,
+            )
+            other_hits = [hit for hit in stage_hits if hit.get("id") != item_id]
+            if other_hits:
+                from volpred.publisher.publisher import _log_dedup_decision
+
+                existing_id = str(other_hits[0].get("id") or "")
+                _log_dedup_decision(
+                    storage_dir,
+                    "block_event_stage_coverage",
+                    str(prospective.get("title") or ""),
+                    existing_id,
+                    (
+                        "atomic release-promotion exact event stage coverage: "
+                        f"event_key={event_identity['event_key']} "
+                        f"slot={event_identity['event_series_slot']}"
+                    ),
+                    candidate_id=(
+                        f"{event_identity['event_key'].strip().casefold()}:"
+                        f"{event_identity['event_series_slot']}"
+                    ),
+                )
+                return {
+                    "outcome": "event_stage_coverage_blocked",
+                    "id": item_id,
+                    "existing_id": existing_id,
+                }
+
         # G1 on the release path (2026-07-22, residual 5). This function is the
         # ONLY place release_pool rewrites status to 'published', so hooking the
         # gate here covers every release route (pool, explicit pub_id, drought

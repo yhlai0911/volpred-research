@@ -1580,6 +1580,70 @@ class Publisher:
         import re
         # --- Dedupe check: reject exact title + warn similar topics ---
         feed = self._load_feed()
+        _is_event_article_input = category == 'event_article' or audience == 'event'
+        _event_details = dict(details or {})
+        _event_fields = ('event_key', 'event_type', 'event_date', 'event_series_slot')
+        _missing_event_fields = (
+            [
+                key
+                for key in _event_fields
+                if _event_details.get(key) in (None, '')
+            ]
+            if _is_event_article_input
+            else []
+        )
+        if _missing_event_fields:
+            _event_identity_issue = (
+                "event article is missing canonical metadata: "
+                + ", ".join(_missing_event_fields)
+                + ". Pass the event task payload fields through details so "
+                "future T-series dedup can match event_key/type/date/slot exactly."
+            )
+            # Event identity is a storage invariant, not a content-audit
+            # preference. Draft/scheduled rows can later be promoted by another
+            # process, so audit_strict=False is not a valid escape hatch.
+            raise ValueError(_event_identity_issue)
+        if _is_event_article_input and not _missing_event_fields:
+            from volpred.publisher.arc_dedup import normalize_event_series_slot
+
+            _event_details["event_series_slot"] = normalize_event_series_slot(
+                str(_event_details["event_series_slot"])
+            )
+            details = _event_details
+        _event_identity_complete = (
+            _is_event_article_input and not _missing_event_fields
+        )
+        if _event_identity_complete:
+            from volpred.publisher.arc_dedup import find_event_stage_coverage
+
+            _event_stage_hits = find_event_stage_coverage(
+                _event_details.get('event_key'),
+                _event_details.get('event_series_slot'),
+                feed,
+            )
+            if _event_stage_hits:
+                _hit = _event_stage_hits[0]
+                _log_dedup_decision(
+                    str(self.reports_dir.parent),
+                    "block_event_stage_coverage",
+                    title,
+                    _hit.get("id"),
+                    (
+                        "exact event stage already published: "
+                        f"event_key={_event_details.get('event_key')} "
+                        f"slot={_event_details.get('event_series_slot')}"
+                    ),
+                    candidate_id=(
+                        f"{str(_event_details.get('event_key')).strip().casefold()}:"
+                        f"{_event_details.get('event_series_slot')}"
+                    ),
+                )
+                print(
+                    "  🚫 BLOCKED exact event stage duplicate of "
+                    f"{_hit.get('id')} (event_key={_event_details.get('event_key')}, "
+                    f"slot={_event_details.get('event_series_slot')})."
+                )
+                return _hit.get("id")
 
         # --- G1: member_qa publish-time duplicate gate (2026-07-19 STRIKE 2) ---
         # The ONLY gate standing on the reader-visible artifact. Every other
@@ -1619,6 +1683,21 @@ class Publisher:
         cutoff_exact = datetime.now(timezone.utc) - timedelta(hours=24)
         for existing in feed:
             if existing.get('title') == title:
+                if _event_identity_complete:
+                    # Exact event-stage identity already ran above. Reusing a
+                    # headline across T-2/T+0 is a quality warning, not proof
+                    # that the later information state was already published.
+                    _log_dedup_decision(
+                        str(self.reports_dir.parent),
+                        "warn_event_cross_stage_title",
+                        title,
+                        existing.get("id"),
+                        (
+                            "same title on a different structured event stage; "
+                            "publishing continues"
+                        ),
+                    )
+                    continue
                 existing_time = existing.get('published_at') or existing.get('created_at', '')
                 try:
                     from dateutil.parser import parse as dtparse
@@ -1682,7 +1761,12 @@ class Publisher:
         # a legitimate companion/different-angle piece and now PUBLISHES instead
         # of being silently swallowed. This is the ONE remaining hard block; the
         # fuzzy gates below are downgraded to warn+log. Override with dup_waiver.
-        if new_refs and not (details or {}).get('dup_waiver') and not _is_digest:
+        if (
+            new_refs
+            and not (details or {}).get('dup_waiver')
+            and not _is_digest
+            and not _event_identity_complete
+        ):
             inferred_aud = _infer_audience(title, description or '', tags or [])
             for existing in feed:
                 if existing.get('status') in ('unpublished', 'retracted'):
@@ -2352,25 +2436,9 @@ class Publisher:
         # these fields silently pushes the next materializer back to title
         # heuristics — the 2026-07-14 CPI T+0 article was suppressed by an
         # unrelated oil/gold digest whose generic tag happened to say `通膨`.
-        # Keep audit_strict=False as the established batch-migration escape, but
-        # never permit a normal live event publish to omit structured identity.
-        _is_event_article = category == 'event_article' or audience == 'event'
-        if _is_event_article:
-            _event_fields = ('event_key', 'event_type', 'event_date', 'event_series_slot')
-            _missing_event_fields = [
-                key for key in _event_fields
-                if details_clean.get(key) in (None, '')
-            ]
-            if _missing_event_fields:
-                _event_identity_issue = (
-                    "event article is missing canonical metadata: "
-                    + ", ".join(_missing_event_fields)
-                    + ". Pass the event task payload fields through details so "
-                    "future T-series dedup can match event_key/type/date/slot exactly."
-                )
-                if audit_strict:
-                    raise ValueError(_event_identity_issue)
-                print(f"  ⚠️ {_event_identity_issue} (audit_strict=False bypass)")
+        # No audit_strict escape exists: drafts are future live candidates and
+        # the canonical append choke rechecks the same invariant.
+        _is_event_article = _is_event_article_input
         # 2026-06-18: persist release-layer arc schema for future dedup/backfill.
         # Historical feed entries may lack this and are recomputed on demand by
         # arc_dedup; new writes should carry the schema explicitly.
@@ -2689,8 +2757,57 @@ class Publisher:
                 # exemption a digest citing the same K as a source article gets
                 # BLOCKED at feed append even after publish_milestone let it
                 # through (caught by tests/test_daily_digest_dup_exemption.py).
-                _item_is_digest = str((item.get('details') or {}).get('content_type') or '') == 'daily_digest'
-                duplicate = None if _item_is_digest else _find_same_ref_feed_duplicate(feed, item)
+                _item_details = item.get('details') or {}
+                _item_is_digest = str(_item_details.get('content_type') or '') == 'daily_digest'
+                _item_is_event = (
+                    str(_item_details.get('content_type') or '') == 'event_article'
+                    or item.get('category') == 'event_article'
+                    or item.get('audience') == 'event'
+                )
+                if _item_is_event:
+                    from volpred.publisher.arc_dedup import (
+                        find_event_stage_coverage,
+                        stamp_canonical_event_identity,
+                    )
+
+                    # The feed append is the canonical write choke. Revalidate
+                    # here under the same lock as the exact-stage lookup so a
+                    # direct caller, release-path drift, or stale precheck
+                    # cannot persist an event row with an unknowable identity.
+                    _event_identity = stamp_canonical_event_identity(item)
+                    assert _event_identity is not None
+                    _item_details = item["details"]
+                    _stage_hits = find_event_stage_coverage(
+                        _event_identity["event_key"],
+                        _event_identity["event_series_slot"],
+                        feed,
+                    )
+                    if _stage_hits:
+                        existing_id = _stage_hits[0].get("id") or item.get("id")
+                        result_label = f"duplicate_event_stage:{existing_id}"[:200]
+                        log_record_id = existing_id
+                        _event_key = _event_identity["event_key"]
+                        _event_slot = _event_identity["event_series_slot"]
+                        _log_dedup_decision(
+                            storage_dir,
+                            "block_event_stage_coverage",
+                            str(item.get("title") or ""),
+                            str(existing_id),
+                            (
+                                "atomic feed-append exact event stage coverage: "
+                                f"event_key={_event_key} slot={_event_slot}"
+                            ),
+                            candidate_id=(
+                                f"{_event_key.strip().casefold()}:"
+                                f"{_event_slot.strip().upper().replace(' ', '')}"
+                            ),
+                        )
+                        return str(existing_id)
+                duplicate = (
+                    None
+                    if _item_is_digest or _item_is_event
+                    else _find_same_ref_feed_duplicate(feed, item)
+                )
                 if duplicate is not None:
                     existing_id = duplicate.get("id") or item.get("id")
                     result_label = f"duplicate_same_ref:{existing_id}"[:200]

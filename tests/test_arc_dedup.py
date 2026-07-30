@@ -5,7 +5,9 @@ real non-duplicate that must NOT be blocked). If any of these fail, the arc gate
 has regressed to the title-similarity blind spot.
 """
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
+from threading import Barrier
 
 import pytest
 
@@ -406,6 +408,189 @@ class TestArcDuplicates:
 
 
 class TestPublisherGateWiring:
+    def test_event_cross_stage_same_title_publishes_but_same_stage_is_idempotent(
+        self, tmp_path, monkeypatch
+    ):
+        import json as _json
+        import sys as _sys
+        from pathlib import Path as _Path
+        from types import ModuleType as _ModuleType
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        existing = {
+            "id": "mile_fomc_preview",
+            "title": "事件溫度計｜FOMC 利率決議",
+            "content": "決議前情境與市場預期。",
+            "status": "published",
+            "audience": "event",
+            "category": "event_article",
+            "published_at": _ts(),
+            "event_key": "FOMC_2026_07_29",
+            "event_type": "FOMC",
+            "event_date": "2026-07-29",
+            "event_series_slot": "T-2",
+            "details": {
+                "content_type": "event_article",
+                "event_key": "FOMC_2026_07_29",
+                "event_type": "FOMC",
+                "event_date": "2026-07-29",
+                "event_series_slot": "T-2",
+                "experiment_refs": ["K2000"],
+            },
+        }
+        (storage / "reports" / "feed.json").write_text(
+            _json.dumps([existing], ensure_ascii=False),
+            encoding="utf-8",
+        )
+        monkeypatch.chdir(tmp_path)
+        supabase_sync = _ModuleType("supabase_sync")
+        supabase_sync.sync_article = lambda *_a, **_k: True
+        monkeypatch.setitem(_sys.modules, "supabase_sync", supabase_sync)
+        original_exists = _Path.exists
+
+        def _clean_checkout_exists(path):
+            if path.name in {".env", ".env.local"}:
+                return False
+            return original_exists(path)
+
+        monkeypatch.setattr(_Path, "exists", _clean_checkout_exists)
+        from volpred.publisher.publisher import Publisher
+
+        pub = Publisher(storage_dir=str(storage))
+        reaction_details = {
+            "event_key": "FOMC_2026_07_29",
+            "event_type": "FOMC",
+            "event_date": "2026-07-29",
+            "event_series_slot": "T+0",
+            "experiment_refs": ["K2000"],
+        }
+        reaction_id = pub.publish_milestone(
+            title=existing["title"],
+            description="決議後官方結果與第一段市場反應。",
+            phase="event",
+            details=reaction_details,
+            category="event_article",
+            audience="event",
+            status="draft",
+            audit_strict=False,
+        )
+        assert reaction_id != existing["id"]
+
+        retry_id = pub.publish_milestone(
+            title="事件溫度計｜FOMC 決議後更新",
+            description="同一階段的重試，不應建立第二篇。",
+            phase="event",
+            details=reaction_details,
+            category="event_article",
+            audience="event",
+            status="draft",
+            audit_strict=False,
+        )
+        assert retry_id == reaction_id
+        feed = _json.loads(
+            (storage / "reports" / "feed.json").read_text(encoding="utf-8")
+        )
+        assert len(feed) == 2
+        decisions = [
+            _json.loads(line)
+            for line in (storage / "logs" / "dedup_decisions.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line.strip()
+        ]
+        exact_blocks = [
+            row
+            for row in decisions
+            if row.get("action") == "block_event_stage_coverage"
+        ]
+        assert exact_blocks[-1]["candidate_id"] == "fomc_2026_07_29:T+0"
+
+    def test_atomic_append_serializes_same_event_stage_writers(
+        self, tmp_path, monkeypatch
+    ):
+        import json as _json
+
+        from volpred.publisher.publisher import Publisher
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        (storage / "reports" / "feed.json").write_text("[]", encoding="utf-8")
+        monkeypatch.setattr(
+            Publisher, "_mirror_article", lambda self, *_a, **_k: True
+        )
+        pub = Publisher(storage_dir=str(storage))
+        start = Barrier(2)
+
+        def event_item(item_id: str) -> dict:
+            identity = {
+                "event_key": "FOMC_2026_07_29",
+                "event_type": "FOMC",
+                "event_date": "2026-07-29",
+                "event_series_slot": "T+0",
+            }
+            return {
+                "id": item_id,
+                "title": "FOMC 決議後即時反應",
+                "description": "官方決議與第一段市場反應。",
+                "content": "官方決議與第一段市場反應。",
+                "status": "draft",
+                "audience": "event",
+                "category": "event_article",
+                "details": {"content_type": "event_article", **identity},
+                **identity,
+            }
+
+        def append(item: dict) -> str:
+            # Both callers bypass the non-atomic publish_milestone precheck.
+            # Only the feed lock + fresh exact-stage read can keep one row.
+            start.wait()
+            return pub._append_to_feed(item)
+
+        items = [event_item("mile_race_a"), event_item("mile_race_b")]
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            results = list(executor.map(append, items))
+
+        feed = _json.loads(
+            (storage / "reports" / "feed.json").read_text(encoding="utf-8")
+        )
+        assert len(feed) == 1
+        assert set(results) == {feed[0]["id"]}
+        assert feed[0]["event_series_slot"] == "T+0"
+
+    def test_atomic_append_rejects_identityless_event_direct_caller(
+        self, tmp_path, monkeypatch
+    ):
+        import json as _json
+
+        from volpred.publisher.publisher import Publisher
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        (storage / "reports" / "feed.json").write_text("[]", encoding="utf-8")
+        monkeypatch.setattr(
+            Publisher, "_mirror_article", lambda self, *_a, **_k: True
+        )
+
+        with pytest.raises(
+            ValueError, match="event article is missing canonical metadata"
+        ):
+            Publisher(storage_dir=str(storage))._append_to_feed(
+                {
+                    "id": "mile_missing_identity",
+                    "title": "FOMC event",
+                    "content": "Event body.",
+                    "audience": "event",
+                    "category": "event_article",
+                    "status": "draft",
+                    "details": {"content_type": "event_article"},
+                }
+            )
+
+        assert _json.loads(
+            (storage / "reports" / "feed.json").read_text(encoding="utf-8")
+        ) == []
+
     def test_publish_milestone_warns_but_publishes_arc_dup(self, tmp_path, monkeypatch):
         """End-to-end: 2026-06-23 (boss「沒發文比重複發文嚴重」) the narrative-arc gate
         is downgraded from HARD BLOCK to warn-only. A different-K, same-arc article
@@ -1125,4 +1310,3 @@ def test_capex_cycle_alone_does_not_link_unrelated_industries():
         [MILE_F5F4CB43], days=30, audience="general", include_fuzzy=True,
     )
     assert not matches, "a fab-capex piece must not arc-match the mega-cap AI story"
-

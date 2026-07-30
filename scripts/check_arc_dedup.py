@@ -6,8 +6,10 @@ Usage:
         --text-file /tmp/draft_or_results_summary.md
     uv run python scripts/check_arc_dedup.py --k-id k1449 --audience general
 
-Exit codes: 0 = no duplicate, 1 = duplicate found (do NOT write/publish
-without a deliberate new angle + details['dup_waiver']), 2 = usage error.
+Exit codes: 0 = no hard duplicate, 1 = exact coverage found, 2 = usage error.
+For event articles, pass ``--event-key`` and ``--event-series-slot`` together:
+only the exact structured stage is a hard duplicate; K/arc similarity across
+T-7/T-2/T+0/T+1 is advisory because the information state is intentionally new.
 
 Why this exists (2026-06-10 K1449/K1091 incident): title-similarity dedup is
 blind to same-story-different-shell duplicates. The publisher now hard-blocks
@@ -60,11 +62,13 @@ from volpred.publisher.arc_dedup import (  # noqa: E402
     _normalize_ref,
     arc_signature,
     find_arc_duplicates,
+    find_event_stage_coverage,
     find_k_coverage,
     find_k_coverage_gap_hints,
     find_lexical_hints,
     is_arc_anchorless,
     is_arc_near_miss,
+    normalize_event_series_slot,
 )
 from volpred.publisher.arc_dedup import (
     tokenize as _tokens,
@@ -99,7 +103,29 @@ def main() -> int:
         "Narrows BOTH gates; omit only if the piece genuinely spans audiences.",
     )
     ap.add_argument("--days", type=int, default=90)
+    ap.add_argument(
+        "--event-key",
+        help="canonical event identity; must be paired with --event-series-slot",
+    )
+    ap.add_argument(
+        "--event-series-slot",
+        help="canonical event stage (T-7/T-2/T+0/T+1); must be paired with --event-key",
+    )
     args = ap.parse_args()
+    if bool(args.event_key) != bool(args.event_series_slot):
+        print(
+            "ERROR: --event-key and --event-series-slot must be supplied together",
+            file=sys.stderr,
+        )
+        return 2
+    if args.event_series_slot:
+        try:
+            args.event_series_slot = normalize_event_series_slot(
+                args.event_series_slot
+            )
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
 
     text = ""
     if args.text_file:
@@ -120,6 +146,19 @@ def main() -> int:
     feed = json.loads((ROOT / "storage" / "reports" / "feed.json").read_text(encoding="utf-8"))
     storage_dir = str(ROOT / "storage")
     candidate_id = _normalize_ref(args.k_id) if args.k_id else None
+    event_identity = (
+        {
+            "event_key": args.event_key,
+            "event_series_slot": args.event_series_slot,
+        }
+        if args.event_key and args.event_series_slot
+        else None
+    )
+    if event_identity:
+        candidate_id = (
+            f"{str(args.event_key).strip().casefold()}:"
+            f"{str(args.event_series_slot).strip().upper().replace(' ', '')}"
+        )
     signature = arc_signature(args.title, text)
     report = {
         "entities": signature["entities"],
@@ -130,7 +169,21 @@ def main() -> int:
         "time_horizon": signature["time_horizon"],
         "arc_signature": signature,
         "audience_scope": args.audience or "any",
+        "event_identity": event_identity,
     }
+
+    # Gate 0 — event-stage coverage (exact).  Event articles are an intentional
+    # multi-stage series, so this structured identity is their only hard lock.
+    event_stage_coverage = (
+        find_event_stage_coverage(
+            args.event_key,
+            args.event_series_slot,
+            feed,
+        )
+        if event_identity
+        else []
+    )
+    report["event_stage_coverage"] = event_stage_coverage
 
     # Gate 1 — K coverage (exact). Runs before the fuzzy arc gate: if the exact
     # gate already knows this K+audience is covered, the fuzzy verdict is moot.
@@ -186,8 +239,11 @@ def main() -> int:
     hints = find_lexical_hints(args.title, text, feed) if thin else []
     report["lexical_hints"] = hints
     report["verdict"] = (
-        "block_k_coverage" if coverage
-        else "block_arc_dup" if dups
+        "block_event_stage_coverage" if event_stage_coverage
+        else "warn_event_k_coverage" if event_identity and coverage
+        else "warn_event_arc_dup" if event_identity and dups
+        else "block_k_coverage" if coverage
+        else "warn_arc_dup" if dups
         else "warn_arc_near_miss" if near_misses
         else "unjudged_thin_signature" if thin
         else "warn_coverage_metadata_gap" if coverage_gap_hints
@@ -195,7 +251,32 @@ def main() -> int:
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
-    if coverage:
+    if event_stage_coverage:
+        for hit in event_stage_coverage:
+            _log_dedup_decision(
+                storage_dir,
+                "block_event_stage_coverage",
+                args.title,
+                hit["id"],
+                (
+                    f"exact event stage already covered: event_key={args.event_key} "
+                    f"slot={args.event_series_slot}"
+                ),
+                candidate_id=candidate_id,
+            )
+        listed = "\n".join(
+            f"    - {h['id']} [{h['status']}/{h['audience']}] "
+            f"{h['published_at']} {h['title']}"
+            for h in event_stage_coverage
+        )
+        print(
+            "\n🚫 EVENT STAGE COVERED — this exact event_key + slot already has "
+            f"{len(event_stage_coverage)} active feed row(s):\n{listed}",
+            file=sys.stderr,
+        )
+        return 1
+
+    if coverage and not event_identity:
         for hit in coverage:
             _log_dedup_decision(
                 storage_dir, "block_k_coverage", args.title, hit["id"],
@@ -215,20 +296,44 @@ def main() -> int:
         )
         return 1
 
+    if event_identity and (coverage or dups):
+        advisory_hits = coverage or dups
+        action = "warn_event_k_coverage" if coverage else "warn_event_arc_dup"
+        for hit in advisory_hits:
+            _log_dedup_decision(
+                storage_dir,
+                action,
+                args.title,
+                hit.get("id"),
+                (
+                    f"cross-stage advisory for event_key={args.event_key} "
+                    f"slot={args.event_series_slot}; "
+                    f"reason={hit.get('match_reason', 'shared K')}"
+                ),
+                candidate_id=candidate_id,
+            )
+        print(
+            "\n⚠️  EVENT CROSS-STAGE SIMILARITY — the event identity is new, so "
+            "semantic/K overlap is advisory and writing may proceed. "
+            "Differentiate this slot's information state.",
+            file=sys.stderr,
+        )
+        return 0
+
     if dups:
         for hit in dups:
             _log_dedup_decision(
-                storage_dir, "block_arc_dup", args.title, hit.get("id"),
+                storage_dir, "warn_arc_dup", args.title, hit.get("id"),
                 f"arc match: {hit.get('match_reason', '?')}",
                 candidate_id=candidate_id,
             )
         print(
-            f"\n🚫 ARC DUPLICATE — {len(dups)} existing article(s) tell the same "
-            f"story. Do not write this piece without a genuinely new angle "
-            f"(and details['dup_waiver'] at publish).",
+            f"\n⚠️  ARC DUPLICATE — {len(dups)} existing article(s) may tell the "
+            "same story. This fuzzy signal is advisory: review and differentiate, "
+            "but the gate does not suppress the article.",
             file=sys.stderr,
         )
-        return 1
+        return 0
 
     if near_misses:
         for hit in near_misses:

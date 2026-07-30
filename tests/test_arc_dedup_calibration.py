@@ -191,8 +191,8 @@ def test_calibration_probe_contract(monkeypatch):
     result = topic_gate.audit_topic_dedup_calibration([{}])
     assert result["ok"] is True
     assert result["metrics"]["incident_margin"] == 3
-    assert result["metrics"]["incident_screen_blocked"] is True
-    assert result["metrics"]["incident_screen_verdict"] == topic_gate.BLOCK_THEME_SATURATED
+    assert result["metrics"]["incident_screen_blocked"] is False
+    assert result["metrics"]["incident_screen_verdict"] == topic_gate.WARN_THEME_SATURATED
     assert result["metrics"]["nfp_control_saturation"] == 3
     assert result["metrics"]["nfp_screen_blocked"] is False
     assert result["metrics"]["fomc_hard_matches"] == 0
@@ -217,14 +217,14 @@ def test_calibration_probe_warns_on_threshold_margin_drift(monkeypatch):
     assert any("margin" in issue for issue in result["issues"])
 
 
-def test_calibration_probe_warns_when_incident_final_verdict_stops_blocking(monkeypatch):
+def test_calibration_probe_warns_when_incident_fuzzy_gate_hard_blocks(monkeypatch):
     real_screen = topic_gate.screen_topic
 
     def fake_screen(title, *args, **kwargs):
         if title == topic_gate._CALIBRATION_AI_TITLE:
             return topic_gate.TopicScreen(
-                verdict=topic_gate.WARN_THEME_SATURATED,
-                blocked=False,
+                verdict=topic_gate.BLOCK_THEME_SATURATED,
+                blocked=True,
                 reason="simulated policy drift",
             )
         return real_screen(title, *args, **kwargs)
@@ -233,7 +233,7 @@ def test_calibration_probe_warns_when_incident_final_verdict_stops_blocking(monk
     result = topic_gate.audit_topic_dedup_calibration([{}])
 
     assert result["ok"] is False
-    assert any("calibrated theme block" in issue for issue in result["issues"])
+    assert any("calibrated fuzzy warning" in issue for issue in result["issues"])
 
 
 def test_calibration_probe_rejects_fomc_gate_error(monkeypatch):
