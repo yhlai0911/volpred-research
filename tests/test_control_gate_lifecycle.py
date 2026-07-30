@@ -432,6 +432,11 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     assert metadata_gap["evidence_sources"][0]["match"]["action"] == [
         "warn_coverage_metadata_gap"
     ]
+    assert metadata_gap["lifecycle"]["last_action"] == "retain"
+    assert metadata_gap["lifecycle"]["review_task_id"] == (
+        "control_gate_review_publisher_coverage_metadata_gap_"
+        "20260729T210710_03eb3f99062d"
+    )
     publisher_arc = gates["publisher_arc_dedup"]
     assert publisher_arc["mode"] == "warn"
     assert publisher_arc["lifecycle"]["last_action"] == "downgrade_to_warn"
