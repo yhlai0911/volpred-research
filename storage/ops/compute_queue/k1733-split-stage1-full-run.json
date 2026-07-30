@@ -1,0 +1,40 @@
+{
+  "id": "k1733-split-stage1-full-run",
+  "title": "K1733 split stage 1/2: full-replicate production run -> K1733_results.json",
+  "script_path": "scripts/run_k1733_stage1_full.sh",
+  "interpreter": "bash",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-30T00:17:28Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1733-split-stage1-full-run.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1733-split-stage1-full-run.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9189c746-k1733/experiments/k1733/K1733_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1733 split stage 2/2 — VERIFY + MERGE (stage 1 = k1733-split-stage1-full-run produced experiments/k1733/K1733_results.json inside worktree .claude/worktrees/dispatch-slot-1-9189c746-k1733; branch k1733-slot1-9189c746). Stage 1 was compute-only and did NOT verify anything. Do all of the following, in the worktree, and do NOT trust the README until it is reconciled against the fresh JSON.\n(0) FRESHNESS GATE: assert config.quick_mode == false and reproduce_spec exists in K1733_results.json. The parent job (agent-brief_k1733-b39c59) timed out before ever writing this artifact, and a 2026-07-30 scratch --quick run showed finalize_experiment writes the JSON BEFORE hashing reproduce_spec inputs — so a JSON without reproduce_spec means the run crashed at the end and must be re-run, not collected.\n(1) README RECONCILIATION (the crux): experiments/k1733/README.md section 7 was written from an in-agent run whose results.json was never persisted. Check EVERY number in README against the fresh JSON: H1-H4 test statistics, p-values, post-FDR conclusions, ordering_robustness sign-stability rates, and any with-cost results. Any mismatch -> correct the README to the JSON (the JSON is the computed truth) and record the correction. A 2026-07-30 quick-mode reproduction already matched the README verdict set (H1 ACCEPT / H2 REJECT / H2R_post_hoc PARTIAL_POST_HOC / H3 REJECT / H4 NOT_RUN_PRECONDITION_NOT_MET), so qualitative agreement is expected — but full-replicate p-values and magnitudes WILL differ from quick mode and are the numbers that must land.\n(2) LOOKAHEAD: K1733.py must carry an explicit signal.shift(1) or equivalent lag, and lookahead_diagnostics (the future-noise causal probe) violations must be empty.\n(3) METHODOLOGY RED LINE (K628b/K865b): every directional claim must rest on order-invariant KPPS GFEVD, with ordering-robustness sign stability >= 90%. If any directional conclusion is supported by Cholesky-ordered FEVD -> verdict FAIL. Note H2 is REJECT and H2R is only PARTIAL_POST_HOC: confirm the README states the post-hoc mirror as post-hoc and does not promote it to a pre-registered finding.\n(4) Nested forecast comparison must use Clark-West, not Diebold-Mariano.\n(5) H4 must remain NOT_RUN: its pre-registered gate was \"run only if H2 or H3 is ACCEPT/PARTIAL\"; both are REJECT, so h4_strategy must be null. If h4_strategy is populated, that is post-hoc fishing -> FAIL.\n(6) Run: uv run python scripts/check_experiment_artifacts.py check --path experiments/k1733 (confirms the run-time-generated reproduce_spec and the three-piece set).\n(7) Codex code review of K1733.py before the results are trusted; also run experiments/k1733/test_k1733.py (18 tests).\n(8) MAIN THREAD writes storage/memory/knowledge.json — agents must not (K1259) — and numbers must be extracted programmatically from K1733_results.json, never retyped.\n(9) MERGE: bash scripts/merge_worktree.sh dispatch-slot-1-9189c746-k1733 (via canonical git_writer_lock run). Leave no unmerged branch/worktree.\n(10) HOUSEKEEPING: a second, older K1733 worktree dispatch-slot-1-1e5922b4-k1733 (age ~57h, unmerged=0, dirty=0) is a stale duplicate from an earlier attempt — reconcile/remove it so the K1733 task-id collision gate is clean.",
+    "task_type": "platform_ops",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1733",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-30T00:17:55Z",
+    "linked_at": "2026-07-30T00:17:55Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "parent_timeout_job_id": "agent-brief_k1733-b39c59",
+  "split_stage": "full_production_run"
+}

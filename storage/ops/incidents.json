@@ -944,7 +944,7 @@
    "class": "ordinary",
    "clean_observations": [],
    "clean_streak_started_at": null,
-   "current_task_id": "ci-red-30494529174",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-29T22:20:23.344314+00:00",
@@ -967,16 +967,32 @@
      "first_seen_at": "2026-07-29T23:20:36.191031+00:00",
      "key": "30498120557:1",
      "last_seen_at": "2026-07-29T23:20:36.191031+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T23:50:33.668091+00:00",
+     "key": "30499763526:1",
+     "last_seen_at": "2026-07-29T23:50:33.668091+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-29T23:18:24.7681300Z E AssertionError: raw termination bypasses: ['scripts/ci_install_system_test_dependencies.py:89', 'scripts/ci_install_system_test_dependencies.py:102']",
-   "last_seen_at": "2026-07-29T23:20:36.191031+00:00",
+   "last_breach_detail": "2026-07-29T23:48:05.2629985Z E AssertionError: raw termination bypasses: ['scripts/ci_install_system_test_dependencies.py:89', 'scripts/ci_install_system_test_dependencies.py:102']",
+   "last_seen_at": "2026-07-29T23:50:33.668091+00:00",
    "notified_at": null,
-   "occurrence_count": 2,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "occurrence_count": 3,
+   "resolution": {
+    "at": "2026-07-30T00:15:36.366757+00:00",
+    "by": "ci-red-30494529174",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-30T00:15:36.366757+00:00",
+     "by": "ci-red-30494529174",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -2609,6 +2625,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T23:36:55.423484+00:00",
+ "updated_at": "2026-07-30T00:21:09.480646+00:00",
  "version": 1
 }

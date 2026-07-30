@@ -39,7 +39,7 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1733",
   "source_task_link": {
     "state": "linked",
@@ -59,12 +59,13 @@
   },
   "claimed_by_pid_start_wall": "Thu Jul 30 03:15:26 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "K1733",
-    "settled_at": "2026-07-29T22:56:26Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-07-30T00:17:51Z"
   },
   "failure_reason": "timeout",
   "split_required": true,
-  "timed_out_at": "2026-07-29T22:56:26Z"
+  "timed_out_at": "2026-07-29T22:56:26Z",
+  "followup_dispatched_at": "2026-07-30T00:17:50Z"
 }
