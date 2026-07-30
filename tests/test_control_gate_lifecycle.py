@@ -414,9 +414,15 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     } <= gates.keys()
     assert gates["hourly_pregate"]["mode"] == "shadow"
     assert gates["dispatch_starvation_lockout"]["mode"] == "selection_constraint"
+    worktree = gates["worktree_merge_ownership"]
     assert (
-        gates["worktree_merge_ownership"]["review_policy"]["incident_metric"]
+        worktree["review_policy"]["incident_metric"]
         == "instance_transitions"
+    )
+    assert worktree["lifecycle"]["last_action"] == "retain"
+    assert worktree["lifecycle"]["review_task_id"] == (
+        "control_gate_review_worktree_merge_ownership_"
+        "20260730T120906_435413c1f352"
     )
     task_generation = gates["task_generation"]
     assert task_generation["lifecycle"]["last_action"] == "recalibrate"
