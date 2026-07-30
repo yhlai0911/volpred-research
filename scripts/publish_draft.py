@@ -879,6 +879,17 @@ def parse_draft(path: Path, require_frontmatter: bool = True) -> dict:
         # --proposer，但這個 helper 之前沒轉發 → 走 publish_draft 的 member_qa
         # 稿件署名一律掉成 null（feed 上 proposer=null 的舊 member_qa 即此因）。
         "proposer": proposer_fm,
+        # Event identity (event_key / event_type / event_date / event_series_slot).
+        # publisher.publish_milestone treats these as a storage invariant for
+        # audience=event and raises without them, but parse_draft used to drop
+        # them, so the canonical helper could never publish an event article.
+        # The dependency-light frontmatter parser supports scalar top-level
+        # fields, so event identity is canonicalized there rather than inside
+        # a nested `details:` mapping.
+        "event_key": fm.get("event_key"),
+        "event_type": fm.get("event_type"),
+        "event_date": fm.get("event_date"),
+        "event_series_slot": fm.get("event_series_slot"),
         "body": body,
     }
 
@@ -1839,6 +1850,14 @@ def main() -> int:
         details_payload["cluster_waiver"] = args.cluster_waiver
     if args.dup_waiver:
         details_payload["dup_waiver"] = args.dup_waiver
+    # Event identity is a publisher storage invariant: publisher.publish_milestone
+    # rejects any audience=event / event_article row whose details lack all four
+    # fields. They were never forwarded here, so the canonical mutation path could
+    # not publish an event article at all (2026-07-29 FOMC T+0 hit this).
+    for _key in ("event_key", "event_type", "event_date", "event_series_slot"):
+        _val = info.get(_key)
+        if _val not in (None, ""):
+            details_payload[_key] = str(_val)
     cmd = [
         "uv", "run", "volpred", "ops", "publish-milestone",
         "--title", info["title"],

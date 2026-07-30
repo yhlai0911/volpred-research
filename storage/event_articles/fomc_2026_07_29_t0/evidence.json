@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-07-30T07:03:28.026466+00:00",
+  "seed": 20260729,
+  "event": {
+    "event_key": "FOMC_2026_07_29",
+    "event_type": "fomc",
+    "event_date": "2026-07-29",
+    "event_series_slot": "T+0"
+  },
+  "data": {
+    "price_source": "yfinance ^VIX / SPY / ^VIX3M, auto_adjust=True",
+    "date_source": "Federal Reserve published FOMC meeting calendars, scheduled meetings only",
+    "sample": "2019-01-30 .. 2026-07-29",
+    "n_fomc_days": 61,
+    "n_prior_events": 60,
+    "last_close_available": "2026-07-29"
+  },
+  "event_day": {
+    "date": "2026-07-29",
+    "prev_date": "2026-07-28",
+    "vix_prev": 18.209999084472656,
+    "vix": 20.65999984741211,
+    "vix_chg": 2.450000762939453,
+    "vix_pct": 0.13454150939680853,
+    "spy_ret": -0.015387473482586067,
+    "spy_abs": 1.5387473482586067,
+    "implied_1d": 1.147122117910203,
+    "realized_over_implied": 1.3413980292367271
+  },
+  "baseline": {
+    "share_vix_down_on_fomc_day": 0.5833333333333334,
+    "n_down": 35,
+    "n_total": 60,
+    "sign_test_p_greater": 0.12253041651147285,
+    "mean_vix_chg": -0.04600008328755697,
+    "median_vix_chg": -0.5300006866455078,
+    "sd_vix_chg": 2.7912289969126265,
+    "ttest_t": -0.12765527779621236,
+    "ttest_p": 0.8988558914907478,
+    "wilcoxon_p": 0.03799051691573585,
+    "mean_spy_abs_pct": 0.9931337336073986
+  },
+  "event_vs_baseline": {
+    "vix_chg_percentile": 0.95,
+    "spy_ret_percentile_worst": 0.8833333333333333,
+    "vix_chg_zscore": 0.8942300502709855,
+    "realized_over_implied": 1.3413980292367271,
+    "share_prior_events_breaching_implied": 0.35,
+    "realized_over_implied_percentile": 0.8666666666666667
+  },
+  "subperiods": {
+    "2019-2021": {
+      "n": 24,
+      "mean_vix_chg": 0.054999709129333496,
+      "share_vix_down": 0.625,
+      "mean_spy_abs": 0.9676362943373095
+    },
+    "2022-2023": {
+      "n": 16,
+      "mean_vix_chg": -0.8031246066093445,
+      "share_vix_down": 0.5625,
+      "mean_spy_abs": 1.3363942588207438
+    },
+    "2024-2026": {
+      "n": 20,
+      "mean_vix_chg": 0.43849978446960447,
+      "share_vix_down": 0.55,
+      "mean_spy_abs": 0.7491222405608288
+    }
+  },
+  "top_vix_jumps": [
+    {
+      "date": "2021-01-27",
+      "vix_prev": 23.020000457763672,
+      "vix": 37.209999084472656,
+      "vix_chg": 14.189998626708984,
+      "vix_pct": 0.6164204319953999,
+      "spy_ret": -0.0244404368826574
+    },
+    {
+      "date": "2024-12-18",
+      "vix_prev": 15.869999885559082,
+      "vix": 27.6200008392334,
+      "vix_chg": 11.750000953674316,
+      "vix_pct": 0.7403907396600702,
+      "spy_ret": -0.02980346115350485
+    },
+    {
+      "date": "2026-03-18",
+      "vix_prev": 22.3700008392334,
+      "vix": 25.09000015258789,
+      "vix_chg": 2.719999313354492,
+      "vix_pct": 0.12159138181989015,
+      "spy_ret": -0.013953644515257158
+    },
+    {
+      "date": "2026-07-29",
+      "vix_prev": 18.209999084472656,
+      "vix": 20.65999984741211,
+      "vix_chg": 2.450000762939453,
+      "vix_pct": 0.13454150939680853,
+      "spy_ret": -0.015387473482586067
+    },
+    {
+      "date": "2019-07-31",
+      "vix_prev": 13.9399995803833,
+      "vix": 16.1200008392334,
+      "vix_chg": 2.1800012588500977,
+      "vix_pct": 0.15638460003383692,
+      "spy_ret": -0.010940784259819258
+    },
+    {
+      "date": "2026-06-17",
+      "vix_prev": 16.40999984741211,
+      "vix": 18.440000534057617,
+      "vix_chg": 2.030000686645508,
+      "vix_pct": 0.12370510088491216,
+      "spy_ret": -0.012487870885051433
+    }
+  ]
+}

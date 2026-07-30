@@ -338,6 +338,57 @@ def test_successful_new_publish_refreshes_publication_candidates(tmp_path, monke
     assert refresh_reasons == ["new_publish"]
 
 
+def test_event_publish_forwards_identity_in_details_json(tmp_path, monkeypatch):
+    """The canonical CLI must not drop the four-field event storage identity."""
+    draft = tmp_path / "event.md"
+    _write_draft(
+        draft,
+        {
+            "title": "FOMC reaction",
+            "audience": "event",
+            "content_type": "event_article",
+            "event_key": "FOMC_2026_07_29",
+            "event_type": "fomc",
+            "event_date": "2026-07-29",
+            "event_series_slot": "T+0",
+            "tags": ["FOMC", "VIX"],
+        },
+        body=(
+            "聯準會決議公布後，市場波動明顯上升。"
+            "\n\n![事件圖](https://example.com/event.png)\n"
+        ),
+    )
+    captured_details = []
+
+    def _fake_run(cmd, *args, **kwargs):
+        if "--details-json" in cmd:
+            captured_details.append(cmd[cmd.index("--details-json") + 1])
+        return _StubResult(0)
+
+    monkeypatch.setattr(publish_draft.subprocess, "run", _fake_run)
+    monkeypatch.setattr(
+        publish_draft,
+        "_refresh_publication_candidates_after_feed_change",
+        lambda reason: None,
+    )
+    monkeypatch.setattr(sys, "argv", [
+        "publish_draft.py",
+        str(draft),
+        "--status", "published",
+        "--force-duplicate",
+    ])
+
+    rc = publish_draft.main()
+
+    assert rc == 0
+    assert len(captured_details) == 1
+    details = __import__("json").loads(captured_details[0])
+    assert details["event_key"] == "FOMC_2026_07_29"
+    assert details["event_type"] == "fomc"
+    assert details["event_date"] == "2026-07-29"
+    assert details["event_series_slot"] == "T+0"
+
+
 # ---------------------------------------------------------------------------
 # Combined: --draft + frontmatter phase + tmp path (regression)
 # ---------------------------------------------------------------------------

@@ -516,3 +516,27 @@ def test_parse_draft_missing_description_returns_empty_string(tmp_path):
     )
     info = parse_draft(draft)
     assert info["description"] == ""
+
+
+def test_parse_draft_preserves_event_identity_from_frontmatter(tmp_path):
+    """Event identity survives parsing so the canonical publisher can forward it."""
+    draft = tmp_path / "event.md"
+    draft.write_text(
+        "---\n"
+        "title: Event\n"
+        "audience: event\n"
+        "event_key: FOMC_2026_07_29\n"
+        "event_type: fomc\n"
+        "event_date: '2026-07-29'\n"
+        "event_series_slot: T+0\n"
+        "---\n\n"
+        "Body.\n",
+        encoding="utf-8",
+    )
+
+    info = parse_draft(draft)
+
+    assert info["event_key"] == "FOMC_2026_07_29"
+    assert info["event_type"] == "fomc"
+    assert info["event_date"] == "2026-07-29"
+    assert info["event_series_slot"] == "T+0"
