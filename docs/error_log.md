@@ -2086,8 +2086,15 @@ fail closed，不啟動下一個會與殘存 apt／dpkg 競爭 lock 的 attempt�
 修正後 bounded workflow／retry／fail-closed／真 dependency／surviving-descendant
 contract 11 tests，連同 checkout-history、Postgres workflow 與 enforcement-map 共
 **22 passed**；Ruff、py_compile、YAML consumer 與 diff check 通過；Matt
-Standards／Spec 最終複審均 PASS。此切片目前為 **`contained`**：仍待 formal push，
-及 fresh GitHub run 實際完成 dependency step 並跑完 pytest，才升級為
+Standards／Spec 最終複審均 PASS。後續 full-suite gate 又正確抓出 bounded helper
+本身仍以 raw `os.killpg` 送 TERM／KILL，違反「所有 system-owned termination 先有
+durable intent」的全域契約。commit `ca41186c4` 把 helper 收斂到 canonical
+stdlib-only termination owner；sudo Python 在專案環境尚未安裝時直接載入唯一 owner
+檔案，runner-local ledger 先持久化 intent／attempt receipt再送 signal，receipt
+無法建立或寫入時 fail closed，不會退化成 raw kill。TERM／KILL沿用同一 generation，
+相鄰 termination／dependency tests **36 passed**，Matt Standards／Spec 雙審 PASS。
+GitHub successor run `30500807966` 的 dependency step成功，完整 suite
+**6645 passed、11 skipped**，其餘四道 gates亦全綠。此 bounded root class現為
 **`root_cause_fixed_and_verified`**。
 
 ### 2026-07-27 — runtime task `succeeded` 誤關仍為 contained 的 GitHub umbrella issue
@@ -5107,6 +5114,11 @@ receipt契約；`_closeout_only`保證pending若被其他路徑先清掉，背�
 無background task，再轉綠：第一次ack <0.15秒、第二次只回in-progress、closeout
 exactly once、pending最後清空。trigger／PHASE-Z／restart closeout相鄰範圍
 **314 passed、1 skipped**，並另有exception-path regression證明0.3秒慢告警不阻塞
-下一次tick。此slice目前為 **`contained`**；需commit、immutable self-reload、
-production連續tick read-back及GitHub CI後才升級為
+下一次tick。修正 commit `e9231ebf5` 已由 immutable release request
+`5bb706310af43be...` 正式載入；LaunchAgent runs由11→12、新 supervisor PID
+`26313` 於2026-07-30 07:38:07台灣時間啟動，planned-restart通知正確抑制，
+trigger socket與health loop皆恢復。07:39自然Operations Core tick回
+`not_due`、exit 0、約4秒，state回讀`current_jobs=0`／`phase_z_pending=0`。
+GitHub successor run `30500807966` 最後以 **6645 passed、11 skipped** 完成；
+四道相鄰 gates全綠。此 bounded root class為
 **`root_cause_fixed_and_verified`**。

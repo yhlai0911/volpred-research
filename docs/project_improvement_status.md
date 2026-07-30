@@ -2906,8 +2906,15 @@ Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy 
   後續tick立即ack in-progress；closeout未終止前仍禁止新worker。
 - ✅ exception通知也移到observed thread task，慢速或失敗告警不阻塞event loop。
 - ✅ TDD先紅後綠；trigger／PHASE-Z／restart完整範圍 **314 passed、1 skipped**。
-- 🟡 程式slice目前 **`contained`**，待commit、immutable release、production
-  連續tick回讀與GitHub CI後升級。
+- ✅ commit `e9231ebf5` 已由immutable request `5bb706310af43be...`部署；新PID
+  `26313`於07:38:07啟動，planned-restart通知抑制、socket／health loop正常。
+- ✅ 07:39自然Operations Core tick回`not_due`、exit 0、約4秒；state為
+  `current_jobs=0`／`phase_z_pending=0`。
+- ✅ CI dependency helper另由commit `ca41186c4`收斂所有TERM／KILL至durable
+  termination owner；相關36案與Matt雙審PASS。GitHub run `30500807966`
+  **6645 passed、11 skipped**，其餘四道gate全綠。
+
+此 trigger bounded root class為 **`root_cause_fixed_and_verified`**。
 
 ## 2026-07-30 — Compute queue UTF-8 argv boundary
 
