@@ -4756,17 +4756,17 @@ def test_loop_crash_transport_identity_ignores_occurrence_values(
     first = """Traceback (most recent call last):
   File "/private/var/folders/aa/run-101/scheduler.py", line 417, in health_tick
     await check_task("task-101")
-RuntimeError: task task-101 failed at 2026-07-30T03:20:01Z
+RuntimeError: task assign_01a5feda failed at 2026-07-30T03:20:01Z
 """
     same_root_new_occurrence = """Traceback (most recent call last):
   File "/private/var/folders/bb/run-999/scheduler.py", line 611, in health_tick
     await check_task("task-999")
-RuntimeError: task task-999 failed at 2026-07-30T03:24:59Z
+RuntimeError: task assign_99bbccdd failed at 2026-07-30T03:24:59Z
 """
     different_frame = """Traceback (most recent call last):
   File "/private/var/folders/bb/run-999/scheduler.py", line 611, in scheduler_tick
     await check_task("task-999")
-RuntimeError: task task-999 failed at 2026-07-30T03:24:59Z
+RuntimeError: task assign_99bbccdd failed at 2026-07-30T03:24:59Z
 """
     different_reason_same_frame = """Traceback (most recent call last):
   File "/private/var/folders/cc/run-777/scheduler.py", line 733, in health_tick

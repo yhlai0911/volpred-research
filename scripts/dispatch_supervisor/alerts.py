@@ -69,7 +69,12 @@ _EXCEPTION_TYPE_RE = re.compile(
 _DYNAMIC_FALLBACK_REPLACEMENTS = (
     (re.compile(r"\b\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z?\b"), "<timestamp>"),
     (re.compile(r"\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\b"), "<uuid>"),
-    (re.compile(r"\b[0-9a-fA-F]{8,}\b"), "<hex>"),
+    (
+        re.compile(
+            r"(?<![0-9a-fA-F])[0-9a-fA-F]{8,}(?![0-9a-fA-F])"
+        ),
+        "<hex>",
+    ),
     (re.compile(r"(?:[A-Za-z]:)?[/~][^\s\"']+"), "<path>"),
     (re.compile(r"\b\d+\b"), "<number>"),
 )
