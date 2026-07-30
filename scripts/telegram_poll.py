@@ -25,6 +25,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import stat
 import sys
 import time
 from datetime import datetime, timezone
@@ -48,10 +50,56 @@ from volpred.canonical_write import guard_canonical_write  # noqa: E402
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 INBOX = ROOT / "storage" / "ops" / "telegram_inbox.jsonl"
 HEARTBEAT_LOG_INTERVAL_SECONDS = 3600
+TELEGRAM_POLL_LOG = Path(
+    os.environ.get(
+        "VOLPRED_TELEGRAM_POLL_LOG",
+        str(Path.home() / ".volpred" / "logs" / "telegram_poll.log"),
+    )
+)
 
 
 def _log(msg: str) -> None:
-    print(f"[{datetime.now(timezone.utc).isoformat(timespec='seconds')}] {msg}", flush=True)
+    """Append one record through a fresh inode lookup.
+
+    The old shell-level ``exec >> telegram_poll.log`` kept one descriptor for
+    the daemon's entire lifetime. Atomic log rotation replaced the pathname
+    but the process kept writing the unlinked inode, making live logs appear
+    frozen. Opening with ``O_APPEND`` per record follows the current pathname
+    after every rotation while keeping each line a single append.
+    """
+    record = (
+        f"[{datetime.now(timezone.utc).isoformat(timespec='seconds')}] "
+        f"{msg}\n"
+    ).encode("utf-8", errors="replace")
+    path = TELEGRAM_POLL_LOG
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        flags = os.O_WRONLY | os.O_CREAT | os.O_APPEND
+        flags |= getattr(os, "O_CLOEXEC", 0)
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(path, flags, 0o600)
+        try:
+            info = os.fstat(descriptor)
+            if not stat.S_ISREG(info.st_mode):
+                raise RuntimeError(
+                    f"telegram poll log is not a regular file: {path}"
+                )
+            os.fchmod(descriptor, 0o600)
+            remaining = memoryview(record)
+            while remaining:
+                written = os.write(descriptor, remaining)
+                if written <= 0:
+                    raise OSError("telegram poll log append made no progress")
+                remaining = remaining[written:]
+        finally:
+            os.close(descriptor)
+    except Exception as exc:  # noqa: BLE001 - daemon must retain a visible fallback
+        print(
+            f"[telegram_poll] log append failed path={path} "
+            f"error={type(exc).__name__}: {exc}; record={msg}",
+            file=sys.stderr,
+            flush=True,
+        )
 
 
 def _parse_state_datetime(raw: object) -> datetime | None:
