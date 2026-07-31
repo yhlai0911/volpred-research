@@ -21,12 +21,12 @@
     "K1701"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 1,
   "queued_at": "2026-07-31T00:17:38Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-31T00:30:24Z",
+  "completed_at": "2026-07-31T00:30:39Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_4b10546f.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_4b10546f.stderr",
   "result_artifact": "storage/lazypack_jobs/mile_4b10546f/runs/lazypack-mile_4b10546f/panels",
@@ -37,7 +37,7 @@
     "storage/lazypack_jobs/mile_4b10546f/runs/lazypack-mile_4b10546f/panels/panel_result.png",
     "storage/lazypack_jobs/mile_4b10546f/runs/lazypack-mile_4b10546f/panels/panel_takeaway.png"
   ],
-  "output_paths_updated_at": null,
+  "output_paths_updated_at": "2026-07-31T00:30:33Z",
   "job_metadata": null,
   "kind": "compute",
   "cwd": null,
@@ -47,5 +47,28 @@
   "source_task_link": null,
   "timeout_seconds": 1800,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 43056,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:70c046ba4022ea2f5e07ef12",
+    "scheduled_for": "2026-07-31T00:30:00Z"
+  },
+  "claimed_by_pid_start_wall": "Fri Jul 31 08:30:23 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "21aab2a54f8c74211e964f042253e9432a4de407",
+  "delivered_paths": [
+    "storage/lazypack_jobs/mile_4b10546f/runs/lazypack-mile_4b10546f/panels/panel_identity.png",
+    "storage/lazypack_jobs/mile_4b10546f/runs/lazypack-mile_4b10546f/panels/panel_question.png",
+    "storage/lazypack_jobs/mile_4b10546f/runs/lazypack-mile_4b10546f/panels/panel_result.png",
+    "storage/lazypack_jobs/mile_4b10546f/runs/lazypack-mile_4b10546f/panels/panel_takeaway.png",
+    "storage/lazypack_jobs/mile_4b10546f/runs/lazypack-mile_4b10546f/plan.json"
+  ],
+  "delivered_at": "2026-07-31T01:00:46.314258+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }

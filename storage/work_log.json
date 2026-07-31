@@ -32922,5 +32922,59 @@
     "owner": "hourly-slot-1-c9210815e0184c66bab893662760b9a0",
     "commit": null,
     "summary": "K1701 general-audience 文章：draft mile_4b10546f（audience=general, status=draft）進草稿池（本班前\nreleasable drafts = 0）。\n\n選題角度：K1701 的核心價值是識別性教訓而非預測力。文章講的是 identity trap ——\nlog(離散度) = log(成分股平均波動) − log(指數波動)，而 HAR 本來就含 index RV，所以\n「加離散度」與「加成分股平均波動」張成同一 span，兩模型預測值重合。從 results.json\nprogrammatically 取得的數字（非重打）：\n- /assets/SPX/oos_vol/h1/ladder/identity_check_rdisp_vs_avg_vol/max_abs_forecast_diff\n  = 8.847089727481716e-17\n- /assets/SPX/sample/n_days_with_dispersion = 4153\n- /assets/SPX/sample/members_per_day/median = 439\n- 樣本 2010-01-04 → 2026-07-10\n\n已誠實揭露的限制（依 knowledge 的「發文前必補」缺口）：verdict 是\nINCONCLUSIVE_NO_EXACT_NULL_CLAIM 非 exact null；R1（2020+ 高覆蓋率）與 R3（sector-ETF）\n子樣本中該指標顯著變差；rho 非精確波動加權平均相關；yfinance 缺已下市股票的存活者偏誤。\n未引用 fig6 event study（in-sample 描述、results.json 無對應數字、無法獨立驗證）。\n\nGates：check_arc_dedup --k-id K1701 --audience general 無 K-COVERAGE（exit 0）；\nARC DUPLICATE warn 指向 mile_50ce135b（AI 電力題材），主題與證據皆不同，判定 false\npositive 後續寫。anti_ai_gate --no-fb-mode exit=0（warn 0/3）。publish_draft\ncontent-vs-source audit PASS（0 claims vs 2696 source values）。\n\nLazypack：撰 storage/lazypack_plans/k1701_general_plan.json（4 panels，數字全部 bind 到\nresults.json JSON pointer + sha256 b951f332...），已 enqueue lazypack-mile_4b10546f，\n*/15 compute worker 渲染。無此 plan 該 draft 不能 release。"
+  },
+  {
+    "timestamp": "2026-07-31T08:30:32+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_4b10546f",
+    "outcome": "fallback_failed",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py failed (rc=1).",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_4b10546f:codex->agy",
+    "article_id": "mile_4b10546f",
+    "job_id": "lazypack-mile_4b10546f",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-31T08:30:33+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_4b10546f",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_agy.py failed (rc=1); scripts/lazypack_render.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_4b10546f:agy->deterministic",
+    "article_id": "mile_4b10546f",
+    "job_id": "lazypack-mile_4b10546f",
+    "stage": "agy->deterministic",
+    "failure_class": null,
+    "primary_renderer": "scripts/gen_lazypack_agy.py",
+    "fallback_renderer": "scripts/lazypack_render.py"
+  },
+  {
+    "timestamp": "2026-07-31T09:22:08+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260731",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-86a31a8535134dd7a0db52c7b80f36b4",
+    "owner": "hourly-slot-1-86a31a8535134dd7a0db52c7b80f36b4",
+    "commit": null,
+    "summary": "第 37 期每日精選導讀已寫作並發佈：`mile_461ff729`〈Fed 這次沒動，卻有人要求升息：你手上的四張避險保單，各自只賠哪一種跌？〉\n\n**時效 lane**：本班走 PHASE A0，`task_urgency` 回傳 count=2 —— urgent lane 的 `assign_0bfcee6e`（platform_ops）依 supervisor 契約被 `supervisor_preassignment_required` 機械拒絕（未繞過），故執行 time_critical lane 的 `daily_digest_20260731`。\n\n**時事骨幹（真實讀數，取自 archive，非臆造）**：2026-07-29 FOMC 按兵不動但出現 9:3 三張**要求升息**的反對票；VIX 18.21→20.66（+2.45 點，60 次決議日第 95 百分位），07-31 回落 17.09；同時通膨預期升溫。本篇框成的投資議題＝「若 Fed 下一步的風險方向是升息而非降息，反射性買的避險部位（長天期公債／TIPS／黃金／VIX）到底賠哪一種跌？」\n\n**具名可帶走框架**：「三種跌法，一張理賠表」— 跌的三種成因（A 股票自己跌／B 利率往上壓價／C 通膨吃掉購買力）× 四張保單（長天期公債／抗通膨債／黃金／買 VIX）的 **2D 理賠對照矩陣**，放在開場後第一區塊當骨幹（非結尾補充），後三節逐列拆解。形狀刻意避開近 5 期已用過的「N 問／四欄檢查表」（07-26/27/28）、「分級採購清單」（07-29）、「三時態對帳表」（07-30）；MOVE/VIX 只用在「方向不對稱」，不碰 07-26 已寫過的「事件日避險保費抓時機」。\n\n**策展合規（cross-archive 專欄，非本週 recap）**：`digest_articles` 8 篇 = mile_45d354f0(07-30) / mile_dd7e7aa4(07-31) / mile_671d4c75(06-22) / mile_579ad22f(06-09) / mile_6f3e2b1a(06-16) / mile_1b56cf6b(06-13) / mile_08820c3d(07-05) / mile_e1a1f7f7(06-25)。**span 2026-06-09→07-31 = 52 天**（機械 gate 要求 ≥14 天；>45 天不觸發 warn）；深庫來源（>30 天）**5 篇**（要求 ≥2）。`_audit_digest_archive_span` 全程無警告。\n\n**主線程前置（派工前完成）**：`check_arc_dedup.py --audience general` exit 0（僅 advisory near-miss，已逐條比對 mile_beee535c/cdade7c8 的角度差異並寫進 brief 避雷）；另做 publishing.md 的 3-layer 查重 —— 盤點近 8 期 digest 主題與近 4 期 `digest_articles` 組成，剔除 07-26/27 重複用過的 mile_d12825bb / mile_78899a5c，8 篇來源皆非近期重用。\n\n**Gate 結果**：`anti_ai_gate.py` exit 0（PASS，warn=1/3，唯一 WARN 是 FB 短段規則，長文必然命中、未達 ≥3 門檻），未用 `--force`；editor-sop 9-checklist 過（Check 2.2「真正的」超額 2→1 已改）；lazypack gate 曾硬擋（general+published 需 `## 懶人包圖組` 且禁拿內文證據圖充數）→ 依 07-30 先例建 data-bound evidence JSON + strict v1 plan 另生 3 張 summary poster（plan 驗證兩輪修正：digits 上限 3 → 改綁 percent；percent 自動 ×100 導致殖利率誤印 519.300% → 新增 `_frac` 分數欄位重渲染，目視確認 5.193% / 45.7% / −22.2% / 94.35% vs 93.44% 正確）。\n\n**主線程獨立驗證（未採信 agent 自報）**：feed 回讀 status=published、content_type=daily_digest、tags 含「精選導讀」、digest_articles 8 篇順序與派工組成逐字一致、標題未以「每日精選導讀｜」起頭；內文 12,017 字元、11 張圖、18 個 inline `/v3/reports/` 來源連結。研究誠實抽驗：8 篇來源各抽 1 個關鍵數字（0.146 / 20.66 / 22.2 / 45.7 / 16.8 / 0.9344 / 3.99 / 2.02）回 grep 原文，**8/8 皆可在來源 content 內找到**，無臆造數字。\n\n產出檔：`storage/drafts/daily_digest_20260731_draft.md`、`storage/drafts/assets/hedge_claims_matrix_20260731.json`、`storage/lazypack_plans/daily_digest_20260731_plan.json`。"
+  },
+  {
+    "timestamp": "2026-07-31T09:26:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "k1733-followup-freshness-gate-falsified",
+    "outcome": "contained",
+    "actor": "hourly-slot-1-86a31a8535134dd7a0db52c7b80f36b4",
+    "owner": "hourly-slot-1-86a31a8535134dd7a0db52c7b80f36b4",
+    "commit": null,
+    "summary": "PHASE A 收件前置：證偽 K1733 followup 的 freshness gate 條件，避免丟棄完好產物 + 重跑 heavy compute。\n\n`k1733-split-stage1-full-run`（exit_code=0）的 `claude_followup.brief` 第 (0) 步要求「`reproduce_spec` 必須存在於 `K1733_results.json` 之內，否則代表 run 崩了，必須 re-run 而非 collect」。實地回讀：`config.quick_mode=False` 通過，但 `reproduce_spec` 確實不在 JSON 的 20 個 top-level key 內 → 照字面執行會判「崩了」。\n\n**根因**：canonical writer `src/volpred/research/reproduce_spec.py` 的契約是寫成 **sibling 檔**（docstring：「writes … side by side」；`SPEC_NAME=\"reproduce_spec.json\"`），從不 inline。該 worktree 內 `experiments/k1733/reproduce_spec.json` 存在（3,951 bytes、mtime 與 results 同為 07-30 08:33、schema v1、欄位齊備）。gate 條件與 writer 產出形狀對不上，對任何正常完成的 run 都會誤判。\n\n**回歸驗證**：spec 的 `canonical_result_identity.sha256=9b4ead33…`、`size_bytes=322085`，對 `K1733_results.json` 實際 bytes 重算 sha256 逐位元相符。spec 內含 results 的 hash ⇒ spec 寫在 results 落地之後 ⇒ finalize 有跑完。**該 artifact 可 collect，不該 re-run。**\n\n**狀態 `contained`**：五步 gate 完成 (1)(2)(4)，未完成 (3) 重構底層與 (5) 制度化 —— 產生此 brief 的 split/followup 撰寫路徑未改，也無機械 gate 擋「後置條件斷言 vs canonical writer 契約不符」。\n\n**未 claim 該 task 的理由**：brief 的 (1) README reconciliation（565 行 README vs 220KB JSON 逐數字核對）＋ worktree `dispatch-slot-1-9189c746-k1733` 正式 merge，本班剩餘預算不足以完整收尾，依 batch-drain 收班條件 (b) 留給下一班（未留 partial、未動 `mark-followup-dispatched`，followup 仍在 pending-followup 佇列可被正常接手）。\n\n寫入 `docs/error_log.md`：Class C 代表 incident 一行 + 文末完整 entry（含接手指引：freshness gate 改讀 sibling `reproduce_spec.json` 比對 `canonical_result_identity`）。"
   }
 ]

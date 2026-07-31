@@ -45091,53 +45091,15 @@
   },
   {
     "id": "assign_7a453d3e",
-    "title": "PHASE-Z 卡住檔案 incident（4f44f01f0d685436）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n4 個未提交檔案不是任何一班 fire 產出的，最長已連續 11 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- docs/error_log.md — 11 班\n- src/volpred/ops/next_tasks.py — 11 班\n- storage/drafts/assets/k1710_overnight_edge.png — 7 班\n- storage/memory/knowledge.json — 9 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T191804307871Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T200734550380Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T210753714072Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T220736129013Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T230736676523Z:<路徑>`",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "superseded",
+    "task_type": "platform_ops",
+    "title": "PHASE-Z 卡住檔案 incident（4f44f01f0d685436）— 未關則 scheduler 降載",
+    "priority": 2,
     "source": "phase_z",
     "created_at": "2026-07-27T19:18:10.368972+00:00",
-    "payload": {
-      "incident_kind": "phase_z_foreign_stuck",
-      "fingerprint": "4f44f01f0d685436",
-      "paths": [
-        "docs/error_log.md",
-        "src/volpred/ops/next_tasks.py",
-        "storage/drafts/assets/k1710_overnight_edge.png",
-        "storage/memory/knowledge.json"
-      ],
-      "streaks": {
-        "docs/error_log.md": 11,
-        "src/volpred/ops/next_tasks.py": 11,
-        "storage/drafts/assets/k1710_overnight_edge.png": 7,
-        "storage/memory/knowledge.json": 9
-      },
-      "quarantine_refs": [
-        "refs/volpred/quarantine/20260727T191804307871Z",
-        "refs/volpred/quarantine/20260727T200734550380Z",
-        "refs/volpred/quarantine/20260727T210753714072Z",
-        "refs/volpred/quarantine/20260727T220736129013Z",
-        "refs/volpred/quarantine/20260727T230736676523Z"
-      ],
-      "fires": 5,
-      "first_seen_at": "2026-07-27T19:18:10.356942+00:00",
-      "last_seen_at": "2026-07-27T23:07:43.486626+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-27T20:07:34.625263+00:00",
-      "deferred": [
-        "docs/error_log.md: 已保存，且 3.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1710_overnight_edge.png: 已保存，且 2.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
-      ]
-    },
-    "priority_capped_from": 1,
-    "updated_at": "2026-07-27T23:07:43.486626+00:00",
-    "superseded_at": "2026-07-28T00:09:29.503477+00:00",
-    "superseded_by": "assign_f12b70f1",
     "completed_at": "2026-07-28T00:09:29.503477+00:00",
-    "result": "subsumed_by_wider_stuck_path_set"
+    "tombstone": true,
+    "archived_at": "2026-07-31T01:01:01.056247+00:00"
   },
   {
     "id": "dreaming_repeated_tool_failure_dispatch_supervisor_failure_exit1",
@@ -59917,7 +59879,7 @@
     "description": "依 Matt master spec WS-H2 與 Issue #13：移除 scripts/token_report_email.py 對 EmailNotifier 的 direct delivery，改由 email.ops_alert 的 OwnedEmailCommand/dispatch_email_by_current_owner 單一正式 effect owner。Scheduled token_report_daily 必須驗證完整 Operations Core fire identity、用 exact fire_key/actor_ref 做 immutable idempotency、existing request 原樣 replay、delivery 未 acknowledged 時 fail loud；scheduled 禁止 --force/--to，manual key 必須 recipient-bound。Boss/Token 新建 subject 各加且只加一次 [新架構派發]，歷史 durable command 原樣 replay。TDD 涵蓋 identity drift、provider-before-fail、no direct EmailNotifier、recipient compatibility、dedupe/replay、sent!=true；相鄰 owned-email/import/schedule suites全綠。完成 Matt code review、精準 commit、immutable部署；live Gate 用下一個自然 08:00 fire 回讀 schedule receipt、owned request terminal receipt、Gmail Sent exact To/subject/hash與同 fire replay零第二封。未滿24h通知觀察只能 contained，不得關 umbrella。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "blocked",
+    "status": "pending",
     "source": "user",
     "created_at": "2026-07-30T00:03:46.760321+00:00",
     "created_by": "codex-vscode",
@@ -59934,6 +59896,12 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "at": "2026-07-31T01:01:01.056011+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-31T00:10:00+00:00)"
       }
     ],
     "block_transition_previous": {
@@ -59942,11 +59910,7 @@
       "claim_expires_at": "2026-07-30T02:03:55.156374+00:00",
       "claim_session_id": "ee6a0d643872",
       "started_at": "2026-07-30T00:03:58.154126+00:00"
-    },
-    "blocked_until": "2026-07-31T00:10:00+00:00",
-    "blocked_reason": "awaiting_event_window",
-    "blocked_at": "2026-07-30T00:27:59+00:00",
-    "blocked_note": "Implementation committed as a75a778e1; Matt Standards/Spec PASS; wait for first natural token_report_daily 08:00 CST fire, then read back exact owned-email command, terminal WorkItem/Effect receipt, attempt_count=1, and Gmail Sent evidence. Do not manual-send today because 08:00 legacy fire already occurred."
+    }
   },
   {
     "id": "assign_01a5feda",
@@ -77852,12 +77816,852 @@
         "to": "pending",
         "by": "hourly-slot-1-b73dbf3d5c3741c796f58ba0bfa2b377",
         "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:20:29.205664+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-7c3466090c3640cb8b5b1cef0ad1ced2",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:20:29.205666+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-7c3466090c3640cb8b5b1cef0ad1ced2",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:20:29.700105+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-7c3466090c3640cb8b5b1cef0ad1ced2",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:21:27.829447+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-7da5812ea8d948f79d7fd0e2dbea9468",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:21:27.829449+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-7da5812ea8d948f79d7fd0e2dbea9468",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:21:28.376719+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-7da5812ea8d948f79d7fd0e2dbea9468",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:22:26.639404+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4b279ec6286c444c8eb22bb8a2e894d9",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:22:26.639407+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4b279ec6286c444c8eb22bb8a2e894d9",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:22:27.154687+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-4b279ec6286c444c8eb22bb8a2e894d9",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:23:26.557189+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-bec366645985428a9f60ecde733f3d04",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:23:26.557191+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-bec366645985428a9f60ecde733f3d04",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:23:27.113419+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-bec366645985428a9f60ecde733f3d04",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:24:27.013914+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-3a60ec44f9a54ca7b9e049b6310dd5bd",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:24:27.013917+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-3a60ec44f9a54ca7b9e049b6310dd5bd",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:24:27.527749+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-3a60ec44f9a54ca7b9e049b6310dd5bd",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:25:30.012073+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a89e79c42907443095b2f45c9af4834a",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:25:30.012075+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a89e79c42907443095b2f45c9af4834a",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:25:30.525713+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-a89e79c42907443095b2f45c9af4834a",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:26:28.702240+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b31b4afc773b492a94f5554b8e0f20e9",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:26:28.702242+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-b31b4afc773b492a94f5554b8e0f20e9",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:26:29.256213+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-b31b4afc773b492a94f5554b8e0f20e9",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:27:28.313871+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-3afa7d430ae24a7ca540e21be350190a",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:27:28.313875+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-3afa7d430ae24a7ca540e21be350190a",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:27:28.837806+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-3afa7d430ae24a7ca540e21be350190a",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:28:28.131245+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-e1e4a0a31fcf46cba220c2feb93e4c8e",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:28:28.131248+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-e1e4a0a31fcf46cba220c2feb93e4c8e",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:28:28.673961+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-e1e4a0a31fcf46cba220c2feb93e4c8e",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:29:28.714616+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2f8180ca60f64197bc5ced11e327e442",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:29:28.714620+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2f8180ca60f64197bc5ced11e327e442",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:29:29.249092+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-2f8180ca60f64197bc5ced11e327e442",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:30:36.040668+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-c1f3f468fb3c43da9e076b6a896f564d",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:30:36.040670+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-c1f3f468fb3c43da9e076b6a896f564d",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:30:36.568315+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-c1f3f468fb3c43da9e076b6a896f564d",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:31:27.250439+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f2fc8b87d09e4f2cb91633996e8c2525",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:31:27.250441+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f2fc8b87d09e4f2cb91633996e8c2525",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:31:27.760233+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-f2fc8b87d09e4f2cb91633996e8c2525",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:32:26.066977+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-05429ec907814ddd8c00681c50ff5beb",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:32:26.066980+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-05429ec907814ddd8c00681c50ff5beb",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:32:26.617212+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-05429ec907814ddd8c00681c50ff5beb",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:33:26.855575+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-caf7ef41c6984f798dac7f6b6f143a9e",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:33:26.855578+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-caf7ef41c6984f798dac7f6b6f143a9e",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:33:27.374326+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-caf7ef41c6984f798dac7f6b6f143a9e",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:34:26.719350+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-43688641a9794370b4606ea403cd18f5",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:34:26.719355+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-43688641a9794370b4606ea403cd18f5",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:34:27.261292+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-43688641a9794370b4606ea403cd18f5",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:35:29.433334+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2752456935a949608d785c5f29953a1c",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:35:29.433336+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2752456935a949608d785c5f29953a1c",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:35:29.968770+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-2752456935a949608d785c5f29953a1c",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:36:28.119039+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-81cdada3e2064bbfa7cea77293c98fee",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:36:28.119041+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-81cdada3e2064bbfa7cea77293c98fee",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:36:28.670008+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-81cdada3e2064bbfa7cea77293c98fee",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:37:27.032523+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-7b11684c017d4559a54b25d57d729c30",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:37:27.032526+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-7b11684c017d4559a54b25d57d729c30",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:37:27.550026+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-7b11684c017d4559a54b25d57d729c30",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:38:27.329883+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b8d407ab430b4e2c9da461b6b66e7a4b",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:38:27.329887+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-b8d407ab430b4e2c9da461b6b66e7a4b",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:38:27.877599+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-b8d407ab430b4e2c9da461b6b66e7a4b",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:39:27.239455+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a3f4e89e6c6c48e7933f1324a16a48e9",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:39:27.239457+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a3f4e89e6c6c48e7933f1324a16a48e9",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:39:27.754402+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-a3f4e89e6c6c48e7933f1324a16a48e9",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:40:30.698392+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-eb3d9f5244a84b6ea84a1cd7c0aa49db",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:40:30.698394+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-eb3d9f5244a84b6ea84a1cd7c0aa49db",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:40:31.342060+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-eb3d9f5244a84b6ea84a1cd7c0aa49db",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:41:29.282086+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ade1ec45ad78406ab2382ed79f01e4fa",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:41:29.282094+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ade1ec45ad78406ab2382ed79f01e4fa",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:41:29.803418+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-ade1ec45ad78406ab2382ed79f01e4fa",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:42:28.527036+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-01f8fa4df773414685bbfe0f70a07c62",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:42:28.527038+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-01f8fa4df773414685bbfe0f70a07c62",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:42:29.068428+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-01f8fa4df773414685bbfe0f70a07c62",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:43:28.488356+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a6da7920207242d79b1d9d78f885fdd8",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:43:28.488358+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a6da7920207242d79b1d9d78f885fdd8",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:43:29.028096+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-a6da7920207242d79b1d9d78f885fdd8",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:44:28.734402+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-794a44430f4244dc9d3831d308ccfcee",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:44:28.734405+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-794a44430f4244dc9d3831d308ccfcee",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:44:29.278082+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-794a44430f4244dc9d3831d308ccfcee",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:45:33.889698+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-64f762339496433dac3582a98e078b86",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:45:33.889700+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-64f762339496433dac3582a98e078b86",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:45:34.433598+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-64f762339496433dac3582a98e078b86",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:46:31.598933+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2218fa9af2414f039137ffccbccec4f4",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:46:31.598935+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2218fa9af2414f039137ffccbccec4f4",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:46:32.123742+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-2218fa9af2414f039137ffccbccec4f4",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:47:29.831121+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-29029775dddd4156b31adaefcdecc2d6",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:47:29.831124+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-29029775dddd4156b31adaefcdecc2d6",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:47:30.390351+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-29029775dddd4156b31adaefcdecc2d6",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:48:30.226749+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-34cc06c307ea4407b78a912c92dd5d83",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:48:30.226752+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-34cc06c307ea4407b78a912c92dd5d83",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:48:30.745535+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-34cc06c307ea4407b78a912c92dd5d83",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:49:30.616764+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-670d0403595045bdb4b425fd234d2588",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:49:30.616766+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-670d0403595045bdb4b425fd234d2588",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:49:31.194757+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-670d0403595045bdb4b425fd234d2588",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:50:35.948781+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-eef2b934dc834d5e8df1a2463f2c0cb1",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:50:35.948783+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-eef2b934dc834d5e8df1a2463f2c0cb1",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:50:36.468944+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-eef2b934dc834d5e8df1a2463f2c0cb1",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:51:33.082491+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-36adf7f055af43d29a2370dff2f664c9",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:51:33.082493+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-36adf7f055af43d29a2370dff2f664c9",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:51:33.630128+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-36adf7f055af43d29a2370dff2f664c9",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:52:32.271870+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1ab512fc52484abfbd4a5c3a5a053042",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:52:32.271872+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1ab512fc52484abfbd4a5c3a5a053042",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:52:32.793179+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-1ab512fc52484abfbd4a5c3a5a053042",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:53:33.173619+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-40c4a76ee5ec43d985be119f7638220f",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:53:33.173625+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-40c4a76ee5ec43d985be119f7638220f",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:53:33.761177+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-40c4a76ee5ec43d985be119f7638220f",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:54:32.756806+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-983635ee410e479ab57b2a0519f0ffe2",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:54:32.756808+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-983635ee410e479ab57b2a0519f0ffe2",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:54:33.270370+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-983635ee410e479ab57b2a0519f0ffe2",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:55:35.641232+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f24eee3408cb45298827c908f68800a4",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:55:35.641236+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f24eee3408cb45298827c908f68800a4",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:55:36.215505+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-f24eee3408cb45298827c908f68800a4",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:56:34.859945+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-699f35a572374043bbd2beb281ce2f08",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:56:34.859948+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-699f35a572374043bbd2beb281ce2f08",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:56:35.395964+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-699f35a572374043bbd2beb281ce2f08",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:57:33.622256+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-7735966315e64e108e9071cb46c4e2af",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:57:33.622258+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-7735966315e64e108e9071cb46c4e2af",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:57:34.165316+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-7735966315e64e108e9071cb46c4e2af",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:58:34.051207+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-10d54531cc954c7da4427f583558f559",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:58:34.051209+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-10d54531cc954c7da4427f583558f559",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:58:34.601793+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-10d54531cc954c7da4427f583558f559",
+        "note": "supervisor_settle_retry"
+      },
+      {
+        "ts": "2026-07-31T00:59:34.854054+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b31f093f02bd4f87a07bb76ee7e86a56",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-31T00:59:34.854057+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-b31f093f02bd4f87a07bb76ee7e86a56",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-31T00:59:35.403036+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-b31f093f02bd4f87a07bb76ee7e86a56",
+        "note": "supervisor_settle_retry"
       }
     ],
-    "last_released_at": "2026-07-30T23:59:48.803207+00:00",
+    "last_released_at": "2026-07-31T00:59:35.403020+00:00",
     "last_release_reason": "workspace_retry",
-    "dispatch_settled_session_id": "dispatch-b73dbf3d-9331ee06",
-    "dispatch_settled_job_id": "b73dbf3d5c3741c796f58ba0bfa2b377"
+    "dispatch_settled_session_id": "dispatch-b31f093f-91c16b79",
+    "dispatch_settled_job_id": "b31f093f02bd4f87a07bb76ee7e86a56"
   },
   {
     "id": "alert_dispatch_supervisor_stale_code_20260730",
@@ -80203,5 +81007,64 @@
     "topic_cluster": null,
     "created_at": "2026-07-31T00:12:27+00:00",
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+  },
+  {
+    "id": "daily_digest_20260731",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-31T09:00:28.944627+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-31T01:01:23.117244+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-86a31a8535134dd7a0db52c7b80f36b4"
+      },
+      {
+        "ts": "2026-07-31T01:01:29.581635+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-86a31a8535134dd7a0db52c7b80f36b4"
+      },
+      {
+        "ts": "2026-07-31T01:22:14.854806+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-86a31a8535134dd7a0db52c7b80f36b4"
+      }
+    ],
+    "started_at": "2026-07-31T01:01:29.581623+00:00",
+    "completed_at": "2026-07-31T01:22:14.854779+00:00",
+    "result": "第37期精選導讀已發佈 mile_461ff729〈Fed 這次沒動，卻有人要求升息：你手上的四張避險保單，各自只賠哪一種跌？〉；框架「三種跌法，一張理賠表」2D 理賠矩陣；digest_articles 8 篇 span 52 天／深庫 5 篇；anti_ai_gate exit 0；主線程回讀 feed 驗證 metadata + 8/8 關鍵數字可溯源"
+  },
+  {
+    "id": "control_gate_review_dispatch_starvation_lockout_20260731T001249_aa6a90fc96a5",
+    "title": "[Gate PDCA] dispatch_starvation_lockout lifecycle review",
+    "description": "gate_id: dispatch_starvation_lockout\nowner: scripts.continue_task_dispatch\nmode: selection_constraint\ninvariant: Aged scheduled work receives a bounded dispatch seat without suppressing urgent, time-critical, or collision-free alternatives.\nprotected_edges: ['pending_task -> dispatch_candidate']\nblocked_downstream_edges: ['non_starved_task -> dispatch_candidate', 'dispatch_candidate -> worker_slot']\nreview_reasons: ['distinct_candidates=6>=5']\nevidence: {'trigger_count': 8, 'distinct_candidates': 6, 'malformed_rows': 0, 'incident_count': 0, 'incident_metric': 'raw_observations', 'incident_occurrences': 0, 'incident_observations': 0, 'incident_ids': [], 'source_health': [{'path': '/Users/yhlai0911/volpred-research/storage/logs/control_gate_decisions.jsonl', 'ok': True, 'error': None, 'row_count': 60, 'malformed_rows': 0, 'invalid_timestamps': 0, 'identity_conflicts': 0}, {'path': '/Users/yhlai0911/volpred-research/storage/next_tasks.json', 'ok': True, 'error': None}]}\noutcomes: {'worker_failed': 0, 'retry': 0, 'published': 0, 'missed_deadline': 0, 'succeeded': 0, 'queued': 6, 'superseded': 0, 'failed': 0, 'waiver': 0, 'dispatch_fire': 0, 'blocked': 6, 'in_flight': 0, 'unjoined': 0, 'task_claim': 0, 'observed': 0, 'sequence_coverage_gap': 0, 'candidate_outcomes': [{'candidate_id': 'K1735', 'decision_count': 2, 'task_ids': ['K1735'], 'outcomes': ['blocked', 'queued']}, {'candidate_id': 'K1737', 'decision_count': 2, 'task_ids': ['K1737'], 'outcomes': ['blocked', 'queued']}, {'candidate_id': 'K1738', 'decision_count': 1, 'task_ids': ['K1738'], 'outcomes': ['blocked', 'queued']}, {'candidate_id': 'K1739', 'decision_count': 1, 'task_ids': ['K1739'], 'outcomes': ['blocked', 'queued']}, {'candidate_id': 'K1741', 'decision_count': 1, 'task_ids': ['K1741'], 'outcomes': ['blocked', 'queued']}, {'candidate_id': 'K1742', 'decision_count': 1, 'task_ids': ['K1742'], 'outcomes': ['blocked', 'queued']}], 'incident_open': 0, 'incident_resolved': 0, 'incident_recurrence': 0}\n\nRequired adjudication: retain / recalibrate / downgrade_to_warn / retire.\n不得只標 observing；裁決後更新 registry lifecycle 的 last_action/last_reviewed_at/review_task_id + tests + live read-back。\ncomplete 時必傳 --gate-decision 與 --gate-live-readback；task_pool_claim 會回讀 registry Act receipt，不一致則拒絕結案。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "control_gate_lifecycle",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-31T01:00:47.630433+00:00",
+    "gate_review_id": "dispatch_starvation_lockout",
+    "gate_review_window_start": "2026-07-30T08:29:11.960683+00:00",
+    "gate_review_watermark": "2026-07-31T00:12:49.169033+00:00",
+    "acceptance": [
+      "choose exactly one: retain/recalibrate/downgrade_to_warn/retire",
+      "update registry lifecycle last_action/last_reviewed_at/review_task_id",
+      "attach downstream outcome read-back",
+      "complete with --gate-decision and --gate-live-readback"
+    ]
   }
 ]

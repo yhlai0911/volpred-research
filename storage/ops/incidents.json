@@ -1993,7 +1993,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-07-31T00:00:51.048920+00:00"
+     "last_seen_at": "2026-07-31T01:00:36.481220+00:00"
     },
     {
      "cleared_at": null,
@@ -2041,9 +2041,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-07-31T00:00:51.048920+00:00",
+   "last_seen_at": "2026-07-31T01:00:36.481220+00:00",
    "notified_at": null,
-   "occurrence_count": 5943,
+   "occurrence_count": 5985,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2329,8 +2329,12 @@
   },
   "inc_a79599a21dbb": {
    "class": "ordinary",
-   "clean_observations": [],
-   "clean_streak_started_at": null,
+   "clean_observations": [
+    {
+     "at": "2026-07-31T01:00:48.624117+00:00"
+    }
+   ],
+   "clean_streak_started_at": "2026-07-31T01:00:48.624117+00:00",
    "control_gate_id": null,
    "current_task_id": null,
    "episode_count": 1,
@@ -2718,6 +2722,16 @@
      "at": "2026-07-30T21:00:42.119646+00:00",
      "instance_key": "30580207070:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-07-31T00:40:22.827850+00:00",
+     "instance_key": "30593259901:1",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-07-31T01:25:40.655160+00:00",
+     "instance_key": "30595412671:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -2834,14 +2848,26 @@
      "first_seen_at": "2026-07-30T21:00:42.119646+00:00",
      "key": "30580207070:1",
      "last_seen_at": "2026-07-30T21:00:42.119646+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-31T00:40:22.827850+00:00",
+     "key": "30593259901:1",
+     "last_seen_at": "2026-07-31T00:40:22.827850+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-31T01:25:40.655160+00:00",
+     "key": "30595412671:1",
+     "last_seen_at": "2026-07-31T01:25:40.655160+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-30T20:58:09.0797903Z E AssertionError: Cutover orphan(s): scripts/hourly_dispatch_pregate.py.",
-   "last_seen_at": "2026-07-30T21:00:42.119646+00:00",
+   "last_breach_detail": "2026-07-31T01:23:00.4507581Z E AssertionError: Cutover orphan(s): scripts/hourly_dispatch_pregate.py.",
+   "last_seen_at": "2026-07-31T01:25:40.655160+00:00",
    "notified_at": null,
-   "occurrence_count": 19,
+   "occurrence_count": 21,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -3165,6 +3191,6 @@
    }
   }
  },
- "updated_at": "2026-07-31T00:18:59.145558+00:00",
+ "updated_at": "2026-07-31T01:29:53.773171+00:00",
  "version": 1
 }
