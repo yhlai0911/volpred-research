@@ -32892,5 +32892,35 @@
     "owner": "codex",
     "backfilled_at": "2026-07-30T20:35:28.680736+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-31T08:09:34+08:00",
+    "task_type": "event_article",
+    "task_id": "event_article_nfp_us_2026-08-07_tminus7",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-c9210815e0184c66bab893662760b9a0",
+    "owner": "hourly-slot-1-c9210815e0184c66bab893662760b9a0",
+    "commit": null,
+    "summary": "NFP_US 2026-08-07 T-7 事件文章：發佈 mile_84e3be0a（audience=event, status=published）。\n\n分析：非農公佈前一週（T-7→T-1，6 個交易日）VIX 路徑 vs 對照組。官方公佈日取自 ALFRED\n新聞發布行事曆（FRED release id 50），非第一個星期五代理值。2010-01-01→2026-07-31 共\n191 次可對上交易日的公佈日。\n\n結果（experiments/nfp_20260807_t7/nfp_t7_results.json）：\n- 事件前視窗 mean +1.63% / median -1.80% / sd 17.31% / 上漲 44.5%（n=191）\n- 對照組（扣除與事件視窗重疊的所有 6 交易日區間）mean +0.36% / median -1.72% /\n  sd 17.99% / 上漲 44.8%（n=1485）\n- Welch t p=0.342；Mann-Whitney U p=0.637 → 測不出差別\n- 依 T-7 當日 VIX 水位分組出現單調梯度（<15 +6.33% → >=25 -9.65%），但同一梯度在\n  對照組完整重現（+5.88% → -6.82%），四格 Welch p 分別 0.817 / 0.617 / 0.116 / 0.427，\n  無一顯著 → 梯度是 VIX 均值回歸，不是事件效應。與 K513（CPI/NFP 對波動率無影響）方向一致。\n- 現況：2026-07-30 VIX 收 17.09，落在 15-20 格。\n\nGates：check_arc_dedup（--audience event --event-key NFP_US_2026_08_07\n--event-series-slot T-7）無 EVENT STAGE COVERED，該 slot 未覆蓋；人工 layer-2 grep feed\n確認 17 篇 NFP 文章中最近一篇為 2026-07-01，無同 stage 重複。anti_ai_gate.py\n--no-fb-mode exit=0（warn 0/3）。\n\n限制已在文中揭露：分組 n=26-68 檢定力有限、僅收盤價、僅 VIX、四次比較未做多重校正。\n\nFB 雙發佈：本班預算不足，未執行 → 已建 follow-up task（見 fb_nfp_t7_20260807）。\n新增 scripts/gen_nfp_20260807_t7_analysis.py（沿用 scripts/plot_style.py 的 CJK 字型鏈）。"
+  },
+  {
+    "timestamp": "2026-07-31T08:10:11+08:00",
+    "task_type": "event_article",
+    "task_id": "event_article_nfp_us_2026-08-07_tminus7",
+    "outcome": "fb_post_failed",
+    "actor": "hourly-slot-1-c9210815e0184c66bab893662760b9a0",
+    "owner": "hourly-slot-1-c9210815e0184c66bab893662760b9a0",
+    "commit": null,
+    "summary": "fb_post_failed — NFP T-7 事件文章 mile_84e3be0a 的 Ivan Lai FB 雙發佈未執行。\n\n原因：非失敗，是未嘗試。本班 50min cap 已用盡（feed publish 於 cap 前約 6 分鐘完成），\nFB 走 claude-in-chrome 互動流程無法在剩餘預算內收尾。依 .claude/rules/publishing.md\n「FB 失敗不阻塞 feed publish 但必留 retry log + work_log entry」留此標記。\n\n待辦（下一班可直接接）：依 .claude/skills/trending-repost/references/fb-ivanlai-tone.md\n改寫 200-400 字 FB 文案（主貼文不放連結，VolPred 連結放第一則留言），過\nanti_ai_gate.py（FB mode default ON）後發佈。event_article 不計入 trending daily cap。\n文章連結 = mile_84e3be0a。"
+  },
+  {
+    "timestamp": "2026-07-31T08:18:01+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1701_article_general",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-c9210815e0184c66bab893662760b9a0",
+    "owner": "hourly-slot-1-c9210815e0184c66bab893662760b9a0",
+    "commit": null,
+    "summary": "K1701 general-audience 文章：draft mile_4b10546f（audience=general, status=draft）進草稿池（本班前\nreleasable drafts = 0）。\n\n選題角度：K1701 的核心價值是識別性教訓而非預測力。文章講的是 identity trap ——\nlog(離散度) = log(成分股平均波動) − log(指數波動)，而 HAR 本來就含 index RV，所以\n「加離散度」與「加成分股平均波動」張成同一 span，兩模型預測值重合。從 results.json\nprogrammatically 取得的數字（非重打）：\n- /assets/SPX/oos_vol/h1/ladder/identity_check_rdisp_vs_avg_vol/max_abs_forecast_diff\n  = 8.847089727481716e-17\n- /assets/SPX/sample/n_days_with_dispersion = 4153\n- /assets/SPX/sample/members_per_day/median = 439\n- 樣本 2010-01-04 → 2026-07-10\n\n已誠實揭露的限制（依 knowledge 的「發文前必補」缺口）：verdict 是\nINCONCLUSIVE_NO_EXACT_NULL_CLAIM 非 exact null；R1（2020+ 高覆蓋率）與 R3（sector-ETF）\n子樣本中該指標顯著變差；rho 非精確波動加權平均相關；yfinance 缺已下市股票的存活者偏誤。\n未引用 fig6 event study（in-sample 描述、results.json 無對應數字、無法獨立驗證）。\n\nGates：check_arc_dedup --k-id K1701 --audience general 無 K-COVERAGE（exit 0）；\nARC DUPLICATE warn 指向 mile_50ce135b（AI 電力題材），主題與證據皆不同，判定 false\npositive 後續寫。anti_ai_gate --no-fb-mode exit=0（warn 0/3）。publish_draft\ncontent-vs-source audit PASS（0 claims vs 2696 source values）。\n\nLazypack：撰 storage/lazypack_plans/k1701_general_plan.json（4 panels，數字全部 bind 到\nresults.json JSON pointer + sha256 b951f332...），已 enqueue lazypack-mile_4b10546f，\n*/15 compute worker 渲染。無此 plan 該 draft 不能 release。"
   }
 ]

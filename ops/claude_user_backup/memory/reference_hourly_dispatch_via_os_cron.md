@@ -5,15 +5,9 @@ type: reference
 originSessionId: 91283b9e-7227-43f5-88bb-9d92168d243a
 ---
 
-> **SUPERSEDED／禁止照做（2026-07-30 physical retirement）**：hourly dispatch
-> 已由 Operations Core scheduler + `com.volpred.dispatch-supervisor` 接管；
-> legacy LaunchAgent、live copy、canonical plist與正式wrapper都已移除。下方是事故
-> 歷史，不是操作手冊。**不得**依下方步驟複製wrapper、reload crontab或bootstrap
-> legacy label；需要rollback時只能回復退役前Git commit、重新跑owner reconciliation
-> 與unique-owner audit，不可讓新舊clock並存。
+> **SUPERSEDED（2026-07-04 cutover）**：hourly dispatch 已由 `com.volpred.dispatch-supervisor` LaunchAgent（常駐 asyncio daemon，real-run）接管；legacy `com.volpred.hourly-dispatch` + cron wrapper 已 disabled。in-flight 檢查改讀 `storage/ops/dispatch_state.json` 的 `current_job`。本檔其餘內容僅存歷史脈絡（OS-level trigger 優於 ScheduleWakeup 的原理仍成立）。
 
-**Historical architectural fact（已退役）**: Hourly dispatch trigger 曾由
-**OS crontab** 負責，不靠 session-level ScheduleWakeup。
+**Architectural fact**: Hourly dispatch trigger 由 **OS crontab** 負責，**不**靠 session-level ScheduleWakeup。
 
 **Why**:
 - 2026-05-12 多次發現 ScheduleWakeup at 14:12 沒 fire（session idle 時不可靠）
@@ -28,11 +22,12 @@ originSessionId: 91283b9e-7227-43f5-88bb-9d92168d243a
 5. 每小時 :07 fire → `claude -p "<dispatch prompt>"` headless → 跑 dispatch logic → exit
 6. Documented in `config/runtime_schedules.json` cron_jobs array
 
-**歷史操作（不可執行）**：舊版曾把canonical wrapper複製到
-`~/.volpred/bin/`並reload crontab。此路徑會繞過Operations Core的single-clock、
-receipt與owner contract，已由repository retirement gate阻止復活。現行排程只看
-`config/runtime_schedules.json`，部署／稽核走
-`scripts/reconcile_schedule_owners.py`。
+**How to apply**:
+1. **不**依賴 session ScheduleWakeup 做 hourly trigger — OS cron 才是 source of truth
+2. Session ScheduleWakeup 仍用於：(a) task-notification 後 follow-up reset, (b) sub-hourly emergency wake (≤30 min)
+3. 改 cron behavior：先改 `scripts/cron_hourly_dispatch.sh` → `cp` 到 `~/.volpred/bin/` → reload crontab
+4. 排程衝突檢測：每次 cron fire 開新 claude session，與當前 interactive session 並存 — 兩邊都能派 agent；diversity rule 跨 session 不共享 work_log 即時更新，但寫入 storage/work_log.json 的 entries 是 cross-session shared
+5. Reliability test：每天看 `tail -50 storage/logs/cron/hourly_dispatch.log`，缺漏 fire 立刻 debug crontab
 
 **相關記憶 / 規則**:
 - `feedback_one_dispatch_per_hour.md` — 每小時 1 agent + diversity rule
