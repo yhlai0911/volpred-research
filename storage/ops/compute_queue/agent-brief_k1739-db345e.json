@@ -1,0 +1,61 @@
+{
+  "id": "agent-brief_k1739-db345e",
+  "title": "K1739 commodity short-horizon momentum-reversal coexistence x vol regime",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1739-db345e.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ae8721c1-k1739",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ae8721c1-k1739/experiments/K1739/K1739_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1739-db345e.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-08-01T10:35:30Z",
+  "started_at": "2026-08-01T10:35:57Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1739-db345e.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1739-db345e.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ae8721c1-k1739/experiments/K1739/K1739_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1739-db345e.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ae8721c1-k1739",
+  "claude_followup": {
+    "brief": "驗 K1739 結果：(1) 從 experiments/K1739/K1739_results.json 程式化取數，核對 README 每個數字（禁轉抄）；(2) 檢查 K1739.py 的 shift(1)/lag 慣例與 HAC lag>=h、seed=42、bootstrap B/block 設定；(3) 派 Codex review 該程式（K1259 gate，過了才寫 knowledge）；(4) 跑 scripts/check_experiment_artifacts.py check --path experiments/K1739；(5) bash scripts/merge_worktree.sh dispatch-slot-1-ae8721c1-k1739 合併 worktree；(6) 主線程寫 knowledge.json 條目（數字從 results.json 取）；(7) 若結論 SUPPORTED 且穩健，排 daily_article 選題。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1739",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-01T10:35:30Z",
+    "linked_at": "2026-08-01T10:35:30Z",
+    "error": null
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1739.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1739-db345e.md",
+  "claimed_by_pid": 48377,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:80e6876c837201b47ea1c828",
+    "scheduled_for": "2026-08-01T10:30:00Z"
+  },
+  "claimed_by_pid_start_wall": "Sat Aug  1 18:30:49 2026"
+}
