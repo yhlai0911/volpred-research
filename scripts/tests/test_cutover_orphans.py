@@ -24,6 +24,7 @@ archive while separately proving the executable `scripts/` entrypoint is gone.
 """
 from __future__ import annotations
 
+import ast
 import re
 from pathlib import Path
 
@@ -40,6 +41,12 @@ _PY_REF = re.compile(r"scripts/([A-Za-z0-9_]+\.py)")
 # Components deliberately NOT carried into the supervisor's fire path. Each key
 # needs a reason that survives review — "unused" is not one.
 _RETIRED_BY_DESIGN: dict[str, str] = {
+    # The production shadow crosscheck found substantive work after 9 of the 10
+    # proposed skips (90% false-skip rate).  H4-4 therefore removed this
+    # heuristic from the canonical schedule and dispatch decision path.  Keep
+    # the historical CLI only as audit evidence; it must never regain veto
+    # authority in Operations Core.
+    "hourly_dispatch_pregate.py": "retired after production shadow measured a 90% false-skip rate",
     # Per-task model/topology routing happens inside the DISPATCHED AGENT
     # (scripts/continue_task_dispatch.py), not in the fire path: the supervisor
     # always spawns opus. See dispatch_supervisor/worker.py OPUS_MODEL.
@@ -77,6 +84,34 @@ def _supervisor_sources() -> str:
         p.read_text(encoding="utf-8")
         for p in sorted(SUPERVISOR_PKG.glob("*.py"))
     )
+
+
+def _supervisor_runtime_references() -> str:
+    """Import targets and runtime strings, excluding comments/docstrings."""
+    references: list[str] = []
+    for path in sorted(SUPERVISOR_PKG.glob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        docstrings = {
+            id(body[0].value)
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+            and (body := getattr(node, "body", []))
+            and isinstance(body[0], ast.Expr)
+            and isinstance(body[0].value, ast.Constant)
+            and isinstance(body[0].value.value, str)
+        }
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                references.extend(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                references.append(node.module or "")
+            elif (
+                isinstance(node, ast.Constant)
+                and isinstance(node.value, str)
+                and id(node) not in docstrings
+            ):
+                references.append(node.value)
+    return "\n".join(references)
 
 
 def test_legacy_wrapper_is_archived_and_not_live() -> None:
@@ -120,4 +155,18 @@ def test_retired_components_are_still_referenced_by_the_wrapper(name: str) -> No
     assert name in LEGACY_WRAPPER.read_text(encoding="utf-8"), (
         f"{name} is in _RETIRED_BY_DESIGN but the wrapper no longer mentions it — "
         "drop the stale allowlist entry."
+    )
+
+
+@pytest.mark.parametrize("name", sorted(_RETIRED_BY_DESIGN))
+def test_retired_components_cannot_reenter_the_supervisor(name: str) -> None:
+    references = _supervisor_runtime_references()
+    stem = Path(name).stem
+    # Cover both subprocess filenames and Python module spellings. Comments and
+    # docstrings are excluded so historical explanation cannot trip the gate.
+    pattern = re.compile(rf"(?<![A-Za-z0-9_])(?:{re.escape(name)}|{re.escape(stem)})(?![A-Za-z0-9_])")
+    assert not pattern.search(references), (
+        f"{name} is retired by design but reappeared in an active supervisor "
+        "import or runtime string. Remove the execution reference or make a "
+        "reviewed cutover decision that also removes its retirement declaration."
     )

@@ -7,15 +7,16 @@ Covers:
 - explicit cluster_waiver bypasses gate
 """
 from __future__ import annotations
+
 import json
-import pytest
 import sys
-import importlib
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
+import types
+from datetime import UTC, datetime, timedelta
+
+import pytest
 
 from volpred.publisher.publisher import Publisher
-from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
+from volpred.topic_clusters import classify_topic_cluster
 
 
 @pytest.fixture
@@ -26,8 +27,8 @@ def pub(tmp_path, monkeypatch):
     monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
     monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
     monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
-    from volpred.publisher.email_notifier import EmailNotifier
     from volpred.publisher import live_verify
+    from volpred.publisher.email_notifier import EmailNotifier
 
     monkeypatch.setattr(EmailNotifier, "notify_article_published", lambda *a, **kw: None)
     monkeypatch.setattr(live_verify, "verify_article_live", lambda *a, **kw: True)
@@ -39,15 +40,25 @@ def pub(tmp_path, monkeypatch):
     # throttle (that has its own test file).
     import volpred.publisher.throttle as _throttle
     monkeypatch.setattr(_throttle, "check_publish_throttle", lambda *a, **kw: None, raising=False)
-    for mod_name in ("supabase_sync", "scripts.supabase_sync"):
-        try:
-            mod = sys.modules.get(mod_name) or importlib.import_module(mod_name)
-            if hasattr(mod, "sync_article"):
-                monkeypatch.setattr(mod, "sync_article", lambda *a, **kw: True, raising=False)
-            if hasattr(mod, "_post"):
-                monkeypatch.setattr(mod, "_post", lambda *a, **kw: False, raising=False)
-        except (ImportError, ModuleNotFoundError):  # silent-ok: either optional import path may be absent in CI
-            pass
+    fake_supabase_sync = types.ModuleType("supabase_sync")
+    fake_supabase_sync.SUPABASE_KEY = ""
+    fake_supabase_sync.SUPABASE_URL = ""
+    for name in (
+        "_delete_where",
+        "_patch_where",
+        "_post",
+        "delete_article",
+        "set_strategy_active",
+        "sync_article",
+        "sync_full",
+        "sync_strategy_signal",
+    ):
+        setattr(fake_supabase_sync, name, lambda *a, **kw: True)
+    fake_supabase_sync._get_article_id = lambda *a, **kw: None
+    fake_supabase_sync._patch_where_returning = lambda *a, **kw: []
+    fake_supabase_sync._select_rows = lambda *a, **kw: []
+    for module_name in ("supabase_sync", "scripts.supabase_sync"):
+        monkeypatch.setitem(sys.modules, module_name, fake_supabase_sync)
     # Redirect cluster gate to tmp feed. 2026-06-29: the FEED_PATH monkeypatch
     # alone was ineffective because cluster_gate_status / recent_cluster_counts
     # capture the original FEED_PATH as a default arg at import time. Tests
@@ -81,6 +92,13 @@ def pub(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "volpred.publisher.publisher.cluster_gate_status",
         _temp_cluster_gate_status,
+    )
+    # Semantic duplicate warnings have their own contract tests.  Their real
+    # embedding adapter loads developer credentials, so crossing that boundary
+    # here would make a cluster-gate test depend on an untracked .env file.
+    monkeypatch.setattr(
+        "volpred.publisher.publisher._semantic_dup_warn",
+        lambda *a, **kw: None,
     )
     return Publisher(storage_dir=str(tmp_path))
 
@@ -186,6 +204,12 @@ class TestTypeLockedExemption:
             category="event_article",
             tags=["event_article", "VIX", "FOMC"],
             status="published",
+            details={
+                "event_key": "fomc-2026-08-01",
+                "event_type": "fomc",
+                "event_date": "2026-08-01",
+                "event_series_slot": "T-2",
+            },
             audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
         )
         assert pub_id.startswith("mile_")
@@ -260,7 +284,7 @@ def _days_ago_iso(days: int) -> str:
     """recent_cluster_counts() cuts off at now - `days`, so fixtures must be
     relative. Hard-coded dates silently age out of the window and turn a real
     assertion into a time bomb (2026-07-10: this file's 06-10 fixture did)."""
-    return (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    return (datetime.now(UTC) - timedelta(days=days)).isoformat()
 
 
 def test_recent_cluster_counts_split_factor_etf_from_spy(tmp_path):
