@@ -26,7 +26,7 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1743",
   "source_task_link": {
     "state": "linked",
@@ -46,10 +46,10 @@
   },
   "claimed_by_pid_start_wall": "Sun Aug  2 00:15:52 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "K1743",
-    "settled_at": "2026-08-01T16:15:59Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-08-01T19:46:40Z"
   },
   "experiment_gate": {
     "status": "passed",
@@ -62,5 +62,7 @@
     "experiments/K1743/K1743_results.json"
   ],
   "delivered_at": "2026-08-01T17:01:02.661866+00:00",
-  "delivery_source": "reap_orphan_deliverables"
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-08-01T19:46:40Z",
+  "followup_next_task_id": "K1743"
 }

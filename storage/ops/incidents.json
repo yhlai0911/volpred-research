@@ -2287,7 +2287,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-01T19:22:36.010050+00:00"
+     "last_seen_at": "2026-08-01T20:26:31.641571+00:00"
     },
     {
      "cleared_at": null,
@@ -2405,9 +2405,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-01T19:22:36.010050+00:00",
+   "last_seen_at": "2026-08-01T20:26:31.641571+00:00",
    "notified_at": null,
-   "occurrence_count": 8038,
+   "occurrence_count": 8081,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3335,7 +3335,7 @@
    "clean_observations": [],
    "clean_streak_started_at": null,
    "control_gate_id": null,
-   "current_task_id": "ci-root-30711055685",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-08-01T17:21:09.309294+00:00",
@@ -3373,6 +3373,11 @@
      "at": "2026-08-01T19:20:52.341104+00:00",
      "instance_key": "30713909333:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T19:50:40.141203+00:00",
+     "instance_key": "30714923226:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -3405,17 +3410,33 @@
      "first_seen_at": "2026-08-01T19:20:52.341104+00:00",
      "key": "30713909333:1",
      "last_seen_at": "2026-08-01T19:20:52.341104+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-01T19:50:40.141203+00:00",
+     "key": "30714923226:1",
+     "last_seen_at": "2026-08-01T19:50:40.141203+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-01T19:20:23.0576739Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1743']",
-   "last_seen_at": "2026-08-01T19:20:52.341104+00:00",
+   "last_breach_detail": "2026-08-01T19:49:15.4378289Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1743']",
+   "last_seen_at": "2026-08-01T19:50:40.141203+00:00",
    "notified_at": null,
-   "occurrence_count": 5,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "occurrence_count": 6,
+   "resolution": {
+    "at": "2026-08-01T20:21:02.529840+00:00",
+    "by": "ci-red-30709398279",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-08-01T20:21:02.529840+00:00",
+     "by": "ci-red-30709398279",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -3736,6 +3757,6 @@
    }
   }
  },
- "updated_at": "2026-08-01T19:22:36.045003+00:00",
+ "updated_at": "2026-08-01T20:26:31.674462+00:00",
  "version": 1
 }

@@ -43,11 +43,45 @@
   "source_task_id": "K1747",
   "source_task_link": {
     "state": "linked",
-    "attempted_at": "2026-08-01T19:18:14Z",
-    "linked_at": "2026-08-01T19:18:14Z",
+    "attempted_at": "2026-08-01T20:01:02Z",
+    "linked_at": "2026-08-01T20:01:02Z",
     "error": null
   },
   "timeout_seconds": 10800,
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1747-ml-inference-bf6e9f48.md",
-  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1747-ml-inference-bf6e9f48.md"
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1747-ml-inference-bf6e9f48.md",
+  "claimed_by_pid": 23902,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:dba57cbbf1064237301d4db6",
+    "scheduled_for": "2026-08-01T20:00:00Z"
+  },
+  "claimed_by_pid_start_wall": "Sun Aug  2 04:00:57 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "K1747",
+    "settled_at": "2026-08-01T20:01:02Z",
+    "error": null
+  },
+  "quota_requeues": 2,
+  "requeue_history": [
+    {
+      "at": "2026-08-01T19:30:48Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-08-01T19:30:44Z",
+      "reset_at": null
+    },
+    {
+      "at": "2026-08-01T20:01:02Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-08-01T20:00:58Z",
+      "reset_at": null
+    }
+  ],
+  "not_before": "2026-08-01T20:31:02.275221+00:00",
+  "attempt_status": "quota_exhausted",
+  "quota_reset_at": null
 }
