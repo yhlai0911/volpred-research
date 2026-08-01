@@ -1,17 +1,15 @@
 {
   "experiment_id": "K1738",
-  "title": "Earnings surprise (SUE) and subsequent realized volatility: causal increment via DML (+ IV falsification)",
-  "generated_at_utc": "2026-08-01T02:21:09.752751+00:00",
+  "title": "Earnings surprise (SUE) and subsequent realized volatility: conditional association via cross-fitted DML (+ invalid-IV diagnostic)",
+  "generated_at_utc": "2026-08-01T23:37:47.718504+00:00",
   "seed": 42,
-  "code_sha256": "2057c5e49b0fc939114fecc4fffa0196775eb5337f395cbe9be10921ab651c27",
-  "git_commit": "fc1b1ca13ec4195591d7b289ede97eac067e70cf",
-  "runtime_seconds": 1.3,
-  "run_complete": false,
+  "code_sha256": "a1add225764e563a23b028accdaaff7096febfddac7844cee37aab28fd23d491",
+  "git_commit": "f258ae7a448d006d3f7d9ed89ddda16d0338232c",
+  "runtime_seconds": 458.2,
+  "run_complete": true,
   "stages_completed": [
     "naive_and_ols_controls",
-    "instrument"
-  ],
-  "stages_missing": [
+    "instrument",
     "primary",
     "robustness:within_month_demeaned",
     "subperiods",
@@ -19,12 +17,52 @@
     "robustness:level_rv_outcome",
     "robustness:lasso_nuisance"
   ],
-  "last_checkpoint": "insurance-artifact-no-DML",
+  "stages_missing": [],
+  "last_checkpoint": "complete",
   "verdict": "CONDITIONAL_PASS",
-  "verdict_reason": "INTERIM ARTIFACT: the DML block did not finish inside the job budget on a heavily contended machine. Only the closed-form estimators (naive OLS, OLS+controls) and the instrument analysis are computed here. The pre-registered verdict in README section 8 is defined on the DML estimate and therefore is NOT yet established; this verdict reflects the OLS-with-controls family only and must not be read as the DML result.",
-  "causal_claim_cap": "CAPPED: no valid instrument AND the DML estimator did not run, so nothing here supports a causal claim; these are covariate-adjusted associations.",
+  "verdict_reason": "BH-significant at signed=['h1m', 'h2m'] abs=[] but failed pre-registered condition(s): ['c3_sign_consistent_across_subperiods']",
+  "causal_claim_cap": "CAPPED: no credible valid instrument, so every estimate is interpreted as a conditional association under unconfoundedness, never as a causal ATE.",
   "identification_stance": "Conditional association under unconfoundedness. No credible instrument was found; see instrument_analysis.",
-  "question": "Not 'does SUE predict vol' (a forecasting question) but 'does SUE carry a causal increment to realized vol after controlling for confounders'.",
+  "question": "The pre-registered target question was whether SUE carries a causal increment after controls. Because no credible IV survives, the estimable result is the conditional association under unconfoundedness, not an identified ATE.",
+  "data_provenance": {
+    "execution_mode": "cached panel estimation plus frozen earnings-cache coverage audit (--no-download); no network access",
+    "checkpoint_base_commit": "f258ae7a448d006d3f7d9ed89ddda16d0338232c",
+    "estimation_input": {
+      "path": "experiments/k1738/panel_k1738.parquet",
+      "sha256": "52e8c4a76b55d70ce8beb85dafb5f77e3a648c31ae461cb46e02606f78962009",
+      "size_bytes": 6806972
+    },
+    "coverage_audit_input": {
+      "path": "experiments/k1738/cache/earnings.parquet",
+      "sha256": "3444ebec387447c4a94347b3bed05aa1eddd96b651c2b6f14e6030e81281a424",
+      "size_bytes": 176117
+    },
+    "upstream_frozen_cache_identities": [
+      {
+        "path": "experiments/k1738/cache/earnings.parquet",
+        "sha256": "3444ebec387447c4a94347b3bed05aa1eddd96b651c2b6f14e6030e81281a424",
+        "size_bytes": 176117
+      },
+      {
+        "path": "experiments/k1738/cache/macro.parquet",
+        "sha256": "1dd81099face73b6c90fe77a9d7936f87021af78dd49e5147f69ed338178dc88",
+        "size_bytes": 103946
+      },
+      {
+        "path": "experiments/k1738/cache/prices.parquet",
+        "sha256": "cc85a2138ff1e9682e021cd06230a707d62d4f85604fb8d057549f757ad60a35",
+        "size_bytes": 13034167
+      },
+      {
+        "path": "experiments/k1738/cache/volumes.parquet",
+        "sha256": "4b895a7120918298134295bdb0034790f3ad91d5b9ce78db20e8fbcc7477d3b7",
+        "size_bytes": 12080382
+      }
+    ],
+    "earnings_source": "yfinance get_earnings_dates(limit=100), frozen current-snapshot EPS Estimate and Reported EPS fields",
+    "price_source": "yfinance adjusted daily closes and volumes, frozen cache",
+    "macro_source": "FRED VIXCLS, T10Y2Y and BAA10Y, frozen cache"
+  },
   "sample": {
     "n_firm_quarters": 24519,
     "n_firms": 292,
@@ -35,7 +73,16 @@
     ],
     "n_announcement_months": 279,
     "panel_rows_before_completeness_filter": 24873,
-    "sue_coverage_of_panel_rows": 1.0,
+    "sue_coverage": {
+      "definition": "constructible analyst-estimate SUE among frozen announcement records for usable tickers within the final panel date span",
+      "n_announcement_records": 26954,
+      "n_sue_constructible": 24884,
+      "coverage": 0.9232024931364547,
+      "date_range": [
+        "2001-03-30",
+        "2026-04-30"
+      ]
+    },
     "universe_size": 298,
     "tickers_with_usable_data": 292,
     "obs_per_sector": {
@@ -53,7 +100,7 @@
     }
   },
   "treatment_definition": {
-    "type": "analyst-based SUE (NOT a seasonal-random-walk proxy)",
+    "type": "Yahoo analyst-estimate-based SUE proxy (current snapshot, non-vintage; NOT a seasonal-random-walk proxy)",
     "formula": "(ReportedEPS - ConsensusEPSEstimate) / std(prior 8 announcement surprises)",
     "source": "yfinance get_earnings_dates(limit=100): EPS Estimate + Reported EPS",
     "continuous": true,
@@ -87,7 +134,7 @@
     "nfci_excluded_reason": "First published 2011 with backcast history and subject to revision (K1655 lesson). VIXCLS / T10Y2Y / BAA10Y are market-priced and unrevised."
   },
   "method": {
-    "estimand": "ATE of SUE on log annualized realized volatility, partially linear model",
+    "estimand": "partially linear conditional-association coefficient of SUE on log annualized realized volatility under unconfoundedness; not an identified ATE",
     "outcome": "log annualized RV over trading days [r+1, r+H], H in {21,42,63}",
     "confounders": [
       "log_rv21",
@@ -142,10 +189,10 @@
             -0.0243942435553862,
             -0.00482312381316965
           ],
-          "pct_vol_change_per_1sd": -1.450249458798225,
           "n": 24519,
           "q_bh": 0.02059786346949455,
-          "significant_bh": true
+          "significant_bh": true,
+          "pct_vol_change_per_treatment_unit": -1.450249458798225
         },
         "ols_controls": {
           "estimator": "ols_controls",
@@ -157,27 +204,37 @@
             -0.011361875975821523,
             -0.003672576231836455
           ],
-          "pct_vol_change_per_1sd": -0.7489042424927206,
           "n": 24519,
           "q_bh": 0.0002897022710786068,
-          "significant_bh": true
+          "significant_bh": true,
+          "pct_vol_change_per_treatment_unit": -0.7489042424927206
         },
         "dml": {
           "estimator": "dml",
-          "theta": null,
-          "se": null,
-          "p_raw": null,
-          "q_bh": null,
-          "significant_bh": false,
+          "theta": -0.004211956756009535,
+          "se": 0.001449078941791585,
+          "z": -2.9066440995975245,
+          "p_raw": 0.0036532858970539372,
           "ci95": [
-            null,
-            null
+            -0.007052151481921041,
+            -0.0013717620300980281
           ],
-          "pct_vol_change_per_1sd": null,
+          "pct_vol_change_per_treatment_unit": -0.42030989068087,
           "n": 24519,
-          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+          "n_reps_ok": 5,
+          "theta_reps": [
+            -0.004498561095724568,
+            -0.004139095601500251,
+            -0.004211956756009535,
+            -0.00413469693255634,
+            -0.004488357498689799
+          ],
+          "treatment_resid_share": 0.11546494555171494,
+          "q_bh": 0.010959857691161812,
+          "significant_bh": true
         },
-        "confounding_absorbed_pct": 48.54275534818283
+        "confounding_absorbed_by_ols_controls_pct": 48.54275534818283,
+        "confounding_absorbed_by_dml_pct": 71.1681295383067
       },
       "h2m": {
         "naive_ols": {
@@ -190,10 +247,10 @@
             -0.023415414259214444,
             -0.0036870380888633994
           ],
-          "pct_vol_change_per_1sd": -1.3459821655562032,
           "n": 24519,
           "q_bh": 0.021268596282647767,
-          "significant_bh": true
+          "significant_bh": true,
+          "pct_vol_change_per_treatment_unit": -1.3459821655562032
         },
         "ols_controls": {
           "estimator": "ols_controls",
@@ -205,27 +262,37 @@
             -0.010616871179494282,
             -0.004267419205312038
           ],
-          "pct_vol_change_per_1sd": -0.7414521000099095,
           "n": 24519,
           "q_bh": 2.6014473676561067e-05,
-          "significant_bh": true
+          "significant_bh": true,
+          "pct_vol_change_per_treatment_unit": -0.7414521000099095
         },
         "dml": {
           "estimator": "dml",
-          "theta": null,
-          "se": null,
-          "p_raw": null,
-          "q_bh": null,
-          "significant_bh": false,
+          "theta": -0.004001143106086602,
+          "se": 0.001282426793026331,
+          "z": -3.119977785745194,
+          "p_raw": 0.0018086467916009763,
           "ci95": [
-            null,
-            null
+            -0.00651469962041821,
+            -0.001487586591754993
           ],
-          "pct_vol_change_per_1sd": null,
+          "pct_vol_change_per_treatment_unit": -0.39931491981527456,
           "n": 24519,
-          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+          "n_reps_ok": 5,
+          "theta_reps": [
+            -0.004001143106086602,
+            -0.003913369428236255,
+            -0.00403426582635387,
+            -0.003911954364917097,
+            -0.004510413580661723
+          ],
+          "treatment_resid_share": 0.11546494555171494,
+          "q_bh": 0.010851880749605858,
+          "significant_bh": true
         },
-        "confounding_absorbed_pct": 45.08138896935671
+        "confounding_absorbed_by_ols_controls_pct": 45.08138896935671,
+        "confounding_absorbed_by_dml_pct": 70.47394047815477
       },
       "h3m": {
         "naive_ols": {
@@ -238,10 +305,10 @@
             -0.019923096928063454,
             -0.0003367922900164074
           ],
-          "pct_vol_change_per_1sd": -1.0078809530977173,
           "n": 24519,
           "q_bh": 0.06393143113745303,
-          "significant_bh": true
+          "significant_bh": true,
+          "pct_vol_change_per_treatment_unit": -1.0078809530977173
         },
         "ols_controls": {
           "estimator": "ols_controls",
@@ -253,27 +320,37 @@
             -0.009132916539211465,
             -0.002917173043453714
           ],
-          "pct_vol_change_per_1sd": -0.6006930606813232,
           "n": 24519,
           "q_bh": 0.0002897022710786068,
-          "significant_bh": true
+          "significant_bh": true,
+          "pct_vol_change_per_treatment_unit": -0.6006930606813232
         },
         "dml": {
           "estimator": "dml",
-          "theta": null,
-          "se": null,
-          "p_raw": null,
-          "q_bh": null,
-          "significant_bh": false,
+          "theta": -0.002262656088109093,
+          "se": 0.0012307724950280875,
+          "z": -1.838403195756708,
+          "p_raw": 0.06600301457121782,
           "ci95": [
-            null,
-            null
+            -0.004674970178364144,
+            0.00014965800214595832
           ],
-          "pct_vol_change_per_1sd": null,
+          "pct_vol_change_per_treatment_unit": -0.22600982113847312,
           "n": 24519,
-          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+          "n_reps_ok": 5,
+          "theta_reps": [
+            -0.002194896925899739,
+            -0.002262656088109093,
+            -0.002010443086941744,
+            -0.0023368613167320767,
+            -0.0022845142049746103
+          ],
+          "treatment_resid_share": 0.11546494555171494,
+          "q_bh": 0.13200602914243564,
+          "significant_bh": false
         },
-        "confounding_absorbed_pct": 40.522431031302396
+        "confounding_absorbed_by_ols_controls_pct": 40.522431031302396,
+        "confounding_absorbed_by_dml_pct": 77.66368745896295
       }
     },
     "abs_sue": {
@@ -288,10 +365,10 @@
             -0.001036079764826522,
             0.017841059139940905
           ],
-          "pct_vol_change_per_1sd": 0.8437889683936106,
           "n": 24519,
           "q_bh": 0.08469316408502525,
-          "significant_bh": true
+          "significant_bh": true,
+          "pct_vol_change_per_treatment_unit": 0.8437889683936106
         },
         "ols_controls": {
           "estimator": "ols_controls",
@@ -303,27 +380,37 @@
             -0.004104196782436366,
             0.006173204290363633
           ],
-          "pct_vol_change_per_1sd": 0.10350390375404306,
           "n": 24519,
           "q_bh": 0.8607519919566469,
-          "significant_bh": false
+          "significant_bh": false,
+          "pct_vol_change_per_treatment_unit": 0.10350390375404306
         },
         "dml": {
           "estimator": "dml",
-          "theta": null,
-          "se": null,
-          "p_raw": null,
-          "q_bh": null,
-          "significant_bh": false,
+          "theta": 0.0023646787265176306,
+          "se": 0.0017467418369992993,
+          "z": 1.353765437129436,
+          "p_raw": 0.17581122374842373,
           "ci95": [
-            null,
-            null
+            -0.001058935274000996,
+            0.005788292727036257
           ],
-          "pct_vol_change_per_1sd": null,
+          "pct_vol_change_per_treatment_unit": 0.2367476784325362,
           "n": 24519,
-          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+          "n_reps_ok": 5,
+          "theta_reps": [
+            0.0024347357054781017,
+            0.0023646787265176306,
+            0.0027913835401004996,
+            0.0022193378451263513,
+            0.001985997682359837
+          ],
+          "treatment_resid_share": 0.10564302276571846,
+          "q_bh": 0.21097346849810847,
+          "significant_bh": false
         },
-        "confounding_absorbed_pct": 87.68812825208728
+        "confounding_absorbed_by_ols_controls_pct": 87.68812825208728,
+        "confounding_absorbed_by_dml_pct": 71.85740400229994
       },
       "h2m": {
         "naive_ols": {
@@ -336,10 +423,10 @@
             -0.0010925907869618993,
             0.017061782814766346
           ],
-          "pct_vol_change_per_1sd": 0.8016557911636024,
           "n": 24519,
           "q_bh": 0.08469316408502525,
-          "significant_bh": true
+          "significant_bh": true,
+          "pct_vol_change_per_treatment_unit": 0.8016557911636024
         },
         "ols_controls": {
           "estimator": "ols_controls",
@@ -351,27 +438,37 @@
             -0.00391360098327143,
             0.003270623892075002
           ],
-          "pct_vol_change_per_1sd": -0.032143687369323715,
           "n": 24519,
           "q_bh": 0.8607519919566469,
-          "significant_bh": false
+          "significant_bh": false,
+          "pct_vol_change_per_treatment_unit": -0.032143687369323715
         },
         "dml": {
           "estimator": "dml",
-          "theta": null,
-          "se": null,
-          "p_raw": null,
-          "q_bh": null,
-          "significant_bh": false,
+          "theta": 0.0011226545064213324,
+          "se": 0.0014513275304262221,
+          "z": 0.7735362851496617,
+          "p_raw": 0.4392050631406996,
           "ci95": [
-            null,
-            null
+            -0.001721947453214063,
+            0.003967256466056728
           ],
-          "pct_vol_change_per_1sd": null,
+          "pct_vol_change_per_treatment_unit": 0.1123284918881362,
           "n": 24519,
-          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+          "n_reps_ok": 5,
+          "theta_reps": [
+            0.0013144779980836464,
+            0.001092280678074415,
+            0.0013200702576109341,
+            0.0011226545064213324,
+            0.0003160140828240946
+          ],
+          "treatment_resid_share": 0.10564302276571846,
+          "q_bh": 0.4392050631406996,
+          "significant_bh": false
         },
-        "confounding_absorbed_pct": 104.02635956832957
+        "confounding_absorbed_by_ols_controls_pct": 104.02635956832957,
+        "confounding_absorbed_by_dml_pct": 85.93974567446313
       },
       "h3m": {
         "naive_ols": {
@@ -384,10 +481,10 @@
             0.0014782511207446399,
             0.018011344553078606
           ],
-          "pct_vol_change_per_1sd": 0.9792432985249011,
           "n": 24519,
           "q_bh": 0.04172167850843955,
-          "significant_bh": true
+          "significant_bh": true,
+          "pct_vol_change_per_treatment_unit": 0.9792432985249011
         },
         "ols_controls": {
           "estimator": "ols_controls",
@@ -399,27 +496,37 @@
             -0.003158432381980606,
             0.004099648151407013
           ],
-          "pct_vol_change_per_1sd": 0.04707186379768746,
           "n": 24519,
           "q_bh": 0.8607519919566469,
-          "significant_bh": false
+          "significant_bh": false,
+          "pct_vol_change_per_treatment_unit": 0.04707186379768746
         },
         "dml": {
           "estimator": "dml",
-          "theta": null,
-          "se": null,
-          "p_raw": null,
-          "q_bh": null,
-          "significant_bh": false,
+          "theta": 0.002496262988832276,
+          "se": 0.0014704134824449113,
+          "z": 1.6976605687004762,
+          "p_raw": 0.08957184401851492,
           "ci95": [
-            null,
-            null
+            -0.00038574743675975,
+            0.0053782734144243016
           ],
-          "pct_vol_change_per_1sd": null,
+          "pct_vol_change_per_treatment_unit": 0.24993812474116694,
           "n": 24519,
-          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+          "n_reps_ok": 5,
+          "theta_reps": [
+            0.002820128703731071,
+            0.0021801627860494905,
+            0.002679875644670515,
+            0.002496262988832276,
+            0.001939072458278268
+          ],
+          "treatment_resid_share": 0.10564302276571846,
+          "q_bh": 0.13435776602777239,
+          "significant_bh": false
         },
-        "confounding_absorbed_pct": 95.17067575347103
+        "confounding_absorbed_by_ols_controls_pct": 95.17067575347103,
+        "confounding_absorbed_by_dml_pct": 74.3836349341506
       }
     }
   },
@@ -513,12 +620,388 @@
       },
       "n_significant_raw": 3,
       "n_significant_bh": 3
+    },
+    "dml": {
+      "family": "F1: {3 horizons} x {signed SUE, |SUE|}",
+      "q": 0.1,
+      "m_hypotheses": 6,
+      "tests": {
+        "signed_sue/h1m": {
+          "p_raw": 0.0036532858970539372,
+          "q_bh": 0.010959857691161812,
+          "significant_raw": true,
+          "significant_bh": true
+        },
+        "signed_sue/h2m": {
+          "p_raw": 0.0018086467916009763,
+          "q_bh": 0.010851880749605858,
+          "significant_raw": true,
+          "significant_bh": true
+        },
+        "signed_sue/h3m": {
+          "p_raw": 0.06600301457121782,
+          "q_bh": 0.13200602914243564,
+          "significant_raw": false,
+          "significant_bh": false
+        },
+        "abs_sue/h1m": {
+          "p_raw": 0.17581122374842373,
+          "q_bh": 0.21097346849810847,
+          "significant_raw": false,
+          "significant_bh": false
+        },
+        "abs_sue/h2m": {
+          "p_raw": 0.4392050631406996,
+          "q_bh": 0.4392050631406996,
+          "significant_raw": false,
+          "significant_bh": false
+        },
+        "abs_sue/h3m": {
+          "p_raw": 0.08957184401851492,
+          "q_bh": 0.13435776602777239,
+          "significant_raw": false,
+          "significant_bh": false
+        }
+      },
+      "n_significant_raw": 2,
+      "n_significant_bh": 2
     }
   },
-  "subperiods": {},
+  "subperiods": {
+    "P1_2002_2009": {
+      "n": 6124,
+      "n_firms": 262,
+      "range": [
+        "2002-02-18",
+        "2009-12-22"
+      ],
+      "h1m": {
+        "estimator": "dml",
+        "theta": 0.00045321064945642224,
+        "se": 0.002292936710974217,
+        "z": 0.19765510634781683,
+        "p_raw": 0.8433149166011802,
+        "ci95": [
+          -0.004040945304053043,
+          0.004947366602965888
+        ],
+        "pct_vol_change_per_treatment_unit": 0.04533133649193832,
+        "n": 6124,
+        "q_bh_F2": 0.8433149166011802,
+        "significant_bh_F2": false
+      },
+      "h2m": {
+        "estimator": "dml",
+        "theta": -0.00038658825588242977,
+        "se": 0.001914246477470049,
+        "z": -0.20195322829762316,
+        "p_raw": 0.8399532891165333,
+        "ci95": [
+          -0.004138511351723726,
+          0.0033653348399588666
+        ],
+        "pct_vol_change_per_treatment_unit": -0.038651354027097184,
+        "n": 6124,
+        "q_bh_F2": 0.8433149166011802,
+        "significant_bh_F2": false
+      },
+      "h3m": {
+        "estimator": "dml",
+        "theta": -0.001056698913427181,
+        "se": 0.0019809526813259304,
+        "z": -0.5334296590668134,
+        "p_raw": 0.5937361911300947,
+        "ci95": [
+          -0.004939366168826004,
+          0.0028259683419716427
+        ],
+        "pct_vol_change_per_treatment_unit": -0.10561408037322861,
+        "n": 6124,
+        "q_bh_F2": 0.7633751028815503,
+        "significant_bh_F2": false
+      }
+    },
+    "P2_2010_2017": {
+      "n": 8661,
+      "n_firms": 286,
+      "range": [
+        "2010-01-07",
+        "2017-12-21"
+      ],
+      "h1m": {
+        "estimator": "dml",
+        "theta": -0.007081515984889854,
+        "se": 0.00246855461600581,
+        "z": -2.8686892074310038,
+        "p_raw": 0.004121765892547646,
+        "ci95": [
+          -0.011919883032261241,
+          -0.002243148937518466
+        ],
+        "pct_vol_change_per_treatment_unit": -0.7056501133087867,
+        "n": 8661,
+        "q_bh_F2": 0.01854794651646441,
+        "significant_bh_F2": true
+      },
+      "h2m": {
+        "estimator": "dml",
+        "theta": -0.006190305434805496,
+        "se": 0.0020551719388877325,
+        "z": -3.0120620653061834,
+        "p_raw": 0.0025947953873404206,
+        "ci95": [
+          -0.010218442435025451,
+          -0.002162168434585541
+        ],
+        "pct_vol_change_per_treatment_unit": -0.6171184968304155,
+        "n": 8661,
+        "q_bh_F2": 0.01854794651646441,
+        "significant_bh_F2": true
+      },
+      "h3m": {
+        "estimator": "dml",
+        "theta": -0.003973100286312509,
+        "se": 0.0020120173942189045,
+        "z": -1.9746848599462163,
+        "p_raw": 0.04830392212143564,
+        "ci95": [
+          -0.007916654378981562,
+          -2.9546193643455523e-05
+        ],
+        "pct_vol_change_per_treatment_unit": -0.39652179659085407,
+        "n": 8661,
+        "q_bh_F2": 0.08694705981858415,
+        "significant_bh_F2": true
+      }
+    },
+    "P3_2018_2026": {
+      "n": 9732,
+      "n_firms": 292,
+      "range": [
+        "2018-01-05",
+        "2026-04-30"
+      ],
+      "h1m": {
+        "estimator": "dml",
+        "theta": -0.004449833376823954,
+        "se": 0.0018828639559580682,
+        "z": -2.3633323919888416,
+        "p_raw": 0.018111417107133265,
+        "ci95": [
+          -0.008140246730501767,
+          -0.0007594200231461406
+        ],
+        "pct_vol_change_per_treatment_unit": -0.44399475371654784,
+        "n": 9732,
+        "q_bh_F2": 0.04075068849104985,
+        "significant_bh_F2": true
+      },
+      "h2m": {
+        "estimator": "dml",
+        "theta": -0.00426976624241316,
+        "se": 0.0017200571907167177,
+        "z": -2.482339695131895,
+        "p_raw": 0.013052278119823013,
+        "ci95": [
+          -0.007641078336217927,
+          -0.0008984541486083937
+        ],
+        "pct_vol_change_per_treatment_unit": -0.4260663750310201,
+        "n": 9732,
+        "q_bh_F2": 0.03915683435946904,
+        "significant_bh_F2": true
+      },
+      "h3m": {
+        "estimator": "dml",
+        "theta": -0.0019910415873510964,
+        "se": 0.001726526234538382,
+        "z": -1.1532066802815988,
+        "p_raw": 0.24882556223779884,
+        "ci95": [
+          -0.005375033007046325,
+          0.001392949832344132
+        ],
+        "pct_vol_change_per_treatment_unit": -0.1989060778891938,
+        "n": 9732,
+        "q_bh_F2": 0.37323834335669825,
+        "significant_bh_F2": false
+      }
+    }
+  },
   "subperiod_family": "F2: {3 horizons} x {3 sub-periods}, BH-corrected separately from F1",
-  "robustness": {},
-  "robustness_note": "Descriptive sensitivity checks, not confirmatory tests; not FDR family members. They can demote a verdict but cannot promote a NULL.",
+  "robustness": {
+    "within_month_demeaned": {
+      "h1m": {
+        "estimator": "dml",
+        "theta": -0.003364158656380361,
+        "se": 0.0013417306706343779,
+        "z": -2.507327834124689,
+        "p_raw": 0.012164782708387056,
+        "ci95": [
+          -0.005993950770823741,
+          -0.0007343665419369803
+        ],
+        "pct_vol_change_per_treatment_unit": -0.3358506214994228,
+        "n": 24519,
+        "q_bh_F3": 0.018247174062580584,
+        "significant_bh_F3": true
+      },
+      "h2m": {
+        "estimator": "dml",
+        "theta": -0.0032969941652373474,
+        "se": 0.0011676546587197994,
+        "z": -2.8236038289369967,
+        "p_raw": 0.004748704213192179,
+        "ci95": [
+          -0.005585597296328154,
+          -0.0010083910341465406
+        ],
+        "pct_vol_change_per_treatment_unit": -0.3291565048202605,
+        "n": 24519,
+        "q_bh_F3": 0.014246112639576536,
+        "significant_bh_F3": true
+      },
+      "h3m": {
+        "estimator": "dml",
+        "theta": -0.0017624895569763256,
+        "se": 0.0011559767901544564,
+        "z": -1.5246755574917985,
+        "p_raw": 0.12734004119829723,
+        "ci95": [
+          -0.00402820406567906,
+          0.0005032249517264087
+        ],
+        "pct_vol_change_per_treatment_unit": -0.1760937284345787,
+        "n": 24519,
+        "q_bh_F3": 0.12734004119829723,
+        "significant_bh_F3": false
+      }
+    },
+    "inclusive_window": {
+      "h1m": {
+        "estimator": "dml",
+        "theta": -0.0032146397766153003,
+        "se": 0.001638937609948503,
+        "z": -1.9614168087315462,
+        "p_raw": 0.049830420788674834,
+        "ci95": [
+          -0.006426957492114366,
+          -2.3220611162343835e-06
+        ],
+        "pct_vol_change_per_treatment_unit": -0.3209478354354367,
+        "n": 24519
+      },
+      "h2m": {
+        "estimator": "dml",
+        "theta": -0.0037435737523733264,
+        "se": 0.0013763736365344549,
+        "z": -2.719881907793003,
+        "p_raw": 0.006530523418929235,
+        "ci95": [
+          -0.006441266079980858,
+          -0.0010458814247657948
+        ],
+        "pct_vol_change_per_treatment_unit": -0.3736575315931634,
+        "n": 24519
+      },
+      "h3m": {
+        "estimator": "dml",
+        "theta": -0.002860882091065042,
+        "se": 0.0013159262012212448,
+        "z": -2.1740444778818158,
+        "p_raw": 0.029701795055453672,
+        "ci95": [
+          -0.005440097445458682,
+          -0.00028166673667140256
+        ],
+        "pct_vol_change_per_treatment_unit": -0.28567936676573424,
+        "n": 24519
+      }
+    },
+    "level_rv_outcome": {
+      "h1m": {
+        "estimator": "dml",
+        "theta": -0.0012398124607722234,
+        "se": 0.000491644097587416,
+        "z": -2.5217682198488727,
+        "p_raw": 0.011676661804365107,
+        "ci95": [
+          -0.0022034348920435586,
+          -0.0002761900295008881
+        ],
+        "pct_vol_change_per_treatment_unit": -0.12390442108313193,
+        "n": 24519
+      },
+      "h2m": {
+        "estimator": "dml",
+        "theta": -0.0013785449079096062,
+        "se": 0.0004764090797562602,
+        "z": -2.8936159416081986,
+        "p_raw": 0.0038083366158949694,
+        "ci95": [
+          -0.002312306704231876,
+          -0.0004447831115873362
+        ],
+        "pct_vol_change_per_treatment_unit": -0.1377595151355493,
+        "n": 24519
+      },
+      "h3m": {
+        "estimator": "dml",
+        "theta": -0.0008305214658405238,
+        "se": 0.0004735308829741613,
+        "z": -1.7538908140989022,
+        "p_raw": 0.07944921789824155,
+        "ci95": [
+          -0.00175864199646988,
+          9.759906478883237e-05
+        ],
+        "pct_vol_change_per_treatment_unit": -0.08301766783456177,
+        "n": 24519
+      }
+    },
+    "lasso_nuisance": {
+      "h1m": {
+        "estimator": "dml",
+        "theta": -0.008744221673011381,
+        "se": 0.0024135099165014124,
+        "z": -3.6230311768044743,
+        "p_raw": 0.0002911707112704942,
+        "ci95": [
+          -0.01347470110935415,
+          -0.0040137422366686125
+        ],
+        "pct_vol_change_per_treatment_unit": -0.8706102156095907,
+        "n": 24519
+      },
+      "h2m": {
+        "estimator": "dml",
+        "theta": -0.0073860525990714606,
+        "se": 0.0017566291974531894,
+        "z": -4.2046737067674655,
+        "p_raw": 2.6145907173757976e-05,
+        "ci95": [
+          -0.010829045826079712,
+          -0.003943059372063209
+        ],
+        "pct_vol_change_per_treatment_unit": -0.7358842744924377,
+        "n": 24519
+      },
+      "h3m": {
+        "estimator": "dml",
+        "theta": -0.005842101613796157,
+        "se": 0.0018178305231992928,
+        "z": -3.213776828609052,
+        "p_raw": 0.0013100144982776118,
+        "ci95": [
+          -0.009405049439266771,
+          -0.002279153788325543
+        ],
+        "pct_vol_change_per_treatment_unit": -0.582506972165231,
+        "n": 24519
+      }
+    }
+  },
+  "robustness_note": "The within-month block is confirmatory family F3 (three horizons, BH q<0.10) because pre-registered criterion c4 uses it. Other sensitivity checks are descriptive and cannot promote a NULL.",
   "instrument_analysis": {
     "status": "ESTIMATED",
     "instrument": "mean SUE of other same-sector firms announcing in the prior 30 calendar days",
@@ -551,7 +1034,7 @@
       }
     },
     "exclusion_restriction_violated": false,
-    "instrument_valid": true,
+    "instrument_valid": false,
     "tsls": {
       "h1m": {
         "estimator": "iv_2sls",
@@ -563,8 +1046,8 @@
           -0.16990301724878418,
           -0.009109167489883024
         ],
-        "pct_vol_change_per_1sd": -8.561730564975123,
-        "n": 23519
+        "n": 23519,
+        "pct_vol_change_per_treatment_unit": -8.561730564975123
       },
       "h2m": {
         "estimator": "iv_2sls",
@@ -576,8 +1059,8 @@
           -0.16069308049096998,
           0.0011482810561721374
         ],
-        "pct_vol_change_per_1sd": -7.667352816065376,
-        "n": 23519
+        "n": 23519,
+        "pct_vol_change_per_treatment_unit": -7.667352816065376
       },
       "h3m": {
         "estimator": "iv_2sls",
@@ -589,29 +1072,70 @@
           -0.13822735633026606,
           0.021919007388181866
         ],
-        "pct_vol_change_per_1sd": -5.649552808010283,
-        "n": 23519
+        "n": 23519,
+        "pct_vol_change_per_treatment_unit": -5.649552808010283
       }
     },
-    "interpretation": "Exclusion not rejected by the pre-registered test; note that a non-rejection is not proof of validity."
+    "interpretation": "INVALID -- the candidate has plausible direct industry-news pathways to the outcome. The pre-registered direct-effect diagnostic is reported unchanged, but its non-rejection does not establish exclusion. 2SLS is a transparency diagnostic only and is NOT interpreted causally.",
+    "relevance_passed": true,
+    "exclusion_test_rejected_at_any_horizon": false,
+    "exclusion_restriction_credible": false,
+    "invalid_reasons": [
+      "sector-peer earnings news has plausible direct paths to focal-firm volatility; non-rejection of a direct coefficient cannot establish exclusion"
+    ]
   },
-  "prereg_checks": {},
+  "prereg_checks": {
+    "c1_bh_significant_in_ge2_horizons": true,
+    "c2_sign_consistent_across_horizons": true,
+    "c3_sign_consistent_across_subperiods": false,
+    "c4_survives_within_month_fe": true,
+    "significant_horizons_signed": [
+      "h1m",
+      "h2m"
+    ],
+    "significant_horizons_abs": [],
+    "subperiods_evaluated": true,
+    "within_month_fe_evaluated": true,
+    "statistical_verdict_before_iv_cap": "CONDITIONAL_PASS"
+  },
   "success_criteria_source": "README.md section 8, written before any estimate was inspected",
   "process_notes": [
     "Disclosure: during runtime calibration a single preliminary h1m signed-SUE DML estimate was observed before the final nuisance-learner configuration was fixed. No success criterion in README section 8 was added, removed or altered at any point after that observation. The configuration changes that followed (HGB max_iter 200 -> 100; 2 cross-fitting repetitions for the non-primary sub-period and robustness blocks) were made to fit a hard wall-clock budget on a heavily contended machine, not to move any estimate. The primary block retains the pre-registered 5 repetitions.",
-    "The artifact is rewritten after every stage, so an interrupted run still yields a coherent partial result. Unfinished pre-registered conditions evaluate to False, which can only weaken the verdict, never strengthen it."
+    "The artifact is rewritten after every stage, so an interrupted run still yields a coherent partial result. Unfinished pre-registered conditions evaluate to False, which can only weaken the verdict, never strengthen it.",
+    "The stage-2 continuation brief assumed a seasonal-random-walk fallback. Frozen columns raw_surprise = eps_act - eps_est and the checkpoint identities prove that the executed treatment is analyst-estimate based; the false brief assumption is rejected rather than copied into the result label."
   ],
   "limitations": [
     "Survivorship: universe is currently-listed firms; delisted firms absent. Expected direction is attenuation toward the null (failed firms had the largest negative surprises and the highest vol), so a positive finding is conservative.",
     "Consensus EPS is a current snapshot, not an archived vintage (see pit_caveat).",
     "Sector labels are current snapshots applied to the whole history.",
     "No credible instrument, so identification rests on unconfoundedness; unobserved drivers correlated with both SUE and future vol would still bias theta.",
-    "At h=3m consecutive same-firm outcome windows are nearly adjacent; firm clustering absorbs the resulting serial dependence."
+    "At h=3m consecutive same-firm outcome windows are nearly adjacent; firm clustering absorbs the resulting serial dependence.",
+    "Cross-fitting holds out whole firms, but crossed firm-month panels cannot keep both firm and announcement-month clusters disjoint with ordinary K-fold partitions. Nuisance training may therefore share announcement months with held-out firms; two-way clustered inference addresses score dependence but not this nuisance-fit dependence. Treat the DML estimates as conditional associations and require a multiway-cross-fit replication before any stronger identification claim."
   ],
   "unresolved": [
-    "DML (the pre-registered primary estimator) did not complete within the job wall-clock budget; machine load average was ~30 from concurrent agents. Re-run: uv run python experiments/k1738/K1738.py --no-download (panel is cached, so only estimation re-runs).",
-    "Sub-period (family F2) and robustness blocks not computed.",
-    "Pre-registered criteria c1-c4 not evaluable without the DML block.",
-    "Codex primary-path review not yet performed."
-  ]
+    "Codex primary-path review not yet recorded"
+  ],
+  "code_trace": {
+    "path": "experiments/k1738/K1738.py",
+    "sha256": "a1add225764e563a23b028accdaaff7096febfddac7844cee37aab28fd23d491",
+    "size_bytes": 67774
+  },
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "dml_split_base",
+        "value": 42
+      }
+    ]
+  }
 }

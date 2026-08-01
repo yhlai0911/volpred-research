@@ -16,13 +16,14 @@ LOOKAHEAD (binding, see README section 4):
     construction -- this is the equivalent of the repo's signal.shift(1) requirement.
   * The SUE scaling denominator uses only the previous 8 announcements.
 
-Run:  uv run python experiments/k1738/K1738.py
-      uv run python experiments/k1738/K1738.py --no-download   (re-estimate from cached panel)
+Run (bounded cached continuation only):
+      uv run python experiments/k1738/K1738.py --no-download
 """
 
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import io
 import json
@@ -36,11 +37,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from volpred.research.reproduce_spec import finalize_experiment
+
 warnings.filterwarnings("ignore")
 
 HERE = Path(__file__).resolve().parent
 CACHE = HERE / "cache"
 SEED = 42
+CHECKPOINT_COMMIT = "f258ae7a448d006d3f7d9ed89ddda16d0338232c"
+CHECKPOINT_RESULT_REPO_PATH = "experiments/k1738/K1738_results.json"
 
 # --------------------------------------------------------------------------------------------
 # Configuration (all pre-registered in README; no value here is tuned against a result)
@@ -430,6 +435,53 @@ def build_panel(data: dict) -> pd.DataFrame:
     return panel
 
 
+def audit_sue_coverage(panel: pd.DataFrame, earnings_path: Path) -> dict:
+    """Measure constructible-SUE coverage against frozen announcement records.
+
+    ``panel`` already excludes rows whose SUE cannot be constructed, so using it as
+    both numerator and denominator makes the coverage gate tautological. Rebuild
+    only SUE availability from the frozen earnings cache over the final panel's
+    ticker/date span; no prices, outcomes, or network data are touched.
+    """
+    earnings = pd.read_parquet(earnings_path).copy()
+    earnings["ann_date"] = pd.to_datetime(earnings["ann_date"])
+    earnings = (
+        earnings[earnings["ticker"].isin(panel["ticker"].unique())]
+        .dropna(subset=["ann_date"])
+        .sort_values(["ticker", "ann_date"])
+        .drop_duplicates(["ticker", "ann_date"])
+        .reset_index(drop=True)
+    )
+    earnings["raw_surprise"] = earnings["eps_act"] - earnings["eps_est"]
+    earnings["sigma_hat"] = earnings.groupby("ticker", sort=False)["raw_surprise"].transform(
+        lambda s: s.shift(1).rolling(SUE_WINDOW, min_periods=SUE_MIN_OBS).std(ddof=1)
+    )
+    in_span = earnings["ann_date"].between(panel["ann_date"].min(), panel["ann_date"].max())
+    denominator = int(in_span.sum())
+    constructible = (
+        in_span
+        & np.isfinite(earnings["raw_surprise"].to_numpy(dtype=float))
+        & np.isfinite(earnings["sigma_hat"].to_numpy(dtype=float))
+        & (earnings["sigma_hat"] > 1e-8)
+    )
+    numerator = int(constructible.sum())
+    if denominator == 0:
+        raise AssertionError("frozen earnings cache has no announcement records in the panel span")
+    return {
+        "definition": (
+            "constructible analyst-estimate SUE among frozen announcement records for usable "
+            "tickers within the final panel date span"
+        ),
+        "n_announcement_records": denominator,
+        "n_sue_constructible": numerator,
+        "coverage": float(numerator / denominator),
+        "date_range": [
+            str(panel["ann_date"].min().date()),
+            str(panel["ann_date"].max().date()),
+        ],
+    }
+
+
 # --------------------------------------------------------------------------------------------
 # Inference machinery
 # --------------------------------------------------------------------------------------------
@@ -626,9 +678,19 @@ def est_record(name, theta, se, n):
         "se": float(se) if np.isfinite(se) else None,
         "z": z if np.isfinite(z) else None, "p_raw": p if np.isfinite(p) else None,
         "ci95": ci(theta, se),
-        "pct_vol_change_per_1sd": float(np.exp(theta) - 1.0) * 100 if np.isfinite(theta) else None,
+        "pct_vol_change_per_treatment_unit": (
+            float(np.exp(theta) - 1.0) * 100 if np.isfinite(theta) else None
+        ),
         "n": int(n),
     }
+
+
+def normalize_est_record(rec: dict) -> dict:
+    """Normalize checkpoint-era effect labels without changing any estimate."""
+    old = rec.pop("pct_vol_change_per_1sd", None)
+    if "pct_vol_change_per_treatment_unit" not in rec and old is not None:
+        rec["pct_vol_change_per_treatment_unit"] = old
+    return rec
 
 
 # --------------------------------------------------------------------------------------------
@@ -642,8 +704,14 @@ def design_matrix(df: pd.DataFrame) -> tuple[np.ndarray, list[str]]:
     return full.values, list(full.columns)
 
 
-def run_estimators(df, treat_col, y_prefix, Xmat, firm, month, label, cache=None):
-    """naive / OLS-controls / DML for one (treatment, outcome-family) combination."""
+def run_estimators(df, treat_col, y_prefix, Xmat, firm, month, label, cache=None,
+                   checkpoint_horizons=None):
+    """Run DML and either estimate or reuse the already-completed closed-form estimators.
+
+    The cached continuation is explicitly bounded to the stages missing from the checkpoint.
+    ``checkpoint_horizons`` therefore reuses the checkpoint's naive/controlled OLS bytes and only
+    executes DML.  A whole-run invocation may omit it and estimate all three methods normally.
+    """
     d = df[treat_col].values.astype(float)
     out = {}
     for hname in HORIZONS:
@@ -651,12 +719,22 @@ def run_estimators(df, treat_col, y_prefix, Xmat, firm, month, label, cache=None
         n = len(y)
         ones = np.ones((n, 1))
 
-        b, V = ols_twoway(y, np.column_stack([d, ones]), firm, month)
-        naive = est_record("naive_ols", b[0], np.sqrt(V[0, 0]), n)
+        if checkpoint_horizons is not None:
+            prior = checkpoint_horizons[hname]
+            naive = normalize_est_record(copy.deepcopy(prior["naive_ols"]))
+            ctrl = normalize_est_record(copy.deepcopy(prior["ols_controls"]))
+            for name, rec in (("naive_ols", naive), ("ols_controls", ctrl)):
+                if rec.get("n") != n or rec.get("theta") is None or rec.get("se") is None:
+                    raise AssertionError(
+                        f"checkpoint {label}/{hname}/{name} is not a complete n={n} estimate"
+                    )
+        else:
+            b, V = ols_twoway(y, np.column_stack([d, ones]), firm, month)
+            naive = est_record("naive_ols", b[0], np.sqrt(V[0, 0]), n)
 
-        W = np.column_stack([d, Xmat, ones])
-        b2, V2 = ols_twoway(y, W, firm, month)
-        ctrl = est_record("ols_controls", b2[0], np.sqrt(V2[0, 0]), n)
+            W = np.column_stack([d, Xmat, ones])
+            b2, V2 = ols_twoway(y, W, firm, month)
+            ctrl = est_record("ols_controls", b2[0], np.sqrt(V2[0, 0]), n)
 
         dml = dml_plr(y, d, Xmat, firm, month, cache=cache,
                       y_key=f"{y_prefix}{hname}", d_key=treat_col)
@@ -665,13 +743,79 @@ def run_estimators(df, treat_col, y_prefix, Xmat, firm, month, label, cache=None
         dml_rec["theta_reps"] = dml.get("theta_reps")
         dml_rec["treatment_resid_share"] = dml.get("treatment_resid_share")
 
-        out[hname] = {"naive_ols": naive, "ols_controls": ctrl, "dml": dml_rec,
-                      "confounding_absorbed_pct": (
-                          float((1.0 - dml_rec["theta"] / naive["theta"]) * 100)
-                          if naive["theta"] and dml_rec["theta"] is not None and abs(naive["theta"]) > 1e-12
-                          else None)}
+        out[hname] = {
+            "naive_ols": naive,
+            "ols_controls": ctrl,
+            "dml": dml_rec,
+            "confounding_absorbed_by_ols_controls_pct": (
+                float((1.0 - ctrl["theta"] / naive["theta"]) * 100)
+                if naive["theta"] and abs(naive["theta"]) > 1e-12 else None
+            ),
+            "confounding_absorbed_by_dml_pct": (
+                float((1.0 - dml_rec["theta"] / naive["theta"]) * 100)
+                if naive["theta"] and dml_rec["theta"] is not None
+                and abs(naive["theta"]) > 1e-12 else None
+            ),
+        }
         print(f"   [{label}/{hname}] naive={naive['theta']:+.4f} "
               f"ols={ctrl['theta']:+.4f} dml={dml_rec['theta']:+.4f} (se {dml_rec['se']:.4f})")
+    return out
+
+
+def apply_iv_honesty_gate(iv: dict) -> dict:
+    """Validate the declared tests, then apply the substantive exclusion honesty gate.
+
+    A failure to reject a direct effect is not evidence that the exclusion restriction holds.
+    Here sector-peer surprises have explicit plausible direct paths to focal-firm volatility
+    (industry demand, costs, regulation and discount-rate news), so the candidate is not credible
+    even when the pre-registered direct-coefficient diagnostic lacks 5% power.
+    """
+    out = copy.deepcopy(iv)
+    for rec in out.get("tsls", {}).values():
+        normalize_est_record(rec)
+    if out.get("status") != "ESTIMATED":
+        out["instrument_valid"] = False
+        return out
+
+    excl = out.get("exclusion_test", {})
+    if set(excl) != set(HORIZONS):
+        raise AssertionError("instrument checkpoint does not contain all three exclusion tests")
+    rejected = any(abs(float(excl[h]["t"])) > 1.96 for h in HORIZONS)
+    recorded = bool(out.get("exclusion_restriction_violated", False))
+    if rejected != recorded:
+        raise AssertionError("instrument exclusion label disagrees with the declared |t| > 1.96 rule")
+    for h in HORIZONS:
+        if bool(excl[h].get("violates_exclusion")) != (abs(float(excl[h]["t"])) > 1.96):
+            raise AssertionError(f"instrument exclusion cell {h} disagrees with its t statistic")
+
+    fs = out["first_stage"]
+    f_from_t = float(fs["t"]) ** 2
+    if not np.isclose(float(fs["F_cluster_robust"]), f_from_t, rtol=1e-10, atol=1e-12):
+        raise AssertionError("instrument first-stage F does not equal the recorded clustered t^2")
+    relevance_passed = f_from_t >= 10.0
+
+    invalid_reasons = []
+    if not relevance_passed:
+        invalid_reasons.append("first-stage clustered F is below the declared relevance threshold")
+    if rejected:
+        invalid_reasons.append("the pre-registered direct-effect diagnostic rejects exclusion")
+    invalid_reasons.append(
+        "sector-peer earnings news has plausible direct paths to focal-firm volatility; "
+        "non-rejection of a direct coefficient cannot establish exclusion"
+    )
+    out.update({
+        "relevance_passed": bool(relevance_passed),
+        "exclusion_test_rejected_at_any_horizon": bool(rejected),
+        "exclusion_restriction_credible": False,
+        "instrument_valid": False,
+        "invalid_reasons": invalid_reasons,
+        "interpretation": (
+            "INVALID -- the candidate has plausible direct industry-news pathways to the outcome. "
+            "The pre-registered direct-effect diagnostic is reported unchanged, but its "
+            "non-rejection does not establish exclusion. 2SLS is a transparency diagnostic only "
+            "and is NOT interpreted causally."
+        ),
+    })
     return out
 
 
@@ -716,7 +860,7 @@ def run_iv(df, Xmat, firm, month):
         b, V = iv2sls_twoway(y, W, Zm, f, m)
         tsls[hname] = est_record("iv_2sls", b[0], np.sqrt(V[0, 0]), n)
 
-    return {
+    return apply_iv_honesty_gate({
         "status": "ESTIMATED",
         "instrument": "mean SUE of other same-sector firms announcing in the prior 30 calendar days",
         "n": int(n),
@@ -732,7 +876,7 @@ def run_iv(df, Xmat, firm, month):
             "Exclusion not rejected by the pre-registered test; note that a non-rejection is "
             "not proof of validity."
         ),
-    }
+    })
 
 
 def evaluate_verdict(insufficient, n_obs, n_firms, n_quarters, results, subper, robustness, iv):
@@ -756,13 +900,16 @@ def evaluate_verdict(insufficient, n_obs, n_firms, n_quarters, results, subper, 
     fe = robustness.get("within_month_demeaned")
     fe_ok = bool(fe) and any(
         (fe[h]["theta"] is not None and np.sign(fe[h]["theta"]) == primary_sign
-         and fe[h]["p_raw"] is not None and fe[h]["p_raw"] < FDR_Q)
+         and fe[h].get("q_bh_F3") is not None and fe[h]["q_bh_F3"] < FDR_Q)
         for h in HORIZONS if h in fe)
 
     checks = {
         "c1_bh_significant_in_ge2_horizons": len(sig_signed) >= 2,
         "c2_sign_consistent_across_horizons": len(set(signs)) == 1,
-        "c3_sign_consistent_across_subperiods": (len(set(sp_signs)) == 1) if sp_signs else False,
+        "c3_sign_consistent_across_subperiods": (
+            len(sp_signs) == len(SUBPERIODS) * len(HORIZONS)
+            and all(s == primary_sign for s in sp_signs)
+        ),
         "c4_survives_within_month_fe": fe_ok,
         "significant_horizons_signed": sig_signed,
         "significant_horizons_abs": sig_abs,
@@ -787,15 +934,83 @@ def evaluate_verdict(insufficient, n_obs, n_firms, n_quarters, results, subper, 
         reason = ("no BH-significant DML effect at any horizon for either treatment definition: "
                   "the raw SUE-vol association is accounted for by the observed confounder set")
 
+    checks["statistical_verdict_before_iv_cap"] = verdict
     causal_cap = None
-    if verdict in ("PASS", "CONDITIONAL_PASS") and iv.get("exclusion_restriction_violated", True):
-        causal_cap = ("CAPPED: no valid instrument, so this is a conditional-association result "
-                      "under unconfoundedness, not an identified causal effect.")
+    if not iv.get("instrument_valid", False):
+        causal_cap = ("CAPPED: no credible valid instrument, so every estimate is interpreted as "
+                      "a conditional association under unconfoundedness, never as a causal ATE.")
+        if verdict == "PASS":
+            verdict = "CONDITIONAL_PASS"
+            reason = ("The statistical PASS criteria were met, but the IV honesty gate caps the "
+                      "final verdict at CONDITIONAL_PASS because exclusion is not credible. "
+                      + reason)
     return verdict, reason, checks, causal_cap
 
 
+def _file_identity(path: Path) -> dict:
+    """Return a byte identity without inferring anything from mtime metadata."""
+    data = path.read_bytes()
+    try:
+        rel = path.resolve().relative_to(HERE.parents[1]).as_posix()
+    except ValueError:
+        rel = path.resolve().as_posix()
+    return {"path": rel, "sha256": hashlib.sha256(data).hexdigest(), "size_bytes": len(data)}
+
+
+def load_verified_checkpoint() -> dict:
+    """Load the immutable interim result from Git and revalidate all frozen data identities.
+
+    The final run overwrites ``K1738_results.json`` by design, so reading that path on a later
+    reproduction would make the continuation non-rerunnable. The exact interim bytes remain in the
+    verified checkpoint commit; the manifest pins both those bytes and every frozen panel/cache
+    input used by this continuation.
+    """
+    manifest = json.loads((HERE / "checkpoint_manifest.json").read_text(encoding="utf-8"))
+    if manifest.get("checkpoint_status") != "INCOMPLETE_NOT_FINAL":
+        raise AssertionError("checkpoint manifest is not the expected incomplete continuation base")
+
+    proc = subprocess.run(
+        ["git", "show", f"{CHECKPOINT_COMMIT}:{CHECKPOINT_RESULT_REPO_PATH}"],
+        cwd=HERE,
+        capture_output=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"cannot read checkpoint result blob from {CHECKPOINT_COMMIT}: "
+            + proc.stderr.decode("utf-8", errors="replace")[:300]
+        )
+    result_entry = next(
+        x for x in manifest["tracked_artifacts"] if x["path"] == "K1738_results.json"
+    )
+    if hashlib.sha256(proc.stdout).hexdigest() != result_entry["sha256"]:
+        raise AssertionError("checkpoint result blob sha256 does not match checkpoint_manifest.json")
+    if len(proc.stdout) != result_entry["size_bytes"]:
+        raise AssertionError("checkpoint result blob size does not match checkpoint_manifest.json")
+
+    frozen_entries = [
+        x for x in manifest["tracked_artifacts"] if x["path"] == "panel_k1738.parquet"
+    ] + manifest["local_cache_artifacts"]
+    for expected in frozen_entries:
+        actual = _file_identity(HERE / expected["path"])
+        if (actual["sha256"], actual["size_bytes"]) != (
+            expected["sha256"], expected["size_bytes"]
+        ):
+            raise AssertionError(f"frozen input identity mismatch: {expected['path']}")
+
+    checkpoint = json.loads(proc.stdout.decode("utf-8"))
+    if checkpoint.get("run_complete") is not False:
+        raise AssertionError("cached continuation requires the incomplete K1738 checkpoint")
+    completed = set(checkpoint.get("stages_completed", []))
+    if completed != {"naive_and_ols_controls", "instrument"}:
+        raise AssertionError(f"unexpected checkpoint stages: {sorted(completed)}")
+    if checkpoint.get("last_checkpoint") != "insurance-artifact-no-DML":
+        raise AssertionError("unexpected K1738 checkpoint identity label")
+    return checkpoint
+
+
 def build_payload(*, df, panel, results, fdr, subper, robustness, iv, verdict, reason, checks,
-                  causal_cap, xnames, n_obs, n_firms, n_quarters, coverage, t_start,
+                  causal_cap, xnames, n_obs, n_firms, n_quarters, coverage_audit, t_start,
                   stages_done, stage_note):
     code_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     try:
@@ -811,8 +1026,8 @@ def build_payload(*, df, panel, results, fdr, subper, robustness, iv, verdict, r
 
     return {
         "experiment_id": "K1738",
-        "title": ("Earnings surprise (SUE) and subsequent realized volatility: causal increment "
-                  "via DML (+ IV falsification)"),
+        "title": ("Earnings surprise (SUE) and subsequent realized volatility: conditional "
+                  "association via cross-fitted DML (+ invalid-IV diagnostic)"),
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "seed": SEED,
         "code_sha256": code_sha,
@@ -827,8 +1042,28 @@ def build_payload(*, df, panel, results, fdr, subper, robustness, iv, verdict, r
         "causal_claim_cap": causal_cap,
         "identification_stance": ("Conditional association under unconfoundedness. No credible "
                                   "instrument was found; see instrument_analysis."),
-        "question": ("Not 'does SUE predict vol' (a forecasting question) but 'does SUE carry a "
-                     "causal increment to realized vol after controlling for confounders'."),
+        "question": ("The pre-registered target question was whether SUE carries a causal increment "
+                     "after controls. Because no credible IV survives, the estimable result is the "
+                     "conditional association under unconfoundedness, not an identified ATE."),
+        "data_provenance": {
+            "execution_mode": (
+                "cached panel estimation plus frozen earnings-cache coverage audit "
+                "(--no-download); no network access"
+            ),
+            "checkpoint_base_commit": CHECKPOINT_COMMIT,
+            "estimation_input": _file_identity(HERE / "panel_k1738.parquet"),
+            "coverage_audit_input": _file_identity(CACHE / "earnings.parquet"),
+            "upstream_frozen_cache_identities": [
+                _file_identity(CACHE / name) for name in
+                ("earnings.parquet", "macro.parquet", "prices.parquet", "volumes.parquet")
+            ],
+            "earnings_source": (
+                "yfinance get_earnings_dates(limit=100), frozen current-snapshot EPS Estimate "
+                "and Reported EPS fields"
+            ),
+            "price_source": "yfinance adjusted daily closes and volumes, frozen cache",
+            "macro_source": "FRED VIXCLS, T10Y2Y and BAA10Y, frozen cache",
+        },
         "sample": {
             "n_firm_quarters": n_obs,
             "n_firms": n_firms,
@@ -836,13 +1071,14 @@ def build_payload(*, df, panel, results, fdr, subper, robustness, iv, verdict, r
             "date_range": [str(df["ann_date"].min().date()), str(df["ann_date"].max().date())],
             "n_announcement_months": int(df["ann_ym"].nunique()),
             "panel_rows_before_completeness_filter": int(len(panel)),
-            "sue_coverage_of_panel_rows": coverage,
+            "sue_coverage": coverage_audit,
             "universe_size": len(TICKERS),
             "tickers_with_usable_data": n_firms,
             "obs_per_sector": {str(k): int(v) for k, v in df["sector"].value_counts().items()},
         },
         "treatment_definition": {
-            "type": "analyst-based SUE (NOT a seasonal-random-walk proxy)",
+            "type": ("Yahoo analyst-estimate-based SUE proxy (current snapshot, non-vintage; "
+                     "NOT a seasonal-random-walk proxy)"),
             "formula": "(ReportedEPS - ConsensusEPSEstimate) / std(prior 8 announcement surprises)",
             "source": "yfinance get_earnings_dates(limit=100): EPS Estimate + Reported EPS",
             "continuous": True,
@@ -884,7 +1120,8 @@ def build_payload(*, df, panel, results, fdr, subper, robustness, iv, verdict, r
                                      "market-priced and unrevised."),
         },
         "method": {
-            "estimand": "ATE of SUE on log annualized realized volatility, partially linear model",
+            "estimand": ("partially linear conditional-association coefficient of SUE on log "
+                         "annualized realized volatility under unconfoundedness; not an identified ATE"),
             "outcome": "log annualized RV over trading days [r+1, r+H], H in {21,42,63}",
             "confounders": xnames,
             "dml": {
@@ -905,8 +1142,11 @@ def build_payload(*, df, panel, results, fdr, subper, robustness, iv, verdict, r
         "subperiods": subper,
         "subperiod_family": "F2: {3 horizons} x {3 sub-periods}, BH-corrected separately from F1",
         "robustness": robustness,
-        "robustness_note": ("Descriptive sensitivity checks, not confirmatory tests; not FDR "
-                            "family members. They can demote a verdict but cannot promote a NULL."),
+        "robustness_note": (
+            "The within-month block is confirmatory family F3 (three horizons, BH q<0.10) "
+            "because pre-registered criterion c4 uses it. Other sensitivity checks are "
+            "descriptive and cannot promote a NULL."
+        ),
         "instrument_analysis": iv,
         "prereg_checks": checks,
         "success_criteria_source": "README.md section 8, written before any estimate was inspected",
@@ -921,6 +1161,10 @@ def build_payload(*, df, panel, results, fdr, subper, robustness, iv, verdict, r
             "The artifact is rewritten after every stage, so an interrupted run still yields a "
             "coherent partial result. Unfinished pre-registered conditions evaluate to False, "
             "which can only weaken the verdict, never strengthen it.",
+            "The stage-2 continuation brief assumed a seasonal-random-walk fallback. Frozen "
+            "columns raw_surprise = eps_act - eps_est and the checkpoint identities prove that "
+            "the executed treatment is analyst-estimate based; the false brief assumption is "
+            "rejected rather than copied into the result label.",
         ],
         "limitations": [
             "Survivorship: universe is currently-listed firms; delisted firms absent. Expected "
@@ -932,6 +1176,12 @@ def build_payload(*, df, panel, results, fdr, subper, robustness, iv, verdict, r
             "drivers correlated with both SUE and future vol would still bias theta.",
             "At h=3m consecutive same-firm outcome windows are nearly adjacent; firm clustering "
             "absorbs the resulting serial dependence.",
+            "Cross-fitting holds out whole firms, but crossed firm-month panels cannot keep both "
+            "firm and announcement-month clusters disjoint with ordinary K-fold partitions. "
+            "Nuisance training may therefore share announcement months with held-out firms; "
+            "two-way clustered inference addresses score dependence but not this nuisance-fit "
+            "dependence. Treat the DML estimates as conditional associations and require a "
+            "multiway-cross-fit replication before any stronger identification claim.",
         ],
         "unresolved": ([f"stage not run within the job budget: {s}" for s in missing]
                        + (["Codex primary-path review not yet recorded"] if True else [])),
@@ -946,16 +1196,18 @@ def main() -> int:
     np.random.seed(SEED)
     t_start = time.time()
     panel_path = HERE / "panel_k1738.parquet"
+    earnings_path = CACHE / "earnings.parquet"
+    out_path = HERE / "K1738_results.json"
 
-    if args.no_download and panel_path.exists():
-        panel = pd.read_parquet(panel_path)
-        print(f"[cache] panel {panel.shape}")
-    else:
-        panel = build_panel(download_all())
-        if panel.empty:
-            raise SystemExit("empty panel")
-        panel.to_parquet(panel_path)
-        print(f"[panel] {panel.shape}")
+    if not args.no_download:
+        raise SystemExit("K1738 cached continuation requires --no-download")
+    checkpoint = load_verified_checkpoint()
+    print(f"[checkpoint] verified frozen base {CHECKPOINT_COMMIT}")
+
+    if not panel_path.exists():
+        raise FileNotFoundError(f"frozen panel missing: {panel_path}")
+    panel = pd.read_parquet(panel_path)
+    print(f"[cache] panel {panel.shape}")
 
     # ---- common estimation sample: complete confounders + all three horizons -----------------
     need = CONFOUNDERS + [f"y_{h}" for h in HORIZONS] + ["sue", "abs_sue"]
@@ -964,11 +1216,16 @@ def main() -> int:
 
     n_obs, n_firms = len(df), df["ticker"].nunique()
     n_quarters = df["ann_date"].dt.to_period("Q").nunique()
-    coverage = float(len(panel.dropna(subset=["sue_raw"])) / max(len(panel), 1))
+    coverage_audit = audit_sue_coverage(panel, earnings_path)
     print(f"[sample] n={n_obs} firms={n_firms} quarters={n_quarters} "
           f"range={df['ann_date'].min().date()}..{df['ann_date'].max().date()}")
 
-    insufficient = (n_obs < 500) or (n_firms < 30) or (n_quarters < 20)
+    insufficient = (
+        (n_obs < 500)
+        or (n_firms < 30)
+        or (n_quarters < 20)
+        or (coverage_audit["coverage"] < 0.30)
+    )
 
     Xmat, xnames = design_matrix(df)
     firm, month = df["ticker"].values, df["ann_ym"].values
@@ -977,9 +1234,15 @@ def main() -> int:
     results: dict = {}
     if not insufficient:
         print("[est] primary: signed SUE")
-        results["signed_sue"] = run_estimators(df, "sue", "y_", Xmat, firm, month, "signed", cache)
+        results["signed_sue"] = run_estimators(
+            df, "sue", "y_", Xmat, firm, month, "signed", cache,
+            checkpoint_horizons=checkpoint["estimates"]["signed_sue"],
+        )
         print("[est] secondary: |SUE|")
-        results["abs_sue"] = run_estimators(df, "abs_sue", "y_", Xmat, firm, month, "abs", cache)
+        results["abs_sue"] = run_estimators(
+            df, "abs_sue", "y_", Xmat, firm, month, "abs", cache,
+            checkpoint_horizons=checkpoint["estimates"]["abs_sue"],
+        )
 
     # ---- FDR (family F1: 3 horizons x 2 treatment definitions, per estimator) ----------------
     fdr = {}
@@ -1011,9 +1274,10 @@ def main() -> int:
     # artifact that is honest about what is missing is collectable; a missing one is a failed job.
     subper: dict = {}
     robustness: dict = {}
-    iv: dict = {"status": "NOT_RUN"}
-    stages_done: list[str] = ["primary"] if results else []
-    out_path = HERE / "K1738_results.json"
+    iv: dict = apply_iv_honesty_gate(checkpoint["instrument_analysis"])
+    stages_done: list[str] = ["naive_and_ols_controls", "instrument"]
+    if results:
+        stages_done.append("primary")
 
     def assemble(stage_note: str) -> dict:
         verdict, reason, checks, causal_cap = evaluate_verdict(
@@ -1022,19 +1286,26 @@ def main() -> int:
             df=df, panel=panel, results=results, fdr=fdr, subper=subper, robustness=robustness,
             iv=iv, verdict=verdict, reason=reason, checks=checks, causal_cap=causal_cap,
             xnames=xnames, n_obs=n_obs, n_firms=n_firms, n_quarters=n_quarters,
-            coverage=coverage, t_start=t_start, stages_done=stages_done,
+            coverage_audit=coverage_audit, t_start=t_start, stages_done=stages_done,
             stage_note=stage_note)
-        out_path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+        results_path, _ = finalize_experiment(
+            results=payload,
+            entrypoint=__file__,
+            canonical_result="K1738_results.json",
+            exp_dir=HERE,
+            inputs=[panel_path, earnings_path],
+            outputs=["README.md"],
+            seeds=[("numpy", SEED), ("dml_split_base", SEED)],
+            started_at=t_start,
+            args=["--no-download"],
+            network="deny",
+        )
         print(f"[checkpoint] {stage_note}: verdict={verdict}")
-        return payload
+        return json.loads(results_path.read_text(encoding="utf-8"))
 
-    assemble("primary+fdr")
-
-    # ---- IV (cheap, and it decides the causal-claim cap) ---------------------------------------
-    print("[est] instrument")
-    iv = run_iv(df, Xmat, firm, month) if not insufficient else {"status": "SKIPPED_INSUFFICIENT_DATA"}
-    stages_done.append("instrument")
-    assemble("instrument")
+    # The closed-form and IV estimates are reused from the verified checkpoint. Only the IV label
+    # is re-derived from its recorded tests plus the substantive exclusion honesty gate.
+    assemble("primary+fdr+cached-instrument")
 
     # ---- within-month demeaning FIRST: pre-registered criterion c4 depends on it ----------------
     if results:
@@ -1048,6 +1319,11 @@ def main() -> int:
                         y_key=f"yfe_{hname}", d_key="sue_fe")
             rob_fe[hname] = est_record("dml", r["theta"], r["se"], n_obs)
         robustness["within_month_demeaned"] = rob_fe
+        fe_keys = list(HORIZONS)
+        fe_rej, fe_adj = bh_fdr([rob_fe[h]["p_raw"] for h in fe_keys])
+        for i, h in enumerate(fe_keys):
+            rob_fe[h]["q_bh_F3"] = float(fe_adj[i]) if np.isfinite(fe_adj[i]) else None
+            rob_fe[h]["significant_bh_F3"] = bool(fe_rej[i])
         stages_done.append("robustness:within_month_demeaned")
         assemble("robustness:within_month_demeaned")
 
@@ -1103,6 +1379,14 @@ def main() -> int:
             assemble(f"robustness:{spec_name}")
 
     payload = assemble("complete")
+    render_proc = subprocess.run(
+        [sys.executable, str(HERE / "render_readme_results.py")],
+        cwd=HERE,
+        check=False,
+        text=True,
+    )
+    if render_proc.returncode != 0:
+        raise RuntimeError(f"README renderer failed with exit {render_proc.returncode}")
     print(f"\n[done] verdict={payload['verdict']} :: {payload['verdict_reason']}")
     print(f"[done] -> {out_path}  ({time.time() - t_start:.0f}s)")
     return 0

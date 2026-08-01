@@ -36,7 +36,8 @@ model
 
   `log RV_{i,q,h} = θ_h · SUE_{i,q} + g(X_{i,q}) + ε_{i,q}`
 
-θ_h is reported as the change in log RV per 1 unit (≈ 1 SD) of SUE, and is also translated into a
+θ_h is reported as the change in log RV per treatment unit on the firm historical-surprise scale
+(not one pooled-sample SD), and is also translated into a
 percentage change in volatility (`exp(θ) − 1`).
 
 ### Identification stance (declared up front)
@@ -188,7 +189,8 @@ label window begins at `r+1 ≥ t0+1`, so the feature/label gap is ≥ 2 trading
 
 ## 5. Estimators
 
-All four are run on the identical estimation sample, with identical two-way clustered SE.
+Naive OLS, controlled OLS, and DML use the identical common sample and two-way clustered SE. The IV
+diagnostic is restricted to rows with prior-sector-peer coverage and therefore reports its own n.
 
 1. **Naive** — OLS of `Y_h` on `D` and a constant. No controls. *This is the number the "SUE predicts
    vol" framing implicitly reports.*
@@ -206,14 +208,20 @@ All four are run on the identical estimation sample, with identical two-way clus
      `σ̂²_med = median_s{ σ̂²_s + (θ̂_s − θ̂_med)² }`, so split uncertainty is included rather than hidden.
    - Cluster-robust variance from the influence function
      `ψ_i = ṽ_i (ỹ_i − θ̂ ṽ_i) / mean(ṽ²)`, two-way clustered as in §3.4.
+   - Cross-fitting holds out whole firms. Because the panel is crossed, ordinary K-fold partitions
+     cannot simultaneously keep both firms and announcement months disjoint: nuisance-training rows
+     can share a month with held-out firms. Two-way clustering handles score dependence but does not
+     turn that nuisance fit into a multiway cross-fit. This is an explicit limitation, and the result
+     remains a conditional association pending a multiway-cross-fit replication.
 4. **IV / 2SLS** — see §6. Reported for transparency; interpreted causally **only** if it passes the
    pre-registered exclusion test, which we expect it not to.
 
 The **naive vs OLS-controls vs DML** contrast is the primary deliverable: it shows how much of the
 raw association is confounding.
 
-**Common estimation sample.** All estimators, all horizons and both treatment definitions run on one
-identical sample: rows with complete confounders **and** all three outcome horizons available. Letting
+**Common estimation sample.** The three primary contrast estimators, all horizons and both treatment
+definitions run on one identical sample: rows with complete confounders **and** all three outcome
+horizons available. Letting
 each horizon keep its own maximal sample would confound "the effect changes with horizon" with "the
 sample changes with horizon", which is precisely the comparison this experiment exists to make.
 
@@ -331,8 +339,9 @@ pre-registered.
 
 ## 10. Artifacts
 
-- `K1738.py` — the single reproducible script (seed 42). Downloads, builds the panel, estimates,
-  writes results.
+- `K1738.py` — the bounded cached-continuation entrypoint (seed 42). It requires `--no-download`,
+  verifies the frozen checkpoint/panel identities, estimates only the missing DML stages, and writes
+  the final results plus runtime `reproduce_spec.json`.
 - `K1738_results.json` — byte-traceable output. **Every number in this README's results discussion and
   in the return summary is read from this file; none is typed by hand.**
 - `test_k1738.py` — lookahead guards, construction invariants, estimator sanity checks.
@@ -347,39 +356,39 @@ See `K1738_results.json`; the `verdict` field there is authoritative. Section 12
 
 ## 12. Results as run (generated from `K1738_results.json` — no figure typed by hand)
 
-**Verdict: `CONDITIONAL_PASS`** — INTERIM ARTIFACT: the DML block did not finish inside the job budget on a heavily contended machine. Only the closed-form estimators (naive OLS, OLS+controls) and the instrument analysis are computed here. The pre-registered verdict in README section 8 is defined on the DML estimate and therefore is NOT yet established; this verdict reflects the OLS-with-controls family only and must not be read as the DML result.
+**Verdict: `CONDITIONAL_PASS`** — BH-significant at signed=['h1m', 'h2m'] abs=[] but failed pre-registered condition(s): ['c3_sign_consistent_across_subperiods']
 
-> CAPPED: no valid instrument AND the DML estimator did not run, so nothing here supports a causal claim; these are covariate-adjusted associations.
+> CAPPED: no credible valid instrument, so every estimate is interpreted as a conditional association under unconfoundedness, never as a causal ATE.
 
-Sample: **24,519 firm-quarters**, 292 firms, 97 quarters, 2001-08-14 to 2026-04-30, 279 distinct announcement months. SUE coverage of panel rows: 100.0%.
+Sample: **24,519 firm-quarters**, 292 firms, 97 quarters, 2001-08-14 to 2026-04-30, 279 distinct announcement months. Constructible-SUE coverage of frozen announcement records in-span: 92.3% (24,884/26,954).
 
-Treatment: analyst-based SUE (NOT a seasonal-random-walk proxy) — `(ReportedEPS - ConsensusEPSEstimate) / std(prior 8 announcement surprises)`.
-
-⚠️ Partial run. Stages completed: naive_and_ols_controls, instrument. Missing: primary, robustness:within_month_demeaned, subperiods, robustness:inclusive_window, robustness:level_rv_outcome, robustness:lasso_nuisance. Unfinished pre-registered conditions evaluate to False, so the verdict cannot be overstated.
+Treatment: Yahoo analyst-estimate-based SUE proxy (current snapshot, non-vintage; NOT a seasonal-random-walk proxy) — `(ReportedEPS - ConsensusEPSEstimate) / std(prior 8 announcement surprises)`.
 
 ### 12.1 The headline contrast: naive vs OLS-controls vs DML
 
-Effect on **log** realized vol per 1 unit of SUE (≈1 SD). `q` is Benjamini–Hochberg-adjusted within the 6-hypothesis family F1.
+Effect on **log** realized vol per 1 treatment unit. A SUE unit is the firm's historical-surprise scale; it is not the pooled estimation-sample SD. `q` is Benjamini–Hochberg-adjusted within the 6-hypothesis family F1.
 
 **Signed SUE (primary)**
 
-| horizon | naive OLS | OLS + controls | DML | DML 95% CI | raw p | BH q | vol change / 1 SD |
+| horizon | naive OLS | OLS + controls | DML | DML 95% CI | raw p | BH q | vol change / treatment unit |
 |---|---|---|---|---|---|---|---|
-| 1m | -0.0146 | -0.0075 | **n/a** | [n/a, n/a] | n/a | n/a | n/a |
-| 2m | -0.0136 | -0.0074 | **n/a** | [n/a, n/a] | n/a | n/a | n/a |
-| 3m | -0.0101 | -0.0060 | **n/a** | [n/a, n/a] | n/a | n/a | n/a |
+| 1m | -0.0146 | -0.0075 | **-0.0042** | [-0.0071, -0.0014] | 0.003653 | 0.01096 | -0.42% |
+| 2m | -0.0136 | -0.0074 | **-0.0040** | [-0.0065, -0.0015] | 0.001809 | 0.01085 | -0.40% |
+| 3m | -0.0101 | -0.0060 | **-0.0023** | [-0.0047, +0.0001] | 0.066 | 0.132 | -0.23% |
 
-Share of the naive association absorbed by the controls: 1m 49%, 2m 45%, 3m 41%.
+Share of the naive association absorbed by linear controls: 1m 49%, 2m 45%, 3m 41%.
+Share absorbed by cross-fitted DML nuisance adjustment: 1m 71%, 2m 70%, 3m 78%.
 
 **|SUE| (secondary)**
 
-| horizon | naive OLS | OLS + controls | DML | DML 95% CI | raw p | BH q | vol change / 1 SD |
+| horizon | naive OLS | OLS + controls | DML | DML 95% CI | raw p | BH q | vol change / treatment unit |
 |---|---|---|---|---|---|---|---|
-| 1m | +0.0084 | +0.0010 | **n/a** | [n/a, n/a] | n/a | n/a | n/a |
-| 2m | +0.0080 | -0.0003 | **n/a** | [n/a, n/a] | n/a | n/a | n/a |
-| 3m | +0.0097 | +0.0005 | **n/a** | [n/a, n/a] | n/a | n/a | n/a |
+| 1m | +0.0084 | +0.0010 | **+0.0024** | [-0.0011, +0.0058] | 0.1758 | 0.211 | +0.24% |
+| 2m | +0.0080 | -0.0003 | **+0.0011** | [-0.0017, +0.0040] | 0.4392 | 0.4392 | +0.11% |
+| 3m | +0.0097 | +0.0005 | **+0.0025** | [-0.0004, +0.0054] | 0.08957 | 0.1344 | +0.25% |
 
-Share of the naive association absorbed by the controls: 1m 88%, 2m 104%, 3m 95%.
+Share of the naive association absorbed by linear controls: 1m 88%, 2m 104%, 3m 95%.
+Share absorbed by cross-fitted DML nuisance adjustment: 1m 72%, 2m 86%, 3m 74%.
 
 ### 12.2 Multiple testing (family F1 = 3 horizons × 2 treatment definitions)
 
@@ -387,6 +396,26 @@ Share of the naive association absorbed by the controls: 1m 88%, 2m 104%, 3m 95%
 |---|---|---|
 | naive_ols | 4/6 | 6/6 |
 | ols_controls | 3/6 | 3/6 |
+| dml | 2/6 | 2/6 |
+
+### 12.3 Sub-period stability (signed SUE, DML; family F2)
+
+Each cell is θ (BH q within the 9-cell F2 family).
+
+| sub-period | n | 1m | 2m | 3m |
+|---|---|---|---|---|
+| P1_2002_2009 | 6,124 | +0.0005 (q=0.8433) | -0.0004 (q=0.8433) | -0.0011 (q=0.7634) |
+| P2_2010_2017 | 8,661 | -0.0071 (q=0.01855) | -0.0062 (q=0.01855) | -0.0040 (q=0.08695) |
+| P3_2018_2026 | 9,732 | -0.0044 (q=0.04075) | -0.0043 (q=0.03916) | -0.0020 (q=0.3732) |
+
+### 12.4 Robustness (within-month = confirmatory F3; others descriptive)
+
+| spec | 1m | 2m | 3m |
+|---|---|---|---|
+| within_month_demeaned | -0.0034 (q=0.01825) | -0.0033 (q=0.01425) | -0.0018 (q=0.1273) |
+| inclusive_window | -0.0032 | -0.0037 | -0.0029 |
+| level_rv_outcome | -0.0012 | -0.0014 | -0.0008 |
+| lasso_nuisance | -0.0087 | -0.0074 | -0.0058 |
 
 ### 12.5 Instrument
 
@@ -398,9 +427,9 @@ Candidate instrument: mean SUE of other same-sector firms announcing in the prio
   - h2m: coefficient -0.0107, t = -1.63, p = 0.1021 → does not reject exclusion
   - h3m: coefficient -0.0077, t = -1.20, p = 0.2287 → does not reject exclusion
 
-**Instrument valid: `True`.** Exclusion not rejected by the pre-registered test; note that a non-rejection is not proof of validity.
+**Instrument valid: `False`.** INVALID -- the candidate has plausible direct industry-news pathways to the outcome. The pre-registered direct-effect diagnostic is reported unchanged, but its non-rejection does not establish exclusion. 2SLS is a transparency diagnostic only and is NOT interpreted causally.
 
-2SLS estimates (diagnostic only unless the instrument is valid):
+2SLS estimates (invalid-IV transparency diagnostic only; never causal):
 
 | horizon | 2SLS | 95% CI | raw p |
 |---|---|---|---|
@@ -408,4 +437,16 @@ Candidate instrument: mean SUE of other same-sector firms announcing in the prio
 | 2m | -0.0798 | [-0.1607, +0.0011] | 0.05334 |
 | 3m | -0.0582 | [-0.1382, +0.0219] | 0.1546 |
 
-_Generated from `K1738_results.json` (code sha256 `2057c5e49b0fc939…`, runtime 1s, last checkpoint `insurance-artifact-no-DML`)._
+### 12.6 Pre-registered criteria, applied verbatim
+
+- `c1_bh_significant_in_ge2_horizons`: **True**
+- `c2_sign_consistent_across_horizons`: **True**
+- `c3_sign_consistent_across_subperiods`: **False**
+- `c4_survives_within_month_fe`: **True**
+- `significant_horizons_signed`: **['h1m', 'h2m']**
+- `significant_horizons_abs`: **[]**
+- `subperiods_evaluated`: **True**
+- `within_month_fe_evaluated`: **True**
+- `statistical_verdict_before_iv_cap`: **CONDITIONAL_PASS**
+
+_Generated from `K1738_results.json` (code sha256 `a1add225764e563a…`, runtime 458s, last checkpoint `complete`)._

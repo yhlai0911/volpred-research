@@ -34,7 +34,10 @@ def main() -> int:
     L.append(f"Sample: **{s['n_firm_quarters']:,} firm-quarters**, {s['n_firms']} firms, "
              f"{s['n_quarters']} quarters, {s['date_range'][0]} to {s['date_range'][1]}, "
              f"{s['n_announcement_months']} distinct announcement months. "
-             f"SUE coverage of panel rows: {s['sue_coverage_of_panel_rows']:.1%}.")
+             f"Constructible-SUE coverage of frozen announcement records in-span: "
+             f"{s['sue_coverage']['coverage']:.1%} "
+             f"({s['sue_coverage']['n_sue_constructible']:,}/"
+             f"{s['sue_coverage']['n_announcement_records']:,}).")
     L.append("")
     L.append(f"Treatment: {r['treatment_definition']['type']} — "
              f"`{r['treatment_definition']['formula']}`.")
@@ -49,7 +52,8 @@ def main() -> int:
     # ---- headline contrast --------------------------------------------------------------------
     L.append("### 12.1 The headline contrast: naive vs OLS-controls vs DML")
     L.append("")
-    L.append("Effect on **log** realized vol per 1 unit of SUE (≈1 SD). "
+    L.append("Effect on **log** realized vol per 1 treatment unit. A SUE unit is the firm's "
+             "historical-surprise scale; it is not the pooled estimation-sample SD. "
              "`q` is Benjamini–Hochberg-adjusted within the 6-hypothesis family F1.")
     L.append("")
     for tname, tlabel in (("signed_sue", "Signed SUE (primary)"), ("abs_sue", "|SUE| (secondary)")):
@@ -57,7 +61,7 @@ def main() -> int:
             continue
         L.append(f"**{tlabel}**")
         L.append("")
-        L.append("| horizon | naive OLS | OLS + controls | DML | DML 95% CI | raw p | BH q | vol change / 1 SD |")
+        L.append("| horizon | naive OLS | OLS + controls | DML | DML 95% CI | raw p | BH q | vol change / treatment unit |")
         L.append("|---|---|---|---|---|---|---|---|")
         for h in ("h1m", "h2m", "h3m"):
             c = r["estimates"][tname][h]
@@ -67,13 +71,23 @@ def main() -> int:
                 f"| {h[1]}m | {fmt(c['naive_ols']['theta'])} | {fmt(c['ols_controls']['theta'])} "
                 f"| **{fmt(d['theta'])}** | [{fmt(ci[0])}, {fmt(ci[1])}] "
                 f"| {g(d['p_raw'])} | {g(d.get('q_bh'))} "
-                f"| {('%+.2f%%' % d['pct_vol_change_per_1sd']) if d.get('pct_vol_change_per_1sd') is not None else 'n/a'} |"
+                f"| {('%+.2f%%' % d['pct_vol_change_per_treatment_unit']) if d.get('pct_vol_change_per_treatment_unit') is not None else 'n/a'} |"
             )
         L.append("")
-        absorbed = [r["estimates"][tname][h].get("confounding_absorbed_pct") for h in ("h1m", "h2m", "h3m")]
-        if any(a is not None for a in absorbed):
-            L.append("Share of the naive association absorbed by the controls: "
-                     + ", ".join(f"{h[1]}m {a:.0f}%" for h, a in zip(("h1m", "h2m", "h3m"), absorbed)
+        ols_absorbed = [
+            r["estimates"][tname][h].get("confounding_absorbed_by_ols_controls_pct")
+            for h in ("h1m", "h2m", "h3m")
+        ]
+        dml_absorbed = [
+            r["estimates"][tname][h].get("confounding_absorbed_by_dml_pct")
+            for h in ("h1m", "h2m", "h3m")
+        ]
+        if any(a is not None for a in ols_absorbed):
+            L.append("Share of the naive association absorbed by linear controls: "
+                     + ", ".join(f"{h[1]}m {a:.0f}%" for h, a in zip(("h1m", "h2m", "h3m"), ols_absorbed)
+                                 if a is not None) + ".")
+            L.append("Share absorbed by cross-fitted DML nuisance adjustment: "
+                     + ", ".join(f"{h[1]}m {a:.0f}%" for h, a in zip(("h1m", "h2m", "h3m"), dml_absorbed)
                                  if a is not None) + ".")
             L.append("")
 
@@ -92,24 +106,36 @@ def main() -> int:
     if r.get("subperiods"):
         L.append("### 12.3 Sub-period stability (signed SUE, DML; family F2)")
         L.append("")
+        L.append("Each cell is θ (BH q within the 9-cell F2 family).")
+        L.append("")
         L.append("| sub-period | n | 1m | 2m | 3m |")
         L.append("|---|---|---|---|---|")
         for p, blk in r["subperiods"].items():
             if blk.get("status") == "TOO_SMALL":
                 L.append(f"| {p} | {blk['n']} | — | — | — |")
                 continue
-            cells = [fmt(blk[h]["theta"]) if h in blk else "n/a" for h in ("h1m", "h2m", "h3m")]
+            cells = [
+                f"{fmt(blk[h]['theta'])} (q={g(blk[h].get('q_bh_F2'))})" if h in blk else "n/a"
+                for h in ("h1m", "h2m", "h3m")
+            ]
             L.append(f"| {p} | {blk['n']:,} | {cells[0]} | {cells[1]} | {cells[2]} |")
         L.append("")
 
     # ---- robustness ---------------------------------------------------------------------------
     if r.get("robustness"):
-        L.append("### 12.4 Robustness (descriptive; not FDR family members)")
+        L.append("### 12.4 Robustness (within-month = confirmatory F3; others descriptive)")
         L.append("")
         L.append("| spec | 1m | 2m | 3m |")
         L.append("|---|---|---|---|")
         for spec, blk in r["robustness"].items():
-            cells = [fmt(blk[h]["theta"]) if h in blk else "n/a" for h in ("h1m", "h2m", "h3m")]
+            cells = [
+                (
+                    f"{fmt(blk[h]['theta'])} (q={g(blk[h].get('q_bh_F3'))})"
+                    if spec == "within_month_demeaned" and h in blk
+                    else fmt(blk[h]["theta"]) if h in blk else "n/a"
+                )
+                for h in ("h1m", "h2m", "h3m")
+            ]
             L.append(f"| {spec} | {cells[0]} | {cells[1]} | {cells[2]} |")
         L.append("")
 
@@ -134,7 +160,7 @@ def main() -> int:
         L.append(f"**Instrument valid: `{iv['instrument_valid']}`.** {iv['interpretation']}")
         L.append("")
         if iv.get("tsls"):
-            L.append("2SLS estimates (diagnostic only unless the instrument is valid):")
+            L.append("2SLS estimates (invalid-IV transparency diagnostic only; never causal):")
             L.append("")
             L.append("| horizon | 2SLS | 95% CI | raw p |")
             L.append("|---|---|---|---|")

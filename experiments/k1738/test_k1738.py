@@ -136,6 +136,15 @@ def test_treatment_is_winsorized(panel):
     assert (panel["abs_sue"] >= 0).all()
 
 
+def test_treatment_proxy_matches_frozen_analyst_estimate_fields(panel, results):
+    """The frozen bytes are analyst-estimate based, not a seasonal-random-walk proxy."""
+    assert np.allclose(panel["raw_surprise"], panel["eps_act"] - panel["eps_est"])
+    assert np.allclose(panel["sue_raw"], panel["raw_surprise"] / panel["sigma_hat"])
+    label = results["treatment_definition"]["type"].lower()
+    assert "analyst-estimate-based" in label
+    assert "not a seasonal-random-walk" in label
+
+
 def test_sigma_hat_strictly_positive(panel):
     assert (panel["sigma_hat"].dropna() > 0).all()
 
@@ -291,6 +300,16 @@ def test_results_sample_meets_declared_thresholds(results):
     assert s["n_firm_quarters"] >= 500
     assert s["n_firms"] >= 30
     assert s["n_quarters"] >= 20
+    coverage = s["sue_coverage"]
+    assert coverage["n_announcement_records"] > coverage["n_sue_constructible"] > 0
+    assert coverage["coverage"] >= 0.30
+
+
+def test_effect_size_labels_are_per_treatment_unit(results):
+    blob = json.dumps(results)
+    assert "pct_vol_change_per_1sd" not in blob
+    assert "pct_vol_change_per_treatment_unit" in blob
+    assert not np.isclose(results["treatment_definition"]["descriptives"]["std"], 1.0)
 
 
 def test_every_estimate_reports_uncertainty(results):
@@ -322,6 +341,19 @@ def test_fdr_correction_present_and_not_looser_than_raw(results):
         assert blk["n_significant_raw"] <= blk["m_hypotheses"]
 
 
+def test_within_month_c4_uses_bh_q(results):
+    fe = results["robustness"]["within_month_demeaned"]
+    for h in K.HORIZONS:
+        assert fe[h]["q_bh_F3"] >= fe[h]["p_raw"] - 1e-12
+        assert fe[h]["significant_bh_F3"] == (fe[h]["q_bh_F3"] < K.FDR_Q)
+    primary_sign = np.sign(results["estimates"]["signed_sue"]["h1m"]["dml"]["theta"])
+    expected = any(
+        np.sign(fe[h]["theta"]) == primary_sign and fe[h]["q_bh_F3"] < K.FDR_Q
+        for h in K.HORIZONS
+    )
+    assert results["prereg_checks"]["c4_survives_within_month_fe"] is expected
+
+
 def test_iv_verdict_is_not_overclaimed(results):
     iv = results["instrument_analysis"]
     if iv.get("status") != "ESTIMATED":
@@ -329,14 +361,21 @@ def test_iv_verdict_is_not_overclaimed(results):
     if iv["exclusion_restriction_violated"]:
         assert iv["instrument_valid"] is False
         assert "NOT interpreted causally" in iv["interpretation"]
+    assert iv["instrument_valid"] is False
+    assert iv["exclusion_restriction_credible"] is False
+    assert iv["invalid_reasons"]
+    assert "non-rejection" in iv["interpretation"]
+    assert "NOT interpreted causally" in iv["interpretation"]
 
 
 def test_causal_claim_is_capped_without_a_valid_instrument(results):
     iv = results["instrument_analysis"]
-    if results["verdict"] == "PASS" and iv.get("exclusion_restriction_violated", True):
+    if not iv.get("instrument_valid", False):
         assert results["causal_claim_cap"], \
-            "a PASS without a valid instrument must carry an explicit causal-claim cap"
+            "every conclusion without a valid instrument must carry an explicit causal-claim cap"
+        assert "never as a causal ATE" in results["causal_claim_cap"]
     assert "unconfoundedness" in results["identification_stance"].lower()
+    assert "not an identified ate" in results["method"]["estimand"].lower()
 
 
 def test_code_sha_matches_the_script_on_disk(results):
@@ -344,6 +383,51 @@ def test_code_sha_matches_the_script_on_disk(results):
     actual = hashlib.sha256((HERE / "K1738.py").read_bytes()).hexdigest()
     assert actual == results["code_sha256"], \
         "K1738.py changed after results were written; re-run before certifying"
+    assert actual == results["code_trace"]["sha256"]
+    assert (HERE / "K1738.py").stat().st_size == results["code_trace"]["size_bytes"]
+
+
+def test_final_runtime_artifact_and_spec_are_complete(results):
+    import hashlib
+
+    assert results["run_complete"] is True
+    assert results["stages_missing"] == []
+    expected = {
+        "naive_and_ols_controls", "instrument", "primary",
+        "robustness:within_month_demeaned", "subperiods",
+        "robustness:inclusive_window", "robustness:level_rv_outcome",
+        "robustness:lasso_nuisance",
+    }
+    assert expected.issubset(set(results["stages_completed"]))
+    assert results["last_checkpoint"] == "complete"
+
+    spec = json.loads((HERE / "reproduce_spec.json").read_text(encoding="utf-8"))
+    result_bytes = RESULTS_PATH.read_bytes()
+    ident = spec["canonical_result_identity"]
+    assert ident["path"] == "K1738_results.json"
+    assert ident["sha256"] == hashlib.sha256(result_bytes).hexdigest()
+    assert ident["size_bytes"] == len(result_bytes)
+    assert spec["entrypoint"]["sha256"] == results["code_trace"]["sha256"]
+    assert spec["entrypoint"]["size_bytes"] == results["code_trace"]["size_bytes"]
+    assert spec["entrypoint"]["args"] == ["--no-download"]
+    assert spec["network"] == "deny"
+    assert {p["path"] for p in spec["inputs"]} == {
+        "experiments/k1738/panel_k1738.parquet",
+        "experiments/k1738/cache/earnings.parquet",
+    }
+
+
+def test_subperiod_f2_covers_all_nine_declared_cells(results):
+    cells = []
+    for pname, block in results["subperiods"].items():
+        assert block.get("status") != "TOO_SMALL", f"{pname} unexpectedly too small"
+        for h in K.HORIZONS:
+            cell = block[h]
+            assert cell["p_raw"] is not None
+            assert cell["q_bh_F2"] is not None
+            assert cell["q_bh_F2"] >= cell["p_raw"] - 1e-12
+            cells.append(cell)
+    assert len(cells) == 9
 
 
 def test_resid_cache_returns_identical_residuals_and_catches_collisions():
