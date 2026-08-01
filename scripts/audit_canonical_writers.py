@@ -132,6 +132,9 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "src/volpred/ops/alert_remediation.py:_close_cleared_task": {
         "open-write": 1,
     },
+    "src/volpred/ops/alert_remediation.py:_fail_expired_machine_repair": {
+        "open-write": 1,
+    },
     "src/volpred/ops/alert_remediation.py:_sweep_cleared_ordinary_tasks": {
         "open-write": 1,
     },
