@@ -39,7 +39,7 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1741",
   "source_task_link": {
     "state": "linked",
@@ -59,10 +59,10 @@
   },
   "claimed_by_pid_start_wall": "Sun Aug  2 03:02:16 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "K1741",
-    "settled_at": "2026-08-01T19:02:32Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-08-01T20:18:35Z"
   },
   "quota_requeues": 11,
   "requeue_history": [
@@ -146,5 +146,7 @@
   ],
   "not_before": "2026-08-01T18:46:24.484843+00:00",
   "attempt_status": "quota_exhausted",
-  "quota_reset_at": null
+  "quota_reset_at": null,
+  "followup_dispatched_at": "2026-08-01T20:18:35Z",
+  "followup_next_task_id": "triage_K1741_zero_output_20260802"
 }

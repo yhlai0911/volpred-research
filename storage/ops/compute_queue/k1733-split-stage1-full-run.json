@@ -24,7 +24,7 @@
     "task_type": "platform_ops",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1733",
   "source_task_link": {
     "state": "linked",
@@ -46,13 +46,15 @@
   },
   "claimed_by_pid_start_wall": "Thu Jul 30 08:30:30 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "K1733",
-    "settled_at": "2026-07-30T00:33:51Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-08-01T20:18:33Z"
   },
   "experiment_gate": {
     "status": "passed",
     "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9189c746-k1733/experiments/k1733"
-  }
+  },
+  "followup_dispatched_at": "2026-08-01T20:18:33Z",
+  "followup_next_task_id": "collect_K1733_20260802"
 }
