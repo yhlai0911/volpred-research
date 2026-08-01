@@ -869,6 +869,16 @@
      "at": "2026-08-01T11:40:50.531421+00:00",
      "instance_key": "30697515601:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T12:10:39.050131+00:00",
+     "instance_key": "30698498939:1",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T12:30:59.116853+00:00",
+     "instance_key": "30699177712:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -949,14 +959,26 @@
      "first_seen_at": "2026-08-01T11:40:50.531421+00:00",
      "key": "30697515601:1",
      "last_seen_at": "2026-08-01T11:40:50.531421+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-01T12:10:39.050131+00:00",
+     "key": "30698498939:1",
+     "last_seen_at": "2026-08-01T12:10:39.050131+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-01T12:30:59.116853+00:00",
+     "key": "30699177712:1",
+     "last_seen_at": "2026-08-01T12:30:59.116853+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-01T11:39:00.5525433Z E AssertionError: machine_self incidents must not ask broken machinery to self-repair",
-   "last_seen_at": "2026-08-01T11:40:50.531421+00:00",
+   "last_breach_detail": "2026-08-01T12:28:38.1734775Z E AssertionError: machine_self incidents must not ask broken machinery to self-repair",
+   "last_seen_at": "2026-08-01T12:30:59.116853+00:00",
    "notified_at": null,
-   "occurrence_count": 13,
+   "occurrence_count": 15,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2224,7 +2246,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-01T12:07:52.442858+00:00"
+     "last_seen_at": "2026-08-01T13:07:54.473783+00:00"
     },
     {
      "cleared_at": null,
@@ -2286,9 +2308,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-08-01T12:07:52.442858+00:00",
+   "last_seen_at": "2026-08-01T13:07:54.473783+00:00",
    "notified_at": null,
-   "occurrence_count": 7701,
+   "occurrence_count": 7758,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3512,6 +3534,6 @@
    }
   }
  },
- "updated_at": "2026-08-01T12:08:05.042847+00:00",
+ "updated_at": "2026-08-01T13:08:07.003518+00:00",
  "version": 1
 }

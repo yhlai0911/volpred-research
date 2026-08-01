@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-08-01T12:45:46+00:00",
+  "mode": "apply",
+  "grace_minutes": 20,
+  "detached": [
+    {
+      "owner": "hourly-slot-1-4e5b3e6ffd2a4d90b0efad04dc9fa4b4",
+      "slot": "slot-1",
+      "job_id": "4e5b3e6ffd2a4d90b0efad04dc9fa4b4",
+      "task_ids": [
+        "K1743"
+      ],
+      "youngest_claim_age_min": 58.6,
+      "age_source": "claimed_at",
+      "process": "dead",
+      "process_evidence": {
+        "source": "dispatch_state.completions",
+        "completed_at": "2026-08-01T11:48:19.441538+00:00",
+        "outcome": "quota_blocked",
+        "exit_code": 1
+      },
+      "worktree_present": false,
+      "disk_evidence": {
+        "pattern": "dispatch-slot-1-4e5b3e6f*",
+        "pattern_matches": [],
+        "referenced": [],
+        "referenced_present": []
+      },
+      "verdict": "detached",
+      "rationale": "process dead (dispatch_state.completions) AND no worktree on disk AND claim age 58.6min >= grace 20min",
+      "released": true,
+      "released_ids": [
+        "K1743"
+      ],
+      "released_at": "2026-08-01T12:45:46+00:00"
+    }
+  ]
+}
