@@ -3345,6 +3345,103 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
     assert replay["already_settled"] is True
 
 
+def test_dispatch_generation_distinguishes_owned_superseded_and_wrong_job(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps([{
+            "id": "generation-bound",
+            "status": "pending",
+            "task_type": "platform_ops",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["scripts/generation.py"],
+            "post_merge_actions": [],
+        }]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="dispatch-supervisor",
+            session="dispatch-abcdef12-deadbeef",
+            job_id="abcdef1234567890abcdef1234567890",
+        )
+    )
+    assert assigned["assigned"] is True
+
+    owned = task_pool_claim.cmd_dispatch_generation(
+        argparse.Namespace(
+            id="generation-bound",
+            session="dispatch-abcdef12-deadbeef",
+            job_id="abcdef1234567890abcdef1234567890",
+        )
+    )
+    wrong_job = task_pool_claim.cmd_dispatch_generation(
+        argparse.Namespace(
+            id="generation-bound",
+            session="dispatch-abcdef12-deadbeef",
+            job_id="abcdef12ffffffffffffffffffffffff",
+        )
+    )
+    empty_job = task_pool_claim.cmd_dispatch_generation(
+        argparse.Namespace(
+            id="generation-bound",
+            session="dispatch-abcdef12-deadbeef",
+            job_id="",
+        )
+    )
+    unrelated_job = task_pool_claim.cmd_dispatch_generation(
+        argparse.Namespace(
+            id="generation-bound",
+            session="dispatch-abcdef12-deadbeef",
+            job_id="12345678ffffffffffffffffffffffff",
+        )
+    )
+    task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="generation-bound",
+            session="dispatch-abcdef12-deadbeef",
+            job_id="abcdef1234567890abcdef1234567890",
+            disposition="retry",
+            result="generation advanced",
+        )
+    )
+    superseded = task_pool_claim.cmd_dispatch_generation(
+        argparse.Namespace(
+            id="generation-bound",
+            session="dispatch-abcdef12-deadbeef",
+            job_id="abcdef1234567890abcdef1234567890",
+        )
+    )
+
+    assert owned == {
+        "ok": True,
+        "task_id": "generation-bound",
+        "generation": "owned",
+        "status": "in_progress",
+        "current_claim_session_id": "dispatch-abcdef12-deadbeef",
+        "current_dispatch_job_id": "abcdef1234567890abcdef1234567890",
+    }
+    assert wrong_job == {
+        "ok": False,
+        "reason": "dispatch_job_mismatch",
+        "task_id": "generation-bound",
+        "expected_job_id": "abcdef1234567890abcdef1234567890",
+    }
+    assert empty_job["reason"] == "dispatch_generation_identity_mismatch"
+    assert unrelated_job["reason"] == "dispatch_generation_identity_mismatch"
+    assert superseded == {
+        "ok": True,
+        "task_id": "generation-bound",
+        "generation": "superseded",
+        "status": "pending",
+        "current_claim_session_id": "",
+        "current_dispatch_job_id": "",
+    }
+
+
 def test_dispatch_preassign_yields_to_higher_ranked_event_article(
     tmp_path, monkeypatch
 ) -> None:

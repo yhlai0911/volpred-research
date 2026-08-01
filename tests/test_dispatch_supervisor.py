@@ -3041,7 +3041,15 @@ def test_restart_verified_dead_workspace_is_adjudicated_before_state_release(
     repo = tmp_path / "repo"
     repo.mkdir()
     _git_init_repo(repo)
-    ws = _ws_allocate(repo, job_id="7" * 32)
+    state_path = _tmp_state(tmp_path)
+    lease = state.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/orphan.log",
+        path=state_path,
+    )
+    ws = _ws_allocate(repo, job_id=lease.job_id)
     assert ws is not None
     ws["declared_output_paths"] = ["orphan.txt"]
     wt = Path(ws["path"])
@@ -3056,14 +3064,6 @@ def test_restart_verified_dead_workspace_is_adjudicated_before_state_release(
         check=True, capture_output=True, text=True,
     ).stdout.strip()
 
-    state_path = _tmp_state(tmp_path)
-    lease = state.reserve_fire(
-        schedule_id="hourly_dispatch",
-        attempt=1,
-        model="opus",
-        log_path="/tmp/orphan.log",
-        path=state_path,
-    )
     state.attach_workspace(job_id=lease.job_id, workspace=ws, path=state_path)
     state.attach_process(
         job_id=lease.job_id,
@@ -5685,8 +5685,9 @@ def test_terminal_replay_fails_closed_on_partial_receipt_line(
         queue_path=_tmp_queue(tmp_path),
     )
 
-    assert retry["disposition"] == "producer_active"
-    assert retry["cohort_status"] == "unverified"
+    assert retry["disposition"] == "receipt_failed"
+    assert retry["reason"] == "terminal_receipt_observation_failed"
+    assert retry["observation_reason"] == "receipt_store_corrupt"
 
 
 def test_workspace_finalize_gate_green_merges(tmp_path: Path) -> None:
@@ -8056,7 +8057,7 @@ def test_workspace_sweep_ignores_durable_remediation_owner(
         repo_root=repo,
         workspace=orphan_ws,
         worker_outcome="killed_timeout",
-        job_id="a" * 8,
+        job_id="a" * 32,
         producer_custody=producer_custody,
         queue_path=queue,
         runner=fail_remove,
@@ -8280,16 +8281,33 @@ def test_task_settlement_reconciler_retries_after_merge_response_failure(
     repo = tmp_path / "repo"
     repo.mkdir()
     state_path = _tmp_state(tmp_path)
+    job_id = "abcdef12" * 4
+    session_id = "dispatch-abcdef12-deadbeef"
     ws = {
-        "name": "dispatch-slot-1-settle",
-        "path": str(repo / ".claude/worktrees/dispatch-slot-1-settle"),
-        "branch": "worktree-dispatch-slot-1-settle",
+        "name": "dispatch-slot-1-abcdef12",
+        "path": str(repo / ".claude/worktrees/dispatch-slot-1-abcdef12"),
+        "branch": "worktree-dispatch-slot-1-abcdef12",
         "base_sha": "abc",
         "task_id": "task-settle",
-        "claim_session_id": "claim-settle",
+        "claim_session_id": session_id,
+        "dispatch_job_id": job_id,
     }
+    assert workspace._append_receipt(repo, {
+        "event": "allocated",
+        "workspace": ws["name"],
+        "job_id": job_id,
+    })
     assert workspace.ensure_task_settlement_pending(
-        repo, workspace=ws, job_id="job-settle", worker_outcome="success"
+        repo, workspace=ws, job_id=job_id, worker_outcome="success"
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_observe_mutating_task_generation",
+        lambda **_kwargs: {
+            "ok": True,
+            "generation": "owned",
+            "status": "in_progress",
+        },
     )
     monkeypatch.setattr(
         scheduler.workspace_mod,
@@ -8338,14 +8356,21 @@ def test_task_settlement_reconciler_recovers_completion_before_finalizer(
         log_path="/tmp/completed.log",
         path=state_path,
     )
+    session_id = f"dispatch-{lease.job_id[:8]}-deadbeef"
     ws = {
-        "name": "dispatch-slot-1-completed",
-        "path": str(repo / ".claude/worktrees/dispatch-slot-1-completed"),
-        "branch": "worktree-dispatch-slot-1-completed",
+        "name": f"dispatch-slot-1-{lease.job_id[:8]}",
+        "path": str(repo / f".claude/worktrees/dispatch-slot-1-{lease.job_id[:8]}"),
+        "branch": f"worktree-dispatch-slot-1-{lease.job_id[:8]}",
         "base_sha": "abc",
         "task_id": "task-completed",
-        "claim_session_id": "claim-completed",
+        "claim_session_id": session_id,
+        "dispatch_job_id": lease.job_id,
     }
+    assert workspace._append_receipt(repo, {
+        "event": "allocated",
+        "workspace": ws["name"],
+        "job_id": lease.job_id,
+    })
     assert state.attach_workspace(
         job_id=lease.job_id, workspace=ws, path=state_path
     )
@@ -8367,6 +8392,15 @@ def test_task_settlement_reconciler_recovers_completion_before_finalizer(
         scheduler,
         "_settle_mutating_task",
         lambda **_kw: {"ok": True, "status": "pending"},
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_observe_mutating_task_generation",
+        lambda **_kwargs: {
+            "ok": True,
+            "generation": "owned",
+            "status": "in_progress",
+        },
     )
 
     result = scheduler.reconcile_task_settlements(
@@ -8392,7 +8426,7 @@ def test_task_settlement_reconciler_uses_cutover_workspace_drain(
         job_id=job_id,
         task_binding={
             "task_id": "task-migrated",
-            "claim_session_id": "claim-migrated",
+            "claim_session_id": "dispatch-abcd1234-deadbeef",
             "write_intent": "repo_patch",
             "declared_output_paths": ["scripts"],
             "post_merge_actions": [],
@@ -8402,7 +8436,8 @@ def test_task_settlement_reconciler_uses_cutover_workspace_drain(
     ws = {
         **ws,
         "task_id": "task-migrated",
-        "claim_session_id": "claim-migrated",
+        "claim_session_id": "dispatch-abcd1234-deadbeef",
+        "dispatch_job_id": job_id,
     }
     assert workspace.ensure_task_settlement_pending(
         repo,
@@ -8431,6 +8466,15 @@ def test_task_settlement_reconciler_uses_cutover_workspace_drain(
         scheduler,
         "_settle_mutating_task",
         lambda **_kwargs: {"ok": True, "status": "succeeded"},
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_observe_mutating_task_generation",
+        lambda **_kwargs: {
+            "ok": True,
+            "generation": "owned",
+            "status": "in_progress",
+        },
     )
 
     result = scheduler.reconcile_task_settlements(
@@ -8517,6 +8561,490 @@ def test_admission_outbox_requeues_task_after_preassign_crash(
     assert commands[1][0] == "dispatch-settle"
     assert commands[1][commands[1].index("--job-id") + 1] == "dead-job"
     assert commands[1][commands[1].index("--disposition") + 1] == "retry"
+
+
+def test_task_settlement_reconciliation_seals_superseded_generation(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    pending = {
+        "job_id": "old-job",
+        "worker_outcome": "success",
+        "task_id": "old-task",
+        "claim_session_id": "old-session",
+        "workspace": {
+            "task_id": "old-task",
+            "claim_session_id": "old-session",
+            "dispatch_job_id": "old-job",
+            "write_intent": "repo_patch",
+        },
+    }
+    completed: list[dict] = []
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "pending_task_settlements",
+        lambda _repo_root, limit=20: [pending],
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "observe_task_settlement_workspace",
+        lambda _repo_root, _pending: {
+            "ok": True,
+            "workspace": pending["workspace"],
+            "terminal": True,
+            "terminal_receipt": {"disposition": "merged"},
+        },
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "ensure_task_settlement_pending",
+        lambda *_args, **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "finalize_workspace",
+        lambda **_kwargs: pytest.fail(
+            "a superseded generation must not finalize its old workspace"
+        ),
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_settle_mutating_task",
+        lambda **_kwargs: pytest.fail(
+            "a superseded generation must not apply a queue disposition"
+        ),
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_observe_mutating_task_generation",
+        lambda **_kwargs: {
+            "ok": True,
+            "task_id": "old-task",
+            "generation": "superseded",
+            "status": "succeeded",
+            "current_claim_session_id": "",
+            "current_dispatch_job_id": "",
+        },
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "complete_task_settlement",
+        lambda _repo_root, **kwargs: completed.append(kwargs) or True,
+    )
+
+    result = scheduler.reconcile_task_settlements(
+        repo_root=tmp_path, state_path=state_path
+    )
+
+    assert result == [{
+        "ok": True,
+        "task_id": "old-task",
+        "generation": "superseded",
+        "status": "succeeded",
+        "current_claim_session_id": "",
+        "current_dispatch_job_id": "",
+        "settlement_completed": True,
+    }]
+    assert completed == [{
+        "task_id": "old-task",
+        "claim_session_id": "old-session",
+        "disposition": "superseded",
+        "status": "succeeded",
+    }]
+
+
+def test_task_settlement_workspace_identity_accepts_bound_legacy_job(
+    tmp_path: Path,
+) -> None:
+    job_id = "abcdef1234567890abcdef1234567890"
+    terminal = {"disposition": "empty_removed"}
+    assert workspace._append_receipt(tmp_path, {
+        "event": "allocated",
+        "workspace": "dispatch-slot-1-abcdef12",
+        "job_id": job_id,
+    })
+    assert workspace._append_receipt(tmp_path, {
+        "event": "finalized",
+        "workspace": "dispatch-slot-1-abcdef12",
+        "job_id": job_id,
+        **terminal,
+    })
+    pending = {
+        "task_id": "legacy-task",
+        "claim_session_id": "dispatch-abcdef12-deadbeef",
+        "job_id": job_id,
+        "workspace": {
+            "name": "dispatch-slot-1-abcdef12",
+            "task_id": "legacy-task",
+            "claim_session_id": "dispatch-abcdef12-deadbeef",
+        },
+    }
+
+    observed = workspace.observe_task_settlement_workspace(tmp_path, pending)
+
+    assert observed["ok"] is True
+    assert observed["workspace"]["dispatch_job_id"] == job_id
+    assert observed["terminal"] is True
+    assert observed["terminal_receipt"]["disposition"] == "empty_removed"
+    assert (
+        observed["terminal_receipt"]["workspace"]
+        == "dispatch-slot-1-abcdef12"
+    )
+    wrong = workspace.observe_task_settlement_workspace(
+        tmp_path,
+        {
+            **pending,
+            "workspace": {
+                **pending["workspace"],
+                "dispatch_job_id": "12345678ffffffffffffffffffffffff",
+            },
+        },
+    )
+    assert wrong == {
+        "ok": False,
+        "reason": "settlement_generation_job_mismatch",
+    }
+
+
+@pytest.mark.parametrize(
+    ("receipt_shape", "expected_reason"),
+    [
+        ("missing", "receipt_store_missing"),
+        ("unreadable", "receipt_store_unreadable"),
+        ("corrupt", "receipt_store_corrupt"),
+        ("wrong_allocation", "allocation_generation_not_found"),
+    ],
+)
+def test_task_settlement_workspace_identity_fails_closed_on_receipt_uncertainty(
+    tmp_path: Path,
+    receipt_shape: str,
+    expected_reason: str,
+) -> None:
+    repo = tmp_path / receipt_shape
+    repo.mkdir()
+    receipt_path = repo / workspace.RECEIPTS_RELPATH
+    if receipt_shape == "unreadable":
+        receipt_path.mkdir(parents=True)
+    elif receipt_shape == "corrupt":
+        receipt_path.parent.mkdir(parents=True)
+        receipt_path.write_text("{broken\n", encoding="utf-8")
+    elif receipt_shape == "wrong_allocation":
+        receipt_path.parent.mkdir(parents=True)
+        receipt_path.write_text(json.dumps({
+            "event": "allocated",
+            "workspace": "dispatch-slot-1-abcdef12",
+            "job_id": "12345678ffffffffffffffffffffffff",
+        }) + "\n", encoding="utf-8")
+    pending = {
+        "task_id": "strict-task",
+        "claim_session_id": "dispatch-abcdef12-deadbeef",
+        "job_id": "abcdef1234567890abcdef1234567890",
+        "workspace": {
+            "name": "dispatch-slot-1-abcdef12",
+            "task_id": "strict-task",
+            "claim_session_id": "dispatch-abcdef12-deadbeef",
+        },
+    }
+
+    observed = workspace.observe_task_settlement_workspace(repo, pending)
+
+    assert observed == {"ok": False, "reason": expected_reason}
+
+
+def test_finalize_workspace_fails_closed_when_terminal_receipts_are_corrupt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    receipt_path = repo / workspace.RECEIPTS_RELPATH
+    receipt_path.parent.mkdir(parents=True)
+    receipt_path.write_text("{broken\n", encoding="utf-8")
+    monkeypatch.setattr(
+        workspace,
+        "_finalize_inner",
+        lambda **_kwargs: pytest.fail(
+            "corrupt terminal evidence must block every finalizer effect"
+        ),
+    )
+
+    result = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace={
+            "name": "dispatch-slot-1-abcdef12",
+            "path": str(repo / ".claude/worktrees/dispatch-slot-1-abcdef12"),
+            "branch": "worktree-dispatch-slot-1-abcdef12",
+        },
+        worker_outcome="settlement_recovery",
+        job_id="abcdef1234567890abcdef1234567890",
+    )
+
+    assert result == {
+        "disposition": "receipt_failed",
+        "workspace": "dispatch-slot-1-abcdef12",
+        "reason": "terminal_receipt_observation_failed",
+        "observation_reason": "receipt_store_corrupt",
+    }
+
+
+def test_superseded_nonterminal_workspace_is_quarantined_without_merge(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    pending = {
+        "job_id": "stale-job",
+        "worker_outcome": "success",
+        "task_id": "stale-task",
+        "claim_session_id": "stale-session",
+        "workspace": {
+            "task_id": "stale-task",
+            "claim_session_id": "stale-session",
+            "dispatch_job_id": "stale-job",
+            "write_intent": "repo_patch",
+        },
+    }
+    finalized: list[dict] = []
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "pending_task_settlements",
+        lambda _repo_root, limit=20: [pending],
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "observe_task_settlement_workspace",
+        lambda _repo_root, _pending: {
+            "ok": True,
+            "workspace": pending["workspace"],
+            "terminal": False,
+            "terminal_receipt": None,
+        },
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "ensure_task_settlement_pending",
+        lambda *_args, **_kwargs: True,
+    )
+
+    def finalize(**kwargs):
+        finalized.append(kwargs)
+        return {
+            "disposition": "producer_active",
+            "reason": "producer_liveness_unverified",
+        }
+
+    monkeypatch.setattr(scheduler.workspace_mod, "finalize_workspace", finalize)
+    monkeypatch.setattr(
+        scheduler,
+        "_observe_mutating_task_generation",
+        lambda **_kwargs: {
+            "ok": True,
+            "task_id": "stale-task",
+            "generation": "superseded",
+            "status": "pending",
+            "current_claim_session_id": "",
+            "current_dispatch_job_id": "",
+        },
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_settle_mutating_task",
+        lambda **_kwargs: pytest.fail("nonterminal workspace must not settle"),
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "complete_task_settlement",
+        lambda *_args, **_kwargs: pytest.fail(
+            "nonterminal workspace must remain pending"
+        ),
+    )
+
+    result = scheduler.reconcile_task_settlements(
+        repo_root=tmp_path, state_path=state_path
+    )
+
+    assert finalized[0]["worker_outcome"] == "superseded_generation"
+    assert result[0]["reason"] == "workspace_not_terminal"
+    assert result[0]["generation"] == "superseded"
+
+
+def test_task_settlement_reconciliation_seals_generation_advanced_during_finalize(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    pending = {
+        "job_id": "raced-job",
+        "worker_outcome": "success",
+        "task_id": "raced-task",
+        "claim_session_id": "raced-session",
+        "workspace": {
+            "task_id": "raced-task",
+            "claim_session_id": "raced-session",
+            "dispatch_job_id": "raced-job",
+            "write_intent": "repo_patch",
+        },
+    }
+    observations = iter([
+        {
+            "ok": True,
+            "task_id": "raced-task",
+            "generation": "owned",
+            "status": "in_progress",
+            "current_claim_session_id": "raced-session",
+            "current_dispatch_job_id": "raced-job",
+        },
+        {
+            "ok": True,
+            "task_id": "raced-task",
+            "generation": "superseded",
+            "status": "succeeded",
+            "current_claim_session_id": "",
+            "current_dispatch_job_id": "",
+        },
+    ])
+    completed: list[dict] = []
+    workspace_states = iter([
+        {
+            "ok": True,
+            "workspace": pending["workspace"],
+            "terminal": False,
+            "terminal_receipt": None,
+        },
+        {
+            "ok": True,
+            "workspace": pending["workspace"],
+            "terminal": True,
+            "terminal_receipt": {"disposition": "remediation_opened"},
+        },
+    ])
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "pending_task_settlements",
+        lambda _repo_root, limit=20: [pending],
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "observe_task_settlement_workspace",
+        lambda _repo_root, _pending: next(workspace_states),
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "ensure_task_settlement_pending",
+        lambda *_args, **_kwargs: True,
+    )
+    def finalize(**kwargs):
+        assert kwargs["worker_outcome"] == "settlement_recovery"
+        return {
+            "disposition": "remediation_opened",
+            "reason": "worker_settlement_recovery",
+            "checkpoint": {"released": True},
+        }
+
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "finalize_workspace",
+        finalize,
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_settle_mutating_task",
+        lambda **_kwargs: {
+            "ok": False,
+            "reason": "claim_session_mismatch",
+            "task_id": "raced-task",
+        },
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_observe_mutating_task_generation",
+        lambda **_kwargs: next(observations),
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "complete_task_settlement",
+        lambda _repo_root, **kwargs: completed.append(kwargs) or True,
+    )
+
+    result = scheduler.reconcile_task_settlements(
+        repo_root=tmp_path, state_path=state_path
+    )
+
+    assert result[0]["generation"] == "superseded"
+    assert result[0]["settlement_completed"] is True
+    assert completed[0]["disposition"] == "superseded"
+
+
+def test_task_settlement_reconciliation_keeps_owned_nonterminal_generation(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    pending = {
+        "job_id": "live-job",
+        "worker_outcome": "system_terminated",
+        "task_id": "live-task",
+        "claim_session_id": "live-session",
+        "workspace": {
+            "task_id": "live-task",
+            "claim_session_id": "live-session",
+            "dispatch_job_id": "live-job",
+            "write_intent": "observe_only",
+        },
+    }
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "pending_task_settlements",
+        lambda _repo_root, limit=20: [pending],
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "observe_task_settlement_workspace",
+        lambda _repo_root, _pending: {
+            "ok": True,
+            "workspace": pending["workspace"],
+            "terminal": False,
+            "terminal_receipt": None,
+        },
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "ensure_task_settlement_pending",
+        lambda *_args, **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "finalize_workspace",
+        lambda **_kwargs: {"disposition": "empty_removed"},
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_observe_mutating_task_generation",
+        lambda **_kwargs: {
+            "ok": True,
+            "task_id": "live-task",
+            "generation": "owned",
+            "status": "in_progress",
+            "current_claim_session_id": "live-session",
+            "current_dispatch_job_id": "live-job",
+        },
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod,
+        "complete_task_settlement",
+        lambda *_args, **_kwargs: pytest.fail(
+            "an owned generation must remain pending"
+        ),
+    )
+
+    result = scheduler.reconcile_task_settlements(
+        repo_root=tmp_path, state_path=state_path
+    )
+
+    assert result == [{
+        "ok": False,
+        "task_id": "live-task",
+        "reason": "workspace_not_terminal",
+        "workspace_disposition": "empty_removed",
+        "generation": "owned",
+    }]
 
 
 def test_task_pool_cli_failure_preserves_subprocess_stderr(

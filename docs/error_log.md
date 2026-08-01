@@ -5444,3 +5444,39 @@ publishing rule 與 hourly dispatch prompt 同步機械命令；registry ratchet
 `alert_control_gate_source_health_20260801` 寫入 `warn_thin_signature` receipt，回讀 candidate id
 精確等於 task SoT；原 detector 隨即回報 `healthy=true`、`unhealthy_source_count=0`。本根因切片
 為 **`root_cause_fixed_and_verified`**；歷史 60 筆保留作 incident 證據，未手改或刪除 log。
+
+---
+
+## 2026-08-01 — 舊 dispatch generation 的 settlement receipt 無終止語意，形成每分鐘永久重試
+
+**證據化症狀**：live supervisor 每輪都對同一批已完成、已 blocked 或已由後續 session 接管的
+task settlement 重跑 CAS；`ci-red-30339013855`、`ci-red-30409803097`、
+`ci-red-30433823744`、`ci-red-30494529174`、`ci-red-30507270318` 等穩定回
+`claim_session_mismatch`，termination canary 另回 `workspace_not_terminal`。單輪最多 20 個 child
+CLI 反覆讀寫 queue，與郵件中的 `dispatch-preassign` 30 秒逾時同時出現。歷史 receipt 與 task
+狀態均保留，未以清檔止血。
+
+**根因層級（generation／settlement state machine）**：workspace ledger 只有 pending 與 completed，
+但 scheduler 僅能在舊 claim-session CAS 成功時寫 completed。任務若先被 termination path 原子
+re-pend、由新 session 接手或由其他正式流程結案，舊 CAS 必然永久 mismatch；observe-only 的
+`system_terminated` 路徑又刻意不做第二次 queue settlement，因此也沒有 durable terminal edge。
+正確語意不是把舊 disposition 套到新任務，而是證明 canonical generation 已前進後，只封存舊
+receipt 為 `superseded`。
+
+**底層修復與制度化**：task-pool 新增 supervisor-only、read-only 的
+`dispatch-generation` read-back，精確比對 task id、claim session 與 dispatch job。reconciler 只在
+durable workspace receipt 已入 ledger、且 canonical read-back 回 `generation=superseded` 時，追加
+`task_settlement_completed(disposition=superseded)`；不修改 task、不重放 merge／remediation effect。
+task/session/job、workspace name 與 allocation receipt 必須全部綁到同一 generation；terminal
+observation 採 strict tri-state，store 消失、I/O／JSON 錯誤或找不到 exact allocation 一律在副作用
+前 fail closed。reconciliation 沒有 terminal receipt 時只以 `settlement_recovery`／
+`superseded_generation` 進入 non-merge checkpoint/quarantine，絕不沿用原本的 success outcome 去
+merge；原 generation 仍 owned、identity 不符、queue 不可讀或 completed receipt append 失敗時都
+保留 pending 供下一輪重試。
+
+**回歸與狀態**：TDD 覆蓋 owned／superseded／wrong-job、正常 disposition 後 CAS mismatch、以及
+`system_terminated + empty_removed` 非終態路徑；另覆蓋 generation-advance race、舊 receipt job
+正規化、missing／unreadable／corrupt／wrong-allocation 四類 strict observation 與 finalizer
+fail-closed。task-pool suite **146 passed**，supervisor suite **323 passed, 1 skipped**，Matt
+Standards／Spec 雙 PASS，critical Ruff、compile 與 diff gate 通過。immutable reload、live pending ledger
+收斂與 sustained-clean read-back 尚待完成，因此目前僅為 **`contained`**。

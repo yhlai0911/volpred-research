@@ -1859,13 +1859,14 @@ def record_allocation_deferred(
     )
 
 
-def _latest_terminal_receipt(
+def _observe_terminal_receipt(
     repo_root: Path,
     workspace_name: str,
     *,
-    job_id: str = "",
-) -> dict[str, Any] | None:
-    """Return the terminal receipt for the exact allocation generation."""
+    job_id: str,
+    require_store: bool,
+) -> dict[str, Any]:
+    """Tri-state terminal read; strict reconciliation never guesses absent."""
     source = Path(repo_root) / RECEIPTS_RELPATH
     try:
         with source.open("r", encoding="utf-8") as handle:
@@ -1874,21 +1875,25 @@ def _latest_terminal_receipt(
                 lines = handle.read().splitlines()
             finally:
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
-    except FileNotFoundError:  # silent-ok: no prior receipt means this is the first finalization
-        return None
+    except FileNotFoundError:  # first finalization may legitimately have no store
+        return (
+            {"ok": False, "reason": "receipt_store_missing"}
+            if require_store
+            else {"ok": True, "terminal": False, "terminal_receipt": None}
+        )
     except OSError as exc:
         LOG.warning("workspace terminal receipt read failed (%s): %s", source, exc)
-        return None
+        return {"ok": False, "reason": "receipt_store_unreadable"}
     events: list[dict[str, Any]] = []
     for line in lines:
         try:
             event = json.loads(line)
         except json.JSONDecodeError as exc:
             LOG.warning("workspace terminal receipt line unreadable (%s): %s", source, exc)
-            return None
+            return {"ok": False, "reason": "receipt_store_corrupt"}
         if not isinstance(event, dict):
             LOG.warning("workspace terminal receipt is not an object: %s", source)
-            return None
+            return {"ok": False, "reason": "receipt_store_non_object"}
         events.append(event)
     normalized_job_id = str(job_id or "").strip()
     generation_start = 0
@@ -1905,7 +1910,10 @@ def _latest_terminal_receipt(
                     else -1
                 )
         if generation_start < 0:
-            return None
+            return {
+                "ok": False,
+                "reason": "allocation_generation_not_found",
+            }
     for event in reversed(events[generation_start:]):
         if (
             event.get("event") in {"finalized", "released"}
@@ -1921,12 +1929,72 @@ def _latest_terminal_receipt(
                 in {"empty_removed", "merged", "remediation_opened"}
             )
         ):
-            return {
+            receipt = {
                 key: value
                 for key, value in event.items()
                 if key not in {"at", "event", "job_id", "worker_outcome"}
             }
-    return None
+            return {
+                "ok": True,
+                "terminal": True,
+                "terminal_receipt": receipt,
+            }
+    return {"ok": True, "terminal": False, "terminal_receipt": None}
+
+
+def observe_task_settlement_workspace(
+    repo_root: Path,
+    pending: dict[str, Any],
+) -> dict[str, Any]:
+    """Validate one settlement receipt identity and read terminal evidence.
+
+    Older workspace payloads did not duplicate ``dispatch_job_id`` inside the
+    nested workspace object.  The receipt's top-level job id is canonical, but
+    it is accepted only when the independently persisted workspace name and
+    claim-session prefixes bind to the same job generation.
+    """
+    workspace = pending.get("workspace")
+    if not isinstance(workspace, dict):
+        return {"ok": False, "reason": "pending_workspace_missing"}
+    task_id = str(pending.get("task_id") or "").strip()
+    session = str(pending.get("claim_session_id") or "").strip()
+    job_id = str(pending.get("job_id") or "").strip()
+    name = str(workspace.get("name") or "").strip()
+    match = _JOB8_RE.fullmatch(name)
+    if (
+        not task_id
+        or re.fullmatch(r"[0-9a-f]{32}", job_id) is None
+        or match is None
+        or re.fullmatch(
+            rf"dispatch-{re.escape(job_id[:8])}-[0-9a-f]{{8}}",
+            session,
+        ) is None
+    ):
+        return {"ok": False, "reason": "settlement_generation_identity_missing"}
+    if (
+        str(workspace.get("task_id") or "").strip() != task_id
+        or str(workspace.get("claim_session_id") or "").strip() != session
+        or match.group(1) != job_id[:8]
+    ):
+        return {"ok": False, "reason": "settlement_generation_identity_mismatch"}
+    nested_job = str(workspace.get("dispatch_job_id") or "").strip()
+    if nested_job and nested_job != job_id:
+        return {"ok": False, "reason": "settlement_generation_job_mismatch"}
+    normalized = {**workspace, "dispatch_job_id": job_id}
+    terminal = _observe_terminal_receipt(
+        repo_root,
+        name,
+        job_id=job_id,
+        require_store=True,
+    )
+    if not terminal.get("ok"):
+        return terminal
+    return {
+        "ok": True,
+        "workspace": normalized,
+        "terminal": bool(terminal.get("terminal")),
+        "terminal_receipt": terminal.get("terminal_receipt"),
+    }
 
 
 def _active_allocated_workspace_names(repo_root: Path) -> set[str]:
@@ -3983,11 +4051,20 @@ def finalize_workspace(
         LOG.warning("workspace finalize refused: test process on canonical checkout")
         return {"disposition": "canonical_guard", "workspace": workspace.get("name")}
     workspace_name = str(workspace.get("name") or "")
-    prior = _latest_terminal_receipt(
+    prior_observation = _observe_terminal_receipt(
         repo_root,
         workspace_name,
         job_id=job_id,
+        require_store=bool(job_id),
     )
+    if not prior_observation.get("ok"):
+        return {
+            "disposition": "receipt_failed",
+            "workspace": workspace_name,
+            "reason": "terminal_receipt_observation_failed",
+            "observation_reason": prior_observation.get("reason"),
+        }
+    prior = prior_observation.get("terminal_receipt")
     if prior is not None:
         return {**prior, "replayed": True}
     cohort_members = (
@@ -4057,11 +4134,20 @@ def finalize_workspace(
             "workspace": workspace_name,
             "reason": "task_settlement_pending_not_durable",
         }
-    prior = _latest_terminal_receipt(
+    prior_observation = _observe_terminal_receipt(
         repo_root,
         workspace_name,
         job_id=job_id,
+        require_store=bool(job_id),
     )
+    if not prior_observation.get("ok"):
+        return {
+            "disposition": "receipt_failed",
+            "workspace": workspace_name,
+            "reason": "terminal_receipt_observation_failed",
+            "observation_reason": prior_observation.get("reason"),
+        }
+    prior = prior_observation.get("terminal_receipt")
     if prior is not None:
         return {**prior, "replayed": True}
     reconciled = _reconcile_terminal_intent(

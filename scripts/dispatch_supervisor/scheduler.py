@@ -710,6 +710,60 @@ def _settle_mutating_task(
     )
 
 
+def _observe_mutating_task_generation(
+    *,
+    repo_root: Path,
+    workspace: dict[str, Any],
+) -> dict[str, Any]:
+    """Read back the queue generation without mutating a newer task claim."""
+    return _task_pool_command(
+        repo_root=repo_root,
+        args=[
+            "dispatch-generation",
+            "--id",
+            str(workspace["task_id"]),
+            "--session",
+            str(workspace["claim_session_id"]),
+            "--job-id",
+            str(workspace.get("dispatch_job_id") or ""),
+        ],
+    )
+
+
+def _seal_superseded_task_settlement(
+    *,
+    repo_root: Path,
+    workspace: dict[str, Any],
+    terminal_receipt: dict[str, Any] | None,
+    observed: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Seal an old receipt iff the canonical task generation has advanced."""
+    observed = observed or _observe_mutating_task_generation(
+        repo_root=repo_root, workspace=workspace,
+    )
+    if (
+        not observed.get("ok")
+        or observed.get("generation") != "superseded"
+        or not isinstance(terminal_receipt, dict)
+    ):
+        return observed
+    completed = workspace_mod.complete_task_settlement(
+        repo_root,
+        task_id=str(workspace["task_id"]),
+        claim_session_id=str(workspace["claim_session_id"]),
+        disposition="superseded",
+        status=str(observed.get("status") or ""),
+    )
+    if not completed:
+        return {
+            **observed,
+            "ok": False,
+            "reason": "settlement_receipt_append_failed",
+            "settlement_completed": False,
+        }
+    return {**observed, "settlement_completed": True}
+
+
 def _settlement_disposition(
     workspace_outcome: dict[str, Any],
     *,
@@ -783,14 +837,49 @@ def reconcile_task_settlements(
             # A new daemon has an empty process-local map and will reconcile;
             # this daemon must not race its own finalizer.
             continue
-        workspace = pending.get("workspace")
-        if not isinstance(workspace, dict):
-            results.append({"ok": False, "reason": "pending_workspace_missing"})
+        workspace_state = workspace_mod.observe_task_settlement_workspace(
+            repo_root, pending,
+        )
+        if not workspace_state.get("ok"):
+            results.append(workspace_state)
+            continue
+        workspace = dict(workspace_state["workspace"])
+        generation = _observe_mutating_task_generation(
+            repo_root=repo_root,
+            workspace=workspace,
+        )
+        if (
+            generation.get("generation") == "superseded"
+            and workspace_state.get("terminal")
+        ):
+            results.append(_seal_superseded_task_settlement(
+                repo_root=repo_root,
+                workspace=workspace,
+                terminal_receipt=workspace_state.get("terminal_receipt"),
+                observed=generation,
+            ))
+            continue
+        if (
+            not generation.get("ok")
+            or generation.get("generation") not in {"owned", "superseded"}
+        ):
+            results.append({
+                **generation,
+                "ok": False,
+                "reason": str(
+                    generation.get("reason")
+                    or "dispatch_generation_observation_invalid"
+                ),
+            })
             continue
         final = workspace_mod.finalize_workspace(
             repo_root=repo_root,
             workspace=workspace,
-            worker_outcome=str(pending.get("worker_outcome") or "failure"),
+            worker_outcome=(
+                "superseded_generation"
+                if generation.get("generation") == "superseded"
+                else "settlement_recovery"
+            ),
             job_id=str(pending.get("job_id") or ""),
             producer_custody=(
                 pending.get("producer_custody")
@@ -811,12 +900,24 @@ def reconcile_task_settlements(
             worker_outcome=str(pending.get("worker_outcome") or "failure"),
         )
         if disposition is None:
-            results.append({
-                "ok": False,
-                "task_id": workspace.get("task_id"),
-                "reason": "workspace_not_terminal",
-                "workspace_disposition": final.get("disposition"),
-            })
+            terminal_state = workspace_mod.observe_task_settlement_workspace(
+                repo_root, pending,
+            )
+            superseded = _seal_superseded_task_settlement(
+                repo_root=repo_root,
+                workspace=workspace,
+                terminal_receipt=terminal_state.get("terminal_receipt"),
+            )
+            if superseded.get("settlement_completed"):
+                results.append(superseded)
+            else:
+                results.append({
+                    "ok": False,
+                    "task_id": workspace.get("task_id"),
+                    "reason": "workspace_not_terminal",
+                    "workspace_disposition": final.get("disposition"),
+                    "generation": superseded.get("generation"),
+                })
             continue
         settled = _settle_mutating_task(
             repo_root=repo_root,
@@ -827,6 +928,21 @@ def reconcile_task_settlements(
                 f"main_sha={final.get('main_sha', '')}"
             ),
         )
+        if (
+            not settled.get("ok")
+            and settled.get("reason") == "claim_session_mismatch"
+        ):
+            terminal_state = workspace_mod.observe_task_settlement_workspace(
+                repo_root, pending,
+            )
+            superseded = _seal_superseded_task_settlement(
+                repo_root=repo_root,
+                workspace=workspace,
+                terminal_receipt=terminal_state.get("terminal_receipt"),
+            )
+            if superseded.get("settlement_completed"):
+                results.append(superseded)
+                continue
         if settled.get("ok") and workspace_mod.complete_task_settlement(
             repo_root,
             task_id=str(workspace["task_id"]),

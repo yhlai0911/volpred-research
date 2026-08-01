@@ -1187,6 +1187,56 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
         return {"ok": True, "task_id": args.id, "status": task["status"]}
 
 
+def cmd_dispatch_generation(args: argparse.Namespace) -> dict[str, Any]:
+    """Read back whether one durable dispatch generation still owns a task.
+
+    This command never mutates the queue.  Reconciliation uses it only after a
+    workspace settlement receipt proves that the supplied session existed; a
+    superseded result lets the receipt ledger close the old generation without
+    applying its disposition to the task's newer generation.
+    """
+    if not _dispatch_supervisor_authorized():
+        return {"ok": False, "reason": "supervisor_capability_required"}
+    with _locked_readonly() as tasks:
+        task = _find(tasks, args.id)
+        current_session = str(task.get("claim_session_id") or "")
+        current_job = str(task.get("dispatch_job_id") or "")
+        supplied_session = str(args.session or "").strip()
+        supplied_job = str(getattr(args, "job_id", "") or "").strip()
+        if (
+            not supplied_session
+            or re.fullmatch(r"[0-9a-f]{32}", supplied_job) is None
+            or re.fullmatch(
+                rf"dispatch-{re.escape(supplied_job[:8])}-[0-9a-f]{{8}}",
+                supplied_session,
+            ) is None
+        ):
+            return {
+                "ok": False,
+                "reason": "dispatch_generation_identity_mismatch",
+                "task_id": args.id,
+            }
+        if current_session == supplied_session:
+            if current_job and supplied_job != current_job:
+                return {
+                    "ok": False,
+                    "reason": "dispatch_job_mismatch",
+                    "task_id": args.id,
+                    "expected_job_id": current_job,
+                }
+            generation = "owned"
+        else:
+            generation = "superseded"
+        return {
+            "ok": True,
+            "task_id": args.id,
+            "generation": generation,
+            "status": str(task.get("status") or ""),
+            "current_claim_session_id": current_session,
+            "current_dispatch_job_id": current_job,
+        }
+
+
 def cmd_dispatch_pending(args: argparse.Namespace) -> dict[str, Any]:
     """List supervisor-owned admission outbox rows for crash reconciliation."""
     if not _dispatch_supervisor_authorized():
@@ -2303,6 +2353,14 @@ def main() -> int:
     )
     p.add_argument("--result")
     p.set_defaults(fn=cmd_dispatch_settle)
+    p = sub.add_parser(
+        "dispatch-generation",
+        help="supervisor-only readback of one task claim generation",
+    )
+    p.add_argument("--id", required=True)
+    p.add_argument("--session", required=True)
+    p.add_argument("--job-id", required=True)
+    p.set_defaults(fn=cmd_dispatch_generation)
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
