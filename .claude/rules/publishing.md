@@ -250,7 +250,7 @@ uv run python scripts/check_arc_dedup.py --audience event --title "<planned titl
 grep -i "核心關鍵詞" storage/reports/INDEX.md | head
 grep -i "K<id>" storage/reports/feed.json | grep title
 ```
-**`--audience` 不可省**：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成永久重複。無 K、非事件的檢查若沒有 canonical `--candidate-id`／`VOLPRED_PRESELECTED_TASK_ID` 會直接 exit 2；禁止退回 `title:<hash>`，因為它無法和 task outcome 做 PDCA join。
+**`--audience` 不可省**：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成永久重複。無 K、非事件的檢查必須帶 canonical `--candidate-id`／`VOLPRED_PRESELECTED_TASK_ID`；缺失或無法從 task SoT 回讀時，gate 必須留下 durable WARN、回 `gate_error_fail_open` 並讓寫作繼續，禁止因 fuzzy gate metadata 缺口製造內容黑洞。這類 receipt 會刻意維持 source-health 紅燈，直到 caller identity propagation 修正，不得靜默降成「零次觸發」。
 
 事件文章不可使用 generic arc exit 1 作為跨階段拒稿依據。T-7／T-2／T+0／T+1
 本來就會共享主題與敘事；formal event workflow 必把 `event_key`、`event_series_slot`

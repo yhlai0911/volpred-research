@@ -213,12 +213,12 @@ def test_cli_uses_preselected_task_as_non_k_candidate_identity(
     assert logged == [{"candidate_id": "daily_digest_20260801"}]
 
 
-def test_cli_rejects_non_k_candidate_without_canonical_identity(
+def test_cli_fails_open_without_canonical_candidate_identity(
     tmp_path: Path,
     monkeypatch,
     capsys,
 ) -> None:
-    """A title hash is not a joinable post-ratchet candidate identity."""
+    """Identity propagation failure stays visible without blocking content."""
     (tmp_path / "storage" / "reports").mkdir(parents=True)
     (tmp_path / "storage" / "reports" / "feed.json").write_text(
         "[]",
@@ -226,6 +226,12 @@ def test_cli_rejects_non_k_candidate_without_canonical_identity(
     )
     monkeypatch.setattr(cli, "ROOT", tmp_path)
     monkeypatch.delenv("VOLPRED_PRESELECTED_TASK_ID", raising=False)
+    logged: list[dict] = []
+    monkeypatch.setattr(
+        cli,
+        "_log_dedup_decision",
+        lambda *_a, **kwargs: logged.append(kwargs) or True,
+    )
     monkeypatch.setattr(
         sys,
         "argv",
@@ -238,16 +244,19 @@ def test_cli_rejects_non_k_candidate_without_canonical_identity(
         ],
     )
 
-    assert cli.main() == 2
-    assert "--candidate-id" in capsys.readouterr().err
+    assert cli.main() == 0
+    captured = capsys.readouterr()
+    assert json.loads(captured.out)["verdict"] == "gate_error_fail_open"
+    assert "--candidate-id" in captured.err
+    assert logged == [{"candidate_id": None}]
 
 
-def test_cli_rejects_non_k_candidate_missing_from_task_pool(
+def test_cli_fails_open_when_candidate_is_missing_from_task_pool(
     tmp_path: Path,
     monkeypatch,
     capsys,
 ) -> None:
-    """A plausible string is not canonical unless the task SoT owns it."""
+    """Task SoT lookup failure warns durably but cannot create a content hole."""
     (tmp_path / "storage" / "reports").mkdir(parents=True)
     (tmp_path / "storage" / "reports" / "feed.json").write_text(
         "[]",
@@ -258,6 +267,12 @@ def test_cli_rejects_non_k_candidate_missing_from_task_pool(
         encoding="utf-8",
     )
     monkeypatch.setattr(cli, "ROOT", tmp_path)
+    logged: list[dict] = []
+    monkeypatch.setattr(
+        cli,
+        "_log_dedup_decision",
+        lambda *_a, **kwargs: logged.append(kwargs) or True,
+    )
     monkeypatch.setattr(
         sys,
         "argv",
@@ -272,8 +287,11 @@ def test_cli_rejects_non_k_candidate_missing_from_task_pool(
         ],
     )
 
-    assert cli.main() == 2
-    assert "storage/next_tasks.json" in capsys.readouterr().err
+    assert cli.main() == 0
+    captured = capsys.readouterr()
+    assert json.loads(captured.out)["verdict"] == "gate_error_fail_open"
+    assert "storage/next_tasks.json" in captured.err
+    assert logged == [{"candidate_id": None}]
 
 
 def test_k_coverage_fails_open_without_durable_receipt(

@@ -220,7 +220,7 @@ PHASE B — 派新工:
      --event-key <event_key> --event-series-slot <event_series_slot>
    ```
 
-   （無對應 K 就用 `--candidate-id "$VOLPRED_PRESELECTED_TASK_ID"` 並以 `--text-file` 餵主題摘要）。**`--audience` 不可省**（2026-07-11 起）：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成重複、且是永久性誤判。缺 canonical candidate identity 時 CLI exit 2，不再製造無法 join outcome 的 `title:<hash>` evidence。
+   （無對應 K 就用 `--candidate-id "$VOLPRED_PRESELECTED_TASK_ID"` 並以 `--text-file` 餵主題摘要）。**`--audience` 不可省**（2026-07-11 起）：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成重複、且是永久性誤判。缺 canonical candidate identity 時 CLI 會留下 durable WARN、回 `gate_error_fail_open` 並讓寫作繼續；這不是綠燈，caller 必須修 identity，但不得讓 fuzzy gate metadata 缺口造成內容黑洞。
 
    兩道 gate，依確定性排序：
    - **exit 1 + `🚫 K-COVERAGE`** = 這個 K 在這個 audience **已經有現成文章**（含 draft — 草稿池裡那篇會被 release cron 發出去，等於已覆蓋）。精確比對、無模糊判斷 → **絕對不寫**，換 K。

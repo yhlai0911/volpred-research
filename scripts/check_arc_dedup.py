@@ -94,6 +94,36 @@ __all__ = [
 ]
 
 
+def _candidate_identity_fail_open(*, title: str, reason: str) -> int:
+    """Keep an unjoinable pre-write check visible without blocking content."""
+
+    receipt_persisted = _log_dedup_decision(
+        str(ROOT / "storage"),
+        "warn_arc_unjudged",
+        title,
+        None,
+        f"candidate identity unverified: {reason}",
+        candidate_id=None,
+    )
+    print(json.dumps({
+        "verdict": "gate_error_fail_open",
+        "reason": reason,
+        "candidate_identity_verified": False,
+        "warning_receipt_persisted": receipt_persisted,
+    }, ensure_ascii=False, indent=2))
+    receipt_note = (
+        "durable warning recorded"
+        if receipt_persisted
+        else "durable warning unavailable"
+    )
+    print(
+        f"WARNING: {reason}; dedup is unjudged and writing may proceed "
+        f"({receipt_note})",
+        file=sys.stderr,
+    )
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--title", default="", help="planned article title / topic")
@@ -154,34 +184,37 @@ def main() -> int:
             or runtime_candidate_id.startswith(("title:", "decision:"))
             or any(character.isspace() for character in runtime_candidate_id)
         ):
-            print(
-                "ERROR: non-K, non-event checks require a canonical "
-                "--candidate-id (or $VOLPRED_PRESELECTED_TASK_ID); title and "
-                "decision hashes are not joinable evidence",
-                file=sys.stderr,
+            return _candidate_identity_fail_open(
+                title=args.title,
+                reason=(
+                    "non-K, non-event checks require a canonical "
+                    "--candidate-id (or $VOLPRED_PRESELECTED_TASK_ID); "
+                    "title and decision hashes are not joinable evidence"
+                ),
             )
-            return 2
         queue_path = ROOT / "storage" / "next_tasks.json"
         try:
             task_pool = json.loads(queue_path.read_text(encoding="utf-8"))
         except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-            print(
-                f"ERROR: cannot verify candidate identity against "
-                f"{queue_path}: {exc}",
-                file=sys.stderr,
+            return _candidate_identity_fail_open(
+                title=args.title,
+                reason=(
+                    "cannot verify candidate identity against "
+                    f"{queue_path}: {exc}"
+                ),
             )
-            return 2
         if not isinstance(task_pool, list) or not any(
             isinstance(task, dict)
             and str(task.get("id") or "") == runtime_candidate_id
             for task in task_pool
         ):
-            print(
-                "ERROR: non-K candidate identity is not owned by canonical "
-                f"storage/next_tasks.json: {runtime_candidate_id}",
-                file=sys.stderr,
+            return _candidate_identity_fail_open(
+                title=args.title,
+                reason=(
+                    "non-K candidate identity is not owned by canonical "
+                    f"storage/next_tasks.json: {runtime_candidate_id}"
+                ),
             )
-            return 2
 
     text = ""
     if args.text_file:

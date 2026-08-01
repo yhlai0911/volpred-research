@@ -3199,9 +3199,10 @@ program goal。
   歷史 row 改時戳或多 writer 分岔。
 - ✅ `check_arc_dedup.py` 對這類 task 現只接受 canonical `--candidate-id`／
   `VOLPRED_PRESELECTED_TASK_ID`，並回讀 `storage/next_tasks.json` 證明 task 存在；缺失、
-  synthetic 或假 id 一律 pre-effect exit 2。K/event 既有 exact identity 不變。
+  synthetic、假 id 或 queue 讀取失敗時留下 durable WARN、回 `gate_error_fail_open`／exit 0，
+  source-health 維持紅燈但不阻斷寫作。K/event 既有 exact identity 不變。
 - ✅ publishing rule、hourly dispatch prompt 與真正 enforcement ratchet 同步；歷史壞 row
   保留，不以改 log 假裝修復。
-- ✅ TDD／相鄰回歸 **100 passed**；production canary 已寫入 exact task identity，原 audit
+- ✅ TDD／Matt review 後相鄰回歸 **172 passed**；production canary 已寫入 exact task identity，原 audit
   回讀 `healthy=true`、`unhealthy_source_count=0`。本 slice 為
   **`root_cause_fixed_and_verified`**。

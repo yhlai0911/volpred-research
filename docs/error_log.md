@@ -5431,13 +5431,16 @@ title-only 呼叫，並由 publisher logger退回 `title:<hash>`。因此 gate a
 
 **底層修復與制度化**：pre-write CLI 新增 `--candidate-id`；Operations Core agent 預設取
 `VOLPRED_PRESELECTED_TASK_ID`，互動 session 必須明示。無 K、非 event 的 identity 若缺失、
-含空白、使用 `title:/decision:`，或不存在 canonical task pool，全部在讀 feed／寫 receipt 前
-exit 2。K 與 structured event 仍分別使用既有 K+audience／event+slot 身分，禁止混入第二個
-candidate id。publishing rule 與 hourly dispatch prompt 同步機械命令；registry ratchet 校正到
-真正 enforcement 生效的 `2026-08-01T10:52:12+00:00`，不再對尚未具備的能力做虛假宣告。
+含空白、使用 `title:/decision:`，或無法在 canonical task pool 回讀，不執行模糊 dedup，改寫
+durable `warn_arc_unjudged` receipt、回 `gate_error_fail_open`／exit 0，讓 source-health 保持紅燈
+但絕不阻斷寫作；這同時遵守「證據不可靜默消失」與「fuzzy gate 不得製造內容黑洞」。K 與
+structured event 仍分別使用既有 K+audience／event+slot 身分，禁止混入第二個 candidate id。
+publishing rule 與 hourly dispatch prompt 同步機械命令；registry ratchet 校正到真正 enforcement
+生效的 `2026-08-01T10:52:12+00:00`，不再對尚未具備的能力做虛假宣告。
 
 **回歸與 live read-back**：兩輪 TDD 先固定 scheduled env identity、缺 identity、task pool
-不存在三種 RED，再轉 GREEN；相鄰 suites **100 passed**。正式 canary 以
+不存在三種 RED，再轉 GREEN；Matt review 發現並修正一筆舊 generic fuzzy 測試的 title-only
+契約，最終擴大相鄰 suites **172 passed**。正式 canary 以
 `alert_control_gate_source_health_20260801` 寫入 `warn_thin_signature` receipt，回讀 candidate id
 精確等於 task SoT；原 detector 隨即回報 `healthy=true`、`unhealthy_source_count=0`。本根因切片
 為 **`root_cause_fixed_and_verified`**；歷史 60 筆保留作 incident 證據，未手改或刪除 log。
