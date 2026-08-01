@@ -1904,12 +1904,30 @@ async def _tick_once(
     preassignment: dict[str, Any] = {"ok": True, "assigned": False}
     task_binding: dict[str, Any] | None = None
     if iso_cfg["mode"] in {"pilot", "enforce"}:
-        preassignment = await asyncio.to_thread(
-            _preassign_mutating_task,
-            repo_root=repo_root,
-            slot_id=slot_id,
-            job_id=job_id,
-        )
+        try:
+            preassignment = await asyncio.to_thread(
+                _preassign_mutating_task,
+                repo_root=repo_root,
+                slot_id=slot_id,
+                job_id=job_id,
+            )
+        except (OSError, subprocess.TimeoutExpired, RuntimeError) as exc:
+            deferred = state.defer_reserved_fire(
+                job_id=job_id,
+                reason=f"mutating_preassignment_exception:{job_id[:8]}",
+                path=state_path,
+            )
+            LOG.error(
+                "mutating task preassignment failed before spawn job_id=%s: %s",
+                job_id,
+                exc,
+            )
+            return {
+                "action": "isolation_deferred",
+                "reason": "mutating_preassignment_exception",
+                "error": str(exc),
+                "state_deferred": deferred is not None,
+            }
         if not preassignment.get("ok"):
             deferred = state.defer_reserved_fire(
                 job_id=job_id,

@@ -770,6 +770,51 @@ def test_scheduler_scratch_failure_releases_reserved_slot(tmp_path: Path, monkey
     assert state.read_state(state_path)["current_jobs"] == []
 
 
+def test_scheduler_preassignment_timeout_releases_reserved_slot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A pre-spawn admission timeout must not leave a pid-less active job."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{
+            "id": "volpred-dispatch-supervisor",
+            "max_slots": 2,
+            "writer_isolation": {"mode": "enforce"},
+        }],
+    }), encoding="utf-8")
+    monkeypatch.setattr(
+        scheduler,
+        "_preassign_mutating_task",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            subprocess.TimeoutExpired("dispatch-preassign", 30)
+        ),
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+        schedules_path=schedules,
+    ))
+
+    assert decision["action"] == "isolation_deferred"
+    assert decision["reason"] == "mutating_preassignment_exception"
+    snapshot = state.read_state(state_path)
+    assert snapshot["current_jobs"] == []
+    assert snapshot["fire_requested_at"] is not None
+    assert snapshot["fire_request_reason"].startswith(
+        "mutating_preassignment_exception:"
+    )
+
+
 # ── PHASE-Z safety net (Deliverable 7 cutover port of cron_hourly_dispatch.sh) ──
 
 
