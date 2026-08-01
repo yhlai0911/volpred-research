@@ -17,9 +17,12 @@ These tests pin both. Keep them mechanical — prose in a rule file is what fail
 
 from __future__ import annotations
 
+import json
+import math
 import subprocess
 import sys
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -27,7 +30,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import dispatch_slot_budget as sb  # noqa: E402
+import dispatch_slot_budget as sb
 
 
 @pytest.fixture(autouse=True)
@@ -35,6 +38,7 @@ def isolate_live_occupancy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     """Cap tests must not inspect developer-only worktrees or agent receipts."""
     monkeypatch.setattr(sb, "WORKTREES_DIR", tmp_path / "no-live-worktrees")
     monkeypatch.setattr(sb, "AGENTS_DIR", tmp_path / "no-live-agents")
+    monkeypatch.setattr(sb, "AGENT_JOBS_DIR", tmp_path / "no-agent-jobs")
 
 
 # --- 1. cap has exactly one owner -------------------------------------------
@@ -98,13 +102,16 @@ def fake_worktrees(tmp_path):
     return root, made
 
 
-def test_stale_worktree_stops_holding_a_slot(fake_worktrees, monkeypatch):
+def test_worktree_artifact_never_holds_a_slot_without_execution_lease(
+    fake_worktrees, monkeypatch,
+):
     root, _ = fake_worktrees
     monkeypatch.setattr(sb, "WORKTREES_DIR", root)
 
-    # Now: both just committed -> both live.
+    # A checkout is artifact custody, not an execution lease.
     slots = {w["name"]: w for w in sb.worktree_slots()}
-    assert slots["fresh"]["live"] and slots["idle"]["live"]
+    assert not slots["fresh"]["live"] and not slots["idle"]["live"]
+    assert slots["fresh"]["release_reason"] == "artifact_without_execution_lease"
 
     # Fast-forward past the threshold: with no new progress, both go stale.
     later = time.time() + (sb.STALE_HOURS + 1) * 3600
@@ -113,8 +120,10 @@ def test_stale_worktree_stops_holding_a_slot(fake_worktrees, monkeypatch):
     assert not slots["idle"]["live"]
 
 
-def test_recent_commit_keeps_the_slot_held(fake_worktrees, monkeypatch):
-    """The exact regression: a worktree that is still committing must keep its slot."""
+def test_recent_commit_is_visible_but_does_not_hold_a_slot(
+    fake_worktrees, monkeypatch,
+):
+    """Recent commits remain visible but cannot manufacture a capacity lease."""
     root, made = fake_worktrees
     monkeypatch.setattr(sb, "WORKTREES_DIR", root)
 
@@ -127,14 +136,15 @@ def test_recent_commit_keeps_the_slot_held(fake_worktrees, monkeypatch):
     # simulate by evaluating at real now: it is live, and `idle` (old commit) is
     # only stale once we look from the future.
     slots_now = {w["name"]: w for w in sb.worktree_slots()}
-    assert slots_now["fresh"]["live"]
+    assert slots_now["fresh"]["live"] is False
+    assert slots_now["fresh"]["progress_at"] is not None
 
     slots_later = {w["name"]: w for w in sb.worktree_slots(now=later)}
     assert not slots_later["idle"]["live"], "no-progress worktree must release its slot"
 
 
 def test_uncommitted_work_counts_as_progress(fake_worktrees, monkeypatch):
-    """Dirty files are work in flight — an agent mid-write must not be reclaimed."""
+    """Dirty artifacts stay visible for salvage but own no scheduler capacity."""
     root, made = fake_worktrees
     monkeypatch.setattr(sb, "WORKTREES_DIR", root)
 
@@ -142,21 +152,391 @@ def test_uncommitted_work_counts_as_progress(fake_worktrees, monkeypatch):
     scratch.write_text("# agent is writing right now")
 
     slots = {w["name"]: w for w in sb.worktree_slots()}
-    assert slots["idle"]["live"], "an untracked file just written is progress"
+    assert slots["idle"]["live"] is False
+    assert slots["idle"]["release_reason"] == "artifact_without_execution_lease"
+    assert slots["idle"]["progress_at"] is not None
 
 
-def test_occupancy_only_counts_live_worktrees(fake_worktrees, monkeypatch):
+def _write_terminal_agent_job(path: Path, *, cwd: Path, finished_epoch: float) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({
+            "schema_version": 2,
+            "execution_id": path.stem,
+            "state": "terminal",
+            "cwd": str(cwd),
+            "runner_pid": 123,
+            "started_at": datetime.fromtimestamp(
+                finished_epoch - 60, UTC,
+            ).isoformat(),
+            "finished_at": datetime.fromtimestamp(
+                finished_epoch, UTC,
+            ).isoformat(),
+            "timed_out": True,
+            "termination_confirmed": True,
+            "exit_code": -1,
+            "runner_exit_code": 1,
+            "result_artifact_exists": True,
+        }),
+        encoding="utf-8",
+    )
+
+
+def _write_running_agent_job(path: Path, *, cwd: Path, started_epoch: float) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({
+            "schema_version": 2,
+            "execution_id": path.stem,
+            "state": "running",
+            "cwd": str(cwd),
+            "runner_pid": 456,
+            "started_at": datetime.fromtimestamp(started_epoch, UTC).isoformat(),
+            "finished_at": None,
+            "timed_out": False,
+            "termination_confirmed": None,
+            "exit_code": None,
+            "runner_exit_code": None,
+        }),
+        encoding="utf-8",
+    )
+
+
+def test_terminal_agent_receipt_releases_fresh_worktree_slot_immediately(
+    fake_worktrees,
+):
+    """Artifact custody survives, but a finished execution owns no capacity."""
+    root, made = fake_worktrees
+    jobs = root.parent / "agent_jobs"
+    finished = time.time() + 1
+    _write_terminal_agent_job(
+        jobs / "k1735.json", cwd=made["fresh"], finished_epoch=finished,
+    )
+
+    slots = {
+        item["name"]: item
+        for item in sb.worktree_slots(worktrees_dir=root, agent_jobs_dir=jobs)
+    }
+
+    assert slots["fresh"]["live"] is False
+    assert slots["fresh"]["release_reason"] == "terminal_agent_job"
+    assert slots["fresh"]["terminal_job"]["timed_out"] is True
+    assert slots["idle"]["live"] is False
+    assert slots["idle"]["release_reason"] == "artifact_without_execution_lease"
+
+    occupancy = sb.occupancy(
+        worktrees_dir=root,
+        agents_dir=root.parent / "no-agents",
+        agent_jobs_dir=jobs,
+    )
+    assert occupancy["occupied"] == 0
+    assert occupancy["worktrees"] == []
+    assert any(
+        item["name"] == "fresh"
+        and item.get("release_reason") == "terminal_agent_job"
+        for item in occupancy["stale"]
+    ), "released artifacts remain visible for salvage; only capacity is freed"
+
+
+def test_new_progress_after_terminal_is_unowned_not_a_capacity_lease(
+    fake_worktrees,
+):
+    """An old receipt cannot release a later execution that reused the path."""
+    root, made = fake_worktrees
+    jobs = root.parent / "agent_jobs"
+    _write_terminal_agent_job(
+        jobs / "old-run.json",
+        cwd=made["fresh"],
+        finished_epoch=time.time() - 3600,
+    )
+    scratch = made["fresh"] / "new-run.py"
+    scratch.write_text("# later execution progress", encoding="utf-8")
+
+    slots = {
+        item["name"]: item
+        for item in sb.worktree_slots(worktrees_dir=root, agent_jobs_dir=jobs)
+    }
+
+    assert slots["fresh"]["live"] is False
+    assert slots["fresh"].get("terminal_job") is None
+    assert slots["fresh"]["release_reason"] == "unowned_progress_after_terminal"
+
+
+def test_new_running_generation_supersedes_old_terminal_before_first_mutation(
+    fake_worktrees,
+):
+    root, made = fake_worktrees
+    jobs = root.parent / "agent_jobs"
+    now = time.time()
+    _write_terminal_agent_job(
+        jobs / "old.json", cwd=made["fresh"], finished_epoch=now - 60,
+    )
+    _write_running_agent_job(
+        jobs / "new.json", cwd=made["fresh"], started_epoch=now,
+    )
+
+    slot = next(
+        item
+        for item in sb.worktree_slots(worktrees_dir=root, agent_jobs_dir=jobs)
+        if item["name"] == "fresh"
+    )
+
+    assert slot["live"] is True
+    assert slot["active_job"]["state"] == "running"
+    assert slot["active_job"]["execution_id"] == "new"
+    assert slot.get("terminal_job") is None
+
+
+def test_unverified_termination_receipt_keeps_lease_held(fake_worktrees):
+    root, made = fake_worktrees
+    jobs = root.parent / "agent_jobs"
+    finished = time.time()
+    _write_terminal_agent_job(
+        jobs / "uncertain.json", cwd=made["fresh"], finished_epoch=finished,
+    )
+    payload = json.loads((jobs / "uncertain.json").read_text())
+    payload["state"] = "termination_unverified"
+    payload["termination_confirmed"] = False
+    (jobs / "uncertain.json").write_text(json.dumps(payload), encoding="utf-8")
+
+    slot = next(
+        item
+        for item in sb.worktree_slots(worktrees_dir=root, agent_jobs_dir=jobs)
+        if item["name"] == "fresh"
+    )
+
+    assert slot["live"] is True
+    assert slot["active_job"]["state"] == "termination_unverified"
+    assert slot.get("terminal_job") is None
+
+
+def test_newer_malformed_generation_quarantines_old_terminal_release(
+    fake_worktrees,
+):
+    root, made = fake_worktrees
+    jobs = root.parent / "agent_jobs"
+    now = time.time()
+    _write_terminal_agent_job(
+        jobs / "old.json", cwd=made["fresh"], finished_epoch=now - 60,
+    )
+    malformed = {
+        "schema_version": 2,
+        "execution_id": "new",
+        "state": "running",
+        "cwd": str(made["fresh"]),
+        # runner_pid intentionally absent: newest generation is not trustworthy.
+        "started_at": datetime.fromtimestamp(now, UTC).isoformat(),
+        "finished_at": None,
+        "timed_out": False,
+        "termination_confirmed": None,
+        "exit_code": None,
+        "runner_exit_code": None,
+    }
+    (jobs / "new.json").write_text(json.dumps(malformed), encoding="utf-8")
+
+    slot = next(
+        item
+        for item in sb.worktree_slots(worktrees_dir=root, agent_jobs_dir=jobs)
+        if item["name"] == "fresh"
+    )
+
+    assert slot["live"] is True
+    assert slot["active_job"]["state"] == "invalid"
+    assert slot["active_job"]["execution_id"] == "new"
+    assert slot.get("terminal_job") is None
+
+
+def test_same_second_clean_commit_after_receipt_is_not_misattributed_terminal(
+    fake_worktrees,
+):
+    """Git's second-resolution commit timestamp cannot erase event ordering."""
+    root, made = fake_worktrees
+    jobs = root.parent / "agent_jobs"
+    while time.time() % 1 > 0.5:
+        time.sleep(0.01)
+    finished = time.time()
+    _write_terminal_agent_job(
+        jobs / "old-run.json",
+        cwd=made["fresh"],
+        finished_epoch=finished,
+    )
+    (made["fresh"] / "new-commit.py").write_text("# later execution\n")
+    _git("add", "-A", cwd=made["fresh"])
+    _git("commit", "-qm", "same-second later progress", cwd=made["fresh"])
+    assert math.floor(sb._last_commit_epoch(made["fresh"])) == math.floor(finished)
+
+    slot = next(
+        item
+        for item in sb.worktree_slots(worktrees_dir=root, agent_jobs_dir=jobs)
+        if item["name"] == "fresh"
+    )
+
+    assert slot["live"] is False
+    assert slot.get("terminal_job") is None
+    assert slot["release_reason"] == "unowned_progress_after_terminal"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"cwd": "{cwd}", "finished_at": "2099-01-01T00:00:00+00:00"},
+        {
+            "schema_version": 2,
+            "execution_id": "naive-time",
+            "state": "terminal",
+            "cwd": "{cwd}",
+            "runner_pid": 123,
+            "started_at": "2026-08-01T00:00:00",
+            "finished_at": "2026-08-01T01:00:00",
+            "timed_out": False,
+            "termination_confirmed": True,
+            "exit_code": 0,
+            "runner_exit_code": 0,
+        },
+        {
+            "schema_version": 2,
+            "execution_id": "future-time",
+            "state": "terminal",
+            "cwd": "{cwd}",
+            "runner_pid": 123,
+            "started_at": "2099-01-01T00:00:00+00:00",
+            "finished_at": "2099-01-01T01:00:00+00:00",
+            "timed_out": False,
+            "termination_confirmed": True,
+            "exit_code": 0,
+            "runner_exit_code": 0,
+        },
+        {
+            "cwd": "\x00",
+            "started_at": "2026-08-01T00:00:00+00:00",
+            "finished_at": "2026-08-01T01:00:00+00:00",
+            "timed_out": True,
+            "exit_code": -1,
+            "runner_exit_code": 1,
+        },
+    ],
+)
+def test_malformed_terminal_receipt_warns_and_cannot_release(
+    fake_worktrees,
+    capsys,
+    payload,
+):
+    root, made = fake_worktrees
+    jobs = root.parent / "agent_jobs"
+    jobs.mkdir()
+    materialized = {
+        key: (str(made["fresh"]) if value == "{cwd}" else value)
+        for key, value in payload.items()
+    }
+    (jobs / "partial.json").write_text(json.dumps(materialized), encoding="utf-8")
+
+    slot = next(
+        item
+        for item in sb.worktree_slots(worktrees_dir=root, agent_jobs_dir=jobs)
+        if item["name"] == "fresh"
+    )
+
+    assert slot.get("terminal_job") is None
+    if slot.get("active_job"):
+        assert slot["live"] is True
+        assert slot["active_job"]["state"] == "invalid"
+    else:
+        assert slot["live"] is False
+        assert slot["release_reason"] == "artifact_without_execution_lease"
+    assert "不用它釋放 slot" in capsys.readouterr().err
+
+
+def test_occupancy_reports_unleased_artifacts_without_counting_them(
+    fake_worktrees, monkeypatch,
+):
     root, _ = fake_worktrees
     monkeypatch.setattr(sb, "WORKTREES_DIR", root)
     monkeypatch.setattr(sb, "AGENTS_DIR", root / "does-not-exist")
 
     occ = sb.occupancy()
-    assert occ["occupied"] == 2 and not occ["stale"]
+    assert occ["occupied"] == 0
+    assert len(occ["stale"]) == 2
+    assert all(
+        item["release_reason"] == "artifact_without_execution_lease"
+        for item in occ["stale"]
+    )
 
     later = time.time() + (sb.STALE_HOURS + 1) * 3600
     occ = sb.occupancy(now=later)
     assert occ["occupied"] == 0, "stale worktrees must not consume capacity"
     assert len(occ["stale"]) == 2, "…but they must still be reported, not silently dropped"
+
+
+def test_monkeypatched_agent_root_also_isolates_execution_receipts(
+    tmp_path, monkeypatch,
+):
+    """The long-standing AGENTS_DIR fixture contract must isolate all ops state."""
+    isolated_agents = tmp_path / "isolated" / "agents"
+    live_jobs = tmp_path / "live" / "agent_jobs"
+    live_worktree = tmp_path / "worktree"
+    isolated_agents.mkdir(parents=True)
+    live_jobs.mkdir(parents=True)
+    live_worktree.mkdir()
+    (live_jobs / "running.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "execution_id": "must-not-leak",
+                "state": "running",
+                "cwd": str(live_worktree),
+                "runner_pid": 123,
+                "started_at": datetime.now(UTC).isoformat(),
+                "finished_at": None,
+                "timed_out": False,
+                "termination_confirmed": None,
+                "exit_code": None,
+                "runner_exit_code": None,
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(sb, "AGENTS_DIR", isolated_agents)
+    monkeypatch.setattr(sb, "AGENT_JOBS_DIR", live_jobs)
+    monkeypatch.setattr(sb, "WORKTREES_DIR", tmp_path / "no-worktrees")
+
+    occ = sb.occupancy()
+
+    assert occ["occupied"] == 0
+    assert occ["worktree_detail"] == []
+
+
+def test_reclaimer_only_targets_expired_formal_execution_leases(
+    tmp_path, monkeypatch,
+):
+    """Artifact custody is not permission to kill or remove a worktree."""
+    import reclaim_stale_worktrees as reclaimer
+
+    monkeypatch.setattr(reclaimer.slot_budget, "WORKTREES_DIR", tmp_path)
+    monkeypatch.setattr(
+        reclaimer.slot_budget,
+        "worktree_slots",
+        lambda: [
+            {
+                "name": "artifact-only",
+                "idle_hours": 100.0,
+                "release_reason": "artifact_without_execution_lease",
+            },
+            {
+                "name": "expired-lease",
+                "idle_hours": 3.0,
+                "release_reason": "no_progress_timeout",
+            },
+        ],
+    )
+    monkeypatch.setattr(reclaimer, "_branch_of", lambda path: f"branch/{path.name}")
+    monkeypatch.setattr(reclaimer, "_is_dirty", lambda path: False)
+    monkeypatch.setattr(reclaimer, "_holder_pids", lambda path: [])
+    monkeypatch.setattr(reclaimer, "_unmerged_count", lambda branch: 0)
+
+    report = reclaimer.reclaim(apply=False)
+
+    assert report["stale_count"] == 1
+    assert [item["worktree"] for item in report["actions"]] == ["expired-lease"]
 
 
 def test_unreadable_agent_record_warns_and_holds_no_slot(tmp_path, monkeypatch, capsys):

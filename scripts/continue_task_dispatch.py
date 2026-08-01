@@ -4,7 +4,7 @@
 讀 storage/next_tasks.json 的 pending queue，候選排序最外層先按 lane rank
 （task_urgency：urgent boss 急件 → time_critical 時效任務 → 其餘；lane 內 FIFO），
 lane 之後才是既有 priority asc + 餓死保護 + 同 priority 多樣性輪替，
-count 當前 slot 占用（.claude/worktrees/ + storage/ops/agents/ active），
+count 當前正式 execution lease / active agent slot（worktree 只作 artifact custody），
 若 slot < cap (4) 且有可派 agent 的 task → 列出 / 派出（依 mode）。
 
 執行模式：
@@ -153,12 +153,11 @@ def _warn_dispatch(message: str) -> None:
 def count_active_slots() -> dict:
     """Occupied slots. Thin delegate — `dispatch_slot_budget.occupancy()` owns this.
 
-    It used to count worktree DIRECTORIES, which meant a hung agent held a slot
-    forever: on 2026-07-13 four worktrees pinned the dispatcher at 4/4 with 34
-    tasks pending while two of them had produced nothing for two days. Occupancy
-    is now measured by progress (commits / dirty-file mtime), not by a directory
-    existing and not by a process being alive — both zombies still had live
-    processes. See the budget module's docstring.
+    Worktree directories, commits and dirty-file mtimes are artifact custody,
+    never capacity authority. Only formal running/unverified execution receipts
+    and active agent records hold slots; terminal/unleased worktrees remain in
+    the report for salvage without blocking admission. See the budget module's
+    lifecycle contract.
     """
     return _slot_budget.occupancy()
 
@@ -1445,14 +1444,14 @@ def print_report(report: dict) -> None:
         f"free={report['free_slots']}"
         + (f" | cap: {budget['reason']}" if budget.get("reason") else "")
     )
-    # A stale worktree no longer holds a slot, but it must not become invisible —
-    # that is how it rotted for two days in the first place. Say it out loud.
+    # Released artifact custody must not become invisible. It no longer owns a
+    # slot, but the reason tells operators whether it needs salvage or lease GC.
     for st in s.get("stale") or []:
         idle = "unknown" if st.get("idle_hours") is None else f"{st['idle_hours']}h"
         print(
-            f"  ⚠️ stale slot released: {st['name']} — 無進度 {idle}"
-            f"（>{_slot_budget.STALE_HOURS}h）；不再占 slot，清理走 "
-            f"scripts/reclaim_stale_worktrees.py"
+            f"  ⚠️ slot released / artifact retained: {st['name']} — "
+            f"reason={st.get('release_reason', 'unknown')} idle={idle}；"
+            "不再占 capacity，成果仍走正式 merge/salvage lifecycle"
         )
     for c in report.get("dreaming_cleared") or []:
         print(

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Clean up worktrees that stopped making progress. HYGIENE, not capacity.
+"""Clean up execution leases that stopped making progress. HYGIENE, not capacity.
 
-Capacity is already handled: `dispatch_slot_budget.occupancy()` stops counting a
-stale worktree the moment it goes quiet, so the dispatcher is unblocked whether
-or not this script ever runs. That separation is deliberate — reclaiming capacity
-must not depend on a destructive cleanup succeeding. What this script does is
-stop the hung agent from burning CPU/RAM and get the directory out of the way.
+Capacity is already handled by formal lifecycle receipts. A worktree directory,
+commit or dirty mtime is artifact custody and never owns a slot. This script only
+acts on `no_progress_timeout`: a once-formal running/unverified lease that expired.
+Terminal or unleased artifacts stay with merge/salvage lifecycle and are never
+turned into kill/remove targets merely because capacity no longer counts them.
 
 Staleness is defined in one place (`dispatch_slot_budget.STALE_HOURS`, measured
 by progress, not by process liveness — the 2026-07-13 zombies both had live
@@ -155,7 +155,7 @@ def _branch_of(worktree: Path) -> str | None:
 def reclaim(apply: bool) -> dict:
     results = []
     for wt in slot_budget.worktree_slots():
-        if wt["live"]:
+        if wt.get("release_reason") != "no_progress_timeout":
             continue
 
         path = slot_budget.WORKTREES_DIR / wt["name"]

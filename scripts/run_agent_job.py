@@ -30,27 +30,28 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import signal
 import shutil
+import signal
 import subprocess
 import sys
 import threading
 import time
+import uuid
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-from scripts.dispatch_supervisor import failure_class, procutil  # noqa: E402
-from volpred.ops import termination  # noqa: E402
-from volpred.ops.execution.registry import (  # noqa: E402
+from scripts.dispatch_supervisor import failure_class, procutil
+from volpred.ops import termination
+from volpred.ops.execution.registry import (
     ProviderRegistryError,
     authorize_provider_spawn,
     load_provider_registry,
     verify_spawn_receipt,
 )
-from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
+from volpred.ops.git_writer_lock import is_registered_linked_worktree
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -114,6 +115,7 @@ AUTH_BACKOFF_S = 120
 AUTH_RETRY_MIN_BUDGET_S = 600
 # Enough to carry the CLI's auth/quota banner; not enough to hold a research log.
 _TAIL_LINES = 200
+AGENT_JOB_RECEIPT_SCHEMA_VERSION = 2
 
 
 # Prepended to every brief. The agent runs headless: when its turn ends the
@@ -149,13 +151,21 @@ def _compose_brief(brief_text: str) -> str:
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
+
+
+def _write_metadata(path: Path, payload: dict) -> None:
+    """Atomically replace one execution-generation lifecycle receipt."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, path)
 
 
 def _run_attempt(
     argv: list[str], workdir: Path, env: dict[str, str], timeout: int
-) -> tuple[int, bool, str]:
-    """Run the agent once. Returns (exit_code, timed_out, tail_of_its_output).
+) -> tuple[int, bool, str, bool]:
+    """Return exit, timeout, output tail, and verified process-group drain.
 
     The output is teed, not swallowed: every line still reaches the compute log on
     its original stream. We keep a bounded tail only so the caller can classify
@@ -194,10 +204,18 @@ def _run_attempt(
         exit_code = -1
         print(f"[run_agent_job] TIMEOUT after {timeout}s — killing agent tree",
               file=sys.stderr, flush=True)
-        _kill_agent_tree(proc)
+        killed = _kill_agent_tree(proc)
+        try:
+            proc.wait(timeout=5)
+            leader_reaped = True
+        except (subprocess.TimeoutExpired, OSError):
+            leader_reaped = False
+        termination_confirmed = killed and leader_reaped
+    else:
+        termination_confirmed = procutil.pgid_members_checked(proc.pid) == []
     for t in pumps:
         t.join(timeout=5)
-    return exit_code, timed_out, "".join(tail)
+    return exit_code, timed_out, "".join(tail), termination_confirmed
 
 
 def _should_retry_auth(failure: str | None, attempts: int, deadline: float) -> bool:
@@ -369,6 +387,29 @@ def main() -> int:
     env = {**os.environ, "VOLPRED_ACTOR": f"agent-job:{brief_path.stem}"}
 
     started = _utc_now()
+    execution_id = uuid.uuid4().hex
+    running_receipt = {
+        "schema_version": AGENT_JOB_RECEIPT_SCHEMA_VERSION,
+        "execution_id": execution_id,
+        "state": "running",
+        "brief_file": (
+            str(brief_path.relative_to(ROOT))
+            if brief_path.is_relative_to(ROOT)
+            else str(brief_path)
+        ),
+        "model": args.model,
+        "effort": args.effort,
+        "cwd": str(workdir),
+        "runner_pid": os.getpid(),
+        "started_at": started,
+        "finished_at": None,
+        "termination_confirmed": None,
+        "timed_out": False,
+        "exit_code": None,
+        "runner_exit_code": None,
+        "result_artifact": str(result_artifact) if result_artifact is not None else None,
+    }
+    _write_metadata(metadata_path, running_receipt)
     print(f"[run_agent_job] start {started} model={args.model} effort={args.effort} cwd={workdir}", flush=True)
 
     deadline = time.monotonic() + args.timeout
@@ -377,6 +418,7 @@ def main() -> int:
     failure = None
     provider_receipt = None
     provider_policy_denial = None
+    termination_confirmed = True
     while True:
         attempts += 1
         remaining = int(deadline - time.monotonic())
@@ -416,9 +458,15 @@ def main() -> int:
             provider_receipt.settings_path
         )
         agent_spawn_attempts += 1
-        exit_code, timed_out, output = _run_attempt(
+        exit_code, timed_out, output, attempt_termination_confirmed = _run_attempt(
             attempt_argv, workdir, attempt_env, remaining
         )
+        termination_confirmed = (
+            termination_confirmed and attempt_termination_confirmed
+        )
+        if not attempt_termination_confirmed:
+            failure = "termination_unverified"
+            break
         if exit_code == 0:
             failure = None
             break
@@ -443,17 +491,26 @@ def main() -> int:
             if candidate.is_file()
         }
         artifact_near_misses = [str(candidate) for candidate in sorted(candidates)][:20]
-    validation_ok = exit_code == 0 and artifact_exists is not False
+    validation_ok = (
+        termination_confirmed
+        and exit_code == 0
+        and artifact_exists is not False
+    )
     runner_exit_code = 0 if validation_ok else 1
     summary = {
+        "schema_version": AGENT_JOB_RECEIPT_SCHEMA_VERSION,
+        "execution_id": execution_id,
+        "state": "terminal" if termination_confirmed else "termination_unverified",
         "brief_file": str(brief_path.relative_to(ROOT)) if brief_path.is_relative_to(ROOT) else str(brief_path),
         "model": args.model,
         "effort": args.effort,
         "cwd": str(workdir),
+        "runner_pid": os.getpid(),
         "started_at": started,
         "finished_at": finished,
         "exit_code": exit_code,
         "timed_out": timed_out,
+        "termination_confirmed": termination_confirmed,
         # Which wall the job hit, so the collecting fire routes on the failure's
         # NATURE and not merely on "nonzero": an `auth` job computed nothing and
         # needs re-enqueueing, whereas a `hard_failure` (None) has a worktree
@@ -478,10 +535,7 @@ def main() -> int:
         "runner_exit_code": runner_exit_code,
     }
 
-    metadata_path.parent.mkdir(parents=True, exist_ok=True)
-    metadata_tmp = metadata_path.with_name(f".{metadata_path.name}.{os.getpid()}.tmp")
-    metadata_tmp.write_text(json.dumps(summary, ensure_ascii=False, indent=2))
-    os.replace(metadata_tmp, metadata_path)
+    _write_metadata(metadata_path, summary)
     print(f"[run_agent_job] metadata → {metadata_path}", flush=True)
 
     if exit_code == 0 and artifact_exists is False:

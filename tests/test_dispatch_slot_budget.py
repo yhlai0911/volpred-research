@@ -17,6 +17,9 @@ def isolate_live_occupancy(tmp_path, monkeypatch):
     monkeypatch.setattr(
         slot_budget, "AGENTS_DIR", tmp_path / "no-live-agents",
     )
+    monkeypatch.setattr(
+        slot_budget, "AGENT_JOBS_DIR", tmp_path / "no-agent-jobs",
+    )
 
 
 def _write(tmp_path, tasks, state):

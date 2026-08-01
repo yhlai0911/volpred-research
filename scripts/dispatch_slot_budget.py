@@ -36,18 +36,25 @@ agent holds a slot forever and silently. On 2026-07-13 02:00 four worktrees held
 4/4 slots while only two were doing anything; the dispatcher printed "NO agent
 dispatch candidates" for hours with 34 tasks pending, six of them P1.
 
-The obvious fix — "check whether the agent process is still alive" — DOES NOT
-WORK, and this is the part worth remembering. Both hung agents (`fervent-payne`,
-`wizardly-mirzakhani`) still had live claude processes holding the worktree as
-cwd, 2 days after their last commit. Liveness is not progress. A slot is held
-only while work is PROGRESSING, so progress is what we measure:
+The first fix measured commit/dirty-file progress and expired a worktree after
+four hours. 2026-08-01 proved that was still the same category error with a
+timer: three timed-out result worktrees looked "fresh" and consumed 3/2 slots,
+blocking both article and incident repair admission. A directory and its mtimes
+are artifact custody, never an execution lease.
 
-    progress_at = max(HEAD commit time, mtime of any dirty/untracked file)
+Only typed schema-v2 lifecycle receipts may now hold worktree capacity. The
+runner atomically writes `running + execution_id` before provider spawn and
+settles that same generation as either verified `terminal` or
+`termination_unverified`. Running/unverified generations hold capacity while
+fresh; verified terminal generations release immediately. A newer malformed
+generation quarantines the slot rather than exposing an older terminal receipt.
+Commit/dirty/reflog progress remains evidence for lease expiry and salvage, but
+can never manufacture a lease by itself.
 
-No progress for STALE_HOURS -> the worktree stops counting against capacity. It
-is NOT deleted here: reclaiming capacity must not depend on a destructive cleanup
-succeeding. Hygiene (kill the holder, remove the worktree, keep the branch) is a
-separate explicit step — `scripts/reclaim_stale_worktrees.py`.
+The worktree is NOT deleted here: reclaiming capacity must not depend on a
+destructive cleanup succeeding. Hygiene (kill the holder, remove the worktree,
+keep the branch) is a separate explicit step —
+`scripts/reclaim_stale_worktrees.py`.
 
 The same "artifact nobody expires" bug applies to `storage/ops/agents/*.json`
 records stuck at status=running, so the same staleness rule is applied to them.
@@ -64,6 +71,7 @@ import json
 import subprocess
 import time
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 from volpred.ops.diagnostics import warn
@@ -74,17 +82,17 @@ TASKS_PATH = REPO / "storage" / "next_tasks.json"
 STATE_PATH = REPO / "storage" / "ops" / "dispatch_state.json"
 WORKTREES_DIR = REPO / ".claude" / "worktrees"
 AGENTS_DIR = REPO / "storage" / "ops" / "agents"
+AGENT_JOBS_DIR = REPO / "storage" / "ops" / "agent_jobs"
 
 BASE_CAP = 4
 SURGE_CAP = 6
 DERATE_CAP = 2
 P1_SURGE_AT = 3
 
-# Hours a worktree may show zero progress before it stops holding a slot.
-# Agent runs are scoped to <=50min (fire cap); queued research agents run longer
-# but commit as they go. 4h clears every real run with room to spare, and both
-# 2026-07-13 zombies were 48h+ stale — the threshold is not a close call.
+# Hours a formal running/unverified execution lease may show zero progress before
+# capacity expires. The artifact remains; only the scheduling lease is released.
 STALE_HOURS = 4.0
+MAX_RECEIPT_CLOCK_SKEW_S = 300.0
 ACTIVE_AGENT_STATUSES = {"running", "active", "in_progress", "claimed"}
 # Bound the stat() cost on a worktree with a large untracked tree.
 _MAX_DIRTY_FILES_STATTED = 200
@@ -165,15 +173,241 @@ def _last_dirty_mtime(worktree: Path) -> float:
     return newest
 
 
-def worktree_slots(now: float | None = None, worktrees_dir: Path | None = None) -> list[dict]:
-    """Classify each worktree as live (holds a slot) or stale (does not).
+def _last_git_metadata_mtime(worktree: Path) -> float:
+    """High-resolution checkout/ref progress missing from Git commit objects."""
+    try:
+        output = subprocess.run(
+            [
+                "git", "-C", str(worktree), "rev-parse",
+                "--git-path", "logs/HEAD",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        ).stdout
+    except (subprocess.SubprocessError, OSError) as exc:
+        warn(
+            "slot-budget",
+            f"讀不到 {worktree.name} 的 Git metadata path ({exc}) — "
+            "terminal receipt 不取得同秒 release authority",
+        )
+        return 0.0
+    newest = 0.0
+    for raw in output.splitlines():
+        path = Path(raw.strip())
+        if not path.is_absolute():
+            path = worktree / path
+        try:
+            newest = max(newest, path.stat().st_mtime)
+        except OSError:  # silent-ok: Git metadata paths may disappear mid-read
+            continue
+    return newest
 
-    Progress, not process liveness — see module docstring.
-    """
+
+def _iso_epoch(value: object) -> float | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:  # silent-ok: parser is a validation predicate
+        return None
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        return None
+    return parsed.timestamp()
+
+
+def _is_int(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _legacy_agent_job_receipt(data: dict, *, now: float) -> bool:
+    """Recognize v1 archive rows without granting them release authority."""
+    cwd = data.get("cwd")
+    started = _iso_epoch(data.get("started_at"))
+    finished = _iso_epoch(data.get("finished_at"))
+    try:
+        path_valid = isinstance(cwd, str) and bool(cwd.strip()) and bool(Path(cwd).resolve())
+    except (OSError, ValueError):
+        path_valid = False
+    return (
+        path_valid
+        and started is not None
+        and finished is not None
+        and started <= finished <= now + MAX_RECEIPT_CLOCK_SKEW_S
+        and isinstance(data.get("timed_out"), bool)
+        and _is_int(data.get("exit_code"))
+        and _is_int(data.get("runner_exit_code"))
+    )
+
+
+def agent_job_leases(
+    agent_jobs_dir: Path | None = None,
+    *,
+    now: float | None = None,
+) -> dict[Path, dict]:
+    """Newest schema-v2 execution generation for each worktree path."""
+    now = time.time() if now is None else now
+    agent_jobs_dir = AGENT_JOBS_DIR if agent_jobs_dir is None else agent_jobs_dir
+    latest: dict[Path, dict] = {}
+    if not agent_jobs_dir.exists():
+        return latest
+
+    def quarantine_invalid(receipt_path: Path, data: dict) -> None:
+        cwd = data.get("cwd")
+        if not isinstance(cwd, str) or not cwd.strip():
+            return
+        try:
+            key = Path(cwd).resolve()
+            observed_epoch = receipt_path.stat().st_mtime
+        except (OSError, ValueError):  # silent-ok: caller already emitted receipt warning
+            return
+        claimed_start = _iso_epoch(data.get("started_at"))
+        if (
+            claimed_start is not None
+            and claimed_start <= now + MAX_RECEIPT_CLOCK_SKEW_S
+        ):
+            observed_epoch = max(observed_epoch, claimed_start)
+        generation = {
+            "receipt": str(receipt_path),
+            "schema_version": data.get("schema_version"),
+            "execution_id": data.get("execution_id"),
+            "state": "invalid",
+            "runner_pid": data.get("runner_pid"),
+            "started_at": data.get("started_at"),
+            "started_epoch": observed_epoch,
+            "finished_at": data.get("finished_at"),
+            "finished_epoch": None,
+            "termination_confirmed": False,
+            "timed_out": data.get("timed_out") is True,
+            "exit_code": data.get("exit_code"),
+            "runner_exit_code": data.get("runner_exit_code"),
+            "result_artifact_exists": data.get("result_artifact_exists") is True,
+            "validation_ok": False,
+            "invalid_reason": "lifecycle_schema_invalid",
+        }
+        previous = latest.get(key)
+        if previous is None or previous["started_epoch"] < observed_epoch:
+            latest[key] = generation
+
+    for receipt_path in sorted(agent_jobs_dir.glob("*.json")):
+        try:
+            data = json.loads(receipt_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeError) as exc:
+            warn(
+                "slot-budget",
+                f"agent job receipt 讀不到 {receipt_path.name} "
+                f"({type(exc).__name__}: {exc}) — 不用它釋放 slot",
+            )
+            continue
+        if not isinstance(data, dict):
+            warn(
+                "slot-budget",
+                f"agent job receipt {receipt_path.name} root 不是 object — 不用它釋放 slot",
+            )
+            continue
+        if data.get("schema_version") != 2:
+            if _legacy_agent_job_receipt(data, now=now):
+                continue
+            warn(
+                "slot-budget",
+                f"agent job receipt {receipt_path.name} schema 不完整 — 不用它釋放 slot",
+            )
+            quarantine_invalid(receipt_path, data)
+            continue
+        cwd = data.get("cwd")
+        execution_id = data.get("execution_id")
+        state = data.get("state")
+        runner_pid = data.get("runner_pid")
+        started_epoch = _iso_epoch(data.get("started_at"))
+        finished_epoch = _iso_epoch(data.get("finished_at"))
+        valid_identity = (
+            isinstance(cwd, str)
+            and bool(cwd.strip())
+            and isinstance(execution_id, str)
+            and bool(execution_id.strip())
+            and state in {"running", "terminal", "termination_unverified"}
+            and _is_int(runner_pid)
+            and runner_pid > 0
+            and started_epoch is not None
+            and started_epoch <= now + MAX_RECEIPT_CLOCK_SKEW_S
+        )
+        valid_running = (
+            state == "running"
+            and data.get("finished_at") is None
+            and data.get("termination_confirmed") is None
+            and data.get("exit_code") is None
+            and data.get("runner_exit_code") is None
+        )
+        valid_settled = (
+            state in {"terminal", "termination_unverified"}
+            and finished_epoch is not None
+            and started_epoch is not None
+            and started_epoch <= finished_epoch <= now + MAX_RECEIPT_CLOCK_SKEW_S
+            and isinstance(data.get("timed_out"), bool)
+            and _is_int(data.get("exit_code"))
+            and _is_int(data.get("runner_exit_code"))
+            and isinstance(data.get("termination_confirmed"), bool)
+            and (
+                (state == "terminal" and data.get("termination_confirmed") is True)
+                or (
+                    state == "termination_unverified"
+                    and data.get("termination_confirmed") is False
+                )
+            )
+        )
+        if not valid_identity or not (valid_running or valid_settled):
+            warn(
+                "slot-budget",
+                f"agent job receipt {receipt_path.name} lifecycle schema 無效 — "
+                "不用它釋放 slot",
+            )
+            quarantine_invalid(receipt_path, data)
+            continue
+        try:
+            key = Path(cwd).resolve()
+        except (OSError, ValueError) as exc:
+            warn(
+                "slot-budget",
+                f"agent job receipt {receipt_path.name} cwd 無效 ({exc}) — "
+                "不用它釋放 slot",
+            )
+            continue
+        generation = {
+            "receipt": str(receipt_path),
+            "schema_version": 2,
+            "execution_id": execution_id,
+            "state": state,
+            "runner_pid": runner_pid,
+            "started_at": data["started_at"],
+            "started_epoch": started_epoch,
+            "finished_at": data.get("finished_at"),
+            "finished_epoch": finished_epoch,
+            "termination_confirmed": data.get("termination_confirmed"),
+            "timed_out": data.get("timed_out") is True,
+            "exit_code": data.get("exit_code"),
+            "runner_exit_code": data.get("runner_exit_code"),
+            "result_artifact_exists": data.get("result_artifact_exists") is True,
+            "validation_ok": data.get("validation_ok") is True,
+        }
+        previous = latest.get(key)
+        if previous is not None and previous["started_epoch"] >= started_epoch:
+            continue
+        latest[key] = generation
+    return latest
+
+
+def worktree_slots(
+    now: float | None = None,
+    worktrees_dir: Path | None = None,
+    agent_jobs_dir: Path | None = None,
+) -> list[dict]:
+    """Join artifact custody to formal execution leases; artifacts never own slots."""
     now = time.time() if now is None else now
     # Resolved at call time, not bound as a default: a default arg freezes the
     # module constant and makes the dir un-injectable in tests.
     worktrees_dir = WORKTREES_DIR if worktrees_dir is None else worktrees_dir
+    jobs_by_cwd = agent_job_leases(agent_jobs_dir, now=now)
     slots: list[dict] = []
     if not worktrees_dir.exists():
         return slots
@@ -181,14 +415,47 @@ def worktree_slots(now: float | None = None, worktrees_dir: Path | None = None) 
     for path in sorted(worktrees_dir.iterdir()):
         if not path.is_dir() or path.name.startswith("."):
             continue
-        progress_at = max(_last_commit_epoch(path), _last_dirty_mtime(path))
+        worktree_progress_at = max(
+            _last_commit_epoch(path),
+            _last_git_metadata_mtime(path),
+            _last_dirty_mtime(path),
+        )
+        job = jobs_by_cwd.get(path.resolve())
+        lease_progress_at = 0.0
+        if job and job["state"] in {"running", "invalid"}:
+            lease_progress_at = job["started_epoch"]
+        elif job and job["state"] == "termination_unverified":
+            lease_progress_at = job["finished_epoch"]
+        progress_at = max(worktree_progress_at, lease_progress_at)
         idle_hours = (now - progress_at) / 3600.0 if progress_at else float("inf")
-        slots.append({
+        terminal_release = bool(
+            job
+            and job["state"] == "terminal"
+            and job["termination_confirmed"] is True
+            and job["finished_epoch"] >= worktree_progress_at
+        )
+        active_lease = bool(
+            job
+            and job["state"] in {"running", "termination_unverified", "invalid"}
+        )
+        slot = {
             "name": path.name,
             "progress_at": progress_at or None,
             "idle_hours": None if idle_hours == float("inf") else round(idle_hours, 1),
-            "live": idle_hours < STALE_HOURS,
-        })
+            "live": active_lease and idle_hours < STALE_HOURS,
+        }
+        if terminal_release:
+            slot["release_reason"] = "terminal_agent_job"
+            slot["terminal_job"] = job
+        elif active_lease:
+            slot["active_job"] = job
+            if idle_hours >= STALE_HOURS:
+                slot["release_reason"] = "no_progress_timeout"
+        elif job and job["state"] == "terminal":
+            slot["release_reason"] = "unowned_progress_after_terminal"
+        else:
+            slot["release_reason"] = "artifact_without_execution_lease"
+        slots.append(slot)
     return slots
 
 
@@ -249,10 +516,22 @@ def occupancy(
     *,
     worktrees_dir: Path | None = None,
     agents_dir: Path | None = None,
+    agent_jobs_dir: Path | None = None,
 ) -> dict:
     """How many slots are actually held. Single owner — do not re-derive."""
-    wts = worktree_slots(now=now, worktrees_dir=worktrees_dir)
-    agents = agent_slots(now=now, agents_dir=agents_dir)
+    # AGENTS_DIR is intentionally monkeypatchable: existing callers use it to
+    # establish an isolated ops-state root.  Resolve it before deriving the
+    # sibling execution-receipt directory, otherwise a clean fixture can still
+    # leak reads from live storage/ops/agent_jobs.
+    effective_agents_dir = AGENTS_DIR if agents_dir is None else agents_dir
+    if agent_jobs_dir is None:
+        agent_jobs_dir = effective_agents_dir.parent / "agent_jobs"
+    wts = worktree_slots(
+        now=now,
+        worktrees_dir=worktrees_dir,
+        agent_jobs_dir=agent_jobs_dir,
+    )
+    agents = agent_slots(now=now, agents_dir=effective_agents_dir)
     live_wt = [w["name"] for w in wts if w["live"]]
     live_agents = [a["name"] for a in agents if a["live"]]
     stale = [w for w in wts if not w["live"]] + [a for a in agents if not a["live"]]
@@ -299,6 +578,7 @@ def budget(
     now: float | None = None,
     worktrees_dir: Path | None = None,
     agents_dir: Path | None = None,
+    agent_jobs_dir: Path | None = None,
 ) -> dict:
     pending = _pending_by_priority(tasks_path)
     blocked = _auth_blocked(state_path)
@@ -325,6 +605,7 @@ def budget(
         now=now,
         worktrees_dir=worktrees_dir,
         agents_dir=agents_dir,
+        agent_jobs_dir=agent_jobs_dir,
     )
     return {
         "cap": cap,

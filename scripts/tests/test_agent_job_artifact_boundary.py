@@ -8,7 +8,9 @@ silently creates plausible fake experiment results in main.
 from __future__ import annotations
 
 import argparse
+import io
 import json
+import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -101,10 +103,152 @@ def test_runner_verifies_worktree_result_without_writing_main(monkeypatch, tmp_p
     assert not (main / rel_artifact).exists()
 
     receipt = json.loads(metadata.read_text())
+    assert receipt["schema_version"] == 2
+    assert receipt["execution_id"]
+    assert receipt["state"] == "terminal"
+    assert receipt["termination_confirmed"] is True
     assert receipt["result_artifact"] == str(real_artifact)
     assert receipt["result_artifact_exists"] is True
     assert receipt["validation_ok"] is True
     assert receipt["runner_exit_code"] == 0
+
+
+def test_runner_persists_running_generation_before_provider_spawn(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    main = tmp_path / "main"
+    worktree = tmp_path / "worktree"
+    main.mkdir()
+    worktree.mkdir()
+    brief = main / "brief.md"
+    brief.write_text("produce the result")
+    metadata = main / "storage/ops/agent_jobs/job-running.json"
+    running_snapshot = tmp_path / "running-snapshot.json"
+    rel_artifact = "experiments/k-running/k-running_results.json"
+    artifact = worktree / rel_artifact
+    fake = _fake_agent(
+        tmp_path / "claude",
+        f'cp "{metadata}" "{running_snapshot}"\n'
+        f'mkdir -p "{artifact.parent}"\n'
+        f'printf \'{{"ok":true}}\' > "{artifact}"\n',
+    )
+
+    monkeypatch.setattr(run_agent_job, "ROOT", main)
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        _runner_argv(brief, worktree, metadata, rel_artifact),
+    )
+
+    assert run_agent_job.main() == 0
+    running = json.loads(running_snapshot.read_text())
+    terminal = json.loads(metadata.read_text())
+    assert running["schema_version"] == 2
+    assert running["state"] == "running"
+    assert running["finished_at"] is None
+    assert running["termination_confirmed"] is None
+    assert terminal["state"] == "terminal"
+    assert terminal["termination_confirmed"] is True
+    assert terminal["execution_id"] == running["execution_id"]
+
+
+def test_unverified_timeout_never_writes_releasable_terminal_receipt(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    main = tmp_path / "main"
+    worktree = tmp_path / "worktree"
+    main.mkdir()
+    worktree.mkdir()
+    brief = main / "brief.md"
+    brief.write_text("time out")
+    metadata = main / "storage/ops/agent_jobs/job-timeout.json"
+    fake = _fake_agent(tmp_path / "claude", "exit 0\n")
+
+    monkeypatch.setattr(run_agent_job, "ROOT", main)
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
+    monkeypatch.setattr(
+        run_agent_job,
+        "_run_attempt",
+        lambda *_a, **_kw: (-1, True, "timeout", False),
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        _runner_argv(brief, worktree, metadata, "results.json"),
+    )
+
+    assert run_agent_job.main() == 1
+    receipt = json.loads(metadata.read_text())
+    assert receipt["state"] == "termination_unverified"
+    assert receipt["termination_confirmed"] is False
+    assert receipt["timed_out"] is True
+
+
+def test_clean_leader_exit_with_live_descendant_fails_collection(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    main = tmp_path / "main"
+    worktree = tmp_path / "worktree"
+    main.mkdir()
+    worktree.mkdir()
+    brief = main / "brief.md"
+    brief.write_text("return before descendant")
+    metadata = main / "storage/ops/agent_jobs/job-orphan.json"
+    artifact = worktree / "results.json"
+    artifact.write_text('{"partial": true}', encoding="utf-8")
+    fake = _fake_agent(tmp_path / "claude", "exit 0\n")
+
+    monkeypatch.setattr(run_agent_job, "ROOT", main)
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
+    monkeypatch.setattr(
+        run_agent_job,
+        "_run_attempt",
+        lambda *_a, **_kw: (0, False, "leader exited", False),
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        _runner_argv(brief, worktree, metadata, "results.json"),
+    )
+
+    assert run_agent_job.main() == 1
+    receipt = json.loads(metadata.read_text())
+    assert receipt["state"] == "termination_unverified"
+    assert receipt["termination_confirmed"] is False
+    assert receipt["result_artifact_exists"] is True
+    assert receipt["validation_ok"] is False
+    assert receipt["runner_exit_code"] == 1
+
+
+def test_timeout_propagates_failed_process_group_verification(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    class TimedOutProc:
+        pid = 123
+        stdout = io.StringIO("")
+        stderr = io.StringIO("")
+        waits = 0
+
+        def wait(self, timeout=None):
+            self.waits += 1
+            if self.waits == 1:
+                raise subprocess.TimeoutExpired(cmd="claude", timeout=timeout)
+            return -9
+
+    monkeypatch.setattr(run_agent_job.subprocess, "Popen", lambda *_a, **_kw: TimedOutProc())
+    monkeypatch.setattr(run_agent_job, "_kill_agent_tree", lambda _proc: False)
+
+    exit_code, timed_out, _tail, termination_confirmed = run_agent_job._run_attempt(
+        ["claude"], tmp_path, {}, 1,
+    )
+
+    assert (exit_code, timed_out) == (-1, True)
+    assert termination_confirmed is False
 
 
 def test_runner_fails_when_successful_agent_omits_declared_result(
