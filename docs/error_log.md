@@ -5484,3 +5484,38 @@ immutable release 完成 planned reload；22:26:38 與 22:28:23 兩個自然 rec
 workspace identity、但尚無 terminal receipt 的舊 generation，已走 `remediation_opened` 並 materialize
 P2 `inc_792a94b0ecf4_e1`，沒有重放舊 task effect 或污染現行 claim。五步 Gate 已完成，狀態為
 **`root_cause_fixed_and_verified`**。
+### 2026-08-01 — Claude quota 後 Codex failover 仍被 production env 關閉，OAuth crash custody 未封口
+
+**證據化症狀**：live LaunchAgent 明確載入 `VOLPRED_CODEX_FAILOVER=0`；同一時段
+supervisor log 在 Claude quota 後反覆寫出 `codex failover disabled`，因此
+`Claude→Codex failover 接手失敗` 並非通知誤報。canonical schedule、repo plist 與
+installer validator 都仍把先前的 `disabled_until_per_fire_custody` 當現況，造成後續已完成
+的 kernel custody／termination-intent 工作無法自動解除舊 disable snapshot。
+
+**根因層級與底層修復**：這是 activation contract 加 credential lifecycle 的複合缺口。
+canonical schedule、plist 與 immutable installer 現共同要求 failover=1；新 Codex OAuth
+lease 在 secret 寫入前先 fsync parent/child directory 與 durable v3 intent，精確綁定
+job、attempt 與 Darwin producer custody。missing／invalid／stale-attempt custody 在
+materialize、provider spawn、kill 前 fail closed。所有 terminal path 都以完整 resource
+coalition（含 `setsid` descendant）連續兩次 empty 才刪 synthetic auth；unknown／live
+custody 不再同步無限等待唯一 slot，而是 durable `recovery_pending` 後交給 health/startup
+重試。receipt state 依 durable `close_phase` 單調前進，pre-checkpoint failure 與
+destination-unlinked 後 crash 都能在 restart 收斂；v1/v2 歷史 recovery 保持相容。
+
+**live canary 揭露的相鄰根因**：一次性 launchd canary remove 後，exact saved resource
+coalition 已被 kernel 移除並回 `ESRCH`；舊 observer 把它當 unknown，會讓 v3 receipt
+永久 active。`_unknown_custody_members()` 現只把 exact saved-coalition enumeration 的
+`ESRCH` 視為 authoritative drained；host、boot、observer-current-coalition 或 ancestor
+probe 的任何 `ESRCH` 仍是 unknown／fail closed。負向測試鎖住三種不可誤放行的 probe。
+
+**回歸、部署與回讀**：TDD 與 Matt Spec／Standards 多輪雙審最終皆 PASS；activation
+scoped suite **380 passed、1 skipped**，live-follow-up 後合併 suite **402 passed、2
+skipped**，F/E9 lint 與 diff check clean。commits `c25324da2`、`02ee2b8a0` 透過 immutable
+installer 部署；current release=`02ee2b8a0863f7038eff0c1610d1cf3cc423279b`、SHA
+`b233a8a151bf04d8ac2453cd9aebb7a6d6e6ad4376ff506aead217af38f0c4d2`，LaunchAgent
+read-back 為 failover=1、fresh PID／heartbeat、0 current job、auth_blocked=false。
+subscription-only canary 回讀 `codex-cli 0.145.0`、ChatGPT reachable、API-key env=false、
+v3 job/attempt match、cleanup=true、synthetic auth absent；移除 canary 後的第二筆 interrupted
+receipt由 ESRCH 修正成功回收（recovered=1），全目錄 nonterminal v3=0。此 bounded incident
+五步完成，狀態 **`root_cause_fixed_and_verified`**；program umbrella 的 formal owner
+cutover／retirement window 仍依 #9→#12 blocking edge 獨立保持 `contained`。

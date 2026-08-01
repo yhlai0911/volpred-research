@@ -3206,3 +3206,18 @@ program goal。
 - ✅ TDD／Matt review 後相鄰回歸 **172 passed**；production canary 已寫入 exact task identity，原 audit
   回讀 `healthy=true`、`unhealthy_source_count=0`。本 slice 為
   **`root_cause_fixed_and_verified`**。
+## 2026-08-01 — Subscription-only Codex failover 正式啟用與 crash custody 收斂
+
+- ✅ production `VOLPRED_CODEX_FAILOVER` 已由 0 切為 1；canonical schedule、repo plist、
+  immutable installer validator 三處同契約，不能再因舊 snapshot 靜默安裝停用值。
+- ✅ v3 provider-auth receipt 在 secret 前 durable，綁 exact job／attempt／kernel custody；
+  unknown、stale attempt、`setsid` descendant、pre/post-unlink crash、close failure均有
+  fail-closed／bounded recovery regression，歷史 v1/v2 receipt仍可 recovery。
+- ✅ Matt Spec／Standards 最終雙 PASS；相關完整範圍 **402 passed、2 skipped**。
+- ✅ immutable live release `02ee2b8a0`／`b233a8a…c4d2` 已 stable，LaunchAgent env=1、
+  heartbeat fresh、0 current job。subscription-only live canary 無 API key、Codex reachable、
+  v3 terminal cleaned、synthetic auth absent；canary remove 後的 coalition-ESRCH receipt亦
+  recovered=1，現有 nonterminal v3=0。
+- 🟢 此 failover activation incident 為 **`root_cause_fixed_and_verified`**。這不提前
+  宣稱 Operations Core 全 program 完成；#9→#12 formal owner cutover與既定 retirement
+  clean-window仍是獨立 blocking edge。
