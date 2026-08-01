@@ -2287,7 +2287,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-01T17:33:52.225199+00:00"
+     "last_seen_at": "2026-08-01T18:07:54.139612+00:00"
     },
     {
      "cleared_at": null,
@@ -2405,9 +2405,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-01T17:33:52.225199+00:00",
+   "last_seen_at": "2026-08-01T18:07:54.139612+00:00",
    "notified_at": null,
-   "occurrence_count": 7986,
+   "occurrence_count": 8014,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3335,7 +3335,7 @@
    "clean_observations": [],
    "clean_streak_started_at": null,
    "control_gate_id": null,
-   "current_task_id": "ci-red-30709398279",
+   "current_task_id": "ci-root-30711055685",
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-08-01T17:21:09.309294+00:00",
@@ -3353,6 +3353,16 @@
      "at": "2026-08-01T17:21:09.309294+00:00",
      "instance_key": "30709398279:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T17:46:07.198534+00:00",
+     "instance_key": "30710346293:1",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T18:05:59.620780+00:00",
+     "instance_key": "30711055685:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -3361,14 +3371,26 @@
      "first_seen_at": "2026-08-01T17:21:09.309294+00:00",
      "key": "30709398279:1",
      "last_seen_at": "2026-08-01T17:21:09.309294+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-01T17:46:07.198534+00:00",
+     "key": "30710346293:1",
+     "last_seen_at": "2026-08-01T17:46:07.198534+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-01T18:05:59.620780+00:00",
+     "key": "30711055685:1",
+     "last_seen_at": "2026-08-01T18:05:59.620780+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-01T17:18:40.3972158Z E AssertionError: _drive_every_writer 沒驅動這些 public writer: ['activate_provider_auth_receipt_capability'] → 窮舉 gate 已不再窮舉。請補上呼叫。",
-   "last_seen_at": "2026-08-01T17:21:09.309294+00:00",
+   "last_breach_detail": "2026-08-01T18:04:10.4570340Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1743']",
+   "last_seen_at": "2026-08-01T18:05:59.620780+00:00",
    "notified_at": null,
-   "occurrence_count": 1,
+   "occurrence_count": 3,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -3378,6 +3400,11 @@
      "episode": 1,
      "opened_at": "2026-08-01T17:21:10.503281+00:00",
      "task_id": "ci-red-30709398279"
+    },
+    {
+     "episode": 1,
+     "opened_at": "2026-08-01T18:06:00.245451+00:00",
+     "task_id": "ci-root-30711055685"
     }
    ],
    "task_mode": "external",
@@ -3687,6 +3714,6 @@
    }
   }
  },
- "updated_at": "2026-08-01T17:33:52.269121+00:00",
+ "updated_at": "2026-08-01T18:07:54.179710+00:00",
  "version": 1
 }
