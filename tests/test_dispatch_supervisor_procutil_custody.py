@@ -213,6 +213,67 @@ def test_complete_custody_treats_removed_pinned_coalition_as_drained(
     ) == []
 
 
+def test_producer_cohort_treats_removed_pinned_coalition_as_drained(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api = _FakeDarwinCustodyAPI(pids=[])
+    _install_fake_darwin(monkeypatch, api)
+    monkeypatch.setattr(
+        api,
+        "coalition_pids",
+        lambda _coalition_id: (_ for _ in ()).throw(
+            ProcessLookupError(errno.ESRCH, "coalition removed")
+        ),
+    )
+
+    assert procutil.producer_cohort_members_checked(
+        0,
+        job_id="removed-coalition",
+        custody={
+            "version": 2,
+            "host_uuid": HOST_UUID,
+            "boot_session_uuid": BOOT_UUID,
+            "resource_coalition_id": 73,
+            "trusted_unique_ids": [100],
+        },
+    ) == []
+
+
+@pytest.mark.parametrize("probe", ["host", "boot", "current_coalition"])
+def test_producer_cohort_does_not_treat_other_esrch_as_saved_drain(
+    monkeypatch: pytest.MonkeyPatch,
+    probe: str,
+) -> None:
+    api = _FakeDarwinCustodyAPI(
+        pids=[10],
+        identities={10: (100, 9000)},
+    )
+    _install_fake_darwin(monkeypatch, api)
+    monkeypatch.setattr(procutil.os, "getpid", lambda: 10)
+
+    def missing(*_args):
+        raise ProcessLookupError(errno.ESRCH, f"{probe} unavailable")
+
+    if probe == "host":
+        monkeypatch.setattr(api, "host_uuid", missing)
+    elif probe == "boot":
+        monkeypatch.setattr(api, "boot_session_uuid", missing)
+    else:
+        monkeypatch.setattr(api, "resource_coalition_id", missing)
+
+    assert procutil.producer_cohort_members_checked(
+        0,
+        job_id="observer-probe-error",
+        custody={
+            "version": 2,
+            "host_uuid": HOST_UUID,
+            "boot_session_uuid": BOOT_UUID,
+            "resource_coalition_id": 73,
+            "trusted_unique_ids": [100],
+        },
+    ) is None
+
+
 def test_empty_launchd_coalition_reference_survives_service_removal(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

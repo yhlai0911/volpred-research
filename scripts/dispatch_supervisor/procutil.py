@@ -631,16 +631,48 @@ def _unknown_custody_members(
         api = _get_darwin_custody_api()
         current_host_uuid = api.host_uuid()
         current_boot_uuid = api.boot_session_uuid()
-        if current_host_uuid != saved_host_uuid:
-            # A foreign host cannot prove anything about producers on the
-            # authority host. Cross-host release requires an explicit remote
-            # drain acknowledgement, which this local ledger does not carry.
-            return None
-        if current_boot_uuid != saved_boot_uuid:
-            # Same physical Mac, later boot: no process or coalition from the
-            # saved boot can still exist. Avoid probing a possibly reused ID.
-            return {}
+    except _CUSTODY_PROBE_ERRORS as exc:
+        LOG.warning(
+            "producer custody probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+    if current_host_uuid != saved_host_uuid:
+        # A foreign host cannot prove anything about producers on the
+        # authority host. Cross-host release requires an explicit remote
+        # drain acknowledgement, which this local ledger does not carry.
+        return None
+    if current_boot_uuid != saved_boot_uuid:
+        # Same physical Mac, later boot: no process or coalition from the
+        # saved boot can still exist. Avoid probing a possibly reused ID.
+        return {}
+    try:
         identities = _coalition_identities(api, coalition_id)
+    except OSError as exc:
+        if exc.errno == errno.ESRCH:
+            # The exact saved resource coalition no longer exists. Darwin
+            # cannot recycle that coalition identity within the saved boot,
+            # so this is authoritative drain evidence, not probe ambiguity.
+            return {}
+        LOG.warning(
+            "producer custody probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+    except (
+        TypeError,
+        ValueError,
+        OverflowError,
+        AttributeError,
+        ctypes.ArgumentError,
+        _DarwinCustodyProbeError,
+    ) as exc:
+        LOG.warning(
+            "producer custody probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+    try:
         dynamic_trusted: set[int] = set()
         current_pid = os.getpid()
         current_cid = api.resource_coalition_id(current_pid)
@@ -649,18 +681,18 @@ def _unknown_custody_members(
                 identities,
                 current_pid,
             )
-        trusted = saved_trusted | dynamic_trusted
-        return {
-            pid: uniqueid
-            for pid, (uniqueid, _parent_uniqueid) in identities.items()
-            if uniqueid not in trusted
-        }
     except _CUSTODY_PROBE_ERRORS as exc:
         LOG.warning(
-            "producer custody probe failed closed: %s",
+            "producer custody observer probe failed closed: %s",
             type(exc).__name__,
         )
         return None
+    trusted = saved_trusted | dynamic_trusted
+    return {
+        pid: uniqueid
+        for pid, (uniqueid, _parent_uniqueid) in identities.items()
+        if uniqueid not in trusted
+    }
 
 
 def producer_cohort_members_checked(
