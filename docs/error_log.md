@@ -5580,6 +5580,10 @@ knowledge closure 的 compute result 誤認為可交付成品。
 canonical experiment admission gate，並在持有 receipt／Git transaction lock 後、真正 staging 前
 重新授權 exact paths；review verdict、artifact contract、reproduce spec、knowledge 或 byte binding
 未齊、或 scan 後發生漂移時，只寫 `experiment_admission_blocked` evidence，保留原檔且禁止 commit。
+queue lane 另遵守 `experiments/<id>/` first-child atomic unit：receipt 未宣告的 dirty companion 不得拿來
+通過 gate 後只提交 results；正式收件必由 namespace／main-thread collector 原子落地整個 unit。持鎖
+admission 會在 staging 後再跑一次，並逐一比對 HEAD、working-tree SHA 與 staged Git blob，連不拿
+writer lock 的外部檔案寫入也不能把已審 bytes 偷換掉。
 Codex failover prompt 補齊 PHASE A，逐筆處理 `collect_completed`、`split_required`、
 `artifact_contract_mismatch`、`triage_failed`，未 `mark-followup-dispatched` settlement 前不得挑新工。
 K1743 本身改用 runtime `finalize_experiment()` 同步產 results/spec byte trace，新增 FX 合理範圍與

@@ -404,6 +404,102 @@ def test_compute_experiment_admission_is_rechecked_inside_delivery_transaction(
     assert "delivered_paths" not in json.loads(job_path.read_text(encoding="utf-8"))
 
 
+def test_compute_experiment_cannot_use_undeclared_dirty_companions_for_admission(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """The queue lane may not commit one member of a dirty experiment unit."""
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    queue = root / "storage" / "ops" / "compute_queue"
+    experiment = root / "experiments" / "K1743"
+    queue.mkdir(parents=True)
+    experiment.mkdir(parents=True)
+    result = experiment / "K1743_results.json"
+    result.write_text('{"experiment_id":"K1743"}\n', encoding="utf-8")
+    review = experiment / "review_verdict.json"
+    review.write_text('{"verdict":"PASS"}\n', encoding="utf-8")
+    result_rel = str(result.relative_to(root))
+    review_rel = str(review.relative_to(root))
+    (queue / "k1743-partial-unit.json").write_text(json.dumps({
+        "id": "k1743-partial-unit",
+        "kind": "compute",
+        "status": "completed",
+        "output_paths": [result_rel],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+    monkeypatch.setattr(
+        reaper,
+        "_gate_experiment_ready_for_main",
+        lambda _path, _ctx: ("experiment_admission", True, "ready_for_main"),
+    )
+
+    scan = reaper.scan_job_deliverables()
+
+    assert scan["candidates"] == []
+    held = scan["held"]
+    assert held[0]["reason"] == "experiment_admission_blocked"
+    assert "undeclared dirty experiment paths" in held[0]["detail"]
+    assert review_rel in held[0]["detail"]
+
+
+def test_compute_experiment_commit_rejects_bytes_changed_after_locked_admission(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Even a non-cooperating file writer cannot change the admitted blob."""
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    queue = root / "storage" / "ops" / "compute_queue"
+    experiment = root / "experiments" / "K1743"
+    queue.mkdir(parents=True)
+    experiment.mkdir(parents=True)
+    result = experiment / "K1743_results.json"
+    result.write_text('{"version":1}\n', encoding="utf-8")
+    result_rel = str(result.relative_to(root))
+    job_path = queue / "k1743-byte-race.json"
+    job_path.write_text(json.dumps({
+        "id": "k1743-byte-race",
+        "kind": "compute",
+        "status": "completed",
+        "output_paths": [result_rel],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+    monkeypatch.setattr(
+        reaper,
+        "_queue_experiment_admission",
+        lambda _paths: (True, "ready_for_main"),
+    )
+    original_git = reaper._git
+
+    def mutate_immediately_before_add(*args: str):
+        if args and args[0] == "add":
+            result.write_text('{"version":2}\n', encoding="utf-8")
+        return original_git(*args)
+
+    monkeypatch.setattr(reaper, "_git", mutate_immediately_before_add)
+    before = _repo_git(root, "rev-parse", "HEAD").stdout.strip()
+    candidate = {
+        "job_id": "k1743-byte-race",
+        "job_path": str(job_path),
+        "execution_status": "completed",
+        "paths": [result_rel],
+        "existing_paths": [result_rel],
+        "previously_delivered_paths": [],
+        "rejected": [],
+    }
+
+    outcome = reaper.deliver_job_outputs(candidate)
+
+    assert outcome["delivered"] is False
+    assert outcome["reason"] == "experiment_admission_snapshot_changed"
+    assert outcome["mismatches"] == [result_rel]
+    assert _repo_git(root, "rev-parse", "HEAD").stdout.strip() == before
+    assert result.read_text(encoding="utf-8") == '{"version":2}\n'
+
+
 def test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths(
     tmp_path: Path,
     monkeypatch,

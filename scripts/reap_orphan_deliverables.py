@@ -726,6 +726,25 @@ def deliver_job_outputs(candidate: dict) -> dict:
         # artifact, its review binding, or HEAD before this transaction obtains
         # both locks.  Re-authorize the exact paths at the commit boundary so a
         # stale scan can never become permission to land unreviewed bytes.
+        experiment_paths = [
+            path
+            for path in paths
+            if len(PurePosixPath(path).parts) >= 3
+            and PurePosixPath(path).parts[0] == "experiments"
+        ]
+        admission_head: str | None = None
+        experiment_snapshots: dict[str, dict[str, str]] = {}
+        if experiment_paths:
+            admission_head, head_error = _head_revision()
+            if admission_head is None:
+                outcome.update(
+                    reason="experiment_admission_blocked",
+                    detail=(
+                        "admission evidence unavailable in HEAD: "
+                        f"{head_error or 'unknown'}"
+                    ),
+                )
+                return outcome
         experiment_admission = _queue_experiment_admission(paths)
         if experiment_admission is not None and not experiment_admission[0]:
             outcome.update(
@@ -733,6 +752,23 @@ def deliver_job_outputs(candidate: dict) -> dict:
                 detail=experiment_admission[1],
             )
             return outcome
+        if experiment_paths:
+            current_head, _head_error = _head_revision()
+            if current_head != admission_head:
+                outcome.update(
+                    reason="experiment_admission_snapshot_changed",
+                    mismatches=["HEAD"],
+                )
+                return outcome
+            for path in experiment_paths:
+                snapshot = _path_snapshot(path, admission_head)
+                if snapshot is None:
+                    outcome.update(
+                        reason="experiment_admission_snapshot_changed",
+                        mismatches=[path],
+                    )
+                    return outcome
+                experiment_snapshots[path] = snapshot
 
         pre_staged = _git("diff", "--cached", "--name-only", "--", *paths)
         if pre_staged.returncode != 0:
@@ -755,6 +791,44 @@ def deliver_job_outputs(candidate: dict) -> dict:
                 outcome.update(reason="git_diff_failed", stderr=(staged.stderr or "")[-500:])
                 return outcome
             staged_paths = [line for line in staged.stdout.splitlines() if line]
+
+            if experiment_snapshots:
+                # Re-run the full policy after staging: undeclared companions
+                # written by a non-cooperating producer are now visible to the
+                # atomic-unit check.  Then bind both working-tree and staged
+                # blobs to the pre-add evidence; the writer lock alone cannot
+                # stop a process that writes files without taking the lock.
+                fresh_admission = _queue_experiment_admission(paths)
+                if fresh_admission is None or not fresh_admission[0]:
+                    outcome.update(
+                        reason="experiment_admission_blocked",
+                        detail=(
+                            "experiment admission disappeared"
+                            if fresh_admission is None
+                            else fresh_admission[1]
+                        ),
+                    )
+                    return outcome
+                current_head, _head_error = _head_revision()
+                snapshot_mismatches: list[str] = []
+                if current_head != admission_head:
+                    snapshot_mismatches.append("HEAD")
+                for path, expected in experiment_snapshots.items():
+                    if _path_snapshot(path, admission_head) != expected:
+                        snapshot_mismatches.append(path)
+                        continue
+                    staged_blob = _git("rev-parse", f":{path}")
+                    if (
+                        staged_blob.returncode != 0
+                        or staged_blob.stdout.strip() != expected["git_blob"]
+                    ):
+                        snapshot_mismatches.append(path)
+                if snapshot_mismatches:
+                    outcome.update(
+                        reason="experiment_admission_snapshot_changed",
+                        mismatches=sorted(set(snapshot_mismatches)),
+                    )
+                    return outcome
 
             if staged_paths:
                 safe_job_id = re.sub(r"[\x00-\x1f\x7f]+", "_", job_id)[:120]
@@ -1242,6 +1316,55 @@ def _queue_experiment_admission(paths: list[str]) -> tuple[bool, str] | None:
     ]
     if not experiment_paths:
         return None
+
+    # The experiments namespace defines one first-child directory as an atomic
+    # unit.  Queue receipts own only their declared paths, so they may not use
+    # unowned working-tree companions to satisfy review/spec gates and then
+    # commit a partial unit.  Clean companions are already part of HEAD; dirty
+    # companions must go through the formal namespace/main-thread collector.
+    declared = set(paths)
+    units = {
+        "/".join(PurePosixPath(path).parts[:2])
+        for path in experiment_paths
+    }
+    for unit in sorted(units):
+        status = _git(
+            "-c",
+            "core.quotePath=false",
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+            "--",
+            unit + "/",
+        )
+        if status.returncode != 0:
+            return False, (
+                "experiment atomic-unit status unavailable: "
+                f"{unit}: {(status.stderr or '').strip()[:200]}"
+            )
+        dirty: set[str] = set()
+        non_additive: list[str] = []
+        for line in status.stdout.splitlines():
+            if len(line) < 4:
+                return False, f"malformed experiment status for {unit}: {line!r}"
+            code = line[:2]
+            rel = line[3:].strip()
+            if not rel:
+                continue
+            dirty.add(rel)
+            if "D" in code or "R" in code or "C" in code or " -> " in rel:
+                non_additive.append(rel)
+        if non_additive:
+            return False, (
+                f"experiment atomic unit {unit} contains deletion/rename: "
+                + ", ".join(sorted(non_additive))
+            )
+        undeclared = sorted(dirty - declared)
+        if undeclared:
+            return False, (
+                f"experiment atomic unit {unit} has undeclared dirty experiment paths: "
+                + ", ".join(undeclared)
+            )
 
     head_revision, head_error = _head_revision()
     if not head_revision:
