@@ -59,7 +59,12 @@ def _light_load_vocab():
             stub.__path__ = [str(path)]
             sys.modules[name] = stub
     mod = importlib.import_module("volpred.ops.next_tasks")
-    return mod.TASK_STATUSES, mod.is_valid_status, mod.is_valid_blocked_reason
+    return (
+        mod.TASK_STATUSES,
+        mod.is_valid_status,
+        mod.is_valid_blocked_reason,
+        mod.read_tasks_locked,
+    )
 
 
 try:
@@ -67,12 +72,18 @@ try:
         TASK_STATUSES,
         is_valid_blocked_reason,
         is_valid_status,
+        read_tasks_locked,
     )
 except ModuleNotFoundError as exc:
     # Observable (not silent): ops deps absent on the deps-free CI runner, fall
     # back to the light import that bypasses the heavy package __init__.
     print(f"[validate-next-tasks-status] light-load (ops deps absent: {exc})", file=sys.stderr)
-    TASK_STATUSES, is_valid_status, is_valid_blocked_reason = _light_load_vocab()
+    (
+        TASK_STATUSES,
+        is_valid_status,
+        is_valid_blocked_reason,
+        read_tasks_locked,
+    ) = _light_load_vocab()
 
 
 def count_out_of_vocab(tasks: list) -> int:
@@ -139,14 +150,9 @@ def main() -> int:
         return 2
 
     try:
-        with open(path, encoding="utf-8") as f:
-            tasks = json.load(f)
-    except (OSError, json.JSONDecodeError) as exc:
+        tasks = read_tasks_locked(path)
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
         print(f"[validate-next-tasks-status] FAIL: cannot parse {path}: {exc}", file=sys.stderr)
-        return 2
-
-    if not isinstance(tasks, list):
-        print(f"[validate-next-tasks-status] FAIL: {path} is not a list", file=sys.stderr)
         return 2
 
     n = count_out_of_vocab(tasks)

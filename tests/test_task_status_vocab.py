@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import fcntl
 import json
+import select
 import subprocess
 import sys
 from pathlib import Path
@@ -98,6 +99,28 @@ def test_write_tasks_to_handle_is_serialize_first_then_truncate_on_success(tmp_p
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
     written = json.loads(p.read_text(encoding="utf-8"))
     assert written == [{"id": "new", "status": "succeeded", "priority": 2}]
+
+
+def test_write_tasks_to_handle_flushes_before_caller_releases_lock(tmp_path):
+    """A successor writer must see the committed bytes as soon as this call returns.
+
+    Queue callers release their ``flock`` after this helper returns but before the
+    text handle's context manager closes.  Leaving bytes buffered across that
+    unlock lets the next writer observe an empty/stale queue and lose an update.
+    """
+    p = tmp_path / "next_tasks.json"
+    p.write_text('[{"id": "old", "status": "pending", "priority": 1}]\n', encoding="utf-8")
+    expected = [{"id": "new", "status": "succeeded", "priority": 2}]
+
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            nt.write_tasks_to_handle(fh, expected)
+            observed_before_close = json.loads(p.read_text(encoding="utf-8"))
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+    assert observed_before_close == expected
 
 
 def test_write_tasks_to_handle_scrubs_lone_surrogate(tmp_path):
@@ -270,17 +293,126 @@ def test_validator_passes_on_current_file():
     assert proc.returncode == 0, proc.stderr
 
 
+def test_canonical_reader_waits_for_exclusive_queue_writer(tmp_path):
+    """The reader reaches LOCK_SH, then waits out the writer's rewrite window."""
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text("[]\n", encoding="utf-8")
+    writer_code = """
+import fcntl
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+with path.open("r+", encoding="utf-8") as handle:
+    fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+    handle.seek(0)
+    handle.truncate()
+    handle.flush()
+    print("ready", flush=True)
+    sys.stdin.readline()
+    handle.write('[{"id":"after-lock","status":"pending","priority":1}]\\n')
+    handle.flush()
+    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+"""
+    writer = subprocess.Popen(
+        [sys.executable, "-c", writer_code, str(queue)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    reader_code = """
+import fcntl
+import json
+import sys
+
+sys.path.insert(0, sys.argv[2])
+from volpred.ops import next_tasks
+
+real_flock = next_tasks.fcntl.flock
+def observed_flock(fd, operation):
+    if operation == fcntl.LOCK_SH:
+        try:
+            real_flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print("contention-confirmed", flush=True)
+        else:
+            real_flock(fd, fcntl.LOCK_UN)
+            raise RuntimeError("reader did not contend with the exclusive writer")
+    return real_flock(fd, operation)
+
+next_tasks.fcntl.flock = observed_flock
+print(json.dumps(next_tasks.read_tasks_locked(sys.argv[1])), flush=True)
+"""
+    reader = None
+
+    def _bounded_readline(pipe, *, label: str) -> str:
+        ready, _, _ = select.select([pipe], [], [], 10)
+        assert ready, f"timed out waiting for {label}"
+        return pipe.readline().strip()
+
+    try:
+        assert writer.stdout is not None
+        assert _bounded_readline(writer.stdout, label="writer lock") == "ready"
+        reader = subprocess.Popen(
+            [sys.executable, "-c", reader_code, str(queue), str(ROOT / "src")],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        assert reader.stdout is not None
+        assert (
+            _bounded_readline(reader.stdout, label="reader contention")
+            == "contention-confirmed"
+        )
+        assert reader.poll() is None
+        assert writer.stdin is not None
+        writer.stdin.write("\n")
+        writer.stdin.flush()
+        stdout, stderr = reader.communicate(timeout=10)
+        assert reader.returncode == 0, stdout + stderr
+        assert json.loads(stdout) == [
+            {"id": "after-lock", "status": "pending", "priority": 1},
+        ]
+        assert writer.wait(timeout=10) == 0, writer.stderr.read() if writer.stderr else ""
+    finally:
+        if writer.poll() is None:
+            writer.kill()
+            writer.wait(timeout=5)
+        if reader is not None and reader.poll() is None:
+            reader.kill()
+            reader.wait(timeout=5)
+
+
+def test_validator_routes_through_canonical_locked_reader(tmp_path, monkeypatch):
+    from scripts import validate_next_tasks_status as vns
+
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text("{intentionally invalid", encoding="utf-8")
+    observed: list[Path] = []
+
+    def _read(path):
+        observed.append(Path(path))
+        return []
+
+    monkeypatch.setattr(vns, "read_tasks_locked", _read)
+    monkeypatch.setattr(sys, "argv", [str(VALIDATOR), "--path", str(queue)])
+
+    assert vns.main() == 0
+    assert observed == [queue]
+
+
 def test_current_out_of_vocab_count_matches_frozen_baseline():
     from scripts import validate_next_tasks_status as vns
 
-    tasks = json.loads(REAL_NEXT_TASKS.read_text(encoding="utf-8"))
+    tasks = nt.read_tasks_locked(REAL_NEXT_TASKS)
     assert vns.count_out_of_vocab(tasks) == BASELINE
 
 
 def test_validator_flags_one_injected_out_of_vocab_row(tmp_path):
     from scripts import validate_next_tasks_status as vns
 
-    tasks = json.loads(REAL_NEXT_TASKS.read_text(encoding="utf-8"))
+    tasks = nt.read_tasks_locked(REAL_NEXT_TASKS)
     current = vns.count_out_of_vocab(tasks)  # frozen baseline, computed not hardcoded
     tasks.append({"id": "injected", "status": "hand_written_bogus", "priority": 3})
     fixture = tmp_path / "next_tasks.json"

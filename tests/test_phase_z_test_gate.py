@@ -557,7 +557,7 @@ def test_phase_z_test_gate_red_is_a_registered_bridge_key() -> None:
     assert "phase_z_test_gate_red" in ops_alerts.INTERNAL_REMEDIABLE_ALERT_KEYS
 
 
-def test_phase_z_test_gate_red_records_machine_self_without_a_task(
+def test_phase_z_test_gate_red_mints_one_bounded_machine_repair_without_owner_mail(
     tmp_path: Path, monkeypatch,
 ) -> None:
     from volpred.ops import alerts as ops_alerts
@@ -588,7 +588,20 @@ def test_phase_z_test_gate_red_records_machine_self_without_a_task(
 
     tasks = _json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
     minted = [t for t in tasks if "phase_z_test_gate_red" in (t.get("tags") or [])]
-    assert minted == [], "machine_self incidents must not ask broken machinery to self-repair"
-    assert result["remediation"]["action"] == "notify"
-    assert result["remediation"]["reason"] == "incident_notification_due"
+    assert len(minted) == 1
+    repair = minted[0]
+    assert repair["source"] == "internal_alert_remediation_router"
+    assert repair["dispatch_lane"] == "agent"
+    assert repair["write_intent"] == "repo_patch"
+    assert repair["priority"] == 2
+    assert repair["deadline"]
+    assert repair["declared_output_paths"] == [
+        "scripts/dispatch_supervisor/phase_z.py",
+        "tests/test_dispatch_supervisor.py",
+    ]
+    assert result["sent"] is False
+    assert result["skip_reason"] == "internal_auto_remediation"
+    assert result["escalated"] is False
+    assert result["remediation"]["action"] == "create_task"
+    assert result["remediation"]["reason"] == "incident_disposition_created"
     assert result["remediation"]["incident_id"]

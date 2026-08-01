@@ -33,6 +33,12 @@ Single enforcement owner for two invariants on the canonical queue:
    the same hardening ``scripts/task_pool_claim.py`` grew inline in 2026-07-05,
    now shared here so every writer inherits it.
 
+   Readers of the mutable queue must take ``LOCK_SH`` on the same descriptor.
+   Serialization-first prevents a failed serializer from truncating the file,
+   but a lock-free reader can still observe the intentional truncate/write
+   window of a healthy writer. ``read_tasks_locked`` is the canonical snapshot
+   reader for tools that do not already own a queue lock.
+
 3. **Blocked rows always have an exit** (``enforce_blocked_until`` /
    ``_audit_blocked_until``). ``scripts/unblock_expired_blocked_tasks.py`` only
    re-pends a block whose ``blocked_until`` has PASSED, so a row that reached
@@ -827,6 +833,32 @@ def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
     fh.truncate()
     fh.write(payload)
     fh.write("\n")
+    # Every read/modify/write caller releases its flock immediately after this
+    # helper returns, while the text handle itself closes one stack frame later.
+    # Flush before that unlock boundary so the next lock owner cannot observe
+    # the post-truncate, pre-buffer-flush gap and silently lose its update.
+    fh.flush()
+
+
+def read_tasks_locked(path: str | Path) -> list[Any]:
+    """Return one parseable task-pool snapshot under the queue's shared lock.
+
+    Writers lock the queue file itself with ``LOCK_EX`` and rewrite it in place.
+    Opening and parsing without ``LOCK_SH`` can therefore observe the brief
+    post-truncate, pre-write interval even though the writer is correct.  This
+    helper deliberately shares that exact inode lock and validates the root
+    shape before returning.
+    """
+    p = Path(path)
+    with p.open("r", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_SH)
+        try:
+            tasks = json.load(fh)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    if not isinstance(tasks, list):
+        raise ValueError("next_tasks.json root is not a list")
+    return tasks
 
 
 def write_tasks_locked(path: str | Path, tasks: list[Any]) -> None:

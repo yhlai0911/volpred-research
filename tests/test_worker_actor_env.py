@@ -40,6 +40,34 @@ def _neutralize_state(monkeypatch) -> None:
     monkeypatch.setattr(worker.state, "update_started_wall", lambda **_kw: None)
     monkeypatch.setattr(worker.state, "release_reservation", lambda **_kw: None)
     monkeypatch.setattr(worker.procutil, "get_process_start_wall", lambda _pid: None)
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    # This test owns the child-environment contract, not the macOS kernel
+    # coalition probe.  Give the worker a deterministic, already-verified
+    # custody boundary so unrelated host processes cannot make the test red.
+    monkeypatch.setattr(
+        worker.procutil, "capture_producer_custody", lambda: dict(custody),
+    )
+    monkeypatch.setattr(
+        worker.procutil,
+        "producer_cohort_members_checked",
+        lambda *_args, **_kwargs: [],
+    )
+    monkeypatch.setattr(
+        worker.custody_receipt,
+        "bind_producer_custody",
+        lambda *_args, **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        worker.custody_receipt,
+        "release_producer_custody",
+        lambda *_args, **_kwargs: True,
+    )
 
 
 # ── _dispatch_actor: value locates the fire ──────────────────────────────────

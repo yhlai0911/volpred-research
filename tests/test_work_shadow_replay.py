@@ -1333,9 +1333,11 @@ def test_replay_uses_real_selector_reasons_for_routing_and_lease_policy() -> Non
 
     assert ledger.schema_version == "work-shadow-replay.v2"
     assert ledger.selection_scope == "next_tasks"
-    assert ledger.legacy_selection.selected_candidate_ref == (
-        "legacy://next_tasks/preferred"
-    )
+    # `paper_body` is a main-thread capability, not a metadata preference.
+    # The legacy selector must no longer let `preferred_agent=codex` spoof that
+    # ownership boundary; only the coordinator may reclaim the expired row.
+    assert ledger.legacy_selection.selected_candidate_ref is None
+    assert ledger.legacy_selection.eligible_candidate_refs == ()
     assert ledger.coordinator_selection.selected_candidate_ref == (
         "legacy://next_tasks/expired_claim"
     )
@@ -1361,6 +1363,10 @@ def test_replay_uses_real_selector_reasons_for_routing_and_lease_policy() -> Non
         preference.classification_reason_code
         == "provider_execution_capability_routing"
     )
+    preferred_capability = by_candidate["legacy://next_tasks/preferred"][
+        "capability"
+    ]
+    assert "not_codex_eligible" in preferred_capability.legacy_reason_codes
     lease = by_candidate["legacy://next_tasks/expired_claim"]["lease_expiry"]
     assert "already_claimed" in lease.legacy_reason_codes
     assert "ready_expired_claim" in lease.coordinator_reason_codes

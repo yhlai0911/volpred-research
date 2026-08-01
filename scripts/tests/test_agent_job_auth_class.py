@@ -38,7 +38,10 @@ class _FakeAgent:
         self.environments.append(dict(env))
         exit_code, output = self.attempts[min(self.calls, len(self.attempts) - 1)]
         self.calls += 1
-        return exit_code, False, output
+        # _run_attempt's public receipt includes the process-group drain
+        # acknowledgement.  Auth classification tests do not exercise
+        # termination failure, so their fake reports the normal verified case.
+        return exit_code, False, output, True
 
 
 AUTH_BANNER = "Not logged in · Please run /login\n"

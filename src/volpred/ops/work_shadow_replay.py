@@ -1308,10 +1308,14 @@ def _legacy_dimension_projection(
         "priority": ("legacy_priority_then_id_rank",),
         "readiness": readiness_reasons,
         "capability": (
-            ("legacy_capability_not_enforced",)
-            if "legacy_capability_not_enforced"
-            in legacy_decision.policy_codes
-            else ("legacy_no_capability_requirement",)
+            ("not_codex_eligible",)
+            if legacy_decision.primary_reason == "not_codex_eligible"
+            else (
+                ("legacy_capability_not_enforced",)
+                if "legacy_capability_not_enforced"
+                in legacy_decision.policy_codes
+                else ("legacy_no_capability_requirement",)
+            )
         ),
         "attestation": (
             ("legacy_attestation_not_enforced",)

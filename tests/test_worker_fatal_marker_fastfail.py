@@ -179,6 +179,42 @@ def test_run_worker_releases_the_claim_and_sends_no_hang_alert(
     )
     monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
 
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    monkeypatch.setattr(
+        worker.procutil, "capture_producer_custody", lambda: dict(custody),
+    )
+    monkeypatch.setattr(
+        worker.procutil,
+        "producer_cohort_members_checked",
+        lambda *_args, **_kwargs: [],
+    )
+    monkeypatch.setattr(
+        worker.custody_receipt,
+        "bind_producer_custody",
+        lambda *_args, **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        worker.custody_receipt,
+        "release_producer_custody",
+        lambda *_args, **_kwargs: True,
+    )
+    # The test intentionally spawns a real disposable process group, but it
+    # does not own the macOS coalition-kill implementation.  Preserve the real
+    # PGID drain while keeping the synthetic custody receipt out of that path.
+    real_kill_pgid = worker._kill_pgid
+
+    def _kill_test_process_group(pgid: int, **kwargs) -> bool:
+        kwargs["custody"] = None
+        return real_kill_pgid(pgid, **kwargs)
+
+    monkeypatch.setattr(worker, "_kill_pgid", _kill_test_process_group)
+
     started = time.time()
     result = worker.run_worker(
         prompt_text="noop", log_path=log_path, state_path=state_path,
