@@ -33016,5 +33016,15 @@
     "owner": "hourly-slot-1-9783132d97a84a0488a8c999036565fd",
     "commit": null,
     "summary": "PHASE B（starvation lockout lane，batch-drain 第 4 張）：派出 K1738「財報盈餘驚喜(SUE)對次月 realized vol 的因果增量：DML + IV」（餓死 313.3h）。\n\n**job**: `agent-brief_k1738-b377db`（queued）；worktree `dispatch-slot-1-9783132d-k1738`（branch `k1738-slot1-9783132d`，經 canonical `git_writer_lock.py run` 建立）；artifact 契約 `experiments/k1738/K1738_results.json`；timeout 3600s。pool status = `awaiting_agent_job`。\n\n**為何本班停在 3 個 enqueue**：`cron_compute_worker.sh` 的 parallelism 預設 `min(3, cpu//3)`，K1735/K1737/K1738 剛好填滿並行度。再往下堆只會變成序列 backlog（每個 timeout 3600s），claim lease 反而可能先過期 —— 餓死清單還有 K1739/K1741/K1742/K1746，留給下一班。\n\n**brief 內建的效度防線（本題兩個脆弱點）**：\n(1) **IV 的 exclusion restriction** —— brief 明寫「找不到可信 instrument 就明說並退回純 DML、把結論降級為 conditional association，這比硬造一個爛 IV 誠實得多，也是可接受產出」；followup brief 反向把「硬造無論證的 IV 還報因果 ATE → FAIL」寫成收件硬判準。\n(2) **財報公佈日 vs 財季結束日** —— 兩者不同，用財季結束日當事件時點即 look-ahead；brief 要求在程式碼註明處理方式，followup 明列此項為 FAIL 判準。\n另要求誠實標示 SUE 定義：yfinance 拿不到歷史分析師預期時可用 seasonal random walk 代理，但必須在 README 明寫與文獻 analyst-based SUE 的區隔，不可混為一談。"
+  },
+  {
+    "timestamp": "2026-08-01T15:57",
+    "task_id": "K1450_article_general_v2",
+    "task_type": "daily_article",
+    "actor": "hourly-slot-1-1d125255a3ff4cfeae2ff7eb224c41bc",
+    "owner": "hourly-slot-1-1d125255a3ff4cfeae2ff7eb224c41bc",
+    "outcome": "succeeded",
+    "commit": "",
+    "summary": "K1450 general-audience article written + published to draft pool as mile_5378daa1. Story: rate regime does NOT make VNQ more stock-like (VNQ-SPY fwd corr 0.625 vs 0.628, p=0.897); what flips is VNQ-TLT fwd corr -0.077 -> +0.041 (HAC p=0.0030, Bonferroni 0.0150) - the only one of 5 tests surviving multiple-testing correction. All 34 numbers programmatically reconciled to experiments/k1450/k1450_results.json; anti_ai_gate exit 0; content-vs-source audit PASS (6 claims vs 91 source values); 2 real matplotlib charts auto-uploaded to Supabase. v1 had been blocked by the old hard arc-dedup rule (now warn-only) - re-ran gate under current rules: verdict=warn_arc_dup advisory, no K-COVERAGE, layer-2 feed grep confirmed no general-audience VNQ/rate-regime article exists. OPEN: lazypack plan not authored -> draft cannot release until storage/lazypack_plans/k1450_general_plan.json exists + lazypack_async_render enqueue."
   }
 ]
