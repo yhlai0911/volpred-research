@@ -472,14 +472,14 @@ def test_compute_experiment_commit_rejects_bytes_changed_after_locked_admission(
         "_queue_experiment_admission",
         lambda _paths: (True, "ready_for_main"),
     )
-    original_git = reaper._git
+    original_git_in_index = reaper._git_in_index
 
-    def mutate_immediately_before_add(*args: str):
+    def mutate_immediately_before_add(index_file: Path, *args: str):
         if args and args[0] == "add":
             result.write_text('{"version":2}\n', encoding="utf-8")
-        return original_git(*args)
+        return original_git_in_index(index_file, *args)
 
-    monkeypatch.setattr(reaper, "_git", mutate_immediately_before_add)
+    monkeypatch.setattr(reaper, "_git_in_index", mutate_immediately_before_add)
     before = _repo_git(root, "rev-parse", "HEAD").stdout.strip()
     candidate = {
         "job_id": "k1743-byte-race",
@@ -497,6 +497,62 @@ def test_compute_experiment_commit_rejects_bytes_changed_after_locked_admission(
     assert outcome["reason"] == "experiment_admission_snapshot_changed"
     assert outcome["mismatches"] == [result_rel]
     assert _repo_git(root, "rev-parse", "HEAD").stdout.strip() == before
+    assert result.read_text(encoding="utf-8") == '{"version":2}\n'
+
+
+def test_compute_experiment_commit_uses_verified_index_after_worktree_mutation(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """The final commit tree must not re-read files after blob verification."""
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    queue = root / "storage" / "ops" / "compute_queue"
+    experiment = root / "experiments" / "K1743"
+    queue.mkdir(parents=True)
+    experiment.mkdir(parents=True)
+    result = experiment / "K1743_results.json"
+    result.write_text('{"version":1}\n', encoding="utf-8")
+    result_rel = str(result.relative_to(root))
+    job_path = queue / "k1743-post-stage-race.json"
+    job_path.write_text(json.dumps({
+        "id": "k1743-post-stage-race",
+        "kind": "compute",
+        "status": "completed",
+        "output_paths": [result_rel],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+    monkeypatch.setattr(
+        reaper,
+        "_queue_experiment_admission",
+        lambda _paths: (True, "ready_for_main"),
+    )
+    original_commit = reaper._commit_verified_index
+
+    def mutate_after_staged_verification(**kwargs):
+        result.write_text('{"version":2}\n', encoding="utf-8")
+        return original_commit(**kwargs)
+
+    monkeypatch.setattr(
+        reaper,
+        "_commit_verified_index",
+        mutate_after_staged_verification,
+    )
+    candidate = {
+        "job_id": "k1743-post-stage-race",
+        "job_path": str(job_path),
+        "execution_status": "completed",
+        "paths": [result_rel],
+        "existing_paths": [result_rel],
+        "previously_delivered_paths": [],
+        "rejected": [],
+    }
+
+    outcome = reaper.deliver_job_outputs(candidate)
+
+    assert outcome["delivered"] is True
+    assert _repo_git(root, "show", f"HEAD:{result_rel}").stdout == '{"version":1}\n'
     assert result.read_text(encoding="utf-8") == '{"version":2}\n'
 
 

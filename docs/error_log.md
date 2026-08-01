@@ -5583,7 +5583,10 @@ canonical experiment admission gate，並在持有 receipt／Git transaction loc
 queue lane 另遵守 `experiments/<id>/` first-child atomic unit：receipt 未宣告的 dirty companion 不得拿來
 通過 gate 後只提交 results；正式收件必由 namespace／main-thread collector 原子落地整個 unit。持鎖
 admission 會在 staging 後再跑一次，並逐一比對 HEAD、working-tree SHA 與 staged Git blob，連不拿
-writer lock 的外部檔案寫入也不能把已審 bytes 偷換掉。
+writer lock 的外部檔案寫入也不能把已審 bytes 偷換掉。experiment transaction 不再使用會重讀
+working tree 的 `git commit --only`；它從隔離 index 建立 commit-tree，驗 commit 內 exact blob／
+path scope 後才以 HEAD CAS 發佈，因此 staged 驗證後的檔案改寫只會留下新 dirty bytes，不會進入
+已授權 commit。
 Codex failover prompt 補齊 PHASE A，逐筆處理 `collect_completed`、`split_required`、
 `artifact_contract_mismatch`、`triage_failed`，未 `mark-followup-dispatched` settlement 前不得挑新工。
 K1743 本身改用 runtime `finalize_experiment()` 同步產 results/spec byte trace，新增 FX 合理範圍與

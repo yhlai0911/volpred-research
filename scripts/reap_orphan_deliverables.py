@@ -760,7 +760,10 @@ def deliver_job_outputs(candidate: dict) -> dict:
                     mismatches=["HEAD"],
                 )
                 return outcome
-            for path in experiment_paths:
+            # When one transaction contains an experiment result plus ordinary
+            # declared outputs, the whole changeset is immutable evidence.  Bind
+            # every path, not only the experiment member.
+            for path in paths:
                 snapshot = _path_snapshot(path, admission_head)
                 if snapshot is None:
                     outcome.update(
@@ -780,24 +783,68 @@ def deliver_job_outputs(candidate: dict) -> dict:
             outcome.update(reason="pre_staged_collision", collisions=collisions)
             return outcome
 
-        index_owned = True  # preflight proved these scoped index entries were empty
+        # The formal experiment branch uses a private index.  The legacy queue
+        # branch still stages its scoped paths in the shared index and therefore
+        # owns cleanup on failure.
+        index_owned = not bool(experiment_snapshots)
         try:
-            add = _git("add", "--", *paths)
-            if add.returncode != 0:
-                outcome.update(reason="git_add_failed", stderr=(add.stderr or "")[-500:])
-                return outcome
-            staged = _git("diff", "--cached", "--name-only", "--", *paths)
-            if staged.returncode != 0:
-                outcome.update(reason="git_diff_failed", stderr=(staged.stderr or "")[-500:])
-                return outcome
-            staged_paths = [line for line in staged.stdout.splitlines() if line]
-
             if experiment_snapshots:
+                assert admission_head is not None
+                git_dir_result = _git(
+                    "rev-parse", "--path-format=absolute", "--git-common-dir"
+                )
+                if (
+                    git_dir_result.returncode != 0
+                    or not git_dir_result.stdout.strip()
+                ):
+                    outcome.update(reason="git_common_dir_unavailable")
+                    return outcome
+                isolated_index = (
+                    Path(git_dir_result.stdout.strip())
+                    / "volpred-orphan-queue-index"
+                )
+                initialize = _git_in_index(
+                    isolated_index,
+                    "read-tree",
+                    "--reset",
+                    admission_head,
+                )
+                if initialize.returncode != 0:
+                    outcome.update(
+                        reason="isolated_index_initialization_failed",
+                        stderr=(initialize.stderr or "")[-500:],
+                    )
+                    return outcome
+                add = _git_in_index(isolated_index, "add", "--", *paths)
+                if add.returncode != 0:
+                    outcome.update(
+                        reason="git_add_failed",
+                        stderr=(add.stderr or "")[-500:],
+                    )
+                    return outcome
+                staged = _git_in_index(
+                    isolated_index,
+                    "diff",
+                    "--cached",
+                    "--name-only",
+                    "--",
+                    *paths,
+                )
+                if staged.returncode != 0:
+                    outcome.update(
+                        reason="git_diff_failed",
+                        stderr=(staged.stderr or "")[-500:],
+                    )
+                    return outcome
+                staged_paths = [
+                    line for line in staged.stdout.splitlines() if line
+                ]
+
                 # Re-run the full policy after staging: undeclared companions
                 # written by a non-cooperating producer are now visible to the
-                # atomic-unit check.  Then bind both working-tree and staged
-                # blobs to the pre-add evidence; the writer lock alone cannot
-                # stop a process that writes files without taking the lock.
+                # atomic-unit check.  Then bind working-tree and private-index
+                # blobs to the pre-add evidence; commit-tree consumes that exact
+                # private index and never re-reads the working tree.
                 fresh_admission = _queue_experiment_admission(paths)
                 if fresh_admission is None or not fresh_admission[0]:
                     outcome.update(
@@ -813,45 +860,119 @@ def deliver_job_outputs(candidate: dict) -> dict:
                 snapshot_mismatches: list[str] = []
                 if current_head != admission_head:
                     snapshot_mismatches.append("HEAD")
+                staged_identities: dict[str, tuple[str, str]] = {}
                 for path, expected in experiment_snapshots.items():
                     if _path_snapshot(path, admission_head) != expected:
                         snapshot_mismatches.append(path)
                         continue
-                    staged_blob = _git("rev-parse", f":{path}")
-                    if (
-                        staged_blob.returncode != 0
-                        or staged_blob.stdout.strip() != expected["git_blob"]
-                    ):
+                    identity = _staged_identity(
+                        path,
+                        index_file=isolated_index,
+                    )
+                    if identity is None or identity[1] != expected["git_blob"]:
                         snapshot_mismatches.append(path)
+                    elif path in staged_paths:
+                        staged_identities[path] = identity
                 if snapshot_mismatches:
                     outcome.update(
                         reason="experiment_admission_snapshot_changed",
                         mismatches=sorted(set(snapshot_mismatches)),
                     )
                     return outcome
-
-            if staged_paths:
                 safe_job_id = re.sub(r"[\x00-\x1f\x7f]+", "_", job_id)[:120]
-                commit = _git(
-                    "commit", "--only", "-m",
-                    f"chore(deliverables): commit {safe_job_id} outputs",
-                    "--", *paths,
-                )
-                if commit.returncode != 0:
-                    outcome.update(reason="git_commit_failed",
-                                   stderr=(commit.stderr or commit.stdout or "")[-500:])
-                    return outcome
-                index_owned = False
-                evidence = _git("log", "-1", "--format=%H", "--", *staged_paths)
-            else:
-                # Clean paths are deliverable only if Git already tracks them;
-                # HEAD alone is not evidence that this job's file is in history.
-                for path in paths:
-                    tracked = _git("ls-files", "--error-unmatch", "--", path)
-                    if tracked.returncode != 0:
-                        outcome.update(reason="clean_path_not_tracked", path=path)
+                if staged_paths:
+                    commit = _commit_verified_index(
+                        expected_head=admission_head,
+                        paths=staged_paths,
+                        identities=staged_identities,
+                        message=(
+                            "chore(deliverables): commit "
+                            f"{safe_job_id} outputs"
+                        ),
+                        index_file=isolated_index,
+                    )
+                    if commit.returncode != 0:
+                        outcome.update(
+                            reason="git_commit_failed",
+                            stderr=(
+                                commit.stderr or commit.stdout or ""
+                            )[-500:],
+                        )
                         return outcome
-                evidence = _git("log", "-1", "--format=%H", "--", *paths)
+                    evidence = _git(
+                        "log", "-1", "--format=%H", "--", *staged_paths
+                    )
+                else:
+                    # Clean paths are deliverable only if Git already tracks
+                    # them; no empty commit is manufactured.
+                    for path in paths:
+                        tracked = _git(
+                            "ls-files", "--error-unmatch", "--", path
+                        )
+                        if tracked.returncode != 0:
+                            outcome.update(
+                                reason="clean_path_not_tracked", path=path
+                            )
+                            return outcome
+                    evidence = _git(
+                        "log", "-1", "--format=%H", "--", *paths
+                    )
+            else:
+                add = _git("add", "--", *paths)
+                if add.returncode != 0:
+                    outcome.update(
+                        reason="git_add_failed",
+                        stderr=(add.stderr or "")[-500:],
+                    )
+                    return outcome
+                staged = _git(
+                    "diff", "--cached", "--name-only", "--", *paths
+                )
+                if staged.returncode != 0:
+                    outcome.update(
+                        reason="git_diff_failed",
+                        stderr=(staged.stderr or "")[-500:],
+                    )
+                    return outcome
+                staged_paths = [
+                    line for line in staged.stdout.splitlines() if line
+                ]
+                if staged_paths:
+                    safe_job_id = re.sub(
+                        r"[\x00-\x1f\x7f]+", "_", job_id
+                    )[:120]
+                    commit = _git(
+                        "commit", "--only", "-m",
+                        f"chore(deliverables): commit {safe_job_id} outputs",
+                        "--", *paths,
+                    )
+                    if commit.returncode != 0:
+                        outcome.update(
+                            reason="git_commit_failed",
+                            stderr=(
+                                commit.stderr or commit.stdout or ""
+                            )[-500:],
+                        )
+                        return outcome
+                    index_owned = False
+                    evidence = _git(
+                        "log", "-1", "--format=%H", "--", *staged_paths
+                    )
+                else:
+                    # Clean paths are deliverable only if Git already tracks them;
+                    # HEAD alone is not evidence that this job's file is in history.
+                    for path in paths:
+                        tracked = _git(
+                            "ls-files", "--error-unmatch", "--", path
+                        )
+                        if tracked.returncode != 0:
+                            outcome.update(
+                                reason="clean_path_not_tracked", path=path
+                            )
+                            return outcome
+                    evidence = _git(
+                        "log", "-1", "--format=%H", "--", *paths
+                    )
 
             if evidence.returncode != 0 or not evidence.stdout.strip():
                 outcome.update(reason="delivery_commit_not_found",
