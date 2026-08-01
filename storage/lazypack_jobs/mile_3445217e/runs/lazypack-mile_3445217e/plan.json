@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：三個分數全贏，我們還是判它不能用",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1325/k1325_results.json",
+      "sha256": "2639c8c9b0bf29321a7120bc69ef3fded128dbc6ed60faeb8aae76df0c1f0152",
+      "label": "experiment K1325 results (0050.TW five-minute realised-volatility HAR checkpoint against a random-walk baseline, adjudicated as untrustworthy small sample)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "計分板上是全勝",
+      "alt": "HAR 模型在預測誤差分數與平方誤差兩項都低於「昨天照抄」的對手，但兩個模型的解釋力指標都落在零以下，代表雙方都輸給直接猜測試期平均值的做法。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "誤差分數越低越準",
+          "body": [
+            "我們拿前一天、前五天、前一個月的晃動量去推明天，對手直接把昨天的答案抄過來。",
+            "前兩項評分是我們贏，而且不是險勝。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "我們的模型：預測誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/results/HAR_QLIKE_test",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "昨天照抄：預測誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/results/RW_QLIKE_test",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "我們的模型：贏過猜平均值的程度",
+          "value": {
+            "source": "results",
+            "path": "/results/HAR_OOS_R2",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "零以下代表輸給一條水平線"
+        },
+        {
+          "kind": "metric",
+          "label": "昨天照抄：贏過猜平均值的程度",
+          "value": {
+            "source": "results",
+            "path": "/results/RW_OOS_R2",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "也在零以下，輸得更難看"
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "professional",
+      "title": "正式對決：差距撐不起結論",
+      "alt": "兩模型逐日誤差差距的正式比較檢定給出很低的統計強度與很高的顯著性數值，遠不及專案自訂的嚴格門檻；上一個檢查點多了兩天資料後，統計強度反而退步。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "分數會贏，不代表差距站得穩",
+          "body": [
+            "每天算一次雙方的誤差差距，再看這串差距相對於它自己的跳動幅度有多大。",
+            "如果兩個模型其實一樣爛，光靠這麼短的測試窗，也很容易湊出我們看到的差距。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "勝負的統計強度",
+          "value": {
+            "source": "results",
+            "path": "/results/DM_HLN_t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "專案及格線要求絕對值超過三"
+        },
+        {
+          "kind": "metric",
+          "label": "對應的顯著性數值",
+          "value": {
+            "source": "results",
+            "path": "/results/DM_HLN_p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "越大代表越可能只是運氣"
+        },
+        {
+          "kind": "metric",
+          "label": "測試窗天數",
+          "value": {
+            "source": "results",
+            "path": "/sample/n_test",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "上一個檢查點的統計強度",
+          "value": {
+            "source": "results",
+            "path": "/comparison_to_k1324/prior_dm_hln_t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "多了兩天資料之後反而退步"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "連我們自己的重啟門檻都訂鬆了",
+      "alt": "目前樣本只有幾個月的交易日，扣掉暖身後訓練與測試各自很短；把每日差距等比例外推，專案原訂的重啟測試天數仍不足以分出勝負，因此門檻本身要被改掉。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "缺的不是幾週，是幾年",
+          "body": [
+            "把目前每天觀察到的差距原封不動往後複製，原訂的重啟天數到了之後，還是什麼都不能宣稱。",
+            "這一輪最有用的發現跟 0050.TW 沒關係，是我們自己設檢查點的方式要改。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "手上的原始交易日",
+          "value": {
+            "source": "results",
+            "path": "/sample/n_total_days",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "扣掉暖身後可用的列數",
+          "value": {
+            "source": "results",
+            "path": "/sample/n_har_rows_after_warmup",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "原訂重啟所需的測試天數",
+          "value": {
+            "source": "results",
+            "path": "/revisit_gate/n_test_days_required",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "外推後仍不足以過關，門檻要調高"
+        }
+      ]
+    }
+  ]
+}
