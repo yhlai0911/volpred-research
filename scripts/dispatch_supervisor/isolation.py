@@ -601,6 +601,7 @@ class ProviderAuthLease:
     destination_path: str
     baseline_sha256: str
     lease_id: str = field(default_factory=lambda: secrets.token_hex(16))
+    recovery_receipt_path: str | None = None
     _authority_lock_fd: int | None = field(default=None, repr=False)
     _reconciled: bool = field(default=False, repr=False)
     _source_advanced: bool = field(default=False, repr=False)
@@ -632,6 +633,24 @@ class ProviderAuthLease:
                 self._destination_unlinked,
                 "provider credential authority lock is not held",
             )
+
+        recovery_path = (
+            Path(self.recovery_receipt_path)
+            if self.recovery_receipt_path
+            else None
+        )
+
+        def durable_checkpoint(phase: str) -> None:
+            if recovery_path is not None:
+                _transition_provider_auth_reaper_receipt(
+                    recovery_path,
+                    {
+                        "state": "cleanup_started",
+                        "close_phase": phase,
+                    },
+                )
+            if checkpoint is not None:
+                checkpoint(phase)
 
         destination_dir_fd: int | None = None
         destination_home_fd: int | None = None
@@ -734,15 +753,13 @@ class ProviderAuthLease:
                             os.close(source_dir_fd)
                     finally:
                         os.close(source_home_fd)
-                if checkpoint is not None:
-                    checkpoint("unlink_intent")
+                durable_checkpoint("unlink_intent")
                 os.unlink("auth.json", dir_fd=destination_dir_fd)
                 self._destination_unlinked = True
             if destination_dir_fd is not None:
                 os.fsync(destination_dir_fd)
                 destination_dir_fsynced = True
-                if checkpoint is not None:
-                    checkpoint("destination_unlinked")
+                durable_checkpoint("destination_unlinked")
         except (IsolationUnavailable, OSError) as exc:
             return ProviderAuthCloseReceipt(
                 ok=False,
@@ -776,13 +793,34 @@ class ProviderAuthLease:
                 else "closed"
             )
         )
-        self._terminal_receipt = ProviderAuthCloseReceipt(
+        terminal_receipt = ProviderAuthCloseReceipt(
             ok=True,
             reconciled=self._reconciled,
             source_advanced=self._source_advanced,
             cleaned=True,
             reason=reason,
         )
+        if recovery_path is not None:
+            try:
+                _transition_provider_auth_reaper_receipt(
+                    recovery_path,
+                    {
+                        "state": "cleaned",
+                        "close": asdict(terminal_receipt),
+                    },
+                )
+            except (IsolationUnavailable, OSError) as exc:
+                return ProviderAuthCloseReceipt(
+                    ok=False,
+                    reconciled=self._reconciled,
+                    source_advanced=self._source_advanced,
+                    cleaned=True,
+                    reason=(
+                        "provider auth bytes cleaned but terminal recovery "
+                        f"receipt failed: {exc}"
+                    ),
+                )
+        self._terminal_receipt = terminal_receipt
         # Reaper handoff uses pass_fds, whose duplicate shares one open-file
         # description with the parent. Explicit LOCK_UN here would unlock the
         # parent's quarantine descriptor too. Close-only preserves custody
@@ -912,10 +950,37 @@ class _QuarantinedProviderAuthLease:
     empty_group_reads: int = 0
 
 
+@dataclass
+class _QuarantinedProviderAuthCustodyLease:
+    lease: ProviderAuthLease
+    job_id: str
+    producer_custody: dict[str, Any]
+
+
 _QUARANTINED_PROVIDER_AUTH_LEASES: dict[
     str, _QuarantinedProviderAuthLease
 ] = {}
 _QUARANTINED_PROVIDER_AUTH_LOCK = threading.Lock()
+_QUARANTINED_PROVIDER_AUTH_CUSTODY_LEASES: dict[
+    str, _QuarantinedProviderAuthCustodyLease
+] = {}
+
+
+def quarantine_provider_auth_custody_lease(
+    lease: ProviderAuthLease,
+    *,
+    job_id: str,
+    producer_custody: dict[str, Any],
+) -> None:
+    """Retain an unparkable v3 lock for bounded health-loop recovery."""
+    with _QUARANTINED_PROVIDER_AUTH_LOCK:
+        _QUARANTINED_PROVIDER_AUTH_CUSTODY_LEASES[lease.lease_id] = (
+            _QuarantinedProviderAuthCustodyLease(
+                lease=lease,
+                job_id=job_id,
+                producer_custody=producer_custody,
+            )
+        )
 
 
 def quarantine_provider_auth_lease(
@@ -951,6 +1016,35 @@ def reap_quarantined_provider_auth_leases() -> dict[str, int]:
     cleaned = 0
     with _QUARANTINED_PROVIDER_AUTH_LOCK:
         records = list(_QUARANTINED_PROVIDER_AUTH_LEASES.items())
+        custody_records = list(
+            _QUARANTINED_PROVIDER_AUTH_CUSTODY_LEASES.items()
+        )
+    for lease_id, record in custody_records:
+        try:
+            receipt = reap_provider_auth_lease_for_custody_in_process(
+                record.lease,
+                job_id=record.job_id,
+                producer_custody=record.producer_custody,
+                poll_seconds=0.1,
+            )
+        except Exception as exc:  # lock remains reachable in quarantine
+            warn(
+                "provider-auth-recovery",
+                "custody lease quarantine retry failed",
+                lease_id=lease_id,
+                err=str(exc),
+            )
+            pending += 1
+            continue
+        if receipt.ok:
+            cleaned += 1
+        else:
+            pending += 1
+        if receipt.ok or record.lease._authority_lock_fd is None:
+            with _QUARANTINED_PROVIDER_AUTH_LOCK:
+                _QUARANTINED_PROVIDER_AUTH_CUSTODY_LEASES.pop(
+                    lease_id, None,
+                )
     for lease_id, record in records:
         try:
             child_rc = record.reaper_process.poll()
@@ -1055,12 +1149,56 @@ def reap_quarantined_provider_auth_leases() -> dict[str, int]:
     return {"pending": pending, "cleaned": cleaned}
 
 
+def _ensure_private_directory_durable(path: Path) -> None:
+    """Create each missing directory and fsync its parent entry."""
+    target = Path(path)
+    missing: list[Path] = []
+    cursor = target
+    while not cursor.exists():
+        missing.append(cursor)
+        if cursor.parent == cursor:
+            raise IsolationUnavailable(
+                "provider auth receipt root has no existing ancestor"
+            )
+        cursor = cursor.parent
+    for directory in reversed(missing):
+        parent_fd = _open_directory(directory.parent)
+        try:
+            try:
+                os.mkdir(directory.name, 0o700, dir_fd=parent_fd)
+            except FileExistsError:
+                pass  # silent-ok: exact directory is verified below
+            os.fsync(parent_fd)
+        finally:
+            os.close(parent_fd)
+        directory_fd = _open_directory(directory)
+        try:
+            metadata = os.fstat(directory_fd)
+            if metadata.st_uid != os.getuid():
+                raise IsolationUnavailable(
+                    "provider auth receipt directory has foreign owner"
+                )
+            os.fchmod(directory_fd, 0o700)
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    directory_fd = _open_directory(target)
+    try:
+        metadata = os.fstat(directory_fd)
+        if metadata.st_uid != os.getuid():
+            raise IsolationUnavailable(
+                "provider auth receipt directory has foreign owner"
+            )
+        os.fchmod(directory_fd, 0o700)
+    finally:
+        os.close(directory_fd)
+
+
 def _write_provider_auth_reaper_receipt(
     path: Path,
     payload: dict[str, Any],
 ) -> None:
-    path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
-    os.chmod(path.parent, 0o700)
+    _ensure_private_directory_durable(path.parent)
     directory_fd = _open_directory(path.parent)
     try:
         _write_private_at(
@@ -1073,6 +1211,9 @@ def _write_provider_auth_reaper_receipt(
 
 
 _REAPER_STATE_ORDER = {
+    "materialize_intent": 5,
+    "materialized": 6,
+    "recovery_pending": 7,
     "handoff_intent": 10,
     "waiting_for_process_group": 20,
     "handoff_failed": 21,
@@ -1089,8 +1230,7 @@ def _transition_provider_auth_reaper_receipt(
     payload: dict[str, Any],
 ) -> dict[str, Any]:
     """Persist a monotonic reaper transition under a receipt-local flock."""
-    path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
-    os.chmod(path.parent, 0o700)
+    _ensure_private_directory_durable(path.parent)
     lock_path = path.with_suffix(path.suffix + ".lock")
     lock_fd = os.open(
         lock_path,
@@ -1447,6 +1587,126 @@ def reap_provider_auth_lease_in_process(
         time.sleep(close_retry_seconds)
 
 
+def _producer_custody_drained_twice(
+    *,
+    job_id: str,
+    producer_custody: dict[str, Any],
+    poll_seconds: float,
+) -> bool:
+    """Return true only after two consecutive authoritative empty reads."""
+    from . import procutil
+
+    first = procutil.producer_cohort_members_checked(
+        0,
+        job_id=job_id,
+        custody=producer_custody,
+    )
+    if first != []:
+        return False
+    time.sleep(poll_seconds)
+    second = procutil.producer_cohort_members_checked(
+        0,
+        job_id=job_id,
+        custody=producer_custody,
+    )
+    return second == []
+
+
+def park_provider_auth_lease_for_recovery(
+    lease: ProviderAuthLease,
+    *,
+    reason: str,
+) -> None:
+    """Durably fence future admission, then release the authority flock.
+
+    The nonterminal v3 receipt remains the cleanup owner.  Health/startup will
+    retry after global producer custody drains; no secret is deleted here.
+    """
+    if not lease.recovery_receipt_path:
+        raise IsolationUnavailable(
+            "provider auth lease has no durable recovery receipt"
+        )
+    path = Path(lease.recovery_receipt_path)
+    try:
+        current = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise IsolationUnavailable(
+            "provider auth recovery receipt is unreadable before park"
+        ) from exc
+    close_phase = current.get("close_phase")
+    parked_state = (
+        "cleanup_retry"
+        if close_phase in {"unlink_intent", "destination_unlinked"}
+        else "recovery_pending"
+    )
+    transitioned = _transition_provider_auth_reaper_receipt(
+        path,
+        {
+            "state": parked_state,
+            "recovery_pending": True,
+            "reason": reason,
+        },
+    )
+    if (
+        transitioned.get("schema_version") != "provider-auth-lease.v3"
+        or transitioned.get("lease_id") != lease.lease_id
+        or Path(str(transitioned.get("source_home"))).resolve()
+        != Path(lease.source_home).resolve()
+        or Path(str(transitioned.get("run_dir"))).resolve()
+        != Path(lease.run_dir).resolve()
+        or Path(str(transitioned.get("destination_path"))).resolve()
+        != Path(lease.destination_path).resolve()
+        or transitioned.get("recovery_pending") is not True
+    ):
+        raise IsolationUnavailable(
+            "provider auth recovery-pending receipt failed read-back"
+        )
+    _release_provider_auth_lock(lease._authority_lock_fd)
+    lease._authority_lock_fd = None
+
+
+def reap_provider_auth_lease_for_custody_in_process(
+    lease: ProviderAuthLease,
+    *,
+    job_id: str,
+    producer_custody: dict[str, Any],
+    poll_seconds: float = 1.0,
+    close_retry_seconds: float = 5.0,
+) -> ProviderAuthCloseReceipt:
+    """Make one bounded full-custody cleanup attempt.
+
+    Resource-coalition custody includes descendants that escape the original
+    process group with ``setsid``.  Unknown/live custody is durably parked for
+    health-loop recovery instead of blocking the only dispatch slot.
+    """
+    from . import procutil
+
+    if not job_id or procutil._parse_producer_custody(producer_custody) is None:
+        raise IsolationUnavailable(
+            "provider auth custody reaper requires exact producer identity"
+        )
+    _ = close_retry_seconds
+    if not _producer_custody_drained_twice(
+        job_id=job_id,
+        producer_custody=producer_custody,
+        poll_seconds=poll_seconds,
+    ):
+        park_provider_auth_lease_for_recovery(
+            lease,
+            reason="producer custody is live or unverified",
+        )
+        return ProviderAuthCloseReceipt(
+            False, False, False, False, "recovery_pending",
+        )
+    receipt = lease.close()
+    if not receipt.ok:
+        park_provider_auth_lease_for_recovery(
+            lease,
+            reason=f"bounded close failed: {receipt.reason}",
+        )
+    return receipt
+
+
 def defer_provider_auth_cleanup(
     lease: ProviderAuthLease,
     *,
@@ -1790,6 +2050,92 @@ def _load_recoverable_provider_auth_receipts(
                 continue
             invalid += 1
             continue
+        if schema == "provider-auth-lease.v3":
+            from . import procutil
+
+            try:
+                receipt_source = Path(str(payload["source_home"])).resolve()
+                run_dir = Path(str(payload["run_dir"])).resolve()
+                destination = Path(
+                    str(payload["destination_path"])
+                ).resolve()
+                expected_destination = (
+                    run_dir / "home" / ".codex" / "auth.json"
+                ).resolve()
+                baseline = str(payload["baseline_sha256"])
+                lease_id = str(payload["lease_id"])
+                job_id = str(payload["job_id"])
+                attempt = int(payload["attempt"])
+                producer_custody = payload["producer_custody"]
+            except (
+                KeyError,
+                TypeError,
+                ValueError,
+                OSError,
+                RuntimeError,
+            ) as exc:
+                warn(
+                    "provider-auth-recovery",
+                    "v3 receipt identity invalid; admission will fail closed",
+                    path=str(path),
+                    err=str(exc),
+                )
+                invalid += 1
+                continue
+            if receipt_source != source_home.resolve():
+                continue
+            destination_missing = not destination.exists()
+            close_phase = payload.get("close_phase")
+            valid_state = state in {
+                "materialize_intent",
+                "materialized",
+                "recovery_pending",
+                "cleanup_started",
+                "cleanup_retry",
+                "cleaned",
+            }
+            valid_identity = (
+                destination == expected_destination
+                and len(baseline) == 64
+                and all(
+                    char in "0123456789abcdef"
+                    for char in baseline.lower()
+                )
+                and bool(lease_id)
+                and bool(job_id)
+                and attempt > 0
+                and procutil._parse_producer_custody(
+                    producer_custody
+                    if isinstance(producer_custody, dict)
+                    else None
+                )
+                is not None
+                and valid_state
+            )
+            if not valid_identity:
+                invalid += 1
+                continue
+            if state == "cleaned":
+                if (
+                    not isinstance(close, dict)
+                    or close.get("ok") is not True
+                    or close.get("cleaned") is not True
+                    or not destination_missing
+                ):
+                    invalid += 1
+                continue
+            if close_phase == "destination_unlinked" and not destination_missing:
+                invalid += 1
+                continue
+            destination_unlinked = destination_missing and (
+                state == "materialize_intent"
+                or close_phase in {"unlink_intent", "destination_unlinked"}
+            )
+            if destination_missing and not destination_unlinked:
+                invalid += 1
+                continue
+            recoverable.append((path, payload, destination_unlinked))
+            continue
         if schema != "provider-auth-reaper.v2":
             invalid += 1
             continue
@@ -2016,9 +2362,30 @@ def _recover_provider_auth_with_held_lock(
         destination_path=str(payload["destination_path"]),
         baseline_sha256=str(payload["baseline_sha256"]),
         lease_id=str(payload["lease_id"]),
+        recovery_receipt_path=(
+            str(path)
+            if payload.get("schema_version") == "provider-auth-lease.v3"
+            else None
+        ),
         _authority_lock_fd=authority_lock_fd,
         _destination_unlinked=destination_unlinked,
     )
+    if payload.get("schema_version") == "provider-auth-lease.v3":
+        drained = _producer_custody_drained_twice(
+            job_id=str(payload["job_id"]),
+            producer_custody=payload["producer_custody"],
+            poll_seconds=0.1,
+        )
+        if not drained:
+            _release_provider_auth_lock(lease._authority_lock_fd)
+            lease._authority_lock_fd = None
+            return True
+        receipt = lease.close()
+        if not receipt.ok:
+            _release_provider_auth_lock(lease._authority_lock_fd)
+            lease._authority_lock_fd = None
+            raise IsolationUnavailable(receipt.reason)
+        return True
     try:
         defer_provider_auth_cleanup(
             lease,
@@ -2112,10 +2479,34 @@ def recover_provider_auth_reapers(
                 destination_path=str(payload["destination_path"]),
                 baseline_sha256=str(payload["baseline_sha256"]),
                 lease_id=str(payload["lease_id"]),
+                recovery_receipt_path=(
+                    str(path)
+                    if payload.get("schema_version")
+                    == "provider-auth-lease.v3"
+                    else None
+                ),
                 _authority_lock_fd=lock_fd,
                 _destination_unlinked=destination_unlinked,
             )
             try:
+                if payload.get("schema_version") == "provider-auth-lease.v3":
+                    drained = _producer_custody_drained_twice(
+                        job_id=str(payload["job_id"]),
+                        producer_custody=payload["producer_custody"],
+                        poll_seconds=0.1,
+                    )
+                    if not drained:
+                        _release_provider_auth_lock(
+                            lease._authority_lock_fd
+                        )
+                        lease._authority_lock_fd = None
+                        active += 1
+                        continue
+                    receipt = lease.close()
+                    if not receipt.ok:
+                        raise IsolationUnavailable(receipt.reason)
+                    recovered += 1
+                    continue
                 try:
                     defer_provider_auth_cleanup(
                         lease,
@@ -2236,6 +2627,10 @@ def materialize_provider_auth(
     *,
     provider_id: str,
     credential_home: Path | None = None,
+    job_id: str | None = None,
+    attempt: int = 1,
+    producer_custody: dict[str, Any] | None = None,
+    receipt_root: Path | None = None,
 ) -> ProviderAuthLease | None:
     """Materialize only the selected provider's subscription credential.
 
@@ -2251,6 +2646,25 @@ def materialize_provider_auth(
         raise IsolationUnavailable(
             f"unsupported isolated provider identity: {provider_id!r}"
         )
+    durable_identity_requested = any(
+        value is not None
+        for value in (job_id, producer_custody, receipt_root)
+    )
+    if durable_identity_requested:
+        from . import procutil
+
+        if (
+            not isinstance(job_id, str)
+            or not job_id.strip()
+            or isinstance(attempt, bool)
+            or not isinstance(attempt, int)
+            or attempt <= 0
+            or procutil._parse_producer_custody(producer_custody) is None
+        ):
+            raise IsolationUnavailable(
+                "provider auth materialization requires exact job, attempt, "
+                "and producer custody identity"
+            )
     run_dir = Path(raw["run_dir"]).resolve()
     synthetic_home = Path(raw["synthetic_home"]).resolve()
     if synthetic_home != run_dir / "home":
@@ -2268,6 +2682,7 @@ def materialize_provider_auth(
                 if _recover_provider_auth_with_held_lock(
                     source_home=Path(source_home),
                     authority_lock_fd=authority_lock_fd,
+                    receipt_root=receipt_root,
                 ):
                     authority_lock_fd = None
                     raise IsolationUnavailable(
@@ -2283,6 +2698,14 @@ def materialize_provider_auth(
         _release_provider_auth_lock(authority_lock_fd)
         raise
 
+    destination = synthetic_home / ".codex" / "auth.json"
+    baseline_sha256 = hashlib.sha256(payload).hexdigest()
+    lease_id = secrets.token_hex(16)
+    recovery_receipt_path = (
+        (receipt_root or _provider_auth_reaper_root()) / f"{lease_id}.json"
+        if durable_identity_requested
+        else None
+    )
     try:
         run_dir_fd = _open_directory(run_dir)
         try:
@@ -2292,7 +2715,29 @@ def materialize_provider_auth(
                     home_fd, ".codex", create=True,
                 )
                 try:
+                    if recovery_receipt_path is not None:
+                        _write_provider_auth_reaper_receipt(
+                            recovery_receipt_path,
+                            {
+                                "schema_version": "provider-auth-lease.v3",
+                                "state": "materialize_intent",
+                                "lease_id": lease_id,
+                                "source_home": str(Path(source_home).resolve()),
+                                "run_dir": str(run_dir),
+                                "destination_path": str(destination),
+                                "baseline_sha256": baseline_sha256,
+                                "job_id": job_id,
+                                "attempt": attempt,
+                                "producer_custody": producer_custody,
+                                "custody_state": "parent",
+                            },
+                        )
                     _write_private_at(destination_dir_fd, "auth.json", payload)
+                    if recovery_receipt_path is not None:
+                        _transition_provider_auth_reaper_receipt(
+                            recovery_receipt_path,
+                            {"state": "materialized"},
+                        )
                 finally:
                     os.close(destination_dir_fd)
             finally:
@@ -2302,12 +2747,17 @@ def materialize_provider_auth(
     except Exception:
         _release_provider_auth_lock(authority_lock_fd)
         raise
-    destination = synthetic_home / ".codex" / "auth.json"
     return ProviderAuthLease(
         source_home=str(source_home),
         run_dir=str(run_dir),
         destination_path=str(destination),
-        baseline_sha256=hashlib.sha256(payload).hexdigest(),
+        baseline_sha256=baseline_sha256,
+        lease_id=lease_id,
+        recovery_receipt_path=(
+            str(recovery_receipt_path)
+            if recovery_receipt_path is not None
+            else None
+        ),
         _authority_lock_fd=authority_lock_fd,
     )
 
@@ -2384,6 +2834,7 @@ def wrap_command(
 
 
 __all__ = [
+    "SANDBOX_EXEC",
     "IsolationUnavailable",
     "PreparedIsolation",
     "ProviderAuthCloseReceipt",
@@ -2391,15 +2842,17 @@ __all__ = [
     "ProviderAuthHandoffQuarantined",
     "ProviderAuthHandoffReceipt",
     "ProviderAuthLease",
-    "SANDBOX_EXEC",
     "bootstrap_codex_auth_authority",
     "defer_provider_auth_cleanup",
     "isolated_environment",
     "materialize_provider_auth",
+    "park_provider_auth_lease_for_recovery",
     "prepare",
+    "quarantine_provider_auth_custody_lease",
     "quarantine_provider_auth_lease",
-    "reap_quarantined_provider_auth_leases",
+    "reap_provider_auth_lease_for_custody_in_process",
     "reap_provider_auth_lease_in_process",
+    "reap_quarantined_provider_auth_leases",
     "recover_provider_auth_reapers",
     "sandbox_profile",
     "wrap_command",

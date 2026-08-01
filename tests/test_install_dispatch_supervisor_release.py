@@ -156,7 +156,7 @@ def _plist(
     *,
     stage0_path: str,
     working_directory: Path,
-    failover: str = "0",
+    failover: str = "1",
 ) -> bytes:
     return plistlib.dumps(
         {
@@ -703,7 +703,7 @@ def test_invalid_failover_plist_is_rejected_before_any_mutation(
         _plist(
             stage0_path=release["stage0_path"],
             working_directory=ROOT,
-            failover="1",
+            failover="0",
         )
     )
     commands: list[list[str]] = []
@@ -717,7 +717,7 @@ def test_invalid_failover_plist_is_rejected_before_any_mutation(
 
     with pytest.raises(
         installer.CutoverError,
-        match="VOLPRED_CODEX_FAILOVER=0",
+        match="VOLPRED_CODEX_FAILOVER=1",
     ):
         installer.cutover(
             repo_root=ROOT,

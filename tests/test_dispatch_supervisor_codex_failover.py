@@ -19,6 +19,14 @@ from scripts.dispatch_supervisor import (
     worker,
 )
 
+VALID_PRODUCER_CUSTODY = {
+    "version": 2,
+    "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+    "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+    "resource_coalition_id": 73,
+    "trusted_unique_ids": [1001],
+}
+
 
 @pytest.fixture(autouse=True)
 def _provider_guard_stub(monkeypatch):
@@ -339,6 +347,11 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
         "pgid_members_checked",
         lambda _pgid: [],
     )
+    monkeypatch.setattr(
+        codex_failover.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody: [],
+    )
 
     result = codex_failover.run_codex_failover(
         reason="quota",
@@ -348,6 +361,7 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
         slot_id="slot-1",
         job_id="abcdef123456",
         on_process_started=lambda _pid, _pgid: True,
+        producer_custody=VALID_PRODUCER_CUSTODY,
     )
 
     assert result.recovered is True
@@ -422,12 +436,199 @@ def test_isolated_codex_unexpected_exception_still_closes_auth_lease(
         isolated_workspace=isolated_workspace,
         slot_id="slot-1",
         job_id="abcdef123456",
+        producer_custody=VALID_PRODUCER_CUSTODY,
     )
 
     assert result.recovered is False
     assert result.exit_code == codex_failover.RC_DISABLED
     assert "injected prompt error" in result.detail
     assert closed == [True]
+
+
+def test_isolated_codex_materialization_binds_exact_custody_identity(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    workdir = tmp_path / "workspace"
+    run_dir = tmp_path / "run"
+    for path in (workdir, run_dir / "home", run_dir / "tmp", run_dir / "pycache"):
+        path.mkdir(parents=True)
+    profile = run_dir / "sandbox.sb"
+    profile.write_text("(version 1)\n", encoding="utf-8")
+    isolated_workspace = {
+        "path": str(workdir),
+        "isolation_profile_path": str(profile),
+        "isolation_run_dir": str(run_dir),
+        "isolation_synthetic_home": str(run_dir / "home"),
+        "isolation_tmp_dir": str(run_dir / "tmp"),
+        "isolation_pycache_dir": str(run_dir / "pycache"),
+        "isolation_workspace": str(workdir),
+        "isolation_canonical_root": str(tmp_path / "repo"),
+    }
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    captured: list[dict] = []
+
+    class FakeLease:
+        recovery_receipt_path = str(tmp_path / "lease.json")
+
+        def close(self):
+            return codex_failover.isolation.ProviderAuthCloseReceipt(
+                True, False, False, True, "closed",
+            )
+
+    def materialize(*_args, **kwargs):
+        captured.append(kwargs)
+        return FakeLease()
+
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(
+        codex_failover.isolation, "materialize_provider_auth", materialize,
+    )
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "isolated_environment",
+        lambda env, *_a, **_k: dict(env),
+    )
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "reap_provider_auth_lease_for_custody_in_process",
+        lambda _lease, **_kwargs: (
+            codex_failover.isolation.ProviderAuthCloseReceipt(
+                True, False, False, True, "closed",
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        codex_failover,
+        "preflight",
+        lambda *_a, **_k: (False, 9, "stop after materialization"),
+    )
+
+    result = codex_failover.run_codex_failover(
+        reason="quota",
+        enabled=True,
+        workdir=workdir,
+        isolated_workspace=isolated_workspace,
+        slot_id="slot-1",
+        job_id="d" * 32,
+        attempt=3,
+        producer_custody=custody,
+    )
+
+    assert result.exit_code == 9
+    assert captured == [{
+        "provider_id": "codex-cli",
+        "job_id": "d" * 32,
+        "attempt": 3,
+        "producer_custody": custody,
+    }]
+
+
+@pytest.mark.parametrize("producer_custody", [None, {}])
+def test_isolated_codex_missing_or_invalid_custody_fails_before_materialization(
+    monkeypatch,
+    tmp_path: Path,
+    producer_custody,
+) -> None:
+    workdir = tmp_path / "workspace"
+    run_dir = tmp_path / "run"
+    for path in (workdir, run_dir / "home", run_dir / "tmp", run_dir / "pycache"):
+        path.mkdir(parents=True)
+    profile = run_dir / "sandbox.sb"
+    profile.write_text("(version 1)\n", encoding="utf-8")
+    isolated_workspace = {
+        "path": str(workdir),
+        "isolation_profile_path": str(profile),
+        "isolation_run_dir": str(run_dir),
+        "isolation_synthetic_home": str(run_dir / "home"),
+        "isolation_tmp_dir": str(run_dir / "tmp"),
+        "isolation_pycache_dir": str(run_dir / "pycache"),
+        "isolation_workspace": str(workdir),
+        "isolation_canonical_root": str(tmp_path / "repo"),
+    }
+    materialized: list[bool] = []
+
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "materialize_provider_auth",
+        lambda *_a, **_k: materialized.append(True),
+    )
+    monkeypatch.setattr(
+        codex_failover.subprocess,
+        "run",
+        lambda *_a, **_k: pytest.fail("invalid custody must fail before spawn"),
+    )
+
+    result = codex_failover.run_codex_failover(
+        reason="quota",
+        enabled=True,
+        workdir=workdir,
+        isolated_workspace=isolated_workspace,
+        slot_id="slot-1",
+        job_id="f" * 32,
+        producer_custody=producer_custody,
+    )
+
+    assert result.exit_code == codex_failover.RC_DISABLED
+    assert "exact producer custody" in result.detail
+    assert materialized == []
+
+
+def test_failover_guard_uses_full_custody_before_auth_close(monkeypatch) -> None:
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    closed: list[bool] = []
+    reaped: list[tuple[str, dict]] = []
+
+    class FakeLease:
+        recovery_receipt_path = "/tmp/provider-auth-v3.json"
+
+        def close(self):
+            closed.append(True)
+            return codex_failover.isolation.ProviderAuthCloseReceipt(
+                True, False, False, True, "closed",
+            )
+
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "reap_provider_auth_lease_for_custody_in_process",
+        lambda _lease, *, job_id, producer_custody: (
+            reaped.append((job_id, producer_custody))
+            or codex_failover.isolation.ProviderAuthCloseReceipt(
+                True, False, False, True, "closed",
+            )
+        ),
+    )
+    guard = codex_failover._ProviderAuthLeaseGuard(
+        lease=FakeLease(),
+        job_id="e" * 32,
+        producer_custody=custody,
+    )
+    guard.mark_process_started(pid=777, pgid=777, started_wall="start")
+
+    result = guard.finish(codex_failover.FailoverResult(
+        attempted=True,
+        recovered=False,
+        exit_code=codex_failover.RC_WORK_TIMEOUT,
+        detail="descendant alive",
+        process_active=True,
+    ))
+
+    assert result.process_active is False
+    assert reaped == [("e" * 32, custody)]
+    assert closed == []
 
 
 def test_active_descendant_hands_auth_lease_to_reaper_before_return(
@@ -513,8 +714,8 @@ def test_active_descendant_hands_auth_lease_to_reaper_before_return(
     )
     monkeypatch.setattr(
         codex_failover.procutil,
-        "kill_pgid",
-        lambda _pgid, **_kwargs: False,
+        "kill_producer_cohort",
+        lambda _custody, **_kwargs: False,
     )
     monkeypatch.setattr(
         codex_failover.termination,
@@ -540,6 +741,7 @@ def test_active_descendant_hands_auth_lease_to_reaper_before_return(
         slot_id="slot-1",
         job_id="abcdef123456",
         on_process_started=lambda _pid, _pgid: True,
+        producer_custody=VALID_PRODUCER_CUSTODY,
         state_path=tmp_path / "dispatch_state.json",
     )
 
@@ -759,6 +961,7 @@ def test_spawn_post_popen_probe_error_never_closes_live_auth_early(
         slot_id="slot-1",
         job_id="abcdef123456",
         on_process_started=lambda _pid, _pgid: True,
+        producer_custody=VALID_PRODUCER_CUSTODY,
     )
 
     assert result.exit_code == codex_failover.RC_DISABLED
@@ -1220,6 +1423,65 @@ def test_failover_descendant_survivor_keeps_global_custody_and_slot_quarantined(
     assert current["pid"] == 777
     assert state.read_state(state_path)["completions"] == []
     assert len(custody_receipt.read_pending_producer_custodies(tmp_path)) == 1
+
+
+def test_stale_attempt_cannot_reuse_new_custody_or_spawn_failover(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    state_path = tmp_path / "dispatch_state.json"
+    lease = state.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=2,
+        model="opus",
+        log_path="/tmp/worker.log",
+        path=state_path,
+    )
+    assert state.attach_producer_custody(
+        job_id=lease.job_id,
+        custody=VALID_PRODUCER_CUSTODY,
+        expected_attempt=2,
+        path=state_path,
+    )
+    provider_calls: list[bool] = []
+    kill_calls: list[bool] = []
+    alerts: list[dict] = []
+    monkeypatch.setattr(
+        worker.codex_failover,
+        "run_codex_failover",
+        lambda **_kwargs: provider_calls.append(True),
+    )
+    monkeypatch.setattr(
+        worker.procutil,
+        "kill_producer_cohort",
+        lambda *_args, **_kwargs: kill_calls.append(True),
+    )
+    monkeypatch.setattr(
+        worker.alerts,
+        "send_codex_failover_alert",
+        lambda **kwargs: alerts.append(kwargs) or True,
+    )
+
+    result = worker._attempt_codex_failover(
+        reason="quota",
+        attempt=1,
+        total_duration=0,
+        fallback_exit=1,
+        model="opus",
+        log_tail="quota",
+        state_path=state_path,
+        job_id=lease.job_id,
+        slot_id="slot-1",
+        workdir=tmp_path / "workspace",
+        isolated_workspace={"isolation_canonical_root": str(tmp_path)},
+    )
+
+    assert result is None
+    assert provider_calls == []
+    assert kill_calls == []
+    assert len(alerts) == 1
+    assert alerts[0]["attempted"] is False
+    assert "exact job/attempt producer custody" in alerts[0]["detail"]
 
 
 def test_success_path_never_calls_failover(monkeypatch, tmp_path, _quiet_state_and_alerts):

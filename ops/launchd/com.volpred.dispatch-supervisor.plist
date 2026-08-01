@@ -34,11 +34,11 @@
     <string>/Users/yhlai0911</string>
     <key>VOLPRED_WRITER_ISOLATION_REQUIRED</key>
     <string>1</string>
-    <!-- Shared launchd coalition cannot yet couple Codex reachability
-         descendants to provider-auth lease drain. Keep failover mechanically
-         off until per-fire custody passes regression + live read-back. -->
+    <!-- Codex failover retains the same exact fire custody and isolated
+         subscription-auth lease. Unknown cohort drain or lease recovery fails
+         closed; it never revives the retired legacy runner. -->
     <key>VOLPRED_CODEX_FAILOVER</key>
-    <string>0</string>
+    <string>1</string>
   </dict>
 
   <key>RunAtLoad</key>

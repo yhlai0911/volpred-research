@@ -11223,6 +11223,450 @@ def test_provider_auth_admission_fences_nonterminal_crashed_lease(
     assert not (new_run / "home" / ".codex" / "auth.json").exists()
 
 
+def test_codex_auth_materialization_arms_recovery_before_secret_write(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    receipt_root = tmp_path / "receipts"
+    events: list[tuple[str, str]] = []
+    real_write_receipt = isolation._write_provider_auth_reaper_receipt
+    real_write_private = isolation._write_private_at
+
+    def write_receipt(path: Path, payload: dict) -> None:
+        events.append(("receipt", str(payload.get("state"))))
+        real_write_receipt(path, payload)
+
+    def write_private(directory_fd: int, name: str, payload: bytes) -> None:
+        if name == "auth.json":
+            events.append(("secret", name))
+        real_write_private(directory_fd, name, payload)
+
+    monkeypatch.setattr(
+        isolation, "_write_provider_auth_reaper_receipt", write_receipt,
+    )
+    monkeypatch.setattr(isolation, "_write_private_at", write_private)
+
+    lease = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=authority,
+        job_id="a" * 32,
+        attempt=2,
+        producer_custody=custody,
+        receipt_root=receipt_root,
+    )
+
+    assert lease is not None
+    assert events[:2] == [
+        ("receipt", "materialize_intent"),
+        ("secret", "auth.json"),
+    ]
+    receipt_path = Path(lease.recovery_receipt_path)
+    payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "provider-auth-lease.v3"
+    assert payload["state"] == "materialized"
+    assert payload["job_id"] == "a" * 32
+    assert payload["attempt"] == 2
+    assert payload["producer_custody"] == custody
+
+    closed = lease.close()
+    assert closed.ok is True
+    assert not Path(lease.destination_path).exists()
+    terminal = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert terminal["state"] == "cleaned"
+    assert terminal["close"]["cleaned"] is True
+
+
+def test_codex_auth_materialization_fails_before_secret_when_receipt_root_is_not_durable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+
+    monkeypatch.setattr(
+        isolation,
+        "_ensure_private_directory_durable",
+        lambda _path: (_ for _ in ()).throw(
+            isolation.IsolationUnavailable("injected parent fsync failure")
+        ),
+    )
+
+    with pytest.raises(
+        isolation.IsolationUnavailable,
+        match="injected parent fsync failure",
+    ):
+        isolation.materialize_provider_auth(
+            prepared,
+            provider_id="codex-cli",
+            credential_home=authority,
+            job_id="9" * 32,
+            attempt=1,
+            producer_custody={
+                "version": 2,
+                "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+                "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+                "resource_coalition_id": 73,
+                "trusted_unique_ids": [1001],
+            },
+            receipt_root=tmp_path / "receipts",
+        )
+
+    assert not (run_dir / "home" / ".codex" / "auth.json").exists()
+
+
+def test_provider_auth_v3_crash_recovery_waits_for_full_custody(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    receipt_root = tmp_path / "receipts"
+    lease = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=authority,
+        job_id="b" * 32,
+        attempt=1,
+        producer_custody=custody,
+        receipt_root=receipt_root,
+    )
+    assert lease is not None
+    destination = Path(lease.destination_path)
+
+    monkeypatch.setattr(
+        procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody: None,
+    )
+    parked = isolation.reap_provider_auth_lease_for_custody_in_process(
+        lease,
+        job_id="b" * 32,
+        producer_custody=custody,
+        poll_seconds=0,
+    )
+    assert parked.ok is False
+    assert parked.reason == "recovery_pending"
+    assert lease._authority_lock_fd is None
+    assert destination.exists(), "unknown custody must retain the OAuth copy"
+    parked_payload = json.loads(
+        Path(lease.recovery_receipt_path).read_text(encoding="utf-8")
+    )
+    assert parked_payload["recovery_pending"] is True
+
+    monkeypatch.setattr(
+        procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody: [222],
+    )
+    active = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipt_root,
+    )
+    assert active == {"recovered": 0, "active": 1, "invalid": 0}
+    assert destination.exists(), "live custody must retain the OAuth copy"
+
+    transient = iter([[], [222]])
+    monkeypatch.setattr(
+        procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody: next(transient),
+    )
+    not_yet_drained = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipt_root,
+    )
+    assert not_yet_drained == {"recovered": 0, "active": 1, "invalid": 0}
+    assert destination.exists(), "one empty read cannot authorize OAuth cleanup"
+
+    monkeypatch.setattr(
+        procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody: [],
+    )
+    real_transition = isolation._transition_provider_auth_reaper_receipt
+
+    def fail_terminal_receipt(path: Path, payload: dict):
+        if payload.get("state") == "cleaned":
+            raise isolation.IsolationUnavailable(
+                "injected crash before terminal receipt"
+            )
+        return real_transition(path, payload)
+
+    monkeypatch.setattr(
+        isolation,
+        "_transition_provider_auth_reaper_receipt",
+        fail_terminal_receipt,
+    )
+    interrupted = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipt_root,
+    )
+    assert interrupted == {"recovered": 0, "active": 0, "invalid": 1}
+    assert not destination.exists()
+    interrupted_payload = json.loads(
+        next(receipt_root.glob("*.json")).read_text(encoding="utf-8")
+    )
+    assert interrupted_payload["state"] == "cleanup_started"
+    assert interrupted_payload["close_phase"] == "destination_unlinked"
+
+    monkeypatch.setattr(
+        isolation,
+        "_transition_provider_auth_reaper_receipt",
+        real_transition,
+    )
+    recovered = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipt_root,
+    )
+    assert recovered == {"recovered": 1, "active": 0, "invalid": 0}
+    assert not destination.exists()
+    receipt = next(receipt_root.glob("*.json"))
+    terminal = json.loads(receipt.read_text(encoding="utf-8"))
+    assert terminal["state"] == "cleaned"
+
+
+def test_provider_auth_custody_reaper_requires_two_empty_reads(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observations = iter([[], []])
+    checks: list[tuple[int, str, dict]] = []
+    closed: list[bool] = []
+
+    class FakeLease:
+        recovery_receipt_path = None
+
+        def close(self, *, checkpoint=None):
+            closed.append(True)
+            return isolation.ProviderAuthCloseReceipt(
+                True, False, False, True, "closed",
+            )
+
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+
+    def members(pgid: int, *, job_id: str, custody: dict):
+        checks.append((pgid, job_id, custody))
+        return next(observations)
+
+    monkeypatch.setattr(procutil, "producer_cohort_members_checked", members)
+    monkeypatch.setattr(isolation.time, "sleep", lambda _seconds: None)
+
+    receipt = isolation.reap_provider_auth_lease_for_custody_in_process(
+        FakeLease(),
+        job_id="c" * 32,
+        producer_custody=custody,
+        poll_seconds=0,
+    )
+
+    assert receipt.ok is True
+    assert len(checks) == 2
+    assert all(call == (0, "c" * 32, custody) for call in checks)
+    assert closed == [True]
+
+
+def test_provider_auth_custody_reaper_parks_close_failure_without_retry(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    close_calls: list[bool] = []
+    parked: list[str] = []
+
+    class FakeLease:
+        def close(self):
+            close_calls.append(True)
+            return isolation.ProviderAuthCloseReceipt(
+                False, False, False, False, "injected close failure",
+            )
+
+    monkeypatch.setattr(
+        isolation,
+        "_producer_custody_drained_twice",
+        lambda **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        isolation,
+        "park_provider_auth_lease_for_recovery",
+        lambda _lease, *, reason, **_kwargs: parked.append(reason),
+    )
+
+    receipt = isolation.reap_provider_auth_lease_for_custody_in_process(
+        FakeLease(),
+        job_id="8" * 32,
+        producer_custody={
+            "version": 2,
+            "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+            "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+            "resource_coalition_id": 73,
+            "trusted_unique_ids": [1001],
+        },
+        poll_seconds=0,
+        close_retry_seconds=0,
+    )
+
+    assert receipt.ok is False
+    assert close_calls == [True]
+    assert parked == ["bounded close failed: injected close failure"]
+
+
+def test_provider_auth_close_failure_before_checkpoint_parks_low_and_recovers(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    receipt_root = tmp_path / "receipts"
+    lease = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=authority,
+        job_id="7" * 32,
+        attempt=1,
+        producer_custody=custody,
+        receipt_root=receipt_root,
+    )
+    assert lease is not None
+    real_open_directory = isolation._open_directory
+
+    def fail_run_open(path: Path) -> int:
+        if Path(path).resolve() == run_dir.resolve():
+            raise isolation.IsolationUnavailable("injected pre-checkpoint failure")
+        return real_open_directory(path)
+
+    monkeypatch.setattr(isolation, "_open_directory", fail_run_open)
+    monkeypatch.setattr(
+        isolation,
+        "_producer_custody_drained_twice",
+        lambda **_kwargs: True,
+    )
+    failed = isolation.reap_provider_auth_lease_for_custody_in_process(
+        lease,
+        job_id="7" * 32,
+        producer_custody=custody,
+        poll_seconds=0,
+    )
+    assert failed.ok is False
+    parked = json.loads(
+        Path(lease.recovery_receipt_path).read_text(encoding="utf-8")
+    )
+    assert parked["state"] == "recovery_pending"
+    assert "close_phase" not in parked
+    assert Path(lease.destination_path).exists()
+    assert lease._authority_lock_fd is None
+
+    monkeypatch.setattr(isolation, "_open_directory", real_open_directory)
+    monkeypatch.setattr(
+        isolation,
+        "_producer_custody_drained_twice",
+        lambda **_kwargs: True,
+    )
+    recovered = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipt_root,
+    )
+    assert recovered == {"recovered": 1, "active": 0, "invalid": 0}
+    assert not Path(lease.destination_path).exists()
+
+
 def test_provider_auth_forged_cleaned_receipt_fails_closed(
     tmp_path: Path,
 ) -> None:

@@ -990,8 +990,8 @@ def _validate_new_plist(
     if str(request["stage0_path"]) not in parsed["ProgramArguments"]:
         raise CutoverError("launchd plist does not execute the materialized stage-0")
     environment = parsed["EnvironmentVariables"]
-    if environment.get("VOLPRED_CODEX_FAILOVER") != "0":
-        raise CutoverError("launchd plist must set VOLPRED_CODEX_FAILOVER=0")
+    if environment.get("VOLPRED_CODEX_FAILOVER") != "1":
+        raise CutoverError("launchd plist must set VOLPRED_CODEX_FAILOVER=1")
     if environment.get("VOLPRED_WRITER_ISOLATION_REQUIRED") != "1":
         raise CutoverError("launchd plist must require writer isolation")
 

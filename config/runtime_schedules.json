@@ -1830,9 +1830,9 @@
         "rationale": "2026-07-29 production safety cutover：supervisor 以 launchd resource coalition + per-fire process unique-id baseline 追蹤 setsid／leader-exit 後仍存活的 producer。shared coalition 無法安全區分同時起跑的多個 fire，因此 scheduler 必須機械限流為單一 slot；恢復多 slot 前須先切到 per-fire isolated coalition 並完成 live drain read-back。"
       },
       "codex_failover": {
-        "mode": "disabled_until_per_fire_custody",
-        "environment": "VOLPRED_CODEX_FAILOVER=0",
-        "rationale": "2026-07-29 safe-launch gate：Codex reachability/preflight 與 provider-auth reaper 仍以 subprocess/PGID 管理，無法證明 setsid descendant 與 credential lease 同時 drained；shared launchd coalition 期間機械停用 failover。Claude subscription 主執行不受影響；只有 per-fire custody + lease drain regression/live proof 全綠後才可恢復。"
+        "mode": "active_with_per_fire_custody",
+        "environment": "VOLPRED_CODEX_FAILOVER=1",
+        "rationale": "2026-08-01 activation gate：Codex subscription failover 與 Claude fire 共用 exact job custody；synthetic OAuth lease 在 materialize 時即有 durable recovery identity，所有 terminal path 必須先證明完整 producer cohort（含 setsid descendants）drained，再 reconcile／刪除 credential。shared launchd coalition 仍維持 max_slots=1，未知 custody、lease recovery 或 provider policy一律 fail closed，不回 legacy runner。"
       },
       "max_slots": 1,
       "max_slots_rationale": "2026-07-29 shared_launchd_coalition custody safety mode：單一 shared coalition 的 per-fire baseline 在並行 fire 下會互相看見新成員，故 production 必須 max_slots=1；scheduler.load_max_slots 即使讀到漂移值或無效值也 fail-safe clamp 1。2026-07-19 的 4-slot throughput 設定暫停，待 per-fire isolated coalition 通過 regression + live drain proof 後才可恢復。",
@@ -1848,7 +1848,7 @@
         "rationale": "Issue #43 enforce cutover：每班 mutating-capable fire 由 supervisor 在 agent spawn 前機械配發 registered worktree，worker cwd 與 macOS sandbox 綁定該 workspace；active cap、disk floor、binding、receipt 或 lock 失敗只會釋放 slot 並保留 fire request 重派，禁止 shared-main fallback。candidate head + main base 進 durable gate receipt；main 前進必 rebase + re-gate，integrator 以雙 SHA fence 落地。canonical storage 只容許既有帶鎖 CLI；workspace 內 storage/** 變更在 merge gate fail closed。max_active=1 與 shared_launchd_coalition 的單 slot custody gate 一致；max_total=3 是 artifact backlog advisory threshold，超限必寫 durable allocation_advisory，但保留的事故證據與待整合產物不占 execution capacity、不得阻斷新 fire。"
       },
       "since": "2026-07-04T16:36:00+08:00",
-      "description": "Long-lived dispatch executor after the Operations Core cutover. It has no schedule clock: a local Unix-socket trigger server accepts Operations Core ticks, while the process retains the independent health monitor, single-slot shared-coalition worker, retry ladder and cohort-drained PHASE-Z safety commit. Codex failover is fail-closed disabled until per-fire custody also owns provider-auth lease drain. Schedule-trigger receipts and model-delivery outcomes remain separate. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover model outcomes."
+      "description": "Long-lived dispatch executor after the Operations Core cutover. It has no schedule clock: a local Unix-socket trigger server accepts Operations Core ticks, while the process retains the independent health monitor, single-slot shared-coalition worker, retry ladder and cohort-drained PHASE-Z safety commit. Claude quota/auth failure hands the same exact job, isolated workspace, producer custody and subscription-only credential lease to Codex; no legacy runner is re-enabled. Schedule-trigger receipts and model-delivery outcomes remain separate. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover model outcomes."
     },
     {
       "id": "telegram_poll",

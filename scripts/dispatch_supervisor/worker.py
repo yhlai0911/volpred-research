@@ -1029,10 +1029,27 @@ def _attempt_codex_failover(
             raw.get("producer_custody")
             for raw in (custody_state.get("current_jobs") or [])
             if str(raw.get("job_id") or "") == job_id
+            and raw.get("attempt") == attempt
             and isinstance(raw.get("producer_custody"), dict)
         ),
         None,
     )
+    if isolated_workspace is not None and producer_custody is None:
+        detail = (
+            "Codex failover exact job/attempt producer custody is unavailable; "
+            "refusing OAuth materialization and provider spawn"
+        )
+        LOG.error("%s job_id=%s attempt=%d", detail, job_id, attempt)
+        alerts.send_codex_failover_alert(
+            reason=reason,
+            recovered=False,
+            exit_code=codex_failover.RC_DISABLED,
+            detail=detail,
+            attempted=False,
+            output_tail=log_tail,
+            state_path=state_path,
+        )
+        return None
     custody_repo_root = Path(
         str(
             (
@@ -1194,6 +1211,7 @@ def _attempt_codex_failover(
             isolated_workspace=isolated_workspace,
             preselected_task_id=preselected_task_id,
             producer_custody=producer_custody,
+            attempt=attempt,
             state_path=state_path,
         )
     except Exception as exc:  # failover must never take the supervisor down

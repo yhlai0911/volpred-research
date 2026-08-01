@@ -265,6 +265,8 @@ class _ProviderAuthLeaseGuard:
     active_pgid: int | None = None
     leader_pid: int | None = None
     leader_started_wall: str | None = None
+    job_id: str | None = None
+    producer_custody: dict | None = None
 
     def bind(self, lease: isolation.ProviderAuthLease | None) -> None:
         if self.lease is not None:
@@ -295,6 +297,63 @@ class _ProviderAuthLeaseGuard:
     ) -> FailoverResult:
         if self.lease is None:
             return result
+        if (
+            getattr(self.lease, "recovery_receipt_path", None) is not None
+            and self.job_id
+            and self.producer_custody is not None
+        ):
+            try:
+                receipt = (
+                    isolation.reap_provider_auth_lease_for_custody_in_process(
+                        self.lease,
+                        job_id=self.job_id,
+                        producer_custody=self.producer_custody,
+                    )
+                )
+            except Exception as exc:  # retain the live FD for health retry
+                isolation.quarantine_provider_auth_custody_lease(
+                    self.lease,
+                    job_id=self.job_id,
+                    producer_custody=self.producer_custody,
+                )
+                self.lease = None
+                return FailoverResult(
+                    attempted=result.attempted,
+                    recovered=False,
+                    exit_code=RC_DISABLED,
+                    detail=(
+                        "Codex credential custody was quarantined for bounded "
+                        f"health recovery: {exc}"
+                    ),
+                    duration_s=result.duration_s,
+                    output_tail=result.output_tail,
+                    process_active=True,
+                )
+            if receipt.ok:
+                self.lease = None
+                self.mark_process_group_drained()
+                return FailoverResult(
+                    attempted=result.attempted,
+                    recovered=result.recovered,
+                    exit_code=result.exit_code,
+                    detail=result.detail,
+                    duration_s=result.duration_s,
+                    output_tail=result.output_tail,
+                    process_active=False,
+                )
+            self.lease = None
+            return FailoverResult(
+                attempted=result.attempted,
+                recovered=False,
+                exit_code=RC_DISABLED,
+                detail=(
+                    "Codex subscription credential custody did not close "
+                    f"safely: {receipt.reason}"
+                ),
+                duration_s=result.duration_s,
+                output_tail=result.output_tail,
+                process_active=True,
+            )
         if result.process_active or self.active_pgid is not None:
             active_pgid = self.active_pgid or pgid
             if active_pgid is None or self.leader_pid is None:
@@ -443,7 +502,39 @@ class _ProviderAuthLeaseGuard:
 
     def close_on_unwind(self) -> None:
         """Exception-safe fallback for every non-descendant terminal path."""
-        if self.lease is None or self.active_pgid is not None:
+        if self.lease is None:
+            return
+        if (
+            getattr(self.lease, "recovery_receipt_path", None) is not None
+            and self.job_id
+            and self.producer_custody is not None
+        ):
+            try:
+                receipt = (
+                    isolation.reap_provider_auth_lease_for_custody_in_process(
+                        self.lease,
+                        job_id=self.job_id,
+                        producer_custody=self.producer_custody,
+                    )
+                )
+            except Exception as exc:  # retain the live FD for health retry
+                isolation.quarantine_provider_auth_custody_lease(
+                    self.lease,
+                    job_id=self.job_id,
+                    producer_custody=self.producer_custody,
+                )
+                LOG.error(
+                    "Codex auth custody quarantined during unwind: %s", exc,
+                )
+                self.lease = None
+                return
+            if receipt.ok:
+                self.lease = None
+                self.mark_process_group_drained()
+            else:
+                self.lease = None
+            return
+        if self.active_pgid is not None:
             return
         receipt = self.lease.close()
         if receipt.ok:
@@ -471,10 +562,14 @@ def run_codex_failover(
     isolated_workspace: dict | None = None,
     preselected_task_id: str | None = None,
     producer_custody: dict | None = None,
+    attempt: int = 1,
     state_path: Path = state.STATE_PATH,
 ) -> FailoverResult:
     """Try to let ``codex exec`` cover this hourly slot without leaking auth."""
-    lease_guard = _ProviderAuthLeaseGuard()
+    lease_guard = _ProviderAuthLeaseGuard(
+        job_id=job_id,
+        producer_custody=producer_custody,
+    )
     try:
         return _run_codex_failover_impl(
             reason=reason,
@@ -491,6 +586,7 @@ def run_codex_failover(
             isolated_workspace=isolated_workspace,
             preselected_task_id=preselected_task_id,
             producer_custody=producer_custody,
+            attempt=attempt,
             state_path=state_path,
             lease_guard=lease_guard,
         )
@@ -522,6 +618,7 @@ def _run_codex_failover_impl(
     isolated_workspace: dict | None = None,
     preselected_task_id: str | None = None,
     producer_custody: dict | None = None,
+    attempt: int = 1,
     state_path: Path = state.STATE_PATH,
     lease_guard: _ProviderAuthLeaseGuard,
 ) -> FailoverResult:
@@ -565,10 +662,27 @@ def _run_codex_failover_impl(
             if key.startswith("isolation_")
         }
         try:
-            lease_guard.bind(isolation.materialize_provider_auth(
-                isolation_receipt,
-                provider_id="codex-cli",
-            ))
+            isolation._prepared_payload(isolation_receipt)
+            if (
+                not job_id
+                or isinstance(attempt, bool)
+                or not isinstance(attempt, int)
+                or attempt <= 0
+                or procutil._parse_producer_custody(producer_custody) is None
+            ):
+                raise isolation.IsolationUnavailable(
+                    "Codex failover requires exact producer custody before "
+                    "OAuth materialization"
+                )
+            lease_guard.bind(
+                isolation.materialize_provider_auth(
+                    isolation_receipt,
+                    provider_id="codex-cli",
+                    job_id=job_id,
+                    attempt=attempt,
+                    producer_custody=producer_custody,
+                )
+            )
             child_env = isolation.isolated_environment(
                 child_env,
                 isolation_receipt,

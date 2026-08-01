@@ -42,7 +42,7 @@ def test_dispatch_writer_isolation_is_fail_closed_in_config_and_launchd():
     assert daemon["producer_custody"]["mode"] == "shared_launchd_coalition"
     assert (
         daemon["codex_failover"]["mode"]
-        == "disabled_until_per_fire_custody"
+        == "active_with_per_fire_custody"
     )
 
     with (
@@ -53,4 +53,4 @@ def test_dispatch_writer_isolation_is_fail_closed_in_config_and_launchd():
         plist["EnvironmentVariables"]["VOLPRED_WRITER_ISOLATION_REQUIRED"]
         == "1"
     )
-    assert plist["EnvironmentVariables"]["VOLPRED_CODEX_FAILOVER"] == "0"
+    assert plist["EnvironmentVariables"]["VOLPRED_CODEX_FAILOVER"] == "1"
