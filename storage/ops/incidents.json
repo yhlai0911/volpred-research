@@ -2287,7 +2287,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-01T19:04:18.290832+00:00"
+     "last_seen_at": "2026-08-01T19:22:36.010050+00:00"
     },
     {
      "cleared_at": null,
@@ -2405,9 +2405,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-01T19:04:18.290832+00:00",
+   "last_seen_at": "2026-08-01T19:22:36.010050+00:00",
    "notified_at": null,
-   "occurrence_count": 8035,
+   "occurrence_count": 8038,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3368,6 +3368,11 @@
      "at": "2026-08-01T18:41:03.350336+00:00",
      "instance_key": "30712334706:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T19:20:52.341104+00:00",
+     "instance_key": "30713909333:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -3394,14 +3399,20 @@
      "first_seen_at": "2026-08-01T18:41:03.350336+00:00",
      "key": "30712334706:1",
      "last_seen_at": "2026-08-01T18:41:03.350336+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-01T19:20:52.341104+00:00",
+     "key": "30713909333:1",
+     "last_seen_at": "2026-08-01T19:20:52.341104+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-01T18:39:45.7070924Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1743']",
-   "last_seen_at": "2026-08-01T18:41:03.350336+00:00",
+   "last_breach_detail": "2026-08-01T19:20:23.0576739Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1743']",
+   "last_seen_at": "2026-08-01T19:20:52.341104+00:00",
    "notified_at": null,
-   "occurrence_count": 4,
+   "occurrence_count": 5,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -3725,6 +3736,6 @@
    }
   }
  },
- "updated_at": "2026-08-01T19:04:18.328306+00:00",
+ "updated_at": "2026-08-01T19:22:36.045003+00:00",
  "version": 1
 }
