@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：比特幣 ETF 的每日申贖金流，能預告明天的震盪嗎",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1709/k1709_results.json",
+      "sha256": "c91e6f5132b102eae91ea541bb511ea05596886ab679b58ffead468d36ba33f2",
+      "label": "experiment K1709 results (whether spot BTC/ETH ETF daily net creation/redemption flow adds out-of-sample predictive value for next-day and five-day realized volatility over a baseline that only uses volatility's own history)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "那個數字跟價格綁得很緊，但綁的是同一天",
+      "alt": "現貨比特幣 ETF 每日淨申贖金流與同一天報酬的相關係數明顯為正，以太坊也是同向；但金流與同一天波動幅度的相關幾乎是零，代表這個數字講的是漲跌方向，不是市場晃不晃。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "申贖金流跟當天價格一起動",
+          "body": [
+            "有人在券商帳戶按下買進，發行商當天增發份額，做市商拿著錢去現貨市場買幣。所謂「今天淨流入多少億」，換個角度就是「今天有一批人在買」。",
+            "價格跟著同一批買盤走，兩個數字當然同向。真正被誤讀的是下一步：人眼看到金流爆量那天市場也在動，很容易記成金流帶動了市場。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "比特幣：金流與同一天報酬的相關",
+          "value": {
+            "source": "results",
+            "path": "/endogeneity_diagnostic/BTC/corr_flow_vs_same_day_return",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "以太坊：金流與同一天報酬的相關",
+          "value": {
+            "source": "results",
+            "path": "/endogeneity_diagnostic/ETH/corr_flow_vs_same_day_return",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "比特幣：金流與同一天波動幅度的相關",
+          "value": {
+            "source": "results",
+            "path": "/endogeneity_diagnostic/BTC/corr_flow_vs_same_day_logrv",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "跟漲跌方向有關，跟晃不晃幾乎無關"
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "professional",
+      "title": "怎麼測：事先講好十個格子，兩個模型共用同一組訓練日期",
+      "alt": "測試涵蓋比特幣與以太坊兩年多的每日申贖資料，每一格用固定長度的滾動視窗重新估參數，加金流與不加金流的兩個模型共用同一組訓練日期，金流一律落後一天才進模型。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "先講好要測哪幾格，再去看結果",
+          "body": [
+            "兩個資產、隔日與五日兩種預測天期、金流規模與金流方向不對稱兩種形式，再加兩格「比特幣的金流會不會外溢到以太坊」。",
+            "每一格都用固定長度的滾動視窗重新估參數。加金流跟不加金流的兩個模型共用同一組訓練日期，避免其中一邊偷到多的資訊；金流一律落後一天才進模型。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "比特幣：可用的交易日",
+          "value": {
+            "source": "results",
+            "path": "/data_diagnostics/flows/BTC/n_obs",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "以太坊：可用的交易日",
+          "value": {
+            "source": "results",
+            "path": "/data_diagnostics/flows/ETH/n_obs",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "每次重估參數用的滾動視窗長度（天）",
+          "value": {
+            "source": "results",
+            "path": "/primary_cells/0/oos_audit/train_window",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "比特幣隔日那一格的樣本外預測日數",
+          "value": {
+            "source": "results",
+            "path": "/primary_cells/0/n_oos",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "十格裡七格反而更不準，最好的一格也撐不住檢驗",
+      "alt": "十個事先講好的測試格中，七格加了申贖金流之後預測準確度反而下降，最差的一格掉超過一個半百分點，最好的一格只好不到半個百分點；做完多重比較校正後全部退回沒有訊號。連樣本內的解釋力都只多到小數點第四位。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "連樣本內第一關都沒亮",
+          "body": [
+            "多數「訊號沒用」的故事走同一條弧線：樣本內漂亮得不得了，一放到樣本外就垮掉。這次的申贖金流連那個漂亮的開頭都沒有。",
+            "在最寬鬆、可以隨便挑參數的樣本內環境裡，加了金流的解釋力要看到小數點第四位才知道有東西進去。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本內解釋力：只加市場狀態控制變數",
+          "value": {
+            "source": "results",
+            "path": "/in_sample/BTC_h1_HAR+ctrl/r2",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本內解釋力：再加上金流規模",
+          "value": {
+            "source": "results",
+            "path": "/in_sample/BTC_h1_H1_absflow/r2",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本外最差的一格：預測準確度變化",
+          "value": {
+            "source": "results",
+            "path": "/primary_cells/3/qlike_improvement_pct",
+            "format": {
+              "kind": "percent",
+              "scale": 1,
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本外最好的一格：預測準確度變化",
+          "value": {
+            "source": "results",
+            "path": "/primary_cells/2/qlike_improvement_pct",
+            "format": {
+              "kind": "percent",
+              "scale": 1,
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "做完多重比較校正後，十格全部退回沒有訊號"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "「我沒量到」跟「這裡什麼都沒有」，是兩句不同的話",
+      "alt": "模擬顯示這份樣本對中小型效果近乎盲目：金流把波動推高一成時抓得到的機率只有個位數百分比，要推高八成以上才有九成把握，因此結論是無定論而非證明無效；唯一能講死的是平均帶來百分之一以上準確度改善這件事已被排除。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "這把尺的最小刻度很大",
+          "body": [
+            "量完之後說「我沒量到東西」，這句話成立。要說「這裡什麼都沒有」，刻度這麼粗的尺講不了；比刻度還小的效果，這份樣本讀不出來。",
+            "有一件事倒是可以講死：就算金流真的有效，平均效果的天花板已經被壓在很低的位置。對想拿它當進出場依據的人來說，這個上限比「有沒有效」更實用。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "金流把波動推高約一成時，抓得到的機率",
+          "value": {
+            "source": "results",
+            "path": "/power_simulation/BTC/curve/2/power_gw_one_sided_5pct",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "要推高到八成以上，才有這個把握看得見",
+          "value": {
+            "source": "results",
+            "path": "/power_simulation/BTC/curve/7/power_gw_one_sided_5pct",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "排除「平均帶來百分之一以上改善」的校正後強度",
+          "value": {
+            "source": "results",
+            "path": "/multiple_testing/primary_family/0/material_gain_exclusion_holm_p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "數字越小，這個上限越站得住"
+        }
+      ]
+    }
+  ]
+}
