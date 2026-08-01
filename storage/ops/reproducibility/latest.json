@@ -1,7 +1,7 @@
 {
   "schema_version": "volpred.reproduce_inventory.v1",
-  "generated_at": "2026-08-01T19:23:49.466033+00:00",
-  "repo_head": "32f8bc4d780275cf32a651f9e0b9951c8871f3ea",
+  "generated_at": "2026-08-01T22:00:57.118587+00:00",
+  "repo_head": "3aa5f3b1c81495d227438e1fc6b3a2f8dbd09568",
   "scope": {
     "paper_sources": "paper/*/experiments.md plus canonical submission compile closures; README fallback only when both are absent",
     "recent_feed_articles": "latest 60 records with status=published",
@@ -242,6 +242,7 @@
       "K1436",
       "K1443",
       "K1448",
+      "K1450",
       "K148",
       "K1492",
       "K1493",
@@ -364,6 +365,7 @@
       "K1436",
       "K1443",
       "K1448",
+      "K1450",
       "K1457",
       "K1470",
       "K1471",
@@ -601,6 +603,7 @@
     "K1436": "k1436",
     "K1443": "k1443",
     "K1448": "k1448",
+    "K1450": "k1450",
     "K1457": "k1457",
     "K1470": "k1470_eav_multistart_main_spec",
     "K1471": "k1471_vt_crowding_redesign",
@@ -744,19 +747,19 @@
     "unverified_missing_spec": 1171,
     "code_without_results": 168,
     "results_without_code": 13,
-    "priority_refs": 234,
-    "priority_existing": 230,
+    "priority_refs": 235,
+    "priority_existing": 231,
     "priority_missing_dirs": 4,
     "priority_runnable": 11,
     "priority_with_reproduce_report": 3,
     "priority_reproduced_match": 1,
     "priority_stale_reports": 2,
-    "priority_unverified": 229,
+    "priority_unverified": 230,
     "priority_code_without_results": 2,
     "broken_reports": 0,
     "stale_reports": 3,
     "knowledge_base_readable": true,
-    "results_without_knowledge": 1
+    "results_without_knowledge": 0
   },
   "report_status_counts": {
     "pass_tolerated": 4
@@ -2414,6 +2417,23 @@
       "spec_file": null,
       "entrypoint": "k1448.py",
       "result_file": "k1448_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1450",
+      "path": "experiments/k1450",
+      "priority_sources": [
+        "recent_feed"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1450.py",
+      "result_file": "k1450_results.json",
       "classification": "unverified_missing_spec",
       "blocker": "missing reproduce_spec.json"
     },
@@ -7208,23 +7228,7 @@
       "blocker": "no archived *_results.json"
     }
   ],
-  "results_without_knowledge": [
-    {
-      "experiment": "K1743",
-      "path": "experiments/K1743",
-      "priority_sources": [],
-      "code_count": 1,
-      "results_count": 1,
-      "reproduce_report": false,
-      "report_status": null,
-      "report_stale": null,
-      "spec_file": "reproduce_spec.json",
-      "entrypoint": "K1743.py",
-      "result_file": "K1743_results.json",
-      "classification": "runnable",
-      "blocker": null
-    }
-  ],
+  "results_without_knowledge": [],
   "broken_reports": [],
   "sample_candidates": [
     {
