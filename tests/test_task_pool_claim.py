@@ -3854,6 +3854,76 @@ def test_dispatch_preassign_does_not_yield_to_collision_blocked_article(
     assert assigned["contract"]["task_id"] == "platform-runnable"
 
 
+def test_dispatch_preassign_collision_scan_excludes_terminal_history(
+    tmp_path, monkeypatch
+) -> None:
+    """A compactable queue history must not expand the pre-spawn git query."""
+    import continue_task_dispatch
+
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    terminal_history = [
+        {
+            "id": f"historical-{index}",
+            "status": "succeeded",
+            "priority": 1,
+            "task_type": "daily_article",
+            "dispatch_lane": "agent",
+            "created_at": "2000-01-01T00:00:00+00:00",
+        }
+        for index in range(500)
+    ]
+    next_tasks.write_text(
+        json.dumps(
+            terminal_history
+            + [
+                {
+                    "id": "article-live",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "daily_article",
+                    "dispatch_lane": "agent",
+                    "created_at": "2000-01-01T00:00:00+00:00",
+                },
+                {
+                    "id": "platform-runnable",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    scanned: list[str] = []
+
+    def scan(**kwargs):
+        scanned.extend(kwargs["task_ids"])
+        return {}
+
+    monkeypatch.setattr(
+        continue_task_dispatch,
+        "_find_task_dispatch_collisions",
+        scan,
+    )
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-article",
+            job_id="job-article",
+        )
+    )
+
+    assert assigned["selected_task_id"] == "article-live"
+    assert scanned == ["article-live"]
+
+
 @pytest.mark.parametrize(
     "terminal_status",
     [

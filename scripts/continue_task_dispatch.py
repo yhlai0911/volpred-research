@@ -474,6 +474,7 @@ def resolve_dispatch_ownership(
     recent_type_counts: Counter | None = None,
     repo_root: Path = ROOT,
     now: datetime | None = None,
+    input_is_pending: bool = False,
 ) -> dict:
     """Resolve the shared worker/supervisor boundary and collision gate.
 
@@ -483,7 +484,12 @@ def resolve_dispatch_ownership(
     admits another.
     """
 
-    cats = categorize(tasks, recent_type_counts=recent_type_counts)
+    pending_tasks = tasks if input_is_pending else [
+        task
+        for task in tasks
+        if str(task.get("status") or "").strip().lower() == "pending"
+    ]
+    cats = categorize(pending_tasks, recent_type_counts=recent_type_counts)
     supervisor_only = [
         task
         for task in cats["agentable"]
@@ -1186,6 +1192,7 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
         recent_type_counts=recent_type_counts,
         repo_root=ROOT,
         now=now,
+        input_is_pending=True,
     )
     cats = ownership["categories"]
     supervisor_only = ownership["supervisor_only"]
