@@ -249,6 +249,10 @@ def test_generic_fuzzy_arc_is_warn_only(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     _write_feed(tmp_path, [_event_article("T-2")])
+    (tmp_path / "storage" / "next_tasks.json").write_text(
+        json.dumps([{"id": "daily_article_same_fuzzy_story"}]),
+        encoding="utf-8",
+    )
     monkeypatch.setattr(cli, "ROOT", tmp_path)
     monkeypatch.setattr(cli, "_log_dedup_decision", lambda *_a, **_k: None)
     monkeypatch.setattr(
@@ -265,7 +269,13 @@ def test_generic_fuzzy_arc_is_warn_only(
     monkeypatch.setattr(
         sys,
         "argv",
-        ["check_arc_dedup.py", "--title", "same fuzzy story"],
+        [
+            "check_arc_dedup.py",
+            "--candidate-id",
+            "daily_article_same_fuzzy_story",
+            "--title",
+            "same fuzzy story",
+        ],
     )
 
     assert cli.main() == 0
