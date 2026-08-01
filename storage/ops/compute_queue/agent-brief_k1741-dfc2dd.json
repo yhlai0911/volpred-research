@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1741-dfc2dd",
+  "title": "K1741: short-credit tail hedge vs put-proxy/VIX overlay",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1741-dfc2dd.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1d13fe83-k1741",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1d13fe83-k1741/experiments/k1741/K1741_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1741-dfc2dd.json",
+    "--timeout",
+    "3360"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-01T10:44:04Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1741-dfc2dd.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1741-dfc2dd.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1d13fe83-k1741/experiments/k1741/K1741_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1741-dfc2dd.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1d13fe83-k1741",
+  "claude_followup": {
+    "brief": "K1741 收件：(1) 驗 K1741_results.json 三件套齊全、數字可對回程式（抽驗 3 個報告數字）；(2) 驗 lookahead — K1741.py 內 signal.shift(1) 與 beta/duration-beta 皆事前估計、seed=42；(3) 驗 borrow_fee_grid 三檔都跑且結論翻轉點如實標示；(4) 派 Codex review（K1259 gate）通過後才由主線程寫 knowledge.json + experiment_experiences.json；(5) 以 scripts/merge_worktree.sh 完整合併 wt/dispatch-slot-1-1d13fe83-k1741，不得留未合併 branch。Null result 亦須完整記錄。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1741",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-01T10:44:04Z",
+    "linked_at": "2026-08-01T10:44:04Z",
+    "error": null
+  },
+  "timeout_seconds": 3480,
+  "brief_source": "/tmp/brief_k1741.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1741-dfc2dd.md"
+}
