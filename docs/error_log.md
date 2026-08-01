@@ -5478,5 +5478,9 @@ merge；原 generation 仍 owned、identity 不符、queue 不可讀或 complete
 `system_terminated + empty_removed` 非終態路徑；另覆蓋 generation-advance race、舊 receipt job
 正規化、missing／unreadable／corrupt／wrong-allocation 四類 strict observation 與 finalizer
 fail-closed。task-pool suite **146 passed**，supervisor suite **323 passed, 1 skipped**，Matt
-Standards／Spec 雙 PASS，critical Ruff、compile 與 diff gate 通過。immutable reload、live pending ledger
-收斂與 sustained-clean read-back 尚待完成，因此目前僅為 **`contained`**。
+Standards／Spec 雙 PASS，critical Ruff、compile 與 diff gate 通過。2026-08-01 22:26:24 CST 已由
+immutable release 完成 planned reload；22:26:38 與 22:28:23 兩個自然 reconciliation 週期均為
+`claim_session_mismatch=0`、新 ERROR=0，pending settlement 由 26 收斂至 1。最後一筆是有 durable
+workspace identity、但尚無 terminal receipt 的舊 generation，已走 `remediation_opened` 並 materialize
+P2 `inc_792a94b0ecf4_e1`，沒有重放舊 task effect 或污染現行 claim。五步 Gate 已完成，狀態為
+**`root_cause_fixed_and_verified`**。
