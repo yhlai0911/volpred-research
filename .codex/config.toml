@@ -10,11 +10,11 @@ inherit = "core"
 [shell_environment_policy.set]
 CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "62"
 
-[mcp_servers.graphify-volpred-codeonly]
+[mcp_servers.graphify-volpred]
 command = "/Users/yhlai0911/.local/bin/graphify-mcp"
 args = [
     "--graph",
-    "/Users/yhlai0911/volpred-research/storage/ops/graphify_codeonly/graphify-out/graph.json",
+    "/Users/yhlai0911/volpred-research/graphify-out/graph.json",
 ]
 
 [mcp_servers.zeabur]

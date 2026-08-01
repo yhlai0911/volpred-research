@@ -330,6 +330,25 @@ model-invoked skills 可按任務描述自動採用。建立或修改 skill 時�
 `writing-great-skills` 的 predictability、information hierarchy、completion criterion
 與 single source of truth 為準。
 
+### Graphify code map
+
+- 全域 Graphify CLI / skill 是大型 codebase 導航工具；專案已有
+  `graphify-out/graph.json` 時，架構、caller、dependency、legacy path 或影響面問題先走
+  Graphify fast path，再讀命中的原始碼。CLI 是必要基線；MCP 只是可選包裝，不得讓 MCP
+  是否載入阻塞工作。
+- 開始 graph work 先跑 `graphify reflect --if-stale` 並讀
+  `graphify-out/reflections/LESSONS.md`；query 前依全域 `graphify` skill 從實際 graph vocabulary
+  做 constrained expansion。不得憑記憶替 graph 發明 synonym / edge。
+- 每次使用先比對 `graphify-out/GRAPH_REPORT.md` 的 `Built from commit` 與目前 `HEAD`。
+  過期時先用本機 `graphify update .` 增量更新；code AST 路徑不需要 API key，也不得改走
+  `claude-cli` 或按量 API。更新期間仍可探索，但過期 graph 不得支撐最終裁決。
+- Graphify 是 map，不是 proof：所有結論必須回到 `source_location` 對應原始碼、測試、runtime
+  receipt / API read-back 驗證；不得用 node/edge、community 或 query 命中取代五步 Gate。
+- root graph 不涵蓋被根 repo 忽略的獨立 `frontend-v2-fix/` Git repo；分析 active frontend
+  時必須另建／更新該 repo 的 graph，或直接讀其 source，不得以 root graph 的缺席推論功能不存在。
+- `graphify-out/` 是可重建產物；除既有明確追蹤檔外，不得把大型 graph/cache 順手納入功能
+  commit。Graph query 若形成可重用判斷，依 skill 的 `save-result --outcome` 寫回學習紀錄。
+
 ### Issue tracker
 
 本專案使用 GitHub Issues 追蹤工程工作。見 `docs/agents/issue-tracker.md`。
