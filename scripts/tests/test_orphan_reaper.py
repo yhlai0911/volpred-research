@@ -357,6 +357,53 @@ def test_completed_compute_experiment_cannot_bypass_formal_admission(
     assert result.exists(), "blocked admission preserves the producer bytes"
 
 
+def test_compute_experiment_admission_is_rechecked_inside_delivery_transaction(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A scan-time approval cannot authorize bytes that changed before commit."""
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    queue = root / "storage" / "ops" / "compute_queue"
+    experiment = root / "experiments" / "K1743"
+    queue.mkdir(parents=True)
+    experiment.mkdir(parents=True)
+    result = experiment / "K1743_results.json"
+    result.write_text('{"experiment_id":"K1743"}\n', encoding="utf-8")
+    result_rel = str(result.relative_to(root))
+    job_path = queue / "k1743-race.json"
+    job_path.write_text(json.dumps({
+        "id": "k1743-race",
+        "kind": "compute",
+        "status": "completed",
+        "output_paths": [result_rel],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+
+    decisions = iter([(True, "ready_for_main"), (False, "review bytes changed")])
+    monkeypatch.setattr(
+        reaper,
+        "_queue_experiment_admission",
+        lambda _paths: next(decisions),
+    )
+    candidate = reaper.scan_job_deliverables()["candidates"][0]
+    before = _repo_git(root, "rev-parse", "HEAD").stdout.strip()
+
+    outcome = reaper.deliver_job_outputs(candidate)
+
+    assert outcome == {
+        "job_id": "k1743-race",
+        "paths": [result_rel],
+        "delivered": False,
+        "reason": "experiment_admission_blocked",
+        "detail": "review bytes changed",
+    }
+    assert _repo_git(root, "rev-parse", "HEAD").stdout.strip() == before
+    assert result.exists()
+    assert "delivered_paths" not in json.loads(job_path.read_text(encoding="utf-8"))
+
+
 def test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths(
     tmp_path: Path,
     monkeypatch,

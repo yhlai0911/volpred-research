@@ -5577,8 +5577,9 @@ commit `3dac20c9c7ab` 只收了 results。原始 results 另含 2011-10-25 的 1
 knowledge closure 的 compute result 誤認為可交付成品。
 
 **底層修復與制度化**：queue-output candidate 現在對任何 `experiments/<id>/` 路徑重用同一個
-canonical experiment admission gate；review verdict、artifact contract、reproduce spec、knowledge
-或 byte binding 未齊時只寫 `experiment_admission_blocked` held evidence，保留原檔且禁止 commit。
+canonical experiment admission gate，並在持有 receipt／Git transaction lock 後、真正 staging 前
+重新授權 exact paths；review verdict、artifact contract、reproduce spec、knowledge 或 byte binding
+未齊、或 scan 後發生漂移時，只寫 `experiment_admission_blocked` evidence，保留原檔且禁止 commit。
 Codex failover prompt 補齊 PHASE A，逐筆處理 `collect_completed`、`split_required`、
 `artifact_contract_mismatch`、`triage_failed`，未 `mark-followup-dispatched` settlement 前不得挑新工。
 K1743 本身改用 runtime `finalize_experiment()` 同步產 results/spec byte trace，新增 FX 合理範圍與

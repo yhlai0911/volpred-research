@@ -722,6 +722,18 @@ def deliver_job_outputs(candidate: dict) -> dict:
             outcome["reason"] = "no_pending_paths"
             return outcome
 
+        # The scan result is advisory.  Another writer may change an experiment
+        # artifact, its review binding, or HEAD before this transaction obtains
+        # both locks.  Re-authorize the exact paths at the commit boundary so a
+        # stale scan can never become permission to land unreviewed bytes.
+        experiment_admission = _queue_experiment_admission(paths)
+        if experiment_admission is not None and not experiment_admission[0]:
+            outcome.update(
+                reason="experiment_admission_blocked",
+                detail=experiment_admission[1],
+            )
+            return outcome
+
         pre_staged = _git("diff", "--cached", "--name-only", "--", *paths)
         if pre_staged.returncode != 0:
             outcome.update(reason="git_preflight_failed",
