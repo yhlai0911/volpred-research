@@ -90,7 +90,9 @@ import os
 import re
 import subprocess
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
+from enum import Enum
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -970,8 +972,95 @@ def check_image_gate(body: str, audience: str, bypass: bool) -> int:
     return 0
 
 
-def check_lazypack_gate(body: str, audience: str, bypass: bool,
-                        status: str = "published") -> int:
+class LazypackObligationKind(str, Enum):
+    """Single classification used by both lazypack enforcement stages."""
+
+    EXEMPT = "exempt"
+    SATISFIED = "satisfied"
+    REQUIRED_NOW = "required_now"
+    DEFERRED = "deferred"
+    CHECK_FAILED_REQUIRED_NOW = "check_failed_required_now"
+    CHECK_FAILED_DEFERRED = "check_failed_deferred"
+    CHECK_FAILED_UNKNOWN = "check_failed_unknown"
+
+
+@dataclass(frozen=True)
+class LazypackObligation:
+    kind: LazypackObligationKind
+    error: Exception | None = None
+
+
+_KNOWN_DEFERRED_LAZYPACK_STATUSES = frozenset({"draft", "scheduled"})
+
+
+def _failed_lazypack_boundary_kind(status: str) -> LazypackObligationKind:
+    """Fail closed for the only deferred statuses when the canonical owner is down.
+
+    ``publisher.lazypack_required_at`` remains the semantic owner.  This tiny
+    fallback is a safety ratchet, not a second policy table: it only prevents
+    the two historically deferred mutations from succeeding without a render
+    owner while that canonical function/import is unavailable.  Every other
+    status preserves the reader-visible gate's documented fail-open behavior.
+    """
+    if str(status).strip().lower() in _KNOWN_DEFERRED_LAZYPACK_STATUSES:
+        return LazypackObligationKind.CHECK_FAILED_DEFERRED
+    return LazypackObligationKind.CHECK_FAILED_UNKNOWN
+
+
+def classify_lazypack_obligation(
+    body: str,
+    audience: str,
+    bypass: bool,
+    status: str,
+) -> LazypackObligation:
+    """Classify one publish against the canonical reader-visible boundary."""
+    if bypass or audience != "general":
+        return LazypackObligation(LazypackObligationKind.EXEMPT)
+    try:
+        from volpred.publisher.publisher import (  # noqa: WPS433
+            has_lazypack_section,
+            lazypack_required_at,
+        )
+    except Exception as exc:  # noqa: BLE001 - gate identity unavailable
+        return LazypackObligation(
+            _failed_lazypack_boundary_kind(status),
+            exc,
+        )
+
+    try:
+        required_now = lazypack_required_at(status)
+    except Exception as exc:  # noqa: BLE001 - boundary owner unavailable
+        return LazypackObligation(
+            _failed_lazypack_boundary_kind(status),
+            exc,
+        )
+    try:
+        has_section = has_lazypack_section(body)
+    except Exception as exc:  # noqa: BLE001 - content checker unavailable
+        kind = (
+            LazypackObligationKind.CHECK_FAILED_REQUIRED_NOW
+            if required_now
+            else LazypackObligationKind.CHECK_FAILED_DEFERRED
+        )
+        return LazypackObligation(kind, exc)
+
+    if has_section:
+        return LazypackObligation(LazypackObligationKind.SATISFIED)
+    return LazypackObligation(
+        LazypackObligationKind.REQUIRED_NOW
+        if required_now
+        else LazypackObligationKind.DEFERRED
+    )
+
+
+def check_lazypack_gate(
+    body: str,
+    audience: str,
+    bypass: bool,
+    status: str = "published",
+    *,
+    obligation: LazypackObligation | None = None,
+) -> int:
     """Return 0 if pass, 6 if the 懶人包 (lazypack) gate fails.
 
     Per .claude/rules/publishing.md §4 + lazypack-infographic skill (boss 2026-06-04
@@ -999,32 +1088,36 @@ def check_lazypack_gate(body: str, audience: str, bypass: bool,
     dedup-gate-audit.md (a content gate must never silently swallow OR over-block
     on its own error): if the check itself throws, log a warn and PASS.
     """
-    if bypass or audience != 'general':
+    obligation = obligation or classify_lazypack_obligation(
+        body, audience, bypass, status
+    )
+    if obligation.kind in {
+        LazypackObligationKind.EXEMPT,
+        LazypackObligationKind.SATISFIED,
+    }:
         return 0
-    try:
-        import sys as _sys
-        src_dir = ROOT / "src"
-        if str(src_dir) not in _sys.path:
-            _sys.path.insert(0, str(src_dir))
-        from volpred.publisher.publisher import (  # noqa: WPS433
-            has_lazypack_section,
-            lazypack_required_at,
-        )
-
-        if has_lazypack_section(body):
-            return 0
-        if not lazypack_required_at(status):
-            print(f"[publish_draft] lazypack deferred (status={status}): enqueue "
-                  f"the async render after publish — uv run python "
-                  f"scripts/lazypack_async_render.py enqueue --article-id <mile_id> "
-                  f"--experiment <K> --plan <plan.json>; release_pool holds the "
-                  f"publish flip until the section lands.")
-            return 0
-        # else: published + no 懶人包 heading (or heading without image) → block
-    except Exception as e:  # fail-open: a gate malfunction must not block content
+    if obligation.kind in {
+        LazypackObligationKind.DEFERRED,
+        LazypackObligationKind.CHECK_FAILED_DEFERRED,
+    }:
+        if obligation.error is not None:
+            print(
+                "[publish_draft] LAZYPACK GATE deferred-check warning: "
+                f"{type(obligation.error).__name__}: {obligation.error}",
+                file=sys.stderr,
+            )
+        print(f"[publish_draft] lazypack deferred (status={status}): enqueue "
+              f"the async render after publish — uv run python "
+              f"scripts/lazypack_async_render.py enqueue --article-id <mile_id> "
+              f"--experiment <K> --plan <plan.json>; release_pool holds the "
+              f"publish flip until the section lands.")
+        return 0
+    if obligation.error is not None:
         print(f"[publish_draft] LAZYPACK GATE fail-open (check error): "
-              f"{type(e).__name__}: {e}", file=sys.stderr)
+              f"{type(obligation.error).__name__}: {obligation.error}",
+              file=sys.stderr)
         return 0
+    # required now + no 懶人包 heading (or heading without image) → block
     print(f"\n[publish_draft] LAZYPACK GATE: audience=general with "
           f"status=published requires a 懶人包圖組 (cheat-sheet infographic SET) "
           f"at the article end; none found.",
@@ -1040,6 +1133,70 @@ def check_lazypack_gate(body: str, audience: str, bypass: bool,
           f"`--no-lazypack-gate` only for genuinely non-reader pieces (rare).",
           file=sys.stderr)
     return 6
+
+
+def check_deferred_lazypack_contract(
+    body: str,
+    audience: str,
+    bypass: bool,
+    status: str,
+    plan: str | None,
+    *,
+    obligation: LazypackObligation | None = None,
+) -> int:
+    """Require a runnable render hand-off before creating a general draft.
+
+    ``check_lazypack_gate`` intentionally defers the image section until the
+    reader-visible boundary for draft/scheduled articles.  Deferral is only a
+    real workflow when the same publish transaction carries a strict,
+    evidence-bound plan that ``lazypack_async_render.py`` can enqueue.  A
+    printed reminder is not an owner and must not let the producer report
+    success while leaving an unreleasable draft behind.
+
+    This preflight is scoped to the canonical *new publish* CLI.  Update mode
+    may be editing a draft whose durable render job already exists, so its
+    article-id-bound state is assessed by the release gate instead.
+    """
+    obligation = obligation or classify_lazypack_obligation(
+        body, audience, bypass, status
+    )
+    if obligation.kind == LazypackObligationKind.CHECK_FAILED_DEFERRED:
+        exc = obligation.error
+        print(
+            "[publish_draft] DEFERRED LAZYPACK PREFLIGHT failed closed "
+            f"(check error): {type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
+        return 6
+    if obligation.kind != LazypackObligationKind.DEFERRED:
+        return 0
+
+    if not plan:
+        print(
+            "\n[publish_draft] DEFERRED LAZYPACK CONTRACT: a general "
+            f"{status} without a lazypack section requires --lazypack-plan. "
+            "No draft was published; author and validate the evidence-bound "
+            "plan, then retry the same command.",
+            file=sys.stderr,
+        )
+        return 6
+
+    try:
+        scripts_dir = ROOT / "scripts"
+        if str(scripts_dir) not in sys.path:
+            sys.path.insert(0, str(scripts_dir))
+        from lazypack_render import validate_runnable_plan  # noqa: WPS433
+
+        validate_runnable_plan(plan)
+    except Exception as exc:  # noqa: BLE001 - invalid input must fail closed before mutation
+        print(
+            "\n[publish_draft] DEFERRED LAZYPACK CONTRACT: "
+            f"--lazypack-plan is not runnable ({type(exc).__name__}: {exc}). "
+            "No draft was published.",
+            file=sys.stderr,
+        )
+        return 6
+    return 0
 
 
 def infer_publish_audience(
@@ -1724,8 +1881,29 @@ def main() -> int:
         return rc
     # New publish: enforce by the TARGET status — draft/scheduled defer the
     # lazypack to the async pipeline + release gate (2026-07-02 error_log 15:15 #4).
-    rc = check_lazypack_gate(body, audience, getattr(args, 'no_lazypack_gate', False),
-                             status=status)
+    lazypack_obligation = classify_lazypack_obligation(
+        body,
+        audience,
+        getattr(args, "no_lazypack_gate", False),
+        status,
+    )
+    rc = check_lazypack_gate(
+        body,
+        audience,
+        getattr(args, "no_lazypack_gate", False),
+        status=status,
+        obligation=lazypack_obligation,
+    )
+    if rc != 0:
+        return rc
+    rc = check_deferred_lazypack_contract(
+        body,
+        audience,
+        getattr(args, "no_lazypack_gate", False),
+        status,
+        getattr(args, "lazypack_plan", None),
+        obligation=lazypack_obligation,
+    )
     if rc != 0:
         return rc
 
@@ -1878,22 +2056,70 @@ def main() -> int:
         print(f"[publish_draft] stderr: {result.stderr[-700:]}", file=sys.stderr)
     if result.returncode == 0:
         _refresh_publication_candidates_after_feed_change("new_publish")
-        rc_lz = _settle_deferred_lazypack(
+        rc_lz = settle_deferred_lazypack(
             stdout=result.stdout or "",
             body=body,
             audience=audience,
             status=status,
             plan=getattr(args, "lazypack_plan", None),
             bypass=getattr(args, "no_lazypack_gate", False),
+            obligation=lazypack_obligation,
         )
         if rc_lz != 0:
             return rc_lz
     return result.returncode
 
 
-def _settle_deferred_lazypack(
+def _article_id_from_publish_stdout(stdout: str) -> str | None:
+    """Read back the id the publisher actually just created — not merely the first one it mentioned.
+
+    2026-08-01 (K1325): this used to be ``re.search(r"mile_[0-9a-f]{6,}", stdout)``.
+    The publisher's stdout is not a bare receipt — it also carries gate notes and
+    a ``publication_candidates`` refresh that name *other* articles, and any of
+    those can precede the line describing this publish. On K1325 the first match
+    was ``mile_80cae4cb``, an unrelated research article published a month
+    earlier, so K1325's lazypack plan was queued to render into that article's
+    body. The queue entry was cancelled before the */15 worker ran; had it run,
+    a live published article would have grown a 懶人包圖組 about a different
+    experiment, and K1325 would have sat in the pool forever waiting on a render
+    nobody queued.
+
+    "First id that appears in the output" was never the contract. The publisher
+    emits its own structured receipt (``JSON: {...}`` with an ``id``); that is
+    the only authoritative statement of what was created, so read that. Fall back
+    to the anchored ``Stored milestone <id>`` line, then give up — returning None
+    makes the caller print a manual-enqueue instruction, which costs one operator
+    action, whereas guessing costs the integrity of whichever article got picked.
+    """
+    for line in reversed(stdout.splitlines()):
+        marker = line.find("JSON:")
+        if marker == -1:
+            continue
+        try:
+            payload = json.loads(line[marker + len("JSON:"):].strip())
+        except (ValueError, TypeError) as exc:
+            print(
+                "[publish_draft] WARN ignored malformed publish receipt: "
+                f"{type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
+            continue
+        if not isinstance(payload, dict):
+            continue
+        if payload.get("action") != "publish_milestone":
+            continue
+        candidate = payload.get("id")
+        if isinstance(candidate, str) and re.fullmatch(r"mile_[0-9a-f]{6,}", candidate):
+            return candidate
+
+    anchored = re.search(r"Stored milestone\s+(mile_[0-9a-f]{6,})", stdout)
+    return anchored.group(1) if anchored else None
+
+
+def settle_deferred_lazypack(
     *, stdout: str, body: str, audience: str, status: str,
     plan: str | None, bypass: bool,
+    obligation: LazypackObligation | None = None,
 ) -> int:
     """Close the obligation a deferred lazypack creates, at the moment it is created.
 
@@ -1911,26 +2137,26 @@ def _settle_deferred_lazypack(
     nobody re-reads. The release gate (content._lazypack_gate_issue) reports the
     same gap truthfully and auto-enqueues the moment a plan lands.
     """
-    if bypass or audience != "general":
-        return 0
     try:
-        src_dir = ROOT / "src"
-        if str(src_dir) not in sys.path:
-            sys.path.insert(0, str(src_dir))
-        from volpred.publisher.publisher import (  # noqa: WPS433
-            has_lazypack_section,
-            lazypack_required_at,
+        obligation = obligation or classify_lazypack_obligation(
+            body, audience, bypass, status
         )
-
-        if has_lazypack_section(body) or lazypack_required_at(status):
-            return 0  # already has one, or the publish-time gate already ruled
-        match = re.search(r"mile_[0-9a-f]{6,}", stdout)
-        if not match:
+        if obligation.kind == LazypackObligationKind.CHECK_FAILED_DEFERRED:
+            exc = obligation.error
+            print(
+                "[publish_draft] LAZYPACK FOLLOW-UP failed closed "
+                f"(check error): {type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
+            return 8
+        if obligation.kind != LazypackObligationKind.DEFERRED:
+            return 0
+        article_id = _article_id_from_publish_stdout(stdout)
+        if not article_id:
             print("[publish_draft] LAZYPACK FOLLOW-UP: published but could not "
                   "read the article id back from publish-milestone output; "
                   "enqueue the render manually.", file=sys.stderr)
-            return 0
-        article_id = match.group(0)
+            return 8
 
         if not plan:
             from volpred.ops.diagnostics import warn  # noqa: WPS433
@@ -1946,7 +2172,7 @@ def _settle_deferred_lazypack(
                   f"a plan exists. Author one (lazypack-infographic skill), then: "
                   f"uv run python scripts/lazypack_async_render.py enqueue "
                   f"--article-id {article_id} --plan <plan.json>", file=sys.stderr)
-            return 0
+            return 8
 
         proc = subprocess.run(
             ["uv", "run", "python", "scripts/lazypack_async_render.py", "enqueue",
@@ -1969,7 +2195,7 @@ def _settle_deferred_lazypack(
         print(f"[publish_draft] LAZYPACK FOLLOW-UP errored "
               f"({type(exc).__name__}: {exc}) — enqueue the render manually.",
               file=sys.stderr)
-        return 0
+        return 8
 
 
 if __name__ == "__main__":

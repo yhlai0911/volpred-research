@@ -649,6 +649,13 @@ def _resolve_panels(document: dict[str, Any], evidence: dict[str, Any]) -> list[
     return resolved
 
 
+def validate_runnable_plan(plan_path: str | Path) -> dict[str, Any]:
+    """Validate schema, evidence identity, and every binding without writing files."""
+    document, evidence = load_plan(plan_path)
+    _resolve_panels(document, evidence)
+    return document
+
+
 def _tokens(paragraph: str) -> list[str]:
     """CJK-aware tokens: preserve ASCII words, allow wrapping between CJK glyphs."""
     return re.findall(r"\s+|[A-Za-z0-9][A-Za-z0-9_./:+%,'’()\-]*|.", paragraph)
@@ -1284,8 +1291,7 @@ def main(argv: list[str] | None = None) -> int:
     if bool(args.receipt) != bool(args.run_token):
         parser.error("--receipt and --run-token must be provided together")
     if args.validate_only:
-        document, evidence = load_plan(args.plan)
-        _resolve_panels(document, evidence)
+        document = validate_runnable_plan(args.plan)
         print(json.dumps({"valid": True, "panels": len(document["panels"])}, ensure_ascii=False))
         return 0
     paths, report = render_plan_with_report(args.plan, args.out_dir)

@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：升息時，房地產 ETF 會變得更像股票嗎",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1450/k1450_results.json",
+      "sha256": "81542d3d612de58b0cd698239402564b8397ec32d97951736d4f08623b674143",
+      "label": "experiment K1450 results (VNQ forward volatility and stock or bond affinity under lagged rate regimes)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "把利率方向當成分組標籤，不把它當成交易訊號",
+      "alt": "研究用前一期以前的長債殖利率變化，把樣本分成利率上行與下行兩組；兩組天數幾乎完全平衡，因此比較不會只是在比一小段特殊行情。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "先分組，再看後續期間",
+          "body": [
+            "每一天的分組只使用前一期以前已知的長債殖利率變化，之後才觀察房地產、股票與長債的波動和連動。這能避免用未來資訊替今天貼標籤。",
+            "這裡回答的是不同利率環境下市場曾呈現什麼樣子，不是預測下一次升降息，也不是可直接交易的規則。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "完整可用觀察日",
+          "value": {
+            "source": "results",
+            "path": "/sample/n_obs",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "利率下行組天數",
+          "value": {
+            "source": "results",
+            "path": "/regime_counts/rate_down",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "利率上行組天數",
+          "value": {
+            "source": "results",
+            "path": "/regime_counts/rate_up",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "真正翻面的不是股票，而是長債",
+      "alt": "房地產 ETF 與長債的未來連動，在利率下行組略為負，在利率上行組轉為略為正；這是主要比較中唯一經過多重檢查後仍保留的差異。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "債券分散效果不是固定不變",
+          "body": [
+            "房地產常被放在股票與債券之間理解，但資料顯示它和長債的關係會隨利率環境翻面。利率上行時，長債未必還能提供同樣方向的分散。",
+            "這個結果只描述樣本中的平均差異；它沒有證明利率本身造成連動改變，也沒有承諾下一次環境切換會照樣重演。"
+          ]
+        },
+        {
+          "kind": "metric",
+      "label": "下行連動",
+          "value": {
+            "source": "results",
+            "path": "/summaries/fwd_corr_vnq_tlt/rate_down/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+      "label": "上行連動",
+          "value": {
+            "source": "results",
+            "path": "/summaries/fwd_corr_vnq_tlt/rate_up/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+      "label": "校正差異",
+          "value": {
+            "source": "results",
+            "path": "/multiple_test_correction/fwd_corr_vnq_tlt/bonferroni_p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+      }
+        }
+      ]
+    },
+    {
+      "name": "panel_not_stock",
+      "info": "results",
+      "style": "professional",
+      "title": "房地產沒有在升息時突然變得更像股票",
+      "alt": "房地產 ETF 與股票的未來連動，在利率下行與上行兩組幾乎一樣；模型能解釋的差異也接近零，因此資料不支持升息讓房地產更像股票的直覺。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "最直覺的故事反而沒有出現",
+          "body": [
+            "如果升息真的讓房地產資產全面股票化，兩組的連動應該拉開；實際上兩個平均值幾乎重疊。",
+            "因此不能把前一張圖的長債翻面，誤讀成房地產整體風險結構都向股票靠攏。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "下行組連動",
+          "value": {
+            "source": "results",
+            "path": "/summaries/fwd_corr_vnq_spy/rate_down/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "上行組連動",
+          "value": {
+            "source": "results",
+            "path": "/summaries/fwd_corr_vnq_spy/rate_up/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "模型解釋度",
+          "value": {
+            "source": "results",
+            "path": "/models/fwd_corr_vnq_spy/meta/r2",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "幾乎沒有可解釋的組間差異"
+        }
+      ]
+    },
+    {
+      "name": "panel_limit",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "平均波動看似不同，但中位數沒有支持同一個故事",
+      "alt": "房地產 ETF 的未來平均波動在利率下行組較高，但中位數反而在利率上行組略高；經多重比較校正後，平均差異也沒有保留，因此不能把少數危機尖峰當成穩定規律。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "平均值會被危機尖峰拉動",
+          "body": [
+            "利率下行組包含金融危機與疫情等劇烈時段，少數尖峰會把平均波動往上拉。換成代表典型日子的中位數，方向並沒有跟著平均值走。",
+            "所以這份結果適合提醒投資人重新檢查分散假設，不適合被包裝成只看利率方向就能擇時的規則。"
+          ]
+        },
+        {
+          "kind": "metric",
+      "label": "下行波動",
+          "value": {
+            "source": "results",
+            "path": "/summaries/fwd_rv_vnq/rate_down/mean",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+      "label": "上行波動",
+          "value": {
+            "source": "results",
+            "path": "/summaries/fwd_rv_vnq/rate_up/mean",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+      "label": "校正差異",
+          "value": {
+            "source": "results",
+            "path": "/multiple_test_correction/fwd_rv_vnq/bonferroni_p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+      }
+        }
+      ]
+    }
+  ]
+}
