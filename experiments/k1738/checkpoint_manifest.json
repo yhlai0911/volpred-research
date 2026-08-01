@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "experiment_id": "K1738",
+  "parent_task_id": "K1738",
+  "parent_job_id": "agent-brief_k1738-b377db",
+  "split_stage": "preserve_incomplete_checkpoint",
+  "created_at_utc": "2026-08-01T21:26:07Z",
+  "checkpoint_status": "INCOMPLETE_NOT_FINAL",
+  "run_complete": false,
+  "last_checkpoint": "insurance-artifact-no-DML",
+  "completed_stages": [
+    "naive_and_ols_controls",
+    "instrument"
+  ],
+  "missing_stages": [
+    "primary",
+    "robustness:within_month_demeaned",
+    "subperiods",
+    "robustness:inclusive_window",
+    "robustness:level_rv_outcome",
+    "robustness:lasso_nuisance"
+  ],
+  "disposition": "Preserved only for the bounded cached-DML continuation. K1738_results.json is an interim insurance artifact and must not be promoted, reviewed as final, merged, or written to knowledge.json.",
+  "tracked_artifacts": [
+    {
+      "path": "K1738.py",
+      "sha256": "2057c5e49b0fc939114fecc4fffa0196775eb5337f395cbe9be10921ab651c27",
+      "size_bytes": 54084
+    },
+    {
+      "path": "K1738_results.json",
+      "sha256": "9d68d16bc3bd1915844070fb71e3b11ba6e03c6c23c1f2df4a8094db8318ff9f",
+      "size_bytes": 22109
+    },
+    {
+      "path": "README.md",
+      "sha256": "1568198cbb7fd376f95eccd269b0eca85806c4072765288c55656878840a45ab",
+      "size_bytes": 24276
+    },
+    {
+      "path": "panel_k1738.parquet",
+      "sha256": "52e8c4a76b55d70ce8beb85dafb5f77e3a648c31ae461cb46e02606f78962009",
+      "size_bytes": 6806972
+    },
+    {
+      "path": "render_readme_results.py",
+      "sha256": "e7201efbe27e0a95d8399991c21e307b3606cf8d78dfc65b946733f8d705fb36",
+      "size_bytes": 8634
+    },
+    {
+      "path": "test_k1738.py",
+      "sha256": "f9919d66cb240b6ad8db893c026b1b608999be1e10c401701c00baacd043c611",
+      "size_bytes": 16038
+    }
+  ],
+  "local_cache_artifacts": [
+    {
+      "path": "cache/earnings.parquet",
+      "sha256": "3444ebec387447c4a94347b3bed05aa1eddd96b651c2b6f14e6030e81281a424",
+      "size_bytes": 176117
+    },
+    {
+      "path": "cache/macro.parquet",
+      "sha256": "1dd81099face73b6c90fe77a9d7936f87021af78dd49e5147f69ed338178dc88",
+      "size_bytes": 103946
+    },
+    {
+      "path": "cache/prices.parquet",
+      "sha256": "cc85a2138ff1e9682e021cd06230a707d62d4f85604fb8d057549f757ad60a35",
+      "size_bytes": 13034167
+    },
+    {
+      "path": "cache/volumes.parquet",
+      "sha256": "4b895a7120918298134295bdb0034790f3ad91d5b9ce78db20e8fbcc7477d3b7",
+      "size_bytes": 12080382
+    }
+  ]
+}

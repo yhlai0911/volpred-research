@@ -1,0 +1,88 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1738.py",
+    "args": [
+      "--no-download"
+    ],
+    "sha256": "a1add225764e563a23b028accdaaff7096febfddac7844cee37aab28fd23d491",
+    "size_bytes": 67774
+  },
+  "canonical_result": "K1738_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1738/panel_k1738.parquet",
+      "sha256": "52e8c4a76b55d70ce8beb85dafb5f77e3a648c31ae461cb46e02606f78962009",
+      "size_bytes": 6806972
+    },
+    {
+      "path": "experiments/k1738/cache/earnings.parquet",
+      "sha256": "3444ebec387447c4a94347b3bed05aa1eddd96b651c2b6f14e6030e81281a424",
+      "size_bytes": 176117
+    }
+  ],
+  "outputs": [
+    "K1738_results.json",
+    "README.md"
+  ],
+  "timeout_seconds": 1434,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "dml_split_base",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 458.265,
+    "recorded_at": "2026-08-01T23:37:47Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "dml_split_base",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1738_results.json",
+    "sha256": "c1ee85448c2f59ce2851db3005f1d2460737c119d15c544f81e52b5602f924aa",
+    "size_bytes": 39748
+  }
+}
