@@ -479,6 +479,66 @@ def test_scheduler_fire_runs_worker_when_due(tmp_path: Path, monkeypatch) -> Non
     assert "inline task 可用絕對路徑編輯 canonical_root" in received[0]["prompt_text"]
 
 
+def test_scheduler_carries_generic_preselection_into_prompt_and_worker(
+    tmp_path: Path, monkeypatch
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(
+        json.dumps({
+            "cron_jobs": [
+                {"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}
+            ],
+            "daemons": [{
+                "id": "volpred-dispatch-supervisor",
+                "max_slots": 1,
+                "writer_isolation": {"mode": "pilot", "lanes": ["platform_ops"]},
+            }],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "_preassign_mutating_task",
+        lambda **_kwargs: {
+            "ok": True,
+            "assigned": False,
+            "reason": "starved_non_mutating_task",
+            "selected_task_id": "article-starved",
+        },
+    )
+    received: list[dict] = []
+
+    def fake_run_worker(**kwargs):
+        received.append(kwargs)
+        return worker.WorkerResult(
+            exit_code=0,
+            outcome="success",
+            final_model=worker.OPUS_MODEL,
+            attempts=1,
+            duration_s=1.0,
+            log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+        schedules_path=schedules,
+    ))
+
+    assert decision["action"] == "fired"
+    assert received[0]["preselected_task_id"] == "article-starved"
+    assert "task_id=article-starved" in received[0]["prompt_text"]
+
+
 def test_scheduler_does_not_admit_next_fire_while_deferred_reload_is_active(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -2458,11 +2518,13 @@ def test_run_one_attempt_globally_binds_before_spawn_and_releases_after_drain(
         migration_confirmed_quiescent=True,
     )
     observed_pending_at_spawn: list[int] = []
+    spawned_env: dict[str, str] = {}
 
     class ExitedProc:
         pid = 123
 
-    def fake_spawn(**_kwargs):
+    def fake_spawn(**kwargs):
+        spawned_env.update(kwargs["env"])
         observed_pending_at_spawn.append(
             len(
                 worker.custody_receipt.read_pending_producer_custodies(
@@ -2492,10 +2554,12 @@ def test_run_one_attempt_globally_binds_before_spawn_and_releases_after_drain(
         attempt=1,
         schedule_id="hourly_dispatch",
         state_path=tmp_path / "state.json",
+        preselected_task_id="article-starved",
     )
 
     assert exit_code == 0
     assert observed_pending_at_spawn == [1]
+    assert spawned_env["VOLPRED_PRESELECTED_TASK_ID"] == "article-starved"
     assert (
         worker.custody_receipt.read_pending_producer_custodies(tmp_path)
         == []
@@ -4883,6 +4947,24 @@ def test_slot_prompt_labels_all_external_reports_and_preserves_incident_timeline
     assert "[新架構派發]" in prompt
     assert "現在健康只能證明已恢復" in prompt
     assert "不能把先前告警改稱誤報" in prompt
+
+
+def test_slot_prompt_binds_supervisor_selected_generic_task(
+    tmp_path: Path,
+) -> None:
+    prompt = scheduler._slot_prompt(
+        "original task",
+        slot_id="slot-1",
+        job_id="job-123",
+        workdir=tmp_path / "scratch",
+        repo_root=tmp_path / "repo",
+        selected_task_id="article-starved",
+    )
+
+    assert "[Supervisor-selected generic task]" in prompt
+    assert "task_id=article-starved" in prompt
+    assert "$VOLPRED_PRESELECTED_TASK_ID" in prompt
+    assert "唯一可 claim" in prompt
 
 
 def test_supervisor_restart_unexpected_still_emails(tmp_path: Path, monkeypatch) -> None:
@@ -12116,15 +12198,17 @@ def test_mutating_e2e_two_slots_different_paths_land_and_settle(
     queue = tmp_path / "next_tasks.json"
     queue.write_text(
         json.dumps([
-            {
-                "id": "slot-a", "status": "pending", "priority": 1,
-                "task_type": "platform_ops", "write_intent": "repo_patch",
+                {
+                    "id": "slot-a", "status": "pending", "priority": 1,
+                    "task_type": "platform_ops", "dispatch_lane": "agent",
+                    "write_intent": "repo_patch",
                 "declared_output_paths": ["scripts/slot_a.py"],
                 "post_merge_actions": [],
             },
-            {
-                "id": "slot-b", "status": "pending", "priority": 2,
-                "task_type": "governance", "write_intent": "repo_patch",
+                {
+                    "id": "slot-b", "status": "pending", "priority": 2,
+                    "task_type": "governance", "dispatch_lane": "agent",
+                    "write_intent": "repo_patch",
                 "declared_output_paths": ["docs/slot_b.md"],
                 "post_merge_actions": [],
             },

@@ -520,6 +520,7 @@ def _run_one_attempt(
     effort: str = DISPATCH_EFFORT,
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
+    preselected_task_id: str | None = None,
     process_identity_sink: Callable[[int], None] | None = None,
 ) -> tuple[int, float]:
     """Single Popen attempt. Returns (exit_code, duration_s, attempt_output).
@@ -630,6 +631,11 @@ def _run_one_attempt(
             "VOLPRED_FIRE_REPO_ROOT": str(PROJECT_ROOT),
             "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
                 role="hourly", slot_id=slot_id, job_id=job_id,
+            ),
+            **(
+                {"VOLPRED_PRESELECTED_TASK_ID": preselected_task_id}
+                if preselected_task_id
+                else {}
             ),
         },
     )
@@ -982,6 +988,7 @@ def _attempt_codex_failover(
     slot_id: str,
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
+    preselected_task_id: str | None = None,
 ) -> WorkerResult | None:
     """Hand this hourly slot to Codex. Returns a WorkerResult only if Codex recovered it.
 
@@ -1185,6 +1192,7 @@ def _attempt_codex_failover(
             on_process_finished=_track_finished,
             workdir=workdir,
             isolated_workspace=isolated_workspace,
+            preselected_task_id=preselected_task_id,
             producer_custody=producer_custody,
             state_path=state_path,
         )
@@ -1247,6 +1255,7 @@ def run_worker(
     max_slots: int = 2,
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
+    preselected_task_id: str | None = None,
 ) -> WorkerResult:
     """Run prompt through claude -p with retry ladder.
 
@@ -1302,6 +1311,7 @@ def run_worker(
                 job_id=job_id, slot_id=slot_id,
                 workdir=workdir,
                 isolated_workspace=isolated_workspace,
+                preselected_task_id=preselected_task_id,
                 process_identity_sink=lambda pgid: attempt_identity.__setitem__(
                     "pgid", pgid,
                 ),
@@ -1628,6 +1638,7 @@ def run_worker(
                 state_path=state_path, job_id=job_id, slot_id=slot_id,
                 workdir=workdir,
                 isolated_workspace=isolated_workspace,
+                preselected_task_id=preselected_task_id,
             )
             if recovered is not None:
                 if recovered.outcome == "kill_failed_orphan":
@@ -1678,6 +1689,7 @@ def run_worker(
                 state_path=state_path, job_id=job_id, slot_id=slot_id,
                 workdir=workdir,
                 isolated_workspace=isolated_workspace,
+                preselected_task_id=preselected_task_id,
             )
             if recovered is not None:
                 if recovered.outcome == "kill_failed_orphan":

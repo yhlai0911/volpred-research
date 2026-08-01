@@ -3269,12 +3269,14 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
                     "status": "pending",
                     "priority": 1,
                     "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
                 },
                 {
                     "id": "bound",
                     "status": "pending",
                     "priority": 2,
                     "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
                     "write_intent": "repo_patch",
                     "declared_output_paths": [
                         "scripts/dispatch_supervisor",
@@ -3364,6 +3366,14 @@ def test_dispatch_preassign_yields_to_higher_ranked_event_article(
                     "deadline": "2099-07-31T06:00:00+00:00",
                 },
                 {
+                    "id": "article-starved",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "daily_article",
+                    "dispatch_lane": "agent",
+                    "created_at": "2000-01-01T00:00:00+00:00",
+                },
+                {
                     "id": "a-platform-backlog",
                     "status": "pending",
                     "priority": 1,
@@ -3395,6 +3405,7 @@ def test_dispatch_preassign_yields_to_higher_ranked_event_article(
     }
     rows = {row["id"]: row for row in json.loads(next_tasks.read_text())}
     assert rows["event_article_fomc_tplus0"]["status"] == "pending"
+    assert rows["article-starved"]["status"] == "pending"
     assert rows["a-platform-backlog"]["status"] == "pending"
 
 
@@ -3585,6 +3596,336 @@ def test_dispatch_preassign_does_not_duplicate_scheduled_menu_rotation(
     assert assigned["contract"]["task_id"] == "platform-scheduled"
 
 
+def test_dispatch_preassign_yields_to_starved_scheduled_article(
+    tmp_path, monkeypatch
+) -> None:
+    """A mutating backlog cannot hide a worker task past its starvation SLA."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "article-starved",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "daily_article",
+                    "dispatch_lane": "agent",
+                    "created_at": "2000-01-01T00:00:00+00:00",
+                },
+                {
+                    "id": "platform-scheduled",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                    "created_at": "2000-01-01T00:00:00+00:00",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-starved-article",
+            job_id="job-starved-article",
+        )
+    )
+
+    assert assigned == {
+        "ok": True,
+        "assigned": False,
+        "reason": "starved_non_mutating_task",
+        "selected_task_id": "article-starved",
+        "blocked_contracts": [],
+    }
+    rows = {row["id"]: row for row in json.loads(next_tasks.read_text())}
+    assert rows["article-starved"]["status"] == "pending"
+    assert rows["platform-scheduled"]["status"] == "pending"
+
+
+def test_dispatch_preassign_ignores_contractless_starved_mutator_before_article(
+    tmp_path, monkeypatch
+) -> None:
+    """A row that cannot bind a workspace cannot own the starvation verdict."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "contractless-platform",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
+                    "created_at": "1999-01-01T00:00:00+00:00",
+                },
+                {
+                    "id": "article-starved",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "daily_article",
+                    "dispatch_lane": "agent",
+                    "created_at": "2000-01-01T00:00:00+00:00",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-starved-article",
+            job_id="job-starved-article",
+        )
+    )
+
+    assert assigned == {
+        "ok": True,
+        "assigned": False,
+        "reason": "starved_non_mutating_task",
+        "selected_task_id": "article-starved",
+        "blocked_contracts": [
+            {
+                "task_id": "contractless-platform",
+                "reason": "write_intent_missing_or_unsupported",
+            }
+        ],
+    }
+
+
+def test_dispatch_preassign_selects_exact_starved_mutator_within_priority(
+    tmp_path, monkeypatch
+) -> None:
+    """Starvation must choose the overdue row, not an alphabetical fresh peer."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "a-fresh-platform",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fresh.py"],
+                    "post_merge_actions": [],
+                    "created_at": "2099-01-01T00:00:00+00:00",
+                },
+                {
+                    "id": "z-starved-platform",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/starved.py"],
+                    "post_merge_actions": [],
+                    "created_at": "2000-01-01T00:00:00+00:00",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-starved-platform",
+            job_id="job-starved-platform",
+        )
+    )
+
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "z-starved-platform"
+
+
+@pytest.mark.parametrize("blocked_lane", ["main_thread", "mystery_lane"])
+def test_dispatch_preassign_does_not_yield_to_non_worker_starvation(
+    tmp_path, monkeypatch, blocked_lane
+) -> None:
+    """The generic menu's ownership filter must precede starvation ranking."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "article-not-worker-owned",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "daily_article",
+                    "dispatch_lane": blocked_lane,
+                    "created_at": "2000-01-01T00:00:00+00:00",
+                },
+                {
+                    "id": "platform-runnable",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-platform",
+            job_id="job-platform",
+        )
+    )
+
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "platform-runnable"
+
+
+def test_dispatch_preassign_does_not_yield_to_collision_blocked_article(
+    tmp_path, monkeypatch
+) -> None:
+    """A task the shared worktree gate rejects cannot consume a real fire."""
+    import continue_task_dispatch
+
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "article-collides",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "daily_article",
+                    "dispatch_lane": "agent",
+                    "created_at": "2000-01-01T00:00:00+00:00",
+                },
+                {
+                    "id": "platform-runnable",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        continue_task_dispatch,
+        "_find_task_dispatch_collisions",
+        lambda **_kwargs: {
+            "article-collides": {
+                "reason": "active_task_worktree_collision",
+                "worktrees": ["dispatch-existing"],
+            }
+        },
+    )
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-platform",
+            job_id="job-platform",
+        )
+    )
+
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "platform-runnable"
+
+
+@pytest.mark.parametrize(
+    "terminal_status",
+    [
+        "succeeded",
+        "succeeded_null_result",
+        "failed",
+        "blocked",
+        "superseded",
+        "closed_no_action",
+        "cancelled",
+        "expired",
+    ],
+)
+def test_supervisor_preselected_worker_can_claim_only_exact_task(
+    tmp_path, monkeypatch, terminal_status
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {"id": "selected", "status": "pending", "priority": 1},
+                {"id": "other", "status": "pending", "priority": 1},
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setenv("VOLPRED_PRESELECTED_TASK_ID", "selected")
+    monkeypatch.setenv("VOLPRED_TASK_CLAIM_OWNER", "hourly-slot-1-job")
+
+    denied = task_pool_claim.cmd_claim(
+        argparse.Namespace(
+            id="other",
+            owner="hourly-slot-1-job",
+            session="preselected-session",
+            main_thread=False,
+        )
+    )
+    assert denied == {
+        "ok": False,
+        "reason": "supervisor_preselection_mismatch",
+        "selected_task_id": "selected",
+        "requested_task_id": "other",
+    }
+
+    claimed = task_pool_claim.cmd_claim(
+        argparse.Namespace(
+            id="selected",
+            owner="hourly-slot-1-job",
+            session="preselected-session",
+            main_thread=False,
+        )
+    )
+    assert claimed["ok"] is True
+    assert claimed["task_id"] == "selected"
+
+    rows = json.loads(next_tasks.read_text(encoding="utf-8"))
+    rows[0]["status"] = terminal_status
+    next_tasks.write_text(json.dumps(rows), encoding="utf-8")
+    drained = task_pool_claim.cmd_claim(
+        argparse.Namespace(
+            id="other",
+            owner="hourly-slot-1-job",
+            session="batch-drain-session",
+            main_thread=False,
+        )
+    )
+    assert drained["ok"] is True
+    assert drained["task_id"] == "other"
+
+
 def test_dispatch_preassign_accepts_observe_only_without_fake_output_paths(
     tmp_path, monkeypatch
 ) -> None:
@@ -3598,6 +3939,7 @@ def test_dispatch_preassign_accepts_observe_only_without_fake_output_paths(
                     "status": "pending",
                     "priority": 1,
                     "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
                     "write_intent": "observe_only",
                     "declared_output_paths": [],
                     "post_merge_actions": [],
@@ -3641,6 +3983,7 @@ def test_dispatch_preassign_rejects_observe_only_with_declared_outputs(
                     "status": "pending",
                     "priority": 1,
                     "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
                     "write_intent": "observe_only",
                     "declared_output_paths": ["docs/fake-output.md"],
                     "post_merge_actions": [],
@@ -3677,6 +4020,7 @@ def test_dispatch_preassign_rejects_observe_only_without_explicit_empty_list(
         "status": "pending",
         "priority": 1,
         "task_type": "platform_ops",
+        "dispatch_lane": "agent",
         "write_intent": "observe_only",
         "post_merge_actions": [],
     }
@@ -3909,6 +4253,7 @@ def test_dispatch_preassign_revalidates_and_skips_cleared_dreaming_task(
     contract = {
         "status": "pending",
         "task_type": "platform_ops",
+        "dispatch_lane": "agent",
         "write_intent": "repo_patch",
         "declared_output_paths": ["scripts/fix.py"],
         "post_merge_actions": [],

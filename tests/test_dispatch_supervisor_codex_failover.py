@@ -809,6 +809,7 @@ def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
     launched: dict = {}
 
     def _popen(*args, **kwargs):
+        launched["args"] = args
         launched.update(kwargs)
         return FakeProc()
 
@@ -819,6 +820,7 @@ def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
 
     result = codex_failover.run_codex_failover(
         reason="quota", enabled=True, slot_id="slot-2", job_id="abcdef123456",
+        preselected_task_id="article-starved",
         on_process_started=lambda pid, pgid: bool(seen.append(("start", pid, pgid)) or True),
         on_process_finished=lambda pid: seen.append(("finish", pid)),
     )
@@ -828,6 +830,11 @@ def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
     assert launched["env"]["VOLPRED_TASK_CLAIM_OWNER"] == (
         "codex-failover-slot-2-abcdef123456"
     )
+    assert launched["env"]["VOLPRED_PRESELECTED_TASK_ID"] == "article-starved"
+    argv = launched["args"][0]
+    prompt = argv[-1]
+    assert "task_id=article-starved" in prompt
+    assert "$VOLPRED_PRESELECTED_TASK_ID" in prompt
 
 
 def test_tracked_failover_keeps_pid_attached_when_timeout_kill_is_unverified(
@@ -999,9 +1006,11 @@ class _FailoverStub:
     def __init__(self, recovered: bool) -> None:
         self.recovered = recovered
         self.seen_reasons: list[str] = []
+        self.seen_kwargs: list[dict] = []
 
-    def __call__(self, *, reason: str, **_kwargs):
+    def __call__(self, *, reason: str, **kwargs):
         self.seen_reasons.append(reason)
+        self.seen_kwargs.append(kwargs)
         return codex_failover.FailoverResult(
             attempted=True, recovered=self.recovered, exit_code=0 if self.recovered else 1,
             detail="stub", duration_s=1.0, output_tail="codex output",
@@ -1050,9 +1059,11 @@ def test_quota_outage_hands_slot_to_codex(monkeypatch, tmp_path, _quiet_state_an
     result = worker.run_worker(
         prompt_text="tick", log_path=tmp_path / "d.log",
         state_path=tmp_path / "s.json", sleep_fn=lambda _s: None,
+        preselected_task_id="article-starved",
     )
 
     assert stub.seen_reasons == ["quota"]
+    assert stub.seen_kwargs[0]["preselected_task_id"] == "article-starved"
     assert result.outcome == "codex_failover_recovered"
     assert result.exit_code == 0
     assert result.final_model == worker.CODEX_MODEL_LABEL

@@ -57,9 +57,12 @@ from typing import Any, Iterator
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
+if str(_REPO_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT / "scripts"))
 
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import (  # noqa: E402
+    TERMINAL_COMPACTABLE_STATUSES,
     enforce_blocked_until,
     normalize_priority,
     normalize_task_priority,
@@ -78,6 +81,7 @@ from volpred.ops.task_pool_selection import (  # noqa: E402
     CODEX_ELIGIBLE_TASK_TYPES,  # noqa: F401 - compatibility re-export
     dispatch_admission_rank_key,
     evaluate_task_claim,
+    find_starved,
     is_immediate_dispatch_task,
     is_codex_eligible_task as _is_codex_eligible_task,
     is_pending_list_candidate,
@@ -96,6 +100,7 @@ CONTROL_GATE_REGISTRY = ROOT / "config" / "control_gate_registry.json"
 
 DEFAULT_STALE_HOURS = 2  # Canonical handoff stale sweep contract
 TERMINAL_STATUSES = {"succeeded", "failed", "blocked"}
+PRESELECTION_TERMINAL_STATUSES = TERMINAL_COMPACTABLE_STATUSES | {"blocked"}
 FB_DUAL_PUBLISH_TASK_TYPES = {"trending_repost", "event_article"}
 _MILE_ID_RE = re.compile(r"\bmile_[A-Za-z0-9_-]+\b")
 _PUBLISH_EVIDENCE_RE = re.compile(
@@ -605,8 +610,42 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
             "mode": mode.mode,
             "hint": "execute owner-directed work directly; task-pool claims are suspended",
         }
+    preselected_task_id = str(
+        os.environ.get("VOLPRED_PRESELECTED_TASK_ID") or ""
+    ).strip()
     session = args.session or os.environ.get("CLAUDE_SESSION_ID") or uuid.uuid4().hex[:12]
     with _locked_load() as (_fh, tasks):
+        if preselected_task_id:
+            expected_owner = str(
+                os.environ.get("VOLPRED_TASK_CLAIM_OWNER") or ""
+            ).strip()
+            resolution = resolve_task_identity(tasks, preselected_task_id)
+            if resolution.reason_code != "unique_task_id":
+                return {
+                    "ok": False,
+                    "reason": "supervisor_preselection_identity_invalid",
+                    "selected_task_id": preselected_task_id,
+                    "identity_reason": resolution.reason_code,
+                }
+            selected = tasks[resolution.matching_indexes[0]]
+            selected_status = str(selected.get("status") or "").lower()
+            # The binding owns the first task of this fire. Once that exact
+            # task reaches a terminal state, batch-drain may claim the next
+            # candidate under the same supervisor-issued owner token.
+            if selected_status not in PRESELECTION_TERMINAL_STATUSES:
+                if not expected_owner or str(args.owner or "") != expected_owner:
+                    return {
+                        "ok": False,
+                        "reason": "supervisor_preselection_owner_mismatch",
+                        "expected_owner": expected_owner,
+                    }
+                if str(args.id or "") != preselected_task_id:
+                    return {
+                        "ok": False,
+                        "reason": "supervisor_preselection_mismatch",
+                        "selected_task_id": preselected_task_id,
+                        "requested_task_id": str(args.id or ""),
+                    }
         task = _find(tasks, args.id)
         if task.get("unblock_gate") is not None:
             return {
@@ -809,10 +848,35 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
     session = args.session or uuid.uuid4().hex[:12]
     blockers: list[dict[str, str]] = []
     with _locked_load() as (_fh, tasks):
+        import continue_task_dispatch as dispatch_report
+
+        observed_at = datetime.now(timezone.utc)
+        ownership = dispatch_report.resolve_dispatch_ownership(
+            tasks,
+            repo_root=ROOT,
+            now=observed_at,
+        )
+        dispatch_owned_rows = {
+            id(task)
+            for task in (
+                ownership["worker_claimable"]
+                + ownership["supervisor_only"]
+            )
+        }
         identity_counts = Counter(task_identity(task) for task in tasks)
-        for task in sorted(tasks, key=dispatch_admission_rank_key):
+        eligibility: dict[int, bool] = {}
+        contracts: dict[int, dict[str, Any]] = {}
+
+        def _eligible(task: dict[str, Any]) -> bool:
+            cache_key = id(task)
+            if cache_key in eligibility:
+                return eligibility[cache_key]
+            if cache_key not in dispatch_owned_rows:
+                eligibility[cache_key] = False
+                return False
             if (task.get("status") or "").lower() != "pending":
-                continue
+                eligibility[cache_key] = False
+                return False
             task_id = _task_key(task)
             if not task_id or identity_counts[task_id] != 1:
                 if requires_supervisor_preassignment(task):
@@ -826,7 +890,8 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
                             ),
                         }
                     )
-                continue
+                eligibility[cache_key] = False
+                return False
             if task.get("unblock_gate") is not None:
                 if requires_supervisor_preassignment(task):
                     blockers.append(
@@ -835,8 +900,8 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
                             "reason": "unblock_gate_not_satisfied",
                         }
                     )
-                continue
-            observed_at = datetime.now(timezone.utc)
+                eligibility[cache_key] = False
+                return False
             decision = evaluate_task_claim(
                 task,
                 owner=args.owner,
@@ -846,7 +911,8 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
             if decision.primary_reason == "live_revalidation_required":
                 cleared = _revalidate_dreaming_before_claim(task, owner=args.owner)
                 if cleared is not None:
-                    continue
+                    eligibility[cache_key] = False
+                    return False
                 decision = evaluate_task_claim(
                     task,
                     owner=args.owner,
@@ -855,9 +921,72 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
                     revalidation_checked=True,
                 )
             if not decision.eligible:
-                continue
+                eligibility[cache_key] = False
+                return False
             active_task_id = single_flight_blocker_task_id(tasks, task)
             if active_task_id is not None:
+                eligibility[cache_key] = False
+                return False
+            if requires_supervisor_preassignment(task):
+                contract, error = _dispatch_execution_contract(task)
+                if contract is None:
+                    blockers.append(
+                        {"task_id": _task_key(task), "reason": str(error)}
+                    )
+                    eligibility[cache_key] = False
+                    return False
+                contracts[cache_key] = contract
+            eligibility[cache_key] = True
+            return True
+
+        ordered_tasks = sorted(tasks, key=dispatch_admission_rank_key)
+        selected_mutating: dict[str, Any] | None = None
+
+        # Urgent/time-critical lanes are the outermost ordering contract.  Seat
+        # them before scheduled starvation so a fresh event/boss task cannot be
+        # displaced by an old article.
+        for task in ordered_tasks:
+            if not is_immediate_dispatch_task(task) or not _eligible(task):
+                continue
+            if not requires_supervisor_preassignment(task):
+                return {
+                    "ok": True,
+                    "assigned": False,
+                    "reason": "immediate_non_mutating_task",
+                    "selected_task_id": _task_key(task),
+                    "blocked_contracts": blockers[:20],
+                }
+            selected_mutating = task
+            break
+
+        # The generic dispatcher owns fresh scheduled rotation, but its
+        # starvation verdict must still own the *real* admission boundary.
+        # Compare all runnable rows at the shared policy seam before splitting
+        # them into mutating vs worker-owned execution paths.  If the winner is
+        # mutating, bind that exact row rather than falling back to id ordering.
+        if selected_mutating is None:
+            for starved in find_starved(tasks, now=observed_at):
+                task = starved["task"]
+                if not _eligible(task):
+                    continue
+                if not requires_supervisor_preassignment(task):
+                    return {
+                        "ok": True,
+                        "assigned": False,
+                        "reason": "starved_non_mutating_task",
+                        "selected_task_id": _task_key(task),
+                        "blocked_contracts": blockers[:20],
+                    }
+                selected_mutating = task
+                break
+
+        candidates = (
+            [selected_mutating]
+            if selected_mutating is not None
+            else ordered_tasks
+        )
+        for task in candidates:
+            if not _eligible(task):
                 continue
             if not requires_supervisor_preassignment(task):
                 if is_immediate_dispatch_task(task):
@@ -869,10 +998,7 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
                         "blocked_contracts": blockers[:20],
                     }
                 continue
-            contract, error = _dispatch_execution_contract(task)
-            if contract is None:
-                blockers.append({"task_id": _task_key(task), "reason": str(error)})
-                continue
+            contract = contracts[id(task)]
             now = _now()
             task["status"] = "in_progress"
             task["claimed_by"] = args.owner

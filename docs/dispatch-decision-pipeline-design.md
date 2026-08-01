@@ -4,6 +4,22 @@
 
 本文件為 **design-first**：只描述現況證據與目標架構，不含任何 code 變更。落地由主線程後續裁決。
 
+> **2026-08-01 production amendment（H4 candidate admission）**：原本把
+> candidate-level starvation 留在 `continue_task_dispatch.py`、而 supervisor
+> 先做 mutating preassignment 的偏離已證實不可接受。真實狀態為 K1221 已被
+> report 判定 starved 49h，但每個實際 fire 都先被 CI/platform task 綁走；
+> `draft_pool_low` 因此累積 31 次 occurrence、草稿仍為 0。修正後
+> `volpred.ops.task_pool_selection` 是 starvation threshold／age／rank 的唯一
+> owner，`continue_task_dispatch` 與 `dispatch-preassign` 共用同一 verdict；
+> 第一個 runnable starved task 若屬 generic worker，supervisor 必須保留該 fire，
+> contract 不完整的 mutating row 則在排名前 fail closed，不得成為幽靈 blocker。
+> 本 amendment 只改 scheduled starvation admission；fresh scheduled rotation 仍由
+> generic menu 持有，避免在 supervisor 重造第二套 rotation。Supervisor 產出的
+> exact generic task id 會一路帶進 worker environment；該 task terminal 前，claim
+> CLI 機械拒絕其他 identity，terminal 後才解鎖同班 batch-drain。2026-08-01
+> natural fire 已先裁決不可寫的 K1221，再完成可寫的 K1450 並回讀 draft
+> `mile_5378daa1`，證明 admission 與 batch-drain 都有實際 consumer。
+
 計畫原文（`docs/refactor_plan_ops_master_2026_07.md:136`）：
 
 > **派工決策單一 pipeline**：派工職責現散在 5 檔（supervisor scheduler / continue_task_dispatch / pregate / slot_budget / legacy shell）→ 收斂為 supervisor 內單一 decision pipeline：`continue_task_dispatch.py` 降為純 library（候選計算，不再自帶寫入路徑，與 A1 同步）；pregate 明文 observational（D3）；priority / starvation / cluster budget / burst 的裁決邏輯集中一處、其餘為輸入

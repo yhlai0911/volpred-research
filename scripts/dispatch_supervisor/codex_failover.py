@@ -469,6 +469,7 @@ def run_codex_failover(
     on_process_finished: Callable[[int], None] | None = None,
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
+    preselected_task_id: str | None = None,
     producer_custody: dict | None = None,
     state_path: Path = state.STATE_PATH,
 ) -> FailoverResult:
@@ -488,6 +489,7 @@ def run_codex_failover(
             on_process_finished=on_process_finished,
             workdir=workdir,
             isolated_workspace=isolated_workspace,
+            preselected_task_id=preselected_task_id,
             producer_custody=producer_custody,
             state_path=state_path,
             lease_guard=lease_guard,
@@ -518,6 +520,7 @@ def _run_codex_failover_impl(
     on_process_finished: Callable[[int], None] | None = None,
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
+    preselected_task_id: str | None = None,
     producer_custody: dict | None = None,
     state_path: Path = state.STATE_PATH,
     lease_guard: _ProviderAuthLeaseGuard,
@@ -605,6 +608,15 @@ def _run_codex_failover_impl(
     prompt = _read_prompt(prompt_path)
     if slot_id and job_id:
         prefix = f"dispatch-{slot_id}-{job_id[:8]}"
+        selected_assignment = (
+            "[Supervisor-selected generic task]\n"
+            f"task_id={preselected_task_id}.\n"
+            "這是本 fire 第一張且唯一可 claim 的 task；"
+            "$VOLPRED_PRESELECTED_TASK_ID 會機械拒絕其他 identity，"
+            "該 task terminal 後才可 batch-drain。\n\n"
+            if preselected_task_id
+            else ""
+        )
         prompt = (
             "[Supervisor multi-slot context]\n"
             f"slot_id={slot_id}; job_id={job_id}; worktree_prefix={prefix}.\n"
@@ -613,6 +625,7 @@ def _run_codex_failover_impl(
             "用 canonical exact-path locked commit helper 提交。只有 routing 明定 experiment/"
             "worktree 時才建立 worktree，且本輪須用正式 merge_worktree.sh 整合完畢。"
             "task-pool CLI 必須使用 canonical_root 的絕對 script path。\n\n"
+            + selected_assignment
             + prompt
         )
     argv = [
@@ -633,6 +646,11 @@ def _run_codex_failover_impl(
             "VOLPRED_DISPATCH_JOB_ID": job_id,
             "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
                 role="codex-failover", slot_id=slot_id, job_id=job_id,
+            ),
+            **(
+                {"VOLPRED_PRESELECTED_TASK_ID": preselected_task_id}
+                if preselected_task_id
+                else {}
             ),
         })
     try:

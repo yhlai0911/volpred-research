@@ -537,6 +537,7 @@ def _slot_prompt(
     workdir: Path,
     repo_root: Path,
     workspace: dict[str, Any] | None = None,
+    selected_task_id: str | None = None,
 ) -> str:
     """Inject the stable namespace and non-main launch boundary."""
     prefix = f"dispatch-{slot_id}-{job_id[:8]}"
@@ -584,6 +585,14 @@ def _slot_prompt(
             "不得 git add/commit；完成檔案與測試後停止。machine finalizer 會只 stage declared "
             "paths 並建立 candidate commit；landing、post-actions 與 complete 由 supervisor"
             "回讀後處理。\n\n"
+        )
+    elif selected_task_id:
+        task_assignment = (
+            "[Supervisor-selected generic task]\n"
+            f"task_id={selected_task_id}.\n"
+            "這是本 fire 唯一可 claim 的 task；$VOLPRED_PRESELECTED_TASK_ID 已"
+            "機械綁定同一 identity，claim 其他 task 會被拒絕。先讀 canonical task"
+            "內容，再以 $VOLPRED_TASK_CLAIM_OWNER claim/start/complete 這張。\n\n"
         )
     base_prompt = (
         "[Supervisor multi-slot context]\n"
@@ -994,6 +1003,7 @@ async def _run_reserved_fire(
     repo_root: Path,
     workdir: Path | None = None,
     fire_workspace: dict[str, Any] | None = None,
+    preselected_task_id: str | None = None,
 ) -> dict[str, Any]:
     """Run one already-admitted logical fire and close its cohort safely."""
     phase_z_outcome: dict | None = None
@@ -1009,6 +1019,7 @@ async def _run_reserved_fire(
             job_id=job_id, slot_id=slot_id,
             workdir=workdir,
             isolated_workspace=fire_workspace,
+            preselected_task_id=preselected_task_id,
         )
         LOG.info(
             "worker returned job_id=%s slot=%s outcome=%s attempts=%d duration=%.1fs",
@@ -2176,6 +2187,9 @@ async def _tick_once(
         workdir=execution_workdir,
         repo_root=repo_root,
         workspace=fire_workspace,
+        selected_task_id=(
+            str(preassignment.get("selected_task_id") or "") or None
+        ),
     )
     LOG.info(
         "firing worker job_id=%s slot=%s prev_scheduled=%s log=%s",
@@ -2197,6 +2211,9 @@ async def _tick_once(
         scheduled_for=prev_fire.isoformat(), fire_reason=fire_reason,
         log_path=job_log_path, state_path=state_path, repo_root=repo_root,
         workdir=execution_workdir, fire_workspace=fire_workspace,
+        preselected_task_id=(
+            str(preassignment.get("selected_task_id") or "") or None
+        ),
     )
     if not background:
         return await coro

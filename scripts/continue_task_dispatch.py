@@ -73,16 +73,6 @@ FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 # reintroduce a literal here — `scripts/tests/test_dispatch_slot_budget.py`
 # fails the build if one comes back.
 
-# Hours a pending agentable task may age before dispatch is locked onto it.
-# The dispatcher only ever produced an advisory candidate list; which task a fire
-# actually took was the LLM's discretion, and the diversity rule (rotate away from
-# the last-3 task_types) actively pushed against repeatedly-skipped work. A P1
-# member_qa task therefore sat pending for 17 hours across ~17 fires while the
-# member_qa_stale alert emailed the owner an hourly to-do list (2026-07-13).
-# Age, not priority, is what starvation is made of — so age is what unlocks it.
-STARVATION_HOURS = {1: 6.0, 2: 24.0, 3: 72.0}
-STARVATION_HOURS_DEFAULT = 96.0
-
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dispatch_slot_budget as _slot_budget  # noqa: E402
@@ -90,6 +80,13 @@ import dispatch_slot_budget as _slot_budget  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
 from volpred.ops.task_dispatch_collision import (  # noqa: E402
     find_task_dispatch_collisions as _find_task_dispatch_collisions,
+)
+from volpred.ops.task_pool_selection import (  # noqa: E402
+    STARVATION_HOURS,
+    STARVATION_HOURS_DEFAULT,  # noqa: F401 - compatibility re-export
+    find_starved,
+    starvation_threshold_hours,  # noqa: F401 - compatibility re-export
+    task_age_hours,
 )
 # 2026-07-01 3-STRIKE fix (dreaming persistent_alert draft_pool_low, 5x/73d):
 # `draft_pool_low` alert (src/volpred/ops/alerts.py::_parse_draft_pool_state)
@@ -330,57 +327,6 @@ def is_paper_task(task: dict) -> bool:
     )
 
 
-def task_age_hours(task: dict, now: datetime | None = None) -> float | None:
-    """Hours since the task was created, or None when `created_at` is unusable."""
-    created = parse_iso_warn(
-        task.get("created_at"),
-        tag="dispatch_starvation",
-        field_name="created_at",
-        fallback=None,
-        task_id=task.get("id"),
-    )
-    if created is None:
-        return None
-    now = now or datetime.now(timezone.utc)
-    return (now - created).total_seconds() / 3600.0
-
-
-def starvation_threshold_hours(task: dict) -> float:
-    return STARVATION_HOURS.get(_coerce_priority(task.get("priority", 999)), STARVATION_HOURS_DEFAULT)
-
-
-def find_starved(tasks: list[dict], now: datetime | None = None) -> list[dict]:
-    """Agentable tasks that have aged past their priority's starvation threshold.
-
-    Ordered by priority first, then by how far past the threshold the task is.
-    Sorting purely by lateness would let a P3 that is 47h overdue outrank a P1
-    that just crossed its 6h line — which is the very starvation this function
-    exists to end, merely relocated inside the starved set.
-
-    A task with no parseable `created_at` can never be judged starved — it is
-    left in the normal queue rather than silently promoted or silently dropped.
-    """
-    now = now or datetime.now(timezone.utc)
-    starved: list[tuple[int, float, dict, float]] = []
-    for t in tasks:
-        age = task_age_hours(t, now)
-        if age is None:
-            continue
-        threshold = starvation_threshold_hours(t)
-        if age >= threshold:
-            starved.append((_coerce_priority(t.get("priority", 999)), age - threshold, t, age))
-    starved.sort(key=lambda row: (row[0], -row[1]))
-    return [
-        {
-            "task": t,
-            "age_hours": round(age, 1),
-            "threshold_hours": starvation_threshold_hours(t),
-            "over_by_hours": round(over, 1),
-        }
-        for _prio, over, t, age in starved
-    ]
-
-
 def apply_starved_tail_floor(
     starved: list[dict],
     candidates: list[dict],
@@ -520,6 +466,78 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
     main_thread.sort(key=lambda t: (_prio_key(t.get("priority", 999)), str(t.get("id", ""))))
     blocked.sort(key=lambda b: (_prio_key(b["task"].get("priority", 999)), str(b["task"].get("id", ""))))
     return {"agentable": agentable, "main_thread": main_thread, "blocked": blocked}
+
+
+def resolve_dispatch_ownership(
+    tasks: list[dict],
+    *,
+    recent_type_counts: Counter | None = None,
+    repo_root: Path = ROOT,
+    now: datetime | None = None,
+) -> dict:
+    """Resolve the shared worker/supervisor boundary and collision gate.
+
+    Both the read-only dispatch report and the supervisor's pre-spawn admission
+    call this seam. Keeping categorisation or worktree-collision filtering in
+    either caller would let the report advertise one task while the real fire
+    admits another.
+    """
+
+    cats = categorize(tasks, recent_type_counts=recent_type_counts)
+    supervisor_only = [
+        task
+        for task in cats["agentable"]
+        if requires_supervisor_preassignment(task)
+    ]
+    worker_claimable = [
+        task
+        for task in cats["agentable"]
+        if not requires_supervisor_preassignment(task)
+    ]
+    collision_blocked_tasks: list[dict] = []
+    collision_scan_error: str | None = None
+    if worker_claimable:
+        try:
+            collision_by_id = _find_task_dispatch_collisions(
+                repo_root=repo_root,
+                task_ids=(
+                    str(task.get("id") or "")
+                    for task in worker_claimable
+                ),
+                target_workdir=repo_root,
+            )
+        except RuntimeError as exc:
+            collision_scan_error = f"{type(exc).__name__}: {exc}"
+            collision_by_id = {}
+        if collision_scan_error is None:
+            collision_blocked_tasks = [
+                {
+                    "id": task.get("id"),
+                    "priority": task.get("priority"),
+                    "task_type": task.get("task_type"),
+                    "age_hours": task_age_hours(task, now=now),
+                    **collision_by_id[str(task.get("id") or "")],
+                }
+                for task in worker_claimable
+                if str(task.get("id") or "") in collision_by_id
+            ]
+            collision_blocked_ids = {
+                item["id"] for item in collision_blocked_tasks
+            }
+            worker_claimable = [
+                task
+                for task in worker_claimable
+                if task.get("id") not in collision_blocked_ids
+            ]
+        else:
+            worker_claimable = []
+    return {
+        "categories": cats,
+        "supervisor_only": supervisor_only,
+        "worker_claimable": worker_claimable,
+        "collision_blocked_tasks": collision_blocked_tasks,
+        "collision_scan_error": collision_scan_error,
+    }
 
 
 def _current_agentable_count() -> int:
@@ -1161,59 +1179,19 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
     free_slots = max(0, slot_cap - slots["occupied"])
 
     # Mutating platform/governance work is admitted before worker spawn by the
-    # supervisor and cannot be claimed from a generic hourly prompt.  It must
-    # remain visible, but it must not enter that prompt's candidate menu.  The
-    # claim CLI imports this same predicate, so starvation and claim admission
-    # cannot disagree about who is eligible.
-    supervisor_only = [
-        task
-        for task in cats["agentable"]
-        if requires_supervisor_preassignment(task)
-    ]
-    worker_claimable = [
-        task
-        for task in cats["agentable"]
-        if not requires_supervisor_preassignment(task)
-    ]
-    collision_blocked_tasks: list[dict] = []
-    collision_scan_error: str | None = None
-    if worker_claimable:
-        try:
-            collision_by_id = _find_task_dispatch_collisions(
-                repo_root=ROOT,
-                task_ids=(
-                    str(task.get("id") or "")
-                    for task in worker_claimable
-                ),
-                target_workdir=ROOT,
-            )
-        except RuntimeError as exc:
-            collision_scan_error = f"{type(exc).__name__}: {exc}"
-            collision_by_id = {}
-        if collision_scan_error is None:
-            collision_blocked_tasks = [
-                {
-                    "id": task.get("id"),
-                    "priority": task.get("priority"),
-                    "task_type": task.get("task_type"),
-                    "age_hours": task_age_hours(task, now=now),
-                    **collision_by_id[str(task.get("id") or "")],
-                }
-                for task in worker_claimable
-                if str(task.get("id") or "") in collision_by_id
-            ]
-            collision_blocked_ids = {
-                item["id"] for item in collision_blocked_tasks
-            }
-            worker_claimable = [
-                task
-                for task in worker_claimable
-                if task.get("id") not in collision_blocked_ids
-            ]
-        else:
-            # enqueue-agent uses the same git query and would also reject every
-            # candidate.  Do not advertise a menu that cannot pass admission.
-            worker_claimable = []
+    # supervisor.  Generic worker ownership and collision filtering must come
+    # from the same seam the supervisor calls during preassignment.
+    ownership = resolve_dispatch_ownership(
+        pending,
+        recent_type_counts=recent_type_counts,
+        repo_root=ROOT,
+        now=now,
+    )
+    cats = ownership["categories"]
+    supervisor_only = ownership["supervisor_only"]
+    worker_claimable = ownership["worker_claimable"]
+    collision_blocked_tasks = ownership["collision_blocked_tasks"]
+    collision_scan_error = ownership["collision_scan_error"]
 
     # 2026-07-21 dispatch-lanes R1: lane rank is the OUTERMOST ordering key.
     # `task_urgency.classify()` has been the single urgency owner since

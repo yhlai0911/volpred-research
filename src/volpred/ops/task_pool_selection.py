@@ -71,6 +71,13 @@ _CLAIMABLE_STATUSES = frozenset(
     {"pending", "pending_main_thread", "claimed", "blocked", ""}
 )
 
+# Canonical scheduled-lane service levels.  Both the diagnostic dispatcher and
+# the supervisor admission gate consume these helpers; keeping a second copy in
+# either caller recreates the exact split-brain that let a correctly reported
+# starved article lose every real fire to mutating preassignment.
+STARVATION_HOURS = {1: 6.0, 2: 24.0, 3: 72.0}
+STARVATION_HOURS_DEFAULT = 96.0
+
 
 @dataclass(frozen=True)
 class LegacyClaimDecision:
@@ -237,6 +244,72 @@ def task_rank_key(task: Mapping[str, Any]) -> tuple[int, str]:
         priority_sort_key(task.get("priority"), default=999),
         task_id,
     )
+
+
+def task_age_hours(
+    task: Mapping[str, Any],
+    now: datetime | None = None,
+) -> float | None:
+    """Hours since creation, or ``None`` when the timestamp is unusable."""
+
+    created = parse_iso_warn(
+        task.get("created_at"),
+        tag="dispatch_starvation",
+        field_name="created_at",
+        fallback=None,
+        task_id=task.get("id"),
+    )
+    if created is None:
+        return None
+    observed_at = now or datetime.now(timezone.utc)
+    return (observed_at - created).total_seconds() / 3600.0
+
+
+def starvation_threshold_hours(task: Mapping[str, Any]) -> float:
+    """Return the SLA for a task's canonical priority representation."""
+
+    priority = priority_sort_key(task.get("priority"), default=999)
+    return STARVATION_HOURS.get(priority, STARVATION_HOURS_DEFAULT)
+
+
+def find_starved(
+    tasks: Iterable[Mapping[str, Any]],
+    now: datetime | None = None,
+) -> list[dict[str, Any]]:
+    """Return overdue tasks ordered by priority then SLA overrun.
+
+    Priority stays the outer ordering key: a P3 that is much older cannot
+    displace a P1 that has crossed its own service level.  Callers receive the
+    original mapping so the selection verdict and later claim mutation refer
+    to the same queue row.
+    """
+
+    observed_at = now or datetime.now(timezone.utc)
+    starved: list[tuple[int, float, Mapping[str, Any], float]] = []
+    for task in tasks:
+        age = task_age_hours(task, observed_at)
+        if age is None:
+            continue
+        threshold = starvation_threshold_hours(task)
+        if age >= threshold:
+            starved.append(
+                (
+                    priority_sort_key(task.get("priority"), default=999),
+                    age - threshold,
+                    task,
+                    age,
+                )
+            )
+    starved.sort(key=lambda row: (row[0], -row[1]))
+    return [
+        {
+            "task": task,
+            "age_hours": round(age, 1),
+            "threshold_hours": starvation_threshold_hours(task),
+            "over_by_hours": round(over_by, 1),
+        }
+        for _priority, over_by, task, age in starved
+    ]
 
 
 def dispatch_admission_rank_key(
@@ -538,11 +611,16 @@ __all__ = [
     "normalize_task_type_value",
     "normalized_task_type",
     "dispatch_admission_rank_key",
+    "find_starved",
     "is_immediate_dispatch_task",
     "requires_supervisor_preassignment",
     "resolve_task_identity",
     "select_task_for_claim",
     "single_flight_blocker_task_id",
+    "STARVATION_HOURS",
+    "STARVATION_HOURS_DEFAULT",
+    "starvation_threshold_hours",
+    "task_age_hours",
     "task_identity",
     "task_rank_key",
 ]
