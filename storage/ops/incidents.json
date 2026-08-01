@@ -791,7 +791,7 @@
    "clean_observations": [],
    "clean_streak_started_at": null,
    "control_gate_id": null,
-   "current_task_id": "ci-red-30686930127",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-08-01T06:20:36.755083+00:00",
@@ -990,9 +990,19 @@
    "last_seen_at": "2026-08-01T13:30:55.136652+00:00",
    "notified_at": null,
    "occurrence_count": 16,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-08-01T14:20:40.852917+00:00",
+    "by": "ci-red-30686930127",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-08-01T14:20:40.852917+00:00",
+     "by": "ci-red-30686930127",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -1970,6 +1980,26 @@
      "at": "2026-08-01T06:30:14.335753+00:00",
      "instance_key": "dispatch-slot-1-d6459dd5",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T14:27:34.060192+00:00",
+     "instance_key": "dispatch-slot-1-6426974e",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T14:27:45.801852+00:00",
+     "instance_key": "dispatch-slot-1-87a43952",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T14:27:59.462037+00:00",
+     "instance_key": "dispatch-slot-1-cce33836",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T14:28:12.810482+00:00",
+     "instance_key": "dispatch-slot-1-7b79e5c2",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -2251,13 +2281,13 @@
       "base_sha": "1296ffcd71bc9ee4a29f42b63087791171dcb131",
       "branch": "worktree-dispatch-slot-1-810125e6",
       "checkpoint_commit": "",
-      "detail_tail": "fire ended with outcome=kill_failed_orphan_drained; dirty=True unique_commits=0",
-      "reason": "worker_kill_failed_orphan_drained",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-810125e6"
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-01T14:08:35.895567+00:00"
+     "last_seen_at": "2026-08-01T15:07:26.314715+00:00"
     },
     {
      "cleared_at": null,
@@ -2314,14 +2344,70 @@
      "first_seen_at": "2026-08-01T06:30:14.335753+00:00",
      "key": "dispatch-slot-1-d6459dd5",
      "last_seen_at": "2026-08-01T06:30:14.335753+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "ecc9159deef7a9ed64c6beb6385752c51c22d193",
+      "branch": "worktree-dispatch-slot-1-6426974e",
+      "checkpoint_commit": "e204635e81bdfb626ceb31434384875e0ef90846",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-6426974e"
+     },
+     "first_seen_at": "2026-08-01T14:27:34.060192+00:00",
+     "key": "dispatch-slot-1-6426974e",
+     "last_seen_at": "2026-08-01T14:27:34.060192+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "33cd3062e1c2b55f251201897be1e992d10c8640",
+      "branch": "worktree-dispatch-slot-1-87a43952",
+      "checkpoint_commit": "cb92e1f7cf9a1904e8d214f1e26d547384a6f30a",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-87a43952"
+     },
+     "first_seen_at": "2026-08-01T14:27:45.801852+00:00",
+     "key": "dispatch-slot-1-87a43952",
+     "last_seen_at": "2026-08-01T14:27:45.801852+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "dd603dbbeee5bfbaac161e0b44fa218e95bd6cd7",
+      "branch": "worktree-dispatch-slot-1-cce33836",
+      "checkpoint_commit": "56d8310f5f7848d813cb8ffc7109c9518b00d972",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-cce33836"
+     },
+     "first_seen_at": "2026-08-01T14:27:59.462037+00:00",
+     "key": "dispatch-slot-1-cce33836",
+     "last_seen_at": "2026-08-01T14:27:59.462037+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "8ac66611f9257c07422b7508be943443b721162d",
+      "branch": "worktree-dispatch-slot-1-7b79e5c2",
+      "checkpoint_commit": "9f7c19e5f60770165833bbdd5b3a1612d3e3443a",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-7b79e5c2"
+     },
+     "first_seen_at": "2026-08-01T14:28:12.810482+00:00",
+     "key": "dispatch-slot-1-7b79e5c2",
+     "last_seen_at": "2026-08-01T14:28:12.810482+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-08-01T14:08:35.895567+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
+   "last_seen_at": "2026-08-01T15:07:26.314715+00:00",
    "notified_at": null,
-   "occurrence_count": 7816,
+   "occurrence_count": 7878,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3545,6 +3631,6 @@
    }
   }
  },
- "updated_at": "2026-08-01T14:08:35.925924+00:00",
+ "updated_at": "2026-08-01T15:07:35.722120+00:00",
  "version": 1
 }
