@@ -2287,7 +2287,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-01T17:11:48.750394+00:00"
+     "last_seen_at": "2026-08-01T17:25:35.313766+00:00"
     },
     {
      "cleared_at": null,
@@ -2405,9 +2405,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-01T17:11:48.750394+00:00",
+   "last_seen_at": "2026-08-01T17:25:35.313766+00:00",
    "notified_at": null,
-   "occurrence_count": 7975,
+   "occurrence_count": 7984,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3330,6 +3330,62 @@
     "last_at": null
    }
   },
+  "inc_dc1a33dc0a49": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
+   "control_gate_id": null,
+   "current_task_id": "ci-red-30709398279",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-08-01T17:21:09.309294+00:00",
+   "escalation": null,
+   "fingerprint": "dc1a33dc0a496cdbef8990e4c49913c1e2b1579d1407f2ebd249d196a39e4ec9",
+   "fingerprint_parts": [
+    "ci-red-30709398279"
+   ],
+   "first_seen_at": "2026-08-01T17:21:09.309294+00:00",
+   "incident_id": "inc_dc1a33dc0a49",
+   "instance_transition_baselined_at": "2026-08-01T17:21:09.309294+00:00",
+   "instance_transition_tracking": true,
+   "instance_transitions": [
+    {
+     "at": "2026-08-01T17:21:09.309294+00:00",
+     "instance_key": "30709398279:1",
+     "transition": "opened"
+    }
+   ],
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-01T17:21:09.309294+00:00",
+     "key": "30709398279:1",
+     "last_seen_at": "2026-08-01T17:21:09.309294+00:00"
+    }
+   ],
+   "is_control_intervention": false,
+   "kind": "ci_red",
+   "last_breach_detail": "2026-08-01T17:18:40.3972158Z E AssertionError: _drive_every_writer 沒驅動這些 public writer: ['activate_provider_auth_receipt_capability'] → 窮舉 gate 已不再窮舉。請補上呼叫。",
+   "last_seen_at": "2026-08-01T17:21:09.309294+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-08-01T17:21:10.503281+00:00",
+     "task_id": "ci-red-30709398279"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_e0a90acaef25": {
    "class": "ordinary",
    "clean_observations": [],
@@ -3631,6 +3687,6 @@
    }
   }
  },
- "updated_at": "2026-08-01T17:11:48.857136+00:00",
+ "updated_at": "2026-08-01T17:26:50.905362+00:00",
  "version": 1
 }
