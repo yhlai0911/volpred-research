@@ -5177,6 +5177,21 @@ delivery 等相鄰範圍 **107 passed**，Matt Standards／Spec 均 PASS。目�
 自然 08:00 fire 回讀 exact WorkItem／Effect、attempt 1 與 Gmail Sent evidence，
 且 Issue #13 的 24 小時通知頻率 audit 完成後，才可升級。
 
+**2026-08-01 live closure read-back**：修正後已連續兩次由自然 Operations Core
+`token_report_daily` fire 成功執行：2026-07-31 fire
+`operations-core-v1:token_report_daily:7548a16e4db73cef3f108c8c` 與 2026-08-01 fire
+`operations-core-v1:token_report_daily:a565edadccc314a49bc92acf` 都由
+`operations-core-scheduler` attempt 1、exit 0。後者 durable receipt 回讀
+WorkItem=`succeeded`、Effect=`delivered`、attempt_count=`1`，收件人為
+`yihao.lai@gmail.com`，subject 恰好一次帶 `[新架構派發]`；production adapter 以 exact
+Message-ID 從 Gmail Sent 讀回後，逐欄驗 To／Subject／text／HTML，原始郵件證據 hash 為
+`d72be58f22bb16fcaa13441de808463ff10fee71818b5b5e697d284978c88da3`。同一 fire
+人工重播前後 effect id、attempt_count、evidence ref／hash 與 recorded_at 全部不變，
+證實零第二封 provider delivery。當前 HEAD 相鄰回歸 **60 passed**。因此本條
+Token Report ownership／exactly-once 根因切片升級為
+**`root_cause_fixed_and_verified`**；Issue #13 umbrella 的其他通道與整體通知政策
+仍依各自 acceptance／觀察窗保持 OPEN，不由本切片代替結案。
+
 ---
 
 ## 2026-07-30 — 通知雖已切新架構標題，仍可由 identity／旁路／log inode 重複噴送

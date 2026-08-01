@@ -3098,6 +3098,14 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
   legacy／new 雙寄不做人工 canary。待下一個自然 08:00 fire 回讀 exact command、
   WorkItem／Effect terminal receipt、attempt 1 與 Gmail Sent evidence，再決定是否
   升級；Issue #13 的 24 小時頻率／資訊性 audit 仍須另行完成。
+- ✅ 2026-08-01 live closure：修正後 07-31、08-01 兩次自然 08:00 fire 均由
+  Operations Core scheduler attempt 1／exit 0；最新 immutable receipt 為
+  WorkItem `succeeded`、Effect `delivered`、attempt_count 1，exact Gmail Sent
+  read-back 驗證 To／Subject／text／HTML，且 subject 恰好一次帶 `[新架構派發]`。
+  同 fire 重播前後 effect／attempt／evidence／recorded_at 全不變，零第二封寄送；
+  當前 HEAD 相鄰回歸 **60 passed**。本 Token Report 切片現為
+  **`root_cause_fixed_and_verified`**；Issue #13 umbrella 仍為 OPEN，等待其他通道
+  與整體通知政策的獨立 acceptance，不把 bounded closure 誤報為整案完成。
 
 ## 2026-07-30 — T39 operator termination／observe-only bounded closure（Issue #45）
 
