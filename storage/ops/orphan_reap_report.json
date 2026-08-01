@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01T16:01:10.285179+00:00",
+  "generated_at": "2026-08-01T17:00:32.885375+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 107.5
+      "age_hours": 108.4
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 107.3
+      "age_hours": 108.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 102.7
+      "age_hours": 103.6
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 101.7
+      "age_hours": 102.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 266.7
+      "age_hours": 267.6
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 70.8
+      "age_hours": 71.8
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 101.6
+      "age_hours": 102.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 118.6
+      "age_hours": 119.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 126.7
+      "age_hours": 127.7
     }
   ],
   "held": [],
@@ -95,9 +95,34 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "k1743-price-discovery",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/k1743-price-discovery.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/K1743/K1743_results.json"
+      ],
+      "existing_paths": [
+        "experiments/K1743/K1743_results.json"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "k1743-price-discovery",
+      "paths": [
+        "experiments/K1743/K1743_results.json"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "3dac20c9c7ab7664f6901212a31889e08106a4fd",
+      "reason": "committed"
+    }
+  ],
   "namespaces": {
     "drafts": {
       "collectable": [],
@@ -121,23 +146,26 @@
     },
     "experiments": {
       "collectable": [],
-      "held": [],
+      "held": [
+        {
+          "path": "experiments/K1743",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/K1743/K1743_results.json"
+          ]
+        }
+      ],
       "skipped": {
-        "grace": 0,
+        "grace": 1,
         "inflight": 0,
         "unclaimed": 0
       },
       "collections": []
     }
   },
-  "held_escalations": [
-    {
-      "task_id": "assign_98e0980a",
-      "paths": [
-        "experiments/K1342"
-      ]
-    }
-  ],
+  "held_escalations": [],
   "held_escalated_paths": [
     "experiments/K1342",
     "experiments/nfp_20260807_t7"
