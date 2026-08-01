@@ -312,7 +312,7 @@
         "max_raw_triggers": 20,
         "min_distinct_candidates": 5,
         "max_harm_outcomes": 1,
-        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "harm_outcomes": ["missed_deadline", "sequence_coverage_gap", "unjoined"],
         "max_false_positive_signals": 2,
         "min_incident_occurrences": 2
       },
@@ -320,9 +320,9 @@
         "phase": "check",
         "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"],
-        "last_action": "retain",
-        "last_reviewed_at": "2026-07-30T08:34:08.634012+00:00",
-        "review_task_id": "control_gate_review_dispatch_starvation_lockout_20260730T082911_6c99d63ffb55"
+        "last_action": "recalibrate",
+        "last_reviewed_at": "2026-08-01T20:17:11.647362+00:00",
+        "review_task_id": "control_gate_review_dispatch_starvation_lockout_20260731T001249_aa6a90fc96a5"
       }
     },
     {

@@ -669,7 +669,21 @@ def test_project_registry_lists_known_problematic_gates() -> None:
         "publisher_cluster_cap",
     } <= gates.keys()
     assert gates["hourly_pregate"]["mode"] == "shadow"
-    assert gates["dispatch_starvation_lockout"]["mode"] == "selection_constraint"
+    starvation = gates["dispatch_starvation_lockout"]
+    assert starvation["mode"] == "selection_constraint"
+    assert starvation["review_policy"]["harm_outcomes"] == [
+        "missed_deadline",
+        "sequence_coverage_gap",
+        "unjoined",
+    ]
+    assert starvation["lifecycle"]["last_action"] == "recalibrate"
+    assert starvation["lifecycle"]["last_reviewed_at"] == (
+        "2026-08-01T20:17:11.647362+00:00"
+    )
+    assert starvation["lifecycle"]["review_task_id"] == (
+        "control_gate_review_dispatch_starvation_lockout_"
+        "20260731T001249_aa6a90fc96a5"
+    )
     worktree = gates["worktree_merge_ownership"]
     assert (
         worktree["review_policy"]["incident_metric"]
@@ -3106,6 +3120,56 @@ def test_distinct_gate_edges_are_not_collapsed_by_generic_task_dedupe(
         )
         if row.get("gate_review_id")
     } == {"dispatch_collision", "dispatch_starvation_lockout"}
+
+
+def test_starvation_selection_does_not_claim_unrelated_execution_failure_as_harm(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry(mode="selection_constraint", identity="heuristic")
+    default_registry = load_gate_registry(DEFAULT_REGISTRY_PATH)
+    starvation_gate = next(
+        gate
+        for gate in default_registry["gates"]
+        if gate["gate_id"] == "dispatch_starvation_lockout"
+    )
+    registry["gates"] = [json.loads(json.dumps(starvation_gate))]
+    registry["gates"][0]["lifecycle"] = {
+        "phase": "check",
+        "review_anchor_at": (NOW - timedelta(hours=1)).isoformat(),
+        "allowed_actions": [
+            "retain",
+            "recalibrate",
+            "downgrade_to_warn",
+            "retire",
+        ],
+    }
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(
+        storage / "next_tasks.json",
+        [{"id": "failed-later", "status": "failed"}],
+    )
+    _append_jsonl(
+        storage / "logs" / "control_gate_decisions.jsonl",
+        [{
+            "ts": (NOW - timedelta(minutes=1)).isoformat(),
+            "gate_id": "dispatch_starvation_lockout",
+            "decision": "constrain",
+            "candidate_id": "failed-later",
+        }],
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    gate = verdict["gates"][0]
+
+    assert gate["outcomes"]["failed"] == 1
+    assert gate["review"] == {"due": False, "reasons": []}
 
 
 def test_alert_readback_exposes_due_gate_without_creating_a_second_queue(
