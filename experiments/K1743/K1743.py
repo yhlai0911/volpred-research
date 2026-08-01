@@ -1,7 +1,4 @@
-"""K1743: TSM/2330.TW daily price discovery and volatility transmission.
-
-nested-dm: diagnostic-only. Clark-West is the primary nested-model inference.
-"""
+"""K1743: TSM/2330.TW daily price discovery and volatility transmission."""
 
 from __future__ import annotations
 
@@ -14,7 +11,7 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 
-from volpred.stats.model_evaluation import clark_west_test, dm_test, qlike_pointwise
+from volpred.stats.model_evaluation import clark_west_test, qlike_pointwise
 
 SEED = 42
 START = "2010-01-01"
@@ -65,8 +62,6 @@ def _evaluate(panel: pd.DataFrame, target: str, base_cols: list[str],
     aug_var = np.maximum(aug_abs ** 2, 1e-12)
     base_loss = qlike_pointwise(actual_var, base_var)
     aug_loss = qlike_pointwise(actual_var, aug_var)
-    # nested-dm: diagnostic-only -- the verdict below is owned by Clark-West.
-    dm_t, dm_p = dm_test(aug_loss, base_loss, h=1)
     cw = clark_west_test(actual_abs, base_abs, aug_abs, h=1)
     mse_base = float(np.mean((actual_abs - base_abs) ** 2))
     mse_aug = float(np.mean((actual_abs - aug_abs) ** 2))
@@ -89,8 +84,6 @@ def _evaluate(panel: pd.DataFrame, target: str, base_cols: list[str],
         "mse_improvement_pct": 100 * (mse_base - mse_aug) / mse_base,
         "qlike_baseline": q_base, "qlike_augmented": q_aug,
         "qlike_improvement_pct": 100 * (q_base - q_aug) / q_base,
-        "dm_qlike_aug_minus_base_t": dm_t, "dm_qlike_p_two_sided": dm_p,
-        "dm_role": "diagnostic-only; does not feed direction_supported",
         "clark_west_primary": cw,
         "direction_supported": supported,
     }

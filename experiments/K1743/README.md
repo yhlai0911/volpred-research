@@ -24,8 +24,8 @@ For each direction, a fixed 2010–2020 training sample estimates a baseline
 absolute-return model (own lagged absolute return) and an augmented model
 (cross-market return plus lagged premium change).  The untouched 2021 onward
 sample is scored using MSE and proxy-robust QLIKE on squared returns.  Because
-the models are nested, Clark–West supplies the primary predictive-content
-inference; the canonical repository DM statistic is diagnostic-only.  This is a daily-close
+the models are nested, Clark–West supplies the predictive-content inference.
+This is a daily-close
 lead–lag design, not an information-share estimator and not an intraday
 causal claim.
 
@@ -41,7 +41,7 @@ record this timing assumption.  No revised macroeconomic series are used.
 
 The directional price-discovery claim is supported only if the augmented
 model improves OOS QLIKE and MSE and its one-sided Clark–West p-value is below
-5%.  The diagnostic DM statistic never feeds the verdict.
+5%.
 Anything weaker is recorded as null/mixed.  Premium claims must be based on
 the downloaded observations and include annual coverage counts.  `seed=42`
 is fixed even though the current estimator is deterministic.
