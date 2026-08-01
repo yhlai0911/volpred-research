@@ -43,11 +43,38 @@
   "source_task_id": "K1745",
   "source_task_link": {
     "state": "linked",
-    "attempted_at": "2026-08-01T17:24:27Z",
-    "linked_at": "2026-08-01T17:24:28Z",
+    "attempted_at": "2026-08-01T17:32:00Z",
+    "linked_at": "2026-08-01T17:32:00Z",
     "error": null
   },
   "timeout_seconds": 10800,
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief-k1745-dce2e9e5.md",
-  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1745-tvp-har-dce2e9e5.md"
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1745-tvp-har-dce2e9e5.md",
+  "claimed_by_pid": 7898,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:f7d8e01f3140a7c756a0994e",
+    "scheduled_for": "2026-08-01T17:30:00Z"
+  },
+  "claimed_by_pid_start_wall": "Sun Aug  2 01:31:46 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "K1745",
+    "settled_at": "2026-08-01T17:31:58Z",
+    "error": null
+  },
+  "quota_requeues": 1,
+  "requeue_history": [
+    {
+      "at": "2026-08-01T17:31:59Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-08-01T17:31:49Z",
+      "reset_at": null
+    }
+  ],
+  "not_before": "2026-08-01T18:01:59.480261+00:00",
+  "attempt_status": "quota_exhausted",
+  "quota_reset_at": null
 }
