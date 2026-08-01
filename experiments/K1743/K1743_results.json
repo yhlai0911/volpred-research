@@ -1,7 +1,7 @@
 {
   "experiment_id": "K1743",
   "seed": 42,
-  "generated_at_utc": "2026-08-01T16:15:59.607836+00:00",
+  "generated_at_utc": "2026-08-01T19:25:16.653424+00:00",
   "data": {
     "source": "Yahoo Finance via yfinance",
     "tickers": [
@@ -11,15 +11,34 @@
     ],
     "start": "2010-01-04",
     "end": "2026-07-31",
-    "common_date_n": 3914,
+    "common_date_n": 3912,
     "adr_ratio": 5.0,
     "fx_interpretation": "TWD per USD",
-    "sha256_common_close_csv": "dd5bee8ba2333cd196e3f30034495336272342cc7b2911630a0db7d1335d4bbf"
+    "quality_controls": {
+      "fx_valid_range_twd_per_usd": [
+        10.0,
+        100.0
+      ],
+      "invalid_fx_count": 2,
+      "invalid_fx_share": 0.000510986203372509,
+      "invalid_fx_observations": [
+        {
+          "date": "2011-10-25",
+          "value": 1.8014999628067017
+        },
+        {
+          "date": "2014-12-31",
+          "value": 3.6700000762939453
+        }
+      ],
+      "action": "dropped_not_imputed"
+    },
+    "sha256_common_close_csv": "0a6f7d5605ba4bb8b50d6311317a0890e64c8a9ff5c11ed1038aa4693bb597e2"
   },
   "timing": {
     "taipei_to_new_york": "same calendar date; Taipei close precedes NY open",
     "new_york_to_taipei": "previous common-date US close via signal.shift(1)",
-    "limitations": "Daily common-date alignment omits non-overlap holidays and is not intraday information share."
+    "limitations": "Daily common-date alignment omits non-overlap holidays; a target return can span more than one local trading session around exchange-specific holidays. This is not an intraday information-share design."
   },
   "annual_adr_premium_pct": {
     "2010": {
@@ -30,10 +49,10 @@
       "max": 13.905674
     },
     "2011": {
-      "count": 238,
-      "mean": 0.762696,
-      "median": 2.027232,
-      "min": -93.857263,
+      "count": 237,
+      "mean": 1.959125,
+      "median": 2.035415,
+      "min": -4.646973,
       "max": 8.390956
     },
     "2012": {
@@ -51,10 +70,10 @@
       "max": 6.507467
     },
     "2014": {
-      "count": 240,
-      "mean": -0.913771,
-      "median": -0.172504,
-      "min": -88.349702,
+      "count": 239,
+      "mean": -0.022296,
+      "median": -0.155288,
+      "min": -4.431147,
       "max": 4.635429
     },
     "2015": {
@@ -144,7 +163,7 @@
   },
   "volatility_forecast": {
     "taipei_to_new_york": {
-      "train_n": 2607,
+      "train_n": 2605,
       "oos_n": 1305,
       "train_start": "2010-01-06",
       "train_end": "2020-12-31",
@@ -159,29 +178,29 @@
         "premium_change_lag"
       ],
       "coefficients_baseline": [
-        0.01024498120842427,
-        0.21016042942525204
+        0.010232434834490376,
+        0.2115037565052993
       ],
       "coefficients_augmented": [
-        0.010249545766368773,
-        0.20977930426049138,
-        0.0003915423083799124,
-        0.005121325225373223
+        0.010250815889174026,
+        0.21046272752279346,
+        -0.006287804759909741,
+        0.017312563116917316
       ],
-      "mse_baseline": 0.00030284994491616506,
-      "mse_augmented": 0.0003028209599864262,
-      "mse_improvement_pct": 0.009570723133818822,
-      "qlike_baseline": 2.906353837118858,
-      "qlike_augmented": 2.906565381396186,
-      "qlike_improvement_pct": -0.007278682816457906,
+      "mse_baseline": 0.00030290133466437337,
+      "mse_augmented": 0.0003029487317937641,
+      "mse_improvement_pct": -0.01564771229655755,
+      "qlike_baseline": 2.9063534826610042,
+      "qlike_augmented": 2.9099671277140686,
+      "qlike_improvement_pct": -0.12433604771831805,
       "clark_west_primary": {
         "test": "Clark-West (2007) nested MSPE-adjusted",
         "status": "ok",
         "n_obs": 1305,
-        "t_stat": 0.3682785047408427,
-        "p_value_one_sided": 0.3563327893433163,
-        "p_value_two_sided": 0.7126655786866326,
-        "mean_adjusted_loss_diff": 4.7176242147508865e-08,
+        "t_stat": 0.229431024832392,
+        "p_value_one_sided": 0.40926696242828076,
+        "p_value_two_sided": 0.8185339248565615,
+        "mean_adjusted_loss_diff": 1.1141256087176066e-07,
         "hac_lag": 11,
         "alternative": "larger nested model has incremental predictive content",
         "direction": "positive t favors the larger nested model"
@@ -189,7 +208,7 @@
       "direction_supported": false
     },
     "new_york_to_taipei": {
-      "train_n": 2607,
+      "train_n": 2605,
       "oos_n": 1305,
       "train_start": "2010-01-06",
       "train_end": "2020-12-31",
@@ -204,29 +223,29 @@
         "premium_change_lag"
       ],
       "coefficients_baseline": [
-        0.010166716744503626,
-        0.09940155092664058
+        0.010177557654794639,
+        0.09852561303119656
       ],
       "coefficients_augmented": [
-        0.010173049374887552,
-        0.10020404299068444,
-        -0.017952302552806953,
-        0.003424156384032346
+        0.010175764180279505,
+        0.10199162382437844,
+        -0.04405879289636098,
+        0.04631827938703967
       ],
-      "mse_baseline": 0.00018232185637442468,
-      "mse_augmented": 0.0001830694083805484,
-      "mse_improvement_pct": -0.41001776802256595,
-      "qlike_baseline": 3.2070486727063514,
-      "qlike_augmented": 3.256540820156307,
-      "qlike_improvement_pct": -1.5432303186153529,
+      "mse_baseline": 0.00018233943960157295,
+      "mse_augmented": 0.00018221969497860492,
+      "mse_improvement_pct": 0.06567126850322515,
+      "qlike_baseline": 3.2071079570815915,
+      "qlike_augmented": 3.214741393965594,
+      "qlike_improvement_pct": -0.238016212305769,
       "clark_west_primary": {
         "test": "Clark-West (2007) nested MSPE-adjusted",
         "status": "ok",
         "n_obs": 1305,
-        "t_stat": -1.4517895154806835,
-        "p_value_one_sided": 0.9267199299763341,
-        "p_value_two_sided": 0.14656014004733173,
-        "mean_adjusted_loss_diff": -5.979748333378389e-07,
+        "t_stat": 0.9157956119640153,
+        "p_value_one_sided": 0.17988705272352706,
+        "p_value_two_sided": 0.3597741054470541,
+        "mean_adjusted_loss_diff": 9.706552729677852e-07,
         "hac_lag": 11,
         "alternative": "larger nested model has incremental predictive content",
         "direction": "positive t favors the larger nested model"
@@ -235,5 +254,25 @@
     }
   },
   "success_rule": "both OOS QLIKE and MSE improve and one-sided Clark-West p < 0.05",
-  "overall_verdict": "NULL"
+  "overall_verdict": "NULL",
+  "code_trace": {
+    "path": "experiments/K1743/K1743.py",
+    "sha256": "dd8b51d18cb2d76a22f07a8307f8701c6110abe6db5dc785b2681392a2ac86c4",
+    "size_bytes": 9344
+  },
+  "runtime_seconds": 1.217,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  }
 }

@@ -1516,8 +1516,17 @@ def test_legacy_completed_only_filter_does_not_return_failed_agent(
     assert json.loads(capsys.readouterr().out) == []
 
 
-def test_hourly_prompt_routes_both_followup_modes() -> None:
-    prompt = (Path(__file__).resolve().parents[1] / "scripts/cron_hourly_dispatch_prompt.md").read_text()
+@pytest.mark.parametrize(
+    "prompt_name",
+    [
+        "cron_hourly_dispatch_prompt.md",
+        "cron_hourly_dispatch_codex_failover_prompt.md",
+    ],
+)
+def test_hourly_prompt_routes_both_followup_modes(prompt_name: str) -> None:
+    prompt = (
+        Path(__file__).resolve().parents[1] / "scripts" / prompt_name
+    ).read_text()
 
     assert "list --pending-followup --json" in prompt
     assert "collect_completed" in prompt

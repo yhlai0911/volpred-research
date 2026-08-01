@@ -1,0 +1,66 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1743.py",
+    "args": [],
+    "sha256": "dd8b51d18cb2d76a22f07a8307f8701c6110abe6db5dc785b2681392a2ac86c4",
+    "size_bytes": 9344
+  },
+  "canonical_result": "K1743_results.json",
+  "inputs": [],
+  "outputs": [
+    "K1743_results.json"
+  ],
+  "timeout_seconds": 63,
+  "network": "allow",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 1.217,
+    "recorded_at": "2026-08-01T19:25:16Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1743_results.json",
+    "sha256": "9c9b048b1a6f0032ddb489b93ad79955c354ff1e57a556285f6fdac4da7de696",
+    "size_bytes": 7270
+  }
+}

@@ -304,6 +304,59 @@ def test_failed_lazypack_commits_only_existing_declared_panels_and_reaps_late_ar
     assert receipt["status"] == "failed"
 
 
+def test_completed_compute_experiment_cannot_bypass_formal_admission(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A compute receipt is preservation evidence, not experiment approval.
+
+    K1743 reached main through the queue-deliverable path while the namespace
+    path correctly held the same result for missing review/knowledge/spec.  A
+    second intake path must not be able to bypass the canonical experiment
+    admission gate merely because the producer declared an exact output path.
+    """
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    queue = root / "storage" / "ops" / "compute_queue"
+    experiment = root / "experiments" / "K1743"
+    queue.mkdir(parents=True)
+    experiment.mkdir(parents=True)
+    result = experiment / "K1743_results.json"
+    result.write_text(
+        json.dumps({"experiment_id": "K1743", "overall_verdict": "NULL"}),
+        encoding="utf-8",
+    )
+    result_rel = str(result.relative_to(root))
+    (queue / "k1743-price-discovery.json").write_text(
+        json.dumps({
+            "id": "k1743-price-discovery",
+            "kind": "compute",
+            "status": "completed",
+            "output_paths": [result_rel],
+            "followup_dispatched": False,
+            "source_task_id": "K1743",
+            "source_task_settlement": {"state": "pending_collection"},
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+
+    before = _repo_git(root, "rev-parse", "HEAD").stdout.strip()
+    scan = reaper.scan_job_deliverables()
+
+    assert scan["candidates"] == []
+    assert scan["held"] == [{
+        "job_id": "k1743-price-discovery",
+        "reason": "experiment_admission_blocked",
+        "paths": [result_rel],
+        "detail": scan["held"][0]["detail"],
+    }]
+    assert "artifact" in scan["held"][0]["detail"]
+    assert _repo_git(root, "rev-parse", "HEAD").stdout.strip() == before
+    assert result.exists(), "blocked admission preserves the producer bytes"
+
+
 def test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths(
     tmp_path: Path,
     monkeypatch,

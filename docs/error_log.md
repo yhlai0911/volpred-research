@@ -5556,3 +5556,37 @@ root 只剩 1 筆 v1／2 筆 v2；22 筆 audit 精確形成 11 組 intent＋comp
 沒有 nonterminal／invalid v3。此 bounded 根因五步 Gate 完成，狀態為
 **`root_cause_fixed_and_verified`**；Issue #9→#12 全域 legacy retirement 仍依其獨立 clean-window
 與 blocking edge 判定，不由本 slice 提前結案。
+
+---
+
+## 2026-08-02 — compute queue 交付繞過 experiment admission，Codex failover 又缺少 PHASE A 收件
+
+**證據化症狀**：GitHub Actions runs `30711055685`、`30713909333` 都只有
+`test_knowledge_unrecorded_ratchet` 失敗：K1743 的 archived results 已進 main，但 canonical
+knowledge 沒有 K1743。compute receipt `storage/ops/compute_queue/k1743-price-discovery.json`
+同時仍為 `followup_dispatched=false`、`source_task_settlement.state=pending_collection`；落地
+commit `3dac20c9c7ab` 只收了 results。原始 results 另含 2011-10-25 的 1.8015 與
+2014-12-31 的 3.67 TWD/USD 壞 tick，造成約 -94%／-88% 的不可能 ADR premium，證明未經
+正式收件與 review 的檔案不只是 metadata 不完整，也可能包含研究品質錯誤。
+
+**根因層級（雙 admission path／followup lifecycle）**：generic `experiments/**` namespace
+掃描會呼叫 `_gate_experiment_ready_for_main`，但 completed compute receipt 的 queue-output
+捷徑直接把 declared paths 送進 commit，形成較弱的第二入口；另一方面 Codex failover prompt
+只從 handoff Section 4 挑新工，沒有 Claude hourly flow 的 PHASE A，因此 Claude 不可用時
+`pending_collection` 永遠沒有人正式收件。兩個缺口疊加後，orphan reaper 把尚未 review、spec、
+knowledge closure 的 compute result 誤認為可交付成品。
+
+**底層修復與制度化**：queue-output candidate 現在對任何 `experiments/<id>/` 路徑重用同一個
+canonical experiment admission gate；review verdict、artifact contract、reproduce spec、knowledge
+或 byte binding 未齊時只寫 `experiment_admission_blocked` held evidence，保留原檔且禁止 commit。
+Codex failover prompt 補齊 PHASE A，逐筆處理 `collect_completed`、`split_required`、
+`artifact_contract_mismatch`、`triage_failed`，未 `mark-followup-dispatched` settlement 前不得挑新工。
+K1743 本身改用 runtime `finalize_experiment()` 同步產 results/spec byte trace，新增 FX 合理範圍與
+material-corruption fail-closed gate；兩個孤立壞 tick只記錄後剔除、不插值，重跑後維持誠實
+`NULL`，並以 Codex review、PASS verdict 與 canonical MemorySystem writer 完成研究閉環。
+
+**驗證狀態**：TDD 已鎖住「completed compute experiment 不得繞過正式 admission」及「Claude／
+Codex failover prompt 必須具備相同 followup modes」；K1743 artifact gate、四項 experiment gate、
+review byte binding 與 knowledge provenance 均已通過。提交後仍須由 tracked-file pytest、GitHub
+Actions green 及 CI watcher read-back 完成最終持續驗證；在此以前本 incident 僅為
+**`contained`**，不得提前稱 `root_cause_fixed_and_verified`。

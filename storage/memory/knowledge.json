@@ -43031,5 +43031,21 @@
   ],
   "confidence": 0.85,
   "created_at": "2026-07-30T01:35:08.872825"
+ },
+ {
+  "item_id": "a637f43c",
+  "category": "research_finding",
+  "content": "[K1743 收件 PASS；科學結論=NULL] TSM ADR、2330.TW 與 TWD/USD 的日頻 common-date 設計未支持任一方向具有增量波動預測力。資料 2010-01-04–2026-07-31，common-date n=3912；runtime 偵測並不插值地剔除 2 個不可能 FX tick (0.051099%)。Taipei→New York：OOS n=1305，MSE improvement=-0.015648%，QLIKE improvement=-0.124336%，one-sided Clark-West p=0.409267。New York→Taipei：OOS n=1305，MSE improvement=0.065671%，QLIKE improvement=-0.238016%，one-sided Clark-West p=0.179887。兩方向皆未同時改善 MSE/QLIKE 且通過 5% CW gate，故不得宣稱方向性 price discovery。描述上，清理後 ADR premium annual mean 為 2024=16.212511%、2025=22.463121%、2026 through 2026-07-31=16.429631%；這只是描述統計，不是因果或資訊份額證據。限制：共同交易日對齊在單邊假日附近可跨多個 local sessions，且 Yahoo Finance 為 network input；本結果不等同 intraday information-share 檢定。",
+  "evidence": [
+   "experiment_id: K1743",
+   "scientific_verdict: NULL",
+   "reviewer: codex/gpt-5.6-sol (ultra)",
+   "review_verdict: experiments/K1743/review_verdict.json (PASS, blocking_defects=[])",
+   "results: experiments/K1743/K1743_results.json (code_trace=dd8b51d18cb2d76a22f07a8307f8701c6110abe6db5dc785b2681392a2ac86c4)",
+   "reproduce_spec: experiments/K1743/reproduce_spec.json",
+   "review_artifact: experiments/K1743/codex_review.md"
+  ],
+  "confidence": 0.95,
+  "created_at": "2026-08-02T03:27:12.101398"
  }
 ]

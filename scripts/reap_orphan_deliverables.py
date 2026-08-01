@@ -666,6 +666,21 @@ def scan_job_deliverables() -> dict:
                     "rejected": rejected,
                 })
             continue
+        experiment_admission = _queue_experiment_admission(pending)
+        if experiment_admission is not None and not experiment_admission[0]:
+            # Queue ownership proves which producer wrote the bytes; it is not
+            # a research-admission certificate.  Before this seam existed the
+            # generic experiments namespace correctly held K1743 for missing
+            # knowledge/spec, while this earlier queue path committed the same
+            # result directly to main.  One canonical gate must govern both
+            # entrances or the weaker entrance wins every time.
+            held.append({
+                "job_id": str(job.get("id") or job_path.stem),
+                "reason": "experiment_admission_blocked",
+                "paths": pending,
+                "detail": experiment_admission[1],
+            })
+            continue
         candidates.append({
             "job_id": str(job.get("id") or job_path.stem),
             "job_path": str(job_path),
@@ -1196,6 +1211,47 @@ def _gate_experiment_ready_for_main(rel: str, ctx: dict):
         )
     ok, why = cache[exp_rel]
     return ("experiment_admission", ok, why)
+
+
+def _queue_experiment_admission(paths: list[str]) -> tuple[bool, str] | None:
+    """Apply the canonical experiment gate to queue-owned result paths.
+
+    ``scan_job_deliverables`` and the registered ``experiments`` namespace are
+    two preservation views over the same files.  They must not become two
+    admission policies.  Non-experiment outputs remain governed by their queue
+    receipt; an experiment directory must additionally satisfy the exact gate
+    used by ``scan_namespace('experiments')`` before the reaper may commit it.
+    """
+    experiment_paths = [
+        path
+        for path in paths
+        if len(PurePosixPath(path).parts) >= 3
+        and PurePosixPath(path).parts[0] == "experiments"
+    ]
+    if not experiment_paths:
+        return None
+
+    head_revision, head_error = _head_revision()
+    if not head_revision:
+        return False, f"admission evidence unavailable in HEAD: {head_error or 'unknown'}"
+    ctx = {
+        "dirty_set": set(paths),
+        "ns_depth": 1,
+        "ns": {"id": "experiments", "path": "experiments"},
+        "head_revision": head_revision,
+    }
+    reasons: list[str] = []
+    for path in experiment_paths:
+        decision = _gate_experiment_ready_for_main(path, ctx)
+        if decision is None:
+            reasons.append(f"{path}: not an experiment run path")
+            continue
+        _kind, ok, why = decision
+        if not ok:
+            reasons.append(f"{path}: {why}")
+    if reasons:
+        return False, "; ".join(dict.fromkeys(reasons))
+    return True, "ready_for_main"
 
 
 _CONTENT_GATES = {
