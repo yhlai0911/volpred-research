@@ -1,8 +1,8 @@
 # 2026-08-02 — NFP T-7 資訊集、重疊對照組與讀者結論更正
 
-**Class**：F（Timestamp / provenance / information set），兼 G（DM-HAC / 方法論）。  
-**Task**：`assign_706482a8`。  
-**狀態**：`contained`。研究與讀者面已止血並回讀；尚待 exact-path Git adoption、post-commit CI parity 與 orphan reaper 證明孤兒已正式退役，才可改為 `root_cause_fixed_and_verified`。
+**Class**：F（Timestamp / provenance / information set），兼 G（DM-HAC / 方法論）。
+**Task**：`assign_706482a8`。
+**狀態**：`root_cause_fixed_and_verified`。研究、讀者面、Git ownership、committed-tree reproduction、orphan reaper 與 task completion receipt 皆已回讀。
 
 ## 1. 證據化症狀
 
@@ -40,11 +40,11 @@
 
 `https://volpred.zeabur.app/v3/reports/mile_84e3be0a` 實際 HTTP 200 回讀，可見新標題、7 月 29 日 VIX 20.66、「沒有事件日對照組」與 T-7 起點水位限定；不再出現「7/30 還有七個交易日」、事件日穩定推論，也不再以 VIX 17 作結尾。Mirror 與 Supabase sync 均回報 ok，feed-sync 已 acknowledgement。
 
-## 結案條件
+## 結案證據
 
-本 entry 不因「線上已改」就宣稱完成。只有下列全部回讀後才能改為 `root_cause_fixed_and_verified`：
+本 entry 沒有因「線上已改」就宣稱完成；以下四項 terminal gate 已全數回讀：
 
-1. exact-path locked commit 將 code、pinned inputs、results/spec、tests、draft/feed/series 與本記錄作為同一可稽核變更集落地；
-2. committed tree 上的 CI-parity regression、artifact gate、methodology gate 與 reproduce check 全綠；
-3. `reap_orphan_deliverables.py --json` 回讀 `experiments/nfp_20260807_t7` 不再 held；
-4. task-pool completion receipt 將 `assign_706482a8` 結束為 succeeded，且不藉由刪除產物或復活 legacy runner 收尾。
+1. exact-path locked commit `ea336b823defe0f27878c617db004e506f3e7540` 落地 23 個 task-owned files，其他 session 的 dirty paths 未納入；
+2. committed tree 上 CI-parity regression 172 passed，artifact/result identity PASS、4 methodology gates PASS、SHA-bound certify PASS、Ruff PASS、series drift=0、anti-AI PASS；
+3. commit `ea336b823` 的隔離 clean clone 在 macOS sandbox/network-deny 下重跑 exit 0，`pass_tolerated`，198/198 scalar matched、mismatch=0、canonical unchanged。`reap_orphan_deliverables.py --apply --max 0 --max-jobs 0 --max-draft-files 0` 只更新 held tracking、沒有收編其他產物；回讀 experiments held=[]，`orphan_held_state.json` 已不含 `experiments/nfp_20260807_t7`；
+4. task-pool completion receipt 已將 `assign_706482a8` 結束為 `succeeded`；整個收尾沒有刪除產物或復活 legacy runner。
