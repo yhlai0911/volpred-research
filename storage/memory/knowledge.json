@@ -43047,5 +43047,20 @@
   ],
   "confidence": 0.95,
   "created_at": "2026-08-02T03:27:12.101398"
+ },
+ {
+  "item_id": "dfc3a39f",
+  "category": "experiment_result",
+  "content": "[K1738 收件 PASS；科學結論=CONDITIONAL_PASS，僅條件關聯] experiment_id=K1738。以 frozen analyst-estimate SUE 研究盈餘意外與後續 realized volatility；樣本 24,519 firm-quarters、292 firms、97 quarters，2001-08-14–2026-04-30。Signed-SUE cross-fitted DML：h1m: theta=-0.00421196, p=0.00365329, q_BH=0.0109599, effect=-0.4203% per treatment unit; h2m: theta=-0.00400114, p=0.00180865, q_BH=0.0108519, effect=-0.3993% per treatment unit; h3m: theta=-0.00226266, p=0.066003, q_BH=0.132006, effect=-0.2260% per treatment unit。1、2 個月在事前 FDR family 內顯著，3 個月不顯著；subperiod consistency gate 未通過。獨立 frozen earnings coverage audit 為 24,884/26,954=92.3%。候選 sector-peer IV 的 cluster-robust first-stage F=31.78，但同業盈餘消息對焦點公司波動有合理直接路徑，故 instrument_valid=false；2SLS 僅為透明度診斷，不能作因果解讀。所有估計均受 invalid-IV honesty gate 限制為 unconfoundedness 下的 conditional association，CONDITIONAL_PASS 不是 causal PASS。主要限制：frozen current snapshot/存活者與資料可得性偏誤；firm-held-out cross-fitting 仍跨 fold 共用月份，two-way clustered score inference 不消除 nuisance-fit dependence，若要升級主張須做 multiway cross-fitting replication；效果單位是 firm historical-surprise treatment unit，不是 pooled-sample 1 SD。",
+  "evidence": [
+   "experiment_id=K1738",
+   "experiments/k1738/K1738_results.json (sha256 c1ee85448c2f59ce2851db3005f1d2460737c119d15c544f81e52b5602f924aa)",
+   "experiments/k1738/reproduce_spec.json (network=deny; frozen panel and earnings-cache identities)",
+   "experiments/k1738/review_verdict.json (PASS; blocking_defects=[])",
+   "experiments/k1738/K1738_CODE_REVIEW.md (independent Standards, Spec, and methods reviews)",
+   "main-thread cached rerun: run_complete=true, stages_missing=[]; experiment gates PASS; 37 tests passed before tracking reproduce_spec.json"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-08-02T07:43:46.184283"
  }
 ]
