@@ -1,0 +1,53 @@
+{
+  "id": "agent-k1747-ml-inference-bf6e9f48",
+  "title": "K1747 ML estimation-risk inference audit",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1747-ml-inference-bf6e9f48.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bf6e9f48-k1747",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bf6e9f48-k1747/experiments/K1747/K1747_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-k1747-ml-inference-bf6e9f48.json",
+    "--timeout",
+    "10680"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-01T19:18:14Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1747-ml-inference-bf6e9f48.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1747-ml-inference-bf6e9f48.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bf6e9f48-k1747/experiments/K1747/K1747_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-k1747-ml-inference-bf6e9f48.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bf6e9f48-k1747",
+  "claude_followup": {
+    "brief": "Collect K1747: read terminal receipt and evidence timestamps; verify README, K1747.py, K1747_results.json, reproduce_spec, data provenance, signal.shift(1), seed=42, outer holdout, conventional DM versus ML-aware predictive-ability inference, Monte Carlo size, multiplicity, and robustness; run artifact gates plus primary-path Codex review; merge dispatch-slot-1-bf6e9f48-k1747 only via scripts/merge_worktree.sh if gates pass; then write knowledge/work log and terminalize honestly.",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1747",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-01T19:18:14Z",
+    "linked_at": "2026-08-01T19:18:14Z",
+    "error": null
+  },
+  "timeout_seconds": 10800,
+  "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1747-ml-inference-bf6e9f48.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1747-ml-inference-bf6e9f48.md"
+}
