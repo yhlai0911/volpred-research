@@ -1,0 +1,48 @@
+{
+  "id": "codex-k1738-cached-dml-2aad9e77",
+  "title": "K1738 cached DML continuation (Codex detached)",
+  "script_path": "Read and execute the full K1738 cached-DML continuation brief at /Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1738-cached-dml-2aad9e77.md. Follow it exactly and do not rerun the original whole brief.",
+  "interpreter": "bash scripts/codex_exec_bounded.sh --timeout 2820 -C /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1738 -s danger-full-access --dangerously-bypass-hook-trust",
+  "args": [],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-08-01T21:29:32Z",
+  "started_at": "2026-08-01T21:30:34Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-k1738-cached-dml-2aad9e77.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-k1738-cached-dml-2aad9e77.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1738/experiments/k1738/K1738_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Collect K1738 cached-DML split stage: verify checkpoint identities; require run_complete=true, empty stages_missing, runtime sibling reproduce identity, earnings-announcement timing and explicit lag, genuine cross-fitting, three-horizon FDR, honest invalid-IV/conditional-association cap, README-to-JSON numbers, tests/gates, and independent fresh-context primary Codex full-surface review. Only pinned PASS may write knowledge and call formal merge_worktree.sh; NULL is valid.",
+    "task_type": "platform_ops",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1738",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-01T21:29:32Z",
+    "linked_at": "2026-08-01T21:29:32Z",
+    "error": null
+  },
+  "timeout_seconds": 3000,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "parent_timeout_job_id": "agent-brief_k1738-b377db",
+  "split_stage": "cached_dml_finish",
+  "claimed_by_pid": 91026,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:e10c06a6dd7028807978a880",
+    "scheduled_for": "2026-08-01T21:30:00Z"
+  },
+  "claimed_by_pid_start_wall": "Sun Aug  2 05:30:34 2026"
+}
