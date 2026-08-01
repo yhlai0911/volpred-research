@@ -1,0 +1,617 @@
+{
+  "experiment_id": "K1738",
+  "title": "Earnings surprise (SUE) and subsequent realized volatility: causal increment via DML (+ IV falsification)",
+  "generated_at_utc": "2026-08-01T02:21:09.752751+00:00",
+  "seed": 42,
+  "code_sha256": "2057c5e49b0fc939114fecc4fffa0196775eb5337f395cbe9be10921ab651c27",
+  "git_commit": "fc1b1ca13ec4195591d7b289ede97eac067e70cf",
+  "runtime_seconds": 1.3,
+  "run_complete": false,
+  "stages_completed": [
+    "naive_and_ols_controls",
+    "instrument"
+  ],
+  "stages_missing": [
+    "primary",
+    "robustness:within_month_demeaned",
+    "subperiods",
+    "robustness:inclusive_window",
+    "robustness:level_rv_outcome",
+    "robustness:lasso_nuisance"
+  ],
+  "last_checkpoint": "insurance-artifact-no-DML",
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_reason": "INTERIM ARTIFACT: the DML block did not finish inside the job budget on a heavily contended machine. Only the closed-form estimators (naive OLS, OLS+controls) and the instrument analysis are computed here. The pre-registered verdict in README section 8 is defined on the DML estimate and therefore is NOT yet established; this verdict reflects the OLS-with-controls family only and must not be read as the DML result.",
+  "causal_claim_cap": "CAPPED: no valid instrument AND the DML estimator did not run, so nothing here supports a causal claim; these are covariate-adjusted associations.",
+  "identification_stance": "Conditional association under unconfoundedness. No credible instrument was found; see instrument_analysis.",
+  "question": "Not 'does SUE predict vol' (a forecasting question) but 'does SUE carry a causal increment to realized vol after controlling for confounders'.",
+  "sample": {
+    "n_firm_quarters": 24519,
+    "n_firms": 292,
+    "n_quarters": 97,
+    "date_range": [
+      "2001-08-14",
+      "2026-04-30"
+    ],
+    "n_announcement_months": 279,
+    "panel_rows_before_completeness_filter": 24873,
+    "sue_coverage_of_panel_rows": 1.0,
+    "universe_size": 298,
+    "tickers_with_usable_data": 292,
+    "obs_per_sector": {
+      "Industrials": 3296,
+      "Technology": 3113,
+      "Financials": 3005,
+      "HealthCare": 2883,
+      "ConsDiscretionary": 2428,
+      "ConsStaples": 2098,
+      "Utilities": 1983,
+      "RealEstate": 1708,
+      "Materials": 1628,
+      "Energy": 1370,
+      "CommServices": 1007
+    }
+  },
+  "treatment_definition": {
+    "type": "analyst-based SUE (NOT a seasonal-random-walk proxy)",
+    "formula": "(ReportedEPS - ConsensusEPSEstimate) / std(prior 8 announcement surprises)",
+    "source": "yfinance get_earnings_dates(limit=100): EPS Estimate + Reported EPS",
+    "continuous": true,
+    "winsorized_at": [
+      0.01,
+      0.99
+    ],
+    "primary": "signed SUE",
+    "secondary": "|SUE|",
+    "denominator_min_prior_obs": 6,
+    "pit_caveat": "Yahoo's stored consensus is a current snapshot of the pre-announcement consensus, not a timestamped archived vintage; Reported EPS may embed later restatements. Standardizing by the firm's own prior surprise dispersion neutralizes unit and split-adjustment drift but not restatement.",
+    "descriptives": {
+      "mean": 0.8392865707992061,
+      "std": 1.549192147289781,
+      "p5": -1.3242703108772182,
+      "p50": 0.6219918974976102,
+      "p95": 3.6750594227390145,
+      "share_positive": 0.7074513642481342
+    }
+  },
+  "lookahead_policy": {
+    "event_anchor": "announcement timestamp (America/New_York), never the fiscal period end",
+    "announcement_vs_period_end": "Anchoring on the fiscal period end would look ahead by 2-8 weeks because the earnings number is not public then. Only the announcement date is used.",
+    "reaction_day_rule": "hour < 09:30 ET -> reaction day = announcement date; hour >= 16:00 ET or ambiguous -> next trading day (conservative: never earlier)",
+    "confounder_window_end": "last trading day strictly before the announcement date (t0-1)",
+    "outcome_window_start": "reaction day + 1 (the reaction day itself is excluded)",
+    "min_feature_label_gap_trading_days": 2,
+    "why_reaction_day_excluded": "Including it makes the finding near-tautological: a large surprise mechanically produces a large announcement-day jump which inflates that window's RV. The inclusive window is reported under robustness so the mechanical part is visible.",
+    "sue_denominator": "previous 8 announcements only, strictly earlier",
+    "macro_asof": "backward fill only (last observation on or before t0-1); no interpolation",
+    "nfci_excluded_reason": "First published 2011 with backcast history and subject to revision (K1655 lesson). VIXCLS / T10Y2Y / BAA10Y are market-priced and unrevised."
+  },
+  "method": {
+    "estimand": "ATE of SUE on log annualized realized volatility, partially linear model",
+    "outcome": "log annualized RV over trading days [r+1, r+H], H in {21,42,63}",
+    "confounders": [
+      "log_rv21",
+      "log_rv63",
+      "log_rv252",
+      "rv_trend",
+      "ret21",
+      "ret252",
+      "log_dollar_vol",
+      "sue_lag",
+      "abs_sue_lag",
+      "log_sigma_hat",
+      "log_vix",
+      "term_spread",
+      "credit_spread",
+      "log_mkt_rv21",
+      "days_since_prev",
+      "year_frac",
+      "cal_quarter",
+      "sec_ConsDiscretionary",
+      "sec_ConsStaples",
+      "sec_Energy",
+      "sec_Financials",
+      "sec_HealthCare",
+      "sec_Industrials",
+      "sec_Materials",
+      "sec_RealEstate",
+      "sec_Technology",
+      "sec_Utilities"
+    ],
+    "dml": {
+      "cross_fitting": "5-fold, grouped by firm (no firm straddles train/estimate)",
+      "nuisance_learner": "HistGradientBoostingRegressor (Lasso variant under robustness)",
+      "score": "partialling-out: theta = sum(vtil*ytil)/sum(vtil^2)",
+      "repetitions_primary": 5,
+      "repetitions_secondary_blocks": 2,
+      "variance": "Chernozhukov median adjustment over split seeds"
+    },
+    "standard_errors": "two-way clustered by firm and announcement year-month (Cameron-Gelbach-Miller), for every estimator; per repo K1355 rule, same-date cross-firm observations are not treated as iid",
+    "common_sample": "rows with complete confounders and all three horizons available"
+  },
+  "estimates": {
+    "signed_sue": {
+      "h1m": {
+        "naive_ols": {
+          "estimator": "naive_ols",
+          "theta": -0.014608683684277923,
+          "se": 0.004992632587300139,
+          "z": -2.9260482178156524,
+          "p_raw": 0.003432977244915758,
+          "ci95": [
+            -0.0243942435553862,
+            -0.00482312381316965
+          ],
+          "pct_vol_change_per_1sd": -1.450249458798225,
+          "n": 24519,
+          "q_bh": 0.02059786346949455,
+          "significant_bh": true
+        },
+        "ols_controls": {
+          "estimator": "ols_controls",
+          "theta": -0.007517226103828989,
+          "se": 0.001961556057139048,
+          "z": -3.832276970352277,
+          "p_raw": 0.00012696268398570965,
+          "ci95": [
+            -0.011361875975821523,
+            -0.003672576231836455
+          ],
+          "pct_vol_change_per_1sd": -0.7489042424927206,
+          "n": 24519,
+          "q_bh": 0.0002897022710786068,
+          "significant_bh": true
+        },
+        "dml": {
+          "estimator": "dml",
+          "theta": null,
+          "se": null,
+          "p_raw": null,
+          "q_bh": null,
+          "significant_bh": false,
+          "ci95": [
+            null,
+            null
+          ],
+          "pct_vol_change_per_1sd": null,
+          "n": 24519,
+          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+        },
+        "confounding_absorbed_pct": 48.54275534818283
+      },
+      "h2m": {
+        "naive_ols": {
+          "estimator": "naive_ols",
+          "theta": -0.013551226174038922,
+          "se": 0.005032749023048736,
+          "z": -2.6926091708483146,
+          "p_raw": 0.007089532094215922,
+          "ci95": [
+            -0.023415414259214444,
+            -0.0036870380888633994
+          ],
+          "pct_vol_change_per_1sd": -1.3459821655562032,
+          "n": 24519,
+          "q_bh": 0.021268596282647767,
+          "significant_bh": true
+        },
+        "ols_controls": {
+          "estimator": "ols_controls",
+          "theta": -0.00744214519240316,
+          "se": 0.001619758156679144,
+          "z": -4.594602695294447,
+          "p_raw": 4.335745612760178e-06,
+          "ci95": [
+            -0.010616871179494282,
+            -0.004267419205312038
+          ],
+          "pct_vol_change_per_1sd": -0.7414521000099095,
+          "n": 24519,
+          "q_bh": 2.6014473676561067e-05,
+          "significant_bh": true
+        },
+        "dml": {
+          "estimator": "dml",
+          "theta": null,
+          "se": null,
+          "p_raw": null,
+          "q_bh": null,
+          "significant_bh": false,
+          "ci95": [
+            null,
+            null
+          ],
+          "pct_vol_change_per_1sd": null,
+          "n": 24519,
+          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+        },
+        "confounding_absorbed_pct": 45.08138896935671
+      },
+      "h3m": {
+        "naive_ols": {
+          "estimator": "naive_ols",
+          "theta": -0.010129944609039931,
+          "se": 0.004996506285216084,
+          "z": -2.0274055571615963,
+          "p_raw": 0.042620954091635355,
+          "ci95": [
+            -0.019923096928063454,
+            -0.0003367922900164074
+          ],
+          "pct_vol_change_per_1sd": -1.0078809530977173,
+          "n": 24519,
+          "q_bh": 0.06393143113745303,
+          "significant_bh": true
+        },
+        "ols_controls": {
+          "estimator": "ols_controls",
+          "theta": -0.00602504479133259,
+          "se": 0.0015856488509586103,
+          "z": -3.7997345929965043,
+          "p_raw": 0.0001448511355393034,
+          "ci95": [
+            -0.009132916539211465,
+            -0.002917173043453714
+          ],
+          "pct_vol_change_per_1sd": -0.6006930606813232,
+          "n": 24519,
+          "q_bh": 0.0002897022710786068,
+          "significant_bh": true
+        },
+        "dml": {
+          "estimator": "dml",
+          "theta": null,
+          "se": null,
+          "p_raw": null,
+          "q_bh": null,
+          "significant_bh": false,
+          "ci95": [
+            null,
+            null
+          ],
+          "pct_vol_change_per_1sd": null,
+          "n": 24519,
+          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+        },
+        "confounding_absorbed_pct": 40.522431031302396
+      }
+    },
+    "abs_sue": {
+      "h1m": {
+        "naive_ols": {
+          "estimator": "naive_ols",
+          "theta": 0.00840248968755719,
+          "se": 0.004815596659379445,
+          "z": 1.7448491395539687,
+          "p_raw": 0.08101113253812509,
+          "ci95": [
+            -0.001036079764826522,
+            0.017841059139940905
+          ],
+          "pct_vol_change_per_1sd": 0.8437889683936106,
+          "n": 24519,
+          "q_bh": 0.08469316408502525,
+          "significant_bh": true
+        },
+        "ols_controls": {
+          "estimator": "ols_controls",
+          "theta": 0.0010345037539636337,
+          "se": 0.0026217859879591834,
+          "z": 0.3945797859606759,
+          "p_raw": 0.6931530340209349,
+          "ci95": [
+            -0.004104196782436366,
+            0.006173204290363633
+          ],
+          "pct_vol_change_per_1sd": 0.10350390375404306,
+          "n": 24519,
+          "q_bh": 0.8607519919566469,
+          "significant_bh": false
+        },
+        "dml": {
+          "estimator": "dml",
+          "theta": null,
+          "se": null,
+          "p_raw": null,
+          "q_bh": null,
+          "significant_bh": false,
+          "ci95": [
+            null,
+            null
+          ],
+          "pct_vol_change_per_1sd": null,
+          "n": 24519,
+          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+        },
+        "confounding_absorbed_pct": 87.68812825208728
+      },
+      "h2m": {
+        "naive_ols": {
+          "estimator": "naive_ols",
+          "theta": 0.007984596013902223,
+          "se": 0.00463121775554292,
+          "z": 1.7240813184277026,
+          "p_raw": 0.08469316408502525,
+          "ci95": [
+            -0.0010925907869618993,
+            0.017061782814766346
+          ],
+          "pct_vol_change_per_1sd": 0.8016557911636024,
+          "n": 24519,
+          "q_bh": 0.08469316408502525,
+          "significant_bh": true
+        },
+        "ols_controls": {
+          "estimator": "ols_controls",
+          "theta": -0.00032148854559821416,
+          "se": 0.001832710427384294,
+          "z": -0.1754169893915284,
+          "p_raw": 0.8607519919566469,
+          "ci95": [
+            -0.00391360098327143,
+            0.003270623892075002
+          ],
+          "pct_vol_change_per_1sd": -0.032143687369323715,
+          "n": 24519,
+          "q_bh": 0.8607519919566469,
+          "significant_bh": false
+        },
+        "dml": {
+          "estimator": "dml",
+          "theta": null,
+          "se": null,
+          "p_raw": null,
+          "q_bh": null,
+          "significant_bh": false,
+          "ci95": [
+            null,
+            null
+          ],
+          "pct_vol_change_per_1sd": null,
+          "n": 24519,
+          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+        },
+        "confounding_absorbed_pct": 104.02635956832957
+      },
+      "h3m": {
+        "naive_ols": {
+          "estimator": "naive_ols",
+          "theta": 0.009744797836911623,
+          "se": 0.004217625875595399,
+          "z": 2.3104936578889794,
+          "p_raw": 0.020860839254219776,
+          "ci95": [
+            0.0014782511207446399,
+            0.018011344553078606
+          ],
+          "pct_vol_change_per_1sd": 0.9792432985249011,
+          "n": 24519,
+          "q_bh": 0.04172167850843955,
+          "significant_bh": true
+        },
+        "ols_controls": {
+          "estimator": "ols_controls",
+          "theta": 0.00047060788471320336,
+          "se": 0.0018515511564764335,
+          "z": 0.254169528650122,
+          "p_raw": 0.7993645903569988,
+          "ci95": [
+            -0.003158432381980606,
+            0.004099648151407013
+          ],
+          "pct_vol_change_per_1sd": 0.04707186379768746,
+          "n": 24519,
+          "q_bh": 0.8607519919566469,
+          "significant_bh": false
+        },
+        "dml": {
+          "estimator": "dml",
+          "theta": null,
+          "se": null,
+          "p_raw": null,
+          "q_bh": null,
+          "significant_bh": false,
+          "ci95": [
+            null,
+            null
+          ],
+          "pct_vol_change_per_1sd": null,
+          "n": 24519,
+          "status": "NOT_COMPUTED_IN_THIS_ARTIFACT"
+        },
+        "confounding_absorbed_pct": 95.17067575347103
+      }
+    }
+  },
+  "multiple_testing": {
+    "naive_ols": {
+      "family": "F1: {3 horizons} x {signed SUE, |SUE|}",
+      "q": 0.1,
+      "m_hypotheses": 6,
+      "tests": {
+        "signed_sue/h1m": {
+          "p_raw": 0.003432977244915758,
+          "q_bh": 0.02059786346949455,
+          "significant_raw": true,
+          "significant_bh": true
+        },
+        "signed_sue/h2m": {
+          "p_raw": 0.007089532094215922,
+          "q_bh": 0.021268596282647767,
+          "significant_raw": true,
+          "significant_bh": true
+        },
+        "signed_sue/h3m": {
+          "p_raw": 0.042620954091635355,
+          "q_bh": 0.06393143113745303,
+          "significant_raw": true,
+          "significant_bh": true
+        },
+        "abs_sue/h1m": {
+          "p_raw": 0.08101113253812509,
+          "q_bh": 0.08469316408502525,
+          "significant_raw": false,
+          "significant_bh": true
+        },
+        "abs_sue/h2m": {
+          "p_raw": 0.08469316408502525,
+          "q_bh": 0.08469316408502525,
+          "significant_raw": false,
+          "significant_bh": true
+        },
+        "abs_sue/h3m": {
+          "p_raw": 0.020860839254219776,
+          "q_bh": 0.04172167850843955,
+          "significant_raw": true,
+          "significant_bh": true
+        }
+      },
+      "n_significant_raw": 4,
+      "n_significant_bh": 6
+    },
+    "ols_controls": {
+      "family": "F1: {3 horizons} x {signed SUE, |SUE|}",
+      "q": 0.1,
+      "m_hypotheses": 6,
+      "tests": {
+        "signed_sue/h1m": {
+          "p_raw": 0.00012696268398570965,
+          "q_bh": 0.0002897022710786068,
+          "significant_raw": true,
+          "significant_bh": true
+        },
+        "signed_sue/h2m": {
+          "p_raw": 4.335745612760178e-06,
+          "q_bh": 2.6014473676561067e-05,
+          "significant_raw": true,
+          "significant_bh": true
+        },
+        "signed_sue/h3m": {
+          "p_raw": 0.0001448511355393034,
+          "q_bh": 0.0002897022710786068,
+          "significant_raw": true,
+          "significant_bh": true
+        },
+        "abs_sue/h1m": {
+          "p_raw": 0.6931530340209349,
+          "q_bh": 0.8607519919566469,
+          "significant_raw": false,
+          "significant_bh": false
+        },
+        "abs_sue/h2m": {
+          "p_raw": 0.8607519919566469,
+          "q_bh": 0.8607519919566469,
+          "significant_raw": false,
+          "significant_bh": false
+        },
+        "abs_sue/h3m": {
+          "p_raw": 0.7993645903569988,
+          "q_bh": 0.8607519919566469,
+          "significant_raw": false,
+          "significant_bh": false
+        }
+      },
+      "n_significant_raw": 3,
+      "n_significant_bh": 3
+    }
+  },
+  "subperiods": {},
+  "subperiod_family": "F2: {3 horizons} x {3 sub-periods}, BH-corrected separately from F1",
+  "robustness": {},
+  "robustness_note": "Descriptive sensitivity checks, not confirmatory tests; not FDR family members. They can demote a verdict but cannot promote a NULL.",
+  "instrument_analysis": {
+    "status": "ESTIMATED",
+    "instrument": "mean SUE of other same-sector firms announcing in the prior 30 calendar days",
+    "n": 23519,
+    "first_stage": {
+      "coef": 0.14782564117789931,
+      "se": 0.02622197153424756,
+      "t": 5.637472414491398,
+      "F_cluster_robust": 31.78109522415148,
+      "weak_by_stock_yogo_rule_of_thumb": false
+    },
+    "exclusion_test": {
+      "h1m": {
+        "coef_on_instrument": -0.012114835190317572,
+        "t": -1.794009216485932,
+        "p": 0.07281169778275065,
+        "violates_exclusion": false
+      },
+      "h2m": {
+        "coef_on_instrument": -0.01071086082145855,
+        "t": -1.634895992634973,
+        "p": 0.10207085270066218,
+        "violates_exclusion": false
+      },
+      "h3m": {
+        "coef_on_instrument": -0.0077118359037254315,
+        "t": -1.203830176980848,
+        "p": 0.22865522343188993,
+        "violates_exclusion": false
+      }
+    },
+    "exclusion_restriction_violated": false,
+    "instrument_valid": true,
+    "tsls": {
+      "h1m": {
+        "estimator": "iv_2sls",
+        "theta": -0.0895060923693336,
+        "se": 0.04101883922420948,
+        "z": -2.1820727758796927,
+        "p_raw": 0.029104162063406713,
+        "ci95": [
+          -0.16990301724878418,
+          -0.009109167489883024
+        ],
+        "pct_vol_change_per_1sd": -8.561730564975123,
+        "n": 23519
+      },
+      "h2m": {
+        "estimator": "iv_2sls",
+        "theta": -0.07977239971739891,
+        "se": 0.0412860616191689,
+        "z": -1.9321871980242602,
+        "p_raw": 0.05333640471847323,
+        "ci95": [
+          -0.16069308049096998,
+          0.0011482810561721374
+        ],
+        "pct_vol_change_per_1sd": -7.667352816065376,
+        "n": 23519
+      },
+      "h3m": {
+        "estimator": "iv_2sls",
+        "theta": -0.0581541744710421,
+        "se": 0.04085366421388978,
+        "z": -1.4234751175947233,
+        "p_raw": 0.15459847025550655,
+        "ci95": [
+          -0.13822735633026606,
+          0.021919007388181866
+        ],
+        "pct_vol_change_per_1sd": -5.649552808010283,
+        "n": 23519
+      }
+    },
+    "interpretation": "Exclusion not rejected by the pre-registered test; note that a non-rejection is not proof of validity."
+  },
+  "prereg_checks": {},
+  "success_criteria_source": "README.md section 8, written before any estimate was inspected",
+  "process_notes": [
+    "Disclosure: during runtime calibration a single preliminary h1m signed-SUE DML estimate was observed before the final nuisance-learner configuration was fixed. No success criterion in README section 8 was added, removed or altered at any point after that observation. The configuration changes that followed (HGB max_iter 200 -> 100; 2 cross-fitting repetitions for the non-primary sub-period and robustness blocks) were made to fit a hard wall-clock budget on a heavily contended machine, not to move any estimate. The primary block retains the pre-registered 5 repetitions.",
+    "The artifact is rewritten after every stage, so an interrupted run still yields a coherent partial result. Unfinished pre-registered conditions evaluate to False, which can only weaken the verdict, never strengthen it."
+  ],
+  "limitations": [
+    "Survivorship: universe is currently-listed firms; delisted firms absent. Expected direction is attenuation toward the null (failed firms had the largest negative surprises and the highest vol), so a positive finding is conservative.",
+    "Consensus EPS is a current snapshot, not an archived vintage (see pit_caveat).",
+    "Sector labels are current snapshots applied to the whole history.",
+    "No credible instrument, so identification rests on unconfoundedness; unobserved drivers correlated with both SUE and future vol would still bias theta.",
+    "At h=3m consecutive same-firm outcome windows are nearly adjacent; firm clustering absorbs the resulting serial dependence."
+  ],
+  "unresolved": [
+    "DML (the pre-registered primary estimator) did not complete within the job wall-clock budget; machine load average was ~30 from concurrent agents. Re-run: uv run python experiments/k1738/K1738.py --no-download (panel is cached, so only estimation re-runs).",
+    "Sub-period (family F2) and robustness blocks not computed.",
+    "Pre-registered criteria c1-c4 not evaluable without the DML block.",
+    "Codex primary-path review not yet performed."
+  ]
+}
