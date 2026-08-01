@@ -102,6 +102,28 @@ def test_append_task_record_rejects_a_naive_created_at(tmp_path):
     assert not queue.exists()
 
 
+def test_append_task_record_rejects_conflicting_payload_task_type(tmp_path):
+    """One task cannot advertise different routing types at two boundaries."""
+    queue = tmp_path / "next_tasks.json"
+
+    with pytest.raises(ValueError, match="payload.task_type.*trending_repost"):
+        append_task_record(
+            {
+                "id": "fb-only-followup",
+                "title": "post an already-published event article to Facebook",
+                "description": "external-only delivery; this cannot fill the draft pool",
+                "task_type": "daily_article",
+                "payload": {"task_type": "trending_repost"},
+                "priority": 2,
+                "status": "pending",
+                "source": "agent",
+            },
+            path=queue,
+        )
+
+    assert not queue.exists()
+
+
 def test_append_task_record_rejects_an_absent_parent(tmp_path):
     queue = tmp_path / "next_tasks.json"
 

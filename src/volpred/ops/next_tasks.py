@@ -55,7 +55,6 @@ from typing import IO, Any, Callable
 from volpred.canonical_write import guard_canonical_write
 
 from .blocked_reasons import (
-    BLOCKED_REASONS,
     INCIDENT_SUSTAINED_CLEAN_GATE,
 )
 from .blocked_reasons import is_valid as is_valid_blocked_reason
@@ -68,6 +67,30 @@ class InvalidTaskPriority(ValueError):
 
 class ActiveTaskExecutionFence(ValueError):
     """A writer attempted to mutate a task owned by a running external job."""
+
+
+def normalize_task_type_value(value: object) -> str:
+    """Canonical task-type spelling shared by queue and dispatch contracts."""
+    return re.sub(r"[-_\s]+", "_", str(value or "").strip().lower()).strip("_")
+
+
+def task_type_payload_conflict(
+    task: dict[str, Any],
+) -> tuple[str, str] | None:
+    """Return conflicting top-level/payload task types, if both are declared.
+
+    ``task_type`` owns routing, capability, urgency, and draft-pool accounting.
+    A nested payload may repeat that declaration for an external adapter, but
+    it cannot advertise a different operation without splitting those owners.
+    """
+    payload = task.get("payload")
+    if not isinstance(payload, dict) or "task_type" not in payload:
+        return None
+    declared = normalize_task_type_value(task.get("task_type"))
+    payload_declared = normalize_task_type_value(payload.get("task_type"))
+    if declared == payload_declared:
+        return None
+    return declared, payload_declared
 
 
 def task_record_sha256(task: dict[str, Any]) -> str:
@@ -1123,6 +1146,13 @@ def append_task_record(
     task_id = record.get("id")
     if not isinstance(task_id, str) or not task_id.strip():
         raise ValueError("task record must carry a non-empty string 'id'")
+    type_conflict = task_type_payload_conflict(record)
+    if type_conflict is not None:
+        declared, payload_declared = type_conflict
+        raise ValueError(
+            "task record task_type conflicts with payload.task_type: "
+            f"{declared or '<missing>'} != {payload_declared or '<missing>'}"
+        )
     record.setdefault("created_at", datetime.now(timezone.utc).isoformat())
     created_at = record["created_at"]
     if not isinstance(created_at, str):

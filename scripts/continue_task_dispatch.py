@@ -77,7 +77,11 @@ if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dispatch_slot_budget as _slot_budget  # noqa: E402
 
-from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
+from volpred.ops.next_tasks import (  # noqa: E402
+    normalize_task_priorities,
+    normalize_task_priority,
+    task_type_payload_conflict,
+)
 from volpred.ops.task_dispatch_collision import (  # noqa: E402
     find_task_dispatch_collisions as _find_task_dispatch_collisions,
 )
@@ -727,7 +731,8 @@ def _in_flight_article_task_count() -> int:
             1
             for t in tasks
             if isinstance(t, dict)
-            and str(t.get("task_type") or "") == "daily_article"
+            and normalize_task_type_value(t.get("task_type")) == "daily_article"
+            and task_type_payload_conflict(t) is None
             and str(t.get("status") or "pending").lower() in active
         )
     except Exception as e:  # noqa: BLE001 — fail-open, but observable
@@ -811,7 +816,8 @@ def _promote_starved_article_tasks(limit: int) -> int:
                     pri = 9
                 if (
                     isinstance(t, dict)
-                    and str(t.get("task_type") or "") == "daily_article"
+                    and normalize_task_type_value(t.get("task_type")) == "daily_article"
+                    and task_type_payload_conflict(t) is None
                     and str(t.get("status") or "pending").lower() == "pending"
                     and pri > 1
                 ):

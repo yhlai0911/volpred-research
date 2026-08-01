@@ -184,6 +184,43 @@ def test_in_flight_counts_only_active_daily_article_tasks(tmp_path, monkeypatch)
     assert MODULE._in_flight_article_task_count() == 3
 
 
+def test_in_flight_excludes_payload_type_conflict(tmp_path, monkeypatch):
+    """An FB-only follow-up must not masquerade as draft-producing stock."""
+    tasks = [
+        {
+            "id": "article",
+            "task_type": "daily_article",
+            "status": "pending",
+        },
+        {
+            "id": "fb-only",
+            "task_type": "daily_article",
+            "payload": {"task_type": "trending_repost"},
+            "status": "pending",
+        },
+    ]
+    nt = tmp_path / "next_tasks.json"
+    nt.write_text(json.dumps(tasks), encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", nt)
+
+    assert MODULE._in_flight_article_task_count() == 1
+
+
+def test_in_flight_uses_canonical_task_type_spelling(tmp_path, monkeypatch):
+    tasks = [
+        {
+            "id": "article",
+            "task_type": " Daily-Article ",
+            "status": "pending",
+        },
+    ]
+    nt = tmp_path / "next_tasks.json"
+    nt.write_text(json.dumps(tasks), encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", nt)
+
+    assert MODULE._in_flight_article_task_count() == 1
+
+
 # --- _maybe_refill_draft_pool wiring --------------------------------------
 
 
@@ -318,6 +355,61 @@ def test_promote_starved_articles_respects_limit(isolated_next_tasks):
 
     tasks = json.loads(isolated_next_tasks.read_text(encoding="utf-8"))
     assert sum(1 for t in tasks if t["priority"] == 1) == 2
+
+
+def test_promote_starved_articles_excludes_payload_type_conflict(
+    isolated_next_tasks,
+):
+    isolated_next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "article",
+                    "task_type": "daily_article",
+                    "status": "pending",
+                    "priority": 3,
+                },
+                {
+                    "id": "fb-only",
+                    "task_type": "daily_article",
+                    "payload": {"task_type": "trending_repost"},
+                    "status": "pending",
+                    "priority": 3,
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    assert MODULE._promote_starved_article_tasks(limit=6) == 1
+    by_id = {
+        task["id"]: task
+        for task in json.loads(isolated_next_tasks.read_text(encoding="utf-8"))
+    }
+    assert by_id["article"]["priority"] == 1
+    assert by_id["fb-only"]["priority"] == 3
+
+
+def test_promote_starved_articles_uses_canonical_task_type_spelling(
+    isolated_next_tasks,
+):
+    isolated_next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "article",
+                    "task_type": " Daily-Article ",
+                    "status": "pending",
+                    "priority": 3,
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    assert MODULE._promote_starved_article_tasks(limit=6) == 1
+    task = json.loads(isolated_next_tasks.read_text(encoding="utf-8"))[0]
+    assert task["priority"] == 1
 
 
 def test_maybe_refill_promotes_starved_articles_when_pool_dry(monkeypatch, isolated_next_tasks):

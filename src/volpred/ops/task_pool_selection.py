@@ -10,12 +10,12 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
-import re
 from typing import Any, Iterable, Mapping
 
 from .next_tasks import (
     is_main_thread_reserved,
     normalize_dispatch_lane,
+    normalize_task_type_value,
     priority_sort_key,
 )
 from .dreaming_revalidate import requires_live_revalidation
@@ -155,11 +155,6 @@ def resolve_task_identity(
         matching_indexes=matching_indexes,
         reason_code=reason_code,
     )
-
-
-def normalize_task_type_value(value: object) -> str:
-    """Canonical spelling shared by claim, dispatch, routing, and reporting."""
-    return re.sub(r"[-_\s]+", "_", str(value or "").strip().lower()).strip("_")
 
 
 def normalized_task_type(task: Mapping[str, Any]) -> str:
