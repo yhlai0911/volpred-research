@@ -5519,3 +5519,40 @@ v3 job/attempt match、cleanup=true、synthetic auth absent；移除 canary 後�
 receipt由 ESRCH 修正成功回收（recovered=1），全目錄 nonterminal v3=0。此 bounded incident
 五步完成，狀態 **`root_cause_fixed_and_verified`**；program umbrella 的 formal owner
 cutover／retirement window 仍依 #9→#12 blocking edge 獨立保持 `contained`。
+
+---
+
+## 2026-08-02 — 新舊 supervisor 共用 provider-auth receipt namespace，測試 receipt 令 live health loop crash
+
+**證據化症狀**：2026-08-01 23:06 CST 的通知不是 credential 或 API key 失效；舊 immutable
+supervisor 在 root `~/.volpred/logs/provider-auth-reapers/*.json` 讀到 working-tree tests 寫出的
+`provider-auth-lease.v3`，將未知 schema 當成 health loop exception，整個週期被記為
+`loop_crash`。同批郵件另揭露 dispatch-preassign 30 秒逾時；後者已由 generation settlement
+state-machine ticket 獨立收斂，本條只處理 receipt rollout／test-state isolation 根因。
+
+**根因層級（rollout compatibility／writer capability／test isolation）**：receipt writer 沒有
+版本化 live namespace，測試預設也能落到 production root；writer 只有 PID-shaped guard，沒有
+證明「目前 supervisor 是哪一個 immutable release、是否已完成 startup recovery」的 capability。
+健康檢查又把 receipt control-plane invalid 與 loop crash 混為一談，所以一次 schema rollout
+同時造成 cross-release 誤讀、測試污染與錯誤事故分類。
+
+**底層修復與制度化**：`provider-auth-lease.v3` 成為單一 schema constant；v3 writer 只有在
+startup recovery 完成、PID 與 process-start fingerprint 精確吻合後才取得
+`provider_auth_receipt_schema` capability，且 pytest context 無條件禁止寫 production root。
+新 receipt 寫入版本化 `provider-auth-reapers/v3/`；reader 在 rolling window 同時讀 legacy root
+與 v3 child，舊 release 則自然只看到 root v1/v2。startup relocation 僅搬移 terminal／cleaned、
+destination 已消失的 root v3 receipt；每筆採 fsync、content hash、intent/completed append-only
+audit，torn audit tail 可在鎖內截到最後完整行再依 target digest reconciliation。malformed 或
+nonterminal receipt 不搬移並 fail closed。健康層遇到 invalid receipt 現設 `auth_blocked=true`、
+持續 heartbeat，另送精確的「派工安全暫停」通知，不再誤稱 login 失敗或讓整個 health loop crash。
+
+**回歸與 live read-back**：Issue #53／commit `ccb97792c` 經 Matt Standards／Spec 雙 PASS，
+相鄰完整 suite **374 passed、1 skipped**，compile、Ruff F/E9 與 diff gate 均通過。自然 PHASE-Z
+drain 後 supervisor 於 2026-08-02 00:15:52 CST planned reload 至 release commit `095a31f16`
+（含上述 commit）；fresh PID 72651，兩個以上 health 週期 heartbeat 持續前進，
+`provider_auth_receipt_schema=provider-auth-lease.v3`、writer start fingerprint 已寫入、
+`auth_blocked=false`、current jobs／PHASE-Z 均為 0。11 筆歷史 test v3 receipts 全部搬到 v3 child，
+root 只剩 1 筆 v1／2 筆 v2；22 筆 audit 精確形成 11 組 intent＋completed，逐檔 SHA-256 回讀吻合，
+沒有 nonterminal／invalid v3。此 bounded 根因五步 Gate 完成，狀態為
+**`root_cause_fixed_and_verified`**；Issue #9→#12 全域 legacy retirement 仍依其獨立 clean-window
+與 blocking edge 判定，不由本 slice 提前結案。

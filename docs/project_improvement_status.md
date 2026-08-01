@@ -3221,3 +3221,19 @@ program goal。
 - 🟢 此 failover activation incident 為 **`root_cause_fixed_and_verified`**。這不提前
   宣稱 Operations Core 全 program 完成；#9→#12 formal owner cutover與既定 retirement
   clean-window仍是獨立 blocking edge。
+
+## 2026-08-02 — Issue #53 provider-auth receipt rolling compatibility 上線
+
+- ✅ 修正舊 immutable supervisor 誤讀新 v3／pytest receipt 後把 health loop 標成 crash：
+  v3 改用版本化子目錄，reader 保持 rolling 相容，writer 必須持有 exact process-start／startup
+  recovery capability；pytest 無條件禁止寫 production receipt root。
+- ✅ invalid receipt 現只會安全暫停 provider dispatch 並維持 heartbeat，通知明示不是登入、
+  API key 或 subscription 失效；不可再以 generic `loop_crash` 誤導 owner。
+- ✅ commit `ccb97792c` 經 Matt Spec／Standards 雙 PASS；相關 suite **374 passed、1 skipped**，
+  compile、Ruff F/E9、diff gate clean。
+- ✅ 自然 PHASE-Z drain 後 planned reload 至 release commit `095a31f16`；live state 回讀 fresh
+  PID 72651、v3 writer capability active、`auth_blocked=false`、0 current／PHASE-Z job，heartbeat
+  至少兩個週期持續前進。
+- ✅ 11 筆 root-level test v3 receipts 已由 startup 程序自動搬到 v3 child；22 筆 durable
+  intent/completed audit 與逐檔 SHA 全吻合，root 只保留舊版 v1/v2。此 Issue #53 bounded slice
+  為 **`root_cause_fixed_and_verified`**；全域 legacy retirement 狀態不變。
