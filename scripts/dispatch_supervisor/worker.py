@@ -41,6 +41,7 @@ from pathlib import Path
 
 from volpred.ops import fire_manifest, termination
 from volpred.ops.execution.registry import (
+    ProviderExecutionContract,
     ProviderRegistryError,
     authorize_provider_spawn,
     verify_spawn_receipt,
@@ -168,12 +169,14 @@ DEBUG_SIDECAR_FROM_ATTEMPT = int(os.environ.get("VOLPRED_DISPATCH_DEBUG_FROM_ATT
 class WorkerResult:
     exit_code: int
     # success | failure | killed_timeout | kill_failed_orphan | auth_blocked |
-    # quota_blocked | codex_failover_recovered | superseded
+    # quota_blocked | codex_failover_recovered | codex_failover_failed |
+    # codex_failover_timeout | superseded
     outcome: str
     final_model: str
     attempts: int
     duration_s: float
     log_tail: str            # last ~2KB of combined stdout+stderr
+    provider_execution_contract: ProviderExecutionContract | None = None
 
 
 def _normalize_signal_exit(exit_code: int) -> int:
@@ -1245,15 +1248,55 @@ def _attempt_codex_failover(
             exit_code=137, outcome="kill_failed_orphan", final_model=CODEX_MODEL_LABEL,
             attempts=attempt, duration_s=total_duration + result.duration_s,
             log_tail=result.output_tail or log_tail,
+            provider_execution_contract=result.execution_contract,
         )
     if not result.recovered:
-        return None
+        if result.execution_contract is None:
+            return None
+        outcome = (
+            "codex_failover_timeout"
+            if result.exit_code == codex_failover.RC_WORK_TIMEOUT
+            else "codex_failover_failed"
+        )
+        return WorkerResult(
+            exit_code=result.exit_code,
+            outcome=outcome,
+            final_model=CODEX_MODEL_LABEL,
+            attempts=attempt,
+            duration_s=total_duration + result.duration_s,
+            log_tail=result.output_tail or log_tail,
+            provider_execution_contract=result.execution_contract,
+        )
 
     return WorkerResult(
         exit_code=0, outcome="codex_failover_recovered", final_model=CODEX_MODEL_LABEL,
         attempts=attempt, duration_s=total_duration + result.duration_s,
         log_tail=result.output_tail or log_tail,
+        provider_execution_contract=result.execution_contract,
     )
+
+
+def _settle_codex_failover_result(
+    result: WorkerResult,
+    *,
+    job_id: str,
+    attempt: int,
+    state_path: Path,
+) -> WorkerResult:
+    """Persist one typed Codex result through the canonical completion writer."""
+    if result.outcome == "kill_failed_orphan":
+        return result
+    state.record_completion(
+        job_id=job_id,
+        expected_attempt=attempt,
+        expected_phase="codex_failover",
+        exit_code=result.exit_code,
+        outcome=result.outcome,
+        final_model=result.final_model,
+        provider_execution_contract=result.provider_execution_contract,
+        path=state_path,
+    )
+    return result
 
 
 def run_worker(
@@ -1659,15 +1702,12 @@ def run_worker(
                 preselected_task_id=preselected_task_id,
             )
             if recovered is not None:
-                if recovered.outcome == "kill_failed_orphan":
-                    return recovered
-                state.record_completion(
-                    job_id=job_id, expected_attempt=attempt, exit_code=0,
-                    expected_phase="codex_failover",
-                    outcome=recovered.outcome, final_model=recovered.final_model,
-                    path=state_path,
+                return _settle_codex_failover_result(
+                    recovered,
+                    job_id=job_id,
+                    attempt=attempt,
+                    state_path=state_path,
                 )
-                return recovered
             state.record_completion(
                 job_id=job_id, expected_attempt=attempt, exit_code=exit_code,
                 expected_phase="codex_failover",
@@ -1710,15 +1750,12 @@ def run_worker(
                 preselected_task_id=preselected_task_id,
             )
             if recovered is not None:
-                if recovered.outcome == "kill_failed_orphan":
-                    return recovered
-                state.record_completion(
-                    job_id=job_id, expected_attempt=attempt, exit_code=0,
-                    expected_phase="codex_failover",
-                    outcome=recovered.outcome, final_model=recovered.final_model,
-                    path=state_path,
+                return _settle_codex_failover_result(
+                    recovered,
+                    job_id=job_id,
+                    attempt=attempt,
+                    state_path=state_path,
                 )
-                return recovered
             state.record_completion(
                 job_id=job_id, expected_attempt=attempt, exit_code=exit_code,
                 expected_phase="codex_failover",

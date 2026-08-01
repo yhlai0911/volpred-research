@@ -151,6 +151,7 @@ def test_spawn_receipt_binds_contract_model_executable_and_registry(
         path=path,
     )
     environment = receipt.environment()
+    execution_contract = receipt.execution_contract()
 
     assert environment["VOLPRED_PROVIDER_ID"] == "codex-cli"
     assert environment["VOLPRED_PROVIDER_MODEL_ID"] == "gpt-5.6-sol"
@@ -166,6 +167,51 @@ def test_spawn_receipt_binds_contract_model_executable_and_registry(
     )
     assert len(environment["VOLPRED_PROVIDER_EXECUTABLE_SHA256"]) == 64
     assert len(environment["VOLPRED_PROVIDER_REGISTRY_SHA256"]) == 64
+    assert environment["VOLPRED_PROVIDER_REASONING_EFFORT_PROFILE"] == "work"
+    assert environment["VOLPRED_PROVIDER_REASONING_EFFORT"] == "ultra"
+    assert execution_contract.provider_id == "codex-cli"
+    assert execution_contract.launch_contract_id == (
+        "dispatch-supervisor.codex-failover"
+    )
+    assert execution_contract.model_id == "gpt-5.6-sol"
+    assert execution_contract.reasoning_effort_profile == "work"
+    assert execution_contract.reasoning_effort == "ultra"
+
+
+def test_reasoning_effort_profile_is_registry_owned_and_fails_closed(
+    tmp_path: Path,
+) -> None:
+    executable, path = _fixture_executable(
+        tmp_path, provider_index=1, name="codex"
+    )
+
+    with pytest.raises(TypeError, match="reasoning_effort_profile"):
+        authorize_provider_spawn(
+            contract_id="dispatch-supervisor.codex-failover",
+            model_id="gpt-5.6-sol",
+            executable_path=str(executable),
+            environment={},
+            reasoning_effort_profile="probe",
+            path=path,
+        )
+
+    probe = authorize_provider_spawn(
+        contract_id="dispatch-supervisor.codex-probe",
+        model_id="gpt-5.6-sol",
+        executable_path=str(executable),
+        environment={},
+        path=path,
+    )
+    assert probe.reasoning_effort_profile == "probe"
+    assert probe.reasoning_effort == "low"
+    assert probe.execution_contract().launch_contract_id == (
+        "dispatch-supervisor.codex-probe"
+    )
+
+    payload = json.loads(path.read_text())
+    payload["providers"][1]["reasoning_effort"]["profiles"]["work"] = "turbo"
+    with pytest.raises(ProviderRegistryError, match="supported_values"):
+        load_provider_registry(_write(tmp_path, payload))
 
 
 def test_launcher_contract_cannot_be_downgraded_by_caller(

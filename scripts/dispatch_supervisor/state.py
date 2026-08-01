@@ -131,6 +131,14 @@ Schema (version 1)::
           "scheduled_for": "<ISO|null>", "fire_reason": str, "fire_key": str | null,
           "exit_code": int, "duration_s": float,
           "attempts": int, "final_model": str,
+          # Codex failover only: atomic provider contract, validated against
+          # the exact canonical registry generation before state mutation.
+          "provider_execution_contract": {
+            "provider_id": str, "model_id": str,
+            "launch_contract_id": str, "reasoning_effort_profile": str,
+            "reasoning_effort": str,
+            "registry_sha256": str
+          },
           # 下三者只在 orphan 路徑（append_completion_entry 且 job 有 pid）出現，
           # 供事後人工核對是哪個行程 — 一般 record_completion() 的 entry 沒有。
           "pid": int, "pgid": int, "started_wall": str,
@@ -146,6 +154,8 @@ Schema (version 1)::
                      "timeout_unverified" | "killed_supervisor_restart" |
                      "orphan_gone_or_reused" | "orphan_unverified_not_killed" |
                      "reservation_abandoned_no_pid" | "quota_blocked" | "auth_blocked" |
+                     "codex_failover_recovered" | "codex_failover_failed" |
+                     "codex_failover_timeout" |
                      # 2026-07-20：CLI 落地即 fatal（log 只有 "Execution error"）
                      # 但行程不退出，worker 於 ~60s 主動收屍 —— 非 hang，非一般
                      # failure，故獨立命名以便 completion history 可辨識此形狀。
@@ -219,12 +229,15 @@ from pathlib import Path
 from typing import Any, Iterator, Mapping
 
 from volpred.canonical_write import guard_canonical_write
+from volpred.ops.execution.registry import (
+    PROVIDER_EXECUTION_OUTCOMES,
+    ProviderExecutionContract,
+    validate_provider_execution_settlement,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 STATE_PATH = ROOT / "storage" / "ops" / "dispatch_state.json"
 PROVIDER_AUTH_RECEIPT_SCHEMA = "provider-auth-lease.v3"
-
-
 def _lock_path(state_path: Path) -> Path:
     """Stable sibling lockfile — NEVER replaced/renamed, unlike `state_path` itself.
 
@@ -1632,6 +1645,7 @@ def record_completion(
     expected_pid: int | None = None,
     expected_phase: str | None = None,
     release_slot: bool = True,
+    provider_execution_contract: ProviderExecutionContract | None = None,
     path: Path = STATE_PATH,
 ) -> dict[str, Any] | None:
     """Move current_job → completions ring buffer. Returns the completion entry,
@@ -1654,6 +1668,16 @@ def record_completion(
     transition — rides along in the returned dict so the winner never has to look
     it up again. It is deliberately NOT persisted into the completions ring.
     """
+    if provider_execution_contract is not None:
+        validate_provider_execution_settlement(
+            provider_execution_contract,
+            outcome=outcome,
+            exit_code=exit_code,
+        )
+    elif outcome in PROVIDER_EXECUTION_OUTCOMES:
+        raise ValueError(
+            f"completion outcome {outcome!r} requires a provider execution contract"
+        )
     managed_phase_z = job_id is not None
     with _locked_state(path) as (_fh, data):
         found = _find_job(data, job_id)
@@ -1695,6 +1719,10 @@ def record_completion(
             "final_model": final_model,
             "outcome": outcome,
         }
+        if provider_execution_contract is not None:
+            entry["provider_execution_contract"] = (
+                provider_execution_contract.as_dict()
+            )
         if job.get("workspace") is not None:
             # WS-B ownership receipt: the completion ring is where an auditor
             # reverse-maps a merged branch to the fire that produced it.

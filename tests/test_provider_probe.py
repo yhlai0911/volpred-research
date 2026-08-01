@@ -80,6 +80,10 @@ def portable_registry(tmp_path: Path) -> Path:
                     }
                 ],
                 "model_ids": ["gpt-5.6-sol"],
+                "reasoning_effort": {
+                    "supported_values": ["low", "ultra"],
+                    "profiles": {"probe": "low", "work": "ultra"},
+                },
                 "auth": {
                     "surface": "desktop_subscription",
                     "api_key_env": None,

@@ -12,6 +12,11 @@ from types import SimpleNamespace
 
 import pytest
 
+from volpred.ops.execution.registry import (
+    ProviderExecutionContract,
+    load_provider_registry,
+)
+
 from scripts.dispatch_supervisor import (
     codex_failover,
     custody_receipt,
@@ -30,7 +35,12 @@ VALID_PRODUCER_CUSTODY = {
 
 @pytest.fixture(autouse=True)
 def _provider_guard_stub(monkeypatch):
-    def authorize(codex_bin, environment):
+    def authorize(
+        codex_bin,
+        environment,
+        *,
+        contract_id,
+    ):
         forbidden = [
             key
             for key in ("OPENAI_API_KEY", "CODEX_API_KEY")
@@ -40,13 +50,42 @@ def _provider_guard_stub(monkeypatch):
             raise codex_failover.ProviderRegistryError(
                 f"forbidden API-key variables {forbidden}"
             )
+        reasoning_effort_profile = (
+            "probe"
+            if contract_id == codex_failover.CODEX_PROBE_CONTRACT_ID
+            else "work"
+        )
+        effort = {"probe": "low", "work": "ultra"}[
+            reasoning_effort_profile
+        ]
+        registry_sha256 = "a" * 64
+        provider_environment = {
+            "VOLPRED_PROVIDER_ID": "codex-cli",
+            "VOLPRED_PROVIDER_LAUNCH_CONTRACT": contract_id,
+            "VOLPRED_PROVIDER_MODEL_ID": codex_failover.CODEX_MODEL,
+            "VOLPRED_PROVIDER_REGISTRY_SHA256": registry_sha256,
+        }
+        if reasoning_effort_profile is not None:
+            provider_environment.update({
+                "VOLPRED_PROVIDER_REASONING_EFFORT_PROFILE": (
+                    reasoning_effort_profile
+                ),
+                "VOLPRED_PROVIDER_REASONING_EFFORT": effort,
+            })
         return SimpleNamespace(
             resolved_executable=codex_bin,
-            environment=lambda: {
-                "VOLPRED_PROVIDER_ID": "codex-cli",
-                "VOLPRED_PROVIDER_MODEL_ID": codex_failover.CODEX_MODEL,
-                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
-            },
+            model_id=codex_failover.CODEX_MODEL,
+            reasoning_effort=effort,
+            reasoning_effort_profile=reasoning_effort_profile,
+            environment=lambda: provider_environment,
+            execution_contract=lambda: ProviderExecutionContract(
+                provider_id="codex-cli",
+                launch_contract_id=contract_id,
+                model_id=codex_failover.CODEX_MODEL,
+                reasoning_effort_profile=reasoning_effort_profile,
+                reasoning_effort=effort,
+                registry_sha256=registry_sha256,
+            ),
         )
 
     monkeypatch.setattr(codex_failover, "_authorize_codex", authorize)
@@ -172,6 +211,15 @@ def test_exec_success_marks_recovered(monkeypatch) -> None:
     assert "--ignore-user-config" in calls[2]
     assert calls[1][calls[1].index("-m") + 1] == codex_failover.CODEX_MODEL
     assert calls[2][calls[2].index("-m") + 1] == codex_failover.CODEX_MODEL
+    assert calls[1][calls[1].index("-c") + 1] == (
+        'model_reasoning_effort="low"'
+    )
+    assert calls[2][calls[2].index("-c") + 1] == (
+        'model_reasoning_effort="ultra"'
+    )
+    assert result.execution_contract is not None
+    assert result.execution_contract.model_id == codex_failover.CODEX_MODEL
+    assert result.execution_contract.reasoning_effort == "ultra"
     assert "claimed task X" in result.output_tail
     assert len(work_envs) == 1
     assert work_envs[0]["VOLPRED_PROVIDER_ID"] == "codex-cli"
@@ -224,7 +272,7 @@ def test_registry_denial_prevents_any_codex_subprocess(monkeypatch) -> None:
     monkeypatch.setattr(
         codex_failover,
         "_authorize_codex",
-        lambda *_a: (_ for _ in ()).throw(
+        lambda *_a, **_k: (_ for _ in ()).throw(
             codex_failover.ProviderRegistryError("paid overflow")
         ),
     )
@@ -297,15 +345,38 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
         lambda: source_home,
     )
 
-    def authorize(codex_bin, environment):
+    def authorize(
+        codex_bin,
+        environment,
+        *,
+        contract_id,
+    ):
         authorized.append(dict(environment))
+        reasoning_effort_profile = (
+            "probe"
+            if contract_id == codex_failover.CODEX_PROBE_CONTRACT_ID
+            else "work"
+        )
+        effort = {"probe": "low", "work": "ultra"}[
+            reasoning_effort_profile
+        ]
         return SimpleNamespace(
             resolved_executable=codex_bin,
+            model_id=codex_failover.CODEX_MODEL,
+            reasoning_effort=effort,
             environment=lambda: {
                 "VOLPRED_PROVIDER_ID": "codex-cli",
                 "VOLPRED_PROVIDER_MODEL_ID": codex_failover.CODEX_MODEL,
                 "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
             },
+            execution_contract=lambda: ProviderExecutionContract(
+                provider_id="codex-cli",
+                launch_contract_id=contract_id,
+                model_id=codex_failover.CODEX_MODEL,
+                reasoning_effort_profile=reasoning_effort_profile,
+                reasoning_effort=effort,
+                registry_sha256="a" * 64,
+            ),
         )
 
     def run(argv, **kwargs):
@@ -1128,6 +1199,8 @@ def test_exec_failure_is_attempted_but_not_recovered(monkeypatch) -> None:
 
     result = codex_failover.run_codex_failover(reason="auth", enabled=True)
     assert (result.attempted, result.recovered, result.exit_code) == (True, False, 1)
+    assert result.execution_contract is not None
+    assert result.execution_contract.reasoning_effort == "ultra"
 
 
 # ── the 2026-07-12 misdiagnosis ──────────────────────────────────────────────
@@ -1148,6 +1221,8 @@ def test_work_timeout_does_not_accuse_an_api_that_just_answered(monkeypatch) -> 
 
     assert (result.attempted, result.recovered) == (True, False)
     assert result.exit_code == codex_failover.RC_WORK_TIMEOUT
+    assert result.execution_contract is not None
+    assert result.execution_contract.reasoning_effort == "ultra"
     assert "partial work" in result.output_tail
     assert "不可用" not in result.detail, "the probe proved otherwise — do not guess"
     assert "沒在" in result.detail and "分鐘內做完" in result.detail
@@ -1166,6 +1241,7 @@ def test_unreachable_api_skips_the_slot_rather_than_blaming_the_task(monkeypatch
 
     assert result.attempted is False, "nothing was claimed — the slot was skipped"
     assert result.exit_code == codex_failover.RC_UNREACHABLE
+    assert result.execution_contract is None
     assert "額度" in result.detail
     assert "quota exceeded" in result.detail, "say what ChatGPT actually replied"
 
@@ -1209,17 +1285,42 @@ def test_shipped_and_fallback_prompts_share_external_report_contract(
 # ── worker wiring ──────────────────────────────────────────────────────────
 
 class _FailoverStub:
-    def __init__(self, recovered: bool) -> None:
+    def __init__(
+        self,
+        recovered: bool,
+        *,
+        attempted: bool | None = None,
+        exit_code: int | None = None,
+    ) -> None:
         self.recovered = recovered
+        self.attempted = recovered if attempted is None else attempted
+        self.exit_code = (
+            0 if recovered else 1
+        ) if exit_code is None else exit_code
         self.seen_reasons: list[str] = []
         self.seen_kwargs: list[dict] = []
 
     def __call__(self, *, reason: str, **kwargs):
         self.seen_reasons.append(reason)
         self.seen_kwargs.append(kwargs)
+        execution_contract = (
+            ProviderExecutionContract(
+                provider_id="codex-cli",
+                launch_contract_id="dispatch-supervisor.codex-failover",
+                model_id=codex_failover.CODEX_MODEL,
+                reasoning_effort_profile="work",
+                reasoning_effort="ultra",
+                registry_sha256=load_provider_registry().sha256,
+            )
+            if self.attempted
+            else None
+        )
         return codex_failover.FailoverResult(
-            attempted=True, recovered=self.recovered, exit_code=0 if self.recovered else 1,
+            attempted=self.attempted,
+            recovered=self.recovered,
+            exit_code=self.exit_code,
             detail="stub", duration_s=1.0, output_tail="codex output",
+            execution_contract=execution_contract,
         )
 
 
@@ -1273,6 +1374,194 @@ def test_quota_outage_hands_slot_to_codex(monkeypatch, tmp_path, _quiet_state_an
     assert result.outcome == "codex_failover_recovered"
     assert result.exit_code == 0
     assert result.final_model == worker.CODEX_MODEL_LABEL
+
+
+def test_codex_recovery_completion_receipt_records_model_and_effort(
+    monkeypatch,
+    tmp_path,
+    _quiet_state_and_alerts,
+) -> None:
+    receipts: list[dict] = []
+    monkeypatch.setattr(
+        worker.state,
+        "record_completion",
+        lambda **kwargs: receipts.append(kwargs) or {},
+    )
+    _stub_attempt(monkeypatch, QUOTA_OUTPUT)
+    monkeypatch.setattr(
+        worker.codex_failover,
+        "run_codex_failover",
+        _FailoverStub(recovered=True),
+    )
+
+    result = worker.run_worker(
+        prompt_text="tick",
+        log_path=tmp_path / "d.log",
+        state_path=tmp_path / "s.json",
+        sleep_fn=lambda _s: None,
+    )
+
+    assert result.outcome == "codex_failover_recovered"
+    contract = receipts[-1]["provider_execution_contract"]
+    assert contract.model_id == codex_failover.CODEX_MODEL
+    assert contract.reasoning_effort == "ultra"
+
+
+def test_failed_codex_work_persists_its_execution_contract(
+    monkeypatch,
+    tmp_path,
+    _quiet_state_and_alerts,
+) -> None:
+    receipts: list[dict] = []
+    monkeypatch.setattr(
+        worker.state,
+        "record_completion",
+        lambda **kwargs: receipts.append(kwargs) or {},
+    )
+    _stub_attempt(monkeypatch, QUOTA_OUTPUT)
+    monkeypatch.setattr(
+        worker.codex_failover,
+        "run_codex_failover",
+        _FailoverStub(recovered=False, attempted=True, exit_code=9),
+    )
+
+    result = worker.run_worker(
+        prompt_text="tick",
+        log_path=tmp_path / "d.log",
+        state_path=tmp_path / "s.json",
+        sleep_fn=lambda _s: None,
+    )
+
+    assert result.outcome == "codex_failover_failed"
+    assert result.exit_code == 9
+    assert receipts[-1]["outcome"] == "codex_failover_failed"
+    contract = receipts[-1]["provider_execution_contract"]
+    assert contract.model_id == codex_failover.CODEX_MODEL
+    assert contract.reasoning_effort == "ultra"
+
+
+def test_completion_receipt_persists_codex_execution_contract(tmp_path) -> None:
+    state_path = tmp_path / "dispatch_state.json"
+    lease = state.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="claude-opus-5",
+        log_path=str(tmp_path / "worker.log"),
+        path=state_path,
+    )
+
+    contract = ProviderExecutionContract(
+        provider_id="codex-cli",
+        launch_contract_id="dispatch-supervisor.codex-failover",
+        model_id=codex_failover.CODEX_MODEL,
+        reasoning_effort_profile="work",
+        reasoning_effort="ultra",
+        registry_sha256=load_provider_registry().sha256,
+    )
+    entry = state.record_completion(
+        job_id=lease.job_id,
+        exit_code=0,
+        outcome="codex_failover_recovered",
+        final_model=worker.CODEX_MODEL_LABEL,
+        provider_execution_contract=contract,
+        path=state_path,
+    )
+
+    assert entry is not None
+    persisted = state.read_state(state_path)["completions"][-1]
+    assert persisted["provider_execution_contract"] == contract.as_dict()
+
+
+def test_completion_receipt_rejects_partial_or_false_codex_contract(
+    tmp_path,
+) -> None:
+    state_path = tmp_path / "dispatch_state.json"
+    lease = state.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="claude-opus-5",
+        log_path=str(tmp_path / "worker.log"),
+        path=state_path,
+    )
+    valid = ProviderExecutionContract(
+        provider_id="codex-cli",
+        launch_contract_id="dispatch-supervisor.codex-failover",
+        model_id=codex_failover.CODEX_MODEL,
+        reasoning_effort_profile="work",
+        reasoning_effort="ultra",
+        registry_sha256=load_provider_registry().sha256,
+    )
+
+    with pytest.raises(TypeError, match="provider_model_id"):
+        state.record_completion(
+            job_id=lease.job_id,
+            exit_code=0,
+            outcome="codex_failover_recovered",
+            final_model=worker.CODEX_MODEL_LABEL,
+            provider_model_id=codex_failover.CODEX_MODEL,
+            path=state_path,
+        )
+    forged = ProviderExecutionContract(
+        provider_id="codex-cli",
+        launch_contract_id="dispatch-supervisor.codex-failover",
+        model_id=codex_failover.CODEX_MODEL,
+        reasoning_effort_profile="work",
+        reasoning_effort="turbo",
+        registry_sha256=valid.registry_sha256,
+    )
+    with pytest.raises(ValueError, match="reasoning effort"):
+        state.record_completion(
+            job_id=lease.job_id,
+            exit_code=1,
+            outcome="codex_failover_failed",
+            final_model=worker.CODEX_MODEL_LABEL,
+            provider_execution_contract=forged,
+            path=state_path,
+        )
+    probe = ProviderExecutionContract(
+        provider_id="codex-cli",
+        launch_contract_id="dispatch-supervisor.codex-probe",
+        model_id=codex_failover.CODEX_MODEL,
+        reasoning_effort_profile="probe",
+        reasoning_effort="low",
+        registry_sha256=valid.registry_sha256,
+    )
+    with pytest.raises(ValueError, match="launch contract"):
+        state.record_completion(
+            job_id=lease.job_id,
+            exit_code=0,
+            outcome="codex_failover_recovered",
+            final_model=worker.CODEX_MODEL_LABEL,
+            provider_execution_contract=probe,
+            path=state_path,
+        )
+    for outcome, exit_code in (
+        ("codex_failover_recovered", 1),
+        ("codex_failover_failed", 0),
+        ("codex_failover_timeout", 1),
+    ):
+        with pytest.raises(ValueError, match="exit code"):
+            state.record_completion(
+                job_id=lease.job_id,
+                exit_code=exit_code,
+                outcome=outcome,
+                final_model=worker.CODEX_MODEL_LABEL,
+                provider_execution_contract=valid,
+                path=state_path,
+            )
+    with pytest.raises(ValueError, match="outcome"):
+        state.record_completion(
+            job_id=lease.job_id,
+            exit_code=1,
+            outcome="quota_blocked",
+            final_model=worker.CODEX_MODEL_LABEL,
+            provider_execution_contract=valid,
+            path=state_path,
+        )
+
+    persisted = state.read_state(state_path)
+    assert persisted["completions"] == []
+    assert persisted["current_jobs"][0]["job_id"] == lease.job_id
 
 
 def test_quota_outage_without_codex_still_reports_quota_blocked(

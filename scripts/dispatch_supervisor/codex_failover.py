@@ -46,12 +46,14 @@ import shutil
 import signal
 import subprocess
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Callable
 
 from volpred.ops import termination
 from volpred.ops.execution.registry import (
+    CODEX_FAILOVER_TIMEOUT_EXIT_CODE,
+    ProviderExecutionContract,
     ProviderRegistryError,
     ProviderSpawnReceipt,
     authorize_provider_spawn,
@@ -111,18 +113,31 @@ RC_BINARY_MISSING = 127
 RC_PREFLIGHT_TIMEOUT = 142  # matches the shell version's perl SIGALRM code
 RC_DISABLED = -3
 RC_UNREACHABLE = -4   # the probe could not get an answer out of ChatGPT
-RC_WORK_TIMEOUT = -5  # ChatGPT answered the probe; the task itself then ran long
+RC_WORK_TIMEOUT = CODEX_FAILOVER_TIMEOUT_EXIT_CODE
 RC_POLICY_DENIED = -6
 CODEX_MODEL = "gpt-5.6-sol"
+CODEX_PROBE_CONTRACT_ID = "dispatch-supervisor.codex-probe"
+CODEX_WORK_CONTRACT_ID = "dispatch-supervisor.codex-failover"
+
+
+def _reasoning_effort_config(receipt: ProviderSpawnReceipt) -> str:
+    """Render only an effort value authorized by the canonical registry."""
+    if receipt.reasoning_effort is None:
+        raise ProviderRegistryError(
+            "provider receipt omitted the reasoning effort contract"
+        )
+    return f'model_reasoning_effort="{receipt.reasoning_effort}"'
 
 
 def _authorize_codex(
     codex_bin: str,
     environment: dict[str, str],
+    *,
+    contract_id: str,
 ) -> ProviderSpawnReceipt:
     """Reload zero-paid policy immediately before one Codex subprocess."""
     return authorize_provider_spawn(
-        contract_id="dispatch-supervisor.codex-failover",
+        contract_id=contract_id,
         model_id=CODEX_MODEL,
         executable_path=codex_bin,
         environment=environment,
@@ -138,6 +153,7 @@ class FailoverResult:
     duration_s: float = 0.0
     output_tail: str = ""
     process_active: bool = False  # tracked Popen may still be alive after refused kill
+    execution_contract: ProviderExecutionContract | None = None
 
 
 def resolve_codex_bin() -> str | None:
@@ -166,7 +182,11 @@ def preflight(
     """`codex --version`. Returns (ok, rc, detail)."""
     try:
         child_env = external_child_environment(environment)
-        receipt = _authorize_codex(codex_bin, child_env)
+        receipt = _authorize_codex(
+            codex_bin,
+            child_env,
+            contract_id=CODEX_PROBE_CONTRACT_ID,
+        )
         child_env = external_child_environment(
             child_env,
             overrides=receipt.environment(),
@@ -208,7 +228,11 @@ def check_reachable(
     """
     try:
         child_env = external_child_environment(environment)
-        receipt = _authorize_codex(codex_bin, child_env)
+        receipt = _authorize_codex(
+            codex_bin,
+            child_env,
+            contract_id=CODEX_PROBE_CONTRACT_ID,
+        )
         child_env = external_child_environment(
             child_env,
             overrides=receipt.environment(),
@@ -220,7 +244,9 @@ def check_reachable(
                 "exec",
                 "--ignore-user-config",
                 "-m",
-                CODEX_MODEL,
+                receipt.model_id,
+                "-c",
+                _reasoning_effort_config(receipt),
                 "--skip-git-repo-check",
                 REACHABILITY_PROMPT,
             ],
@@ -232,7 +258,9 @@ def check_reachable(
     except subprocess.TimeoutExpired:
         return False, RC_UNREACHABLE, (
             f"ChatGPT 沒有回應（{timeout_s}s 內連一句話都答不出來）——"
-            "Codex 這條路這班走不通，下一班重試"
+            "Codex 這條路這班走不通，下一班重試。"
+            f"probe model={receipt.model_id} "
+            f"reasoning_effort={receipt.reasoning_effort}"
         )
     except OSError as exc:
         return False, RC_BINARY_MISSING, f"`codex exec` 無法啟動：{exc}"
@@ -240,9 +268,15 @@ def check_reachable(
         tail = ((result.stdout or "") + (result.stderr or "")).strip()[-400:]
         return False, RC_UNREACHABLE, (
             f"ChatGPT 拒絕回應（rc={result.returncode}）——通常是額度用完或認證過期。"
+            f"probe model={receipt.model_id} "
+            f"reasoning_effort={receipt.reasoning_effort}。"
             f"輸出：{tail or '(無)'}"
         )
-    return True, 0, "ChatGPT 有回應"
+    return True, 0, (
+        "ChatGPT 有回應；"
+        f"probe model={receipt.model_id} "
+        f"reasoning_effort={receipt.reasoning_effort}"
+    )
 
 
 def _read_prompt(prompt_path: Path) -> str:
@@ -317,56 +351,45 @@ class _ProviderAuthLeaseGuard:
                     producer_custody=self.producer_custody,
                 )
                 self.lease = None
-                return FailoverResult(
-                    attempted=result.attempted,
+                return replace(
+                    result,
                     recovered=False,
                     exit_code=RC_DISABLED,
                     detail=(
                         "Codex credential custody was quarantined for bounded "
                         f"health recovery: {exc}"
                     ),
-                    duration_s=result.duration_s,
-                    output_tail=result.output_tail,
                     process_active=True,
                 )
             if receipt.ok:
                 self.lease = None
                 self.mark_process_group_drained()
-                return FailoverResult(
-                    attempted=result.attempted,
-                    recovered=result.recovered,
-                    exit_code=result.exit_code,
-                    detail=result.detail,
-                    duration_s=result.duration_s,
-                    output_tail=result.output_tail,
+                return replace(
+                    result,
                     process_active=False,
                 )
             self.lease = None
-            return FailoverResult(
-                attempted=result.attempted,
+            return replace(
+                result,
                 recovered=False,
                 exit_code=RC_DISABLED,
                 detail=(
                     "Codex subscription credential custody did not close "
                     f"safely: {receipt.reason}"
                 ),
-                duration_s=result.duration_s,
-                output_tail=result.output_tail,
                 process_active=True,
             )
         if result.process_active or self.active_pgid is not None:
             active_pgid = self.active_pgid or pgid
             if active_pgid is None or self.leader_pid is None:
-                return FailoverResult(
-                    attempted=result.attempted,
+                return replace(
+                    result,
                     recovered=False,
                     exit_code=RC_DISABLED,
                     detail=(
                         "Codex process is active but its process-group identity "
                         "is unavailable; credential cleanup remains quarantined"
                     ),
-                    duration_s=result.duration_s,
-                    output_tail=result.output_tail,
                     process_active=True,
                 )
             if not self.leader_started_wall:
@@ -379,8 +402,8 @@ class _ProviderAuthLeaseGuard:
                 if receipt.ok:
                     self.lease = None
                     self.mark_process_group_drained()
-                return FailoverResult(
-                    attempted=result.attempted,
+                return replace(
+                    result,
                     recovered=False,
                     exit_code=RC_DISABLED,
                     detail=(
@@ -388,8 +411,6 @@ class _ProviderAuthLeaseGuard:
                         "kept credential custody synchronously until the "
                         "process group drained"
                     ),
-                    duration_s=result.duration_s,
-                    output_tail=result.output_tail,
                     process_active=False,
                 )
             handed_off = False
@@ -414,8 +435,8 @@ class _ProviderAuthLeaseGuard:
                 )
                 self.lease = None
                 self.mark_process_group_drained()
-                return FailoverResult(
-                    attempted=result.attempted,
+                return replace(
+                    result,
                     recovered=False,
                     exit_code=RC_DISABLED,
                     detail=(
@@ -423,8 +444,6 @@ class _ProviderAuthLeaseGuard:
                         "supervisor retained authority-lock custody and "
                         "quarantined the slot"
                     ),
-                    duration_s=result.duration_s,
-                    output_tail=result.output_tail,
                     process_active=True,
                 )
             except Exception as exc:  # custody fallback must catch raw OS errors
@@ -473,13 +492,8 @@ class _ProviderAuthLeaseGuard:
             if self.lease is not None:
                 self.lease = None
                 self.mark_process_group_drained()
-            return FailoverResult(
-                attempted=result.attempted,
-                recovered=result.recovered,
-                exit_code=result.exit_code,
-                detail=result.detail,
-                duration_s=result.duration_s,
-                output_tail=result.output_tail,
+            return replace(
+                result,
                 process_active=handed_off,
             )
 
@@ -487,17 +501,14 @@ class _ProviderAuthLeaseGuard:
         if close_receipt.ok:
             self.lease = None
             return result
-        return FailoverResult(
-            attempted=result.attempted,
+        return replace(
+            result,
             recovered=False,
             exit_code=RC_DISABLED,
             detail=(
                 "Codex subscription credential lease did not close safely: "
                 f"{close_receipt.reason}"
             ),
-            duration_s=result.duration_s,
-            output_tail=result.output_tail,
-            process_active=result.process_active,
         )
 
     def close_on_unwind(self) -> None:
@@ -722,7 +733,6 @@ def _run_codex_failover_impl(
         LOG.warning("codex unreachable rc=%d: %s", rc, detail)
         return _finish(FailoverResult(False, False, rc, detail))
 
-    LOG.info("codex failover start reason=%s cap=%ds version=%s", reason, cap_s, version)
     started = time.time()
     prompt = _read_prompt(prompt_path)
     if slot_id and job_id:
@@ -747,17 +757,6 @@ def _run_codex_failover_impl(
             + selected_assignment
             + prompt
         )
-    argv = [
-        codex_bin,
-        "exec",
-        "--ignore-user-config",
-        "-m",
-        CODEX_MODEL,
-        "--skip-git-repo-check",
-        "-s",
-        "danger-full-access",
-        prompt,
-    ]
     if slot_id and job_id:
         child_env.update({
             "VOLPRED_ACTOR": f"codex-failover:{slot_id}:{job_id[:8]}",
@@ -775,7 +774,11 @@ def _run_codex_failover_impl(
     try:
         # The version and reachability calls were independently authorized;
         # reload once more for the process that can claim and mutate work.
-        provider_receipt = _authorize_codex(codex_bin, child_env)
+        provider_receipt = _authorize_codex(
+            codex_bin,
+            child_env,
+            contract_id=CODEX_WORK_CONTRACT_ID,
+        )
         verify_spawn_receipt(provider_receipt)
     except ProviderRegistryError as exc:
         return _finish(FailoverResult(
@@ -788,7 +791,34 @@ def _run_codex_failover_impl(
         child_env,
         overrides=provider_receipt.environment(),
     )
-    argv[0] = provider_receipt.resolved_executable
+    execution_contract = provider_receipt.execution_contract()
+    argv = [
+        provider_receipt.resolved_executable,
+        "exec",
+        "--ignore-user-config",
+        "-m",
+        provider_receipt.model_id,
+        "-c",
+        _reasoning_effort_config(provider_receipt),
+        "--skip-git-repo-check",
+        "-s",
+        "danger-full-access",
+        prompt,
+    ]
+    LOG.info(
+        "codex failover start reason=%s cap=%ds version=%s model=%s "
+        "probe_contract=%s work_contract=%s work_profile=%s work_effort=%s "
+        "registry_sha256=%s",
+        reason,
+        cap_s,
+        version,
+        provider_receipt.model_id,
+        CODEX_PROBE_CONTRACT_ID,
+        execution_contract.launch_contract_id,
+        execution_contract.reasoning_effort_profile,
+        execution_contract.reasoning_effort,
+        execution_contract.registry_sha256,
+    )
     if isolated_workspace is not None:
         try:
             if isolation_receipt is None:
@@ -805,21 +835,28 @@ def _run_codex_failover_impl(
             ))
     tracked_pid: int | None = None
     process_confirmed_finished = False
+    work_started = False
     try:
         if (
             on_process_started is None
             and lease_guard.lease is None
             and producer_custody is None
         ):
-            result = subprocess.run(
-                argv, cwd=str(launch_cwd), capture_output=True, text=True,
-                timeout=cap_s, env=child_env,
-            )
+            try:
+                result = subprocess.run(
+                    argv, cwd=str(launch_cwd), capture_output=True, text=True,
+                    timeout=cap_s, env=child_env,
+                )
+            except subprocess.TimeoutExpired:
+                work_started = True
+                raise
+            work_started = True
         else:
             proc = subprocess.Popen(
                 argv, cwd=str(launch_cwd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 stdin=subprocess.DEVNULL, text=True, start_new_session=True, env=child_env,
             )
+            work_started = True
             tracked_pid = proc.pid
             if lease_guard.lease is not None:
                 # Record provisional custody before even the PGID probe; if it
@@ -940,12 +977,14 @@ def _run_codex_failover_impl(
             "接手前已測過）。任務可能太大，需要切小或改走 compute queue",
             duration, tail,
             process_active=tracked_pid is not None and not process_confirmed_finished,
+            execution_contract=(execution_contract if work_started else None),
         ))
     except OSError as exc:
         duration = time.time() - started
         return _finish(FailoverResult(
             True, False, RC_BINARY_MISSING, f"`codex exec` 無法啟動：{exc}", duration,
             process_active=tracked_pid is not None and not process_confirmed_finished,
+            execution_contract=(execution_contract if work_started else None),
         ))
     finally:
         if tracked_pid is not None and process_confirmed_finished and on_process_finished is not None:
@@ -962,11 +1001,22 @@ def _run_codex_failover_impl(
             "Codex parent 已退出，但同一 process group 仍有程序或無法確認已清空；"
             "保留 PID 並隔離此 slot，禁止 PHASE-Z。",
             duration, combined, process_active=True,
+            execution_contract=execution_contract,
         ))
     recovered = result.returncode == 0
-    LOG.info("codex failover rc=%d recovered=%s duration=%.1fs", result.returncode, recovered, duration)
+    LOG.info(
+        "codex failover rc=%d recovered=%s duration=%.1fs model=%s "
+        "reasoning_effort=%s registry_sha256=%s",
+        result.returncode,
+        recovered,
+        duration,
+        execution_contract.model_id,
+        execution_contract.reasoning_effort,
+        execution_contract.registry_sha256,
+    )
     return _finish(FailoverResult(
         True, recovered, result.returncode,
         "Codex 接手成功" if recovered else f"`codex exec` rc={result.returncode}",
         duration, combined,
+        execution_contract=execution_contract,
     ))

@@ -31,6 +31,7 @@ _PROVIDER_FIELDS = frozenset(
         "provider_id",
         "executables",
         "model_ids",
+        "reasoning_effort",
         "auth",
         "billing",
         "semantic_classes",
@@ -57,6 +58,7 @@ _BILLING_FIELDS = frozenset(
     {"mode", "metered", "uses_credits", "paid_overflow"}
 )
 _HEALTH_FIELDS = frozenset({"initial", "probe_required"})
+_REASONING_EFFORT_FIELDS = frozenset({"supported_values", "profiles"})
 _ALLOWED_AUTH_SURFACES = frozenset(
     {"subscription_oauth", "desktop_subscription"}
 )
@@ -111,10 +113,73 @@ class SettingsSurface:
 
 
 @dataclass(frozen=True)
+class ReasoningEffortPolicy:
+    supported_values: frozenset[str]
+    profiles: tuple[tuple[str, str], ...]
+
+    def resolve(self, profile: str) -> str:
+        matches = [value for name, value in self.profiles if name == profile]
+        if len(matches) != 1:
+            raise ProviderRegistryError(
+                f"unknown provider reasoning effort profile {profile!r}"
+            )
+        return matches[0]
+
+
+@dataclass(frozen=True)
+class ProviderExecutionContract:
+    provider_id: str
+    launch_contract_id: str
+    model_id: str
+    reasoning_effort_profile: str
+    reasoning_effort: str
+    registry_sha256: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "provider_id": self.provider_id,
+            "launch_contract_id": self.launch_contract_id,
+            "model_id": self.model_id,
+            "reasoning_effort_profile": self.reasoning_effort_profile,
+            "reasoning_effort": self.reasoning_effort,
+            "registry_sha256": self.registry_sha256,
+        }
+
+
+CODEX_FAILOVER_TIMEOUT_EXIT_CODE = -5
+
+
+@dataclass(frozen=True)
+class ProviderCompletionPolicy:
+    launch_contract_id: str
+    exact_exit_code: int | None = None
+    require_nonzero_exit: bool = False
+    forbidden_exit_codes: frozenset[int] = frozenset()
+
+    def validate_exit_code(self, *, outcome: str, exit_code: int) -> None:
+        if self.exact_exit_code is not None and exit_code != self.exact_exit_code:
+            raise ProviderRegistryError(
+                f"provider completion outcome {outcome!r} requires exit code "
+                f"{self.exact_exit_code}, got {exit_code}"
+            )
+        if self.require_nonzero_exit and exit_code == 0:
+            raise ProviderRegistryError(
+                f"provider completion outcome {outcome!r} requires a nonzero "
+                "exit code"
+            )
+        if exit_code in self.forbidden_exit_codes:
+            raise ProviderRegistryError(
+                f"provider completion outcome {outcome!r} forbids exit code "
+                f"{exit_code}"
+            )
+
+
+@dataclass(frozen=True)
 class RegisteredProvider:
     provider_id: str
     executables: tuple[ExecutableIdentity, ...]
     model_ids: frozenset[str]
+    reasoning_effort: ReasoningEffortPolicy | None
     auth_surface: str
     forbidden_env: frozenset[str]
     settings_surface: SettingsSurface | None
@@ -158,6 +223,7 @@ class LaunchContract:
     semantic_class: str
     required_capabilities: frozenset[str]
     requires_formal_gate: bool
+    reasoning_effort_profile: str | None = None
 
 
 _LAUNCH_CONTRACTS = {
@@ -175,6 +241,15 @@ _LAUNCH_CONTRACTS = {
         required_capabilities=frozenset({"filesystem", "python", "shell"}),
         requires_formal_gate=False,
     ),
+    "dispatch-supervisor.codex-probe": LaunchContract(
+        provider_id="codex-cli",
+        semantic_class="task-orchestration",
+        required_capabilities=frozenset(
+            {"filesystem", "shell", "task-routing"}
+        ),
+        requires_formal_gate=False,
+        reasoning_effort_profile="probe",
+    ),
     "dispatch-supervisor.codex-failover": LaunchContract(
         provider_id="codex-cli",
         semantic_class="task-orchestration",
@@ -182,6 +257,7 @@ _LAUNCH_CONTRACTS = {
             {"filesystem", "shell", "task-routing"}
         ),
         requires_formal_gate=False,
+        reasoning_effort_profile="work",
     ),
     "execution-brief.claude": LaunchContract(
         provider_id="claude-cli",
@@ -258,6 +334,24 @@ _LAUNCH_CONTRACTS = {
 }
 
 
+_PROVIDER_COMPLETION_POLICIES = {
+    "codex_failover_recovered": ProviderCompletionPolicy(
+        launch_contract_id="dispatch-supervisor.codex-failover",
+        exact_exit_code=0,
+    ),
+    "codex_failover_failed": ProviderCompletionPolicy(
+        launch_contract_id="dispatch-supervisor.codex-failover",
+        require_nonzero_exit=True,
+        forbidden_exit_codes=frozenset({CODEX_FAILOVER_TIMEOUT_EXIT_CODE}),
+    ),
+    "codex_failover_timeout": ProviderCompletionPolicy(
+        launch_contract_id="dispatch-supervisor.codex-failover",
+        exact_exit_code=CODEX_FAILOVER_TIMEOUT_EXIT_CODE,
+    ),
+}
+PROVIDER_EXECUTION_OUTCOMES = frozenset(_PROVIDER_COMPLETION_POLICIES)
+
+
 @dataclass(frozen=True)
 class ProviderSpawnReceipt:
     contract_id: str
@@ -272,10 +366,29 @@ class ProviderSpawnReceipt:
     required_capabilities: frozenset[str]
     settings_path: str | None
     settings_sha256: str | None
+    reasoning_effort_profile: str | None
+    reasoning_effort: str | None
+
+    def execution_contract(self) -> ProviderExecutionContract:
+        if (
+            self.reasoning_effort_profile is None
+            or self.reasoning_effort is None
+        ):
+            raise ProviderRegistryError(
+                "provider spawn receipt has no reasoning effort contract"
+            )
+        return ProviderExecutionContract(
+            provider_id=self.provider_id,
+            launch_contract_id=self.contract_id,
+            model_id=self.model_id,
+            reasoning_effort_profile=self.reasoning_effort_profile,
+            reasoning_effort=self.reasoning_effort,
+            registry_sha256=self.registry_sha256,
+        )
 
     def environment(self) -> dict[str, str]:
         """Auditable identity inherited by the authorized provider process."""
-        return {
+        environment = {
             "VOLPRED_PROVIDER_ID": self.provider_id,
             "VOLPRED_PROVIDER_LAUNCH_CONTRACT": self.contract_id,
             "VOLPRED_PROVIDER_MODEL_ID": self.model_id,
@@ -292,6 +405,15 @@ class ProviderSpawnReceipt:
             ),
             "VOLPRED_PROVIDER_SETTINGS_SHA256": self.settings_sha256 or "",
         }
+        if self.reasoning_effort_profile is not None:
+            environment["VOLPRED_PROVIDER_REASONING_EFFORT_PROFILE"] = (
+                self.reasoning_effort_profile
+            )
+        if self.reasoning_effort is not None:
+            environment["VOLPRED_PROVIDER_REASONING_EFFORT"] = (
+                self.reasoning_effort
+            )
+        return environment
 
 
 def _exact_fields(
@@ -333,6 +455,58 @@ def _string_set(value: object, *, field: str) -> frozenset[str]:
     if len(result) != len(value):
         raise ProviderRegistryError(f"{field} contains duplicates")
     return result
+
+
+def _validate_reasoning_effort_policy(
+    value: object,
+    *,
+    provider_id: str,
+) -> ReasoningEffortPolicy | None:
+    if value is None:
+        return None
+    payload = _exact_fields(
+        value,
+        _REASONING_EFFORT_FIELDS,
+        label=f"{provider_id}.reasoning_effort",
+    )
+    supported_values = _string_set(
+        payload["supported_values"],
+        field=f"{provider_id}.reasoning_effort.supported_values",
+    )
+    raw_profiles = payload["profiles"]
+    if not isinstance(raw_profiles, Mapping) or not raw_profiles:
+        raise ProviderRegistryError(
+            f"{provider_id}.reasoning_effort.profiles must be a non-empty object"
+        )
+    profiles = tuple(
+        sorted(
+            (
+                _nonempty_text(
+                    name,
+                    field=f"{provider_id}.reasoning_effort profile name",
+                ),
+                _nonempty_text(
+                    effort,
+                    field=(
+                        f"{provider_id}.reasoning_effort.profiles.{name}"
+                    ),
+                ),
+            )
+            for name, effort in raw_profiles.items()
+        )
+    )
+    unsupported = sorted(
+        effort for _name, effort in profiles if effort not in supported_values
+    )
+    if unsupported:
+        raise ProviderRegistryError(
+            f"{provider_id}.reasoning_effort profiles contain values outside "
+            f"supported_values: {unsupported}"
+        )
+    return ReasoningEffortPolicy(
+        supported_values=supported_values,
+        profiles=profiles,
+    )
 
 
 def _validate_probe_policy(value: object) -> Mapping[str, int]:
@@ -510,6 +684,10 @@ def _validate_provider(value: object) -> RegisteredProvider:
         model_ids=_string_set(
             payload["model_ids"], field=f"{provider_id}.model_ids"
         ),
+        reasoning_effort=_validate_reasoning_effort_policy(
+            payload["reasoning_effort"],
+            provider_id=provider_id,
+        ),
         auth_surface=auth_surface,
         forbidden_env=forbidden_env,
         settings_surface=_validate_settings_surface(
@@ -568,6 +746,97 @@ def load_provider_registry(
         providers=providers,
         probe_policy=_validate_probe_policy(payload["probe_policy"]),
     )
+
+
+def validate_provider_execution_contract(
+    contract: ProviderExecutionContract,
+    *,
+    path: Path = DEFAULT_REGISTRY_PATH,
+) -> None:
+    """Verify a completion contract against the exact authorized generation."""
+    if not isinstance(contract, ProviderExecutionContract):
+        raise ProviderRegistryError(
+            "provider execution contract must use the canonical typed receipt"
+        )
+    registry = load_provider_registry(path)
+    if contract.registry_sha256 != registry.sha256:
+        raise ProviderRegistryError(
+            "provider execution contract registry generation does not match"
+        )
+    launch_contract = _LAUNCH_CONTRACTS.get(contract.launch_contract_id)
+    if launch_contract is None:
+        raise ProviderRegistryError(
+            "provider execution contract has unknown launch contract "
+            f"{contract.launch_contract_id!r}"
+        )
+    if launch_contract.provider_id != contract.provider_id:
+        raise ProviderRegistryError(
+            "provider execution contract provider does not match launch contract"
+        )
+    if launch_contract.reasoning_effort_profile is None:
+        raise ProviderRegistryError(
+            "provider execution contract launch contract has no reasoning "
+            "effort profile"
+        )
+    if (
+        contract.reasoning_effort_profile
+        != launch_contract.reasoning_effort_profile
+    ):
+        raise ProviderRegistryError(
+            "provider execution contract reasoning effort profile does not "
+            "match launch contract"
+        )
+    matches = [
+        provider
+        for provider in registry.providers
+        if provider.provider_id == contract.provider_id
+    ]
+    if len(matches) != 1:
+        raise ProviderRegistryError(
+            f"provider execution contract has unknown provider "
+            f"{contract.provider_id!r}"
+        )
+    provider = matches[0]
+    if contract.model_id not in provider.model_ids:
+        raise ProviderRegistryError(
+            f"provider execution contract has unknown model "
+            f"{contract.model_id!r}"
+        )
+    if provider.reasoning_effort is None:
+        raise ProviderRegistryError(
+            f"provider {provider.provider_id!r} has no reasoning effort policy"
+        )
+    expected = provider.reasoning_effort.resolve(
+        contract.reasoning_effort_profile
+    )
+    if contract.reasoning_effort != expected:
+        raise ProviderRegistryError(
+            "provider execution contract reasoning effort does not match "
+            f"profile {contract.reasoning_effort_profile!r}"
+        )
+
+
+def validate_provider_execution_settlement(
+    contract: ProviderExecutionContract,
+    *,
+    outcome: str,
+    exit_code: int,
+    path: Path = DEFAULT_REGISTRY_PATH,
+) -> None:
+    """Reject a completion whose provider, launch contract, or exit lies."""
+    policy = _PROVIDER_COMPLETION_POLICIES.get(outcome)
+    if policy is None:
+        raise ProviderRegistryError(
+            f"provider execution contract is invalid for outcome {outcome!r}"
+        )
+    validate_provider_execution_contract(contract, path=path)
+    if contract.launch_contract_id != policy.launch_contract_id:
+        raise ProviderRegistryError(
+            "provider execution launch contract is invalid for completion "
+            f"outcome {outcome!r}: expected {policy.launch_contract_id!r}, got "
+            f"{contract.launch_contract_id!r}"
+        )
+    policy.validate_exit_code(outcome=outcome, exit_code=exit_code)
 
 
 def _authorize_registered_provider(
@@ -779,6 +1048,16 @@ def authorize_provider_spawn(
         raise ProviderRegistryError(
             f"provider {provider.provider_id!r} is not formal-gate eligible"
         )
+    reasoning_effort_profile = contract.reasoning_effort_profile
+    reasoning_effort: str | None = None
+    if reasoning_effort_profile is not None:
+        if provider.reasoning_effort is None:
+            raise ProviderRegistryError(
+                f"provider {provider.provider_id!r} has no reasoning effort policy"
+            )
+        reasoning_effort = provider.reasoning_effort.resolve(
+            reasoning_effort_profile
+        )
     return ProviderSpawnReceipt(
         contract_id=contract_id,
         provider_id=provider.provider_id,
@@ -792,6 +1071,8 @@ def authorize_provider_spawn(
         required_capabilities=contract.required_capabilities,
         settings_path=settings_path,
         settings_sha256=settings_sha256,
+        reasoning_effort_profile=reasoning_effort_profile,
+        reasoning_effort=reasoning_effort,
     )
 
 
