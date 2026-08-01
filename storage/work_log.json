@@ -33026,5 +33026,15 @@
     "outcome": "succeeded",
     "commit": "",
     "summary": "K1450 general-audience article written + published to draft pool as mile_5378daa1. Story: rate regime does NOT make VNQ more stock-like (VNQ-SPY fwd corr 0.625 vs 0.628, p=0.897); what flips is VNQ-TLT fwd corr -0.077 -> +0.041 (HAC p=0.0030, Bonferroni 0.0150) - the only one of 5 tests surviving multiple-testing correction. All 34 numbers programmatically reconciled to experiments/k1450/k1450_results.json; anti_ai_gate exit 0; content-vs-source audit PASS (6 claims vs 91 source values); 2 real matplotlib charts auto-uploaded to Supabase. v1 had been blocked by the old hard arc-dedup rule (now warn-only) - re-ran gate under current rules: verdict=warn_arc_dup advisory, no K-COVERAGE, layer-2 feed grep confirmed no general-audience VNQ/rate-regime article exists. OPEN: lazypack plan not authored -> draft cannot release until storage/lazypack_plans/k1450_general_plan.json exists + lazypack_async_render enqueue."
+  },
+  {
+    "timestamp": "2026-08-01T16:28:57+08:00",
+    "task_type": "daily_article",
+    "task_id": "assign_1bbe86e8",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-f9fa6c9f02fa44deaadc9ba6f3607d75",
+    "owner": "hourly-slot-1-f9fa6c9f02fa44deaadc9ba6f3607d75",
+    "commit": null,
+    "summary": "[FB 補發] FOMC 2026-07-29 T+0 事件文章 mile_45d354f0 完成 Ivan Lai FB 雙發佈。\n\n**發文**：`fb_realchrome_post.py` real-Chrome CDP attach → preflight PASS（已登入）→ dry-run 檢視 composer 截圖 → 送出。主貼文 682 字、附 2 張圖（fig1_fomc_day_vix / fig2_implied_vs_realized，兩張 supabase URL 皆 HTTP 200），正文不含連結；第一則留言 `https://volpred.zeabur.app/v3/reports/mile_45d354f0`（feed live 200）已送出並經 worker 驗證。permalink `https://www.facebook.com/yihao.lai/posts/pfbid02dMZkvYsWhRQCihwBLbX7pwupbGWH9zFpEcxrV42XGXNXJMGkRsfd8PG9emgsSq7Al`，canonical `fb_post_status=success`（頂層欄位）。發文後再跑 `--recapture-permalink mile_45d354f0` 由 timeline anchor+hover 獨立回讀，取得同一 permalink，確認貼文確實在 timeline 上。\n\n**發文前修的兩件事**（task 宣稱「文案已備妥」只對了一半）：\n1. canonical draft `storage/drafts/fb_mile_45d354f0.md` 缺 `parse_draft()` 要求的結構（`# mile_id:` / `## 主貼文` / `## 第一則留言` / `## 圖片`），原樣 `--post` 會直接 ValueError。已補齊為 canonical 格式。\n2. 文案寫於 07-30，開頭「昨天聯準會開完會」「昨天那 +2.45 點」。本次發文為 08-01，補發延遲 3 天 → 改為「禮拜三」「那天」，避免對外貼出錯誤時間指涉。數據事實（VIX 18.21→20.66、9 比 3、+2.45 點第 95 百分位、1.34 倍事前定價）不受影響。改後重跑 `anti_ai_gate.py` = PASS（warn 1/3）。\n\n**順手修的流程缺陷**：`.claude/skills/fb-publishing/SKILL.md` §5 Completion readback 的 jq 讀 `.details.fb_post_status/.fb_post_url/.fb_posted_at`，但 2026-06-01 `migrate_fb_post_status_single_source.py` 已把 canonical 收斂到 feed entry **頂層**（`mark_fb_post_status.py` 寫、`fb_realchrome_post.py:_fb_post_status` guard 讀的都是頂層）。照 skill 的指令回讀成功的貼文一律得到 null，讀起來像「根本沒發出去」。此誤判 2026-Q3 error_log 已記過一次教訓、但 skill 文本從未跟上；本班照著跑又中一次。已改為讀頂層並在 skill 內寫明原因與前科，補上當年缺的第 5 步制度化寫回。\n\n**Verification**：feed canonical readback `fb_post_status=success` / `fb_posted_at=2026-08-01T08:25:00Z`；`audit_fb_pipeline.py` early_warning=0 / stale_pending=0 / missing_draft=0；timeline permalink 獨立 recapture 一致。無重複貼文（發文前確認 `fomc.*2026.07.29` event_key 下只有 mile_45d354f0 一篇，且 fb_post_status 為 null）。event_article 不計入 trending daily cap。"
   }
 ]

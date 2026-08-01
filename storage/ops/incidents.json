@@ -824,6 +824,16 @@
      "at": "2026-08-01T07:35:48.875772+00:00",
      "instance_key": "30689388425:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T08:00:59.673255+00:00",
+     "instance_key": "30690220900:1",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-01T08:30:56.229702+00:00",
+     "instance_key": "30691236241:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -850,14 +860,26 @@
      "first_seen_at": "2026-08-01T07:35:48.875772+00:00",
      "key": "30689388425:1",
      "last_seen_at": "2026-08-01T07:35:48.875772+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-01T08:00:59.673255+00:00",
+     "key": "30690220900:1",
+     "last_seen_at": "2026-08-01T08:00:59.673255+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-01T08:30:56.229702+00:00",
+     "key": "30691236241:1",
+     "last_seen_at": "2026-08-01T08:30:56.229702+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-01T07:33:43.3502913Z E AssertionError: machine_self incidents must not ask broken machinery to self-repair",
-   "last_seen_at": "2026-08-01T07:35:48.875772+00:00",
+   "last_breach_detail": "2026-08-01T08:28:57.2811463Z E AssertionError: machine_self incidents must not ask broken machinery to self-repair",
+   "last_seen_at": "2026-08-01T08:30:56.229702+00:00",
    "notified_at": null,
-   "occurrence_count": 4,
+   "occurrence_count": 6,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -993,9 +1015,9 @@
    "is_control_intervention": false,
    "kind": "publishing_freshness",
    "last_breach_detail": "發文脫班（無新文超過 release 節奏門檻）",
-   "last_seen_at": "2026-08-01T01:01:09.892690+00:00",
+   "last_seen_at": "2026-08-01T08:02:07.664698+00:00",
    "notified_at": null,
-   "occurrence_count": 4,
+   "occurrence_count": 5,
    "resolution": null,
    "resolutions": [],
    "state": "escalated",
@@ -2125,7 +2147,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-01T07:42:00.580183+00:00"
+     "last_seen_at": "2026-08-01T08:31:06.440792+00:00"
     },
     {
      "cleared_at": null,
@@ -2187,9 +2209,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-08-01T07:42:00.580183+00:00",
+   "last_seen_at": "2026-08-01T08:31:06.440792+00:00",
    "notified_at": null,
-   "occurrence_count": 7664,
+   "occurrence_count": 7668,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3403,6 +3425,6 @@
    }
   }
  },
- "updated_at": "2026-08-01T07:59:38.837938+00:00",
+ "updated_at": "2026-08-01T08:31:11.161229+00:00",
  "version": 1
 }
