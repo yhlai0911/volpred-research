@@ -397,6 +397,73 @@ def test_review_harm_policy_includes_worker_failure() -> None:
     assert reasons == ["harm_outcomes=1>=1"]
 
 
+def test_warn_only_unjoined_candidate_is_not_gate_harm() -> None:
+    gate = _registry(mode="warn", identity="heuristic")["gates"][0]
+    gate["review_policy"].update(
+        {
+            "max_raw_triggers": 999,
+            "min_distinct_candidates": 999,
+            "max_harm_outcomes": 1,
+            "harm_outcomes": ["blocked"],
+            "max_false_positive_signals": 999,
+            "min_incident_occurrences": 999,
+        }
+    )
+
+    due, reasons = control_gate_lifecycle._review_due(
+        gate,
+        now=NOW,
+        review_anchor_at=NOW - timedelta(hours=1),
+        trigger_count=1,
+        distinct_candidates=1,
+        incident_occurrences=0,
+        outcomes={"unjoined": 1, "blocked": 0},
+    )
+
+    assert due is False
+    assert reasons == []
+
+
+def test_warn_only_block_resurrection_is_immediate_gate_harm() -> None:
+    gate = _registry(mode="warn", identity="heuristic")["gates"][0]
+    gate["review_policy"].update(
+        {
+            "max_raw_triggers": 999,
+            "min_distinct_candidates": 999,
+            "max_harm_outcomes": 1,
+            "harm_outcomes": ["blocked"],
+            "max_false_positive_signals": 999,
+            "min_incident_occurrences": 999,
+        }
+    )
+    outcomes, _ = control_gate_lifecycle._join_outcomes(
+        [{
+            "candidate_id": "candidate-with-resurrected-lock",
+            "action": "block_arc_dup",
+        }],
+        tasks=[],
+        feed=[],
+        dispatch_completions=[],
+        now=NOW,
+        strategy="candidate_or_feed",
+        deadline_required=False,
+    )
+
+    due, reasons = control_gate_lifecycle._review_due(
+        gate,
+        now=NOW,
+        review_anchor_at=NOW - timedelta(hours=1),
+        trigger_count=1,
+        distinct_candidates=1,
+        incident_occurrences=0,
+        outcomes=outcomes,
+    )
+
+    assert outcomes["blocked"] == 1
+    assert due is True
+    assert reasons == ["harm_outcomes=1>=1"]
+
+
 @pytest.mark.parametrize(
     ("evidence", "feed_item", "expected"),
     [
@@ -673,11 +740,19 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     )
     publisher_arc = gates["publisher_arc_dedup"]
     assert publisher_arc["mode"] == "warn"
-    assert publisher_arc["lifecycle"]["last_action"] == "retain"
+    assert publisher_arc["lifecycle"]["last_action"] == "recalibrate"
     assert publisher_arc["lifecycle"]["review_task_id"] == (
         "control_gate_review_publisher_arc_dedup_"
-        "20260731T000233_c7741cc44277"
+        "20260801T105224_ea7015b3295f"
     )
+    assert publisher_arc["review_policy"]["harm_outcomes"] == [
+        "failed",
+        "missed_deadline",
+        "sequence_coverage_gap",
+        "worker_failed",
+        "blocked",
+    ]
+    assert publisher_arc["review_policy"]["max_harm_outcomes"] == 1
     # Historical block labels stay registered as resurrection detectors even
     # though the live gate is advisory-only.
     publisher_arc_actions = set(
