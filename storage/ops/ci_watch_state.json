@@ -4,8 +4,13 @@
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-root-30711055685",
   "last_push_remediation": {
-    "attempted": false,
-    "reason": "nothing_unpushed"
+    "attempted": true,
+    "ahead": 1,
+    "head_sha": "6d6da8b4038294481fdea0123e3ee650d1122056",
+    "pushed": true,
+    "rc": 0,
+    "outcome": "pushed",
+    "ahead_after": 0
   },
   "schema_version": 3,
   "latest_observed_run": {
@@ -34,7 +39,7 @@
     "updated_at": "2026-08-01T18:04:18Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-01T18:11:09.281206+00:00",
+  "updated_at": "2026-08-01T18:16:06.917285+00:00",
   "processed_run_keys": [
     "29328352646:1",
     "29330892657:1",
@@ -858,19 +863,24 @@
       "ci-red-30709398279": "succeeded",
       "ci-root-30711055685": "pending"
     },
-    "dispatch_request_count": 4,
-    "last_dispatch_request_at": "2026-08-01T18:11:09.281206+00:00",
+    "dispatch_request_count": 5,
+    "last_dispatch_request_at": "2026-08-01T18:16:06.917285+00:00",
     "push_intent": {
-      "head_sha": "30f4bc80f1687e2868c6bb9ead4c3dabc5f9941a",
-      "run_key": "30710346293:1",
-      "recorded_at": "2026-08-01T17:46:04.077705+00:00"
+      "head_sha": "6d6da8b4038294481fdea0123e3ee650d1122056",
+      "run_key": "30711055685:1",
+      "recorded_at": "2026-08-01T18:16:06.917285+00:00"
     },
     "last_push_remediation": {
-      "attempted": false,
-      "reason": "nothing_unpushed"
+      "attempted": true,
+      "ahead": 1,
+      "head_sha": "6d6da8b4038294481fdea0123e3ee650d1122056",
+      "pushed": true,
+      "rc": 0,
+      "outcome": "pushed",
+      "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-08-01T17:50:48.041754+00:00",
-    "last_verified_push_head": "30f4bc80f1687e2868c6bb9ead4c3dabc5f9941a",
+    "last_push_remediation_at": "2026-08-01T18:16:06.917285+00:00",
+    "last_verified_push_head": "6d6da8b4038294481fdea0123e3ee650d1122056",
     "remediation_poll_keys": [
       "2026-08-01T17",
       "2026-08-01T18"
