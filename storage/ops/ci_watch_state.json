@@ -4,8 +4,13 @@
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-30686930127",
   "last_push_remediation": {
-    "attempted": false,
-    "reason": "nothing_unpushed"
+    "attempted": true,
+    "ahead": 2,
+    "head_sha": "f82e4327f85b20663cb0c50e7a4baeeb9cd9ed76",
+    "pushed": true,
+    "rc": 0,
+    "outcome": "pushed",
+    "ahead_after": 0
   },
   "schema_version": 3,
   "latest_observed_run": {
@@ -34,7 +39,7 @@
     "updated_at": "2026-08-01T06:19:45Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-01T06:25:50.281157+00:00",
+  "updated_at": "2026-08-01T06:30:54.019664+00:00",
   "processed_run_keys": [
     "29304886936:1",
     "29307406826:1",
@@ -889,19 +894,24 @@
     "repair_task_statuses": {
       "ci-red-30686930127": "pending"
     },
-    "dispatch_request_count": 2,
-    "last_dispatch_request_at": "2026-08-01T06:25:50.281157+00:00",
+    "dispatch_request_count": 3,
+    "last_dispatch_request_at": "2026-08-01T06:30:54.019664+00:00",
     "push_intent": {
-      "head_sha": "b9cbde058376b741d932d6b9268f7325c7e0c5d2",
+      "head_sha": "f82e4327f85b20663cb0c50e7a4baeeb9cd9ed76",
       "run_key": "30686930127:1",
-      "recorded_at": "2026-08-01T06:20:33.601283+00:00"
+      "recorded_at": "2026-08-01T06:30:54.019664+00:00"
     },
     "last_push_remediation": {
-      "attempted": false,
-      "reason": "nothing_unpushed"
+      "attempted": true,
+      "ahead": 2,
+      "head_sha": "f82e4327f85b20663cb0c50e7a4baeeb9cd9ed76",
+      "pushed": true,
+      "rc": 0,
+      "outcome": "pushed",
+      "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-08-01T06:25:50.281157+00:00",
-    "last_verified_push_head": "b9cbde058376b741d932d6b9268f7325c7e0c5d2",
+    "last_push_remediation_at": "2026-08-01T06:30:54.019664+00:00",
+    "last_verified_push_head": "f82e4327f85b20663cb0c50e7a4baeeb9cd9ed76",
     "remediation_poll_keys": [
       "2026-08-01T06"
     ],
