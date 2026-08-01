@@ -1108,6 +1108,9 @@ def _feed_identities(item: dict[str, Any]) -> set[str]:
     question_id = item.get("question_id") or details.get("question_id")
     if isinstance(question_id, str) and question_id.strip():
         identities.add(question_id.strip())
+    event_identity = _event_identity(item)
+    if event_identity:
+        identities.add(event_identity)
     return identities
 
 

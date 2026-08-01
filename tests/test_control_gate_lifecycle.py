@@ -455,6 +455,33 @@ def test_candidate_or_feed_joins_typed_publisher_identity(
     assert outcomes["unjoined"] == 0
 
 
+def test_candidate_or_feed_joins_published_event_stage_identity() -> None:
+    outcomes, health = control_gate_lifecycle._join_outcomes(
+        [{
+            "candidate_id": "nfp_us_2026_08_07:T-7",
+            "action": "warn_thin_signature",
+        }],
+        tasks=[],
+        feed=[{
+            "id": "mile_event",
+            "status": "published",
+            "audience": "event",
+            "details": {
+                "event_key": "NFP_US_2026_08_07",
+                "event_series_slot": "T-7",
+            },
+        }],
+        dispatch_completions=[],
+        now=NOW,
+        strategy="candidate_or_feed",
+        deadline_required=False,
+    )
+
+    assert health["malformed_task_deadlines"] == []
+    assert outcomes["published"] == 1
+    assert outcomes["unjoined"] == 0
+
+
 def test_k_coverage_does_not_join_across_audience_scope() -> None:
     outcomes, _ = control_gate_lifecycle._join_outcomes(
         [{
@@ -646,10 +673,10 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     )
     publisher_arc = gates["publisher_arc_dedup"]
     assert publisher_arc["mode"] == "warn"
-    assert publisher_arc["lifecycle"]["last_action"] == "downgrade_to_warn"
+    assert publisher_arc["lifecycle"]["last_action"] == "retain"
     assert publisher_arc["lifecycle"]["review_task_id"] == (
         "control_gate_review_publisher_arc_dedup_"
-        "20260730T070838_b933bcabf559"
+        "20260731T000233_c7741cc44277"
     )
     # Historical block labels stay registered as resurrection detectors even
     # though the live gate is advisory-only.
