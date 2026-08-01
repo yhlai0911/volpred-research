@@ -21,6 +21,11 @@ import argparse
 import json
 import sys
 
+from volpred.ops.task_pool_selection import (
+    CLAUDE_ONLY_TASK_TYPES,
+    normalize_task_type_value,
+)
+
 # ─── Canonical mapping ─────────────────────────────────────────────────────
 # Per CLAUDE.md table + .claude/rules/agent-delegation.md
 # Format: task_type → (model_short, reasoning_effort)
@@ -76,9 +81,10 @@ TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
 # ─────────────────────────────────────────────────────────────────────────
 # 拓撲此前散在 prose（task-routing.md / workflow-index.md 執行模式欄 / 各 skill 內），
 # 由每班 orchestrator 臨場判斷。這裡機械化 task_type → 預設拓撲；task 自帶合法
-# `topology` 欄位時以欄位為準（per-task override）。orchestrator 只在欄位/預設
-# 明顯不合時 override，且必須在 work_log 記 override 原因（讓 override 成為可觀測
-# 例外而非常態）。
+# `topology` 欄位時以欄位為準（per-task override）；Claude-only 類型
+# 例外，它們的 topology 是 capability contract，metadata 不可覆寫。
+# orchestrator 只在允許的類型上 override，且必須在 work_log 記原因
+#（讓 override 成為可觀測例外而非常態）。
 # NOTE: compute_queue 不是 per-type 預設 — 任何類型的 heavy compute 子步驟
 # （GARCH MLE / bootstrap / 全期 backtest / pooled-MLE multistart）都應 enqueue
 # compute_queue（見 cron_hourly_dispatch_prompt.md step 5 分流決策），與本表並行。
@@ -111,13 +117,26 @@ DEFAULT_TOPOLOGY = "subagent"  # 未知型別：交給一般 bounded subagent（
 def pick_topology(task_type: str | None, task: dict | None = None) -> dict:
     """Return {"topology": str, "source": "task_field"|"type_default"|"fallback"}.
 
-    優先序：task 自帶合法 `topology` 欄位 > task_type 預設表 > DEFAULT_TOPOLOGY。
+    優先序：Claude-only capability 預設 > task 合法 `topology` 欄位 >
+    task_type 預設表 > DEFAULT_TOPOLOGY。
     非法欄位值 fail-open 落回 type default 並標 invalid_field（不 raise —
     派工路徑不可因 metadata 打錯字炸掉；invalid 值可被 report 消費者看見）。
     """
+    task_type = normalize_task_type_value(task_type)
     field = (task or {}).get("topology")
-    if isinstance(field, str) and field.strip().lower() in TOPOLOGIES:
-        return {"topology": field.strip().lower(), "source": "task_field"}
+    normalized_field = field.strip().lower() if isinstance(field, str) else None
+    if task_type in CLAUDE_ONLY_TASK_TYPES:
+        out = {
+            "topology": TASK_TYPE_TO_TOPOLOGY[task_type],
+            "source": "type_default",
+        }
+        if normalized_field in TOPOLOGIES and normalized_field != out["topology"]:
+            out["rejected_field"] = normalized_field
+        elif field is not None and normalized_field not in TOPOLOGIES:
+            out["invalid_field"] = str(field)
+        return out
+    if normalized_field in TOPOLOGIES:
+        return {"topology": normalized_field, "source": "task_field"}
     out: dict = {}
     if field is not None:
         out["invalid_field"] = str(field)
@@ -163,6 +182,7 @@ CEILING = ("opus", "max")
 
 def pick_model(task_type: str | None) -> tuple[str, str]:
     """Library entry — return (model_short, effort) for given task_type."""
+    task_type = normalize_task_type_value(task_type)
     if not task_type:
         return DEFAULT
     return TASK_TYPE_TO_MODEL.get(task_type, DEFAULT)

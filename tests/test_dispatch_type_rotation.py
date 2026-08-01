@@ -8,6 +8,8 @@ from collections import Counter
 from pathlib import Path
 from types import ModuleType
 
+import pytest
+
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "continue_task_dispatch.py"
 SPEC = importlib.util.spec_from_file_location("continue_task_dispatch_module", MODULE_PATH)
 assert SPEC and SPEC.loader
@@ -41,22 +43,29 @@ def test_categorize_prefers_less_recent_types_within_same_priority():
     cats = dispatch.categorize(tasks, recent_type_counts=recent_counts)
     ordered_ids = [t["id"] for t in cats["agentable"]]
 
-    assert ordered_ids[:2] == ["event-1", "trend-1"]
-    assert ordered_ids[2:] == ["exp-1", "exp-2", "exp-3", "exp-4", "exp-5", "exp-6"]
+    assert ordered_ids[:1] == ["event-1"]
+    assert ordered_ids[1:] == ["exp-1", "exp-2", "exp-3", "exp-4", "exp-5", "exp-6"]
+    assert [t["id"] for t in cats["main_thread"]] == ["trend-1"]
 
 
-def test_categorize_keeps_p1_non_experiment_on_main_thread():
+def test_categorize_routes_known_p1_auto_flows_to_workers():
     tasks = [
         _task("event-1", "event_article", priority=1),
         _task("trend-1", "trending_repost", priority=1),
         _task("exp-1", "experiment", priority=1),
+        _task("article-1", "daily_article", priority=1),
         _task("digest-1", "daily_digest", priority=1),
     ]
 
     cats = dispatch.categorize(tasks, recent_type_counts=Counter())
 
-    assert [t["id"] for t in cats["agentable"]] == ["digest-1", "exp-1"]
-    assert [t["id"] for t in cats["main_thread"]] == ["event-1", "trend-1"]
+    assert [t["id"] for t in cats["agentable"]] == [
+        "article-1",
+        "digest-1",
+        "event-1",
+        "exp-1",
+    ]
+    assert [t["id"] for t in cats["main_thread"]] == ["trend-1"]
 
 
 def test_dispatch_lane_agent_overrides_main_thread_words():
@@ -72,7 +81,7 @@ def test_dispatch_lane_agent_overrides_main_thread_words():
 
 
 def test_dispatch_lane_main_thread_overrides_agentable_default():
-    task = _task("lane-main", "experiment", priority=3)
+    task = _task("lane-main", "daily_article", priority=1)
     task["dispatch_lane"] = "main-thread"
 
     cats = dispatch.categorize([task], recent_type_counts=Counter())
@@ -80,6 +89,61 @@ def test_dispatch_lane_main_thread_overrides_agentable_default():
     assert cats["agentable"] == []
     assert [t["id"] for t in cats["main_thread"]] == ["lane-main"]
     assert cats["blocked"] == []
+
+
+def test_agent_lane_cannot_override_non_background_capability():
+    tasks = []
+    for task_type in (
+        "email_reply",
+        "paper_body",
+        "paper_decision",
+        "strategy_lifecycle",
+        "telegram_reply",
+        "trending_repost",
+    ):
+        task = _task(f"agent-{task_type}", task_type, priority=2)
+        task["dispatch_lane"] = "agent"
+        tasks.append(task)
+
+    cats = dispatch.categorize(tasks, recent_type_counts=Counter())
+
+    assert cats["agentable"] == []
+    assert [t["task_type"] for t in cats["main_thread"]] == sorted(
+        task["task_type"] for task in tasks
+    )
+    assert cats["blocked"] == []
+
+
+@pytest.mark.parametrize(
+    "task_type",
+    [
+        "paper_body",
+        "paper-body",
+        " PAPER BODY ",
+        "paper--body",
+        "paper   body",
+        "paper\tbody",
+        "---paper---body---",
+    ],
+)
+def test_noncanonical_task_type_spelling_cannot_bypass_capability(task_type):
+    task = _task("paper-capability", task_type, priority=2)
+    task["dispatch_lane"] = "agent"
+
+    cats = dispatch.categorize([task], recent_type_counts=Counter())
+
+    assert cats["agentable"] == []
+    assert [t["id"] for t in cats["main_thread"]] == [task["id"]]
+
+
+def test_daily_article_schema_overrides_main_thread_words_in_description():
+    task = _task("article-main-thread-prose", "daily_article", priority=1)
+    task["description"] = "主線程派 worker 前先讀 publication candidates。"
+
+    cats = dispatch.categorize([task], recent_type_counts=Counter())
+
+    assert [t["id"] for t in cats["agentable"]] == [task["id"]]
+    assert cats["main_thread"] == []
 
 
 def test_dispatch_lane_blocked_and_unknown_are_not_dispatched():
@@ -210,21 +274,21 @@ def test_build_report_exposes_disambiguated_pending_summary(monkeypatch, tmp_pat
 
     report = dispatch.build_report(auto_refill=False)
 
-    assert report["pending_agentable"] == 2
-    assert report["pending_main_thread"] == 1
+    assert report["pending_agentable"] == 3
+    assert report["pending_main_thread"] == 0
     assert report["pending_blocked"] == 0
     assert report["pending_summary"] == {
-        "agentable": 2,
-        "worker_claimable": 1,
+        "agentable": 3,
+        "worker_claimable": 2,
         "supervisor_only": 1,
-        "main_thread": 1,
+        "main_thread": 0,
         "blocked": 0,
         "label": (
-            "agentable 2 (worker 1 / supervisor 1) / "
-            "main_thread 1 / blocked 0"
+            "agentable 3 (worker 2 / supervisor 1) / "
+            "main_thread 0 / blocked 0"
         ),
     }
-    assert report["pending_worker_claimable"] == 1
+    assert report["pending_worker_claimable"] == 2
     assert report["pending_supervisor_only"] == 1
     assert [
         item["id"] for item in report["supervisor_preassignment"]["tasks"]

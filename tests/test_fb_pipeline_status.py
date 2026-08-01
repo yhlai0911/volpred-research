@@ -494,7 +494,16 @@ def test_ops_dashboard_warns_on_invalid_inflight_timestamp(tmp_path, monkeypatch
     assert "not-a-date" in captured.out
 
 
-def test_ops_dashboard_marks_claude_only_pending_hint(tmp_path, monkeypatch) -> None:
+@pytest.mark.parametrize(
+    ("task_types", "expected_hint", "interactive_count"),
+    [
+        (["trending_repost", " TELEGRAM-REPLY "], "main thread", 2),
+        (["member-qa", "event_article"], "managed Claude worker", 0),
+    ],
+)
+def test_ops_dashboard_marks_claude_only_pending_hint(
+    tmp_path, monkeypatch, task_types, expected_hint, interactive_count,
+) -> None:
     repo = tmp_path
     (repo / "storage" / "reports").mkdir(parents=True)
     (repo / "storage" / "ops").mkdir(parents=True)
@@ -502,7 +511,8 @@ def test_ops_dashboard_marks_claude_only_pending_hint(tmp_path, monkeypatch) -> 
     (repo / "config").mkdir(parents=True)
 
     tasks = [
-        {"id": "trend-1", "status": "pending", "task_type": "trending_repost"},
+        {"id": f"task-{index}", "status": "pending", "task_type": task_type}
+        for index, task_type in enumerate(task_types)
     ]
     (repo / "storage" / "next_tasks.json").write_text(json.dumps(tasks, ensure_ascii=False), encoding="utf-8")
     (repo / "storage" / "reports" / "feed.json").write_text("[]\n", encoding="utf-8")
@@ -530,9 +540,11 @@ def test_ops_dashboard_marks_claude_only_pending_hint(tmp_path, monkeypatch) -> 
 
     assert rc == 0
     assert section["status"] == "warn"
-    assert section["pending_count"] == 1
-    assert section["pending_claude_only_count"] == 1
-    assert "Claude-only" in section["next"]
+    assert section["pending_count"] == 2
+    assert section["pending_claude_only_count"] == 2
+    assert section["pending_interactive_only_count"] == interactive_count
+    assert section["pending_core_claude_count"] == 2 - interactive_count
+    assert expected_hint in section["next"]
 
 
 def test_audit_terminal_or_handoff_statuses_include_interactive() -> None:

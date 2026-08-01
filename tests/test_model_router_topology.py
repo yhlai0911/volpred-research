@@ -13,6 +13,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
@@ -51,15 +53,47 @@ def test_all_topology_values_valid() -> None:
         assert topo in mr.TOPOLOGIES, f"{task_type} has invalid topology {topo!r}"
 
 
+def test_claude_only_types_have_fixed_topology_contracts() -> None:
+    assert mr.CLAUDE_ONLY_TASK_TYPES <= mr.TASK_TYPE_TO_TOPOLOGY.keys()
+
+
 def test_task_field_overrides_default() -> None:
     out = mr.pick_topology("experiment", {"topology": "compute_queue"})
     assert out == {"topology": "compute_queue", "source": "task_field"}
+
+
+@pytest.mark.parametrize(
+    ("task_type", "topology"),
+    [
+        ("member_qa", "subagent"),
+        (" MEMBER_QA ", "worktree"),
+        ("member-qa", "codex_exec"),
+        ("member qa", "compute_queue"),
+        ("paper-body", "agent_team"),
+        ("paper--body", "subagent"),
+        ("paper   body", "worktree"),
+        ("paper\tbody", "codex_exec"),
+        ("---paper---body---", "compute_queue"),
+    ],
+)
+def test_claude_only_task_rejects_topology_override(
+    task_type: str, topology: str,
+) -> None:
+    out = mr.pick_topology(task_type, {"topology": topology})
+
+    assert out["topology"] == "inline"
+    assert out["source"] == "type_default"
+    assert out["rejected_field"] == topology
 
 
 def test_task_field_normalized() -> None:
     out = mr.pick_topology("experiment", {"topology": "  Worktree "})
     assert out["topology"] == "worktree"
     assert out["source"] == "task_field"
+
+
+def test_task_type_spelling_is_normalized_for_model_route() -> None:
+    assert mr.pick_model(" DAILY-ARTICLE ") == mr.pick_model("daily_article")
 
 
 def test_invalid_field_fails_open_to_default() -> None:

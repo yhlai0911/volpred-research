@@ -135,7 +135,11 @@ _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops import task_urgency as _task_urgency  # noqa: E402  (2026-07-21 R1: lane rank 的唯一判定 owner)
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
-from volpred.ops.task_pool_selection import requires_supervisor_preassignment  # noqa: E402
+from volpred.ops.task_pool_selection import (  # noqa: E402
+    GENERIC_BACKGROUND_HARD_DENY_TASK_TYPES,
+    normalize_task_type_value,
+    requires_supervisor_preassignment,
+)
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 SELF_OPTIONAL_PATTERN = re.compile(
@@ -446,14 +450,18 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
             continue
 
         lane = dispatch_lane(t)
+        task_type = normalize_task_type_value(t.get("task_type"))
         if lane in BLOCKED_DISPATCH_LANES:
             blocked.append({"task": t, "reason": f"dispatch_lane:{lane}"})
             continue
-        if lane in AGENT_DISPATCH_LANES:
-            agentable.append(t)
-            continue
         if lane in MAIN_THREAD_DISPATCH_LANES:
             main_thread.append(t)
+            continue
+        if task_type in GENERIC_BACKGROUND_HARD_DENY_TASK_TYPES:
+            main_thread.append(t)
+            continue
+        if lane in AGENT_DISPATCH_LANES:
+            agentable.append(t)
             continue
         if lane:
             blocked.append({"task": t, "reason": f"unknown_dispatch_lane:{lane}"})
@@ -481,9 +489,11 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
         # auto-flows that hourly dispatch should route (member_qa stays Claude-
         # only via task-routing rule + model_router, agentable just means
         # auto-dispatchable rather than waiting for an interactive session).
-        explicit_agentable = (t.get("task_type") or "").lower() in (
+        explicit_agentable = task_type in (
             "experiment",
+            "event_article",
             "member_qa",
+            "daily_article",
             "daily_digest",
         )
         if explicit_agentable:

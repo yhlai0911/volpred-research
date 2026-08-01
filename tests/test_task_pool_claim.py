@@ -2281,10 +2281,25 @@ def test_codex_owner_cannot_claim_claude_only_task(
     assert "claimed_by" not in saved[0]
 
 
-def test_event_article_is_hard_denied_to_codex_even_when_preferred_agent_drifts() -> None:
+@pytest.mark.parametrize(
+    "task_type",
+    [
+        "email_reply",
+        "event_article",
+        "member_qa",
+        "paper_body",
+        "paper_decision",
+        "strategy_lifecycle",
+        "telegram_reply",
+        "trending_repost",
+    ],
+)
+def test_claude_only_task_is_hard_denied_to_codex_even_when_metadata_drifts(
+    task_type,
+) -> None:
     task = {
-        "id": "event_article_fomc_tplus0",
-        "task_type": "event_article",
+        "id": f"claude-only-{task_type}",
+        "task_type": task_type,
         "status": "pending",
         "dispatch_lane": "agent",
         "preferred_agent": "codex",
@@ -2299,6 +2314,38 @@ def test_event_article_is_hard_denied_to_codex_even_when_preferred_agent_drifts(
     )
     assert decision.eligible is False
     assert decision.primary_reason == "not_codex_eligible"
+
+
+@pytest.mark.parametrize(
+    "task_type",
+    [
+        "paper_body",
+        "paper-body",
+        " PAPER BODY ",
+        "paper--body",
+        "paper   body",
+        "paper\tbody",
+        "---paper---body---",
+    ],
+)
+def test_non_background_capability_blocks_generic_claude_claim(task_type) -> None:
+    task = {
+        "id": "paper-body-background-bypass",
+        "task_type": task_type,
+        "status": "pending",
+        "dispatch_lane": "agent",
+        "preferred_agent": "claude",
+    }
+
+    decision = evaluate_task_claim(
+        task,
+        owner="hourly-slot-1",
+        main_thread=False,
+        observed_at=datetime(2026, 7, 30, 6, 0, tzinfo=timezone.utc),
+    )
+
+    assert decision.eligible is False
+    assert decision.primary_reason == "main_thread_capability"
 
 
 def test_event_article_claim_is_blocked_while_another_event_is_active(
@@ -2886,8 +2933,8 @@ def _selection_task(task_id: str, **overrides: object) -> dict[str, object]:
             ),
             "codex-vscode",
             False,
-            True,
-            "eligible",
+            False,
+            "not_codex_eligible",
         ),
         (
             _selection_task(

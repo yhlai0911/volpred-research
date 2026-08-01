@@ -24,21 +24,15 @@ if str(SRC) not in sys.path:
 
 from volpred.ops.alerts import build_alert_condition_report
 from volpred.ops.boss_facing import plainify_boss_text
+from volpred.ops.task_pool_selection import (
+    CLAUDE_ONLY_TASK_TYPES,
+    GENERIC_BACKGROUND_HARD_DENY_TASK_TYPES,
+    normalize_task_type_value,
+)
 from volpred.ops.task_pool_mode import load_task_pool_mode
 
 FB_POST_TERMINAL_STATUSES = {"success", "wont_fix", "fb_silent_reject", "expired_skip"}
 FB_POST_HANDOFF_STATUSES = {"awaiting_interactive_session"}
-CLAUDE_ONLY_TASK_TYPES = {
-    "paper_body",
-    "paper_decision",
-    "event_article",
-    "member_qa",
-    "trending_repost",
-    "strategy_lifecycle",
-    "email_reply",
-}
-
-
 def load_env():
     env = {}
     for fname in (".env.local", ".env"):
@@ -248,7 +242,15 @@ def main():
         by_type[t.get("task_type", "?")] = by_type.get(t.get("task_type", "?"), 0) + 1
     pending_claude_only = [
         t for t in pending
-        if str(t.get("task_type") or "").strip().lower() in CLAUDE_ONLY_TASK_TYPES
+        if normalize_task_type_value(t.get("task_type")) in CLAUDE_ONLY_TASK_TYPES
+    ]
+    pending_interactive_only = [
+        t for t in pending
+        if normalize_task_type_value(t.get("task_type"))
+        in GENERIC_BACKGROUND_HARD_DENY_TASK_TYPES
+    ]
+    pending_core_claude = [
+        t for t in pending_claude_only if t not in pending_interactive_only
     ]
     # Health threshold counts ALL active pipeline work, not just dispatchable
     # `pending`: pending + pending_main + in_flight (compute_queued/claimed/in_progress).
@@ -301,8 +303,16 @@ def main():
         # （benign、自我修復，但連續多 tick 噪音）。trough=3 視為健康 ok；warn 留給
         # 真正低（≤2 = refill 跟不上消耗）；critical 維持 0-idle（下方 else 分支）。
         pending_status = "ok" if total_active >= 3 else "warn"
-        if len(pending_claude_only) == len(pending):
-            pending_next = "Claude-only pending backlog; Codex should skip and Claude main thread should claim"
+        if len(pending_interactive_only) == len(pending):
+            pending_next = (
+                "interactive-only pending backlog; Operations Core workers should "
+                "skip and the owner/responder main thread should claim"
+            )
+        elif len(pending_core_claude) == len(pending):
+            pending_next = (
+                "Claude-only Operations Core backlog; dispatch the managed Claude "
+                "worker without waiting for a desktop session"
+            )
         else:
             pending_next = "dispatch top P1-P3 if slots free"
     elif pending_main:
@@ -335,6 +345,8 @@ def main():
         pending_count=len(pending),
         pending_main_thread_count=len(pending_main),
         pending_claude_only_count=len(pending_claude_only),
+        pending_core_claude_count=len(pending_core_claude),
+        pending_interactive_only_count=len(pending_interactive_only),
         in_flight_count=len(in_flight),
         stale_inflight_count=len(stale_inflight),
         task_pool_owner_mode=(

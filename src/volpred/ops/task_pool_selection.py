@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
+import re
 from typing import Any, Iterable, Mapping
 
 from .next_tasks import (
@@ -39,7 +40,30 @@ CODEX_ELIGIBLE_TASK_TYPES = frozenset(
         "daily_digest",
     }
 )
-CODEX_HARD_DENY_TASK_TYPES = frozenset({"event_article"})
+# Capability is a task-type contract, not metadata preference.  Every type in
+# this set requires a Claude-owned lifecycle; malformed `preferred_agent=codex`
+# must never turn that into a Codex claim.
+CLAUDE_ONLY_TASK_TYPES = frozenset(
+    {
+        "email_reply",
+        "event_article",
+        "member_qa",
+        "paper_body",
+        "paper_decision",
+        "strategy_lifecycle",
+        "telegram_reply",
+        "trending_repost",
+    }
+)
+CODEX_HARD_DENY_TASK_TYPES = CLAUDE_ONLY_TASK_TYPES
+
+# Two Claude-only types are intentionally executed by an Operations Core
+# Claude worker.  The rest require an interactive/responder lifecycle and are
+# excluded from the generic background candidate pool as well.
+GENERIC_BACKGROUND_HARD_DENY_TASK_TYPES = CLAUDE_ONLY_TASK_TYPES - {
+    "event_article",
+    "member_qa",
+}
 DISPATCH_MUTATING_TASK_TYPES = frozenset({"platform_ops", "governance"})
 SINGLE_FLIGHT_TASK_TYPES = frozenset({"event_article"})
 _ACTIVE_STATUSES = frozenset({"claimed", "in_progress"})
@@ -126,14 +150,13 @@ def resolve_task_identity(
     )
 
 
+def normalize_task_type_value(value: object) -> str:
+    """Canonical spelling shared by claim, dispatch, routing, and reporting."""
+    return re.sub(r"[-_\s]+", "_", str(value or "").strip().lower()).strip("_")
+
+
 def normalized_task_type(task: Mapping[str, Any]) -> str:
-    return (
-        str(task.get("task_type") or "")
-        .strip()
-        .lower()
-        .replace("-", "_")
-        .replace(" ", "_")
-    )
+    return normalize_task_type_value(task.get("task_type"))
 
 
 def requires_supervisor_preassignment(task: Mapping[str, Any]) -> bool:
@@ -380,6 +403,12 @@ def evaluate_task_claim(
     elif is_codex_owner(owner) and not is_codex_eligible_task(task):
         primary_reason = "not_codex_eligible"
         eligible = False
+    elif (
+        normalized_task_type(task) in GENERIC_BACKGROUND_HARD_DENY_TASK_TYPES
+        and not main_thread
+    ):
+        primary_reason = "main_thread_capability"
+        eligible = False
 
     return LegacyClaimDecision(
         task_id=task_id,
@@ -493,9 +522,11 @@ def select_task_for_claim(
 
 
 __all__ = [
+    "CLAUDE_ONLY_TASK_TYPES",
     "CODEX_HARD_DENY_TASK_TYPES",
     "CODEX_ELIGIBLE_TASK_TYPES",
     "DISPATCH_MUTATING_TASK_TYPES",
+    "GENERIC_BACKGROUND_HARD_DENY_TASK_TYPES",
     "SINGLE_FLIGHT_TASK_TYPES",
     "LegacyClaimDecision",
     "LegacyClaimSelection",
@@ -504,6 +535,7 @@ __all__ = [
     "is_codex_eligible_task",
     "is_codex_owner",
     "is_pending_list_candidate",
+    "normalize_task_type_value",
     "normalized_task_type",
     "dispatch_admission_rank_key",
     "is_immediate_dispatch_task",
