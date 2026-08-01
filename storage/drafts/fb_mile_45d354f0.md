@@ -1,4 +1,8 @@
-昨天聯準會開完會，利率一動也沒動，第五次了。
+# mile_id: mile_45d354f0
+
+## 主貼文
+
+禮拜三聯準會開完會，利率一動也沒動，第五次了。
 
 按理說這種會最無聊。不確定的事變確定，波動率該往下掉。
 
@@ -12,7 +16,7 @@
 
 真正的樣子是：多數時候小跌，偶爾大爆一次。
 
-昨天那 +2.45 點，排在 60 次裡的第 95 百分位。
+那天的 +2.45 點，排在 60 次裡的第 95 百分位。
 
 有個地方很有意思。同一天，如果改用 z 分數量，只有 0.89 個標準差，看起來普通到不行。
 
@@ -25,3 +29,12 @@
 樣本就 60 次，切成三段每段剩十幾二十個點，信賴區間很寬。這篇不敢說模式反轉，只敢說：拿「決議日 VIX 會跌」當交易前提，最近這 20 次站不住腳。
 
 完整數字、兩張圖、統計檢定和限制都寫在下面。
+
+## 第一則留言
+
+https://volpred.zeabur.app/v3/reports/mile_45d354f0
+
+## 圖片
+
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fomc_2026_07_29_t0/fig1_fomc_day_vix.png
+https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fomc_2026_07_29_t0/fig2_implied_vs_realized.png
