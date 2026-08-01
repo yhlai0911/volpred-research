@@ -1,0 +1,53 @@
+{
+  "id": "agent-k1745-tvp-har-dce2e9e5",
+  "title": "K1745 TVP-HAR Kalman OOS experiment",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1745-tvp-har-dce2e9e5.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-dce2e9e5-k1745",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-dce2e9e5-k1745/experiments/K1745/K1745_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-k1745-tvp-har-dce2e9e5.json",
+    "--timeout",
+    "10680"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-01T17:24:27Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1745-tvp-har-dce2e9e5.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1745-tvp-har-dce2e9e5.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-dce2e9e5-k1745/experiments/K1745/K1745_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-k1745-tvp-har-dce2e9e5.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-dce2e9e5-k1745",
+  "claude_followup": {
+    "brief": "Collect K1745: read terminal receipt and first_seen/evidence timestamps; verify README, results, reproduce spec, data provenance, lookahead, canonical QLIKE/DM-HLN HAC, Giacomini-Rossi implementation, sensitivities, and final primary-path Codex verdict. Run artifact gates, then integrate dispatch-slot-1-dce2e9e5-k1745 only through bash scripts/merge_worktree.sh if all gates pass; programmatically write knowledge/work log and terminalize K1745 honestly.",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1745",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-01T17:24:27Z",
+    "linked_at": "2026-08-01T17:24:28Z",
+    "error": null
+  },
+  "timeout_seconds": 10800,
+  "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief-k1745-dce2e9e5.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1745-tvp-har-dce2e9e5.md"
+}
