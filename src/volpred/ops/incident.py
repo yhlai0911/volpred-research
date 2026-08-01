@@ -417,19 +417,25 @@ def _record_instance_transition(
     instance_key: str,
     transition: str | None,
     now: datetime,
+    reason: str | None = None,
 ) -> None:
     """Persist failure-edge changes separately from raw detector polls."""
     row["instance_transition_tracking"] = True
     transitions = row.setdefault("instance_transitions", [])
     if transition is None:
         return
-    transitions.append(
-        {
-            "at": now.isoformat(),
-            "instance_key": instance_key,
-            "transition": transition,
-        }
-    )
+    event = {
+        "at": now.isoformat(),
+        "instance_key": instance_key,
+        "transition": transition,
+    }
+    normalized_reason = str(reason or "").strip()
+    if normalized_reason:
+        # The mutable instance detail can change on a later detector poll.
+        # Snapshot the edge-opening cause here so a PDCA review never judges
+        # historical evidence using the latest observation instead.
+        event["reason"] = normalized_reason
+    transitions.append(event)
     del transitions[:-_INSTANCE_TRANSITION_LIMIT]
 
 
@@ -458,14 +464,13 @@ def _ensure_instance_transition_tracking(
         key = str(item.get("key") or "").strip()
         if not key:
             continue
-        transitions.append(
-            {
-                "at": at,
-                "instance_key": key,
-                "transition": "opened",
-                "migration_baseline": True,
-            }
-        )
+        event = {
+            "at": at,
+            "instance_key": key,
+            "transition": "opened",
+            "migration_baseline": True,
+        }
+        transitions.append(event)
     row["instance_transition_tracking"] = True
     row["instance_transition_baselined_at"] = at
     row["instance_transitions"] = transitions[-_INSTANCE_TRANSITION_LIMIT:]
@@ -594,13 +599,19 @@ def route_breach(
         if instance_key:
             key = str(instance_key)
             _ensure_instance_transition_tracking(row, now=current)
+            transition = _upsert_instance(
+                row, key, current, instance_detail
+            )
             _record_instance_transition(
                 row,
                 instance_key=key,
-                transition=_upsert_instance(
-                    row, key, current, instance_detail
-                ),
+                transition=transition,
                 now=current,
+                reason=(
+                    str(instance_detail.get("reason") or "")
+                    if isinstance(instance_detail, dict)
+                    else None
+                ),
             )
         for key in instance_keys or ():
             text = str(key or "").strip()

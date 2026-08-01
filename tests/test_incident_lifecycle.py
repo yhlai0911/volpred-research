@@ -185,6 +185,40 @@ def test_instance_polling_records_one_graph_transition_but_all_observations(
             "at": T0.isoformat(),
             "instance_key": "dispatch-slot-1-same",
             "transition": "opened",
+            "reason": "worker_orphaned",
+        }
+    ]
+
+
+def test_instance_transition_snapshots_reason_before_detail_changes(
+    store, queue
+) -> None:
+    """PDCA evidence must preserve why an edge opened, not its latest detail."""
+    incident.route_breach(
+        store,
+        kind="worker_orphaned",
+        instance_key="dispatch-slot-1-stable-reason",
+        instance_detail={"reason": "worker_unknown_external"},
+        now=T0,
+    )
+    incident.route_breach(
+        store,
+        kind="worker_orphaned",
+        instance_key="dispatch-slot-1-stable-reason",
+        instance_detail={"reason": "worker_superseded_generation"},
+        now=T0 + timedelta(minutes=1),
+    )
+
+    row = _incident_row(store, "worker_orphaned")
+    assert row["instances"][0]["detail"]["reason"] == (
+        "worker_superseded_generation"
+    )
+    assert row["instance_transitions"] == [
+        {
+            "at": T0.isoformat(),
+            "instance_key": "dispatch-slot-1-stable-reason",
+            "transition": "opened",
+            "reason": "worker_unknown_external",
         }
     ]
 
@@ -261,6 +295,9 @@ def test_legacy_instance_incident_baselines_only_open_edges_once(
                                 "first_seen_at": (T0 - timedelta(days=2)).isoformat(),
                                 "last_seen_at": (T0 - timedelta(minutes=2)).isoformat(),
                                 "cleared_at": None,
+                                # A migration projection is mutable evidence;
+                                # it must not be promoted to opening cause.
+                                "detail": {"reason": "worker_superseded_generation"},
                             },
                             {
                                 "key": "active-b",

@@ -507,15 +507,35 @@
         "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
         "max_false_positive_signals": 1,
         "min_incident_occurrences": 2,
-        "incident_metric": "instance_transitions"
+        "incident_metric": "instance_transitions",
+        "incident_transition_reason_prefixes": [
+          "worker_orphaned",
+          "worker_unknown_external",
+          "worker_system_termination_unconfirmed",
+          "worker_kill_failed_orphan",
+          "worker_timeout_unverified",
+          "worker_orphan_unverified"
+        ],
+        "incident_transition_safe_reasons": [
+          "worker_system_terminated",
+          "worker_superseded_generation"
+        ],
+        "incident_transition_reason_receipt": {
+          "path": "ops/dispatch_workspace_receipts.jsonl",
+          "events": ["checkpointed"],
+          "identity_field": "workspace",
+          "reason_field": "reason",
+          "timestamp_field": "at",
+          "max_age_seconds": 120
+        }
       },
       "lifecycle": {
         "phase": "check",
         "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"],
         "last_action": "recalibrate",
-        "last_reviewed_at": "2026-07-30T10:37:59.120738+00:00",
-        "review_task_id": "control_gate_review_dispatch_worker_ownership_20260730T093941_48e26abbabfd"
+        "last_reviewed_at": "2026-08-01T16:44:18.631321+00:00",
+        "review_task_id": "control_gate_review_dispatch_worker_ownership_20260801T150057_3e7a1bfdc47b"
       }
     },
     {

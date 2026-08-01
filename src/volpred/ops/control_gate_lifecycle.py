@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -34,6 +35,9 @@ DEFAULT_REGISTRY_PATH = (
 )
 DEFAULT_STATE_RELATIVE_PATH = "ops/control_gate_lifecycle_latest.json"
 CONTROL_DECISIONS_RELATIVE_PATH = "logs/control_gate_decisions.jsonl"
+MAX_TIMEDELTA_WHOLE_SECONDS = (
+    timedelta.max.days * 24 * 60 * 60 + timedelta.max.seconds
+)
 ACTIVE_TASK_STATUSES = {
     "pending",
     "pending_main_thread",
@@ -381,6 +385,115 @@ def _validate_registry(payload: Any) -> dict[str, Any]:
                 f"gate {gate_id!r} review_policy.incident_metric must be "
                 f"one of {sorted(INCIDENT_METRICS)!r}"
             )
+        reason_prefixes = policy.get("incident_transition_reason_prefixes")
+        if reason_prefixes is not None and (
+            str(policy.get("incident_metric") or "raw_observations")
+            != "instance_transitions"
+            or not isinstance(reason_prefixes, list)
+            or not reason_prefixes
+            or not all(
+                isinstance(prefix, str) and prefix.strip()
+                for prefix in reason_prefixes
+            )
+            or len({prefix.strip() for prefix in reason_prefixes})
+            != len(reason_prefixes)
+        ):
+            raise ValueError(
+                f"gate {gate_id!r} review_policy."
+                "incident_transition_reason_prefixes requires unique "
+                "non-empty strings with incident_metric=instance_transitions"
+            )
+        safe_reasons = policy.get("incident_transition_safe_reasons")
+        if safe_reasons is not None and (
+            str(policy.get("incident_metric") or "raw_observations")
+            != "instance_transitions"
+            or not isinstance(safe_reasons, list)
+            or not safe_reasons
+            or not all(
+                isinstance(reason, str) and reason.strip()
+                for reason in safe_reasons
+            )
+            or len({reason.strip() for reason in safe_reasons})
+            != len(safe_reasons)
+            or not reason_prefixes
+        ):
+            raise ValueError(
+                f"gate {gate_id!r} review_policy."
+                "incident_transition_safe_reasons requires unique "
+                "non-empty strings, owned reason prefixes, and "
+                "incident_metric=instance_transitions"
+            )
+        reason_receipt = policy.get("incident_transition_reason_receipt")
+        if reason_receipt is not None:
+            raw_receipt_path = (
+                reason_receipt.get("path")
+                if isinstance(reason_receipt, dict)
+                else None
+            )
+            receipt_path = (
+                raw_receipt_path.strip()
+                if isinstance(raw_receipt_path, str)
+                else ""
+            )
+            receipt_events = (
+                reason_receipt.get("events")
+                if isinstance(reason_receipt, dict)
+                else None
+            )
+            receipt_fields = (
+                [
+                    reason_receipt.get(name).strip()
+                    for name in (
+                        "identity_field",
+                        "reason_field",
+                        "timestamp_field",
+                    )
+                    if isinstance(reason_receipt.get(name), str)
+                ]
+                if isinstance(reason_receipt, dict)
+                else []
+            )
+            raw_max_age_seconds = (
+                reason_receipt.get("max_age_seconds")
+                if isinstance(reason_receipt, dict)
+                else None
+            )
+            has_valid_max_age_seconds = (
+                isinstance(raw_max_age_seconds, int)
+                and not isinstance(raw_max_age_seconds, bool)
+                and 0 < raw_max_age_seconds <= MAX_TIMEDELTA_WHOLE_SECONDS
+            ) or (
+                isinstance(raw_max_age_seconds, float)
+                and math.isfinite(raw_max_age_seconds)
+                and 0 < raw_max_age_seconds <= MAX_TIMEDELTA_WHOLE_SECONDS
+            )
+            if (
+                str(policy.get("incident_metric") or "raw_observations")
+                != "instance_transitions"
+                or not isinstance(reason_receipt, dict)
+                or not reason_prefixes
+                or not receipt_path
+                or Path(receipt_path).is_absolute()
+                or ".." in Path(receipt_path).parts
+                or not isinstance(receipt_events, list)
+                or not receipt_events
+                or not all(
+                    isinstance(event, str) and event.strip()
+                    for event in receipt_events
+                )
+                or len({event.strip() for event in receipt_events})
+                != len(receipt_events)
+                or len(receipt_fields) != 3
+                or not all(receipt_fields)
+                or len(set(receipt_fields)) != len(receipt_fields)
+                or not has_valid_max_age_seconds
+            ):
+                raise ValueError(
+                    f"gate {gate_id!r} review_policy."
+                    "incident_transition_reason_receipt requires a relative "
+                    "path, unique events/fields, positive max_age_seconds, "
+                    "and incident_metric=instance_transitions"
+                )
         harm_outcomes = policy.get("harm_outcomes")
         if (
             not isinstance(harm_outcomes, list)
@@ -1518,12 +1631,141 @@ def _incident_occurrences_since(
     are not replayed; :mod:`volpred.ops.incident` records one explicit baseline
     transition for each edge that is still open at migration time.
     """
+    summary = _incident_transition_summary_since(
+        row,
+        window_start=window_start,
+        now=now,
+    )
+    return int(summary["count"]), list(summary["diagnostics"])
+
+
+def _index_transition_reason_receipts(
+    rows: list[dict[str, Any]],
+    *,
+    policy: dict[str, Any],
+) -> tuple[
+    dict[str, list[tuple[datetime, str]]],
+    list[str],
+    int,
+]:
+    """Index immutable edge-opening receipts by their workspace identity."""
+
+    accepted_events = {
+        str(event).strip() for event in policy.get("events") or []
+    }
+    identity_field = str(policy["identity_field"])
+    reason_field = str(policy["reason_field"])
+    timestamp_field = str(policy["timestamp_field"])
+    indexed: dict[str, list[tuple[datetime, str]]] = defaultdict(list)
+    diagnostics: list[str] = []
+    selected_count = 0
+    for index, row in enumerate(rows):
+        if str(row.get("event") or "").strip() not in accepted_events:
+            continue
+        selected_count += 1
+        identity = str(row.get(identity_field) or "").strip()
+        reason = str(row.get(reason_field) or "").strip()
+        at, malformed_at = _try_parse_time(row.get(timestamp_field))
+        if not identity:
+            diagnostics.append(f"receipt[{index}]_missing_identity")
+            continue
+        if not reason:
+            diagnostics.append(f"receipt[{index}]_missing_reason")
+            continue
+        if malformed_at or at is None:
+            diagnostics.append(f"receipt[{index}]_invalid_at")
+            continue
+        indexed[identity].append((at, reason))
+    for receipts in indexed.values():
+        receipts.sort(key=lambda item: item[0])
+    return dict(indexed), diagnostics, selected_count
+
+
+def _reason_from_immutable_receipt(
+    transition: dict[str, Any],
+    *,
+    transition_at: datetime,
+    receipt_index: dict[str, list[tuple[datetime, str]]],
+    max_age_seconds: float,
+) -> tuple[str, str | None]:
+    """Join a legacy reasonless transition to its closest prior receipt."""
+
+    identity = str(transition.get("instance_key") or "").strip()
+    if not identity:
+        return "", "reason_receipt_missing_identity"
+    eligible = [
+        (at, reason)
+        for at, reason in receipt_index.get(identity, [])
+        if at < transition_at
+        and (transition_at - at).total_seconds() <= max_age_seconds
+    ]
+    if not eligible:
+        return "", "reason_receipt_unjoinable"
+    eligible_reasons = {reason for _, reason in eligible}
+    if len(eligible_reasons) != 1:
+        return "", "reason_receipt_conflict"
+    return next(iter(eligible_reasons)), None
+
+
+def _classify_incident_transition_reason(
+    reason: str,
+    *,
+    owned_prefixes: tuple[str, ...],
+    safe_reasons: frozenset[str],
+) -> str:
+    """Return the gate-owned domain class for one immutable reason."""
+
+    if any(reason.startswith(prefix) for prefix in owned_prefixes):
+        return "owned"
+    if reason in safe_reasons:
+        return "safe"
+    return "unknown"
+
+
+def _incident_transition_summary_since(
+    row: dict[str, Any],
+    *,
+    window_start: datetime,
+    now: datetime,
+    reason_prefixes: tuple[str, ...] = (),
+    safe_reasons: frozenset[str] = frozenset(),
+    receipt_index: dict[str, list[tuple[datetime, str]]] | None = None,
+    receipt_max_age_seconds: float = 0,
+) -> dict[str, Any]:
+    """Summarize immutable incident-edge transitions for one review window.
+
+    ``worker_orphaned`` is an aggregate workspace-adjudication incident: its
+    instances include true ownership ambiguity as well as expected terminal
+    settlements and merge/test failures.  A gate may therefore select the
+    exact reason families it owns.  New transitions carry their opening
+    reason; legacy transitions may join only to a time-bounded immutable
+    receipt.  Mutable ``instances[].detail`` is deliberately never consulted.
+    Missing, conflicting, or unknown reasons fail audit health closed.
+    """
     if row.get("instance_transition_tracking") is not True:
-        return 0, []
+        return {
+            "count": 0,
+            "diagnostics": [],
+            "excluded_count": 0,
+            "excluded_reasons": {},
+            "unknown_count": 0,
+            "unknown_reasons": {},
+        }
     transitions = row.get("instance_transitions")
     if not isinstance(transitions, list):
-        return 0, ["instance_transitions_not_list"]
+        return {
+            "count": 0,
+            "diagnostics": ["instance_transitions_not_list"],
+            "excluded_count": 0,
+            "excluded_reasons": {},
+            "unknown_count": 0,
+            "unknown_reasons": {},
+        }
     count = 0
+    excluded_count = 0
+    excluded_reasons: dict[str, int] = defaultdict(int)
+    unknown_count = 0
+    unknown_reasons: dict[str, int] = defaultdict(int)
     diagnostics: list[str] = []
     for index, transition in enumerate(transitions):
         if not isinstance(transition, dict):
@@ -1540,8 +1782,45 @@ def _incident_occurrences_since(
             diagnostics.append(f"transition[{index}]_invalid_at")
             continue
         if window_start < at <= now:
+            if reason_prefixes:
+                reason = str(transition.get("reason") or "").strip()
+                if not reason:
+                    reason, receipt_error = _reason_from_immutable_receipt(
+                        transition,
+                        transition_at=at,
+                        receipt_index=receipt_index or {},
+                        max_age_seconds=receipt_max_age_seconds,
+                    )
+                    if receipt_error:
+                        diagnostics.append(
+                            f"transition[{index}]_{receipt_error}"
+                        )
+                        continue
+                classification = _classify_incident_transition_reason(
+                    reason,
+                    owned_prefixes=reason_prefixes,
+                    safe_reasons=safe_reasons,
+                )
+                if classification == "safe":
+                    excluded_count += 1
+                    excluded_reasons[reason] += 1
+                    continue
+                if classification == "unknown":
+                    unknown_count += 1
+                    unknown_reasons[reason] += 1
+                    diagnostics.append(
+                        f"transition[{index}]_unknown_reason:{reason}"
+                    )
+                    continue
             count += 1
-    return count, diagnostics
+    return {
+        "count": count,
+        "diagnostics": diagnostics,
+        "excluded_count": excluded_count,
+        "excluded_reasons": dict(sorted(excluded_reasons.items())),
+        "unknown_count": unknown_count,
+        "unknown_reasons": dict(sorted(unknown_reasons.items())),
+    }
 
 
 def _existing_open_review(
@@ -2224,6 +2503,13 @@ def audit_control_gates(
     dispatch_completions, dispatch_health = _load_dispatch_completions(
         storage_root
     )
+    transition_reason_receipt_cache: dict[
+        str,
+        tuple[
+            dict[str, list[tuple[datetime, str]]],
+            dict[str, Any],
+        ],
+    ] = {}
 
     gate_verdicts: list[dict[str, Any]] = []
     created_reviews: list[str] = []
@@ -2348,19 +2634,100 @@ def audit_control_gates(
             or "raw_observations"
         )
         transition_diagnostics: dict[str, list[str]] = {}
+        transition_summaries: dict[str, dict[str, Any]] = {}
         incident_occurrences = 0
+        incident_excluded_occurrences = 0
+        incident_excluded_reasons: dict[str, int] = defaultdict(int)
+        incident_unknown_occurrences = 0
+        incident_unknown_reasons: dict[str, int] = defaultdict(int)
+        reason_prefixes = tuple(
+            str(prefix).strip()
+            for prefix in gate["review_policy"].get(
+                "incident_transition_reason_prefixes"
+            )
+            or []
+        )
+        safe_reasons = frozenset(
+            str(reason).strip()
+            for reason in gate["review_policy"].get(
+                "incident_transition_safe_reasons"
+            )
+            or []
+        )
+        receipt_policy = gate["review_policy"].get(
+            "incident_transition_reason_receipt"
+        )
+        receipt_index: dict[str, list[tuple[datetime, str]]] = {}
+        receipt_max_age_seconds = 0.0
+        if isinstance(receipt_policy, dict):
+            receipt_max_age_seconds = float(
+                receipt_policy["max_age_seconds"]
+            )
+            receipt_relative_path = str(receipt_policy["path"])
+            cache_key = json.dumps(
+                receipt_policy,
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            cached_receipts = transition_reason_receipt_cache.get(cache_key)
+            if cached_receipts is None:
+                receipt_path = storage_root / receipt_relative_path
+                receipt_rows, _, receipt_health = _read_jsonl(receipt_path)
+                (
+                    receipt_index,
+                    receipt_diagnostics,
+                    selected_receipt_count,
+                ) = _index_transition_reason_receipts(
+                    receipt_rows,
+                    policy=receipt_policy,
+                )
+                receipt_health = {
+                    **receipt_health,
+                    "selected_event_rows": selected_receipt_count,
+                    "indexed_identity_count": len(receipt_index),
+                }
+                if receipt_diagnostics:
+                    receipt_health.update(
+                        {
+                            "ok": False,
+                            "error": (
+                                "malformed_transition_reason_receipt_rows"
+                            ),
+                            "receipt_diagnostics": receipt_diagnostics,
+                        }
+                    )
+                cached_receipts = (receipt_index, receipt_health)
+                transition_reason_receipt_cache[cache_key] = cached_receipts
+            receipt_index, receipt_health = cached_receipts
+            source_health.append(receipt_health)
         for row in incident_hits:
             if incident_metric == "instance_transitions":
-                count, diagnostics = _incident_occurrences_since(
+                incident_id = str(row.get("incident_id") or "<missing>")
+                summary = _incident_transition_summary_since(
                     row,
                     window_start=window_start,
                     now=current,
+                    reason_prefixes=reason_prefixes,
+                    safe_reasons=safe_reasons,
+                    receipt_index=receipt_index,
+                    receipt_max_age_seconds=receipt_max_age_seconds,
                 )
-                incident_occurrences += count
-                if diagnostics:
-                    transition_diagnostics[
-                        str(row.get("incident_id") or "<missing>")
-                    ] = diagnostics
+                transition_summaries[incident_id] = summary
+                incident_occurrences += int(summary["count"])
+                incident_excluded_occurrences += int(
+                    summary["excluded_count"]
+                )
+                for reason, count in summary["excluded_reasons"].items():
+                    incident_excluded_reasons[str(reason)] += int(count)
+                incident_unknown_occurrences += int(
+                    summary["unknown_count"]
+                )
+                for reason, count in summary["unknown_reasons"].items():
+                    incident_unknown_reasons[str(reason)] += int(count)
+                if summary["diagnostics"]:
+                    transition_diagnostics[incident_id] = list(
+                        summary["diagnostics"]
+                    )
             else:
                 incident_occurrences += int(
                     row.get("occurrence_count") or 1
@@ -2408,11 +2775,12 @@ def audit_control_gates(
             1
             for row in incident_hits
             if (
-                _incident_occurrences_since(
-                    row,
-                    window_start=window_start,
-                    now=current,
-                )[0]
+                int(
+                    transition_summaries.get(
+                        str(row.get("incident_id") or "<missing>"),
+                        {"count": 0},
+                    )["count"]
+                )
                 if incident_metric == "instance_transitions"
                 else int(row.get("occurrence_count") or 1)
             ) > 1
@@ -2487,6 +2855,18 @@ def audit_control_gates(
                 "incident_count": len(incident_hits),
                 "incident_metric": incident_metric,
                 "incident_occurrences": incident_occurrences,
+                "incident_excluded_occurrences": (
+                    incident_excluded_occurrences
+                ),
+                "incident_excluded_reasons": dict(
+                    sorted(incident_excluded_reasons.items())
+                ),
+                "incident_unknown_occurrences": (
+                    incident_unknown_occurrences
+                ),
+                "incident_unknown_reasons": dict(
+                    sorted(incident_unknown_reasons.items())
+                ),
                 "incident_observations": incident_observations,
                 "incident_ids": sorted(
                     str(row.get("incident_id") or "") for row in incident_hits

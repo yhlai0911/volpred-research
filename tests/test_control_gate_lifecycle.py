@@ -180,6 +180,168 @@ def test_registry_rejects_non_hashed_review_receipt_identity(
         load_gate_registry(path)
 
 
+def test_registry_rejects_transition_reason_filter_for_raw_metric(
+    tmp_path: Path,
+) -> None:
+    registry = _registry()
+    registry["gates"][0]["review_policy"][
+        "incident_transition_reason_prefixes"
+    ] = ["worker_orphaned"]
+    path = tmp_path / "registry.json"
+    _write_json(path, registry)
+
+    with pytest.raises(
+        ValueError,
+        match="incident_transition_reason_prefixes.*instance_transitions",
+    ):
+        load_gate_registry(path)
+
+
+@pytest.mark.parametrize(
+    "prefixes",
+    [[], [""], ["worker_orphaned", "worker_orphaned"]],
+)
+def test_registry_rejects_invalid_transition_reason_prefixes(
+    tmp_path: Path,
+    prefixes: list[str],
+) -> None:
+    registry = _registry()
+    registry["gates"][0]["review_policy"].update(
+        {
+            "incident_metric": "instance_transitions",
+            "incident_transition_reason_prefixes": prefixes,
+        }
+    )
+    path = tmp_path / "registry.json"
+    _write_json(path, registry)
+
+    with pytest.raises(ValueError, match="unique non-empty strings"):
+        load_gate_registry(path)
+
+
+@pytest.mark.parametrize(
+    "safe_reasons",
+    [[], [""], ["worker_system_terminated"] * 2],
+)
+def test_registry_rejects_invalid_transition_safe_reasons(
+    tmp_path: Path,
+    safe_reasons: list[str],
+) -> None:
+    registry = _registry()
+    registry["gates"][0]["review_policy"].update(
+        {
+            "incident_metric": "instance_transitions",
+            "incident_transition_reason_prefixes": ["worker_orphaned"],
+            "incident_transition_safe_reasons": safe_reasons,
+        }
+    )
+    path = tmp_path / "registry.json"
+    _write_json(path, registry)
+
+    with pytest.raises(ValueError, match="safe_reasons requires unique"):
+        load_gate_registry(path)
+
+
+@pytest.mark.parametrize(
+    "receipt_policy",
+    [
+        {},
+        {
+            "path": "../outside.jsonl",
+            "events": ["checkpointed"],
+            "identity_field": "workspace",
+            "reason_field": "reason",
+            "timestamp_field": "at",
+            "max_age_seconds": 120,
+        },
+        {
+            "path": "ops/receipts.jsonl",
+            "events": ["checkpointed", "checkpointed"],
+            "identity_field": "workspace",
+            "reason_field": "reason",
+            "timestamp_field": "at",
+            "max_age_seconds": 120,
+        },
+        {
+            "path": "ops/receipts.jsonl",
+            "events": ["checkpointed"],
+            "identity_field": "workspace",
+            "reason_field": "reason",
+            "timestamp_field": "at",
+            "max_age_seconds": 0,
+        },
+    ],
+)
+def test_registry_rejects_invalid_transition_reason_receipt(
+    tmp_path: Path,
+    receipt_policy: dict[str, object],
+) -> None:
+    registry = _registry()
+    registry["gates"][0]["review_policy"].update(
+        {
+            "incident_metric": "instance_transitions",
+            "incident_transition_reason_prefixes": ["worker_orphaned"],
+            "incident_transition_reason_receipt": receipt_policy,
+        }
+    )
+    path = tmp_path / "registry.json"
+    _write_json(path, registry)
+
+    with pytest.raises(ValueError, match="reason_receipt requires"):
+        load_gate_registry(path)
+
+
+@pytest.mark.parametrize(
+    "max_age_seconds",
+    [
+        True,
+        "120",
+        "NaN",
+        "Infinity",
+        [1],
+        float("nan"),
+        float("inf"),
+        1e100,
+        10**309,
+    ],
+    ids=[
+        "bool",
+        "numeric-string",
+        "nan-string",
+        "infinity-string",
+        "container",
+        "nan-number",
+        "infinity-number",
+        "overflowing-float",
+        "overflowing-integer",
+    ],
+)
+def test_registry_requires_finite_numeric_transition_receipt_max_age(
+    tmp_path: Path,
+    max_age_seconds: object,
+) -> None:
+    registry = _registry()
+    registry["gates"][0]["review_policy"].update(
+        {
+            "incident_metric": "instance_transitions",
+            "incident_transition_reason_prefixes": ["worker_orphaned"],
+            "incident_transition_reason_receipt": {
+                "path": "ops/receipts.jsonl",
+                "events": ["checkpointed"],
+                "identity_field": "workspace",
+                "reason_field": "reason",
+                "timestamp_field": "at",
+                "max_age_seconds": max_age_seconds,
+            },
+        }
+    )
+    path = tmp_path / "registry.json"
+    _write_json(path, registry)
+
+    with pytest.raises(ValueError, match="reason_receipt requires"):
+        load_gate_registry(path)
+
+
 def test_review_watermark_rejects_syntactic_but_wrong_hash() -> None:
     watermark = NOW - timedelta(hours=2)
     reviewed_at = NOW - timedelta(hours=1)
@@ -423,6 +585,41 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     assert worktree["lifecycle"]["review_task_id"] == (
         "control_gate_review_worktree_merge_ownership_"
         "20260730T120906_435413c1f352"
+    )
+    assert "incident_transition_reason_prefixes" not in worktree[
+        "review_policy"
+    ]
+    worker = gates["dispatch_worker_ownership"]
+    assert worker["review_policy"][
+        "incident_transition_reason_prefixes"
+    ] == [
+        "worker_orphaned",
+        "worker_unknown_external",
+        "worker_system_termination_unconfirmed",
+        "worker_kill_failed_orphan",
+        "worker_timeout_unverified",
+        "worker_orphan_unverified",
+    ]
+    assert worker["review_policy"][
+        "incident_transition_safe_reasons"
+    ] == [
+        "worker_system_terminated",
+        "worker_superseded_generation",
+    ]
+    assert worker["review_policy"][
+        "incident_transition_reason_receipt"
+    ] == {
+        "path": "ops/dispatch_workspace_receipts.jsonl",
+        "events": ["checkpointed"],
+        "identity_field": "workspace",
+        "reason_field": "reason",
+        "timestamp_field": "at",
+        "max_age_seconds": 120,
+    }
+    assert worker["lifecycle"]["last_action"] == "recalibrate"
+    assert worker["lifecycle"]["review_task_id"] == (
+        "control_gate_review_dispatch_worker_ownership_"
+        "20260801T150057_3e7a1bfdc47b"
     )
     task_generation = gates["task_generation"]
     assert task_generation["lifecycle"]["last_action"] == "recalibrate"
@@ -1977,7 +2174,9 @@ def test_instance_incident_reviews_count_only_new_graph_transitions(
     _write_json(registry_path, registry)
     _write_json(storage / "next_tasks.json", [])
     _write_json(storage / "reports" / "feed.json", [])
-    _write_json(storage / "logs" / "control_gate_decisions.jsonl", [])
+    decisions = storage / "logs" / "control_gate_decisions.jsonl"
+    decisions.parent.mkdir(parents=True, exist_ok=True)
+    decisions.write_text("", encoding="utf-8")
     incident_path = storage / "ops" / "incidents.json"
     _write_json(
         incident_path,
@@ -2128,6 +2327,407 @@ def test_instance_transition_metric_has_exact_window_and_health_contract(
         row["error"] == "malformed_instance_transition_rows"
         for row in verdict["audit_health"]["unhealthy_sources"]
     )
+
+
+def test_worker_ownership_review_excludes_safe_settlement_transitions(
+    tmp_path: Path,
+) -> None:
+    """Normal termination/supersession is not a worker-ownership breach."""
+    storage = tmp_path / "storage"
+    registry = _registry()
+    gate = registry["gates"][0]
+    gate["gate_id"] = "dispatch_worker_ownership"
+    gate["outcome_join"] = "incident_or_generation"
+    gate["deadline_required"] = False
+    gate["incident_kinds"] = ["worker_orphaned"]
+    gate["review_policy"].update(
+        {
+            "incident_metric": "instance_transitions",
+            "incident_transition_reason_prefixes": [
+                "worker_orphaned",
+                "worker_unknown_external",
+                "worker_system_termination_unconfirmed",
+                "worker_kill_failed_orphan",
+                "worker_timeout_unverified",
+                "worker_orphan_unverified",
+            ],
+            "incident_transition_safe_reasons": [
+                "worker_system_terminated",
+                "worker_superseded_generation",
+            ],
+            "incident_transition_reason_receipt": {
+                "path": "ops/dispatch_workspace_receipts.jsonl",
+                "events": ["checkpointed"],
+                "identity_field": "workspace",
+                "reason_field": "reason",
+                "timestamp_field": "at",
+                "max_age_seconds": 120,
+            },
+        }
+    )
+    gate["evidence_sources"][0] = {
+        "kind": "jsonl",
+        "path": "logs/control_gate_decisions.jsonl",
+        "match": {"gate_id": ["dispatch_worker_ownership"]},
+    }
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(storage / "ops" / "dispatch_state.json", {"completions": []})
+    decisions = storage / "logs" / "control_gate_decisions.jsonl"
+    decisions.parent.mkdir(parents=True, exist_ok=True)
+    decisions.write_text("", encoding="utf-8")
+    receipt_path = storage / "ops" / "dispatch_workspace_receipts.jsonl"
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_rows = [
+        {
+            "event": "checkpointed",
+            "workspace": f"safe-{index}",
+            "reason": (
+                "worker_system_terminated"
+                if index == 0
+                else "worker_superseded_generation"
+            ),
+            "at": (NOW - timedelta(minutes=5 - index, milliseconds=1)).isoformat(),
+        }
+        for index in range(5)
+    ]
+    receipt_path.write_text(
+        "".join(json.dumps(row) + "\n" for row in receipt_rows),
+        encoding="utf-8",
+    )
+    incident_path = storage / "ops" / "incidents.json"
+    transitions = [
+        {
+            "at": (NOW - timedelta(minutes=5 - index)).isoformat(),
+            "instance_key": f"safe-{index}",
+            "transition": "opened",
+        }
+        for index in range(5)
+    ]
+    transitions.append(
+        {
+            "at": (NOW - timedelta(seconds=30)).isoformat(),
+            "instance_key": "unsafe-orphan",
+            "transition": "opened",
+            "reason": "worker_orphaned",
+        }
+    )
+    instances = [
+        {
+            "key": f"safe-{index}",
+            # Mutable detector detail is deliberately contradictory.  The
+            # review must use the immutable checkpoint receipt that preceded
+            # the transition, never the latest incident projection.
+            "detail": {"reason": "worker_orphaned"},
+        }
+        for index in range(5)
+    ]
+    instances.append(
+        {"key": "unsafe-orphan", "detail": {"reason": "worker_orphaned"}}
+    )
+    _write_json(
+        incident_path,
+        {
+            "incidents": {
+                "inc-worker": {
+                    "incident_id": "inc-worker",
+                    "kind": "worker_orphaned",
+                    "state": "mitigating",
+                    "occurrence_count": 99,
+                    "last_seen_at": (NOW - timedelta(seconds=1)).isoformat(),
+                    "instance_transition_tracking": True,
+                    "instance_transitions": transitions,
+                    "instances": instances,
+                }
+            }
+        },
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    evidence = verdict["gates"][0]["evidence"]
+    assert evidence["incident_occurrences"] == 1
+    assert evidence["incident_excluded_occurrences"] == 5
+    assert evidence["incident_excluded_reasons"] == {
+        "worker_superseded_generation": 4,
+        "worker_system_terminated": 1,
+    }
+    assert verdict["gates"][0]["review"]["due"] is False
+    assert verdict["audit_health"]["healthy"] is True
+
+
+@pytest.mark.parametrize(
+    "receipt_rows",
+    [
+        [],
+        [
+            {
+                "event": "checkpointed",
+                "workspace": "missing-instance-detail",
+                "reason": "worker_orphaned",
+                # Simultaneous is not evidence that preceded the edge.
+                "at": NOW.isoformat(),
+            }
+        ],
+        [
+            {
+                "event": "checkpointed",
+                "workspace": "missing-instance-detail",
+                "reason": "worker_orphaned",
+                "at": (NOW - timedelta(seconds=2)).isoformat(),
+            },
+            {
+                "event": "checkpointed",
+                "workspace": "missing-instance-detail",
+                "reason": "worker_system_terminated",
+                "at": (NOW - timedelta(seconds=1)).isoformat(),
+            },
+        ],
+    ],
+    ids=["missing", "simultaneous", "conflicting"],
+)
+def test_worker_ownership_review_fails_closed_on_unjoinable_reason(
+    tmp_path: Path,
+    receipt_rows: list[dict[str, object]],
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    gate = registry["gates"][0]
+    gate["gate_id"] = "dispatch_worker_ownership"
+    gate["outcome_join"] = "incident_or_generation"
+    gate["deadline_required"] = False
+    gate["incident_kinds"] = ["worker_orphaned"]
+    gate["review_policy"].update(
+        {
+            "incident_metric": "instance_transitions",
+            "incident_transition_reason_prefixes": ["worker_orphaned"],
+            "incident_transition_safe_reasons": [
+                "worker_system_terminated"
+            ],
+            "incident_transition_reason_receipt": {
+                "path": "ops/dispatch_workspace_receipts.jsonl",
+                "events": ["checkpointed"],
+                "identity_field": "workspace",
+                "reason_field": "reason",
+                "timestamp_field": "at",
+                "max_age_seconds": 120,
+            },
+        }
+    )
+    gate["evidence_sources"][0] = {
+        "kind": "jsonl",
+        "path": "logs/control_gate_decisions.jsonl",
+        "match": {"gate_id": ["dispatch_worker_ownership"]},
+    }
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(storage / "ops" / "dispatch_state.json", {"completions": []})
+    decisions = storage / "logs" / "control_gate_decisions.jsonl"
+    decisions.parent.mkdir(parents=True, exist_ok=True)
+    decisions.write_text("", encoding="utf-8")
+    receipts = storage / "ops" / "dispatch_workspace_receipts.jsonl"
+    receipts.parent.mkdir(parents=True, exist_ok=True)
+    receipts.write_text(
+        "".join(json.dumps(row) + "\n" for row in receipt_rows),
+        encoding="utf-8",
+    )
+    _write_json(
+        storage / "ops" / "incidents.json",
+        {
+            "incidents": {
+                "inc-worker": {
+                    "incident_id": "inc-worker",
+                    "kind": "worker_orphaned",
+                    "state": "mitigating",
+                    "last_seen_at": NOW.isoformat(),
+                    "instance_transition_tracking": True,
+                    "instance_transitions": [
+                        {
+                            "at": NOW.isoformat(),
+                            "instance_key": "missing-instance-detail",
+                            "transition": "opened",
+                        }
+                    ],
+                    "instances": [],
+                }
+            }
+        },
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    assert verdict["gates"][0]["evidence"]["incident_occurrences"] == 0
+    assert (
+        verdict["gates"][0]["evidence"]["incident_excluded_occurrences"]
+        == 0
+    )
+    assert verdict["audit_health"]["healthy"] is False
+    assert any(
+        row["error"] == "malformed_instance_transition_rows"
+        for row in verdict["audit_health"]["unhealthy_sources"]
+    )
+
+
+def test_worker_ownership_review_fails_closed_on_unknown_reason(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    gate = registry["gates"][0]
+    gate["gate_id"] = "dispatch_worker_ownership"
+    gate["outcome_join"] = "incident_or_generation"
+    gate["deadline_required"] = False
+    gate["incident_kinds"] = ["worker_orphaned"]
+    gate["review_policy"].update(
+        {
+            "incident_metric": "instance_transitions",
+            "incident_transition_reason_prefixes": ["worker_orphaned"],
+            "incident_transition_safe_reasons": [
+                "worker_system_terminated"
+            ],
+        }
+    )
+    gate["evidence_sources"][0] = {
+        "kind": "jsonl",
+        "path": "logs/control_gate_decisions.jsonl",
+        "match": {"gate_id": ["dispatch_worker_ownership"]},
+    }
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(storage / "ops" / "dispatch_state.json", {"completions": []})
+    decisions = storage / "logs" / "control_gate_decisions.jsonl"
+    decisions.parent.mkdir(parents=True, exist_ok=True)
+    decisions.write_text("", encoding="utf-8")
+    _write_json(
+        storage / "ops" / "incidents.json",
+        {
+            "incidents": {
+                "inc-worker": {
+                    "incident_id": "inc-worker",
+                    "kind": "worker_orphaned",
+                    "state": "mitigating",
+                    "last_seen_at": NOW.isoformat(),
+                    "instance_transition_tracking": True,
+                    "instance_transitions": [
+                        {
+                            "at": NOW.isoformat(),
+                            "instance_key": "novel-reason",
+                            "transition": "opened",
+                            "reason": "worker_future_settlement",
+                        }
+                    ],
+                }
+            }
+        },
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    evidence = verdict["gates"][0]["evidence"]
+    assert evidence["incident_occurrences"] == 0
+    assert evidence["incident_excluded_occurrences"] == 0
+    assert evidence["incident_unknown_occurrences"] == 1
+    assert evidence["incident_unknown_reasons"] == {
+        "worker_future_settlement": 1
+    }
+    assert verdict["audit_health"]["healthy"] is False
+
+
+def test_worker_ownership_review_fails_closed_on_malformed_receipt_source(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry()
+    gate = registry["gates"][0]
+    gate["gate_id"] = "dispatch_worker_ownership"
+    gate["outcome_join"] = "incident_or_generation"
+    gate["deadline_required"] = False
+    gate["incident_kinds"] = ["worker_orphaned"]
+    gate["review_policy"].update(
+        {
+            "incident_metric": "instance_transitions",
+            "incident_transition_reason_prefixes": ["worker_orphaned"],
+            "incident_transition_reason_receipt": {
+                "path": "ops/dispatch_workspace_receipts.jsonl",
+                "events": ["checkpointed"],
+                "identity_field": "workspace",
+                "reason_field": "reason",
+                "timestamp_field": "at",
+                "max_age_seconds": 120,
+            },
+        }
+    )
+    gate["evidence_sources"][0] = {
+        "kind": "jsonl",
+        "path": "logs/control_gate_decisions.jsonl",
+        "match": {"gate_id": ["dispatch_worker_ownership"]},
+    }
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _write_json(storage / "ops" / "dispatch_state.json", {"completions": []})
+    decisions = storage / "logs" / "control_gate_decisions.jsonl"
+    decisions.parent.mkdir(parents=True, exist_ok=True)
+    decisions.write_text("", encoding="utf-8")
+    receipts = storage / "ops" / "dispatch_workspace_receipts.jsonl"
+    receipts.parent.mkdir(parents=True, exist_ok=True)
+    receipts.write_text("[]\n", encoding="utf-8")
+    _write_json(
+        storage / "ops" / "incidents.json",
+        {
+            "incidents": {
+                "inc-worker": {
+                    "incident_id": "inc-worker",
+                    "kind": "worker_orphaned",
+                    "state": "mitigating",
+                    "last_seen_at": NOW.isoformat(),
+                    "instance_transition_tracking": True,
+                    "instance_transitions": [
+                        {
+                            "at": NOW.isoformat(),
+                            "instance_key": "missing-receipt",
+                            "transition": "opened",
+                        }
+                    ],
+                    # A scalar/non-list projection used to crash the mutable
+                    # fallback comprehension.  It must now be irrelevant.
+                    "instances": 7,
+                }
+            }
+        },
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    assert verdict["audit_health"]["healthy"] is False
+    errors = {
+        row["error"] for row in verdict["audit_health"]["unhealthy_sources"]
+    }
+    assert "malformed_jsonl_rows" in errors
+    assert "malformed_instance_transition_rows" in errors
 
 
 def test_completed_adjudication_consumes_old_evidence_until_new_trigger(
