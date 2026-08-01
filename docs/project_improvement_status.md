@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-26（T04 ChangeSet shadow-path root cause fixed and verified；Boss Report production owned-delivery verified；physical two-Mac authority pair verified）**
+Last updated: **2026-08-02（commit-ownership Stage 2 shadow audit fail-closed；legacy Stage 3 permanently superseded）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -3237,3 +3237,23 @@ program goal。
 - ✅ 11 筆 root-level test v3 receipts 已由 startup 程序自動搬到 v3 child；22 筆 durable
   intent/completed audit 與逐檔 SHA 全吻合，root 只保留舊版 v1/v2。此 Issue #53 bounded slice
   為 **`root_cause_fixed_and_verified`**；全域 legacy retirement 狀態不變。
+
+## 2026-08-02 — Commit ownership Stage 2 七日 shadow 結案判定
+
+- ✅ 七日 audit 已改成三方對帳：audit 當下時間＋canonical hourly schedule＋git-common-dir
+  fire manifests；不再以現存 shadow rows 自我定義時間窗與分母。freshness、最大 observation
+  gap、expected-fire coverage、unexpected identity 與 strict schema 全部 fail closed。
+- ✅ `inferred_not_declared` 中位數改以所有班次計算；identity-missing 高缺口班不得消失。
+  任一 baseline unavailable 亦直接阻擋 measurement PASS；`fire_ids=[null]`、缺 gap 欄與 malformed
+  JSONL 分別有 public regressions／CLI exit 2 contract。
+- ✅ live exact evidence：372 rows／1,504,669 bytes／SHA `79dd5326…a29e`；七日 222 班，
+  identity 88.288%、manifest coverage 77.5%、median missing 10、max gap 86,285.506 秒，故
+  `legacy_stage2_metrics_pass=false`。PHASE-Z 仍符合 baseline-or-decline（impossible-state
+  violations=0），但資料不支持任何 ownership cutover。
+- ✅ 舊 Stage 3 被機械固定 `manifest_cutover_eligible=false`；producer landing 唯一出口為
+  Issue #43 isolation／settlement，machine state 走 #41，recognizer physical retirement 走 #44。
+  PHASE-Z、receipt、daily check 文案同步移除「PHASE-Z 擁有 agent output」的過期介面契約。
+- ✅ TDD／相鄰回歸 **630 passed、1 skipped**，新增 exact fire reconciliation 後定向
+  **43 passed**；Matt Spec／Standards 最終雙 PASS。此 bounded
+  false-green auditor class 為 **`root_cause_fixed_and_verified`**；#41／#44 umbrellas 仍為
+  **`contained`**，不因歷史 audit 完成而提前關閉。

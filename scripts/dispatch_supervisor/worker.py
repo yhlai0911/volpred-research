@@ -657,9 +657,10 @@ def _run_one_attempt(
             isolation_receipt,
             provider_id="claude-cli",
         )
-    # Stage 2 of declared commit ownership: create the change-set before the
-    # producer can write.  This remains observability-only; PHASE-Z still uses
-    # its fire-start baseline until the seven-day shadow gate passes.
+    # Legacy Stage-2 observer: create a diagnostic change-set before the
+    # producer can write. Issue #43's isolated workspace + settlement receipt is
+    # the canonical ownership contract. A green shadow window may not activate
+    # the superseded manifest-driven Stage 3; Issue #44 retires this observer.
     if declare_manifest:
         try:
             fire_manifest.open_manifest(
@@ -1355,7 +1356,8 @@ def run_worker(
     attempt = 1
 
     while attempt <= max_attempts:
-        # 2026-07-05 owner directive: ALL dispatch attempts use opus (4.8). The
+        # Owner directive: all dispatch attempts use the canonical Opus route
+        # (Opus 5 / 1M since 2026-07-28). The
         # previous ladder dropped to sonnet on the final attempt as a
         # different-model fallback; that's retired — every attempt is opus, only
         # RETRY_BACKOFF_S separates them.

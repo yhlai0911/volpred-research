@@ -249,14 +249,14 @@ PHASE B — 派新工:
 9. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。
 10. **完整完成 gate**：本 fire 結束前驗證 — (a) agent 跑完 + 結果 verify、(b) knowledge.json 或 work_log 已寫，**且本 fire 寫入的每筆 work_log entry 的 `actor` 或 `owner` 必須逐字等於 `$VOLPRED_TASK_CLAIM_OWNER`；這個 supervisor-issued token 可精確歸因到 slot_id + job_id，缺少或自行改寫視同 (b) 未完成**、(c) commit 已 push 主線 OR worktree merged、(d) 派出的 task next_tasks status 已標 succeeded/failed（不留 in_progress 殘留）。任一未完成 = 本 fire 未真正結束，繼續做完。全部過 gate 後依 **Batch-drain 原則**決定接下一張或收班。
 
-PHASE Z — **本班收尾：交代「為什麼」**（2026-07-13 3-strike 重構；取代舊的「自己 git add + commit」）:
+PHASE Z — **本班收尾：交代「為什麼」**：
 
-**你不再跑 git。** commit 這班的產出是 `scripts/dispatch_supervisor/phase_z.py` 的職責 —— 它在 fire 開始前
-記下工作區基線，結束後**只** commit 這班新產生的檔，別人的一律不碰。它比你準：你只能憑印象猜自己動過什麼，
-而那個猜測正是三次事故的成因（`docs/error_log.md` 2026-07-10：`git add -A` 收走被截斷的 `next_tasks.json`、
-把繞過測試閘門的改寫送進 main、把某互動 session 沒改完的 `merge_worktree.sh` commit 進不相干的訊息裡）。
-
-機器知道**改了哪些檔**；只有你知道**為什麼改**。所以你的 PHASE Z 只剩一件事 —— 把「為什麼」交出去：
+**你不跑 git。** Issue #43 後，repo-byte ownership 由隔離 worktree 的
+`declared_output_paths`、gate receipt 與 durable settlement 決定，machine finalizer
+才有 landing 權限；PHASE-Z 只處理明確分類的 machine state 與有限 legacy recovery，
+不得再用 fire 時間差推測 agent ownership。只有你知道**為什麼改**，因此用 receipt
+留下稽核說明；receipt 不是 path ownership 證據，也不得啟動已被 Issue #44 取代的
+manifest Stage 3：
 
 ```bash
 uv run python scripts/fire_receipt.py \
@@ -265,14 +265,14 @@ uv run python scripts/fire_receipt.py \
   --body "<細節：掃了什麼 / 改了什麼 / 怎麼驗證的>"
 ```
 
-- **這班有產出 → 一定要跑**。它會成為 commit 的 subject/body。
+- **這班有產出 → 留下 receipt**。它提供 cohort 稽核說明；正式 output landing 不依賴它。
 - **這不是可選的**：Stop hook（`scripts/hooks/enforce_fire_receipt.py`）會在你結束 turn 前檢查 ——
   有產出卻沒 receipt 就把 turn 擋回來要你補。想省這一步只會多花一輪。
-- **這班沒產出**（只有 state churn）→ 不用跑，hook 也不會擋（它只認得這班自己動的檔）。
+- **這班沒 repo-byte 產出** → 不用跑；hook 不會把 receipt 當 ownership。
 
 **禁止**:
 - ❌ `git add` / `git commit` / `git add -A` / `git commit -a` —— **一律不要碰 git**。你跑只會製造 race
-  與「收走別人正在編輯的檔」的風險；PHASE-Z 會處理，而且它有你沒有的 fire 起始基線。
+  與「收走別人正在編輯的檔」的風險；正式 landing 由 workspace finalizer 處理。
 - ❌ receipt 的 subject 寫 "ops update" / "wip" / "save progress"（無 audit 價值 — 等於沒交代）
 - ⚠️ 你自己的新檔若是 noise type（不該進 repo）→ 補 `.gitignore`，不要指望 PHASE-Z 幫你濾
 

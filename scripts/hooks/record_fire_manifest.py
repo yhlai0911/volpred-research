@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""PostToolUse hook: declare every Edit/Write/NotebookEdit in this fire's manifest.
+"""Legacy PostToolUse observer for Edit/Write/NotebookEdit fire attribution.
 
 The hook is deliberately fail-open. A missed declaration costs one shadow data
-point; blocking the producer would cost the whole hourly fire. Daily checkup
-separately verifies that this hook remains installed.
+point; blocking the producer would cost the whole hourly fire. It is not the
+canonical ownership gate: Issue #43 uses isolated workspace settlement for every
+mutating producer, and Issue #44 forbids reviving manifest-driven Stage 3.
+Daily checkup separately verifies that this diagnostic hook remains installed.
 """
 from __future__ import annotations
 

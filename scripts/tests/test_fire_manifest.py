@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import subprocess
 import time
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -338,3 +339,317 @@ def test_shadow_cohort_counts_declarations_from_every_fire(repo: Path) -> None:
     assert got["fire_ids"] == ["A", "B"]
     assert got["declared"] == ["a.py", "b.py"]
     assert got["inferred_not_declared"] == []
+
+
+# ── stage-2 acceptance is evidence, never legacy cutover authority ──────────
+
+def _shadow_row(
+    at: datetime,
+    *,
+    fire_ids: list[str] | None,
+    missing: list[str] | None = None,
+    declared: list[str] | None = None,
+    baseline_available: bool = True,
+) -> dict:
+    return {
+        "at": at.astimezone(UTC).isoformat().replace("+00:00", "Z"),
+        "fire_id": None,
+        "fire_ids": fire_ids or [],
+        "baseline_available": baseline_available,
+        "inferred": sorted(set(missing or []) | set(declared or [])),
+        "declared": sorted(declared or []),
+        "agree": sorted(declared or []),
+        "inferred_not_declared": sorted(missing or []),
+        "declared_not_inferred": [],
+    }
+
+
+def _expected_fire(fire_id: str, opened_at: datetime) -> dict:
+    return {
+        "fire_id": fire_id,
+        "opened_at": opened_at.astimezone(UTC).isoformat().replace("+00:00", "Z"),
+    }
+
+
+def _hourly_slots(start: datetime, hours: int) -> list[datetime]:
+    return [start + timedelta(hours=index) for index in range(hours + 1)]
+
+
+def test_stage2_green_metrics_cannot_revive_superseded_manifest_cutover() -> None:
+    start = datetime(2026, 7, 25, tzinfo=UTC)
+    rows = []
+    expected_fires = []
+    for index in range(169):
+        fire_ids = [] if index < 8 else [f"fire-{index}"]
+        rows.append(
+            _shadow_row(
+                start + timedelta(hours=index),
+                fire_ids=fire_ids,
+                missing=["storage/ops/state.json"],
+                declared=[f"src/output_{index}.py"] if fire_ids else [],
+            )
+        )
+        if fire_ids:
+            expected_fires.append(
+                _expected_fire(fire_ids[0], start + timedelta(hours=index))
+            )
+
+    report = fm.assess_shadow_records(
+        rows,
+        assessed_at=start + timedelta(days=7),
+        expected_fires=expected_fires,
+        expected_schedule=_hourly_slots(start, 168),
+        classify_path=lambda path: (
+            "machine_state" if path.startswith("storage/") else "non_machine"
+        ),
+    )
+
+    assert report["legacy_stage2_metrics_pass"] is True
+    assert report["metrics"]["identity_coverage"] == pytest.approx(161 / 169)
+    assert report["metrics"]["expected_fire_coverage"] == 1.0
+    assert report["metrics"]["median_inferred_not_declared"] == 1
+    assert report["manifest_cutover_eligible"] is False
+    assert report["status"] == "superseded_contract_blocked"
+    assert report["successor_contract"]["issue_refs"] == ["#41", "#43", "#44"]
+    assert "legacy_manifest_stage3_superseded" in report["cutover_blockers"]
+
+
+def test_stage2_assessment_identifies_failed_metrics_and_missing_path_lanes() -> None:
+    start = datetime(2026, 7, 25, tzinfo=UTC)
+    rows = [
+        _shadow_row(start, fire_ids=None),
+        _shadow_row(
+            start + timedelta(days=3),
+            fire_ids=["fire-1"],
+            missing=["storage/next_tasks.json", "src/foreign_wip.py"],
+            baseline_available=False,
+        ),
+        _shadow_row(
+            start + timedelta(days=7),
+            fire_ids=None,
+            missing=["storage/next_tasks.json"],
+        ),
+    ]
+
+    report = fm.assess_shadow_records(
+        rows,
+        assessed_at=start + timedelta(days=7),
+        expected_fires=[
+            _expected_fire("fire-1", start + timedelta(days=3)),
+        ],
+        expected_schedule=_hourly_slots(start, 168),
+        classify_path=lambda path: (
+            "machine_state" if path.startswith("storage/") else "non_machine"
+        ),
+    )
+
+    assert report["legacy_stage2_metrics_pass"] is False
+    assert report["metrics"]["identity_coverage"] == pytest.approx(1 / 3)
+    # Every observed shift is a "班".  The two identity-less rows may not be
+    # discarded from the median merely because the attribution hook missed.
+    assert report["metrics"]["median_inferred_not_declared"] == 1
+    assert report["metrics"]["baseline_available_throughout"] is False
+    assert report["missing_path_occurrences"] == {
+        "machine_state": 2,
+        "non_machine": 1,
+    }
+    assert report["legacy_metric_blockers"] == [
+        "observation_cadence_incomplete",
+        "identity_coverage_below_95pct",
+        "baseline_unavailable_in_window",
+        "baseline_or_decline_contract_violated",
+    ]
+
+
+def test_stage2_assessment_fails_closed_on_partial_or_malformed_evidence() -> None:
+    now = datetime(2026, 8, 1, tzinfo=UTC)
+    partial = [
+        _shadow_row(now - timedelta(days=1), fire_ids=["fire-1"]),
+        _shadow_row(now, fire_ids=["fire-2"]),
+    ]
+
+    report = fm.assess_shadow_records(
+        partial,
+        assessed_at=now,
+        expected_fires=[_expected_fire("fire-1", now - timedelta(days=1)),
+                        _expected_fire("fire-2", now)],
+        expected_schedule=_hourly_slots(now - timedelta(days=7), 168),
+    )
+
+    assert report["legacy_stage2_metrics_pass"] is False
+    assert "observation_cadence_incomplete" in report["legacy_metric_blockers"]
+
+    with pytest.raises(fm.FireManifestError, match="shadow record 0 has invalid at"):
+        fm.assess_shadow_records(
+            [{"at": "not-a-time"}],
+            assessed_at=now,
+            expected_fires=[],
+            expected_schedule=_hourly_slots(now - timedelta(days=7), 168),
+        )
+
+
+def test_stage2_sparse_endpoints_cannot_impersonate_continuous_seven_days() -> None:
+    start = datetime(2026, 7, 25, tzinfo=UTC)
+    end = start + timedelta(days=7)
+    rows = [
+        _shadow_row(start, fire_ids=["fire-start"]),
+        _shadow_row(end, fire_ids=["fire-end"]),
+    ]
+
+    report = fm.assess_shadow_records(
+        rows,
+        assessed_at=end,
+        expected_fires=[
+            _expected_fire("fire-start", start),
+            _expected_fire("fire-end", end),
+        ],
+        expected_schedule=_hourly_slots(start, 168),
+    )
+
+    assert report["window"]["full_window"] is False
+    assert report["window"]["max_observation_gap_seconds"] == 7 * 24 * 3600
+    assert "observation_cadence_incomplete" in report["legacy_metric_blockers"]
+
+
+def test_stage2_stale_historical_ledger_is_not_current_evidence() -> None:
+    start = datetime(2026, 7, 25, tzinfo=UTC)
+    last = start + timedelta(days=7)
+    assessed_at = last + timedelta(hours=3)
+    rows = [
+        _shadow_row(start + timedelta(hours=index), fire_ids=[f"fire-{index}"])
+        for index in range(169)
+    ]
+
+    report = fm.assess_shadow_records(
+        rows,
+        assessed_at=assessed_at,
+        expected_fires=[
+            _expected_fire(f"fire-{index}", start + timedelta(hours=index))
+            for index in range(169)
+        ],
+        expected_schedule=_hourly_slots(assessed_at - timedelta(days=7), 168),
+    )
+
+    assert report["window"]["fresh"] is False
+    assert "shadow_evidence_stale" in report["legacy_metric_blockers"]
+
+
+def test_stage2_reconciles_missing_and_unexpected_fire_identities() -> None:
+    start = datetime(2026, 8, 1, tzinfo=UTC)
+    rows = [
+        _shadow_row(
+            start + timedelta(hours=index),
+            fire_ids=[f"fire-{index}" if index < 24 else "unexpected-fire"],
+        )
+        for index in range(25)
+    ]
+    expected = [
+        _expected_fire(f"fire-{index}", start + timedelta(hours=index))
+        for index in range(24)
+    ]
+    expected.extend([
+        _expected_fire("missing-fire-1", start + timedelta(hours=24)),
+        _expected_fire("missing-fire-2", start + timedelta(hours=24)),
+    ])
+
+    report = fm.assess_shadow_records(
+        rows,
+        window_days=1,
+        assessed_at=start + timedelta(days=1),
+        expected_fires=expected,
+        expected_schedule=_hourly_slots(start, 24),
+    )
+
+    assert report["metrics"]["identity_coverage"] == 1.0
+    assert report["metrics"]["expected_fire_coverage"] == pytest.approx(24 / 26)
+    assert report["metrics"]["missing_expected_fire_ids_sample"] == [
+        "missing-fire-1",
+        "missing-fire-2",
+    ]
+    assert report["metrics"]["unexpected_observed_fire_ids_sample"] == [
+        "unexpected-fire"
+    ]
+    assert "expected_fire_coverage_below_95pct" in report["legacy_metric_blockers"]
+    assert "observed_fire_missing_manifest_receipt" in report["legacy_metric_blockers"]
+
+
+def test_stage2_all_baselines_missing_cannot_report_measurement_pass() -> None:
+    start = datetime(2026, 7, 25, tzinfo=UTC)
+    rows = [
+        _shadow_row(
+            start + timedelta(hours=index),
+            fire_ids=[f"fire-{index}"],
+            baseline_available=False,
+        )
+        for index in range(169)
+    ]
+    report = fm.assess_shadow_records(
+        rows,
+        assessed_at=start + timedelta(days=7),
+        expected_fires=[
+            _expected_fire(f"fire-{index}", start + timedelta(hours=index))
+            for index in range(169)
+        ],
+        expected_schedule=_hourly_slots(start, 168),
+    )
+
+    assert report["metrics"]["identity_coverage"] == 1.0
+    assert report["metrics"]["expected_fire_coverage"] == 1.0
+    assert report["metrics"]["median_inferred_not_declared"] == 0
+    assert report["legacy_stage2_metrics_pass"] is False
+    assert "baseline_unavailable_in_window" in report["legacy_metric_blockers"]
+
+
+def test_stage2_schema_is_fail_closed_and_median_uses_every_shift() -> None:
+    start = datetime(2026, 8, 1, tzinfo=UTC)
+    rows = [
+        _shadow_row(start, fire_ids=["fire-0"], missing=[]),
+        _shadow_row(start + timedelta(hours=12), fire_ids=[], missing=[f"p/{i}" for i in range(10)]),
+        _shadow_row(start + timedelta(days=1), fire_ids=[], missing=[f"q/{i}" for i in range(10)]),
+    ]
+    report = fm.assess_shadow_records(
+        rows,
+        window_days=1,
+        identity_threshold=0.1,
+        assessed_at=start + timedelta(days=1),
+        expected_fires=[_expected_fire("fire-0", start)],
+        expected_schedule=[start, start + timedelta(hours=12), start + timedelta(days=1)],
+    )
+    assert report["metrics"]["median_inferred_not_declared"] == 10
+
+    invalid_identity = _shadow_row(start, fire_ids=["fire-0"])
+    invalid_identity["fire_ids"] = [None]
+    with pytest.raises(fm.FireManifestError, match="fire_ids must be a string list"):
+        fm.assess_shadow_records(
+            [invalid_identity],
+            window_days=1,
+            assessed_at=start,
+            expected_fires=[_expected_fire("fire-0", start)],
+            expected_schedule=[start - timedelta(days=1), start],
+        )
+
+    legacy_identity_missing = _shadow_row(start, fire_ids=[])
+    del legacy_identity_missing["fire_ids"]
+    legacy_report = fm.assess_shadow_records(
+        [legacy_identity_missing],
+        window_days=1,
+        assessed_at=start,
+        expected_fires=[],
+        expected_schedule=[start - timedelta(days=1), start],
+    )
+    assert legacy_report["metrics"]["identity_observations"] == 0
+    assert "identity_coverage_below_95pct" in legacy_report["legacy_metric_blockers"]
+
+    missing_gap_field = _shadow_row(start, fire_ids=["fire-0"])
+    del missing_gap_field["inferred_not_declared"]
+    with pytest.raises(
+        fm.FireManifestError,
+        match="inferred_not_declared must be a string list",
+    ):
+        fm.assess_shadow_records(
+            [missing_gap_field],
+            window_days=1,
+            assessed_at=start,
+            expected_fires=[_expected_fire("fire-0", start)],
+            expected_schedule=[start - timedelta(days=1), start],
+        )

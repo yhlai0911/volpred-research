@@ -1,28 +1,27 @@
-"""Git hygiene around a dispatch fire — the single owner of both ends.
+"""Finite canonical-root hygiene while producer landing moves out of PHASE-Z.
 
 Two entry points, both called from `scheduler._tick_once`:
 
   - `run_pre_fire_guard()`  — BEFORE the worker: conflict-marker / orphaned
     AUTO_MERGE backstop (port of the legacy shell's git_conflict_guard call).
-  - `run_phase_z()`         — AFTER the worker: deterministic commit of
-    whatever the dispatched agent left uncommitted.
+  - `run_phase_z()`         — AFTER a drained worker cohort: settle explicitly
+    classified machine state and bounded legacy recovery only.
 
-Keeping both here (rather than scattering a third git-touching module into the
-scheduler) means "git hygiene around a fire" has exactly one enforcement owner
-— see `.claude/rules/control-plane.md` anti-stacking.
+Issue #43 moved mutating producer output to isolated workspaces, declared output
+paths, gates, and durable settlement receipts. The workspace finalizer owns that
+landing transaction; this module must never infer producer authorship from timing,
+a fire-start baseline, or an explanatory receipt. Issue #41 removes remaining
+machine-state writes from Git, and Issue #44 physically retires this recognizer.
 
 ---
 
-PHASE-Z safety net — deterministic post-fire commit of whatever the
-dispatched agent left uncommitted.
+The historical implementation below remains only for the finite retirement
+surface: machine-state commits and already-materialized recovery receipts.
 
 Port of the `scripts/cron_hourly_dispatch.sh` PHASE-Z block (2026-05-29) into
 the supervisor runtime (Deliverable 7 cutover, 2026-07-04). The dispatch prompt
-now explicitly forbids agent-side Git; the agent leaves a fire receipt and this
-owner adopts only paths attributed to that fire. Without this wrapper-level
-commit, a dirty working tree would accumulate between fires with nobody to
-clean it — the exact protection the legacy shell provided and that fired twice
-on cutover day.
+forbids agent-side Git. A fire receipt explains why a cohort acted, but cannot
+establish path ownership or cause producer bytes to land.
 
 Semantics (legacy, minus the `git add -A` that made it steal — see the ownership
 block below and docs/error_log.md 2026-07-10):
@@ -257,9 +256,17 @@ _MACHINE_STATE_FILES = (
 )
 
 
-def _is_machine_state(rel: str) -> bool:
-    """True when `rel` is daemon-written state this module is the sole owner of."""
+def is_machine_state_path(rel: str) -> bool:
+    """Return whether the temporary PHASE-Z namespace owns ``rel``.
+
+    Public only so retirement/audit tooling can classify the exact live policy
+    without copying its prefixes. Issue #41/#44 remove this seam with PHASE-Z.
+    """
     return rel in _MACHINE_STATE_FILES or rel.startswith(_MACHINE_STATE_PREFIXES)
+
+
+# Compatibility for the finite PHASE-Z implementation/tests during retirement.
+_is_machine_state = is_machine_state_path
 
 
 # ── ownership: what did THIS fire produce? ───────────────────────────────────
@@ -890,11 +897,11 @@ def write_fire_receipt(
     task_id: str = "",
     runner=subprocess.run,
 ) -> bool:
-    """Record WHY this fire changed the tree. Called by the agent via scripts/fire_receipt.py.
+    """Record WHY this fire acted. Called via scripts/fire_receipt.py.
 
-    Not an enforcement point — PHASE-Z commits with or without this. It only
-    upgrades the commit message from a generated fallback to the agent's own
-    account of what it did.
+    Not an ownership or settlement point. Issue #43's workspace receipt decides
+    producer output; this legacy receipt only upgrades a PHASE-Z machine-state or
+    recovery commit message from a generated fallback to the agent's account.
     """
     dest = _receipt_path(repo_root, runner)
     if dest is None:
@@ -975,7 +982,7 @@ def _read_and_consume_fire_receipt(repo_root: Path, runner, now: float | None = 
 def fire_output_needs_receipt(
     repo_root: Path, runner=subprocess.run, now: float | None = None,
 ) -> dict:
-    """Would PHASE-Z have to caption this fire's commit itself?
+    """Would PHASE-Z have to caption a legacy/machine-state commit itself?
 
     The Stop-hook gate (`scripts/hooks/enforce_fire_receipt.py`) asks this the moment
     the agent tries to end its turn — while it is still alive to write the receipt.

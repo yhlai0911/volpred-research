@@ -5599,3 +5599,44 @@ Codex failover prompt 必須具備相同 followup modes」；K1743 artifact gate
 review byte binding 與 knowledge provenance 均已通過。提交後仍須由 tracked-file pytest、GitHub
 Actions green 及 CI watcher read-back 完成最終持續驗證；在此以前本 incident 僅為
 **`contained`**，不得提前稱 `root_cause_fixed_and_verified`。
+
+---
+
+## 2026-08-02 — 舊 commit-ownership Stage 2 稽核可用 sparse／stale rows 自我誤判綠燈
+
+**證據化症狀**：原 Stage 2 assessor 把「最後一筆 shadow」當七日窗終點，只用現存 rows
+當 identity 分母，且中位數排除 identity-missing 班。兩筆恰隔七日即可冒充連續觀測；過期
+ledger 可把自己的七日搬到現在；`fire_ids=[null]` 與缺失／null 的
+`inferred_not_declared` 亦可被當成有效 identity／零缺口。這不會直接啟動 Stage 3（另有硬鎖），
+但會產生不實的歷史 PASS，讓退役決策建立在錯誤證據上。
+
+**根因層級（measurement population／schema／superseded contract）**：舊計畫把
+PostToolUse shadow rows 同時當樣本與分母，沒有與 canonical schedule、已開啟的 fire manifests
+或 audit 當下時間對帳。Claude hook 又只涵蓋 Edit／Write 類工具，Bash、Codex 與其他 producer
+不在宣告面；因此擴大 hook 不是修復，而是復活已被 Issue #43 producer isolation 取代的 ownership
+模型。
+
+**底層修復與制度化**：`scripts/audit_commit_ownership_shadow.py` 現嚴格讀取 git-common-dir
+shadow bytes／fire manifests，並從 `config/runtime_schedules.json` 取得 canonical
+`7 * * * *` cadence。評估窗以 timezone-aware audit time 錨定；freshness、窗首／窗尾與任兩筆
+observation 的最大 gap、manifest expected-fire coverage、unexpected observed fire、identity
+coverage及所有班次的 missing-path median 均 fail closed。present `fire_ids` 僅接受非空字串；
+舊 schema 缺欄只算 identity-missing；gap 欄缺失或 null 直接 audit failed。任一班 baseline
+unavailable 也不得把不可量測的 `inferred=[]` 當零缺口。CLI 對 malformed evidence 回 typed
+JSON／exit 2，對任何可解析結果則因 superseded contract 固定
+`manifest_cutover_eligible=false`／exit 1。正式出口明確分成 Issue #43 producer landing、
+Issue #41 machine-state single writer、Issue #44 recognizer physical retirement。
+
+**live read-back 與回歸**：2026-08-02 audit 回讀 shadow **372 rows／1,504,669 bytes／SHA-256
+`79dd5326ed8e6e2b7b31b976f31425003c518f85398d5b50d9bc8991df08a29e`**。當下七日窗為
+222 observations；canonical gap 3,600 秒、允許上限 7,200 秒，實際最大 gap 86,285.506 秒；
+identity coverage 88.288%、280 expected manifests 中 observed 217（77.5%）、missing 63、
+unexpected 1；`inferred_not_declared` 中位數 10、最大 62，baseline available 219/222。
+audit 誠實回 `legacy_stage2_metrics_pass=false`、`manifest_cutover_eligible=false`、exit 1；
+machine-state／non-machine missing occurrences 分別 1,271／1,508。TDD 新增 sparse endpoints、
+stale ledger、expected-fire 漏失、schema、全班 baseline 缺失、全-window median與 public CLI
+exit-contract regressions；PHASE-Z／supervisor 相鄰完整範圍 **630 passed、1 skipped**，新增
+exact fire reconciliation 後定向 **43 passed**；Matt
+Spec／Standards 最終雙 PASS。此「舊 auditor 可誤綠／Stage 3 可被錯誤證據復活」根因為
+**`root_cause_fixed_and_verified`**；Issue #41／#44 umbrellas 仍須各自完成正式 cutover／physical
+retirement，維持 **`contained`**，不得由本歷史 audit 提前結案。

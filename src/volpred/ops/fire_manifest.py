@@ -1,4 +1,14 @@
-"""Declared ownership of a fire's output — the write-side ledger PHASE-Z lacks.
+"""Legacy fire-output declarations retained for shadow and foreign attribution.
+
+Supersession (2026-07-27)
+-------------------------
+Issue #43 made producer-scoped workspaces, declared output paths, and durable
+machine settlement receipts the canonical ownership contract. Issue #44 retires
+PHASE-Z's recognizer physically after its acceptance window. Consequently this
+module has **no commit-cutover authority**: manifests remain useful temporary
+observability/foreign-attribution evidence, but even green Stage-2 metrics may
+not activate the manifest-driven Stage 3 described by the older design below.
+``assess_shadow_records`` enforces that boundary mechanically.
 
 Why this module exists
 ----------------------
@@ -58,12 +68,12 @@ keep claiming paths forever) but are still reported, because "this path's last
 declared owner was job X, which died" is exactly the attribution the current
 orphan alerts cannot produce.
 
-Scope note (stage 1)
---------------------
+Scope note (legacy stage 1)
+---------------------------
 Nothing here mutates git and nothing here is wired into PHASE-Z's commit
 decision. ``shadow_compare`` exists to run both answers side by side — declared
 vs inferred — and log the delta, so the size of the disagreement is measured
-before any behaviour changes on it.
+without authorizing any behaviour change from it.
 """
 from __future__ import annotations
 
@@ -73,10 +83,13 @@ import json
 import logging
 import os
 import re
+import statistics
 import time
-from datetime import datetime, timezone
+from collections import Counter
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from volpred.ops.git_writer_lock import GitWriterLockError, git_common_dir
 
@@ -632,6 +645,330 @@ def observe_shadow(
         )
     append_shadow_record(repo_root, payload)
     return payload
+
+
+# ── stage-2 acceptance audit ────────────────────────────────────────────────
+
+def _shadow_timestamp(record: Mapping[str, Any], index: int) -> datetime:
+    raw = record.get("at")
+    if not isinstance(raw, str) or not raw.strip():
+        raise FireManifestError(f"shadow record {index} has invalid at")
+    try:
+        parsed = datetime.fromisoformat(raw)
+    except ValueError as exc:
+        raise FireManifestError(
+            f"shadow record {index} has invalid at"
+        ) from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise FireManifestError(f"shadow record {index} has invalid at")
+    return parsed.astimezone(UTC)
+
+
+def assess_shadow_records(
+    records: Sequence[Mapping[str, Any]],
+    *,
+    assessed_at: datetime,
+    expected_fires: Sequence[Mapping[str, Any]],
+    expected_schedule: Sequence[datetime],
+    window_days: int = 7,
+    identity_threshold: float = 0.95,
+    median_missing_threshold: float = 2.0,
+    max_observation_gap_multiplier: float = 2.0,
+    classify_path: Callable[[str], str] | None = None,
+) -> dict[str, Any]:
+    """Assess the historical Stage-2 shadow without granting cutover authority.
+
+    The 2026-07-22 experiment expected a seven-day manifest shadow to authorize
+    a later manifest-driven PHASE-Z.  Issue #43 subsequently made isolated
+    workspaces plus machine settlement receipts the canonical producer contract,
+    and Issue #44 requires physical removal of the recognizer instead.  This
+    assessor therefore preserves the useful measurements while making the old
+    inference impossible: even a completely green historical window returns
+    ``manifest_cutover_eligible=False``.
+
+    ``classify_path`` is deliberately injected by the caller.  The shadow ledger
+    owns observations, not the temporary PHASE-Z machine-state namespace; the
+    audit CLI can use that live classifier without duplicating it here.
+    """
+    if window_days <= 0:
+        raise FireManifestError("window_days must be positive")
+    if not 0 < identity_threshold <= 1:
+        raise FireManifestError("identity_threshold must be in (0, 1]")
+    if median_missing_threshold < 0:
+        raise FireManifestError("median_missing_threshold must be non-negative")
+    if max_observation_gap_multiplier < 1:
+        raise FireManifestError(
+            "max_observation_gap_multiplier must be at least 1"
+        )
+    if not records:
+        raise FireManifestError("shadow evidence is empty")
+    if assessed_at.tzinfo is None or assessed_at.utcoffset() is None:
+        raise FireManifestError("assessed_at must be timezone-aware")
+    assessed_at = assessed_at.astimezone(UTC)
+
+    schedule_input = list(expected_schedule)
+    if len(schedule_input) < 2:
+        raise FireManifestError("expected_schedule must contain at least two slots")
+    for index, slot in enumerate(schedule_input):
+        if not isinstance(slot, datetime) or slot.tzinfo is None or slot.utcoffset() is None:
+            raise FireManifestError(
+                f"expected_schedule slot {index} must be timezone-aware"
+            )
+    schedule = sorted({slot.astimezone(UTC) for slot in schedule_input})
+
+    normalized: list[
+        tuple[
+            datetime,
+            Mapping[str, Any],
+            set[str],
+            list[str],
+            list[str],
+            list[str],
+        ]
+    ] = []
+    for index, record in enumerate(records):
+        if not isinstance(record, Mapping):
+            raise FireManifestError(f"shadow record {index} is not an object")
+        timestamp = _shadow_timestamp(record, index)
+        if timestamp > assessed_at:
+            raise FireManifestError(f"shadow record {index} is newer than assessed_at")
+
+        fire_id = record.get("fire_id")
+        if fire_id is not None and (
+            not isinstance(fire_id, str) or not fire_id.strip()
+        ):
+            raise FireManifestError(
+                f"shadow record {index} fire_id must be null or a non-empty string"
+            )
+        # Rows written before cohort-aware attribution added ``fire_ids`` have
+        # only the nullable scalar ``fire_id``. Preserve them as explicit
+        # identity-missing evidence; a present container is still strict, so
+        # values such as ``[null]`` can never masquerade as an identity.
+        fire_ids = record.get("fire_ids", [])
+        if not isinstance(fire_ids, list) or not all(
+            isinstance(value, str) and value.strip() for value in fire_ids
+        ):
+            raise FireManifestError(
+                f"shadow record {index} fire_ids must be a string list"
+            )
+        if not isinstance(record.get("baseline_available"), bool):
+            raise FireManifestError(
+                f"shadow record {index} baseline_available must be boolean"
+            )
+
+        path_lists: dict[str, list[str]] = {}
+        for field in ("inferred", "declared", "inferred_not_declared"):
+            values = record.get(field)
+            if not isinstance(values, list) or not all(
+                isinstance(value, str) for value in values
+            ):
+                raise FireManifestError(
+                    f"shadow record {index} {field} must be a string list"
+                )
+            path_lists[field] = values
+
+        identities = {value.strip() for value in fire_ids}
+        if isinstance(fire_id, str):
+            identities.add(fire_id.strip())
+        normalized.append((
+            timestamp,
+            record,
+            identities,
+            path_lists["inferred_not_declared"],
+            path_lists["declared"],
+            path_lists["inferred"],
+        ))
+    normalized.sort(key=lambda item: item[0])
+
+    evidence_start = normalized[0][0]
+    window_end = assessed_at
+    window_start = assessed_at - timedelta(days=window_days)
+    window = [item for item in normalized if window_start <= item[0] <= window_end]
+
+    schedule_window = [
+        slot for slot in schedule if window_start <= slot <= window_end
+    ]
+    if len(schedule_window) < 2:
+        raise FireManifestError(
+            "expected_schedule does not cover the assessment window"
+        )
+    schedule_gaps = [
+        (right - left).total_seconds()
+        for left, right in zip(schedule_window, schedule_window[1:], strict=False)
+    ]
+    canonical_gap_s = max(schedule_gaps)
+    max_allowed_gap_s = canonical_gap_s * max_observation_gap_multiplier
+
+    observation_points = [window_start, *(item[0] for item in window), window_end]
+    observation_points = sorted(set(observation_points))
+    observation_gaps = [
+        (right - left).total_seconds()
+        for left, right in zip(observation_points, observation_points[1:], strict=False)
+    ]
+    max_observation_gap_s = max(observation_gaps, default=window_days * 86400)
+    latest_observation = window[-1][0] if window else None
+    evidence_age_s = (
+        (assessed_at - latest_observation).total_seconds()
+        if latest_observation is not None
+        else None
+    )
+    fresh = evidence_age_s is not None and evidence_age_s <= max_allowed_gap_s
+    full_window = bool(window) and max_observation_gap_s <= max_allowed_gap_s
+
+    identity_records = [item for item in window if item[2]]
+    total = len(window)
+    identity_total = len(identity_records)
+    identity_coverage = identity_total / total if total else 0.0
+    # The canonical acceptance criterion is paths/fire ("檔/班"), not
+    # paths/identified-fire.  Missing identity is itself a failed observation
+    # and may not remove a high-gap shift from the median denominator.
+    missing_lengths = [len(item[3]) for item in window]
+    median_missing = (
+        statistics.median(missing_lengths) if missing_lengths else None
+    )
+    baseline_available = sum(
+        item[1].get("baseline_available") is True for item in window
+    )
+    baseline_throughout = baseline_available == total
+    baseline_contract_violations = sum(
+        item[1].get("baseline_available") is False and bool(item[5])
+        for item in window
+    )
+    declared_signal_total = sum(bool(item[4]) for item in identity_records)
+
+    expected_by_id: dict[str, datetime] = {}
+    for index, fire in enumerate(expected_fires):
+        if not isinstance(fire, Mapping):
+            raise FireManifestError(f"expected fire {index} is not an object")
+        fire_id = fire.get("fire_id")
+        if not isinstance(fire_id, str) or not fire_id.strip():
+            raise FireManifestError(
+                f"expected fire {index} has invalid fire_id"
+            )
+        opened_at = fire.get("opened_at")
+        if not isinstance(opened_at, str):
+            raise FireManifestError(
+                f"expected fire {index} has invalid opened_at"
+            )
+        try:
+            opened = datetime.fromisoformat(opened_at.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise FireManifestError(
+                f"expected fire {index} has invalid opened_at"
+            ) from exc
+        if opened.tzinfo is None or opened.utcoffset() is None:
+            raise FireManifestError(
+                f"expected fire {index} has invalid opened_at"
+            )
+        fire_id = fire_id.strip()
+        if fire_id in expected_by_id:
+            raise FireManifestError(f"duplicate expected fire_id {fire_id!r}")
+        expected_by_id[fire_id] = opened.astimezone(UTC)
+
+    expected_ids = {
+        fire_id
+        for fire_id, opened in expected_by_id.items()
+        if window_start <= opened <= window_end
+    }
+    observed_ids = set().union(*(item[2] for item in window)) if window else set()
+    observed_expected_ids = observed_ids & expected_ids
+    missing_expected_ids = sorted(expected_ids - observed_ids)
+    unexpected_observed_ids = sorted(observed_ids - expected_ids)
+    expected_fire_coverage = (
+        len(observed_expected_ids) / len(expected_ids) if expected_ids else 0.0
+    )
+
+    path_occurrences: Counter[str] = Counter()
+    top_paths: Counter[str] = Counter()
+    for item in window:
+        paths = item[3]
+        for path in paths:
+            top_paths[path] += 1
+            lane = classify_path(path) if classify_path is not None else "unclassified"
+            if not isinstance(lane, str) or not lane.strip():
+                raise FireManifestError("shadow path classifier returned an invalid lane")
+            path_occurrences[lane] += 1
+
+    legacy_metric_blockers: list[str] = []
+    if not full_window:
+        legacy_metric_blockers.append("observation_cadence_incomplete")
+    if not fresh:
+        legacy_metric_blockers.append("shadow_evidence_stale")
+    if identity_coverage < identity_threshold:
+        legacy_metric_blockers.append("identity_coverage_below_95pct")
+    if not expected_ids:
+        legacy_metric_blockers.append("expected_fire_population_empty")
+    elif expected_fire_coverage < identity_threshold:
+        legacy_metric_blockers.append("expected_fire_coverage_below_95pct")
+    if unexpected_observed_ids:
+        legacy_metric_blockers.append("observed_fire_missing_manifest_receipt")
+    if median_missing is None or median_missing > median_missing_threshold:
+        legacy_metric_blockers.append("median_inferred_not_declared_above_2")
+    if not baseline_throughout:
+        legacy_metric_blockers.append("baseline_unavailable_in_window")
+    if baseline_contract_violations:
+        legacy_metric_blockers.append("baseline_or_decline_contract_violated")
+
+    return {
+        "schema_version": "commit-ownership-shadow-assessment.v1",
+        "status": "superseded_contract_blocked",
+        "window": {
+            "days": window_days,
+            "start_at": window_start.isoformat(),
+            "end_at": window_end.isoformat(),
+            "evidence_start_at": evidence_start.isoformat(),
+            "full_window": full_window,
+            "fresh": fresh,
+            "evidence_age_seconds": evidence_age_s,
+            "canonical_schedule_slots": len(schedule_window),
+            "canonical_max_gap_seconds": canonical_gap_s,
+            "max_allowed_observation_gap_seconds": max_allowed_gap_s,
+            "max_observation_gap_seconds": max_observation_gap_s,
+        },
+        "thresholds": {
+            "identity_coverage": identity_threshold,
+            "median_inferred_not_declared": median_missing_threshold,
+            "max_observation_gap_multiplier": max_observation_gap_multiplier,
+        },
+        "metrics": {
+            "observations": total,
+            "identity_observations": identity_total,
+            "identity_coverage": identity_coverage,
+            "expected_fires": len(expected_ids),
+            "observed_expected_fires": len(observed_expected_ids),
+            "expected_fire_coverage": expected_fire_coverage,
+            "missing_expected_fire_count": len(missing_expected_ids),
+            "missing_expected_fire_ids_sample": missing_expected_ids[:20],
+            "unexpected_observed_fire_count": len(unexpected_observed_ids),
+            "unexpected_observed_fire_ids_sample": unexpected_observed_ids[:20],
+            "declared_signal_observations": declared_signal_total,
+            "declared_signal_coverage": (
+                declared_signal_total / identity_total if identity_total else 0.0
+            ),
+            "median_inferred_not_declared": median_missing,
+            "max_inferred_not_declared": max(missing_lengths, default=None),
+            "baseline_available_observations": baseline_available,
+            "baseline_available_throughout": baseline_throughout,
+            "baseline_or_decline_contract_violations": baseline_contract_violations,
+        },
+        "missing_path_occurrences": dict(sorted(path_occurrences.items())),
+        "top_inferred_not_declared_paths": [
+            {"path": path, "occurrences": count}
+            for path, count in top_paths.most_common(20)
+        ],
+        "legacy_metric_blockers": legacy_metric_blockers,
+        "legacy_stage2_metrics_pass": not legacy_metric_blockers,
+        "manifest_cutover_eligible": False,
+        "cutover_blockers": ["legacy_manifest_stage3_superseded"],
+        "successor_contract": {
+            "issue_refs": ["#41", "#43", "#44"],
+            "producer_ownership": (
+                "isolated workspace + declared output paths + durable settlement receipt"
+            ),
+            "machine_state_exit": "Work Coordinator single-writer cutover",
+            "legacy_action": "observe_only_until_physical_retirement",
+        },
+    }
 
 
 # ── cli ──────────────────────────────────────────────────────────────────────

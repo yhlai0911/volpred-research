@@ -235,6 +235,16 @@ Path 的歸屬只有一個查表動作（`resolve_ownership`），沒有推理�
 
 ### 階段 2 — producer 開始宣告（下一班可起跑）
 
+> **2026-07-27 supersession（Issue #43 / #44）**：本節現在只是一段歷史
+> shadow 實驗，不再是 production cutover 的前置路徑。Issue #43 已將 automated
+> mutating producer 收斂到隔離 worktree、`declared_output_paths` 與 durable
+> settlement receipt；Issue #44 的終態是實體刪除 PHASE-Z recognizer，而不是把
+> 決策權切給本節 manifest。Claude PostToolUse 無法涵蓋 Bash／Codex，擴大這個 hook
+> 會復活舊 ownership 模型，因此禁止以「補 hook」作為 Stage 3 出口。七日資料仍由
+> `scripts/audit_commit_ownership_shadow.py` 稽核；即使歷史指標全綠，該 assessor
+> 也固定回報 `manifest_cutover_eligible=false`。machine-state 缺口走 Issue #41
+> （待 Issue #9 ownership cutover），非 machine producer 只認 Issue #43 receipt。
+
 **做什麼**
 1. `worker.py` / `workspace.py`：派工時 `open_manifest(fire_id=…, actor="dispatch/slot-N", job_id, slot_id)`，fire_id 寫進 agent 環境（`VOLPRED_FIRE_ID`）。
 2. **PostToolUse hook**：agent 每次 `Write`/`Edit`/`NotebookEdit` 落地後自動 `record()`。**這是關鍵設計選擇** —— 宣告必須是 hook 強制的機械動作，不能是 prompt 散文請 agent 自己記。`docs/refactor_plan_agent_output_ownership.md` 已經證明過一次：「一個大家都要記得、但沒有東西在檢查的步驟，不是偶爾漏，它就是預設路徑」（14 天 186/266 漏 receipt）。
@@ -248,7 +258,31 @@ Path 的歸屬只有一個查表動作（`resolve_ownership`），沒有推理�
 - **不得**因為宣告缺漏而讓任何檔案漏掉 commit —— 階段 2 期間 PHASE-Z 仍以 baseline 為準，manifest 只觀察
 - 機械 gate：hook 未安裝 / manifest 未開 → daily checkup 出 finding（沉默的 hook = 沒有 hook）
 
+**歷史資料的 fail-closed 稽核口徑（2026-08-02）**：
+
+- 七日窗固定以 audit 當下時間為終點，不得用「最後一筆 shadow」自行把過期資料搬到現在。
+- 連續性由 `config/runtime_schedules.json` 的 canonical hourly cadence 決定；任兩筆
+  observation（含窗首／窗尾）的 gap 不得超過兩個 canonical interval。只有首尾兩筆的
+  sparse ledger 因此必定失敗。
+- 分母同時對帳 `<git-common-dir>/volpred_fire_manifests/*.json`：manifest 已開但 shadow
+  沒看到的 fire 必須算缺失，不得只拿現存 rows 自我計算漂亮比例。
+- `fire_id`／`fire_ids` 只有非空字串才算 identity；`fire_ids=[null]`、缺少或 null 的
+  `inferred_not_declared` 一律 audit failed。cohort-aware schema 上線前沒有 `fire_ids` 欄的
+  舊 row 可保留，但只能算 identity-missing，不能冒充覆蓋。
+- `inferred_not_declared` 中位數以窗內**所有班次**為分母；identity hook 漏掉的高缺口班
+  不得從計算中消失。任一班 baseline 缺失就無法量測舊算術，因此 Stage 2 指標必須
+  fail closed；「baseline 缺失卻仍推導 inferred paths」另屬更嚴重的 impossible-state
+  違反。
+- 以上只回答歷史 Stage 2 是否曾達標。`manifest_cutover_eligible` 永遠是 false；正式
+  producer landing 走 Issue #43，machine-state exit 走 Issue #41，recognizer removal
+  走 Issue #44。
+
 ### 階段 3 — 切換決策權 + 退役猜測
+
+> **已由 Issue #44 取代，禁止執行本節的 manifest cutover。** 下列內容保留作為
+> 歷史設計與事故對照；目前唯一合法終態是 Producer Isolation 全覆蓋後，實體移除
+> PHASE-Z ownership recognizer／baseline guessing。不得因舊 shadow 指標轉綠而恢復
+> `seal.paths` 作為 canonical commit ownership。
 
 **做什麼**
 1. `run_phase_z()` 的收檔輸入從 `dirty_now − baseline` 換成 `seal.paths`；baseline 降級成**驗證器**（兩邊不一致就 alert，不再是決策者）。

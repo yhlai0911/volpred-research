@@ -955,7 +955,7 @@ def check_task_pool_pressure() -> list[dict]:
 
 
 def check_fire_manifest_hook() -> list[dict]:
-    """The write-time ownership declaration is mechanical only while wired."""
+    """Keep the legacy shadow observer visible without granting it authority."""
     settings_path = ROOT / ".claude" / "settings.json"
     hook_path = ROOT / "scripts" / "hooks" / "record_fire_manifest.py"
     try:
@@ -973,8 +973,10 @@ def check_fire_manifest_hook() -> list[dict]:
         return []
     return [_finding(
         "fire_manifest_hook", "warn",
-        "commit ownership 的 PostToolUse 宣告 hook 未安裝；shadow 覆蓋率會退化為 0",
-        recovery="確認 scripts/hooks/record_fire_manifest.py 存在且註冊於 .claude/settings.json PostToolUse",
+        "舊 shadow 診斷的 PostToolUse 宣告 hook 未安裝；宣告樣本會減少，"
+        "但這不能授權 commit ownership 切換",
+        recovery="恢復診斷 hook 僅供歸因；Issue #43 的隔離 workspace／settlement "
+        "receipt 負責 producer landing，Issue #44 退役 recognizer，禁止切回 Stage 3",
     )]
 
 

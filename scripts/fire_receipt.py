@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
-"""Record WHY this dispatch fire changed the tree. The agent's entire PHASE Z.
+"""Record WHY a dispatch fire acted; never use the receipt as ownership proof.
 
-The dispatched agent does NOT run `git add` / `git commit` any more. PHASE-Z
-(`scripts/dispatch_supervisor/phase_z.py`) is the single owner of committing a
-fire's output, and it already knows — from the fire-start baseline — exactly which
-paths this fire produced. It knows that better than the agent, which can only
-recall what it thinks it touched; that guess is what swept three other sessions'
-half-finished edits into a dispatch commit (docs/error_log.md 2026-07-10).
+The dispatched agent does not run ``git add`` / ``git commit``. Since Issue #43,
+repo-byte ownership comes from the isolated workspace's declared output paths and
+durable settlement receipt; the machine finalizer alone gates and lands them.
+PHASE-Z may still commit explicitly classified machine state and drain finite
+legacy recovery receipts, but it may not infer agent authorship from timing.
 
-What PHASE-Z cannot know is *why*. That is the one thing left to the agent, and
-this is how it hands it over:
+This receipt carries explanatory metadata — *why* the fire acted — for the audit
+trail and any cohort machine-state commit caption. It cannot add a path to the
+owned set and cannot authorize the retired manifest Stage 3:
 
     uv run python scripts/fire_receipt.py \
         --task-id k1702_followup \
         --subject "K1702 收件：raw-MDD 改善是 scale artifact，降級 R3 措辭" \
         --body "全量掃 knowledge.json 命中 12 筆；K1265b 補跑 vol-normalized MDD。"
 
-This call is NOT optional. A Stop hook (`scripts/hooks/enforce_fire_receipt.py`)
-blocks a fire that produced output and left no receipt, and will hand the turn back
-until one exists.
+The Stop hook (``scripts/hooks/enforce_fire_receipt.py``) asks for it when the
+legacy PHASE-Z caption seam sees attributable output. A missing receipt can reduce
+explanatory quality, but it cannot lose or transfer workspace ownership.
 
 That gate is here because the 2026-07-13 refactor left this step to agent
 self-discipline on the theory that skipping it was merely cosmetic. The theory held;
@@ -28,10 +28,8 @@ hourly noise, and the boss read it as the system misfiring (msg 886, 2026-07-16)
 A step everyone must remember, with nothing checking, is not a rare miss — it is the
 default path.
 
-What has not changed: skipping still cannot LOSE work. PHASE-Z commits either way,
-now captioning a receipt-less fire from the diff (what moved, never why). The failure
-mode remains a worse commit message, never a dirty tree
-(docs/refactor_plan_agent_output_ownership.md).
+Skipping cannot lose work: isolated workspace settlement is independent of this
+file. The failure mode is an audit-caption gap, never an ownership fallback.
 """
 from __future__ import annotations
 
@@ -52,9 +50,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--subject", required=True,
-                    help="一句話 what changed | why（會成為 commit subject）")
+                    help="一句話 what changed | why（legacy/machine-state caption）")
     ap.add_argument("--body", default="",
-                    help="細節：掃了什麼、改了什麼、驗證方式（成為 commit body）")
+                    help="細節：掃了什麼、改了什麼、驗證方式（稽核說明）")
     ap.add_argument("--body-file", default="",
                     help="從檔案讀 body（UTF-8）。多行 / 中文 body 用這個，"
                          "不要在 shell 裡 heredoc 出暫存檔再 --body \"$(cat ...)\" —— "
@@ -93,8 +91,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     if not ok:
         # Non-fatal by design: a failed receipt must never fail the agent's task.
-        # PHASE-Z will commit anyway and warn about the missing account.
-        print("[fire_receipt] 無法寫入 receipt — PHASE-Z 仍會 commit，但訊息是自動生成的",
+        # Workspace settlement is independent; only explanatory metadata is lost.
+        print("[fire_receipt] 無法寫入 receipt — workspace settlement 不受影響，但缺少稽核說明",
               file=sys.stderr)
         return 1
     fire_id = os.environ.get("VOLPRED_FIRE_ID", "").strip()
