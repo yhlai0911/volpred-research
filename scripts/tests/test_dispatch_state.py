@@ -1606,6 +1606,10 @@ def _drive_every_writer(path: Path) -> None:
     commit message 宣稱「驅動每一個」（2026-07-10）。
     """
     st.mark_supervisor_started(path=path)
+    st.activate_provider_auth_receipt_capability(
+        started_wall="state-shape-supervisor-start",
+        path=path,
+    )
     st.heartbeat(path=path)
     st.request_fire(reason="manual", path=path)
     st.consume_fire_request(path=path)
