@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：總部所在郡的社交連結廣度，看得出財報日的波動嗎",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1588/k1588_results.json",
+      "sha256": "22ed7f507a60f2450482f652c5d86e29fb1d4de11725ca0dcf7acfcb6d958a11",
+      "label": "experiment K1588 results (Facebook Social Connectedness Index public county snapshot as HQ-county connectivity proxy, tested against earnings-announcement volatility jump and decay speed for 112 US-headquartered S&P 500 tickers, 2,663 events, 2018-01-01 to 2026-06-30; overall verdict NULL)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "professional",
+      "title": "把總部所在郡的臉友連結，接到財報日的波動上",
+      "alt": "臉書公開的社交連結指數記錄美國每一對郡之間的臉友關係強度，郡是比州小一級的行政區。把每個郡對全國的連結加總，得到一個連結廣度分數，再對應到公司總部所在的郡。要測的是連結越廣的地方，公司財報日的波動是否跳得更兇、退得更慢。樣本從標普五百名單篩到總部在美國、地理編碼查得到郡、能對上郡代碼的一百一十二檔，共兩千六百六十三場財報，期間為二〇一八年初到二〇二六年六月。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "連結廣度是怎麼來的",
+          "body": [
+            "臉書公開的社交連結指數量的是美國每一對郡之間有多少臉友關係。郡是美國比州小一級的行政區，全美三千多個。",
+            "把每個郡對全國的連結強度加總，得到一個連結廣度分數，再對回公司總部所在的郡。假說是社交網絡當成消息管道，管道越粗，財報這種資訊事件的反應應該越大。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "納入檢定的公司家數",
+          "value": {
+            "source": "results",
+            "path": "/data/sample_size/tickers",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "標普五百名單篩選後能對上郡代碼的檔數"
+        },
+        {
+          "kind": "metric",
+          "label": "檢定涵蓋的財報場次",
+          "value": {
+            "source": "results",
+            "path": "/data/sample_size/events",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "二〇一八年初到二〇二六年六月"
+        },
+        {
+          "kind": "metric",
+          "label": "總部郡對上連結資料的比例",
+          "value": {
+            "source": "results",
+            "path": "/data/coverage/county_sci_matched_share",
+            "format": {
+              "kind": "percent",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "professional",
+      "title": "粗比較說有關係而且是反的，控制完條件就沒了",
+      "alt": "把公司依總部所在郡的連結廣度切三等份直接比平均，連結最廣那三分之一的財報日波動跳升比最窄那三分之一低了零點一七五四，機率值零點零零七一，方向與假說相反。但同一份資料改用控制產業、年份、市場波動環境與財報意外程度的迴歸之後，連結廣度的係數變成正零點零二一三，機率值零點七四三零，衰退速度那一組是正零點零二二八配零點七一一七。整份研究的判定是沒有發現。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "同一份資料，兩種切法",
+          "body": [
+            "三分組直接相減，連結最廣那端的財報日波動反而比較小，機率值零點零零七一，方向跟假說相反。",
+            "把產業、年份、市場波動環境和財報意外程度控制進來之後，係數縮到接近零，正負號也翻了過去。整份研究的判定是沒有發現。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "三分組直接相減，波動跳升的差距",
+          "value": {
+            "source": "results",
+            "path": "/results/welch_tests/jump_log_abs_high_vs_low/mean_diff",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          },
+          "note": "機率值零點零零七一，方向與假說相反"
+        },
+        {
+          "kind": "metric",
+          "label": "控制條件後，連結廣度的係數",
+          "value": {
+            "source": "results",
+            "path": "/model/full_sample/jump_log_abs/params/county_sci_z",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          },
+          "note": "機率值零點七四三零"
+        },
+        {
+          "kind": "metric",
+          "label": "同一條式子在衰退速度上的機率值",
+          "value": {
+            "source": "results",
+            "path": "/model/full_sample/decay_speed_log_abs/pvalues/county_sci_z",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "係數正零點零二二八"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "兩千多場財報只來自一百多家公司，粗比較的顯著撐不住",
+      "alt": "三分組直接相減的機率值假設兩千六百六十三場財報彼此獨立，但它們來自同一批一百一十二家公司，每家公司的總部郡從頭到尾不變。改成以公司為單位重抽一千次之後，波動跳升那個差距的區間上緣來到正零點零九五零，蓋過了零。三分組本身也不是單調的，中間組的平均比連結最廣那組還低一點。這裡的沒找到只適用於這份單一時點的公開快照配日線波動，推不到社交網絡與財報波動的一般關係。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "獨立的單位是公司，不是財報場次",
+          "body": [
+            "同一家公司在樣本裡貢獻十幾場財報，總部郡從頭到尾都是同一個。改用以公司為單位重抽一千次之後，那個差距的區間就蓋到零了。",
+            "三分組本身也沒有單調性，中間那組的平均比連結最廣那組還低一點，形狀比較像最窄那一格混進了產業結構的差異。",
+            "這份社交連結資料是單一時點的快照，不是財報當下的資訊流。這裡的沒找到只講得到這個代理版本。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "以公司為單位重抽後，差距區間的上緣",
+          "value": {
+            "source": "results",
+            "path": "/results/bootstrap_group_diff/jump_log_abs/ci/hi",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          },
+          "note": "上緣為正，區間蓋過零"
+        },
+        {
+          "kind": "metric",
+          "label": "重抽次數",
+          "value": {
+            "source": "results",
+            "path": "/results/bootstrap_group_diff/jump_log_abs/n_boot",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "以公司為重抽單位，隨機種子固定為四十二"
+        },
+        {
+          "kind": "metric",
+          "label": "二〇二四年之後那一段的係數",
+          "value": {
+            "source": "results",
+            "path": "/verdict_reason/oos_jump_log_abs_sci_coef",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          },
+          "note": "二〇二四年之前那一段是負的，前後正負號相反"
+        }
+      ]
+    }
+  ]
+}
