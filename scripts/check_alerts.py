@@ -849,6 +849,7 @@ def _build_ci_repair_task(
         "incident_id": incident_id,
         "ci_incident_id": incident_id,
         "ci_run_key": _ci_run_key(run),
+        "ci_head_sha": str(run.get("headSha") or ""),
         "created_at": now_iso,
         "title": f"CI 紅燈修復（run {run_id}, attempt {attempt}）— main Test Suite",
         "description": (
@@ -901,6 +902,7 @@ def _build_ci_root_cause_task(
         "incident_id": incident_id,
         "ci_incident_id": incident_id,
         "ci_run_key": _ci_run_key(run),
+        "ci_head_sha": str(run.get("headSha") or ""),
         "denied_repair_task_id": denied_task_id,
         "created_at": now_iso,
         "title": f"CI 單一根因修復（run {run_id}）— main Test Suite",
@@ -1417,26 +1419,100 @@ def _ci_task_records(task_ids: list[str], next_tasks_path: Path) -> dict[str, di
     }
 
 
+def _ci_task_failure_head(task: dict) -> str:
+    """Return the persisted failure commit, including legacy task rows."""
+    head = str(task.get("ci_head_sha") or "").strip()
+    if re.fullmatch(r"[0-9a-fA-F]{7,40}", head):
+        return head
+    description = str(task.get("description") or "")
+    match = re.search(r"(?m)^head_sha:\s*([0-9a-fA-F]{7,40})\s*$", description)
+    return match.group(1) if match else ""
+
+
+def _ci_is_watcher_repair_task(task: dict) -> bool:
+    """Positive identity for machine-generated CI repair queue rows."""
+    task_id = str(task.get("id") or "")
+    source = str(task.get("source") or "")
+    id_source_match = bool(
+        re.fullmatch(r"ci-red-\d+(?:-a\d+)?", task_id)
+        and source == "auto_discovered"
+    ) or bool(
+        re.fullmatch(r"ci-root-\d+", task_id)
+        and source == "incident_escalation"
+    )
+    return bool(
+        id_source_match
+        and str(task.get("task_type") or "") == "platform_ops"
+        and re.fullmatch(r"\d+:\d+", str(task.get("ci_run_key") or ""))
+    )
+
+
 def _ci_close_pending_repair_tasks(
     task_ids: list[str],
     next_tasks_path: Path,
     *,
     now_iso: str,
     green_run: dict,
+    commit_covered_probe=None,
 ) -> list[str]:
-    """Atomically retire incident-owned tasks that never started.
+    """Atomically retire covered CI repair tasks that never started.
 
     Claimed/in-progress work belongs to another worker and is never rewritten.
-    Only still-pending rows become canonical ``closed_no_action`` after a verified
-    green run, preventing a queued fire from claiming stale repair work.
+    Incident-owned rows retain their historical unconditional cleanup contract.
+    In addition, a verified green head retires pending repair rows left behind by
+    older incident episodes when git ancestry proves that green covers their
+    failure commit.  This prevents recovered capacity from claiming stale work.
     """
     import fcntl
 
     from volpred.ops.next_tasks import write_tasks_to_handle
 
     wanted = set(task_ids)
-    if not wanted or not next_tasks_path.exists():
+    if not next_tasks_path.exists():
         return []
+    green_head = str(green_run.get("head_sha") or green_run.get("headSha") or "")
+    commit_covered_probe = commit_covered_probe or _ci_commit_covered
+
+    # Snapshot candidates under a shared lock, then release it before any git
+    # ancestry probe.  The real probe can wait up to 30 seconds per SHA; holding
+    # the canonical queue lock here would stall claim/dispatch/all writers.
+    with next_tasks_path.open("r", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_SH)
+        try:
+            snapshot = json.load(fh)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    if not isinstance(snapshot, list):
+        raise ValueError("next_tasks.json is not a list")
+    candidate_identities = {
+        task_id: (
+            failure_head,
+            str(task.get("task_type") or ""),
+            str(task.get("source") or ""),
+            str(task.get("ci_run_key") or ""),
+        )
+        for task in snapshot
+        if isinstance(task, dict)
+        and (task_id := str(task.get("id") or "")) not in wanted
+        and _ci_is_watcher_repair_task(task)
+        and str(task.get("status") or "").lower() == "pending"
+        and (failure_head := _ci_task_failure_head(task))
+        and green_head
+    }
+    covered_identities: dict[str, tuple[str, str, str, str]] = {}
+    for task_id, identity in candidate_identities.items():
+        failure_head = identity[0]
+        try:
+            if commit_covered_probe(failure_head, green_head):
+                covered_identities[task_id] = identity
+        except Exception as exc:  # noqa: BLE001
+            warn(
+                "ci_watch",
+                "cross-incident repair cleanup ancestry probe failed",
+                task_id=task_id,
+                err=str(exc),
+            )
+
     guard_canonical_write(next_tasks_path)
     retired: list[str] = []
     changed = False
@@ -1447,15 +1523,33 @@ def _ci_close_pending_repair_tasks(
             if not isinstance(tasks, list):
                 raise ValueError("next_tasks.json is not a list")
             for task in tasks:
-                if not isinstance(task, dict) or str(task.get("id")) not in wanted:
+                if not isinstance(task, dict):
                     continue
+                task_id = str(task.get("id") or "")
                 if (
                     str(task.get("status") or "").lower() == "closed_no_action"
                     and task.get("ci_closed_after_green")
                 ):
-                    retired.append(str(task.get("id")))
+                    if task_id in wanted:
+                        retired.append(task_id)
                     continue
                 if str(task.get("status") or "").lower() != "pending":
+                    continue
+                failure_head = _ci_task_failure_head(task)
+                # Revalidate the exact identity observed before the probe. If a
+                # concurrent writer claimed or rewrote the row, leave it alone.
+                current_identity = (
+                    failure_head,
+                    str(task.get("task_type") or ""),
+                    str(task.get("source") or ""),
+                    str(task.get("ci_run_key") or ""),
+                )
+                cross_incident_covered = (
+                    task_id in covered_identities
+                    and current_identity == covered_identities[task_id]
+                    and _ci_is_watcher_repair_task(task)
+                )
+                if task_id not in wanted and not cross_incident_covered:
                     continue
                 task["status"] = "closed_no_action"
                 task["completed_at"] = now_iso
@@ -1464,7 +1558,9 @@ def _ci_close_pending_repair_tasks(
                     f"green_run={green_run.get('run_id')}; no action required"
                 )
                 task["ci_closed_after_green"] = True
-                retired.append(str(task.get("id")))
+                if cross_incident_covered:
+                    task["ci_closed_failure_head"] = failure_head
+                retired.append(task_id)
                 changed = True
             if changed:
                 write_tasks_to_handle(fh, tasks)

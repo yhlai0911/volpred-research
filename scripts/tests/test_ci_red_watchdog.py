@@ -837,6 +837,213 @@ def test_cleanup_then_process_crash_is_idempotent_on_dedup_retry(tmp_path):
     assert closed["repair_task_statuses"][retry_task_id] == "closed_no_action"
 
 
+def test_ci_repair_tasks_persist_full_failure_head_identity():
+    repair = check_alerts._build_ci_repair_task(RED1, now_iso=NOW)
+    root = check_alerts._build_ci_root_cause_task(
+        RED1,
+        now_iso=NOW,
+        failure_cause=CAUSE,
+        incident_id="incident-1",
+        denied_task_id="denied-1",
+    )
+
+    assert repair["ci_head_sha"] == RED1["headSha"]
+    assert root["ci_head_sha"] == RED1["headSha"]
+
+
+def test_recovery_cleanup_retires_covered_pending_ci_tasks_across_incidents(
+    tmp_path,
+):
+    queue = tmp_path / "next_tasks.json"
+    tasks = [
+        {
+            "id": "ci-red-current",
+            "status": "pending",
+            "ci_head_sha": RED2["headSha"],
+        },
+        {
+            "id": "ci-red-29233920234",
+            "status": "pending",
+            "ci_head_sha": RED1["headSha"],
+            "task_type": "platform_ops",
+            "source": "auto_discovered",
+            "ci_run_key": "29233920234:1",
+        },
+        {
+            "id": "ci-red-29233920236-a2",
+            "status": "pending",
+            "description": f"head_sha: {RED3['headSha'][:9]}\n",
+            "task_type": "platform_ops",
+            "source": "auto_discovered",
+            "ci_run_key": "29233920236:2",
+        },
+        {
+            "id": "ci-red-99999999999",
+            "status": "pending",
+            "ci_head_sha": "f" * 40,
+            "task_type": "platform_ops",
+            "source": "auto_discovered",
+            "ci_run_key": "99999999999:1",
+        },
+        {
+            "id": "ci-red-29233920235",
+            "status": "in_progress",
+            "ci_head_sha": RED1["headSha"],
+            "task_type": "platform_ops",
+            "source": "auto_discovered",
+            "ci_run_key": "29233920235:1",
+        },
+        {
+            "id": "ci-red-process-followup",
+            "status": "pending",
+            "ci_head_sha": RED1["headSha"],
+            "task_type": "governance",
+            "source": "user",
+            "ci_run_key": "29233920234:1",
+        },
+        {
+            "id": "ordinary-platform-task",
+            "status": "pending",
+            "ci_head_sha": RED1["headSha"],
+        },
+    ]
+    queue.write_text(json.dumps(tasks), encoding="utf-8")
+
+    covered_heads = {
+        RED1["headSha"],
+        RED2["headSha"],
+        RED3["headSha"][:9],
+    }
+
+    def covered_without_holding_queue_lock(failure, green):
+        lock_probe = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import fcntl,sys; "
+                    "fh=open(sys.argv[1], 'r+'); "
+                    "fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)"
+                ),
+                str(queue),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert lock_probe.returncode == 0, lock_probe.stderr
+        return failure in covered_heads and green == GREEN["headSha"]
+
+    retired = check_alerts._ci_close_pending_repair_tasks(
+        ["ci-red-current"],
+        queue,
+        now_iso=NOW,
+        green_run=check_alerts._ci_run_record(GREEN),
+        commit_covered_probe=covered_without_holding_queue_lock,
+    )
+
+    by_id = {task["id"]: task for task in _tasks(tmp_path)}
+    assert retired == [
+        "ci-red-current",
+        "ci-red-29233920234",
+        "ci-red-29233920236-a2",
+    ]
+    assert by_id["ci-red-current"]["status"] == "closed_no_action"
+    assert by_id["ci-red-29233920234"]["status"] == "closed_no_action"
+    assert by_id["ci-red-29233920236-a2"]["status"] == "closed_no_action"
+    assert by_id["ci-red-99999999999"]["status"] == "pending"
+    assert by_id["ci-red-29233920235"]["status"] == "in_progress"
+    assert by_id["ci-red-process-followup"]["status"] == "pending"
+    assert by_id["ordinary-platform-task"]["status"] == "pending"
+
+
+def test_recovery_cleanup_revalidates_task_after_unlocked_ancestry_probe(tmp_path):
+    import fcntl
+
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text(
+        json.dumps(
+            [{
+                "id": "ci-red-29233920234",
+                "status": "pending",
+                "ci_head_sha": RED1["headSha"],
+                "task_type": "platform_ops",
+                "source": "auto_discovered",
+                "ci_run_key": "29233920234:1",
+            }]
+        ),
+        encoding="utf-8",
+    )
+
+    def claim_while_probe_runs(_failure, _green):
+        with queue.open("r+", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+            rows = json.load(fh)
+            rows[0]["status"] = "claimed"
+            rows[0]["claimed_by"] = "another-worker"
+            fh.seek(0)
+            json.dump(rows, fh)
+            fh.truncate()
+            fh.flush()
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        return True
+
+    retired = check_alerts._ci_close_pending_repair_tasks(
+        [],
+        queue,
+        now_iso=NOW,
+        green_run=check_alerts._ci_run_record(GREEN),
+        commit_covered_probe=claim_while_probe_runs,
+    )
+
+    assert retired == []
+    assert _tasks(tmp_path)[0]["status"] == "claimed"
+    assert _tasks(tmp_path)[0]["claimed_by"] == "another-worker"
+
+
+def test_recovery_cleanup_revalidates_watcher_identity_after_probe(tmp_path):
+    import fcntl
+
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text(
+        json.dumps(
+            [{
+                "id": "ci-red-29233920234",
+                "status": "pending",
+                "ci_head_sha": RED1["headSha"],
+                "task_type": "platform_ops",
+                "source": "auto_discovered",
+                "ci_run_key": "29233920234:1",
+            }]
+        ),
+        encoding="utf-8",
+    )
+
+    def repurpose_row_while_probe_runs(_failure, _green):
+        with queue.open("r+", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+            rows = json.load(fh)
+            rows[0]["ci_run_key"] = "29233920234:2"
+            fh.seek(0)
+            json.dump(rows, fh)
+            fh.truncate()
+            fh.flush()
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        return True
+
+    retired = check_alerts._ci_close_pending_repair_tasks(
+        [],
+        queue,
+        now_iso=NOW,
+        green_run=check_alerts._ci_run_record(GREEN),
+        commit_covered_probe=repurpose_row_while_probe_runs,
+    )
+
+    assert retired == []
+    assert _tasks(tmp_path)[0]["status"] == "pending"
+    assert _tasks(tmp_path)[0]["ci_run_key"] == "29233920234:2"
+
+
 def test_malformed_none_sender_result_does_not_close_incident(tmp_path):
     run, sent, _dispatches = _harness(
         tmp_path,
