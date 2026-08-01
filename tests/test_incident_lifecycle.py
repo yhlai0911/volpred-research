@@ -585,6 +585,86 @@ def test_g4_root_cause_success_lifts_suppression(store, queue) -> None:
     assert any(r["criterion"] == "root_cause_task_succeeded" for r in resolutions)
 
 
+def test_g4_missing_escalation_task_is_reconciled_from_durable_incident_receipt(
+    store, queue
+) -> None:
+    """A receipt must not suppress forever when its canonical task row vanished.
+
+    Production incident ``inc_5fa16e7d8d78`` carried
+    ``escalation.root_cause_task_id`` while that id was absent from
+    ``next_tasks.json``.  The old state machine treated the receipt itself as
+    proof that remediation was active, so every later detector pass returned
+    ``suppressed`` and nobody could ever claim the repair.
+    """
+    kind = "synthetic_gate_red"
+    _drive_breach(store, queue, kind=kind, now=T0)
+    _fail_current_task(store, queue, kind, T0 + timedelta(hours=1))
+    _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=2))
+    _fail_current_task(store, queue, kind, T0 + timedelta(hours=3))
+    out = _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=4))
+    receipt = incident.actuate_escalation(
+        store,
+        out["incident_id"],
+        queue_path=queue,
+        now=T0 + timedelta(hours=4),
+        notify=lambda *a: {"sent": True, "notification_id": "esc-missing"},
+    )
+    root_id = receipt["root_cause_task_id"]
+
+    # Simulate queue loss after the durable incident receipt was committed.
+    queue.write_text("[]\n", encoding="utf-8")
+
+    replay = incident.route_breach(
+        store,
+        kind=kind,
+        now=T0 + timedelta(hours=5),
+        task_status_probe=incident.next_tasks_status_probe(queue),
+    )
+    assert replay["action"] == "escalate"
+    assert replay["suggested_root_cause_task_id"] == root_id
+
+    repaired = incident.actuate_escalation(
+        store,
+        out["incident_id"],
+        queue_path=queue,
+        now=T0 + timedelta(hours=5),
+        notify=lambda *a: pytest.fail("acknowledged escalation must not notify twice"),
+    )
+    assert repaired["task_created"] is True
+    assert repaired["root_cause_task_id"] == root_id
+    assert [task["id"] for task in _load_tasks(queue)] == [root_id]
+
+
+def test_g4_distinct_incident_root_tasks_bypass_generic_semantic_dedupe(
+    store, queue
+) -> None:
+    """Incident ids, not prose similarity, own root-task admission identity."""
+
+    root_ids: list[str] = []
+    for offset, kind in enumerate(("draft_pool_low", "publishing_freshness")):
+        start = T0 + timedelta(hours=offset * 4)
+        out = None
+        for attempt in range(3):
+            out = incident.route_breach(
+                store,
+                kind=kind,
+                now=start + timedelta(hours=attempt),
+                task_status_probe=incident.next_tasks_status_probe(queue),
+            )
+        assert out is not None and out["action"] == "escalate"
+        receipt = incident.actuate_escalation(
+            store,
+            out["incident_id"],
+            queue_path=queue,
+            now=start + timedelta(hours=3),
+            notify=lambda *a: {"sent": True},
+        )
+        assert receipt["task_created"] is True
+        root_ids.append(receipt["root_cause_task_id"])
+
+    assert [task["id"] for task in _load_tasks(queue)] == root_ids
+
+
 # ── G5 ───────────────────────────────────────────────────────────────────────
 
 

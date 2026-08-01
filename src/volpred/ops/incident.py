@@ -580,7 +580,16 @@ def _decide_breach(
         return {"action": "suppressed"}
     if state == STATE_ESCALATED:
         escalation = row.get("escalation") if isinstance(row.get("escalation"), dict) else {}
-        actuated = bool(escalation.get("root_cause_task_id")) and bool(escalation.get("notified_at"))
+        root_cause_task_id = str(escalation.get("root_cause_task_id") or "")
+        task_present = bool(root_cause_task_id)
+        if task_present and task_status_probe is not None:
+            # The incident receipt is not proof that the canonical queue row
+            # survived admission/compaction.  In particular, semantic task
+            # dedupe used to reject a distinct incident root task while the
+            # actuator still recorded its candidate id.  Re-enter the
+            # idempotent actuator whenever the durable id is absent.
+            task_present = task_status_probe(root_cause_task_id) is not None
+        actuated = task_present and bool(escalation.get("notified_at"))
         if actuated:
             # Escalated ⇒ permanently suppressed for auto-dispositions (§5):
             # 「修不好 → 承認修不好 → 交給人 → 閉嘴」。
@@ -1028,14 +1037,39 @@ def actuate_escalation(
     receipt: dict[str, Any] = {"incident_id": incident_id, "actuated": True}
 
     task_id = str(escalation.get("root_cause_task_id") or "")
-    if not task_id:
-        from volpred.ops.next_tasks import append_task_record  # lazy: avoid import cycle
+    task_status = next_tasks_status_probe(queue_path)(task_id) if task_id else None
+    if not task_id or task_status is None:
+        from volpred.ops.next_tasks import (  # lazy: avoid import cycle
+            append_task_record,
+        )
 
         record = _escalation_task_record(row, current)
-        stored, created = append_task_record(record, path=queue_path, if_exists="skip")
+        expected_task_id = str(record["id"])
+        if task_id and task_id != expected_task_id:
+            raise ValueError(
+                "incident escalation receipt task id does not match deterministic identity: "
+                f"receipt={task_id!r} expected={expected_task_id!r}"
+            )
+        # Incident identity already provides exact dedupe.  Generic semantic
+        # dedupe must not merge distinct incidents merely because both mention
+        # incident.py / first_seen_at; that produced a receipt for a task that
+        # never entered next_tasks.json in production.
+        stored, created = append_task_record(
+            record,
+            path=queue_path,
+            if_exists="skip",
+            semantic_dedupe=False,
+        )
         task_id = str(stored.get("id") or record["id"])
+        if task_id != expected_task_id:
+            raise ValueError(
+                "incident escalation admission returned a different task identity: "
+                f"returned={task_id!r} expected={expected_task_id!r}"
+            )
         receipt["task_created"] = created
         record_escalation(store_path, incident_id, root_cause_task_id=task_id, now=current)
+    else:
+        receipt["task_created"] = False
     receipt["root_cause_task_id"] = task_id
 
     if send_mail and not escalation.get("notified_at"):
