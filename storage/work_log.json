@@ -32976,5 +32976,45 @@
     "owner": "hourly-slot-1-86a31a8535134dd7a0db52c7b80f36b4",
     "commit": null,
     "summary": "PHASE A 收件前置：證偽 K1733 followup 的 freshness gate 條件，避免丟棄完好產物 + 重跑 heavy compute。\n\n`k1733-split-stage1-full-run`（exit_code=0）的 `claude_followup.brief` 第 (0) 步要求「`reproduce_spec` 必須存在於 `K1733_results.json` 之內，否則代表 run 崩了，必須 re-run 而非 collect」。實地回讀：`config.quick_mode=False` 通過，但 `reproduce_spec` 確實不在 JSON 的 20 個 top-level key 內 → 照字面執行會判「崩了」。\n\n**根因**：canonical writer `src/volpred/research/reproduce_spec.py` 的契約是寫成 **sibling 檔**（docstring：「writes … side by side」；`SPEC_NAME=\"reproduce_spec.json\"`），從不 inline。該 worktree 內 `experiments/k1733/reproduce_spec.json` 存在（3,951 bytes、mtime 與 results 同為 07-30 08:33、schema v1、欄位齊備）。gate 條件與 writer 產出形狀對不上，對任何正常完成的 run 都會誤判。\n\n**回歸驗證**：spec 的 `canonical_result_identity.sha256=9b4ead33…`、`size_bytes=322085`，對 `K1733_results.json` 實際 bytes 重算 sha256 逐位元相符。spec 內含 results 的 hash ⇒ spec 寫在 results 落地之後 ⇒ finalize 有跑完。**該 artifact 可 collect，不該 re-run。**\n\n**狀態 `contained`**：五步 gate 完成 (1)(2)(4)，未完成 (3) 重構底層與 (5) 制度化 —— 產生此 brief 的 split/followup 撰寫路徑未改，也無機械 gate 擋「後置條件斷言 vs canonical writer 契約不符」。\n\n**未 claim 該 task 的理由**：brief 的 (1) README reconciliation（565 行 README vs 220KB JSON 逐數字核對）＋ worktree `dispatch-slot-1-9189c746-k1733` 正式 merge，本班剩餘預算不足以完整收尾，依 batch-drain 收班條件 (b) 留給下一班（未留 partial、未動 `mark-followup-dispatched`，followup 仍在 pending-followup 佇列可被正常接手）。\n\n寫入 `docs/error_log.md`：Class C 代表 incident 一行 + 文末完整 entry（含接手指引：freshness gate 改讀 sibling `reproduce_spec.json` 比對 `canonical_result_identity`）。"
+  },
+  {
+    "timestamp": "2026-08-01T09:20:00+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260801",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-9783132d97a84a0488a8c999036565fd",
+    "owner": "hourly-slot-1-9783132d97a84a0488a8c999036565fd",
+    "commit": null,
+    "summary": "PHASE A0 time_critical lane：完成並發佈 2026-08-01 每日精選導讀 `mile_a379f63d`「下週五非農值不值得避險？放大鏡不會自己發光，先填完這四格」。\n\n**選題（時事驅動，非研究主題）**：下週五 2026-08-07 非農公佈 → 投資人該不該提前買保護。轉折證據用 7/31 剛出爐的 `mile_84e3be0a`（191 次非農週 vs 1,485 對照週，VIX 幾乎一樣）。\n\n**具名心智模型（先定名再寫）**：「事件是放大鏡，體制才是光源」；骨幹清單「放大鏡四格」（光源／倍率／價錢／時效）以表格放在第三節，每格綁實測數字。\n\n**差異化**：與 7/26 digest `mile_beee535c`（MOVE 先亮、何時買保護）區隔 —— 本篇問「值不值得避險」而非「何時買」；beee535c 的 8 篇來源組完全未重用。\n\n**策展來源 8 篇，跨度 57 天**（2026-06-04 `mile_8d8b8877` → 2026-07-31 `mile_84e3be0a`），過 `_audit_digest_archive_span` ≥14 天機械 gate；已逐一回讀確認全部 published 且 content_type 皆非 daily_digest（agent 主動剔除主線程原建議的 `mile_76475146`/`mile_ffb14405` —— 該兩篇本身是 digest，依「排除 digest 自身」規則不可當來源）。\n\n**Gates**：`check_arc_dedup.py --audience general` = warn_arc_near_miss（非 hard block，near-miss 清單與本主題無關）；`anti_ai_gate.py` exit 0（PASS，warn 2/3 為長文結構性項目，未用 --force）；editor-SOP 9-checklist 全 PASS。\n\n**驗證（主線程獨立回讀，非採信 agent 自述）**：feed.json 內 status=published、`details.content_type=daily_digest`、tags 含「精選導讀」、title 未以「每日精選導讀｜」起頭；live `https://volpred.zeabur.app/v3/reports/mile_a379f63d` HTTP 200；正文 CJK 4,747 字（≥4000 門檻）、10 張 inline 圖、17 個 inline 來源連結（滿足「每段引用 inline 標註」而非只列文末）。\n\n**圖表分工**：7 張來源研究證據圖 inline 貼在對應論證段旁；文末懶人包為另生的 3 張框架合成 poster（panel_framework / panel_numbers / panel_takeaway，已上傳 Supabase HTTP 200），未拿內文證據圖充數。\n圖表渲染因禁止 spawn codex exec，走 deterministic renderer `scripts/lazypack_render.py`（repair_rounds_used=0）—— 有紀錄的 fallback。\n\n**留白一處（誠實標註）**：VIX 17.09 對平台模型 16.3%（差 0.79）與 CPI 篇的 IV−RV 口徑（15.03 對 20 日 RV 14.77%，差 0.26）口徑不同不可直接比大小，文中明寫此點並把補算留給讀者，未硬湊可比數字。"
+  },
+  {
+    "timestamp": "2026-08-01T09:28:00+08:00",
+    "task_type": "experiment",
+    "task_id": "K1735",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-9783132d97a84a0488a8c999036565fd",
+    "owner": "hourly-slot-1-9783132d97a84a0488a8c999036565fd",
+    "commit": null,
+    "summary": "PHASE B（starvation lockout lane）：派出 K1735「日內 diurnal pattern 是否足夠解釋 RV 變異」。\n\n**選任理由**：dispatcher 報 STARVATION LOCKOUT — 6 個 P3 K-experiment 超時 265-313h，diversity rotation 依規則暫停，本班只能從餓死清單挑。K1735 為最久（313.3h，門檻 72h，超出 241.3h）。\n\n**job**: `agent-brief_k1735-88f89d`（queued）；worktree `dispatch-slot-1-9783132d-k1735`（branch `k1735-slot1-9783132d`，經 canonical `git_writer_lock.py run` 建立）；artifact 契約 `experiments/k1735/K1735_results.json`；timeout 3600s。pool status = `awaiting_agent_job`。\n\n**brief 內建的效度防線**：yfinance intraday 歷史深度通常僅 60 天 —— brief 明寫「若樣本深度不足以支撐結論，這件事本身就是要寫進 README 的發現」，並禁止用日資料硬湊成日內結果、禁止把短樣本講成長期定論；`INSUFFICIENT_DATA` 與 NULL 都被明列為可接受產出，避免為了「有發現」而調參到 p<0.05。\n\n**為何走 compute_queue 而非 fire 內跑**：router 回 `experiment → opus/xhigh/worktree`；Agent tool 無 effort 旋鈕拿不到 xhigh，而 fire 有 3000s hard cap、研究 agent 需 20-60min —— 父等子會被 SIGKILL、父先走會留孤兒 worktree（2026-07-12 3-STRIKE）。依 prompt 規則長 agent 唯一合法路徑 = `enqueue-agent`，由 */15 detached worker 執行，成果由後續 fire 在 PHASE A 收件。本 fire 職責到 enqueue 為止。\n\n**followup brief 已預先寫入 2026-07-31 的 freshness-gate 證偽結論**：`reproduce_spec` 是 canonical writer 寫的 **sibling 檔**、從不 inline 進 results.json，因此「results.json 內沒有 reproduce_spec」不可當 re-run 依據（K1733 曾因此差點誤丟完好產物）；正確驗法是比對 `reproduce_spec.canonical_result_identity.sha256` 與 results.json 實際 bytes。把這條寫進 followup brief 是為了讓收件班不必重新踩一次同一個坑。"
+  },
+  {
+    "timestamp": "2026-08-01T09:33:00+08:00",
+    "task_type": "experiment",
+    "task_id": "K1737",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-9783132d97a84a0488a8c999036565fd",
+    "owner": "hourly-slot-1-9783132d97a84a0488a8c999036565fd",
+    "commit": null,
+    "summary": "PHASE B（starvation lockout lane，batch-drain 第 3 張）：派出 K1737「Double-ML 因果 factor 檢定：價值／動能／品質是否有真正因果效應」（餓死 313.3h）。\n\n**job**: `agent-brief_k1737-fc901c`（queued）；worktree `dispatch-slot-1-9783132d-k1737`（branch `k1737-slot1-9783132d`，經 canonical `git_writer_lock.py run` 建立）；artifact 契約 `experiments/k1737/K1737_results.json`；timeout 3600s。pool status = `awaiting_agent_job`。\n\n**brief 內建的效度防線（本題最大風險）**：yfinance 的 book-to-market / ROE 多為**當前快照非 PIT**，用它回推歷史橫斷面即 look-ahead bias。brief 要求 agent 先誠實盤點 PIT 可得性，污染的 factor 必須標 `CONTAMINATED_NO_PIT` 並降級結論（動能 12-1M 純由價格算，是唯一乾淨的一支）；followup brief 進一步把「把快照基本面當乾淨 PIT 用還報顯著因果 → verdict FAIL」寫成收件時的硬判準。\n\n另要求 DML 必須有 cross-fitting、confounders 須真高維（否則 DML 無意義）、三 factor 同檢須 FDR 校正、且必須報 naive OLS vs DML 對照（這個對照才是本題主產出）。並在 brief 明寫本題與既有「純預測 factor ETF」題的區隔，防止退化成又一個預測性 backtest。\n\n**為何走 compute_queue 而非 fire 內跑**：router 回 `experiment → opus/xhigh/worktree`；Agent tool 無 effort 旋鈕拿不到 xhigh，而 fire 有 3000s hard cap、研究 agent 需 20-60min —— 父等子會被 SIGKILL、父先走會留孤兒 worktree（2026-07-12 3-STRIKE）。依 prompt 規則長 agent 唯一合法路徑 = `enqueue-agent`，由 */15 detached worker 執行，成果由後續 fire 在 PHASE A 收件。本 fire 職責到 enqueue 為止。\n\n**followup brief 已預先寫入 2026-07-31 的 freshness-gate 證偽結論**：`reproduce_spec` 是 canonical writer 寫的 **sibling 檔**、從不 inline 進 results.json，因此「results.json 內沒有 reproduce_spec」不可當 re-run 依據（K1733 曾因此差點誤丟完好產物）；正確驗法是比對 `reproduce_spec.canonical_result_identity.sha256` 與 results.json 實際 bytes。把這條寫進 followup brief 是為了讓收件班不必重新踩一次同一個坑。"
+  },
+  {
+    "timestamp": "2026-08-01T09:31:00+08:00",
+    "task_type": "experiment",
+    "task_id": "K1738",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-9783132d97a84a0488a8c999036565fd",
+    "owner": "hourly-slot-1-9783132d97a84a0488a8c999036565fd",
+    "commit": null,
+    "summary": "PHASE B（starvation lockout lane，batch-drain 第 4 張）：派出 K1738「財報盈餘驚喜(SUE)對次月 realized vol 的因果增量：DML + IV」（餓死 313.3h）。\n\n**job**: `agent-brief_k1738-b377db`（queued）；worktree `dispatch-slot-1-9783132d-k1738`（branch `k1738-slot1-9783132d`，經 canonical `git_writer_lock.py run` 建立）；artifact 契約 `experiments/k1738/K1738_results.json`；timeout 3600s。pool status = `awaiting_agent_job`。\n\n**為何本班停在 3 個 enqueue**：`cron_compute_worker.sh` 的 parallelism 預設 `min(3, cpu//3)`，K1735/K1737/K1738 剛好填滿並行度。再往下堆只會變成序列 backlog（每個 timeout 3600s），claim lease 反而可能先過期 —— 餓死清單還有 K1739/K1741/K1742/K1746，留給下一班。\n\n**brief 內建的效度防線（本題兩個脆弱點）**：\n(1) **IV 的 exclusion restriction** —— brief 明寫「找不到可信 instrument 就明說並退回純 DML、把結論降級為 conditional association，這比硬造一個爛 IV 誠實得多，也是可接受產出」；followup brief 反向把「硬造無論證的 IV 還報因果 ATE → FAIL」寫成收件硬判準。\n(2) **財報公佈日 vs 財季結束日** —— 兩者不同，用財季結束日當事件時點即 look-ahead；brief 要求在程式碼註明處理方式，followup 明列此項為 FAIL 判準。\n另要求誠實標示 SUE 定義：yfinance 拿不到歷史分析師預期時可用 seasonal random walk 代理，但必須在 README 明寫與文獻 analyst-based SUE 的區隔，不可混為一談。"
   }
 ]

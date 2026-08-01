@@ -1,0 +1,552 @@
+{
+  "schema": "dreaming_review.v1",
+  "generated_at": "2026-07-31T21:25:38.043999+00:00",
+  "window_days": 14,
+  "dry_run": false,
+  "loop_health": {
+    "generated_at": "2026-07-31T21:25:38.043999+00:00",
+    "window_days": 14,
+    "overall": "ok",
+    "first_pass_success": {
+      "status": "ok",
+      "signal": "derived",
+      "window_days": 14,
+      "total_succeeded": 733,
+      "traced": 386,
+      "coverage": 0.527,
+      "first_pass": 379,
+      "retried": 7,
+      "first_pass_rate": 0.982,
+      "retry_rate": 0.018
+    },
+    "task_outcome": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "success": 733,
+      "fail": 43,
+      "blocked": 9,
+      "other": 153,
+      "success_rate": 0.934
+    },
+    "error_recurrence": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "distinct_signatures": 1,
+      "recurring": 1,
+      "recurrence_rate": 1.0,
+      "distinct_signatures_all": 28,
+      "recurring_all": 18,
+      "recurrence_rate_all": 0.643,
+      "top_recurring": [
+        {
+          "signature": "diag:foo",
+          "count": 3,
+          "first_seen": "2026-07-27T03:49:11.763902+00:00",
+          "last_seen": "2026-07-27T03:49:11.798012+00:00",
+          "source": "diagnostics",
+          "span_days": 0.0,
+          "known": false,
+          "recovered": false
+        },
+        {
+          "signature": "dreaming_review.log:exit1:mojibake",
+          "count": 63,
+          "first_seen": "2026-07-23T21:25:07+00:00",
+          "last_seen": "2026-07-26T09:00:43+00:00",
+          "source": "cron_log",
+          "root_cause": "mojibake",
+          "recovered": true,
+          "span_days": 2.48,
+          "known": false
+        },
+        {
+          "signature": "enqueue_daily_digest.log:exit1",
+          "count": 57,
+          "first_seen": "2026-07-24T01:00:01+00:00",
+          "last_seen": "2026-07-26T09:00:44+00:00",
+          "source": "cron_log",
+          "recovered": true,
+          "span_days": 2.33,
+          "known": false
+        },
+        {
+          "signature": "release_settings_audit.log:exit1",
+          "count": 31,
+          "first_seen": "2026-07-19T16:17:01+00:00",
+          "last_seen": "2026-07-26T22:27:23+00:00",
+          "source": "cron_log",
+          "recovered": true,
+          "span_days": 7.26,
+          "known": false
+        },
+        {
+          "signature": "agent_dispatch_tick.log:exit1",
+          "count": 28,
+          "first_seen": "2026-07-26T13:39:21+00:00",
+          "last_seen": "2026-07-29T16:16:33+00:00",
+          "source": "cron_log",
+          "recovered": true,
+          "span_days": 3.11,
+          "known": false
+        }
+      ]
+    },
+    "correction_trend": {
+      "status": "ok",
+      "signal": "supported",
+      "weeks": 4,
+      "weekly_counts_recent_first": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "slope_per_week": 0.0,
+      "trend": "flat",
+      "current_correction_report_high": null,
+      "current_correction_report_medium": null
+    }
+  },
+  "findings": [
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:K1730",
+      "severity": "critical",
+      "evidence": [
+        "task K1730 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_k1730",
+      "proposal": "Failed task K1730 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "K1730",
+      "governance_target": null,
+      "occurrences": 3,
+      "first_seen": "2026-07-29T21:25:27.740830+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:K1731",
+      "severity": "critical",
+      "evidence": [
+        "task K1731 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_k1731",
+      "proposal": "Failed task K1731 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "K1731",
+      "governance_target": null,
+      "occurrences": 3,
+      "first_seen": "2026-07-29T21:25:27.740830+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:trending_repost_2026_07_23_台股波動",
+      "severity": "critical",
+      "evidence": [
+        "task trending_repost_2026_07_23_台股波動 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_trending_repost_2026_07_23",
+      "proposal": "Failed task trending_repost_2026_07_23_台股波動 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "trending_repost_2026_07_23_台股波動",
+      "governance_target": null,
+      "occurrences": 6,
+      "first_seen": "2026-07-26T21:25:02.047553+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:k1694_codex_fail_repair_20260729",
+      "severity": "critical",
+      "evidence": [
+        "task k1694_codex_fail_repair_20260729 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_k1694_codex_fail_repair_20260729",
+      "proposal": "Failed task k1694_codex_fail_repair_20260729 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "k1694_codex_fail_repair_20260729",
+      "governance_target": null,
+      "occurrences": 3,
+      "first_seen": "2026-07-29T21:25:27.740830+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:assign_6a2adc68",
+      "severity": "critical",
+      "evidence": [
+        "task assign_6a2adc68 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_assign_6a2adc68",
+      "proposal": "Failed task assign_6a2adc68 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "assign_6a2adc68",
+      "governance_target": null,
+      "occurrences": 3,
+      "first_seen": "2026-07-29T21:25:27.740830+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:control_gate_review_event_reaction_coverage_20260723",
+      "severity": "warn",
+      "evidence": [
+        "task control_gate_review_event_reaction_coverage_20260723 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task control_gate_review_event_reaction_coverage_20260723 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "control_gate_review_event_reaction_coverage_20260723",
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-30T21:25:32.540344+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:control_gate_review_hourly_pregate_20260723",
+      "severity": "warn",
+      "evidence": [
+        "task control_gate_review_hourly_pregate_20260723 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task control_gate_review_hourly_pregate_20260723 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "control_gate_review_hourly_pregate_20260723",
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-30T21:25:32.540344+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:control_gate_review_phase_z_baseline_ownership_20260716",
+      "severity": "warn",
+      "evidence": [
+        "task control_gate_review_phase_z_baseline_ownership_20260716 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task control_gate_review_phase_z_baseline_ownership_20260716 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "control_gate_review_phase_z_baseline_ownership_20260716",
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-30T21:25:32.540344+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "memory_skill_gap",
+      "signature": "memory_skill_gap:feedback_content_quality_patrol_gap",
+      "severity": "info",
+      "evidence": [
+        "- [feedback_content_quality_patrol_gap.md](feedback_content_quality_patrol_gap.md) — 只有老闆會發現的問題=缺巡檢"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "這筆記憶描述 recurring process/cadence 但無對應 owner；評估 promote 成 skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。",
+      "subject_task_id": null,
+      "governance_target": ".claude/skills/",
+      "occurrences": 3,
+      "first_seen": "2026-07-29T21:25:27.740830+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:3367eb569efb88a4",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=3367eb569efb88a4 title='[新架構派發] Worker 被外部 signal 15 終止（非 watchdog；已自動回收）' send_count=3 span=3.3d (first 2026-07-26T16:14:11.030357+00:00 → last 2026-07-29T23:36:34.796716+00:00) — no fire in 45.8h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `[新架構派發] Worker 被外部 signal 15 終止（非 watchdog；已自動回收）` fired 3× over 3.3d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-30T21:25:32.540344+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": "2026-07-29T23:36:34.796716+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "unfiled_incident_class",
+      "signature": "unfiled_incident_class:739fcf1bb7ffd6f1",
+      "severity": "warn",
+      "evidence": [
+        "dedupe_key=739fcf1bb7ffd6f1 title='Release pool starved > 8.0h (cron healthy)' occurred 80x over 8.6d (first 2026-07-23T06:01:09.763414+00:00 → last 2026-07-31T21:01:23.182827+00:00) with NO docs/error_log.md entry"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_unfiled_incident_class_739fcf1bb7ffd6f1",
+      "proposal": "Alert class `Release pool starved > 8.0h (cron healthy)` occurred 80x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 739fcf1bb7ffd6f1...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 739fcf1bb7ffd6f1) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 2,
+      "first_seen": "2026-07-26T21:25:02.047553+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": "2026-07-31T21:01:23.182827+00:00",
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "unfiled_incident_class",
+      "signature": "unfiled_incident_class:8b681480cd8b6ca2",
+      "severity": "warn",
+      "evidence": [
+        "dedupe_key=8b681480cd8b6ca2 title='Event receipt watchdog stale (next_task_bridge_missing)' occurred 75x over 3.0d (first 2026-07-23T13:01:08.891027+00:00 → last 2026-07-26T12:00:31.214658+00:00) with NO docs/error_log.md entry"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_unfiled_incident_class_8b681480cd8b6ca2",
+      "proposal": "Alert class `Event receipt watchdog stale (next_task_bridge_missing)` occurred 75x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 8b681480cd8b6ca2...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 8b681480cd8b6ca2) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-26T21:25:02.047553+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": "2026-07-26T12:00:31.214658+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "unfiled_incident_class",
+      "signature": "unfiled_incident_class:8e08e46929dc07ef",
+      "severity": "warn",
+      "evidence": [
+        "dedupe_key=8e08e46929dc07ef title='PHASE-Z 產出已 commit，但 agent 沒交代原因' occurred 44x over 6.7d (first 2026-07-20T12:41:26.320032+00:00 → last 2026-07-27T04:22:54.069613+00:00) with NO docs/error_log.md entry"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_unfiled_incident_class_8e08e46929dc07ef",
+      "proposal": "Alert class `PHASE-Z 產出已 commit，但 agent 沒交代原因` occurred 44x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 8e08e46929dc07ef...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 8e08e46929dc07ef) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 2,
+      "first_seen": "2026-07-26T21:25:02.047553+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": "2026-07-27T04:22:54.069613+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "unfiled_incident_class",
+      "signature": "unfiled_incident_class:2d99bdcd3277e3cc",
+      "severity": "warn",
+      "evidence": [
+        "dedupe_key=2d99bdcd3277e3cc title='內容品質巡檢：發文間隔過久' occurred 42x over 11.0d (first 2026-07-20T13:02:48.421020+00:00 → last 2026-07-31T14:02:16.412716+00:00) with NO docs/error_log.md entry"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_unfiled_incident_class_2d99bdcd3277e3cc",
+      "proposal": "Alert class `內容品質巡檢：發文間隔過久` occurred 42x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 2d99bdcd3277e3cc...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 2d99bdcd3277e3cc) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 2,
+      "first_seen": "2026-07-26T21:25:02.047553+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": "2026-07-31T14:02:16.412716+00:00",
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "unfiled_incident_class",
+      "signature": "unfiled_incident_class:542378afb7b6a3b9",
+      "severity": "warn",
+      "evidence": [
+        "dedupe_key=542378afb7b6a3b9 title='發文脫班（無新文超過 release 節奏門檻）' occurred 39x over 5.8d (first 2026-07-20T13:02:43.319137+00:00 → last 2026-07-26T09:02:17.285077+00:00) with NO docs/error_log.md entry"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_unfiled_incident_class_542378afb7b6a3b9",
+      "proposal": "Alert class `發文脫班（無新文超過 release 節奏門檻）` occurred 39x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 542378afb7b6a3b9...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 542378afb7b6a3b9) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-26T21:25:02.047553+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": "2026-07-26T09:02:17.285077+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "unfiled_incident_class",
+      "signature": "unfiled_incident_class:d32f00ad64eb4c58",
+      "severity": "warn",
+      "evidence": [
+        "dedupe_key=d32f00ad64eb4c58 title='自動補救任務 24h 上限觸發（2026-07-22）' occurred 24x over 0.9d (first 2026-07-22T00:28:47.042432+00:00 → last 2026-07-22T23:01:09.362651+00:00) with NO docs/error_log.md entry"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_unfiled_incident_class_d32f00ad64eb4c58",
+      "proposal": "Alert class `自動補救任務 24h 上限觸發（2026-07-22）` occurred 24x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key d32f00ad64eb4c58...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix d32f00ad64eb4c58) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-26T21:25:02.047553+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": "2026-07-22T23:01:09.362651+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "unfiled_incident_class",
+      "signature": "unfiled_incident_class:eb5a9246633f97d8",
+      "severity": "warn",
+      "evidence": [
+        "dedupe_key=eb5a9246633f97d8 title='3 篇文章的懶人包圖沒生出來，卡在草稿出不去' occurred 24x over 0.9d (first 2026-07-27T15:01:05.010864+00:00 → last 2026-07-28T12:01:21.044518+00:00) with NO docs/error_log.md entry"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert class `3 篇文章的懶人包圖沒生出來，卡在草稿出不去` occurred 24x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key eb5a9246633f97d8...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix eb5a9246633f97d8) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-28T21:25:20.433281+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": "2026-07-28T12:01:21.044518+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "unfiled_incident_class",
+      "signature": "unfiled_incident_class:e61ef2cbd245f377",
+      "severity": "warn",
+      "evidence": [
+        "dedupe_key=e61ef2cbd245f377 title='自動補救任務 24h 上限觸發（2026-07-23）' occurred 23x over 1.0d (first 2026-07-23T00:01:33.855810+00:00 → last 2026-07-23T23:01:06.253953+00:00) with NO docs/error_log.md entry"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_unfiled_incident_class_e61ef2cbd245f377",
+      "proposal": "Alert class `自動補救任務 24h 上限觸發（2026-07-23）` occurred 23x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key e61ef2cbd245f377...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix e61ef2cbd245f377) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-30T21:25:32.540344+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": "2026-07-23T23:01:06.253953+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "observation_ledger_breach",
+      "signature": "observation_ledger_breach:single_gateway_claim_next_removal",
+      "severity": "warn",
+      "evidence": [
+        "observation item `single_gateway_claim_next_removal`: deadline 2026-07-30T23:59:00+08:00 passed (1.2d overdue) — what: volpred ops claim-next 消費 lane 已標 deprecated（stderr 警告指向 task_pool_claim.py；2026-07-16 single-gateway refactor），設計文件寫「觀察一輪後移除」但無日期"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "觀察項 `single_gateway_claim_next_removal` 逾期未決策。到期動作：移除 claim-next 消費 lane（deprecation → 刪除），更新 docs/refactor_plan_single_gateway_task_system.md 殘留項清單與相關測試；或 observation extend 明文展期附理由。二選一，不准留在 limbo：(a) 執行到期動作並 `uv run volpred ops observation resolve --id single_gateway_claim_next_removal --resolution <做了什麼>`；(b) 有充分理由才 `uv run volpred ops observation extend --id single_gateway_claim_next_removal --deadline <ISO> --reason <為什麼>`（展期紀錄留在帳本上）。",
+      "subject_task_id": null,
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-30T21:25:32.540344+00:00",
+      "last_seen": "2026-07-31T21:25:38.043999+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    }
+  ],
+  "new_findings": [],
+  "resolved_findings": [
+    "missing_retry_strategy:K1720",
+    "missing_retry_strategy:k1694_rerun_after_salvage_20260719",
+    "missing_retry_strategy:assign_k1731_rev9",
+    "missing_retry_strategy:K1708_gatecert_s14_rerun",
+    "missing_retry_strategy:assign_99f4b3bf",
+    "missing_retry_strategy:assign_d696156d",
+    "missing_retry_strategy:assign_12a2f9ba",
+    "missing_retry_strategy:assign_8f1165f3",
+    "persistent_alert:dc4663d2a50dcce8",
+    "repeated_tool_failure:dispatch_supervisor:kill_failed_orphan_drained:exit-1"
+  ],
+  "escalations": [
+    "missing_retry_strategy:K1730",
+    "missing_retry_strategy:K1731",
+    "missing_retry_strategy:trending_repost_2026_07_23_台股波動",
+    "missing_retry_strategy:k1694_codex_fail_repair_20260729",
+    "missing_retry_strategy:assign_6a2adc68"
+  ],
+  "auto_remediation": [
+    {
+      "signature": "missing_retry_strategy:K1730",
+      "action": "queued",
+      "task_id": "dreaming_missing_retry_strategy_k1730"
+    },
+    {
+      "signature": "missing_retry_strategy:K1731",
+      "action": "queued",
+      "task_id": "dreaming_missing_retry_strategy_k1731"
+    },
+    {
+      "signature": "missing_retry_strategy:k1694_codex_fail_repair_20260729",
+      "action": "queued",
+      "task_id": "dreaming_missing_retry_strategy_k1694_codex_fail_repair_20260729"
+    },
+    {
+      "signature": "missing_retry_strategy:assign_6a2adc68",
+      "action": "queued",
+      "task_id": "dreaming_missing_retry_strategy_assign_6a2adc68"
+    }
+  ],
+  "counts": {
+    "findings": 19,
+    "new": 0,
+    "resolved": 10,
+    "escalations": 5,
+    "propose_only": 10,
+    "auto_dispatch_eligible": 9,
+    "human_only": 0,
+    "actionable": 5,
+    "actionable_new": 0,
+    "quiescent": 7,
+    "machine_handled": 7,
+    "machine_queued": 7,
+    "machine_fixed": 0,
+    "machine_stalled": 0
+  }
+}

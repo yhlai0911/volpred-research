@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1738-b377db",
+  "title": "K1738: SUE causal increment on next-month RV — DML + IV",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1738-b377db.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1738",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1738/experiments/k1738/K1738_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1738-b377db.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-01T01:26:03Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1738-b377db.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1738-b377db.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1738/experiments/k1738/K1738_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1738-b377db.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1738",
+  "claude_followup": {
+    "brief": "K1738 收件：(0) 讀 experiments/k1738/K1738_results.json + sibling experiments/k1738/reproduce_spec.json（sibling 檔不 inline —— 不要拿「results.json 內沒有它」當 re-run 依據，2026-07-31 已證偽；正確驗法是比對 canonical_result_identity.sha256 與 results.json 實際 bytes）。(1) 驗數字：README 每個數字對回 JSON。(2) **本題最脆弱處 = IV 的 exclusion restriction**：確認 agent 有誠實評估；若找不到可信 instrument 而誠實退回純 DML 並把結論降級為 conditional association，那是**正確**行為不是失敗；反之若硬造一個沒有論證的 IV 還報因果 ATE → verdict FAIL。(3) **lag 正確性**：財報公佈日 vs 財季結束日不同，outcome 必須是公佈後的 realized vol；用財季結束日當事件時點 = look-ahead → FAIL。K1738.py 須有 signal.shift(1) 或等價 lag。(4) SUE 定義誠實性：若用 seasonal random walk 代理而非 analyst-based，README 必須明寫此區隔，不可與文獻的 SUE 混為一談。(5) DML 須有 cross-fitting。(6) 三個 horizon 須 FDR 校正，pre/post 結論都在 JSON。(7) 確認有 naive vs DML vs IV 三者對照（主產出）。(8) success criteria 是否在看到結果前寫死（比對 git log 順序），事後改寫 = FAIL。(9) 跑 check_experiment_artifacts.py check --path experiments/k1738 + test_k1738.py。(10) Codex review K1738.py。(11) 主線程寫 knowledge.json（agent 不可寫，K1259），數字程式化抽取。(12) MERGE：bash scripts/merge_worktree.sh dispatch-slot-1-9783132d-k1738（走 canonical git_writer_lock run），不留未合併 branch/worktree。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1738",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-01T01:26:03Z",
+    "linked_at": "2026-08-01T01:26:03Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1738.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1738-b377db.md"
+}

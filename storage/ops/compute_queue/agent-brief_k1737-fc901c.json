@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1737-fc901c",
+  "title": "K1737: DoubleML causal factor test — value/momentum/quality after high-dim confounders",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1737-fc901c.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1737",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1737/experiments/k1737/K1737_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1737-fc901c.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-01T01:23:13Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1737-fc901c.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1737-fc901c.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1737/experiments/k1737/K1737_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1737-fc901c.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1737",
+  "claude_followup": {
+    "brief": "K1737 收件：(0) 讀 experiments/k1737/K1737_results.json + sibling experiments/k1737/reproduce_spec.json（reproduce_spec 是 sibling 檔不 inline —— 不要拿「results.json 內沒有它」當 re-run 依據，2026-07-31 已證偽；正確驗法是比對 canonical_result_identity.sha256 與 results.json 實際 bytes）。(1) 驗數字：README 每個數字對回 JSON，不符以 JSON 為準。(2) **本題最關鍵**：查證 PIT（point-in-time）基本面問題有沒有被誠實處理 —— yfinance 的 book-to-market / ROE 多為當前快照，用它回推歷史橫斷面 = look-ahead。確認被污染的 factor 有標 CONTAMINATED_NO_PIT 且結論已降級；動能(12-1M)純由價格算可乾淨。若 agent 把快照基本面當乾淨 PIT 用還報顯著因果 → verdict FAIL。(3) lookahead：K1737.py 須有 signal.shift(1) 或等價 lag。(4) DML 必須有 cross-fitting，且 confounders 真的是高維（否則 DML 無意義）。(5) 三個 factor 同時檢定須有 FDR 校正，pre/post 結論都要在 JSON。(6) 確認有 naive OLS vs DML 對照（這是本題主產出）。(7) success criteria 是否在看到結果前寫死（比對 git log 順序），事後改寫 = FAIL。(8) 跑 check_experiment_artifacts.py check --path experiments/k1737 + test_k1737.py。(9) Codex review K1737.py。(10) 主線程寫 knowledge.json（agent 不可寫，K1259），數字程式化抽取。(11) MERGE：bash scripts/merge_worktree.sh dispatch-slot-1-9783132d-k1737（走 canonical git_writer_lock run），不留未合併 branch/worktree。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1737",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-01T01:23:13Z",
+    "linked_at": "2026-08-01T01:23:13Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1737.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1737-fc901c.md"
+}

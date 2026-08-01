@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1735-88f89d",
+  "title": "K1735: diurnal sufficiency for RV — nonparametric seasonal removal + residual test",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1735-88f89d.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1735",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1735/experiments/k1735/K1735_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1735-88f89d.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-01T01:21:51Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1735-88f89d.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1735-88f89d.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1735/experiments/k1735/K1735_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1735-88f89d.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9783132d-k1735",
+  "claude_followup": {
+    "brief": "K1735 收件：(0) 讀 experiments/k1735/K1735_results.json + sibling experiments/k1735/reproduce_spec.json（canonical writer 寫成 sibling 檔，不 inline —— 不要拿「results.json 內沒有 reproduce_spec」當 re-run 依據，那是 2026-07-31 已證偽的誤判；正確驗法是比對 reproduce_spec 的 canonical_result_identity.sha256 與 results.json 實際 bytes）。(1) 驗數字：README 每個數字對回 K1735_results.json，不符以 JSON 為準並記錄修正。(2) lookahead：K1735.py 必須有 signal.shift(1) 或等價 lag，lookahead_diagnostics 違規須為空。(3) 檢查 success criteria 是否在看到結果前就寫死（比對 git log 順序），事後改寫 = FAIL。(4) 多重檢定 FDR 校正的 pre/post 結論都要在 JSON 內。(5) 資料誠實：若 yfinance intraday 深度不足，確認 README 與 verdict 有誠實標註（INSUFFICIENT_DATA 是可接受結論，不可包裝成 PASS）。(6) 跑 uv run python scripts/check_experiment_artifacts.py check --path experiments/k1735 + experiments/k1735/test_k1735.py。(7) Codex review K1735.py。(8) 主線程寫 storage/memory/knowledge.json（agent 不可寫，K1259），數字須程式化抽取不可重打。(9) MERGE：bash scripts/merge_worktree.sh dispatch-slot-1-9783132d-k1735（走 canonical git_writer_lock run），不留未合併 branch/worktree。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1735",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-01T01:21:51Z",
+    "linked_at": "2026-08-01T01:21:52Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1735.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1735-88f89d.md"
+}
