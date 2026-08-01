@@ -244,6 +244,30 @@ PHASE-Z 收班失敗時開一張任務，那張任務要靠下一班 fire 的 PH
 
 `machine_self` 的 threshold 用 2 而非 3，因為這類問題會阻塞所有其他工作，容忍度應更低。
 
+### 6.1 2026-08-01 owner amendment：從通知死路改為一次有界修復
+
+上表原始的「完全不進自動修復迴圈」在 production 驗證中暴露另一個不可接受的死路：detector
+只記錄並通知，Operations Core 沒有任何可 claim 的 actuator，因此信件雖列出錯誤，平台卻不會
+主動修復。自本修正起，五個 shipped machine-self kinds（`phase_z_test_gate_red`、
+`silent_fallback_new`、`git_push_backup_hold`、`phase_z_baseline_missing`、
+`phase_z_generation_rejected`）的 canonical 契約改為：
+
+1. episode 1 建立**恰一張** P2、isolated、具 `write_intent=repo_patch` 與有限
+   `declared_output_paths` 的修復任務；重複 poll 只重用同一 task id，不通知 owner。
+2. 任務自綁定起 **2 小時**內必須 terminal；仍未派工者先由 queue CAS 標記 failed，CAS
+   acknowledgement 成功後 incident 才能前進。已 claimed／in-progress 者保留唯一 producer
+   custody，由 supervisor 既有 work-cap／termination owner 回收；未收到 terminal receipt 前
+   不得另開修復者。
+3. 任務 terminal（含上述 deadline handoff 完成）而 detector 仍 breached，立即進 episode 2，建立恰一張
+   `main_thread` `[根因重構]` 任務並通知一次；不得再開第二張機器自修任務。
+4. 舊 durable incident row 在下一次 breach 依 canonical `KIND_POLICY` 前向遷移，並保存
+   `policy_history`，不可因為事故早於 cutover 就永久停在 notification-only。
+
+此 amendment 取代本節上表對上述五個 shipped kinds 的 notification-only 處置；
+`worker_orphaned`／`worktree_unmerged` 的 main-thread adjudication 與已有明確外部 actuator 的
+kind 不受影響。它同時保留原設計要避免的無限自修迴圈，並補上 autonomous-manager 必須具備的
+首次 actuator。
+
 ---
 
 ## 7. 反迴歸的機械 gate
@@ -256,7 +280,7 @@ PHASE-Z 收班失敗時開一張任務，那張任務要靠下一班 fire 的 PH
 | G2 | resolve 後再 breach | **不開新單**；同一 incident row `state=open`、`episode_count==2`；計數**未歸零** |
 | G3 | 同根因 5 個不同實例 | 只 **1** 個 incident、`len(instances)==5`、只 **1** 張任務 |
 | G4 | 連續 3 次 episode 未收斂 | `state=escalated`，恰 **1** 張 `[根因重構]` 任務，恰 **1** 封信，之後再觸發 10 次 → **0** 張新任務 |
-| G5 | `class=machine_self` 且 `episode_count==2` | 直接 `escalated`，**不曾**進 `mitigating` 開過自動修復單 |
+| G5 | shipped `class=machine_self` 首次 breach，之後持續 breach | episode 1 恰 **1** 張具 WS-B execution contract 的 P2 修復單；2h deadline 先完成 queue／producer-custody settlement，terminal 後仍 breached → episode 2 直接 `escalated`，不開第二張自修單 |
 | G6 | **24h 全域上限** | 任一滾動 24h 內自動補救任務總量 > `MAX_AUTO_REMEDIATION_PER_DAY`（初值 **8**）時，超出的一律不開單、記 `throttled` 到 incident、每日彙整成 **1** 封摘要信 |
 | G7 | 一次乾淨不足以 resolve | 單次乾淨後 `state` 仍為 `mitigating`；滿足 K 次+24h 才 `resolved` |
 

@@ -193,7 +193,7 @@ def test_internal_alert_router_failure_is_not_silently_suppressed(pool, monkeypa
     assert result["routing_failure"] is True
     assert result["escalated"] is False
     assert deliveries[0]["level"] == "critical"
-    assert "P1 任務未能建立" in deliveries[0]["body"]
+    assert "修復任務未能建立" in deliveries[0]["body"]
 
 
 def test_self_remediating_alerts_do_not_double_book(pool) -> None:
@@ -269,9 +269,9 @@ def test_every_shipped_alert_id_is_covered_by_some_disposition(tmp_path) -> None
 # The old episode/attempt machinery (internal_alert_state parasitic in
 # next_tasks rows, clean watermarks, disjoint-fingerprint episode resets) was
 # plan §2.1/§3.3's root cause and is GONE.  These tests pin the replacement:
-# identity + counters live in storage/ops/incidents.json; machine_self kinds
-# record + notify without minting repair tasks; resolution needs sustained
-# clean; the second episode escalates.
+# identity + counters live in storage/ops/incidents.json; machine_self kinds get
+# one bounded repair before escalation; resolution needs sustained clean; the
+# second episode escalates.
 
 
 def _store(pool):
@@ -291,31 +291,237 @@ def _internal_condition(fingerprint=None) -> dict:
     return cond
 
 
-def test_internal_breach_records_incident_without_minting_tasks(pool) -> None:
-    """machine_self（§6）：記錄 + 通知，不再每次 breach 開一張 a1。"""
+def test_internal_breach_mints_one_bounded_machine_self_repair(pool) -> None:
+    """machine_self must become work, without minting one task per poll."""
+    from scripts.task_pool_claim import _dispatch_execution_contract
     from volpred.ops import incident
 
     first = ar.remediate_internal_alert(
         _internal_condition(), alert_key="silent_fallback_new",
         storage_dir=str(pool), now=NOW,
     )
-    assert first["notify_due"] is True
-    assert first["created"] is False
-    assert _tasks(pool) == []
+    assert first["notify_due"] is False
+    assert first["created"] is True
+    [repair] = _tasks(pool)
+    assert repair["source"] == "internal_alert_remediation_router"
+    assert repair["dispatch_lane"] == "agent"
+    contract, error = _dispatch_execution_contract(repair)
+    assert error is None
+    assert contract is not None
+    assert contract["write_intent"] == "repo_patch"
+    assert contract["declared_output_paths"]
 
     second = ar.remediate_internal_alert(
         _internal_condition(), alert_key="silent_fallback_new",
         storage_dir=str(pool), now=NOW + timedelta(hours=1),
     )
-    # notified_at is unset (transport not yet acknowledged) so notify stays due;
-    # either way NO task rows appear and the SAME incident row counts up.
+    # The same active disposition owns repeated observations.
     assert second["created"] is False
-    assert _tasks(pool) == []
+    assert [task["id"] for task in _tasks(pool)] == [repair["id"]]
     rows = incident.list_incidents(_store(pool))
     assert len(rows) == 1
     assert rows[0]["occurrence_count"] == 2
     assert rows[0]["class"] == incident.CLASS_MACHINE_SELF
-    assert rows[0]["task_mode"] == incident.TASK_MODE_NONE
+    assert rows[0]["task_mode"] == incident.TASK_MODE_AUTO_REPAIR
+
+
+def test_internal_repair_uses_exact_incident_identity_not_semantic_neighbour(
+    pool,
+) -> None:
+    """A similarly worded task must never impersonate the incident disposition."""
+    pool.joinpath("next_tasks.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "similar-but-not-the-incident-task",
+                    "title": "[internal alert] silent fallback NEW",
+                    "description": "repair silent fallback",
+                    "task_type": "platform_ops",
+                    "priority": 2,
+                    "status": "pending",
+                    "source": "internal_alert_remediation_router",
+                }
+            ],
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = ar.remediate_internal_alert(
+        _internal_condition(),
+        alert_key="silent_fallback_new",
+        storage_dir=str(pool),
+        now=NOW,
+    )
+
+    ids = {task["id"] for task in _tasks(pool)}
+    assert result["created"] is True
+    assert result["task_id"] in ids
+    assert result["task_id"] != "similar-but-not-the-incident-task"
+    assert len(ids) == 2
+
+
+def test_machine_repair_deadline_fails_stale_task_and_escalates(pool) -> None:
+    """A pending machine repair cannot keep an incident mitigating forever."""
+    from volpred.ops import incident
+
+    first = ar.remediate_internal_alert(
+        _internal_condition(),
+        alert_key="silent_fallback_new",
+        storage_dir=str(pool),
+        now=NOW,
+    )
+    repair_id = first["task_id"]
+
+    expired = ar.remediate_internal_alert(
+        _internal_condition(),
+        alert_key="silent_fallback_new",
+        storage_dir=str(pool),
+        now=NOW + incident.MACHINE_REPAIR_DEADLINE,
+    )
+
+    [repair] = _tasks(pool)
+    assert repair["id"] == repair_id
+    assert repair["status"] == "failed"
+    assert repair["result"] == "machine_repair_deadline_exceeded"
+    assert expired["escalate"] is True
+    assert expired["reason"] == "incident_escalation_due"
+    assert expired["expired_task_id"] == repair_id
+    [row] = incident.list_incidents(_store(pool))
+    assert row["episode_count"] == 2
+    assert row["episode_failures"][-1]["status"] == "deadline_exceeded"
+
+
+def test_machine_repair_settlement_failure_replays_before_escalation(
+    pool, monkeypatch
+) -> None:
+    """Incident advancement waits for the queue CAS and safely retries it."""
+    from volpred.ops import incident
+
+    first = ar.remediate_internal_alert(
+        _internal_condition(),
+        alert_key="silent_fallback_new",
+        storage_dir=str(pool),
+        now=NOW,
+    )
+    repair_id = first["task_id"]
+    real_settle = ar._fail_expired_machine_repair
+    monkeypatch.setattr(
+        ar,
+        "_fail_expired_machine_repair",
+        lambda *a, **k: ar._DEADLINE_SETTLEMENT_FAILED,
+    )
+
+    failed = ar.remediate_internal_alert(
+        _internal_condition(),
+        alert_key="silent_fallback_new",
+        storage_dir=str(pool),
+        now=NOW + incident.MACHINE_REPAIR_DEADLINE,
+    )
+    assert failed["reason"] == "deadline_settlement_failed"
+    assert _tasks(pool)[0]["status"] == "pending"
+    [row] = incident.list_incidents(_store(pool))
+    assert row["state"] == incident.STATE_MITIGATING
+    assert row["episode_count"] == 1
+
+    monkeypatch.setattr(ar, "_fail_expired_machine_repair", real_settle)
+    replay = ar.remediate_internal_alert(
+        _internal_condition(),
+        alert_key="silent_fallback_new",
+        storage_dir=str(pool),
+        now=NOW + incident.MACHINE_REPAIR_DEADLINE + timedelta(minutes=1),
+    )
+    assert replay["escalate"] is True
+    assert replay["expired_task_id"] == repair_id
+    assert _tasks(pool)[0]["status"] == "failed"
+
+
+def test_claimed_machine_repair_keeps_single_owner_past_deadline(pool) -> None:
+    """The incident waits for supervisor custody drain instead of double-booking."""
+    from volpred.ops import incident
+
+    first = ar.remediate_internal_alert(
+        _internal_condition(),
+        alert_key="silent_fallback_new",
+        storage_dir=str(pool),
+        now=NOW,
+    )
+    tasks = _tasks(pool)
+    tasks[0]["status"] = "in_progress"
+    pool.joinpath("next_tasks.json").write_text(
+        json.dumps(tasks, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+
+    waiting = ar.remediate_internal_alert(
+        _internal_condition(),
+        alert_key="silent_fallback_new",
+        storage_dir=str(pool),
+        now=NOW + incident.MACHINE_REPAIR_DEADLINE,
+    )
+
+    assert waiting["escalate"] is False
+    assert waiting["task_id"] == first["task_id"]
+    assert _tasks(pool)[0]["status"] == "in_progress"
+    [row] = incident.list_incidents(_store(pool))
+    assert row["episode_count"] == 1
+    assert row["deadline_handoff"]["observed_status"] == "in_progress"
+
+
+def test_deadline_probe_to_cas_claim_race_stays_silent(
+    pool, monkeypatch
+) -> None:
+    """A worker claiming after the probe is custody transfer, not router failure."""
+    from volpred.ops import alert_remediation, alerts, incident
+
+    deliveries: list[dict] = []
+
+    def fake_send(level, title, body, **kwargs):
+        deliveries.append({"level": level, "title": title, "body": body})
+        return {"sent": True, "skipped": False, "notification_id": "unexpected"}
+
+    monkeypatch.setattr(alerts, "send_routed_alert", fake_send)
+    first = alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new",
+        level="warn",
+        title="held",
+        body="NEW one",
+        storage_dir=str(pool),
+        now=NOW,
+    )
+    repair_id = first["remediation"]["task_id"]
+    real_settle = alert_remediation._fail_expired_machine_repair
+
+    def claim_then_settle(task_id, storage_dir, now):
+        tasks = _tasks(pool)
+        tasks[0]["status"] = "claimed"
+        tasks[0]["claimed_by"] = "hourly-slot-race"
+        pool.joinpath("next_tasks.json").write_text(
+            json.dumps(tasks, ensure_ascii=False) + "\n", encoding="utf-8"
+        )
+        return real_settle(task_id, storage_dir, now)
+
+    monkeypatch.setattr(
+        alert_remediation, "_fail_expired_machine_repair", claim_then_settle
+    )
+    raced = alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new",
+        level="warn",
+        title="held",
+        body="NEW one",
+        storage_dir=str(pool),
+        now=NOW + incident.MACHINE_REPAIR_DEADLINE,
+    )
+
+    assert raced["skipped"] is True
+    assert raced["skip_reason"] == "internal_auto_remediation"
+    assert deliveries == []
+    [task] = _tasks(pool)
+    assert task["id"] == repair_id
+    assert task["status"] == "claimed"
+    [row] = incident.list_incidents(_store(pool))
+    assert row["episode_count"] == 1
+    assert row["state"] == incident.STATE_MITIGATING
 
 
 def test_registered_self_heal_observes_then_escalates_without_duplicate_repair_task(
@@ -415,10 +621,13 @@ def test_internal_resolution_needs_sustained_clean_then_relapse_escalates(pool) 
     )
     assert relapse["escalate"] is True
     assert relapse["episode_count"] == 2  # machine_self threshold = 2 (G5)
-    assert _tasks(pool) == []  # 升級的開單由 actuator 負責，不在 route 這層
+    # Episode 1's bounded repair remains as history; the escalation task is
+    # opened later by the actuator, not by this routing call.
+    assert len(_tasks(pool)) == 1
+    assert _tasks(pool)[0]["status"] == "succeeded"
 
 
-def test_wrapper_sends_first_notification_then_stays_silent(pool, monkeypatch) -> None:
+def test_wrapper_opens_bounded_repair_without_nagging_owner(pool, monkeypatch) -> None:
     from volpred.ops import alerts, incident
 
     deliveries: list[dict] = []
@@ -433,20 +642,21 @@ def test_wrapper_sends_first_notification_then_stays_silent(pool, monkeypatch) -
         alert_key="silent_fallback_new", level="warn", title="held",
         body="NEW one", storage_dir=str(pool), now=NOW,
     )
-    assert first["sent"] is True
-    assert len(deliveries) == 1
-    assert "Incident 已記錄" in deliveries[0]["body"]
+    assert first["skipped"] is True
+    assert first["skip_reason"] == "internal_auto_remediation"
+    assert deliveries == []
+    [repair] = _tasks(pool)
 
     second = alerts.route_internal_remediable_alert(
         alert_key="silent_fallback_new", level="warn", title="held",
-        body="NEW one", storage_dir=str(pool), now=NOW + timedelta(hours=2),
+        body="NEW one", storage_dir=str(pool), now=NOW + timedelta(hours=1),
     )
     assert second["skipped"] is True
     assert second["skip_reason"] == "internal_auto_remediation"
-    assert len(deliveries) == 1  # 已通知過的 episode 不再寄
+    assert deliveries == []
     row = incident.list_incidents(_store(pool))[0]
-    assert row["notified_at"] is not None
-    assert _tasks(pool) == []
+    assert row["notified_at"] is None
+    assert [task["id"] for task in _tasks(pool)] == [repair["id"]]
 
 
 def test_git_push_hold_has_one_stable_edge_and_records_recurrence(

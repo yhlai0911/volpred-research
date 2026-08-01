@@ -86,8 +86,9 @@ ALERT_DEDUP_RETENTION = timedelta(days=30)
 TELEGRAM_ALERT_MAX_CHARS = 4096
 
 # These alerts describe repair work the platform can perform itself.  They must
-# enter the task pool first and stay out of email/Telegram until two completed
-# remediation attempts fail to clear the same stable root-cause key.
+# enter the task pool first and stay out of email/Telegram during one bounded
+# episode-1 repair.  A terminal repair with a persistent breach opens episode 2
+# and escalates once; it does not start a second machine-owned repair.
 # The backup hold and PHASE-Z candidate gate use separate keys because their
 # recovery proofs differ: a clean HEAD audit cannot prove that a rejected dirty
 # candidate was repaired (and vice versa).
@@ -964,7 +965,7 @@ def route_internal_remediable_alert(
     suppress_owner_transport: bool = False,
     fingerprint: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Queue an internal repair and notify only after two failed attempts.
+    """Queue one bounded internal repair; notify on episode-2 escalation.
 
     `alert_key` is an explicit root-cause identity, not the presentation title.
     This is important for PHASE-Z and push-hold messages whose titles/bodies may
@@ -972,10 +973,10 @@ def route_internal_remediable_alert(
     alert skip to existing report/log consumers, but no email or Telegram call
     is made on that path.
 
-    `fingerprint` identifies *which* concrete finding tripped the gate (e.g. the
-    ``file:line`` entries flagged NEW).  Under a coarse alert_key, a disjoint
-    fingerprint marks a genuinely different incident so the escalation counter is
-    not conflated across unrelated one-off findings.
+    `fingerprint` identifies the concrete findings that tripped the gate (e.g.
+    ``file:line`` entries flagged NEW).  They become instances of the stable
+    alert-key incident, preserving one root-cause identity while retaining the
+    exact producer paths needed by its repair execution contract.
     """
 
     normalized_key = str(alert_key or "").strip().lower()
@@ -1005,8 +1006,14 @@ def route_internal_remediable_alert(
         now=now,
     )
     remediation_reason = str(remediation.get("reason") or "")
-    if remediation_reason in {"enqueue_failed", "next_tasks_not_a_list"}:
-        # Suppression is safe only after the promised P1 exists.  A broken task
+    if remediation_reason in {
+        "deadline_settlement_failed",
+        "deadline_settlement_unacknowledged",
+        "enqueue_failed",
+        "execution_contract_unavailable",
+        "next_tasks_not_a_list",
+    }:
+        # Suppression is safe only after the promised repair exists.  A broken task
         # writer is a separate infrastructure failure and must fail loud; it is
         # not counted as one of the alert's completed remediation attempts.
         warn(
@@ -1021,7 +1028,7 @@ def route_internal_remediable_alert(
             "\n".join(
                 [
                     "## 路由失敗",
-                    f"alert_key `{normalized_key}` 的 P1 任務未能建立，因此不能安全靜音。",
+                    f"alert_key `{normalized_key}` 的修復任務未能建立，因此不能安全靜音。",
                     f"失敗原因：{remediation.get('error') or remediation_reason}",
                     "這不計入原警報的自動修復嘗試次數。",
                     "",
@@ -1041,9 +1048,9 @@ def route_internal_remediable_alert(
             "remediation": remediation,
         }
     if remediation.get("notify_due"):
-        # machine_self record+notify (incident-lifecycle §6): the FIRST episode
-        # of a machine-self incident is announced once; repeats stay silent
-        # (counted in the store), and episode >= 2 escalates instead.
+        # Compatibility route for a custom/legacy notification-only policy.
+        # Shipped machine_self kinds now open one bounded repair task first;
+        # episode >= 2 escalates rather than retrying forever.
         from volpred.ops import incident
 
         incident_id = str(remediation.get("incident_id") or "")
@@ -1053,8 +1060,8 @@ def route_internal_remediable_alert(
                 f"incident `{incident_id}`（kind `{normalized_key}`，"
                 f"第 {remediation.get('occurrence_count')} 次觸發，"
                 f"episode {remediation.get('episode_count')}）。",
-                "此類（machine_self）不自動開修復單 —— 修復動作要靠壞掉的機器本身"
-                "執行，實測從不收斂；復發（episode>=2）將升級為單一[根因重構]任務。",
+                "此 alert kind 採明確的 notification-only 相容政策；正式 machine_self "
+                "種類會先建立一張有界修復任務，不會走到此分支。",
                 "",
                 "## 原始警報",
                 str(body),

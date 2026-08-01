@@ -115,12 +115,34 @@ _COARSE_INCIDENT_INSTANCE_KEYS = {
     "git_push_backup_hold": "main_branch->push",
 }
 
-
 def _tasks_path(storage_dir: str) -> Path:
     root = Path(storage_dir)
     if not root.is_absolute():
         root = Path(__file__).resolve().parents[3] / storage_dir
     return root / "next_tasks.json"
+
+
+def _internal_repair_output_paths(
+    condition: dict[str, Any], alert_key: str
+) -> list[str]:
+    """Return a finite WS-B producer scope for one internal repair task."""
+    from volpred.ops import incident
+
+    repo_root = Path(__file__).resolve().parents[3]
+    inferred: set[str] = set()
+    for raw in _normalize_fingerprint(condition.get("fingerprint")):
+        candidate = raw.split("::", 1)[0].strip()
+        head, separator, tail = candidate.rpartition(":")
+        if separator and tail.isdigit():
+            candidate = head
+        if not candidate or candidate.startswith(("/", "../")):
+            continue
+        if any(char in candidate for char in "*?["):
+            continue
+        if (repo_root / candidate).exists():
+            inferred.add(candidate)
+    inferred.update(incident.MACHINE_SELF_REPAIR_OUTPUT_PATHS.get(alert_key, ()))
+    return sorted(inferred)
 
 
 def task_id_for(alert_id: str, now: datetime) -> str:
@@ -130,9 +152,10 @@ def task_id_for(alert_id: str, now: datetime) -> str:
 
 def _internal_task_description(condition: dict[str, Any], alert_key: str) -> str:
     return (
-        f"由內部可自癒 alert_key `{alert_key}` 自動建立（固定 P1）。\n"
-        "這是系統自己的修復工作；首次與修復進行中都不通知老闆。"
-        "只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n"
+        f"由內部可自癒 alert_key `{alert_key}` 自動建立（machine P2）。\n"
+        "這是系統自己的有界修復工作；首次與修復進行中都不通知老闆。"
+        "本 episode 只有一張任務；任務 terminal 後警報仍存在即進入 episode 2 "
+        "並升級根因，不再自動重試。\n\n"
         f"{_REVALIDATION_INSTRUCTION}\n\n"
         f"{condition.get('body') or ''}"
     )
@@ -331,6 +354,72 @@ def _close_cleared_task(task_id: str, storage_dir: str, now: datetime) -> bool:
         return False
 
 
+_DEADLINE_SETTLED = "settled"
+_DEADLINE_CUSTODY_ACTIVE = "custody_active"
+_DEADLINE_SETTLEMENT_FAILED = "failure"
+
+
+def _fail_expired_machine_repair(
+    task_id: str, storage_dir: str, now: datetime
+) -> str:
+    """Atomically retire a non-converging machine repair before escalation."""
+    path = _tasks_path(storage_dir)
+    guard_canonical_write(path)
+    if not path.exists():
+        return _DEADLINE_SETTLEMENT_FAILED
+    try:
+        with path.open("r+", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+            try:
+                payload = json.load(fh)
+                if not isinstance(payload, list):
+                    return _DEADLINE_SETTLEMENT_FAILED
+                for task in payload:
+                    if not isinstance(task, dict) or task.get("id") != task_id:
+                        continue
+                    status = str(task.get("status") or "").strip().lower()
+                    if status in {"claimed", "in_progress"}:
+                        # Probe→CAS race: a worker acquired custody after the
+                        # incident observed pending.  This is not an infra
+                        # failure and must not page the owner or double-book.
+                        return _DEADLINE_CUSTODY_ACTIVE
+                    if status not in {
+                        "",
+                        "pending",
+                        "pending_main_thread",
+                    }:
+                        # A worker may have settled between the incident's
+                        # status probe and this queue lock.  Any terminal row
+                        # already yields control to episode 2; do not turn that
+                        # honest race into a router failure.
+                        return _DEADLINE_SETTLED
+                    task["status"] = "failed"
+                    task["failed_at"] = now.isoformat()
+                    task["completed_at"] = now.isoformat()
+                    task["result"] = "machine_repair_deadline_exceeded"
+                    task["last_error"] = "incident_machine_repair_deadline_exceeded"
+                    _append_router_status_history(
+                        task,
+                        old_status=status,
+                        new_status="failed",
+                        now=now,
+                        note="machine_repair_deadline_exceeded",
+                    )
+                    write_tasks_to_handle(fh, payload)
+                    return _DEADLINE_SETTLED
+                return _DEADLINE_SETTLEMENT_FAILED
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except Exception as exc:  # noqa: BLE001 — failure must be returned to the loud routing path
+        warn(
+            "alert_remediation",
+            "expired machine repair settlement failed",
+            task_id=task_id,
+            err=str(exc),
+        )
+        return _DEADLINE_SETTLEMENT_FAILED
+
+
 def remediate_internal_alert(
     condition: dict[str, Any],
     *,
@@ -345,8 +434,8 @@ def remediate_internal_alert(
     * ``create_task``  — repair task appended via the ``append_task_record``
       gateway (deterministic per-episode id ⇒ idempotent); G6 cap may refuse it,
       which is recorded on the incident (``remediation_throttled``).
-    * ``notify``       — machine_self record+notify (§6): caller (alerts.py)
-      owns the transport, then acknowledges via ``incident.record_notified``.
+    * ``notify``       — compatibility route for a legacy/custom policy; the
+      shipped machine_self policies use one bounded repair instead.
     * ``escalate``     — caller runs ``incident.actuate_escalation`` once.
     * ``none`` / ``suppressed`` — counters moved, nothing to do.
     """
@@ -395,12 +484,22 @@ def remediate_internal_alert(
     )
 
     if action == "create_task":
+        declared_output_paths = _internal_repair_output_paths(condition, alert_key)
+        if not declared_output_paths:
+            return {
+                **base,
+                "reason": "execution_contract_unavailable",
+                "error": f"no declared output paths for internal alert {alert_key!r}",
+            }
         task = {
             "id": str(outcome.get("suggested_task_id")),
             "title": f"[internal alert] {condition.get('title') or alert_key}",
             "description": _internal_task_description(condition, alert_key),
             "task_type": "platform_ops",
             "dispatch_lane": "agent",
+            "write_intent": "repo_patch",
+            "declared_output_paths": declared_output_paths,
+            "post_merge_actions": [],
             # P2 at the source: machine-generated repairs are not boss-urgent;
             # the admission clamp would cap a self-declared P1 anyway.
             "priority": 2,
@@ -411,15 +510,32 @@ def remediate_internal_alert(
             "internal_remediable": True,
             "incident_id": outcome.get("incident_id"),
             "created_at": current.isoformat(),
+            "deadline": (current + incident.MACHINE_REPAIR_DEADLINE).isoformat(),
         }
         try:
             from volpred.ops.next_tasks import append_task_record
 
-            stored, created = append_task_record(task, path=queue, if_exists="skip")
+            stored, created = append_task_record(
+                task,
+                path=queue,
+                if_exists="skip",
+                semantic_dedupe=False,
+            )
         except Exception as exc:  # noqa: BLE001 — a broken task writer is an infra failure, not an attempt
             warn("alert_remediation", "incident task append failed",
                  alert_key=alert_key, err=str(exc))
             return {**base, "reason": "enqueue_failed", "error": str(exc)}
+        expected_task_id = str(task["id"])
+        stored_task_id = str(stored.get("id") or "")
+        if stored_task_id != expected_task_id:
+            return {
+                **base,
+                "reason": "enqueue_failed",
+                "error": (
+                    "incident disposition admission returned a different task identity: "
+                    f"returned={stored_task_id!r} expected={expected_task_id!r}"
+                ),
+            }
         if stored.get("throttled_by_remediation_cap"):
             incident.record_throttled(store, str(outcome.get("incident_id")), now=current)
             return {**base, "reason": "remediation_throttled", "task_id": task["id"]}
@@ -431,12 +547,59 @@ def remediate_internal_alert(
             "task_id": stored.get("id"),
         }
 
+    if action == "expire_task":
+        expired_task_id = str(outcome.get("expired_task_id") or "")
+        settlement = (
+            _fail_expired_machine_repair(expired_task_id, storage_dir, current)
+            if expired_task_id
+            else _DEADLINE_SETTLEMENT_FAILED
+        )
+        if settlement == _DEADLINE_CUSTODY_ACTIVE:
+            return {
+                **base,
+                "action": "none",
+                "reason": "remediation_active",
+                "task_id": expired_task_id,
+                "deadline_handoff_required": True,
+            }
+        if settlement != _DEADLINE_SETTLED:
+            return {
+                **base,
+                "reason": "deadline_settlement_failed",
+                "error": f"could not fail expired machine repair {expired_task_id}",
+                "expired_task_id": expired_task_id,
+            }
+        outcome = incident.settle_expired_task(
+            store,
+            str(outcome.get("incident_id") or ""),
+            expired_task_id,
+            task_status_probe=incident.next_tasks_status_probe(queue),
+            now=current,
+        )
+        action = str(outcome.get("action") or "")
+        base.update(
+            incident_id=outcome.get("incident_id"),
+            state=outcome.get("state"),
+            occurrence_count=outcome.get("occurrence_count"),
+            episode_count=outcome.get("episode_count"),
+            action=action,
+        )
+        if action != "escalate":
+            return {
+                **base,
+                "reason": "deadline_settlement_unacknowledged",
+                "error": str(outcome.get("reason") or "incident did not advance"),
+                "expired_task_id": expired_task_id,
+            }
+
     if action == "escalate":
+        expired_task_id = str(outcome.get("expired_task_id") or "")
         return {
             **base,
             "escalate": True,
             "reason": "incident_escalation_due",
             "suggested_root_cause_task_id": outcome.get("suggested_root_cause_task_id"),
+            "expired_task_id": expired_task_id or None,
         }
     if action == "notify":
         return {**base, "notify_due": True, "reason": "incident_notification_due"}

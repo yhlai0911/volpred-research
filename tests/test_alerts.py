@@ -2485,17 +2485,15 @@ def test_push_backlog_routes_only_when_latest_cause_is_silent_fallback_hold(
     assert outage["details"]["internal_alert_key"] is None
 
 
-def test_held_push_backlog_records_incident_notifies_once_and_mints_no_task(
+def test_held_push_backlog_opens_one_bounded_repair_without_owner_notification(
     tmp_path: Path,
     monkeypatch,
 ):
-    """incident-lifecycle P3 flip of the old contract (plan §6).
+    """Machine-self gets one repair attempt, then the class threshold stops it.
 
-    OLD: first internal signal = silent + P1 repair task per episode — 19 a1
-    tasks for one alert_key, none converged (machine_self repairs run on the
-    broken machinery itself).  NEW: machine_self kinds record the incident,
-    notify ONCE per episode, and never mint auto-repair tasks; repeats stay off
-    the transport entirely.
+    Repeated detector polls share the same task and never nag the owner.  If
+    the bounded repair becomes terminal while the breach persists, episode 2
+    escalates instead of creating an unbounded series of repair tasks.
     """
     storage = tmp_path / "storage"
     _write_json(storage / "next_tasks.json", [])
@@ -2530,11 +2528,13 @@ def test_held_push_backlog_records_incident_notifies_once_and_mints_no_task(
         now=datetime(2026, 7, 14, 12, 0, tzinfo=timezone.utc),
     )
 
-    # First episode: exactly one notification (§6 記錄+通知), zero repair tasks.
-    assert len(deliveries) == 1
-    assert report["alerts"][0]["sent"] is True
+    # First episode: exactly one repair task, no owner notification.
+    assert deliveries == []
+    assert report["alerts"][0]["skip_reason"] == "internal_auto_remediation"
     tasks = json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
-    assert tasks == []
+    assert len(tasks) == 1
+    assert tasks[0]["dispatch_lane"] == "agent"
+    repair_id = tasks[0]["id"]
     from volpred.ops import incident
 
     rows = incident.list_incidents(storage / "ops" / "incidents.json")
@@ -2547,9 +2547,10 @@ def test_held_push_backlog_records_incident_notifies_once_and_mints_no_task(
         storage_dir=str(storage),
         now=datetime(2026, 7, 14, 13, 0, tzinfo=timezone.utc),
     )
-    assert len(deliveries) == 1
+    assert deliveries == []
     assert report2["alerts"][0]["skip_reason"] == "internal_auto_remediation"
-    assert json.loads((storage / "next_tasks.json").read_text(encoding="utf-8")) == []
+    tasks = json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
+    assert [task["id"] for task in tasks] == [repair_id]
     rows = incident.list_incidents(storage / "ops" / "incidents.json")
     assert rows[0]["occurrence_count"] == 2
 

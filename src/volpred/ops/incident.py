@@ -60,7 +60,8 @@ CLASS_ORDINARY = "ordinary"
 #:                       This is not the broken machine repairing itself (the
 #:                       §6 contradiction) — it is a hand-off to the main
 #:                       thread, so machine_self kinds may use it.
-#: * ``none``          — machine_self record+notify only; never any auto task.
+#: * ``none``          — observe an alert whose concrete self-healing actuator
+#:                       is owned elsewhere; never double-book that work here.
 #: * ``external``      — identity/counting shared here, but the repair flow is
 #:                       owned elsewhere (CI watch already does incidents
 #:                       right, plan §2.2 — its semantics are preserved).
@@ -69,18 +70,48 @@ TASK_MODE_ADJUDICATION = "adjudication"
 TASK_MODE_NONE = "none"
 TASK_MODE_EXTERNAL = "external"
 
-#: kind → (class, task_mode).  All four current internal-remediable alert keys
-#: are machine_self/none: their remediation had to run on the machinery that
-#: was broken, which is why 24 of their tasks never converged (plan §6).
+#: Canonical WS-B producer scopes for the five machine-owned repair kinds.
+#: The alert bridge reads this same registry when it materialises a task, so a
+#: new kind cannot become auto-repairable without an execution contract.
+MACHINE_SELF_REPAIR_OUTPUT_PATHS: dict[str, tuple[str, ...]] = {
+    "phase_z_test_gate_red": (
+        "scripts/dispatch_supervisor/phase_z.py",
+        "tests/test_dispatch_supervisor.py",
+    ),
+    "silent_fallback_new": (
+        "scripts/dispatch_supervisor",
+        "tests/test_dispatch_supervisor.py",
+    ),
+    "git_push_backup_hold": (
+        "scripts/cron_git_push_backup.sh",
+        "scripts/audit_silent_fallbacks.py",
+        "tests/test_alerts.py",
+    ),
+    "phase_z_baseline_missing": (
+        "scripts/dispatch_supervisor/phase_z.py",
+        "tests/test_dispatch_supervisor.py",
+    ),
+    "phase_z_generation_rejected": (
+        "scripts/dispatch_supervisor/scheduler.py",
+        "scripts/dispatch_supervisor/state.py",
+        "tests/test_dispatch_supervisor.py",
+    ),
+}
+
+#: kind → (class, task_mode).  All five current internal-remediable alert keys
+#: are machine_self/auto_repair: they get exactly ONE isolated repair attempt.
+#: If that task becomes terminal while the detector still sees the breach,
+#: episode 2 reaches the machine_self threshold and hands one root-cause task
+#: to the independent main-thread authority.  This is bounded autonomy: no
+#: notification-only dead end and no unbounded broken-machine repair loop.
 #: worker_orphaned / worktree_unmerged are "worktree 生命週期" (machine_self in
 #: §6) but their disposition is a main-thread adjudication hand-off, so they
 #: keep one aggregate task per episode instead of going silent.
 KIND_POLICY: dict[str, tuple[str, str]] = {
-    "phase_z_test_gate_red": (CLASS_MACHINE_SELF, TASK_MODE_NONE),
-    "silent_fallback_new": (CLASS_MACHINE_SELF, TASK_MODE_NONE),
-    "git_push_backup_hold": (CLASS_MACHINE_SELF, TASK_MODE_NONE),
-    "phase_z_baseline_missing": (CLASS_MACHINE_SELF, TASK_MODE_NONE),
-    "phase_z_generation_rejected": (CLASS_MACHINE_SELF, TASK_MODE_NONE),
+    **{
+        kind: (CLASS_MACHINE_SELF, TASK_MODE_AUTO_REPAIR)
+        for kind in MACHINE_SELF_REPAIR_OUTPUT_PATHS
+    },
     "worker_orphaned": (CLASS_MACHINE_SELF, TASK_MODE_ADJUDICATION),
     "worktree_unmerged": (CLASS_MACHINE_SELF, TASK_MODE_ADJUDICATION),
     "ci_red": (CLASS_ORDINARY, TASK_MODE_EXTERNAL),
@@ -120,6 +151,12 @@ RESOLVE_MIN_CLEAN_SPAN = timedelta(hours=24)
 #: Instance kinds resolve only when every instance is cleared AND no new
 #: instance appeared for this long (plan §4 row 2).
 INSTANCE_QUIET_SPAN = timedelta(hours=24)
+
+# A machine-owned repair must either clear the detector or yield control to the
+# independent root-cause lane.  The supervisor worker cap is shorter than this;
+# two hours also matches stale-claim cleanup, so an active status past this age
+# is evidence that the disposition itself stopped converging.
+MACHINE_REPAIR_DEADLINE = timedelta(hours=2)
 
 #: Task statuses that count as "disposition in flight" (mirrors the internal
 #: remediation contract: pending/claimed work is not a failed attempt).
@@ -298,6 +335,40 @@ def _new_row(kind: str, parts: Iterable[Any], now: datetime) -> dict[str, Any]:
         "notified_at": None,
         "throttled": {"count": 0, "last_at": None},
     }
+
+
+def _refresh_declared_policy(row: dict[str, Any], kind: str, now: datetime) -> None:
+    """Apply a shipped kind's canonical policy to durable pre-cutover rows.
+
+    Incident rows intentionally outlive releases.  Without this forward
+    migration, changing ``KIND_POLICY`` would affect only brand-new incident
+    identities while every already-observed failure remained stuck on the old
+    notification-only behavior.  Unknown/custom kinds keep their stored policy.
+    """
+    if kind not in KIND_POLICY:
+        return
+    expected_class, expected_task_mode = KIND_POLICY[kind]
+    previous_class = str(row.get("class") or "")
+    previous_task_mode = str(row.get("task_mode") or "")
+    if (
+        previous_class == expected_class
+        and previous_task_mode == expected_task_mode
+    ):
+        return
+    row["class"] = expected_class
+    row["task_mode"] = expected_task_mode
+    history = row.setdefault("policy_history", [])
+    history.append(
+        {
+            "at": now.isoformat(),
+            "from_class": previous_class,
+            "to_class": expected_class,
+            "from_task_mode": previous_task_mode,
+            "to_task_mode": expected_task_mode,
+            "reason": "canonical_kind_policy_refresh",
+        }
+    )
+    del history[:-8]
 
 
 def _upsert_instance(
@@ -512,6 +583,7 @@ def route_breach(
             control_gate_id = CONTROL_GATE_BY_KIND.get(normalized_kind)
             row["is_control_intervention"] = control_gate_id is not None
             row["control_gate_id"] = control_gate_id
+            _refresh_declared_policy(row, normalized_kind, current)
 
         row["occurrence_count"] = int(row.get("occurrence_count") or 0) + 1
         last_seen = _parse_iso(row.get("last_seen_at"))
@@ -622,8 +694,8 @@ def _maybe_escalate_or_dispose(
 
     Escalation rule (plan §5/§6, G4/G5): the Nth episode where
     N >= class threshold does not get another auto disposition — it becomes
-    the escalation itself.  machine_self therefore escalates on its 2nd
-    episode without ever having opened an auto-repair task (G5).
+    the escalation itself.  machine_self therefore receives one bounded
+    episode-1 repair and escalates on episode 2 instead of retrying forever.
     """
     if int(row.get("episode_count") or 0) >= _threshold(row):
         row["state"] = STATE_ESCALATED
@@ -667,6 +739,46 @@ def _dispose_current_episode(
         # Bound task never landed (e.g. throttled append) — retry same episode.
         return {"action": "create_task", "suggested_task_id": suggested_task_id(row)}
     if normalized in ACTIVE_TASK_STATUSES:
+        if (
+            str(row.get("class")) == CLASS_MACHINE_SELF
+            and task_mode == TASK_MODE_AUTO_REPAIR
+        ):
+            opened_at = next(
+                (
+                    _parse_iso(item.get("opened_at"))
+                    for item in reversed(row.get("task_history") or [])
+                    if isinstance(item, dict) and item.get("task_id") == task_id
+                ),
+                None,
+            )
+            if (
+                opened_at is not None
+                and now - opened_at >= MACHINE_REPAIR_DEADLINE
+            ):
+                handoff = row.get("deadline_handoff")
+                if not isinstance(handoff, dict) or handoff.get("task_id") != task_id:
+                    row["deadline_handoff"] = {
+                        "task_id": task_id,
+                        "deadline_at": (
+                            opened_at + MACHINE_REPAIR_DEADLINE
+                        ).isoformat(),
+                        "detected_at": now.isoformat(),
+                        "observed_status": normalized or "pending",
+                    }
+                if normalized in {"", "pending", "pending_main_thread"}:
+                    # Queue CAS must happen BEFORE incident advancement.  The
+                    # caller acknowledges it through settle_expired_task(); if
+                    # the CAS loses a race, this incident remains mitigating.
+                    return {"action": "expire_task", "expired_task_id": task_id}
+                # claimed/in_progress still has producer custody.  Its formal
+                # supervisor work-cap/termination owner must drain that custody;
+                # opening a second repair here would create two writers.
+                row["state"] = STATE_MITIGATING
+                return {
+                    "action": "none",
+                    "active_task_id": task_id,
+                    "deadline_handoff_required": True,
+                }
         row["state"] = STATE_MITIGATING
         return {"action": "none", "active_task_id": task_id}
 
@@ -682,6 +794,70 @@ def _dispose_current_episode(
     )
     _open_new_episode(row, now)
     return _maybe_escalate_or_dispose(row, task_status_probe, now)
+
+
+def settle_expired_task(
+    store_path: str | Path,
+    incident_id: str,
+    task_id: str,
+    *,
+    task_status_probe: Callable[[str], str | None],
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Advance an incident only after the expired queue task is terminal.
+
+    This is phase two of the deadline handoff.  Phase one CAS-settles the queue
+    row; a crash between phases is safe because the next detector poll observes
+    that terminal row and follows the normal persistent-breach path.
+    """
+    current = _utc(now)
+    with _locked_store(store_path) as store:
+        row = store["incidents"].get(incident_id)
+        if not isinstance(row, dict):
+            return {"action": "none", "reason": "unknown_incident"}
+        if str(row.get("current_task_id") or "") != task_id:
+            return {"action": "none", "reason": "task_binding_changed"}
+        status = task_status_probe(task_id)
+        normalized = str(status or "").strip().lower() if status is not None else None
+        if status is None or normalized in ACTIVE_TASK_STATUSES:
+            return {
+                "action": "none",
+                "reason": "task_not_terminal",
+                "active_task_id": task_id,
+            }
+        _record_episode_failure(
+            row,
+            task_id=task_id,
+            status="deadline_exceeded",
+            failure_reason=(
+                "machine repair deadline elapsed; queue settlement acknowledged "
+                f"as {normalized or 'unknown'}"
+            ),
+            now=current,
+        )
+        row["deadline_handoff"] = {
+            **(
+                row.get("deadline_handoff")
+                if isinstance(row.get("deadline_handoff"), dict)
+                else {}
+            ),
+            "task_id": task_id,
+            "settled_at": current.isoformat(),
+            "settled_status": normalized or "unknown",
+        }
+        _open_new_episode(row, current)
+        outcome = _maybe_escalate_or_dispose(row, task_status_probe, current)
+        outcome.update(
+            incident_id=incident_id,
+            kind=row.get("kind"),
+            state=row["state"],
+            occurrence_count=row["occurrence_count"],
+            episode_count=row["episode_count"],
+            task_mode=row["task_mode"],
+            incident_class=row["class"],
+            expired_task_id=task_id,
+        )
+        return outcome
 
 
 # ── clean-side observations (plan §4, G7) ────────────────────────────────────

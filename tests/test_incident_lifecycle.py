@@ -482,7 +482,8 @@ def test_g6_internal_alert_path_is_capped_and_recorded_on_incident(tmp_path) -> 
     # synthetic kind → DEFAULT_POLICY = ordinary/auto_repair → create_task 路。
     outcome = remediate_internal_alert(
         {"id": "synthetic_gate_red", "breached": True, "level": "warn",
-         "title": "gate red", "body": "x"},
+         "title": "gate red", "body": "x",
+         "fingerprint": ["src/volpred/ops/alert_remediation.py:1"]},
         alert_key="synthetic_gate_red",
         storage_dir=str(storage),
         now=now,
@@ -668,39 +669,144 @@ def test_g4_distinct_incident_root_tasks_bypass_generic_semantic_dedupe(
 # ── G5 ───────────────────────────────────────────────────────────────────────
 
 
-def test_g5_machine_self_escalates_at_episode_two_without_ever_mitigating(
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "phase_z_test_gate_red",
+        "silent_fallback_new",
+        "git_push_backup_hold",
+        "phase_z_baseline_missing",
+        "phase_z_generation_rejected",
+    ],
+)
+def test_all_shipped_machine_self_kinds_open_a_bounded_first_repair(
+    store, queue, kind
+) -> None:
+    out = _drive_breach(store, queue, kind=kind, now=T0)
+
+    assert out["action"] == "create_task"
+    [task] = _load_tasks(queue)
+    assert task["source"] == "incident_router"
+    row = _incident_row(store, kind)
+    assert row["class"] == incident.CLASS_MACHINE_SELF
+    assert row["task_mode"] == incident.TASK_MODE_AUTO_REPAIR
+    assert row["state"] == incident.STATE_MITIGATING
+
+
+def test_every_machine_self_auto_repair_kind_has_one_canonical_output_scope() -> None:
+    auto_kinds = {
+        kind
+        for kind, (class_name, task_mode) in incident.KIND_POLICY.items()
+        if class_name == incident.CLASS_MACHINE_SELF
+        and task_mode == incident.TASK_MODE_AUTO_REPAIR
+    }
+    assert auto_kinds == set(incident.MACHINE_SELF_REPAIR_OUTPUT_PATHS)
+
+
+def test_existing_notification_only_machine_self_row_migrates_on_next_breach(
     store, queue
 ) -> None:
-    """G5: class=machine_self 且 episode_count==2 → 直接 escalated，
-    不曾進 mitigating、不曾開過自動修復單。"""
-    kind = "phase_z_test_gate_red"  # machine_self / task_mode none
+    kind = "phase_z_baseline_missing"
+    _drive_breach(store, queue, kind=kind, now=T0)
+
+    payload = json.loads(store.read_text(encoding="utf-8"))
+    row = payload["incidents"][incident.incident_id_for(kind, ())]
+    row.update(
+        {
+            "task_mode": incident.TASK_MODE_NONE,
+            "state": incident.STATE_OPEN,
+            "current_task_id": None,
+            "task_history": [],
+            "notified_at": (T0 + timedelta(minutes=1)).isoformat(),
+        }
+    )
+    store.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    queue.write_text("[]\n", encoding="utf-8")
+
+    out = _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=1))
+
+    assert out["action"] == "create_task"
+    [repair] = _load_tasks(queue)
+    migrated = _incident_row(store, kind)
+    assert migrated["task_mode"] == incident.TASK_MODE_AUTO_REPAIR
+    assert migrated["current_task_id"] == repair["id"]
+    assert migrated["state"] == incident.STATE_MITIGATING
+    assert migrated["policy_history"][-1] == {
+        "at": (T0 + timedelta(hours=1)).isoformat(),
+        "from_class": incident.CLASS_MACHINE_SELF,
+        "to_class": incident.CLASS_MACHINE_SELF,
+        "from_task_mode": incident.TASK_MODE_NONE,
+        "to_task_mode": incident.TASK_MODE_AUTO_REPAIR,
+        "reason": "canonical_kind_policy_refresh",
+    }
+
+
+def test_g5_machine_self_gets_one_bounded_repair_before_episode_two_escalation(
+    store, queue
+) -> None:
+    """G5: machine_self first repairs once; a persistent breach escalates.
+
+    The repair is bounded by the class threshold.  It must not regress to the
+    notification-only policy, and it must not retry forever on the machine
+    whose control edge is unhealthy.
+    """
+    kind = "phase_z_test_gate_red"
     out1 = _drive_breach(store, queue, kind=kind, now=T0)
-    assert out1["action"] == "notify"
-    assert _load_tasks(queue) == []
+    assert out1["action"] == "create_task"
+    [repair] = _load_tasks(queue)
+    assert repair["source"] == "incident_router"
+    row = _incident_row(store, kind)
+    assert row["state"] == incident.STATE_MITIGATING
+    assert row["task_history"] == [
+        {
+            "task_id": repair["id"],
+            "episode": 1,
+            "opened_at": T0.isoformat(),
+        }
+    ]
 
-    # sustained clean resolves episode 1
-    for hours in (2, 14, 27):
-        incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=hours))
-    assert _incident_row(store, kind)["state"] == incident.STATE_RESOLVED
-
-    out2 = _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=40))
+    # The detector still sees the breach after the bounded repair finished.
+    _set_task_status(queue, repair["id"], "succeeded", T0 + timedelta(hours=1))
+    out2 = _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=2))
     assert out2["action"] == "escalate"
     assert out2["episode_count"] == 2
     row = _incident_row(store, kind)
     assert row["state"] == incident.STATE_ESCALATED
-    assert row["task_history"] == []  # 從未開過自動修復單（不曾 mitigating）
-    assert _load_tasks(queue) == []
+    assert len(row["task_history"]) == 1
+    assert len(_load_tasks(queue)) == 1
 
     receipt = incident.actuate_escalation(
         store, row["incident_id"], queue_path=queue,
-        now=T0 + timedelta(hours=40), notify=lambda *a: {"sent": True},
+        now=T0 + timedelta(hours=2), notify=lambda *a: {"sent": True},
     )
-    root = _load_tasks(queue)
+    root = [task for task in _load_tasks(queue) if task["source"] == "incident_escalation"]
     assert len(root) == 1
-    assert root[0]["source"] == "incident_escalation"
     # machine_self 根因 = 執行機器本身 → 主線程 lane（§6）。
     assert root[0]["dispatch_lane"] == "main_thread"
     assert receipt["root_cause_task_id"] == root[0]["id"]
+
+
+def test_g5_active_machine_repair_expires_instead_of_hanging_forever(
+    store, queue
+) -> None:
+    kind = "phase_z_baseline_missing"
+    first = _drive_breach(store, queue, kind=kind, now=T0)
+    assert first["action"] == "create_task"
+    [repair] = _load_tasks(queue)
+
+    expired = incident.route_breach(
+        store,
+        kind=kind,
+        now=T0 + incident.MACHINE_REPAIR_DEADLINE,
+        task_status_probe=incident.next_tasks_status_probe(queue),
+    )
+
+    assert expired["action"] == "expire_task"
+    assert expired["expired_task_id"] == repair["id"]
+    row = _incident_row(store, kind)
+    assert row["episode_count"] == 1
+    assert row["episode_failures"] == []
+    assert row["deadline_handoff"]["task_id"] == repair["id"]
 
 
 # ── G7 ───────────────────────────────────────────────────────────────────────
