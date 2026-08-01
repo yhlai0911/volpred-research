@@ -49,6 +49,8 @@ import os
 
 import numpy as np
 
+from volpred.stats.inference import holm_step_down
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ── Constants copied verbatim from k1380_v4.py (must not drift) ─────────────
@@ -82,22 +84,6 @@ def stationary_bootstrap_indices(T, B, rng, mean_block=None):
                 pos = (pos + 1) % T
         samples.append(idx[:T])
     return samples
-
-
-def holm_step_down(pvals, labels, alpha=0.10):
-    """Holm (1979) step-down. Returns per-label adjusted p and reject flag."""
-    order = np.argsort(pvals)
-    m = len(pvals)
-    adj = np.empty(m)
-    running = 0.0
-    for rank, i in enumerate(order):
-        val = (m - rank) * pvals[i]
-        running = max(running, min(val, 1.0))   # enforce monotonicity
-        adj[i] = running
-    return {labels[i]: {"raw_p": float(pvals[i]),
-                        "holm_adj_p": float(adj[i]),
-                        "reject_at_0.10": bool(adj[i] < alpha)}
-            for i in range(m)}
 
 
 def main():
@@ -241,7 +227,21 @@ def main():
     # ── (4) Per-spec DM tests + Holm step-down ──────────────────────────────
     per_spec_p = np.array([float((np.maximum(0.0, t_b_u[:, i]) >= t_obs[i]).mean())
                            for i in range(n_elig)])
-    holm = holm_step_down(per_spec_p, eligible_non_bm, alpha=0.10)
+    holm_result = holm_step_down(per_spec_p, alpha=0.10)
+    holm = {
+        label: {
+            "raw_p": raw_p,
+            "holm_adj_p": adjusted_p,
+            "reject_at_0.10": rejected,
+        }
+        for label, raw_p, adjusted_p, rejected in zip(
+            eligible_non_bm,
+            holm_result.raw_p_values,
+            holm_result.adjusted_p_values,
+            holm_result.rejected,
+            strict=True,
+        )
+    }
     n_holm_reject = sum(1 for v in holm.values() if v["reject_at_0.10"])
     print(f"[4] Holm step-down at FWER 0.10: {n_holm_reject}/{n_elig} reject")
 
