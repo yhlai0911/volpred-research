@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：成分股各走各的路，能提前告訴你大盤要變天嗎？",
+  "subtitle": "美股大型股分歧度與同步率的均值回歸、預測力與減碼規則檢定",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1331/K1331_results.json",
+      "sha256": "070f0421c94fb021adfbc7e460e751e593b5958e6731a048b1b1213d71b1e351",
+      "label": "experiment K1331 results（SPY 與 20 檔美股大型股的已實現分歧度／同步率代理，2014-01-31 至 2026-05-14 的均值回歸、樣本外波動預測與減碼規則檢定）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "底下每一檔都在晃，指數卻站得很穩",
+      "subtitle": "先講兩個溫度計在量什麼",
+      "alt": "成分股各自跳動的幅度遠大於指數本身，多數波動在投資組合裡互相抵銷掉了；分歧度量的是被抵銷掉多少，同步率量的是大家有多傾向一起動。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩個溫度計",
+          "body": [
+            "分歧度＝成分股的平均變異，減掉大盤自己的變異。差得越多，代表個股各自跑、彼此抵銷掉的越多。",
+            "同步率＝大盤的變異，除以成分股的平均變異。數字越大，代表大家越傾向一起動。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "成分股平均的年化變異（中位數）",
+          "value": {
+            "source": "results",
+            "path": "/descriptive_stats/avg_component_var/p50",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "大盤自己的年化變異（中位數）",
+          "value": {
+            "source": "results",
+            "path": "/descriptive_stats/index_var/p50",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "個股晃得比指數兇得多"
+        },
+        {
+          "kind": "metric",
+          "label": "成分股變異是指數變異的幾倍（中位數）",
+          "value": {
+            "source": "results",
+            "path": "/descriptive_stats/dispersion_ratio/p50",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同步率中位數：大盤變異只剩成分股平均的這麼多",
+          "value": {
+            "source": "results",
+            "path": "/descriptive_stats/realized_corr_proxy/p50",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": "其餘都在投資組合裡自己抵掉了"
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "editorial",
+      "title": "會自己回頭，但預測不了下個月的大盤",
+      "subtitle": "第一段很漂亮，第二段很掃興",
+      "alt": "分歧度拉開之後會收回去，這一段做得很乾淨；但把它加進預測模型，對未來一個月大盤波動的預測誤差幾乎沒有改善，可信程度遠低於嚴格門檻。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "第一段：確實會自己回頭",
+          "body": [
+            "拿當下的分歧度去對接下來一個月它自己的變化，斜率接近負一——這個月拉開多遠，下個月大致就收回多遠。",
+            {
+              "template": "分歧度最低的那批交易日，接下來一個月平均往上回升 {low} 個標準差；最高的那批往下收斂 {high} 個標準差。",
+              "bindings": {
+                "low": {
+                  "source": "results",
+                  "path": "/mean_reversion/dispersion_quintile_forward_change/low_mean_forward_change",
+                  "format": {
+                    "kind": "number",
+                    "digits": 2
+                  }
+                },
+                "high": {
+                  "source": "results",
+                  "path": "/mean_reversion/dispersion_quintile_forward_change/high_mean_forward_change",
+                  "format": {
+                    "kind": "number",
+                    "digits": 2,
+                    "absolute": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "均值回歸斜率（越接近負一，收得越乾淨）",
+          "value": {
+            "source": "results",
+            "path": "/mean_reversion/dispersion_z_21d_change_on_current/slope",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "這條關係解釋了多少變化",
+          "value": {
+            "source": "results",
+            "path": "/mean_reversion/dispersion_z_21d_change_on_current/r2",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "第二段：但拿來預測就沒用了",
+          "body": [
+            "留下最近幾年當實測期，每天只用當天為止的資料重新配適，去猜接下來一個月大盤實際會晃多少。訊號在前、答案在後，不偷看未來。",
+            "真正把誤差壓下來的是恐慌指數，不是分歧度；而且連它都沒碰到嚴格及格線。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "只看大盤自己近期波動的預測誤差（基準）",
+          "value": {
+            "source": "results",
+            "path": "/forecast_results/models/M0_index_rv/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "基準加上分歧度之後的預測誤差",
+          "value": {
+            "source": "results",
+            "path": "/forecast_results/models/M1_index_rv_dispersion/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "幾乎沒動"
+        },
+        {
+          "kind": "metric",
+          "label": "加分歧度比基準準多少的可信程度（嚴格門檻為三）",
+          "value": {
+            "source": "results",
+            "path": "/forecast_results/models/M1_index_rv_dispersion/dm_t_vs_M0",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "absolute": true
+            }
+          },
+          "note": "等於什麼都沒發生"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "那條「散開就減碼」的規則，賺的是什麼",
+      "subtitle": "夏普值變好，來自曝險變少，不是擇時",
+      "alt": "三條減碼規則的夏普值都比買進持有好看，但下檔損失檢定過了、報酬檢定沒過；改善主要來自平均曝險本來就比較低，不是砍在對的時間點。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩道檢定，結果分得很開",
+          "body": [
+            "下檔損失那道過了：只看虧損日，減碼規則確實讓損失縮小，強度穩穩越過嚴格門檻。",
+            "報酬那道沒過：三條策略在報酬面對上買進持有全都離門檻很遠，其中兩條方向還是反的，比買進持有略差一點。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "買進持有大盤的夏普值",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/BH_SPY/sharpe",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同步率低就減碼的夏普值（三條裡最好看的一條）",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/S2_de_risk_low_corr_proxy/sharpe",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "但它的平均曝險本來就低於滿倉",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/S2_de_risk_low_corr_proxy/average_exposure",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": "拿掉曝險，波動自然降"
+        },
+        {
+          "kind": "metric",
+          "label": "下檔損失檢定強度（過了）",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/S2_de_risk_low_corr_proxy/dm_downside_vs_BH/t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "absolute": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "報酬檢定強度（沒過）",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/S2_de_risk_low_corr_proxy/dm_negative_return_vs_BH/t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "absolute": true
+            }
+          },
+          "note": "離嚴格門檻很遠"
+        },
+        {
+          "kind": "text",
+          "heading": "帶走這句",
+          "body": [
+            "同樣的效果，直接把持股比例固定住也做得到，還省下來回換手的成本。把它講成「多賺了」，資料不支持。",
+            "整份檢定的判定是混合：有一段成立，有一段不成立，中間那條把它們連起來的橋沒有搭好。"
+          ]
+        }
+      ]
+    }
+  ]
+}
