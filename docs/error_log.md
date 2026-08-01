@@ -87,6 +87,7 @@
 **規則**：worktree agent 只產 `experiments/kXXX/`，禁改共享狀態；主線程用 `scripts/merge_worktree.sh` 合併，**禁 `git worktree remove --force`**（L1 hook 擋）。實驗進 main 的唯一門票 = `experiments/<kid>/review_verdict.json` 且 sha256 綁「現在這份 bytes」（PASS 後又改 code 也擋）。裁決檔一律由 `verdict-template` 產生，不手抄。**保留 branch ≠ 收割成果**：clean tree 只證明沒有未提交檔案，不證明那些 commits 進了 main；移除 unmerged checkout 就是在製造下一個殭屍。**任務引用的資源會消失，必須有東西去 reconcile**——否則任務永遠 blocked 又永遠不關單。
 **機械 owner**：`scripts/merge_worktree.sh` → `scripts/experiment_gates.py certify`；`worktree-merge-verification` skill；`scripts/reclaim_stale_worktrees.py` 的 **unmerged gate**（dirty 與 unmerged 兩道都 fail-closed，只放行「clean 且已進 main」）；`scripts/daily_checkup.py::check_worktree_reconcile`（open 任務 ↔ 磁碟 reconcile，branch 也沒了 → critical）。
 **代表 incident**：
+- 2026-07-31 **K1733 收件 gate 找錯位置，差點把好的 full-production 產物判成「必須重跑」**：`k1733-split-stage1-full-run` 的 followup brief 把 freshness gate 寫成「`reproduce_spec` 必須存在於 `K1733_results.json` 之內，否則代表 run 在最後崩掉，必須 re-run 而非 collect」。但 canonical writer `volpred.research.reproduce_spec` 的契約是**寫成 sibling 檔**（模組 docstring：「writes `K1750_results.json` 和 `reproduce_spec.json` side by side」），從不 inline 進 results JSON → 這條 gate 對任何正常完成的 run 都會誤判。實地驗證：`reproduce_spec.json` 的 `canonical_result_identity.sha256` 與 `K1733_results.json` 實際 bytes 逐位元相符（`9b4ead33…`, 322,085 bytes），證明 spec 是在 results 落地**之後**寫的，finalize 有跑完、run 沒有崩。**教訓：後置條件要對準 canonical writer 實際的產出契約，不要憑「應該長怎樣」寫 gate**；照這條 gate 執行的代價是丟棄一份完整實驗產物並重跑一次 heavy compute。狀態 **`contained`**（已證偽該 gate 條件並留證，但產生此 brief 的 split/followup 撰寫路徑尚未重構、亦無機械 gate 擋下同類錯誤斷言）— Q3
 - 2026-07-21 K1623 arm C：review subagent **執行了它被指派審查的實驗碼**（違反「先審後跑」），產出未經 queue / gate 的 artifact — Q3
 - 2026-07-19 **k1709 殭屍任務**：任務指向的 worktree 消失了，任務卻沒有任何機制發現 —— 自 07-14 起 blocked 5 天，不會被 dispatch 也不會被關單。根因是 **task pool 與磁碟從來沒有 reconcile**：`reclaim_stale_worktrees.py` 的安全條件只查 dirty，漏查 merged，於是「clean 但未合併」的 checkout 可被回收、branch 隨後也消失，而指著它的任務無人聞問。裁定結果 3 個 commits 其實已進 main（無遺失）。同次修復發現另外 4 個 worktree 共 9 個 commits 正處在同一個懸崖邊上，被新 gate 攔下 — Q3
 - 2026-07-12 **3-STRIKE（K1032 class）** `.claude/worktrees/` 底下「獨立 repo」對 merge 的破壞 — Q3
@@ -5322,3 +5323,77 @@ shadow 已結案及 time-bound monitor 存在。
 read-back 與 rollback rehearsal receipt 完成前，本 H4-4 slice 為
 **`contained`**；不得沿用先前過早的
 `root_cause_fixed_and_verified` 口徑。
+
+## 2026-07-31 — K1733 收件 freshness gate 找錯位置，會把完好的 full-production 產物判成必須重跑
+
+**證據化症狀**：PHASE A 的 `collect_completed` followup `k1733-split-stage1-full-run`
+（exit_code=0）其 `claude_followup.brief` 第 (0) 步寫著：「assert `config.quick_mode == false`
+and `reproduce_spec` exists **in** `K1733_results.json` … a JSON without `reproduce_spec`
+means the run crashed at the end and **must be re-run, not collected**」。
+實地回讀該 artifact：`config.quick_mode` = `False`（通過），但 `reproduce_spec`
+**不在** JSON 的 top-level keys 內（`k_id … code_trace`，共 20 個 key，無此欄）。
+照 brief 字面執行 → 判定「run 崩了」→ 丟棄產物 + 重跑一次 heavy compute。
+
+**根因層級（後置條件契約 vs canonical writer 實際產出）**：canonical writer
+`src/volpred/research/reproduce_spec.py` 的契約是把 spec 寫成 **sibling 檔**，不是 inline 欄位 ——
+模組 docstring 明寫「That writes `K1750_results.json` and `reproduce_spec.json` **side by side**」，
+`SPEC_NAME = "reproduce_spec.json"`。該 worktree 內 `experiments/k1733/reproduce_spec.json`
+確實存在（3,951 bytes，mtime 與 results JSON 同為 07-30 08:33），schema
+`volpred.reproduce_spec.v1`，欄位齊備（entrypoint sha256／inputs 逐檔 sha256／outputs／
+randomness／environment／canonical_result_identity）。
+**gate 條件從一開始就對不上 writer 的產出形狀**，對任何正常完成的 run 都會誤判為崩潰。
+
+**回歸驗證（回讀 live source，非憑印象）**：`reproduce_spec.json` 宣告的
+`canonical_result_identity` = `{path: K1733_results.json, sha256: 9b4ead3349650533a5e82a06ee7ae6e7c5d37b1d8097a0e3fa0d09d809944aaf, size_bytes: 322085}`；
+對該檔實際 bytes 重算 sha256 **逐位元相符**（同 hash、同 322,085 bytes）。
+spec 內含 results 檔的 hash ⇒ spec 必然寫在 results 落地**之後** ⇒ finalize 步驟有跑完、
+run 沒有在最後崩掉。**結論：此 artifact 可以 collect，不該 re-run。**
+
+**狀態：`contained`（不得稱完成）**。已完成五步 gate 的 (1) 證據化症狀、(2) 根因層級、
+(4) 回歸驗證；**未**完成 (3) 重構底層與 (5) 制度化寫回 —— 產生這種 brief 的 split／followup
+撰寫路徑沒有被改，也沒有任何機械 gate 會擋下「後置條件斷言與 canonical writer 契約不符」
+這類錯誤。同類錯誤仍可再靜默發生。
+
+**待辦（留給後續班次，附本條為輸入）**：(a) K1733 收件仍未執行 —— brief 的 (1) README
+reconciliation（`experiments/k1733/README.md` 565 行 vs 220KB JSON 逐數字核對）與 worktree
+`dispatch-slot-1-9189c746-k1733`（branch `k1733-slot1-9189c746`）的正式 merge 都還沒做，
+本班預算不足以完整收尾故未 claim（未留 partial）；接手時**freshness gate 請改讀 sibling
+`reproduce_spec.json` 並比對 `canonical_result_identity`**，不要沿用 brief 原文那條。
+(b) 根治面：讓 followup brief 的後置條件從 canonical writer 的契約推導，而非人工複述。
+
+---
+
+## 2026-08-01 — general draft 的 lazypack「延後」只有提醒、沒有 durable owner，會讓 draft pool 持續缺貨
+
+**證據化症狀**：`publish_draft.py --status draft` 對 general 文章缺少懶人包時，舊流程只印出
+後續 enqueue 提醒便回成功；即使沒有 `--lazypack-plan`、plan 的 evidence binding 無法解析、
+publisher stdout 無法識別新 article id，或 enqueue transport 失敗，文章 task 仍可宣稱完成。
+這類 draft 隨後被 release gate 擋住，形成 `draft_pool_low`／release starvation。K1325 live path
+另證明舊 settlement 用 stdout 第一個 `mile_*` 猜 owner，曾把新 plan 指向無關舊文章。
+
+**根因層級（跨階段 ownership contract）**：系統把「讀者可見前才要求懶人包」誤解成
+「建立 draft 時可沒有後續執行 owner」。publish-time gate、deferred preflight 與 post-publish
+settlement 各自重算 policy，且 settlement 的 receipt identity 與 failure semantics 都不是正式契約；
+因此 exit 0 只證明 feed mutation 發生，不證明該文章具有可執行、可追蹤的 release 路徑。
+
+**底層修復與制度化**：新增單一 `LazypackObligation` classification，publish gate、pre-mutation
+deferred preflight 與 settlement 共用同一判定。draft/scheduled 若尚無圖組，feed mutation 前
+必須攜帶 `--lazypack-plan`，並以 canonical renderer 完整驗 schema、evidence SHA 與每個 binding；
+checker/boundary 無法判定時 deferred path fail closed。publish 後只接受
+`action=publish_milestone` 的 structured receipt（或 publisher 自身 anchored line）作 exact article
+identity；缺 id、缺 plan、enqueue nonzero 或 exception 一律回 8，不得再把 ownerless handoff
+報成成功。published reader gate 原有 fail-open policy 保留，但 exception 必留下可搜尋 diagnostic。
+
+**回歸驗證**：正向 integration 以隔離的 tmp feed／queue 跑 `main()` 到真實
+`lazypack_async_render enqueue`，回讀 exact article id、durable queued receipt 與 frozen plan SHA；
+另覆蓋缺 plan、binding 不存在、checker/boundary failure、malformed receipt、錯誤 id、transport
+exception。相關 suite **112 passed**，Matt Standards／Spec 雙 PASS；全量 suite 的 25 個既有
+control-plane/provider-policy failures 與本 slice 無關，未冒稱全綠。
+
+**Live gate / 狀態**：K1450 article `mile_5378daa1` 由自然 Operations Core fire
+`operations-core-v1:volpred-compute-worker:80e6876c837201b47ea1c828` 執行 r4，exit 0；人工回讀
+4/4 PNG 已無截字／重疊，四個 content-addressed public URLs 全部 HTTP 200。canonical feed 已
+replace 圖組且 `sync_article=true`；`feed-sync --dry-run` 對該 article 為 0 insert／0 update，
+release preview 從 blocker 解除為 draft=6、content_gate_blocked=0、eligible=6，且下一候選精確為
+`mile_5378daa1`。本 slice 五步 Gate 為 **`root_cause_fixed_and_verified`**；incident lifecycle
+本身仍須 sustained-clean 才能標 resolved，這是時間窗狀態，不是再留一個人工修復步驟。
