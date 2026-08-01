@@ -1,0 +1,75 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "nfp_20260807_t7.py",
+    "args": [],
+    "sha256": "02a1f78de18f1e4360e9b40de0d0faa2764aca3d299f5a4bea3d6ae3ac3d86eb",
+    "size_bytes": 21768
+  },
+  "canonical_result": "nfp_20260807_t7_results.json",
+  "inputs": [
+    {
+      "path": "experiments/nfp_20260807_t7/data/vix_close_2010-01-01_2026-07-30.csv",
+      "sha256": "80ba02e5c5f0c6385d55a04debadaddd8558cb016b062f31c29a2fa8562d49ba",
+      "size_bytes": 121573
+    },
+    {
+      "path": "experiments/nfp_20260807_t7/data/nfp_release_dates_2010-01-01_2026-07-31.json",
+      "sha256": "8d40a46802e68f0b7b9dea9252e0e358bfc469fb52fefbcb017e276c713633bf",
+      "size_bytes": 3928
+    },
+    {
+      "path": "experiments/nfp_20260807_t7/nfp_t7_results.json",
+      "sha256": "7658a1610c200840f76699e62e1d38d574930f3956710647e1398b2e1991a315",
+      "size_bytes": 4008
+    }
+  ],
+  "outputs": [
+    "nfp_20260807_t7_controls.csv",
+    "nfp_20260807_t7_events.csv",
+    "nfp_20260807_t7_regime.png",
+    "nfp_20260807_t7_results.json"
+  ],
+  "timeout_seconds": 60,
+  "network": "deny",
+  "randomness": {
+    "status": "not_applicable",
+    "seeds": []
+  },
+  "runtime": {
+    "runtime_seconds": 0.245,
+    "recorded_at": "2026-08-01T22:51:00Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": []
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "nfp_20260807_t7_results.json",
+    "sha256": "2ea19edac3549f1f58fbedf7ff15d8fa487ceffba6f1d5327b6ab51208e9254f",
+    "size_bytes": 9044
+  }
+}
