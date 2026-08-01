@@ -1,23 +1,24 @@
 # Feed Index
 
-_Last built: 2026-08-01 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-08-01 06:02 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1920**  (with thumbnail: 91)
-- Last 30 days: **207**
-- Total chars (content): 5,979,996
+- Total articles: **1921**  (with thumbnail: 91)
+- Last 30 days: **206**
+- Total chars (content): 5,991,419
 
-**Status**: published=1716, archived=124, unpublished=66, retracted=13, wont_fix=1
+**Status**: published=1717, archived=124, unpublished=66, retracted=13, wont_fix=1
 
-**Audience**: research=1144, general=505, daily=169, unknown=77, member_qa=15, event=10
+**Audience**: research=1144, general=506, daily=169, unknown=77, member_qa=15, event=10
 
-**Category**: milestone=921, general=877, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
+**Category**: milestone=921, general=878, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
 
-## 最近 30 天 (207)
+## 最近 30 天 (206)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-08-01 | `mile_a379f63d` | 下週五非農值不值得避險？放大鏡不會自己發光，先填完這四格 | general | general | published | 11423 |  | 一般讀者, 精選導讀, 非農, VIX, 事件交易, 避險 |
 | 2026-07-31 | `mile_4b10546f` | 我們以為找到了新指標，結果兩個模型的預測值到小數點後 16 位都一樣 | general | general | published | 3164 |  | 一般讀者, volatility, index, dispersion, methodology, reader_facing |
 | 2026-07-31 | `mile_461ff729` | Fed 這次沒動，卻有人要求升息：你手上的四張避險保單，各自只賠哪一種跌？ | general | general | published | 12017 |  | 一般讀者, 精選導讀, 波動率, 利率, 避險, 資產配置 |
 | 2026-07-31 | `mile_84e3be0a` | 非農前一週的 VIX，和沒有非農的那一週幾乎一樣：191 次公佈日的對照組檢定 | event | milestone | published | 3319 |  | nfp_us, event_article, macro, reader_facing, volatility, vix |
@@ -223,13 +224,13 @@ _Last built: 2026-08-01 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-07-02 | `mile_c1ce6550` | USDC 脫鉤那幾天：1-3 年短券日波動飆 2.8 倍，1-3 個月卻沒事 | research | milestone | published | 3952 |  | 研究, 穩定幣, 短期公債, USDC, SVB, duration |
 | 2026-07-02 | `mile_cd5d5740` | 波動率「測不準」能不能當減碼訊號？六檔 ETF、六十天的老實答案 | general | general | published | 2833 |  | 一般讀者, 波動率, 風險管理, 波動率預測, ETF, 研究誠實 |
 | 2026-07-02 | `mile_b88ee7bc` | 把五分鐘資料切得更細，預測真的會更準嗎？台指期給了一個保守答案 | general | general | published | 2217 |  | 一般讀者, 波動率預測, 台指期, 高頻資料, 研究誠實, 模型比較 |
-| 2026-07-02 | `mile_cc2f70db` | AI agent 的記憶問題：把所有東西建成圖譜，救得了量化研究平台嗎 | general | general | unpublished | 2968 |  | 一般讀者, trending, AI工具, agent記憶, 知識庫, 檢索架構 |
-| 2026-07-02 | `mile_e511ff94` | 下半年調倉前，先過三道風險安檢 | general | general | published | 5483 |  | 一般讀者, 精選導讀, 下半年調倉, 風險管理, VIX, 分散投資 |
 
-<details><summary>## 2026-Q3 (9)</summary>
+<details><summary>## 2026-Q3 (11)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-02 | `mile_cc2f70db` | AI agent 的記憶問題：把所有東西建成圖譜，救得了量化研究平台嗎 | general | general | unpublished | 2968 |  | 一般讀者, trending, AI工具, agent記憶, 知識庫, 檢索架構 |
+| 2026-07-02 | `mile_e511ff94` | 下半年調倉前，先過三道風險安檢 | general | general | published | 5483 |  | 一般讀者, 精選導讀, 下半年調倉, 風險管理, VIX, 分散投資 |
 | 2026-07-02 | `mile_9ac0c44b` | 每日策略建議：VIX 16.59（正常）— 2026-07-02 | daily | general | published | 1649 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-02 | `mile_c3621a1b` | 2026-07-02 本日持倉比率建議（依據 2026-07-01 收盤數據） | daily | milestone | published | 1048 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-02 | `mile_c8468b0d` | 你花錢升級了預測模型，對帳單卻更難看：一個關於「準」與「賺」的實測 | general | general | published | 3749 |  | 一般讀者, 波動率目標, 交易成本, 換手率, 策略回測, 研究誠實 |
