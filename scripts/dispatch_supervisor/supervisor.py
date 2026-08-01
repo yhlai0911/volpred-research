@@ -625,6 +625,11 @@ def _initialize_runtime(*, state_path: Path) -> None:
             "provider auth startup recovery deferred until producer slot drains"
         )
     else:
+        relocation = isolation.relocate_terminal_root_v3_receipts()
+        if relocation["invalid"]:
+            raise isolation.IsolationUnavailable(
+                f"provider auth receipt relocation failed closed: {relocation}"
+            )
         recovery = isolation.recover_provider_auth_reapers()
         if recovery["invalid"]:
             raise isolation.IsolationUnavailable(
@@ -632,6 +637,15 @@ def _initialize_runtime(*, state_path: Path) -> None:
             )
         if any(recovery.values()):
             logging.info("provider auth reaper recovery=%s", recovery)
+        relocation = isolation.relocate_terminal_root_v3_receipts()
+        if relocation["invalid"] or relocation["pending"]:
+            raise isolation.IsolationUnavailable(
+                "provider auth receipt relocation did not converge: "
+                f"{relocation}"
+            )
+        isolation.activate_live_provider_auth_writer_capability(
+            state_path=state_path,
+        )
     planned_reason = state.consume_planned_restart_marker()
     alerts.send_supervisor_restart(
         prev_started=prev_started,

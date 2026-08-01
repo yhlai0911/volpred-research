@@ -12,6 +12,7 @@ import os
 import resource
 import shutil
 import signal
+import stat
 import subprocess
 import sys
 import time
@@ -3708,6 +3709,64 @@ def test_health_loop_crash_sends_escalation_alert(tmp_path: Path, monkeypatch) -
     assert "health boom" in crash_calls[0][1]
 
 
+def test_health_invalid_provider_receipt_fails_closed_without_loop_crash(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    state.mark_supervisor_started(state_path)
+    sleeps = 0
+    auth_alerts: list[dict[str, int]] = []
+    loop_crashes: list[str] = []
+
+    async def fake_sleep(_seconds):
+        nonlocal sleeps
+        sleeps += 1
+        if sleeps > 1:
+            raise asyncio.CancelledError()
+
+    monkeypatch.setattr(health.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(health, "check_once", lambda **_kwargs: None)
+    monkeypatch.setattr(
+        health,
+        "_renew_live_dispatch_claims",
+        lambda **_kwargs: {"ok": True, "renewed": [], "count": 0},
+    )
+    monkeypatch.setattr(
+        health.custody_receipt,
+        "reconcile_pending_producer_custodies",
+        lambda _root: {"ok": True},
+    )
+    monkeypatch.setattr(
+        health.isolation,
+        "reap_quarantined_provider_auth_leases",
+        lambda: {"pending": 0, "cleaned": 0},
+    )
+    monkeypatch.setattr(
+        health.isolation,
+        "recover_provider_auth_reapers",
+        lambda: {"recovered": 0, "active": 0, "invalid": 1},
+    )
+    monkeypatch.setattr(
+        health.alerts,
+        "send_provider_auth_receipt_alert",
+        lambda *, recovery, **_kwargs: auth_alerts.append(recovery) or True,
+    )
+    monkeypatch.setattr(
+        health.alerts,
+        "send_loop_crash",
+        lambda component, *_args, **_kwargs: loop_crashes.append(component) or True,
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(health.health_loop(state_path=state_path))
+
+    snap = state.read_state(state_path)
+    assert snap["auth_blocked"] is True
+    assert auth_alerts == [{"recovered": 0, "active": 0, "invalid": 1}]
+    assert loop_crashes == []
+
+
 def test_supervisor_main_top_level_crash_sends_alert_and_reraises(tmp_path: Path, monkeypatch) -> None:
     state_path = _tmp_state(tmp_path)
     monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
@@ -3801,6 +3860,49 @@ def test_supervisor_startup_invalid_auth_recovery_runs_after_orphan_reconciliati
         "alert:supervisor_startup",
     ]
     assert state_path.exists()
+
+
+def test_supervisor_startup_relocation_invalid_never_activates_writer(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    activated: list[bool] = []
+    monkeypatch.setattr(
+        supervisor.custody_receipt,
+        "reconcile_pending_producer_custodies",
+        lambda _root: {"ok": True, "released": []},
+    )
+    monkeypatch.setattr(supervisor, "_handle_restart_orphan", lambda: None)
+    monkeypatch.setattr(
+        supervisor.isolation,
+        "relocate_terminal_root_v3_receipts",
+        lambda: {
+            "relocated": 0,
+            "reconciled": 0,
+            "pending": 0,
+            "invalid": 1,
+        },
+    )
+    monkeypatch.setattr(
+        supervisor.isolation,
+        "recover_provider_auth_reapers",
+        lambda: pytest.fail("invalid relocation must stop before recovery"),
+    )
+    monkeypatch.setattr(
+        supervisor.isolation,
+        "activate_live_provider_auth_writer_capability",
+        lambda **_kwargs: activated.append(True),
+    )
+
+    with pytest.raises(
+        isolation.IsolationUnavailable,
+        match="relocation failed closed",
+    ):
+        supervisor._initialize_runtime(state_path=state_path)
+
+    assert activated == []
+    assert state.read_state(state_path)["provider_auth_receipt_schema"] is None
 
 
 def test_supervisor_startup_custody_failure_alerts_before_reraising(
@@ -4752,6 +4854,29 @@ def test_dispatch_supervisor_email_title_identifies_new_architecture(
     title_index = command.index("--title") + 1
     assert command[title_index] == "[新架構派發] supervisor restart"
     assert "--force" not in command
+
+
+def test_provider_auth_receipt_alert_does_not_misdiagnose_login_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sends: list[tuple[str, str, str]] = []
+    monkeypatch.setattr(
+        supervisor.alerts,
+        "_send",
+        lambda level, title, body: sends.append((level, title, body)) or 0,
+    )
+
+    sent = supervisor.alerts.send_provider_auth_receipt_alert(
+        recovery={"recovered": 0, "active": 0, "invalid": 2},
+        state_path=tmp_path / "state.json",
+    )
+
+    assert sent is True
+    assert sends[0][0] == "critical"
+    assert "provider auth receipt invalid" in sends[0][1]
+    assert "不是登入失效" in sends[0][2]
+    assert "不要重新登入或更換 API key" in sends[0][2]
 
 
 def test_loop_crash_transport_identity_groups_same_trace_and_separates_root(
@@ -11665,6 +11790,394 @@ def test_provider_auth_close_failure_before_checkpoint_parks_low_and_recovers(
     )
     assert recovered == {"recovered": 1, "active": 0, "invalid": 0}
     assert not Path(lease.destination_path).exists()
+
+
+def test_live_provider_auth_writer_requires_active_schema_capability(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    live_root = tmp_path / "live-provider-auth"
+    state_path = tmp_path / "inactive-state.json"
+    monkeypatch.setattr(
+        isolation,
+        "_provider_auth_reaper_root",
+        lambda: live_root,
+    )
+    state.mark_supervisor_started(state_path)
+    started_wall = procutil.get_process_start_wall(os.getpid())
+    assert started_wall is not None
+    state.activate_provider_auth_receipt_capability(
+        started_wall=started_wall,
+        path=state_path,
+    )
+    monkeypatch.setattr(
+        procutil,
+        "check_identity",
+        lambda _pid, _started: procutil.IDENTITY_MISMATCH,
+    )
+
+    with pytest.raises(
+        isolation.IsolationUnavailable,
+        match="active capable supervisor",
+    ):
+        isolation.materialize_provider_auth(
+            prepared,
+            provider_id="codex-cli",
+            credential_home=authority,
+            job_id="7" * 32,
+            attempt=1,
+            producer_custody={
+                "version": 2,
+                "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+                "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+                "resource_coalition_id": 73,
+                "trusted_unique_ids": [1001],
+            },
+            live_writer_state_path=state_path,
+        )
+
+    assert not live_root.exists()
+
+
+def test_pytest_cannot_write_default_live_provider_auth_namespace(
+    tmp_path: Path,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    state_path = _tmp_state(tmp_path)
+    state.mark_supervisor_started(state_path)
+    isolation.activate_live_provider_auth_writer_capability(
+        state_path=state_path,
+    )
+    live_root = isolation._DEFAULT_PROVIDER_AUTH_REAPER_ROOT
+    before = sorted(path.name for path in live_root.glob("*.json"))
+
+    with pytest.raises(
+        isolation.IsolationUnavailable,
+        match="pytest may not write the live",
+    ):
+        isolation.materialize_provider_auth(
+            prepared,
+            provider_id="codex-cli",
+            credential_home=authority,
+            job_id="9" * 32,
+            attempt=1,
+            producer_custody={
+                "version": 2,
+                "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+                "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+                "resource_coalition_id": 73,
+                "trusted_unique_ids": [1001],
+            },
+            live_writer_state_path=state_path,
+        )
+
+    assert sorted(path.name for path in live_root.glob("*.json")) == before
+
+
+def test_live_v3_receipt_is_namespaced_away_from_legacy_reader(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    live_root = tmp_path / "live-provider-auth"
+    state_path = _tmp_state(tmp_path)
+    state.mark_supervisor_started(state_path)
+    started_wall = procutil.get_process_start_wall(os.getpid())
+    assert started_wall is not None
+    state.activate_provider_auth_receipt_capability(
+        started_wall=started_wall,
+        path=state_path,
+    )
+    monkeypatch.setattr(
+        isolation,
+        "_provider_auth_reaper_root",
+        lambda: live_root,
+    )
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+
+    lease = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=authority,
+        job_id="8" * 32,
+        attempt=1,
+        producer_custody=custody,
+        live_writer_state_path=state_path,
+    )
+    assert lease is not None
+    receipt_path = Path(lease.recovery_receipt_path)
+    assert receipt_path.parent == live_root / "v3"
+    assert list(live_root.glob("*.json")) == [], (
+        "a legacy reader must never observe the v3 envelope"
+    )
+
+    closed = isolation.reap_provider_auth_lease_for_custody_in_process(
+        lease,
+        job_id="8" * 32,
+        producer_custody=custody,
+        poll_seconds=0,
+    )
+    assert closed.ok is True
+    recovered = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=live_root,
+    )
+    assert recovered == {"recovered": 0, "active": 0, "invalid": 0}
+
+
+def test_terminal_root_v3_receipts_are_audited_off_legacy_scan_surface(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "provider-auth-reapers"
+    root.mkdir()
+    terminal = root / "terminal-v3.json"
+    terminal.write_text(
+        json.dumps({
+            "schema_version": "provider-auth-lease.v3",
+            "state": "cleaned",
+            "destination_path": str(
+                tmp_path / "gone-run" / "home" / ".codex" / "auth.json"
+            ),
+            "close": {"ok": True, "cleaned": True},
+        }),
+        encoding="utf-8",
+    )
+    pending = root / "pending-v3.json"
+    pending.write_text(
+        json.dumps({
+            "schema_version": "provider-auth-lease.v3",
+            "state": "materialized",
+            "destination_path": str(
+                tmp_path / "live-run" / "home" / ".codex" / "auth.json"
+            ),
+        }),
+        encoding="utf-8",
+    )
+
+    result = isolation.relocate_terminal_root_v3_receipts(
+        receipt_root=root,
+    )
+
+    assert result == {
+        "relocated": 1,
+        "reconciled": 0,
+        "pending": 1,
+        "invalid": 0,
+    }
+    assert not terminal.exists()
+    assert (root / "v3" / terminal.name).is_file()
+    assert pending.is_file(), "nonterminal custody must remain visible to recovery"
+    legacy_visible = [
+        json.loads(path.read_text(encoding="utf-8"))["schema_version"]
+        for path in root.glob("*.json")
+    ]
+    assert legacy_visible == ["provider-auth-lease.v3"], (
+        "only the deliberately nonterminal v3 remains until recovery closes it"
+    )
+    audit_lines = (
+        root / "v3" / ".relocation-audit.jsonl"
+    ).read_text(encoding="utf-8").splitlines()
+    assert len(audit_lines) == 2
+    intent, audit = map(json.loads, audit_lines)
+    assert intent["phase"] == "intent"
+    assert audit["phase"] == "completed"
+    assert audit["source"] == str(terminal)
+    assert audit["target"] == str(root / "v3" / terminal.name)
+    assert len(audit["sha256"]) == 64
+
+
+def test_root_v3_relocation_reconciles_crash_after_rename(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = tmp_path / "provider-auth-reapers"
+    root.mkdir()
+    source = root / "terminal-v3.json"
+    source.write_text(
+        json.dumps({
+            "schema_version": state.PROVIDER_AUTH_RECEIPT_SCHEMA,
+            "state": "cleaned",
+            "destination_path": str(tmp_path / "gone" / "auth.json"),
+            "close": {"ok": True, "cleaned": True},
+        }),
+        encoding="utf-8",
+    )
+    real_append = isolation._append_provider_auth_relocation_audit
+
+    def crash_on_completion(path, payload):
+        if payload.get("phase") == "completed":
+            raise OSError("crash after rename")
+        real_append(path, payload)
+
+    monkeypatch.setattr(
+        isolation,
+        "_append_provider_auth_relocation_audit",
+        crash_on_completion,
+    )
+    with pytest.raises(OSError, match="crash after rename"):
+        isolation.relocate_terminal_root_v3_receipts(receipt_root=root)
+
+    target = root / "v3" / source.name
+    assert not source.exists()
+    assert target.is_file()
+    first_events = [
+        json.loads(line)
+        for line in (
+            root / "v3" / ".relocation-audit.jsonl"
+        ).read_text(encoding="utf-8").splitlines()
+    ]
+    assert [event["phase"] for event in first_events] == ["intent"]
+
+    monkeypatch.setattr(
+        isolation,
+        "_append_provider_auth_relocation_audit",
+        real_append,
+    )
+    recovered = isolation.relocate_terminal_root_v3_receipts(
+        receipt_root=root,
+    )
+
+    assert recovered == {
+        "relocated": 0,
+        "reconciled": 1,
+        "pending": 0,
+        "invalid": 0,
+    }
+    final_events = [
+        json.loads(line)
+        for line in (
+            root / "v3" / ".relocation-audit.jsonl"
+        ).read_text(encoding="utf-8").splitlines()
+    ]
+    assert [event["phase"] for event in final_events] == [
+        "intent",
+        "completed",
+    ]
+    assert final_events[-1]["reconciled_after_restart"] is True
+
+    audit_path = root / "v3" / ".relocation-audit.jsonl"
+    with audit_path.open("ab") as audit_fh:
+        audit_fh.write(b'{"phase":"completed"')
+        audit_fh.flush()
+        os.fsync(audit_fh.fileno())
+    tail_recovered = isolation.relocate_terminal_root_v3_receipts(
+        receipt_root=root,
+    )
+    assert tail_recovered == {
+        "relocated": 0,
+        "reconciled": 1,
+        "pending": 0,
+        "invalid": 0,
+    }
+    assert audit_path.read_bytes().endswith(b"\n")
+
+
+def test_root_v3_relocation_fsyncs_intent_namespace_before_rename(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = tmp_path / "provider-auth-reapers"
+    root.mkdir()
+    source = root / "terminal-v3.json"
+    source.write_text(
+        json.dumps({
+            "schema_version": state.PROVIDER_AUTH_RECEIPT_SCHEMA,
+            "state": "cleaned",
+            "destination_path": str(tmp_path / "gone" / "auth.json"),
+            "close": {"ok": True, "cleaned": True},
+        }),
+        encoding="utf-8",
+    )
+    events: list[str] = []
+    real_fsync = isolation.os.fsync
+    real_replace = isolation.os.replace
+
+    def observe_fsync(fd):
+        events.append(
+            "dir" if stat.S_ISDIR(os.fstat(fd).st_mode) else "file"
+        )
+        return real_fsync(fd)
+
+    def observe_replace(source_path, target_path):
+        events.append("replace")
+        return real_replace(source_path, target_path)
+
+    monkeypatch.setattr(isolation.os, "fsync", observe_fsync)
+    monkeypatch.setattr(isolation.os, "replace", observe_replace)
+
+    result = isolation.relocate_terminal_root_v3_receipts(
+        receipt_root=root,
+    )
+
+    assert result["relocated"] == 1
+    assert events[:4] == ["dir", "file", "dir", "replace"], (
+        "v3 dir + audit intent must be durable before receipt rename"
+    )
+    assert events[4:] == ["dir", "dir", "file"]
 
 
 def test_provider_auth_forged_cleaned_receipt_fails_closed(

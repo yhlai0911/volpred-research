@@ -10,6 +10,8 @@ Schema (version 1)::
       "supervisor_release_sha256": str | null,    # verified release archive digest
       "supervisor_release_commit": str | null,    # Git commit materialized into the release
       "supervisor_bootstrap_sha256": str | null,  # installed immutable bootstrap digest
+      "provider_auth_receipt_schema": str | null, # activated only after clean startup recovery
+      "provider_auth_writer_started_wall": str | null, # PID-generation fingerprint for writer
       "cutover_quiesce": null | {                 # durable new-fire fence for launchd migration
         "token": str, "reason": str, "requested_at": str, "expires_at": str,
         "previous_auth_blocked": bool,
@@ -220,6 +222,7 @@ from volpred.canonical_write import guard_canonical_write
 
 ROOT = Path(__file__).resolve().parents[2]
 STATE_PATH = ROOT / "storage" / "ops" / "dispatch_state.json"
+PROVIDER_AUTH_RECEIPT_SCHEMA = "provider-auth-lease.v3"
 
 
 def _lock_path(state_path: Path) -> Path:
@@ -385,6 +388,11 @@ def _empty_state() -> dict[str, Any]:
         "supervisor_release_sha256": None,
         "supervisor_release_commit": None,
         "supervisor_bootstrap_sha256": None,
+        # Runtime capability marker.  A provider-auth writer may target the
+        # live receipt namespace only when this exact daemon owns the state
+        # row and advertises the schema it can also recover.
+        "provider_auth_receipt_schema": None,
+        "provider_auth_writer_started_wall": None,
         "cutover_quiesce": None,
         "last_heartbeat_at": None,
         "last_fire_at": None,
@@ -733,7 +741,29 @@ def mark_supervisor_started(path: Path = STATE_PATH) -> None:
         data["supervisor_bootstrap_sha256"] = os.environ.get(
             "VOLPRED_SUPERVISOR_BOOTSTRAP_SHA256"
         )
+        # Capability is activated only after startup recovery has completed.
+        # Clearing it here prevents a stale state row from authorizing a writer
+        # during boot or after PID reuse.
+        data["provider_auth_receipt_schema"] = None
+        data["provider_auth_writer_started_wall"] = None
         data["last_heartbeat_at"] = _now()
+
+
+def activate_provider_auth_receipt_capability(
+    *,
+    started_wall: str,
+    path: Path = STATE_PATH,
+) -> None:
+    """Publish v3 writer capability after recovery and PID identity pinning."""
+    if not isinstance(started_wall, str) or not started_wall.strip():
+        raise ValueError("provider auth writer requires process start identity")
+    with _locked_state(path) as (_fh, data):
+        if data.get("supervisor_pid") != os.getpid():
+            raise RuntimeError(
+                "provider auth capability owner is not the active supervisor"
+            )
+        data["provider_auth_receipt_schema"] = PROVIDER_AUTH_RECEIPT_SCHEMA
+        data["provider_auth_writer_started_wall"] = started_wall
 
 
 def mark_restart_orphans_pending(path: Path = STATE_PATH) -> list[dict[str, Any]]:

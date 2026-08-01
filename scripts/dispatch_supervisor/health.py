@@ -517,6 +517,19 @@ def _renew_live_dispatch_claims(*, state_path: Path) -> dict[str, object]:
     )
 
 
+def _fence_provider_auth_receipt_fault(
+    summary: dict[str, int],
+    *,
+    state_path: Path,
+) -> None:
+    state.set_auth_blocked(True, path=state_path)
+    LOG.error("provider auth receipt control blocked dispatch: %s", summary)
+    alerts.send_provider_auth_receipt_alert(
+        recovery=summary,
+        state_path=state_path,
+    )
+
+
 async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: int = CHECK_INTERVAL_S) -> None:
     """Long-running health monitor coroutine. Also owns the supervisor
     liveness heartbeat.
@@ -570,14 +583,41 @@ async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: 
                     "provider auth quarantine recovery=%s",
                     quarantine_recovery,
                 )
+            relocation = await asyncio.to_thread(
+                isolation.relocate_terminal_root_v3_receipts
+            )
+            if relocation["invalid"]:
+                _fence_provider_auth_receipt_fault(
+                    relocation,
+                    state_path=state_path,
+                )
+                continue
             auth_recovery = await asyncio.to_thread(
                 isolation.recover_provider_auth_reapers
             )
             if auth_recovery["invalid"]:
-                raise isolation.IsolationUnavailable(
-                    "provider auth runtime recovery has invalid receipts: "
-                    f"{auth_recovery}"
+                # Fail admission closed without taking the entire health pass
+                # down.  A malformed/unknown receipt is an auth-control fault,
+                # not a liveness fault; heartbeat, custody recovery and future
+                # inspection must continue while dispatch stays fenced.
+                _fence_provider_auth_receipt_fault(
+                    auth_recovery,
+                    state_path=state_path,
                 )
+                continue
+            relocation = await asyncio.to_thread(
+                isolation.relocate_terminal_root_v3_receipts
+            )
+            if relocation["invalid"] or relocation["pending"]:
+                _fence_provider_auth_receipt_fault(
+                    relocation,
+                    state_path=state_path,
+                )
+                continue
+            await asyncio.to_thread(
+                isolation.activate_live_provider_auth_writer_capability,
+                state_path=state_path,
+            )
             # Last: a reload SIGTERMs this process, so anything after it in the
             # tick would not run. The heartbeat and the hang check are what keep
             # the platform safe; deploying a fix is what keeps it improving.

@@ -36,6 +36,8 @@ from typing import Any, Callable, Sequence
 from volpred.ops import termination
 from volpred.ops.diagnostics import warn
 
+from .state import PROVIDER_AUTH_RECEIPT_SCHEMA
+
 SANDBOX_EXEC = Path("/usr/bin/sandbox-exec")
 
 
@@ -1648,7 +1650,7 @@ def park_provider_auth_lease_for_recovery(
         },
     )
     if (
-        transitioned.get("schema_version") != "provider-auth-lease.v3"
+        transitioned.get("schema_version") != PROVIDER_AUTH_RECEIPT_SCHEMA
         or transitioned.get("lease_id") != lease.lease_id
         or Path(str(transitioned.get("source_home"))).resolve()
         != Path(lease.source_home).resolve()
@@ -2000,8 +2002,320 @@ def defer_provider_auth_cleanup(
     )
 
 
+_DEFAULT_PROVIDER_AUTH_REAPER_ROOT = (
+    Path.home() / ".volpred" / "logs" / "provider-auth-reapers"
+)
+
+
 def _provider_auth_reaper_root() -> Path:
-    return Path.home() / ".volpred" / "logs" / "provider-auth-reapers"
+    return _DEFAULT_PROVIDER_AUTH_REAPER_ROOT
+
+
+_PROVIDER_AUTH_V3_DIR = "v3"
+
+
+def _live_provider_auth_receipt_root() -> Path:
+    """Namespace v3 away from legacy readers that only scan ``*.json``.
+
+    A pre-v3 daemon can therefore coexist with files written by a staged v3
+    release without classifying the new envelope as a corrupt legacy receipt.
+    New readers scan both the legacy root and this versioned child.
+    """
+    return _provider_auth_reaper_root() / _PROVIDER_AUTH_V3_DIR
+
+
+def _assert_live_provider_auth_writer(*, state_path: Path | None) -> None:
+    """Admit live receipt writes only from the active capable supervisor.
+
+    This prevents tests, canaries, and a newer working-tree interpreter from
+    publishing a receipt schema beside an older live daemon.  Explicit custom
+    receipt roots remain available for hermetic tests and recovery rehearsal.
+    """
+    if (
+        os.environ.get("PYTEST_CURRENT_TEST")
+        and _provider_auth_reaper_root().resolve()
+        == _DEFAULT_PROVIDER_AUTH_REAPER_ROOT.resolve()
+    ):
+        raise IsolationUnavailable(
+            "pytest may not write the live provider auth receipt namespace"
+        )
+    if state_path is None:
+        raise IsolationUnavailable(
+            "live provider auth receipt writes require supervisor state authority"
+        )
+    from . import state
+    from . import procutil
+
+    snap = state.read_state(state_path)
+    started_wall = snap.get("provider_auth_writer_started_wall")
+    if (
+        snap.get("provider_auth_receipt_schema")
+        != PROVIDER_AUTH_RECEIPT_SCHEMA
+        or snap.get("supervisor_pid") != os.getpid()
+        or not snap.get("supervisor_started_at")
+        or not isinstance(started_wall, str)
+        or procutil.check_identity(os.getpid(), started_wall)
+        != procutil.IDENTITY_MATCH
+    ):
+        raise IsolationUnavailable(
+            "live provider auth receipt writer is not the active capable supervisor"
+        )
+
+
+def activate_live_provider_auth_writer_capability(*, state_path: Path) -> None:
+    """Pin current daemon generation and publish v3 writer capability."""
+    from . import procutil, state
+
+    started_wall = procutil.get_process_start_wall(os.getpid())
+    if (
+        not started_wall
+        or procutil.check_identity(os.getpid(), started_wall)
+        != procutil.IDENTITY_MATCH
+    ):
+        raise IsolationUnavailable(
+            "provider auth writer process identity could not be pinned"
+        )
+    state.activate_provider_auth_receipt_capability(
+        started_wall=started_wall,
+        path=state_path,
+    )
+
+
+def _append_provider_auth_relocation_audit(
+    path: Path,
+    payload: dict[str, Any],
+) -> None:
+    existed = path.exists()
+    with path.open("a", encoding="utf-8") as audit_fh:
+        audit_fh.write(
+            json.dumps(payload, sort_keys=True, ensure_ascii=False) + "\n"
+        )
+        audit_fh.flush()
+        os.fsync(audit_fh.fileno())
+    if not existed:
+        parent_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(parent_fd)
+        finally:
+            os.close(parent_fd)
+
+
+def relocate_terminal_root_v3_receipts(
+    *,
+    receipt_root: Path | None = None,
+) -> dict[str, int]:
+    """Move terminal root-level v3 receipts off the legacy scan surface.
+
+    Pre-v3 readers scan only ``root/*.json`` and classify every v3 envelope as
+    invalid, even when it is already clean.  This migration is lock-serialized,
+    content-address checked and append-only audited.  Nonterminal or malformed
+    receipts remain in place so recovery cannot be bypassed by relocation.
+    """
+    root = (receipt_root or _provider_auth_reaper_root()).resolve()
+    result = {
+        "relocated": 0,
+        "reconciled": 0,
+        "pending": 0,
+        "invalid": 0,
+    }
+    if (
+        receipt_root is None
+        and os.environ.get("PYTEST_CURRENT_TEST")
+        and root == _DEFAULT_PROVIDER_AUTH_REAPER_ROOT.resolve()
+    ):
+        return result
+    if not root.is_dir():
+        return result
+    target_root = root / _PROVIDER_AUTH_V3_DIR
+    target_root_created = not target_root.exists()
+    target_root.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if target_root_created:
+        root_fd = os.open(root, os.O_RDONLY)
+        try:
+            os.fsync(root_fd)
+        finally:
+            os.close(root_fd)
+    lock_path = root / ".v3-relocation.lock"
+    with lock_path.open("a+", encoding="utf-8") as lock_fh:
+        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_EX)
+        audit_path = target_root / ".relocation-audit.jsonl"
+        intents: dict[tuple[str, str, str], dict[str, Any]] = {}
+        completed: set[tuple[str, str, str]] = set()
+        if audit_path.is_file():
+            try:
+                audit_bytes = audit_path.read_bytes()
+            except OSError:
+                result["invalid"] += 1
+                audit_bytes = b""
+            if audit_bytes and not audit_bytes.endswith(b"\n"):
+                # O_APPEND gives ordered records but power loss can tear only
+                # the final line.  No rename can follow an incomplete intent
+                # append; an incomplete completion is recoverable from its
+                # preceding durable intent + target digest.  Truncate exactly
+                # that uncommitted tail under the migration lock.
+                boundary = audit_bytes.rfind(b"\n") + 1
+                with audit_path.open("r+b") as audit_fh:
+                    audit_fh.truncate(boundary)
+                    audit_fh.flush()
+                    os.fsync(audit_fh.fileno())
+                audit_bytes = audit_bytes[:boundary]
+                result["reconciled"] += 1
+            try:
+                audit_lines = audit_bytes.decode("utf-8").splitlines()
+            except UnicodeDecodeError:
+                result["invalid"] += 1
+                audit_lines = []
+            for line_number, line in enumerate(audit_lines, start=1):
+                try:
+                    event = json.loads(line)
+                    source_raw = event["source"]
+                    target_raw = event["target"]
+                    digest_raw = event["sha256"]
+                    phase = event["phase"]
+                    if (
+                        event.get("schema_version")
+                        != PROVIDER_AUTH_RECEIPT_SCHEMA
+                        or not isinstance(source_raw, str)
+                        or not Path(source_raw).is_absolute()
+                        or not isinstance(target_raw, str)
+                        or not Path(target_raw).is_absolute()
+                        or not isinstance(digest_raw, str)
+                        or len(digest_raw) != 64
+                        or any(
+                            char not in "0123456789abcdef"
+                            for char in digest_raw.lower()
+                        )
+                        or phase not in {"intent", "completed"}
+                    ):
+                        raise ValueError("invalid relocation audit event")
+                except (
+                    json.JSONDecodeError,
+                    KeyError,
+                    TypeError,
+                    ValueError,
+                ) as exc:
+                    warn(
+                        "provider-auth-receipt-relocation",
+                        "relocation audit event invalid; rollout remains fenced",
+                        path=str(audit_path),
+                        line=line_number,
+                        err=str(exc),
+                    )
+                    result["invalid"] += 1
+                    continue
+                key = (source_raw, target_raw, digest_raw)
+                if phase == "intent":
+                    intents[key] = event
+                else:
+                    completed.add(key)
+        incomplete: dict[tuple[str, str, str], dict[str, Any]] = {}
+        for key, intent in intents.items():
+            if key in completed:
+                continue
+            source = Path(key[0])
+            target = Path(key[1])
+            if (
+                not source.exists()
+                and target.is_file()
+                and hashlib.sha256(target.read_bytes()).hexdigest() == key[2]
+            ):
+                _append_provider_auth_relocation_audit(
+                    audit_path,
+                    {
+                        **intent,
+                        "at": time.time_ns(),
+                        "phase": "completed",
+                        "reconciled_after_restart": True,
+                    },
+                )
+                result["reconciled"] += 1
+            elif source.is_file() and not target.exists():
+                incomplete[key] = intent
+            else:
+                result["invalid"] += 1
+        for source in sorted(root.glob("*.json")):
+            try:
+                raw = source.read_bytes()
+                payload = json.loads(raw)
+            except (OSError, json.JSONDecodeError) as exc:
+                warn(
+                    "provider-auth-receipt-relocation",
+                    "root receipt unreadable; rollout remains fenced",
+                    path=str(source),
+                    err=str(exc),
+                )
+                result["invalid"] += 1
+                continue
+            if not isinstance(payload, dict):
+                result["invalid"] += 1
+                continue
+            if payload.get("schema_version") != PROVIDER_AUTH_RECEIPT_SCHEMA:
+                continue
+            close = payload.get("close")
+            destination_raw = payload.get("destination_path")
+            try:
+                if (
+                    not isinstance(destination_raw, str)
+                    or not Path(destination_raw).is_absolute()
+                ):
+                    raise ValueError("destination is not absolute")
+                destination = Path(destination_raw).resolve()
+            except (OSError, RuntimeError, ValueError) as exc:
+                warn(
+                    "provider-auth-receipt-relocation",
+                    "root v3 destination invalid; rollout remains fenced",
+                    path=str(source),
+                    err=str(exc),
+                )
+                result["invalid"] += 1
+                continue
+            terminal = (
+                payload.get("state") == "cleaned"
+                and isinstance(close, dict)
+                and close.get("ok") is True
+                and close.get("cleaned") is True
+                and not destination.exists()
+            )
+            if not terminal:
+                result["pending"] += 1
+                continue
+            target = target_root / source.name
+            if target.exists():
+                result["invalid"] += 1
+                continue
+            digest = hashlib.sha256(raw).hexdigest()
+            audit_key = (str(source), str(target), digest)
+            audit = {
+                "at": time.time_ns(),
+                "schema_version": PROVIDER_AUTH_RECEIPT_SCHEMA,
+                "source": str(source),
+                "target": str(target),
+                "sha256": digest,
+            }
+            if audit_key not in incomplete:
+                _append_provider_auth_relocation_audit(
+                    audit_path,
+                    {**audit, "phase": "intent"},
+                )
+            os.replace(source, target)
+            target.chmod(0o600)
+            if hashlib.sha256(target.read_bytes()).hexdigest() != digest:
+                raise IsolationUnavailable(
+                    "provider auth receipt relocation verification failed"
+                )
+            for directory in (root, target_root):
+                directory_fd = os.open(directory, os.O_RDONLY)
+                try:
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(directory_fd)
+            _append_provider_auth_relocation_audit(
+                audit_path,
+                {**audit, "at": time.time_ns(), "phase": "completed"},
+            )
+            result["relocated"] += 1
+        fcntl.flock(lock_fh.fileno(), fcntl.LOCK_UN)
+    return result
 
 
 def _load_recoverable_provider_auth_receipts(
@@ -2013,7 +2327,9 @@ def _load_recoverable_provider_auth_receipts(
     invalid = 0
     if not receipt_root.is_dir():
         return recoverable, invalid
-    for path in sorted(receipt_root.glob("*.json")):
+    paths = list(receipt_root.glob("*.json"))
+    paths.extend((receipt_root / _PROVIDER_AUTH_V3_DIR).glob("*.json"))
+    for path in sorted(paths):
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
@@ -2050,7 +2366,7 @@ def _load_recoverable_provider_auth_receipts(
                 continue
             invalid += 1
             continue
-        if schema == "provider-auth-lease.v3":
+        if schema == PROVIDER_AUTH_RECEIPT_SCHEMA:
             from . import procutil
 
             try:
@@ -2364,13 +2680,13 @@ def _recover_provider_auth_with_held_lock(
         lease_id=str(payload["lease_id"]),
         recovery_receipt_path=(
             str(path)
-            if payload.get("schema_version") == "provider-auth-lease.v3"
+            if payload.get("schema_version") == PROVIDER_AUTH_RECEIPT_SCHEMA
             else None
         ),
         _authority_lock_fd=authority_lock_fd,
         _destination_unlinked=destination_unlinked,
     )
-    if payload.get("schema_version") == "provider-auth-lease.v3":
+    if payload.get("schema_version") == PROVIDER_AUTH_RECEIPT_SCHEMA:
         drained = _producer_custody_drained_twice(
             job_id=str(payload["job_id"]),
             producer_custody=payload["producer_custody"],
@@ -2482,14 +2798,14 @@ def recover_provider_auth_reapers(
                 recovery_receipt_path=(
                     str(path)
                     if payload.get("schema_version")
-                    == "provider-auth-lease.v3"
+                    == PROVIDER_AUTH_RECEIPT_SCHEMA
                     else None
                 ),
                 _authority_lock_fd=lock_fd,
                 _destination_unlinked=destination_unlinked,
             )
             try:
-                if payload.get("schema_version") == "provider-auth-lease.v3":
+                if payload.get("schema_version") == PROVIDER_AUTH_RECEIPT_SCHEMA:
                     drained = _producer_custody_drained_twice(
                         job_id=str(payload["job_id"]),
                         producer_custody=payload["producer_custody"],
@@ -2631,6 +2947,7 @@ def materialize_provider_auth(
     attempt: int = 1,
     producer_custody: dict[str, Any] | None = None,
     receipt_root: Path | None = None,
+    live_writer_state_path: Path | None = None,
 ) -> ProviderAuthLease | None:
     """Materialize only the selected provider's subscription credential.
 
@@ -2664,6 +2981,10 @@ def materialize_provider_auth(
             raise IsolationUnavailable(
                 "provider auth materialization requires exact job, attempt, "
                 "and producer custody identity"
+            )
+        if receipt_root is None:
+            _assert_live_provider_auth_writer(
+                state_path=live_writer_state_path,
             )
     run_dir = Path(raw["run_dir"]).resolve()
     synthetic_home = Path(raw["synthetic_home"]).resolve()
@@ -2702,7 +3023,8 @@ def materialize_provider_auth(
     baseline_sha256 = hashlib.sha256(payload).hexdigest()
     lease_id = secrets.token_hex(16)
     recovery_receipt_path = (
-        (receipt_root or _provider_auth_reaper_root()) / f"{lease_id}.json"
+        (receipt_root or _live_provider_auth_receipt_root())
+        / f"{lease_id}.json"
         if durable_identity_requested
         else None
     )
@@ -2719,7 +3041,7 @@ def materialize_provider_auth(
                         _write_provider_auth_reaper_receipt(
                             recovery_receipt_path,
                             {
-                                "schema_version": "provider-auth-lease.v3",
+                                "schema_version": PROVIDER_AUTH_RECEIPT_SCHEMA,
                                 "state": "materialize_intent",
                                 "lease_id": lease_id,
                                 "source_home": str(Path(source_home).resolve()),
@@ -2843,6 +3165,7 @@ __all__ = [
     "ProviderAuthHandoffReceipt",
     "ProviderAuthLease",
     "bootstrap_codex_auth_authority",
+    "activate_live_provider_auth_writer_capability",
     "defer_provider_auth_cleanup",
     "isolated_environment",
     "materialize_provider_auth",
@@ -2854,6 +3177,7 @@ __all__ = [
     "reap_provider_auth_lease_in_process",
     "reap_quarantined_provider_auth_leases",
     "recover_provider_auth_reapers",
+    "relocate_terminal_root_v3_receipts",
     "sandbox_profile",
     "wrap_command",
     "wrap_prepared",

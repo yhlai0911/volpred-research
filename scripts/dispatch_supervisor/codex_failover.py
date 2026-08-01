@@ -564,6 +564,7 @@ def run_codex_failover(
     producer_custody: dict | None = None,
     attempt: int = 1,
     state_path: Path = state.STATE_PATH,
+    provider_auth_receipt_root: Path | None = None,
 ) -> FailoverResult:
     """Try to let ``codex exec`` cover this hourly slot without leaking auth."""
     lease_guard = _ProviderAuthLeaseGuard(
@@ -588,6 +589,7 @@ def run_codex_failover(
             producer_custody=producer_custody,
             attempt=attempt,
             state_path=state_path,
+            provider_auth_receipt_root=provider_auth_receipt_root,
             lease_guard=lease_guard,
         )
     except Exception as exc:  # noqa: BLE001 - public contract is typed, never raises
@@ -620,6 +622,7 @@ def _run_codex_failover_impl(
     producer_custody: dict | None = None,
     attempt: int = 1,
     state_path: Path = state.STATE_PATH,
+    provider_auth_receipt_root: Path | None = None,
     lease_guard: _ProviderAuthLeaseGuard,
 ) -> FailoverResult:
     """Try to let `codex exec` cover this hourly slot. Never raises."""
@@ -681,6 +684,8 @@ def _run_codex_failover_impl(
                     job_id=job_id,
                     attempt=attempt,
                     producer_custody=producer_custody,
+                    receipt_root=provider_auth_receipt_root,
+                    live_writer_state_path=state_path,
                 )
             )
             child_env = isolation.isolated_environment(

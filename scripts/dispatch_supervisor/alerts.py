@@ -33,6 +33,7 @@ two dedup stores by design, do not merge and do not add a third):
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import os
 import re
@@ -200,6 +201,40 @@ def send_auth_alert(*, log_tail: str = "", state_path: Path = state.STATE_PATH) 
         "```\n" + (log_tail[-2000:] if log_tail else "(empty)") + "\n```\n"
     )
     _send("critical", "supervisor auth_blocked", body)
+    state.mark_alert_sent(key, path=state_path)
+    return True
+
+
+def send_provider_auth_receipt_alert(
+    *,
+    recovery: dict[str, int],
+    state_path: Path = state.STATE_PATH,
+) -> bool:
+    """Receipt-control failure.  Distinct from a provider login failure.
+
+    Invalid durable receipts fence new dispatch, but they do not imply that
+    Claude/Codex credentials expired.  Keeping a separate title and remedy
+    prevents the operator from being told to re-login for a schema/state fault.
+    """
+    key = "provider_auth_receipt_invalid"
+    if state.should_dedup_alert(key, window_s=3600, path=state_path):
+        LOG.info("provider auth receipt alert deduped (sent within last 1h)")
+        return False
+    body = (
+        "# Provider auth receipt 驗證失敗，派工已 fail-closed\n\n"
+        "## 發生什麼\n"
+        "- health loop 發現無法安全解讀的 provider-auth durable receipt\n"
+        "- supervisor 仍持續 heartbeat，但已設 `auth_blocked=true`，不會派出新工作\n"
+        "- 這是 receipt schema/state 問題，**不是登入失效；不要重新登入或更換 API key**\n\n"
+        "## Recovery summary\n\n"
+        "```json\n"
+        + json.dumps(recovery, ensure_ascii=False, sort_keys=True)
+        + "\n```\n\n"
+        "## 正確行動\n"
+        "- 檢查 `~/.volpred/logs/provider-auth-reapers/` 與目前 immutable release 的 reader capability\n"
+        "- 修復或隔離 invalid receipt 後回讀 recovery=invalid:0，再解除 auth_blocked\n"
+    )
+    _send("critical", "provider auth receipt invalid（派工已安全暫停）", body)
     state.mark_alert_sent(key, path=state_path)
     return True
 

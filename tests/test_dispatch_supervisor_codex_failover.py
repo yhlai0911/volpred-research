@@ -362,6 +362,7 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
         job_id="abcdef123456",
         on_process_started=lambda _pid, _pgid: True,
         producer_custody=VALID_PRODUCER_CUSTODY,
+        provider_auth_receipt_root=tmp_path / "provider-auth-receipts",
     )
 
     assert result.recovered is True
@@ -524,10 +525,12 @@ def test_isolated_codex_materialization_binds_exact_custody_identity(
     assert result.exit_code == 9
     assert captured == [{
         "provider_id": "codex-cli",
-        "job_id": "d" * 32,
-        "attempt": 3,
-        "producer_custody": custody,
-    }]
+            "job_id": "d" * 32,
+            "attempt": 3,
+            "producer_custody": custody,
+            "receipt_root": None,
+            "live_writer_state_path": state.STATE_PATH,
+        }]
 
 
 @pytest.mark.parametrize("producer_custody", [None, {}])
