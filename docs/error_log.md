@@ -5412,3 +5412,32 @@ replace 圖組且 `sync_article=true`；`feed-sync --dry-run` 對該 article 為
 release preview 從 blocker 解除為 draft=6、content_gate_blocked=0、eligible=6，且下一候選精確為
 `mile_5378daa1`。本 slice 五步 Gate 為 **`root_cause_fixed_and_verified`**；incident lifecycle
 本身仍須 sustained-clean 才能標 resolved，這是時間窗狀態，不是再留一個人工修復步驟。
+
+---
+
+## 2026-08-01 — pre-write dedup 在 identity ratchet 後仍產生 title hash，令 control-gate evidence source 失明
+
+**證據化症狀**：原 detector `audit_control_gate_lifecycle.py` 穩定回報
+`publisher_arc_dedup` 的 75 筆 post-ratchet evidence 中有 60 筆
+`synthetic_candidate_identity_after_ratchet`。逐筆分組後全部都是兩次正式
+`warn_arc_near_miss` 呼叫：55 筆 `title:0188e324171d17f3` 與 5 筆
+`title:221b4ebf6d347778`；沒有隱藏 task／event／K identity，也不是舊 row 被改寫時間戳。
+
+**根因層級（evidence identity／PDCA outcome join）**：registry 已在 07-30 宣告 canonical
+candidate identity ratchet 生效，但 `check_arc_dedup.py` 對無 K、非 event 的文章仍接受
+title-only 呼叫，並由 publisher logger退回 `title:<hash>`。因此 gate action 雖可觀測，卻不能
+和 canonical `storage/next_tasks.json` 的 task outcome join；policy 與 writer capability
+在同一個 cutover 點分岔。
+
+**底層修復與制度化**：pre-write CLI 新增 `--candidate-id`；Operations Core agent 預設取
+`VOLPRED_PRESELECTED_TASK_ID`，互動 session 必須明示。無 K、非 event 的 identity 若缺失、
+含空白、使用 `title:/decision:`，或不存在 canonical task pool，全部在讀 feed／寫 receipt 前
+exit 2。K 與 structured event 仍分別使用既有 K+audience／event+slot 身分，禁止混入第二個
+candidate id。publishing rule 與 hourly dispatch prompt 同步機械命令；registry ratchet 校正到
+真正 enforcement 生效的 `2026-08-01T10:52:12+00:00`，不再對尚未具備的能力做虛假宣告。
+
+**回歸與 live read-back**：兩輪 TDD 先固定 scheduled env identity、缺 identity、task pool
+不存在三種 RED，再轉 GREEN；相鄰 suites **100 passed**。正式 canary 以
+`alert_control_gate_source_health_20260801` 寫入 `warn_thin_signature` receipt，回讀 candidate id
+精確等於 task SoT；原 detector 隨即回報 `healthy=true`、`unhealthy_source_count=0`。本根因切片
+為 **`root_cause_fixed_and_verified`**；歷史 60 筆保留作 incident 證據，未手改或刪除 log。

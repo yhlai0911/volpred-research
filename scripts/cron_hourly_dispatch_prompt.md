@@ -212,12 +212,15 @@ PHASE B — 派新工:
 
    ```bash
    uv run python scripts/check_arc_dedup.py --k-id <kXXXX> --audience <general|research> --title "<planned title>"
+   # 無 K、非事件：用本 fire 已綁定的 task identity，不得使用 title hash
+   uv run python scripts/check_arc_dedup.py --candidate-id "$VOLPRED_PRESELECTED_TASK_ID" \
+     --audience <audience> --title "<planned title>" --text-file <evidence_summary>
    # event_article：必從 task payload 傳入正式階段身分
    uv run python scripts/check_arc_dedup.py --audience event --title "<planned title>" \
      --event-key <event_key> --event-series-slot <event_series_slot>
    ```
 
-   （無對應 K 就 `--text-file` 餵主題摘要）。**`--audience` 不可省**（2026-07-11 起）：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成重複、且是永久性誤判。
+   （無對應 K 就用 `--candidate-id "$VOLPRED_PRESELECTED_TASK_ID"` 並以 `--text-file` 餵主題摘要）。**`--audience` 不可省**（2026-07-11 起）：同一個 K 同時出 research 版與 general 版是產品設計，不帶 audience 會讓 general 稿被自己的 research 手足判成重複、且是永久性誤判。缺 canonical candidate identity 時 CLI exit 2，不再製造無法 join outcome 的 `title:<hash>` evidence。
 
    兩道 gate，依確定性排序：
    - **exit 1 + `🚫 K-COVERAGE`** = 這個 K 在這個 audience **已經有現成文章**（含 draft — 草稿池裡那篇會被 release cron 發出去，等於已覆蓋）。精確比對、無模糊判斷 → **絕對不寫**，換 K。

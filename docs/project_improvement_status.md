@@ -3191,3 +3191,17 @@ program goal。
 - 🟢 此 deadlock class 為 **`root_cause_fixed_and_verified`**；目前 experiment
   lane 仍因 PHASE-Z incident 將 slot cap 降到 2 且兩席占滿而暫無 free slot，
   那是下一張獨立根因 ticket，不混入本結案。
+
+## 2026-08-01 — Control-gate candidate identity source health
+
+- ✅ 原 detector 重現 `publisher_arc_dedup` 60/75 筆 post-ratchet receipt 仍為
+  `title:<hash>`；全數來自兩次無 K、非 event 的正式 pre-write CLI，非 parser 假陽性、
+  歷史 row 改時戳或多 writer 分岔。
+- ✅ `check_arc_dedup.py` 對這類 task 現只接受 canonical `--candidate-id`／
+  `VOLPRED_PRESELECTED_TASK_ID`，並回讀 `storage/next_tasks.json` 證明 task 存在；缺失、
+  synthetic 或假 id 一律 pre-effect exit 2。K/event 既有 exact identity 不變。
+- ✅ publishing rule、hourly dispatch prompt 與真正 enforcement ratchet 同步；歷史壞 row
+  保留，不以改 log 假裝修復。
+- ✅ TDD／相鄰回歸 **100 passed**；production canary 已寫入 exact task identity，原 audit
+  回讀 `healthy=true`、`unhealthy_source_count=0`。本 slice 為
+  **`root_cause_fixed_and_verified`**。

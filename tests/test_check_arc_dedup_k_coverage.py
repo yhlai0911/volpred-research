@@ -166,6 +166,116 @@ def test_cli_logs_normalized_k_as_stable_candidate_id(
     ]
 
 
+def test_cli_uses_preselected_task_as_non_k_candidate_identity(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Scheduled non-K work must join gate evidence to its canonical task."""
+    (tmp_path / "storage" / "reports").mkdir(parents=True)
+    (tmp_path / "storage" / "reports" / "feed.json").write_text(
+        "[]",
+        encoding="utf-8",
+    )
+    (tmp_path / "storage" / "next_tasks.json").write_text(
+        json.dumps([{"id": "daily_digest_20260801"}]),
+        encoding="utf-8",
+    )
+    logged: list[dict] = []
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        cli,
+        "find_arc_duplicates",
+        lambda *_a, **_k: [{
+            "id": "mile_prior",
+            "match_reason": "descriptive_fuzzy_mechanism",
+        }],
+    )
+    monkeypatch.setattr(cli, "is_arc_near_miss", lambda _hit: True)
+    monkeypatch.setattr(
+        cli,
+        "_log_dedup_decision",
+        lambda *_a, **kwargs: logged.append(kwargs) or True,
+    )
+    monkeypatch.setenv("VOLPRED_PRESELECTED_TASK_ID", "daily_digest_20260801")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "check_arc_dedup.py",
+            "--audience",
+            "general",
+            "--title",
+            "NFP preview",
+        ],
+    )
+
+    assert cli.main() == 0
+    assert logged == [{"candidate_id": "daily_digest_20260801"}]
+
+
+def test_cli_rejects_non_k_candidate_without_canonical_identity(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    """A title hash is not a joinable post-ratchet candidate identity."""
+    (tmp_path / "storage" / "reports").mkdir(parents=True)
+    (tmp_path / "storage" / "reports" / "feed.json").write_text(
+        "[]",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.delenv("VOLPRED_PRESELECTED_TASK_ID", raising=False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "check_arc_dedup.py",
+            "--audience",
+            "general",
+            "--title",
+            "NFP preview",
+        ],
+    )
+
+    assert cli.main() == 2
+    assert "--candidate-id" in capsys.readouterr().err
+
+
+def test_cli_rejects_non_k_candidate_missing_from_task_pool(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    """A plausible string is not canonical unless the task SoT owns it."""
+    (tmp_path / "storage" / "reports").mkdir(parents=True)
+    (tmp_path / "storage" / "reports" / "feed.json").write_text(
+        "[]",
+        encoding="utf-8",
+    )
+    (tmp_path / "storage" / "next_tasks.json").write_text(
+        "[]",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "check_arc_dedup.py",
+            "--candidate-id",
+            "daily_digest_20990101",
+            "--audience",
+            "general",
+            "--title",
+            "NFP preview",
+        ],
+    )
+
+    assert cli.main() == 2
+    assert "storage/next_tasks.json" in capsys.readouterr().err
+
+
 def test_k_coverage_fails_open_without_durable_receipt(
     tmp_path: Path,
     monkeypatch,

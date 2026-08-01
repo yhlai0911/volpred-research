@@ -3,7 +3,8 @@
 
 Usage:
     uv run python scripts/check_arc_dedup.py --title "銅博士的波動率版本" \
-        --text-file /tmp/draft_or_results_summary.md
+        --text-file /tmp/draft_or_results_summary.md \
+        --candidate-id "$VOLPRED_PRESELECTED_TASK_ID"
     uv run python scripts/check_arc_dedup.py --k-id k1449 --audience general
 
 Exit codes: 0 = no hard duplicate, 1 = exact coverage found, 2 = usage error.
@@ -49,6 +50,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -98,6 +100,13 @@ def main() -> int:
     ap.add_argument("--text-file", help="draft / results summary file to scan")
     ap.add_argument("--k-id", help="experiment id (reads experiments/<k>/README.md + results)")
     ap.add_argument(
+        "--candidate-id",
+        help=(
+            "canonical task/candidate identity for non-K, non-event work; "
+            "defaults to $VOLPRED_PRESELECTED_TASK_ID"
+        ),
+    )
+    ap.add_argument(
         "--audience",
         help="audience you are about to write (general / research / ...). "
         "Narrows BOTH gates; omit only if the piece genuinely spans audiences.",
@@ -127,6 +136,53 @@ def main() -> int:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 2
 
+    explicit_candidate_id = str(args.candidate_id or "").strip()
+    if explicit_candidate_id and (args.k_id or args.event_key):
+        print(
+            "ERROR: --candidate-id cannot be combined with --k-id or "
+            "structured event identity",
+            file=sys.stderr,
+        )
+        return 2
+    runtime_candidate_id = (
+        explicit_candidate_id
+        or str(os.environ.get("VOLPRED_PRESELECTED_TASK_ID") or "").strip()
+    )
+    if not args.k_id and not args.event_key:
+        if (
+            not runtime_candidate_id
+            or runtime_candidate_id.startswith(("title:", "decision:"))
+            or any(character.isspace() for character in runtime_candidate_id)
+        ):
+            print(
+                "ERROR: non-K, non-event checks require a canonical "
+                "--candidate-id (or $VOLPRED_PRESELECTED_TASK_ID); title and "
+                "decision hashes are not joinable evidence",
+                file=sys.stderr,
+            )
+            return 2
+        queue_path = ROOT / "storage" / "next_tasks.json"
+        try:
+            task_pool = json.loads(queue_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            print(
+                f"ERROR: cannot verify candidate identity against "
+                f"{queue_path}: {exc}",
+                file=sys.stderr,
+            )
+            return 2
+        if not isinstance(task_pool, list) or not any(
+            isinstance(task, dict)
+            and str(task.get("id") or "") == runtime_candidate_id
+            for task in task_pool
+        ):
+            print(
+                "ERROR: non-K candidate identity is not owned by canonical "
+                f"storage/next_tasks.json: {runtime_candidate_id}",
+                file=sys.stderr,
+            )
+            return 2
+
     text = ""
     if args.text_file:
         text = Path(args.text_file).read_text(encoding="utf-8", errors="replace")
@@ -150,7 +206,7 @@ def main() -> int:
         f"{_normalize_ref(args.k_id)}"
         f"|audience:{str(args.audience or 'any').strip().casefold()}"
         if args.k_id
-        else None
+        else runtime_candidate_id or None
     )
     event_identity = (
         {
