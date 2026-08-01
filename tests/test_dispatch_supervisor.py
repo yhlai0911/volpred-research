@@ -5125,20 +5125,53 @@ def test_workspace_allocate_disk_floor_fails_closed(tmp_path: Path) -> None:
     assert not (repo / ".claude" / "worktrees").exists()
 
 
-def test_workspace_allocate_respects_caps(tmp_path: Path) -> None:
+def test_workspace_allocate_respects_live_cap_but_artifact_cap_is_advisory(
+    tmp_path: Path,
+) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     _git_init_repo(repo)
     # active cap: never a second concurrent isolated fire
     assert _ws_allocate(repo, active_isolated=1) is None
-    # total cap counts kept worktrees too
+    # Artifact custody never consumes execution capacity.  The historical
+    # total cap remains telemetry, while disk floor is the physical backstop.
     first = _ws_allocate(repo, job_id="b" * 32)
     assert first is not None
     second = _ws_allocate(repo, job_id="c" * 32, config=_iso_cfg(max_total=1))
-    assert second is None
+    assert second is not None
     reasons = [e.get("reason") for e in _ws_receipt_events(repo)
                if e["event"] == "allocation_skipped"]
-    assert reasons == ["active_cap", "total_cap"]
+    assert reasons == ["active_cap"]
+    assert any(
+        event.get("event") == "allocation_advisory"
+        and event.get("reason") == "artifact_backlog"
+        for event in _ws_receipt_events(repo)
+    )
+
+
+def test_workspace_artifact_backlog_requires_durable_advisory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    first = _ws_allocate(repo, job_id="b" * 32)
+    assert first is not None
+    real_append = workspace._append_receipt
+
+    def fail_advisory(root: Path, payload: dict) -> bool:
+        if payload.get("event") == "allocation_advisory":
+            return False
+        return real_append(root, payload)
+
+    monkeypatch.setattr(workspace, "_append_receipt", fail_advisory)
+    second = _ws_allocate(repo, job_id="c" * 32, config=_iso_cfg(max_total=1))
+
+    assert second is None
+    assert not (
+        repo / ".claude" / "worktrees" / "dispatch-slot-1-cccccccc"
+    ).exists()
 
 
 def test_workspace_enforce_allows_two_isolated_slots_with_configured_cap(
@@ -5237,9 +5270,10 @@ def test_workspace_capacity_counts_only_receipt_declared_ownership(
         config=_iso_cfg(max_total=1),
     )
 
-    assert ws is None
+    assert ws is not None
     assert any(
-        event.get("reason") == "total_cap"
+        event.get("event") == "allocation_advisory"
+        and event.get("reason") == "artifact_backlog"
         for event in _ws_receipt_events(repo)
     )
 
@@ -5314,9 +5348,10 @@ def test_workspace_registration_failure_never_mutates_unverified_path(
         job_id="b" * 32,
         config=_iso_cfg(max_total=1),
     )
-    assert replacement is None
+    assert replacement is not None
     assert any(
-        event.get("reason") == "total_cap"
+        event.get("event") == "allocation_advisory"
+        and event.get("reason") == "artifact_backlog"
         for event in _ws_receipt_events(repo)
     )
 
@@ -6168,7 +6203,12 @@ def test_workspace_live_or_unverified_producer_is_never_finalized(
         job_id="e" * 32,
         config=_iso_cfg(max_total=1),
     )
-    assert replacement is None
+    assert replacement is not None
+    assert any(
+        event.get("event") == "allocation_advisory"
+        and event.get("reason") == "artifact_backlog"
+        for event in _ws_receipt_events(repo)
+    )
 
 
 def test_workspace_remediation_releases_clean_legacy_branch_without_binding(
@@ -6776,10 +6816,10 @@ def test_workspace_snapshot_clamps_extents_to_pinned_fstat_size(
     assert snapshot.read_bytes() == b"safe"
 
 
-def test_workspace_oversized_artifact_stays_registered_and_fail_closed(
+def test_workspace_oversized_artifact_stays_quarantined_without_using_capacity(
     tmp_path: Path,
 ) -> None:
-    """Unscanned bytes never receive a false terminal release receipt."""
+    """Unscanned bytes stay intact but do not become execution capacity."""
     repo = tmp_path / "repo"
     repo.mkdir()
     _git_init_repo(repo)
@@ -6828,7 +6868,12 @@ def test_workspace_oversized_artifact_stays_registered_and_fail_closed(
         job_id="e" * 32,
         config=_iso_cfg(max_total=1),
     )
-    assert replacement is None
+    assert replacement is not None
+    assert any(
+        event.get("event") == "allocation_advisory"
+        and event.get("reason") == "artifact_backlog"
+        for event in _ws_receipt_events(repo)
+    )
 
 
 def test_workspace_snapshot_rechecks_logical_cap_on_pinned_fd(

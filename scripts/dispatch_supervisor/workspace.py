@@ -35,8 +35,9 @@ their only recovery identity. Orphans from a supervisor crash are swept on the
 next allocation pass through the same finalizer.
 
 Cost controls (design §2 measured-cost snapshot): a configurable live isolated
-fire cap, a total registered-workspace cap, and a free-disk floor. In enforce
-mode any cap/floor refusal requeues the mutating task. There is no shared-main
+fire cap and free-disk floor are hard admission gates. The historical total
+registered-workspace threshold is artifact-backlog telemetry only: retained
+recovery evidence does not consume execution capacity. There is no shared-main
 fallback for repo mutation. Every allocation/finalization appends a JSONL
 receipt with real measured durations — never fabricated numbers.
 """
@@ -2121,8 +2122,28 @@ def allocate_workspace(
     existing = _registered_dispatch_worktrees(repo_root, runner=runner)
     max_total = int(config.get("max_total", _DEFAULT_MAX_TOTAL))
     if len(existing) >= max_total:
-        _skip("total_cap", existing=len(existing), max_total=max_total)
-        return None
+        advisory = {
+            "event": "allocation_advisory",
+            "reason": "artifact_backlog",
+            "job_id": job_id,
+            "slot_id": slot_id,
+            "existing": len(existing),
+            "max_total": max_total,
+        }
+        LOG.warning(
+            "workspace artifact backlog existing=%s max_total=%s; "
+            "allocation continues because artifact custody is not capacity",
+            len(existing),
+            max_total,
+        )
+        if not _append_receipt(repo_root, advisory):
+            LOG.error(
+                "workspace artifact backlog advisory receipt was not durable; "
+                "allocation deferred for job_id=%s slot_id=%s",
+                job_id,
+                slot_id,
+            )
+            return None
 
     name = f"{WORKSPACE_PREFIX}{slot_id}-{job_id[:8]}"
     path = repo_root / WORKTREES_RELDIR / name
