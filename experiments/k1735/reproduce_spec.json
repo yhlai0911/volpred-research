@@ -1,0 +1,77 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1735.py",
+    "args": [],
+    "sha256": "0fff943c93225fa94ddb57b2aacef77adbbbfc3ec25da190ab2b2eeddee7bb0c",
+    "size_bytes": 43993
+  },
+  "canonical_result": "K1735_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1735/k1735_panel.py",
+      "sha256": "12b6ad013e0a995a0e032705335acb07b56dbab51961d8ae03752fce9e202ad0",
+      "size_bytes": 13193
+    },
+    {
+      "path": "experiments/k1735/data/k1735_subreturns.parquet",
+      "sha256": "577aab9c84a865381639a3deb067d8f45df3fa4947c95640d98fd73c444ecbbf",
+      "size_bytes": 12616898
+    }
+  ],
+  "outputs": [
+    "K1735_results.json"
+  ],
+  "timeout_seconds": 320,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy_default_rng",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 86.93,
+    "recorded_at": "2026-08-01T02:08:26Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy_default_rng",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1735_results.json",
+    "sha256": "a5519aefa01d20610615ea615a055e224616710e37dcd1bba784047097fd713b",
+    "size_bytes": 210628
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "volpred.gate_history.v1",
+  "entries": [
+    {
+      "sha256": "1e5b7df2758f9ede8063700174f2bf64d085bc68438b4333e1a961ee32e9dab1",
+      "size_bytes": 42210,
+      "source": "K1735.py",
+      "blob": "1e5b7df2__K1735.py",
+      "reason": "K1735 pre-review iteration: generalise cross_grid_consistency to compare any two grids sharing the same bins (adds the 15-min 1-min-sub vs 5-min-sub microstructure control). No verdict-rule change; pre-registered criteria in README §5 untouched.",
+      "preserved_at": "2026-08-01T02:04:33Z"
+    },
+    {
+      "sha256": "03d51968c7a6876db03fb99298b2d108af02edd4a33e8f60de149a15dae0ec5c",
+      "size_bytes": 43283,
+      "source": "K1735.py",
+      "blob": "03d51968__K1735.py",
+      "reason": "K1735 pre-review iteration: raise calibration reps 20->100 and perms 300->400, and report a Wilson CI for the size estimate. 20 reps bounded T1/T2 size only to +-0.08, too loose for two of the three key tests. Pre-registered criteria in README §5 and the 0.20 gate threshold unchanged.",
+      "preserved_at": "2026-08-01T02:06:27Z"
+    }
+  ],
+  "_readme": [
+    "Pre-change bytes of gate-bearing experiment scripts, preserved BEFORE the edit.",
+    "Written by scripts/preserve_gate_blob.py. Never edit a blob: it is evidence,",
+    "and an edited original is a reconstruction, which is what K1708 was rejected for."
+  ]
+}
