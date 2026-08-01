@@ -1259,7 +1259,7 @@
         "max_raw_triggers": 20,
         "min_distinct_candidates": 10,
         "max_harm_outcomes": 1,
-        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed", "unjoined"],
+        "harm_outcomes": ["failed", "missed_deadline", "sequence_coverage_gap", "worker_failed"],
         "max_false_positive_signals": 2,
         "min_incident_occurrences": 2
       },
@@ -1267,9 +1267,9 @@
         "phase": "check",
         "review_anchor_at": "2026-07-30T08:52:04.227834+00:00",
         "allowed_actions": ["retain", "recalibrate", "downgrade_to_warn", "retire"],
-        "last_action": "retain",
-        "last_reviewed_at": "2026-07-30T11:49:21.829681+00:00",
-        "review_task_id": "control_gate_review_publisher_coverage_metadata_gap_20260729T210710_03eb3f99062d"
+        "last_action": "recalibrate",
+        "last_reviewed_at": "2026-08-01T20:53:52.429330+00:00",
+        "review_task_id": "control_gate_review_publisher_coverage_metadata_gap_20260801T085403_7c35dec4971c"
       }
     },
     {

@@ -750,10 +750,19 @@ def test_project_registry_lists_known_problematic_gates() -> None:
     assert metadata_gap["evidence_sources"][0]["match"]["action"] == [
         "warn_coverage_metadata_gap"
     ]
-    assert metadata_gap["lifecycle"]["last_action"] == "retain"
+    assert metadata_gap["review_policy"]["harm_outcomes"] == [
+        "failed",
+        "missed_deadline",
+        "sequence_coverage_gap",
+        "worker_failed",
+    ]
+    assert metadata_gap["lifecycle"]["last_action"] == "recalibrate"
+    assert metadata_gap["lifecycle"]["last_reviewed_at"] == (
+        "2026-08-01T20:53:52.429330+00:00"
+    )
     assert metadata_gap["lifecycle"]["review_task_id"] == (
         "control_gate_review_publisher_coverage_metadata_gap_"
-        "20260729T210710_03eb3f99062d"
+        "20260801T085403_7c35dec4971c"
     )
     publisher_arc = gates["publisher_arc_dedup"]
     assert publisher_arc["mode"] == "warn"
@@ -3172,6 +3181,54 @@ def test_starvation_selection_does_not_claim_unrelated_execution_failure_as_harm
     gate = verdict["gates"][0]
 
     assert gate["outcomes"]["failed"] == 1
+    assert gate["review"] == {"due": False, "reasons": []}
+
+
+def test_metadata_gap_warning_does_not_claim_transient_unjoined_as_harm(
+    tmp_path: Path,
+) -> None:
+    storage = tmp_path / "storage"
+    registry = _registry(mode="warn", identity="heuristic")
+    default_registry = load_gate_registry(DEFAULT_REGISTRY_PATH)
+    metadata_gate = next(
+        gate
+        for gate in default_registry["gates"]
+        if gate["gate_id"] == "publisher_coverage_metadata_gap"
+    )
+    registry["gates"] = [json.loads(json.dumps(metadata_gate))]
+    registry["gates"][0]["lifecycle"] = {
+        "phase": "check",
+        "review_anchor_at": (NOW - timedelta(hours=1)).isoformat(),
+        "allowed_actions": [
+            "retain",
+            "recalibrate",
+            "downgrade_to_warn",
+            "retire",
+        ],
+    }
+    registry_path = tmp_path / "registry.json"
+    _write_json(registry_path, registry)
+    _write_json(storage / "next_tasks.json", [])
+    _write_json(storage / "reports" / "feed.json", [])
+    _append_jsonl(
+        storage / "logs" / "dedup_decisions.jsonl",
+        [{
+            "ts": (NOW - timedelta(minutes=1)).isoformat(),
+            "gate": "publisher_coverage_metadata_gap",
+            "action": "warn_coverage_metadata_gap",
+            "candidate_id": "k:K1717|audience:general",
+        }],
+    )
+
+    verdict = audit_control_gates(
+        storage_dir=str(storage),
+        registry_path=registry_path,
+        queue_path=storage / "next_tasks.json",
+        now=NOW,
+    )
+    gate = verdict["gates"][0]
+
+    assert gate["outcomes"]["unjoined"] == 1
     assert gate["review"] == {"due": False, "reasons": []}
 
 
