@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-02T00:00:43.788987+00:00",
+  "generated_at": "2026-08-02T01:00:40.351613+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 115.5
+      "age_hours": 116.5
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 115.3
+      "age_hours": 116.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 110.6
+      "age_hours": 111.6
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 109.7
+      "age_hours": 110.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 274.6
+      "age_hours": 275.6
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 78.8
+      "age_hours": 79.8
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 109.6
+      "age_hours": 110.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 126.6
+      "age_hours": 127.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,14 +71,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 134.7
+      "age_hours": 135.7
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 89,
-    "grace": 1,
+    "registered": 90,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 9,
@@ -128,26 +128,13 @@
           "reason": "atomic_unit_incomplete",
           "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
           "members": [
-            "experiments/K1380_v4/k1380_v4_rc_correction.py",
-            "experiments/K1380_v4/k1380_v4_rc_correction_results.json",
-            "experiments/K1380_v4/reproduce_spec.json"
-          ]
-        },
-        {
-          "path": "experiments/k1707",
-          "kind": "atomic_unit_incomplete",
-          "reason": "atomic_unit_incomplete",
-          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
-          "members": [
-            "experiments/k1707/K1707.py",
-            "experiments/k1707/K1707_results.json",
-            "experiments/k1707/data/source_manifest.json",
-            "experiments/k1707/reproduce_spec.json"
+            "experiments/K1380_v4/k1380_v4.py",
+            "experiments/K1380_v4/k1380_v4_rc_correction.py"
           ]
         }
       ],
       "skipped": {
-        "grace": 7,
+        "grace": 2,
         "inflight": 0,
         "unclaimed": 0
       },
