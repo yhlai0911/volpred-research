@@ -1,0 +1,80 @@
+{
+  "id": "agent-k1749-lowvol-b7f47803",
+  "title": "K1749 consolidation-duration to high-vol transition experiment",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1749-lowvol-b7f47803.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b7f47803-k1749",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b7f47803-k1749/experiments/K1749/K1749_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-k1749-lowvol-b7f47803.json",
+    "--timeout",
+    "6960"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-02T03:45:21Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1749-lowvol-b7f47803.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1749-lowvol-b7f47803.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b7f47803-k1749/experiments/K1749/K1749_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-k1749-lowvol-b7f47803.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b7f47803-k1749",
+  "claude_followup": {
+    "brief": "Collect K1749 from dispatch-slot-1-b7f47803-k1749. Verify preregistration before outcomes, duration timing and explicit shift(1), completed-spell/censoring handling, common-sample AR/HAR baseline, nested-aware dependence inference, Holm primary family, seed 42, result/reproduce identity, README numerics, scoped tests and gates. Commission an independent frozen-byte Codex review and require PASS before formal merge. Promote scientific SUPPORTED/NULL/INCONCLUSIVE honestly; missing or failed artifacts are never success.",
+    "task_type": "platform_ops",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1749",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-02T03:45:57Z",
+    "linked_at": "2026-08-02T03:45:57Z",
+    "error": null
+  },
+  "timeout_seconds": 7080,
+  "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1749-lowvol-b7f47803.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1749-lowvol-b7f47803.md",
+  "claimed_by_pid": 23845,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:ea635198bd3208e8ae91d183",
+    "scheduled_for": "2026-08-02T03:45:00Z"
+  },
+  "claimed_by_pid_start_wall": "Sun Aug  2 11:45:52 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "K1749",
+    "settled_at": "2026-08-02T03:45:57Z",
+    "error": null
+  },
+  "quota_requeues": 1,
+  "requeue_history": [
+    {
+      "at": "2026-08-02T03:45:57Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-08-02T03:45:52Z",
+      "reset_at": null
+    }
+  ],
+  "not_before": "2026-08-02T04:15:57.624265+00:00",
+  "attempt_status": "quota_exhausted",
+  "quota_reset_at": null
+}

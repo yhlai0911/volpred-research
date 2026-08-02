@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-02T02:00:51.665522+00:00",
+  "generated_at": "2026-08-02T03:00:56.555701+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 117.5
+      "age_hours": 118.5
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 117.3
+      "age_hours": 118.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 112.7
+      "age_hours": 113.7
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 111.7
+      "age_hours": 112.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 276.6
+      "age_hours": 277.6
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 80.8
+      "age_hours": 81.8
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 111.6
+      "age_hours": 112.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 128.6
+      "age_hours": 129.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 136.7
+      "age_hours": 137.7
     }
   ],
   "held": [],
@@ -124,9 +124,9 @@
       "held": [
         {
           "path": "experiments/K1380_v4",
-          "kind": "atomic_unit_incomplete",
-          "reason": "atomic_unit_incomplete",
-          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "kind": "pending_rename",
+          "reason": "pending_rename",
+          "detail": "atomic unit contains a deleted member; the complete directory must be reviewed and committed together",
           "members": [
             "experiments/K1380_v4/README.md",
             "experiments/K1380_v4/gate_history/1ff52e3b__k1380_v4.py",
@@ -138,6 +138,7 @@
             "experiments/K1380_v4/k1380_v4_rc_correction_results.json",
             "experiments/K1380_v4/k1380_v4_results.json",
             "experiments/K1380_v4/reproduce_commit.json",
+            "experiments/K1380_v4/reproduce_report.json",
             "experiments/K1380_v4/reproduce_spec.json",
             "experiments/K1380_v4/run_pipeline.py"
           ]
