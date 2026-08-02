@@ -5,12 +5,12 @@
   "interpreter": "bash /Users/yhlai0911/volpred-research/scripts/codex_exec_bounded.sh --timeout 7080 -C /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-5f75cd52-k1744 -s danger-full-access --dangerously-bypass-hook-trust",
   "args": [],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-08-02T02:22:29Z",
   "started_at": "2026-08-02T02:30:51Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-08-02T02:50:45Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-k1744-latam-5f75cd52.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-k1744-latam-5f75cd52.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-5f75cd52-k1744/experiments/K1744/K1744_results.json",
@@ -24,7 +24,7 @@
     "task_type": "platform_ops",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1744",
   "source_task_link": {
     "state": "linked",
@@ -42,5 +42,18 @@
     "fire_key": "operations-core-v1:volpred-compute-worker:ac5a06f0c9cd2978add739fb",
     "scheduled_for": "2026-08-02T02:30:00Z"
   },
-  "claimed_by_pid_start_wall": "Sun Aug  2 10:30:49 2026"
+  "claimed_by_pid_start_wall": "Sun Aug  2 10:30:49 2026",
+  "source_task_settlement": {
+    "task_id": "K1744",
+    "reason": "terminal_source_task_settled",
+    "source_task_status": "succeeded",
+    "state": "settled",
+    "settled_at": "2026-08-02T03:43:11Z"
+  },
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-5f75cd52-k1744/experiments/K1744"
+  },
+  "followup_dispatched_at": "2026-08-02T03:43:11Z",
+  "followup_next_task_id": "K1744"
 }
