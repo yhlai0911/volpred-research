@@ -5711,6 +5711,37 @@ retirement，維持 **`contained`**，不得由本歷史 audit 提前結案。
 
 ---
 
+## 2026-08-02 — Token 報表漏掉隔離 worker，Codex replay 又把歷史用量膨脹數百倍
+
+**證據化症狀**：舊報表只掃 Claude main project directory，Operations Core scratch／worktree
+worker 明明執行卻可回報零；補進 Codex 後，2026-07-26 週報一度誤報
+**131,255,129,227 billable tokens**。單一 2026-07-30 長 session 被舊 cumulative parser 算成
+72,283,828,462 input，但原始 telemetry 同時提供精確 `last_token_usage`，且同一檔會交錯多條
+cumulative stream、fork parent replay、root resume replay 與重寫 timestamp。
+
+**根因層級（source discovery／telemetry schema／replay identity）**：Claude project slug 把
+underscore 編碼誤認成 underscore，實際目錄使用 hyphen；測試又用同一錯誤 helper 建 fixture，形成
+自我驗證。Codex parser 則把 cumulative snapshot 當單一連續 counter，reset 後整筆重算；fork replay
+沒有可撤回 buffer，modern record identity 又綁 replayable timestamp。Provider quota、pricing、category
+與 reasoning scope 也混在同一口徑，讓報表即使有數字也不能回答來源。
+
+**底層修復與制度化**：Claude discovery 現依 canonical repo／dispatch roots 產生真實 hyphen slug，
+只納入結構上屬於本 repo 的 main、worktree、scratch，並跨副本用 message identity 去重。Codex 採
+single-pass buffered parser：fork replay 只更新 baseline，foreign meta 可撤回 candidate records 與 model，
+boundary 未證明整檔 fail closed；有 `last_token_usage` 時只信 exact delta，欄位存在但 malformed 必 WARN
+並 skip，legacy reset 只重設 baseline。modern identity 改綁 canonical session＋cumulative tuple＋exact
+delta tuple，不含 timestamp。daily／weekly aggregation 與 drilldown 共用同一 telemetry snapshot；provider
+分帳、Claude quota denominator、unpriced Codex N/A、`unclassified` 類別與 Claude-main-only reasoning scope
+均明確分離。
+
+**回歸與 live read-back**：相關測試 **45 passed**，Ruff／diff-check 綠；Matt Spec／Standards 雙軸
+最終 PASS。真實 2026-07-30 長 session 回讀為 **4,124 records／13,842,025 input／605,504,000
+cache-read／1,206,304 output**。重建週報回到 **269,490,831 billable**；2026-08-01 日報為
+**43,240,765 billable**（Claude 4,474,589；Codex 38,766,176）。source、schema、replay、回歸與
+canonical artifact 均完成五步 Gate，本 incident 狀態為 **`root_cause_fixed_and_verified`**。
+
+---
+
 ## 2026-08-02 — Incident／Provider 只有 owner attestation，父 gate 成熟後仍無正式切換出口
 
 **證據化症狀**：fresh formal-owner census持續有五個`wrong_owner`。其中
