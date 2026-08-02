@@ -2029,6 +2029,12 @@
      "instance_key": "dispatch-slot-1-353f996f",
      "reason": "worker_superseded_generation",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-02T11:17:46.618371+00:00",
+     "instance_key": "dispatch-slot-1-e3329da2",
+     "reason": "worker_superseded_generation",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -2316,7 +2322,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-02T10:55:57.993365+00:00"
+     "last_seen_at": "2026-08-02T11:17:42.645166+00:00"
     },
     {
      "cleared_at": null,
@@ -2457,14 +2463,28 @@
      "first_seen_at": "2026-08-02T10:24:55.698797+00:00",
      "key": "dispatch-slot-1-353f996f",
      "last_seen_at": "2026-08-02T10:24:55.698797+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "f093bf3fcc7007f847ed0b37e0dab12310d74b00",
+      "branch": "worktree-dispatch-slot-1-e3329da2",
+      "checkpoint_commit": "fa5a4d3ea984854e499b466eca175b16da8c3952",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e3329da2"
+     },
+     "first_seen_at": "2026-08-02T11:17:46.618371+00:00",
+     "key": "dispatch-slot-1-e3329da2",
+     "last_seen_at": "2026-08-02T11:17:46.618371+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-02T10:55:57.993365+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-e3329da2 unmergeable (worker_superseded_generation)",
+   "last_seen_at": "2026-08-02T11:17:46.618371+00:00",
    "notified_at": null,
-   "occurrence_count": 8473,
+   "occurrence_count": 8476,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3958,6 +3978,6 @@
    }
   }
  },
- "updated_at": "2026-08-02T10:56:13.069669+00:00",
+ "updated_at": "2026-08-02T11:17:59.764330+00:00",
  "version": 1
 }
