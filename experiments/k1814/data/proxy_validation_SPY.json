@@ -1,0 +1,63 @@
+{
+  "ticker": "SPY",
+  "rv_5min": {
+    "n_days": 60,
+    "start": "2026-05-04",
+    "end": "2026-07-29",
+    "bars_per_day_median": 78.0,
+    "parkinson": {
+      "n": 60,
+      "pearson_log": 0.6217641259447384,
+      "spearman_level": 0.5882189497082524,
+      "mean_ratio_proxy_over_true": 0.7514413449475836,
+      "median_ratio_proxy_over_true": 0.6862739757158944,
+      "ols_slope_logtrue_on_logproxy": 0.6238336522802007
+    },
+    "garman_klass": {
+      "n": 60,
+      "pearson_log": 0.6545976847267188,
+      "spearman_level": 0.6269519310919701,
+      "mean_ratio_proxy_over_true": 0.8066115711318371,
+      "median_ratio_proxy_over_true": 0.6961161731422896,
+      "ols_slope_logtrue_on_logproxy": 0.6518781213633246
+    },
+    "rogers_satchell": {
+      "n": 60,
+      "pearson_log": 0.658748404063988,
+      "spearman_level": 0.653070297304807,
+      "mean_ratio_proxy_over_true": 0.8152754029100239,
+      "median_ratio_proxy_over_true": 0.7104662180521197,
+      "ols_slope_logtrue_on_logproxy": 0.6295754775766308
+    }
+  },
+  "rv_1hour": {
+    "n_days": 721,
+    "start": "2023-08-30",
+    "end": "2026-07-29",
+    "bars_per_day_median": 7.0,
+    "parkinson": {
+      "n": 721,
+      "pearson_log": 0.7260166118942104,
+      "spearman_level": 0.7065112641081498,
+      "mean_ratio_proxy_over_true": 1.0648904864471433,
+      "median_ratio_proxy_over_true": 0.7750865505799911,
+      "ols_slope_logtrue_on_logproxy": 0.8792198985440315
+    },
+    "garman_klass": {
+      "n": 721,
+      "pearson_log": 0.7229009738177615,
+      "spearman_level": 0.7092902478475187,
+      "mean_ratio_proxy_over_true": 1.115549191272513,
+      "median_ratio_proxy_over_true": 0.8266877692872618,
+      "ols_slope_logtrue_on_logproxy": 0.9048914676627872
+    },
+    "rogers_satchell": {
+      "n": 721,
+      "pearson_log": 0.6560148242432532,
+      "spearman_level": 0.656650056413389,
+      "mean_ratio_proxy_over_true": 1.1391710276192215,
+      "median_ratio_proxy_over_true": 0.807106620202676,
+      "ols_slope_logtrue_on_logproxy": 0.7756105686310458
+    }
+  }
+}
