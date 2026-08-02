@@ -1440,6 +1440,11 @@
      "at": "2026-07-30T16:26:26.447893+00:00",
      "instance_key": "dispatch-slot-1-87a43952",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-02T04:26:23.181857+00:00",
+     "instance_key": "dispatch-slot-1-ae8721c1-k1739",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -1808,14 +1813,26 @@
      "first_seen_at": "2026-07-30T16:26:26.447893+00:00",
      "key": "dispatch-slot-1-87a43952",
      "last_seen_at": "2026-08-01T04:26:40.812897+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "k1739-slot1-ae8721c1",
+      "dirty": false,
+      "idle_hours": 5.9,
+      "unmerged_commits": 1
+     },
+     "first_seen_at": "2026-08-02T04:26:23.181857+00:00",
+     "key": "dispatch-slot-1-ae8721c1-k1739",
+     "last_seen_at": "2026-08-02T04:26:23.181857+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worktree_unmerged",
-   "last_breach_detail": "held worktree dispatch-slot-3-87c7269d-k1721",
-   "last_seen_at": "2026-08-01T04:26:40.812897+00:00",
+   "last_breach_detail": "held worktree dispatch-slot-1-ae8721c1-k1739",
+   "last_seen_at": "2026-08-02T04:26:23.181857+00:00",
    "notified_at": null,
-   "occurrence_count": 446,
+   "occurrence_count": 447,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2287,7 +2304,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-02T03:46:45.034594+00:00"
+     "last_seen_at": "2026-08-02T04:26:04.938299+00:00"
     },
     {
      "cleared_at": null,
@@ -2405,9 +2422,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-02T03:46:45.034594+00:00",
+   "last_seen_at": "2026-08-02T04:26:04.938299+00:00",
    "notified_at": null,
-   "occurrence_count": 8317,
+   "occurrence_count": 8337,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3757,6 +3774,6 @@
    }
   }
  },
- "updated_at": "2026-08-02T03:46:45.091310+00:00",
+ "updated_at": "2026-08-02T04:26:23.212335+00:00",
  "version": 1
 }

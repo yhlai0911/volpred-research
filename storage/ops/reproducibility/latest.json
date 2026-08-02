@@ -1,7 +1,7 @@
 {
   "schema_version": "volpred.reproduce_inventory.v1",
-  "generated_at": "2026-08-02T00:20:44.498836+00:00",
-  "repo_head": "1c96138eacfbf6e515c8e4a76e58145cfbc19f1c",
+  "generated_at": "2026-08-02T04:08:23.372870+00:00",
+  "repo_head": "fd485838609373efa0356c469e5f296b729471e8",
   "scope": {
     "paper_sources": "paper/*/experiments.md plus canonical submission compile closures; README fallback only when both are absent",
     "recent_feed_articles": "latest 60 records with status=published",
@@ -739,11 +739,11 @@
     "K998": "k998"
   },
   "counts": {
-    "experiment_dirs": 1511,
-    "with_code": 1435,
-    "with_results": 1280,
+    "experiment_dirs": 1512,
+    "with_code": 1436,
+    "with_results": 1281,
     "with_reproduce_report": 6,
-    "runnable": 32,
+    "runnable": 33,
     "unverified_missing_spec": 1169,
     "code_without_results": 168,
     "results_without_code": 13,
@@ -756,13 +756,14 @@
     "priority_stale_reports": 2,
     "priority_unverified": 230,
     "priority_code_without_results": 2,
-    "broken_reports": 0,
+    "broken_reports": 1,
     "stale_reports": 3,
     "knowledge_base_readable": true,
     "results_without_knowledge": 0
   },
   "report_status_counts": {
-    "pass_tolerated": 6
+    "fail_mismatch": 1,
+    "pass_tolerated": 5
   },
   "missing_priority_experiment_dirs": [
     "K54",
@@ -7229,7 +7230,23 @@
     }
   ],
   "results_without_knowledge": [],
-  "broken_reports": [],
+  "broken_reports": [
+    {
+      "experiment": "K1380_v4",
+      "path": "experiments/K1380_v4",
+      "priority_sources": [],
+      "code_count": 3,
+      "results_count": 2,
+      "reproduce_report": true,
+      "report_status": "fail_mismatch",
+      "report_stale": false,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "run_pipeline.py",
+      "result_file": "k1380_v4_rc_correction_results.json",
+      "classification": "runnable",
+      "blocker": null
+    }
+  ],
   "sample_candidates": [
     {
       "experiment": "k1436",

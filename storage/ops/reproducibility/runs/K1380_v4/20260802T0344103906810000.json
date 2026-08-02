@@ -1,0 +1,234 @@
+{
+  "schema_version": "volpred.reproduce_report.v1",
+  "generated_at": "2026-08-02T03:44:10.390681+00:00",
+  "experiment_id": "K1380_v4",
+  "engine": {
+    "name": "scripts/reproduce_check.py",
+    "schema": "volpred.reproduce_report.v1",
+    "path": "scripts/reproduce_check.py",
+    "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+    "committed_at_repo_head": true
+  },
+  "repo_head": "a0bd48bdf0141eba6f1e9198825cb7d824aad0b9",
+  "methodology_references": [
+    {
+      "citation": "Peng (2011), Reproducible Research in Computational Science",
+      "doi": "10.1126/science.1213847",
+      "principle": "computational reproducibility is a minimum standard, not a validity verdict"
+    },
+    {
+      "citation": "Sandve et al. (2013), Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "principle": "record provenance and preserve the exact workflow behind every result"
+    },
+    {
+      "citation": "Stodden et al. (2016), Enhancing Reproducibility for Computational Methods",
+      "doi": "10.1126/science.aah6168",
+      "principle": "disclose code, data, workflow, and computational environment"
+    }
+  ],
+  "discovery": {
+    "inventory_record": {
+      "experiment": "K1380_v4",
+      "path": "experiments/K1380_v4",
+      "priority_sources": [],
+      "code_count": 3,
+      "results_count": 2,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "run_pipeline.py",
+      "result_file": "k1380_v4_rc_correction_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    "subject_files": [
+      {
+        "path": "experiments/K1380_v4/gate_history/1ff52e3b__k1380_v4.py",
+        "sha256": "1ff52e3b74b00e861dd5a8fd88c9783ebbdad5d724395cf0d1d8677cd899325f",
+        "size": 39785
+      },
+      {
+        "path": "experiments/K1380_v4/gate_history/f6ebc460__k1380_v4_rc_correction.py",
+        "sha256": "f6ebc4608f49c33924a7d6ec722906cf38f70d5308e1d48f45fb3e1aef8becee",
+        "size": 20833
+      },
+      {
+        "path": "experiments/K1380_v4/k1380_v4.py",
+        "sha256": "7e0b939f81da9a4946805b9384e0cd701aa77bb18ec280a4080248f186259682",
+        "size": 41728
+      },
+      {
+        "path": "experiments/K1380_v4/k1380_v4_rc_correction.py",
+        "sha256": "ffb0b5b7879265e4408a142df01c6f35cb17c22e383fc8fba0a82091587e2bd8",
+        "size": 20647
+      },
+      {
+        "path": "experiments/K1380_v4/k1380_v4_rc_correction_results.json",
+        "sha256": "95c889647095ecfb72bddd2e0ce4ee156a7e87f3c8ebfc600b691ec795159836",
+        "size": 10980
+      },
+      {
+        "path": "experiments/K1380_v4/reproduce_spec.json",
+        "sha256": "bf47433393d1ee6852e9d9bd8257cb20681585968160fe685bc97f61e61a8e48",
+        "size": 3768
+      },
+      {
+        "path": "experiments/K1380_v4/run_pipeline.py",
+        "sha256": "5c5f31b2a42b1288431b25a5cff395740f08db256438f073a38db2bd67e2ca15",
+        "size": 2723
+      },
+      {
+        "path": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+        "sha256": "2aa9e3b70ae1bf2a4e8335f1f4a552b4eca4b6389e2a2a6e4ac87aa87fe9b019",
+        "size": 3176665
+      },
+      {
+        "path": "scripts/reproduce_check.py",
+        "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+        "size": 65995
+      },
+      {
+        "path": "src/volpred/models/garch/fixed_span_midas.py",
+        "sha256": "e04380fcd223cdb95b76073910d98889ab115aaba63a1060028d7ff4cd68f09f",
+        "size": 10815
+      },
+      {
+        "path": "src/volpred/research/optimization.py",
+        "sha256": "594b08da2fc27cf9b6722c12080c51361627edc04e6e95199ee9ba1412f5bff7",
+        "size": 4630
+      },
+      {
+        "path": "src/volpred/research/reproduce_spec.py",
+        "sha256": "93bc7329279e6935da828d2bd0e3c92890c1e223eb4840a0a3a1a77c8d20719f",
+        "size": 19308
+      },
+      {
+        "path": "src/volpred/stats/inference.py",
+        "sha256": "57ec092ce0f9bc6f86efa5e81580318642bffabaa8b00a6b1f4c24843b6d0dd8",
+        "size": 9164
+      }
+    ],
+    "entrypoint": "experiments/K1380_v4/run_pipeline.py",
+    "canonical_result": "experiments/K1380_v4/k1380_v4_rc_correction_results.json",
+    "spec_sha256": "bf47433393d1ee6852e9d9bd8257cb20681585968160fe685bc97f61e61a8e48",
+    "subject_sha256": "269d45610730accee382ac305f8732ada7e58f2c5904ba9c5338b39d813e63f3"
+  },
+  "environment": {
+    "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "uv_lock_sha256": "340b8dc87c7b1e0f1fc852bab3f62e2d084582c77831cee59a3729064706edf0",
+    "pythonhashseed": "0",
+    "package_versions": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "arch": "8.0.0",
+      "yfinance": "1.2.0",
+      "scikit-learn": "1.8.0"
+    },
+    "seed_evidence": [
+      "experiments/K1380_v4/gate_history/1ff52e3b__k1380_v4.py:38: np.random.seed(42)",
+      "experiments/K1380_v4/gate_history/1ff52e3b__k1380_v4.py:730: rng = np.random.default_rng(BOOTSTRAP_SEED)",
+      "experiments/K1380_v4/gate_history/f6ebc460__k1380_v4_rc_correction.py:130: rng = np.random.default_rng(BOOTSTRAP_SEED)",
+      "experiments/K1380_v4/k1380_v4.py:36: np.random.seed(42)",
+      "experiments/K1380_v4/k1380_v4.py:810: rng = np.random.default_rng(BOOTSTRAP_SEED)",
+      "experiments/K1380_v4/k1380_v4_rc_correction.py:142: rng = np.random.default_rng(BOOTSTRAP_SEED)",
+      "scripts/reproduce_check.py:76: SEED_RE = re.compile(r\"\\b(seed|random_state|default_rng|RandomState)\\b\", re.IGNORECASE)",
+      "scripts/reproduce_check.py:360: raise ValueError(\"declared randomness requires at least one seed\")",
+      "scripts/reproduce_check.py:361: for index, seed in enumerate(seeds):",
+      "scripts/reproduce_check.py:362: if not isinstance(seed, dict) or not isinstance(seed.get(\"library\"), str):",
+      "scripts/reproduce_check.py:364: value = seed.get(\"value\")",
+      "scripts/reproduce_check.py:886: # An empty list reads as \"this experiment sets no seed\" — a real audit verdict.",
+      "scripts/reproduce_check.py:887: warn(\"reproduce_check\", \"seed scan could not read entrypoint\", path=str(entrypoint), err=str(exc))",
+      "scripts/reproduce_check.py:1197: seed[\"value\"]",
+      "scripts/reproduce_check.py:1198: for seed in randomness[\"seeds\"]",
+      "scripts/reproduce_check.py:1199: if str(seed[\"value\"]) not in \"\\n\".join(seed_evidence)",
+      "scripts/reproduce_check.py:1208: summary=f\"declared seed values lack code evidence: {missing_seed_values}\","
+    ],
+    "declared_randomness": {
+      "status": "declared",
+      "seeds": [
+        {
+          "library": "numpy",
+          "value": 42
+        }
+      ]
+    }
+  },
+  "execution": {
+    "command": [
+      "/Users/yhlai0911/volpred-research/.venv/bin/python3",
+      "experiments/K1380_v4/run_pipeline.py"
+    ],
+    "backend": "macos_sandbox_exec",
+    "network": "deny",
+    "exit_code": 0,
+    "timeout_seconds": 4260,
+    "duration_seconds": 1448.536,
+    "stdout_sha256": "3d5323a0067e668dd3e0ffa4193d4d9993861d1a1d72fa8caccb291cda50c76a",
+    "stderr_sha256": "dfca7fbbff433776d668834284737efa3c855dc1d4dcbc5504d44941cad7a9cb",
+    "stdout_tail": "  ✓ A4  : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✓ A5  : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✓ A2f : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✓ A4f : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✓ A3f : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✓ A2n : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✓ A4n : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✗ B1  : n_valid= 1457, coverage=76.7%, NaN_count=443\n    ✗ B2  : n_valid= 1395, coverage=73.4%, NaN_count=505\n    ✗ B3  : n_valid= 1772, coverage=93.3%, NaN_count=128\n    ✓ C1  : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✓ C2  : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✓ C3  : n_valid= 1898, coverage=99.9%, NaN_count=2\n    ✓ B0  : n_valid= 1898, coverage=99.9%, NaN_count=2\n\n  B0 benchmark coverage: 99.9%\n  Eligible specs (coverage >= 95%): ['A1', 'A2', 'A3', 'A4', 'A5', 'A2f', 'A4f', 'A3f', 'A2n', 'A4n', 'C1', 'C2', 'C3']\n  Eligible count: 13 / 16 non-benchmark specs\n\n  Mean QLIKE per spec (own-mask nanmean, lower = better):\n     1. A4f : 1.398392\n     2. A4  : 1.398414\n     3. A4n : 1.398414\n     4. B1  : 1.400025\n     5. A2  : 1.403295\n     6. A2n : 1.403295\n     7. A3f : 1.408340\n     8. A1  : 1.408368\n     9. A3  : 1.408368\n    10. A2f : 1.411603\n    11. B3  : 1.417110\n    12. A5  : 1.428367\n    13. C1  : 1.445991\n    14. C3  : 1.449115\n    15. C2  : 1.450087\n    16. B2  : 1.452680\n    17. B0  : 1.482475\n\n[4] Preliminary raw-scale diagnostics (B=499)...\n\n  n_valid for SPA test (intersection of B0 + 13 eligible): 1898\n\n  Raw-scale max diagnostic over 13 specs: 4.062\n  Empirical bootstrap tail fraction: 0.0000\n\n  A4f raw-scale t diagnostic vs GJR: 4.062\n  Single-spec empirical bootstrap tail fraction: 0.0000\n\n  Individual t-stats for eligible specs:\n    A1  : t= 3.146, d_bar= 0.074107 Harvey PASS\n    A2  : t= 3.421, d_bar= 0.079181 Harvey PASS\n    A3  : t= 3.146, d_bar= 0.074107 Harvey PASS\n    A4  : t= 4.061, d_bar= 0.084062 Harvey PASS\n    A5  : t= 2.617, d_bar= 0.054108\n    A2f : t= 3.012, d_bar= 0.070873 Harvey PASS\n    A4f : t= 4.062, d_bar= 0.084084 Harvey PASS\n    A3f : t= 3.163, d_bar= 0.074136 Harvey PASS\n    A2n : t= 3.421, d_bar= 0.079181 Harvey PASS\n    A4n : t= 4.061, d_bar= 0.084062 Harvey PASS\n    C1  : t= 2.844, d_bar= 0.036484\n    C2  : t= 2.261, d_bar= 0.032389\n    C3  : t= 2.394, d_bar= 0.033361\n\n  Ineligible specs (coverage < 95%, excluded from SPA):\n    B1  : coverage=76.7% (excluded)\n    B2  : coverage=73.4% (excluded)\n    B3  : coverage=93.3% (excluded)\n\n  Superior set (nominally beat GJR among eligible): ['A1', 'A2', 'A3', 'A4', 'A5', 'A2f', 'A4f', 'A3f', 'A2n', 'A4n', 'C1', 'C2', 'C3']\n\n[5] Results saved to /private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-yzdv62cj/repo/experiments/K1380_v4/k1380_v4_results.json\n    Loss matrix saved to k1380_v4_losses_all.npy\n\nTotal elapsed: 1436s\n\n============================================================\nC3 STATUS: use k1380_v4_rc_correction_results.json for canonical inference\n============================================================\n[1] Reproduction of base statistics: PASS (all 4 exact)\n[2] p_l=0.0020 <= p_c=0.0020 <= p_u=0.0020\n[2b] draws exceeding stat: 0/499; argmax attribution: {}\n[3] White RC (non-studentized, max over 13 specs): V=3.6632, p=0.0020\n[4] Holm step-down at FWER 0.10: 13/13 reject\n\n[5] Corrected verdict: C3 POSITIVE (snooping-adjusted): SPA_c p=0.0020 and A4f survives Holm (adj p=0.0260); 13/13 specs reject at FWER 0.10. Historical mislabelled fields have been retired from the rebuilt base artifact; the current conclusion comes only from this long-run-scale max-type inference artifact.\n[6] Written: /private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-yzdv62cj/repo/experiments/K1380_v4/k1380_v4_rc_correction_results.json\n[pipeline] canonical artifact written: /private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-yzdv62cj/repo/experiments/K1380_v4/k1380_v4_rc_correction_results.json\n",
+    "stderr_tail": "[reproduce_spec] wrote k1380_v4_rc_correction_results.json + reproduce_spec.json (entrypoint 5c5f31b2a42b, 2723 bytes)\n",
+    "clean_snapshot": true,
+    "sandbox_removed_after_run": true
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/run_utc",
+      "/runtime_env",
+      "/runtime_seconds"
+    ],
+    "archived_scalar_count": 220,
+    "rerun_scalar_count": 220,
+    "numeric_compared": 112,
+    "matched_scalars": 218,
+    "mismatch_count": 2,
+    "mismatches_truncated": false,
+    "mismatches": [
+      {
+        "path": "/artifact_generation/generation_id",
+        "kind": "value_mismatch",
+        "archived": "fc7ce9ef8ad6ca542aaf0d3eafca17af9a6ef06bf171222d829b685c66776836",
+        "rerun": "e1a5970a2fea7a3c1fb88a406ce4670c27a1cc1db5b6b8407819d99624b91f39"
+      },
+      {
+        "path": "/artifact_generation/output_identities/1/sha256",
+        "kind": "value_mismatch",
+        "archived": "2c1d81cc469d590c44965660909c4abb6541fd4e56065d5aa9ce3b6abc08ba00",
+        "rerun": "4afcbf4b1ac3d721cc6259a8610c18431df37f0335d5bfc19a8b2842bfa06a35"
+      }
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "integrity": {
+    "canonical_unchanged": true,
+    "changed_paths": []
+  },
+  "canonical_results": [
+    {
+      "archived_result": "experiments/K1380_v4/k1380_v4_rc_correction_results.json",
+      "archived_sha256": "95c889647095ecfb72bddd2e0ce4ee156a7e87f3c8ebfc600b691ec795159836",
+      "rerun_sha256": "3f1457e15ba40aa3c22c20f111396746ead60ed4d96606c20d8a60fe30e66962",
+      "bit_identical": false
+    }
+  ],
+  "outcome": {
+    "status": "fail_mismatch",
+    "reason_code": "RESULT_MISMATCH",
+    "severity": "critical",
+    "reproducible": false,
+    "summary": "2 scalar mismatches"
+  }
+}
