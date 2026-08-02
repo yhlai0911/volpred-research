@@ -5,7 +5,8 @@
   "branch": "codex/k1707-pseudo-stress",
   "branch_tip": "de0dbef8c4bf2acf55a0e913f146a77824b46445",
   "branch_result_sha256": "f381380a2754c1222788959e28d61efbb8823aced75068c5387cb83c3a28824b",
-  "canonical_result_sha256": "aa2705d7cea1a7ac3bd48292ca65aa2922c71578bba9dec50e1d577697c7f0cd",
+  "canonical_result_sha256": "58714b31757ad6571463d07fa84f179a4823fac32635a5df62d25643dd22936b",
+  "canonical_scientific_payload_unchanged": true,
   "cross_implementation_validation": {
     "auction_rows": 384580,
     "continuous_rows": 776908,
@@ -52,9 +53,30 @@
     }
   },
   "retirement": {
-    "state": "prepared",
+    "state": "deleted",
     "prepared_at": "2026-08-01T23:28:08Z",
-    "deleted_at": null,
+    "deleted_at": "2026-08-01T23:54:20Z",
+    "implementation_commit": "ee8d9b4cd",
+    "archive_commit": "3fa0e2550",
+    "local_branch_absent_readback": true,
+    "remote_branch_was_absent": true,
+    "bundle_verified_after_deletion": true,
     "reason": "Upstream decision rejected merge; retain only generic statistical helpers and cross-implementation inventory evidence."
+  },
+  "runtime_reproduction": {
+    "artifact_contract_commit": "1c96138eacfbf6e515c8e4a76e58145cfbc19f1c",
+    "k1380_v4": {
+      "status": "pass_tolerated",
+      "matched_scalars": 184,
+      "mismatch_count": 0,
+      "report": "experiments/K1380_v4/reproduce_report.json"
+    },
+    "k1707": {
+      "status": "pass_tolerated",
+      "network": "deny",
+      "matched_scalars": 132,
+      "mismatch_count": 0,
+      "report": "experiments/k1707/reproduce_report.json"
+    }
   }
 }
