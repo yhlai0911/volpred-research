@@ -1,25 +1,29 @@
 {
   "experiment_id": "k1380_v4_rc_correction",
   "title": "K1380_v4 data-snooping correction: proper max-type RC/SPA re-analysis from the saved QLIKE matrix",
-  "supersedes": {
-    "file": "experiments/K1380_v4/k1380_v4_results.json",
+  "historical_mislabels_retired": {
     "fields": [
       "white_rc_test",
       "hansen_spa_test",
       "c3_verdict"
     ],
-    "reason": "`white_rc_test` is a single-spec bootstrap DM test with no snooping adjustment, mislabelled as a Reality Check (k1380_v4.py:771-782). `hansen_spa_test` recenters every spec by its own d-bar, which is the least-favourable configuration (SPA_u / studentized White RC), not Hansen's consistent SPA_c.",
-    "v4_results_file_left_unmodified": true
+    "reason": "Historical artifacts used these names for a single-spec test and a raw-observation-SD statistic. The rebuilt base artifact no longer emits them; this artifact is the only canonical inference result.",
+    "base_results_rebuilt_before_reanalysis": true
   },
   "provenance": {
     "loss_matrix": "k1380_v4_losses_all.npy",
-    "loss_matrix_written_by": "k1380_v4.py:693 (before any testing)",
-    "garch_refit_rerun": false,
-    "rerun_not_required_because": "the defect is entirely downstream of the saved QLIKE matrix; no model estimation is involved in the correction",
+    "loss_matrix_written_by": "k1380_v4.py loss-generation stage, before inference",
+    "garch_refit_rerun": true,
+    "upstream_model_integrity_repairs": [
+      "A-series fits require successful finite in-bounds optimizer results",
+      "fixed-span MIDAS likelihood uses every eligible daily return",
+      "fixed-span MIDAS VIX inputs use prior completed months only",
+      "fixed-span MIDAS state filters the training tail and advances with current-month tau_t per Eq.4"
+    ],
     "bootstrap_B": 499,
     "bootstrap_seed": 42,
-    "n_valid_spa": 1879,
-    "n_eligible_specs": 15,
+    "n_valid_spa": 1898,
+    "n_eligible_specs": 13,
     "eligible_specs": [
       "A1",
       "A2",
@@ -31,267 +35,301 @@
       "A3f",
       "A2n",
       "A4n",
-      "B1",
-      "B2",
-      "B3",
+      "C1",
       "C2",
       "C3"
     ],
-    "pvalue_resolution": 0.002004008016032064
+    "pvalue_resolution": 0.002,
+    "monte_carlo_pvalue_convention": "(exceedances + 1) / (B + 1)"
   },
   "reproduction_check": {
     "status": "PASS",
     "detail": {
-      "v4_hansen_spa_stat": {
-        "ours": 4.204654737813586,
-        "committed": 4.204654737813586
+      "raw_scale_joint_stat": {
+        "ours": 4.062019587246049,
+        "base": 4.062019587246049
       },
-      "v4_hansen_spa_pval": {
-        "ours": 0.28857715430861725,
-        "committed": 0.28857715430861725
-      },
-      "v4_white_rc_t_stat": {
-        "ours": 4.1334667187930885,
-        "committed": 4.1334667187930885
-      },
-      "v4_white_rc_pval": {
+      "raw_scale_joint_tail_fraction": {
         "ours": 0.0,
-        "committed": 0.0
+        "base": 0.0
+      },
+      "a4f_single_spec_t_stat": {
+        "ours": 4.062019587246049,
+        "base": 4.062019587246049
+      },
+      "a4f_single_spec_tail_fraction": {
+        "ours": 0.0,
+        "base": 0.0
       }
     },
-    "note": "All four v4 statistics reproduced exactly (atol=1e-12) from the saved loss matrix, establishing that the corrected numbers below come from the same data and code path."
+    "note": "All four base statistics reproduced exactly (atol=1e-12) from the freshly rebuilt loss matrix, establishing that the corrected numbers below come from the same data and code path."
   },
   "hansen_spa_corrected": {
-    "stat": 4.204654737813586,
-    "stat_attained_by": "B1",
-    "n_specs_tested": 15,
-    "consistent_threshold_sqrt_2loglogT": 2.009986348161046,
-    "n_specs_recentered_c": 12,
-    "n_specs_recentered_l": 12,
-    "specs_dropped_by_c": [
-      "A5",
-      "C2",
-      "C3"
-    ],
-    "studentization_fixed_omega": {
-      "pval_l": 0.0,
-      "pval_c": 0.0,
-      "pval_u": 0.23046092184368738
+    "stat": 5.320417005409797,
+    "stat_attained_by": "A4f",
+    "n_specs_tested": 13,
+    "consistent_threshold_sqrt_2loglogT": 2.0106497874722518,
+    "n_specs_recentered_c": 13,
+    "n_specs_recentered_l": 13,
+    "specs_dropped_by_c": [],
+    "long_run_omega": {
+      "A1": 0.7161735699436578,
+      "A2": 0.7264688870724465,
+      "A3": 0.7161735699436578,
+      "A4": 0.6883783476826016,
+      "A5": 1.1323555238342993,
+      "A2f": 0.7384144069253049,
+      "A4f": 0.6885173315905677,
+      "A3f": 0.7183866521957857,
+      "A2n": 0.7264688870724465,
+      "A4n": 0.6883783476826016,
+      "C1": 0.5421303343612448,
+      "C2": 0.63889309801198,
+      "C3": 0.6052489333341591
     },
-    "studentization_resample_omega_v4_convention": {
-      "pval_l": 0.0,
-      "pval_c": 0.0,
-      "pval_u": 0.28857715430861725
+    "raw_observation_sd_diagnostic_only": {
+      "A1": 1.0261382800094005,
+      "A2": 1.0084531965710954,
+      "A3": 1.0261382800094005,
+      "A4": 0.9017203210294403,
+      "A5": 0.900841569030515,
+      "A2f": 1.0252157599170768,
+      "A4f": 0.9018172465281962,
+      "A3f": 1.0211215021844133,
+      "A2n": 1.0084531965710954,
+      "A4n": 0.9017203210294403,
+      "C1": 0.5589318049216762,
+      "C2": 0.6240743454539734,
+      "C3": 0.6071490715816198
     },
-    "primary_pval": 0.0,
-    "primary_variant": "c (consistent, Hansen 2005), fixed-omega studentization",
+    "pvalues": {
+      "pval_l": 0.002,
+      "pval_c": 0.002,
+      "pval_u": 0.002,
+      "exceedances_l": 0,
+      "exceedances_c": 0,
+      "exceedances_u": 0
+    },
+    "primary_pval": 0.002,
+    "primary_variant": "c (consistent, Hansen 2005), stationary-bootstrap long-run scale",
     "reject_h0_p10": true,
-    "robust_to_studentization_choice": true,
-    "interpretation": "With proper max-type snooping adjustment over 15 eligible specs, SPA_c p=0.0000; H0 IS rejected at the 10% level. The same conclusion holds under both studentization conventions."
+    "interpretation": "With proper max-type snooping adjustment over 13 eligible specs, SPA_c p=0.0020; H0 IS rejected at the 10% level. The denominator estimates long-run variance from stationary-bootstrap means."
   },
   "least_favourable_tail_attribution": {
     "question": "Which specs attain the max in the u-recentered bootstrap draws that exceed the observed statistic?",
-    "n_draws_exceeding": 144,
+    "n_draws_exceeding": 0,
     "bootstrap_B": 499,
-    "argmax_counts": {
-      "A5": 77,
-      "C2": 48,
-      "C3": 19
-    },
-    "finding": "Every exceeding draw is attained by a spec that is catastrophically WORSE than the benchmark (A5 t=-11.2, C2 t=-21.1, C3 t=-10.0). No draw is attained by a competitive spec. The v4 non-rejection therefore measures the degeneracy of the three worst specs under least-favourable recentering, not the competitiveness of the candidate set — which is exactly the conservativeness Hansen's SPA_c removes.",
-    "caveat": "The three specs' extreme QLIKE losses (10-21 sigma below benchmark) are themselves worth investigating for numerical degeneracy; they are dropped by SPA_c on statistical grounds, but if they are simply broken they should not be candidates at all. Either route yields the same corrected verdict."
+    "argmax_attribution": {},
+    "all_tail_from_specs_worse_than_minus_3sigma": false,
+    "finding": "No bootstrap draw exceeds the observed statistic.",
+    "caveat": "This attribution is recomputed from the rebuilt loss matrix and must not be replaced by the historical A5/C2/C3 counts."
   },
   "white_rc_corrected": {
     "definition": "White (2000) max-type Reality Check, non-studentized",
-    "stat": 3.7333357298210785,
-    "pval": 0.6052104208416834,
-    "reject_h0_p10": false,
-    "note": "The studentized equivalent is hansen_spa_corrected.pval_u."
+    "stat": 3.6631993195138324,
+    "pval": 0.002,
+    "exceedances": 0,
+    "reject_h0_p10": true,
+    "note": "Monte Carlo p-value uses the plus-one finite-draw convention."
   },
   "per_spec_dm_tests": {
     "snooping_adjusted": false,
     "warning": "These are per-spec Diebold-Mariano bootstrap t-tests. They are NOT snooping-adjusted and must never be cited as Reality Check evidence. Use holm_step_down for a multiplicity-controlled per-spec statement.",
     "specs": {
       "A1": {
-        "t_stat": 3.126631716534911,
-        "d_bar": 0.07438206059658156,
-        "raw_bootstrap_p": 0.0
+        "t_stat": 4.508070620870011,
+        "d_bar": 0.07410728390998952,
+        "bootstrap_exceedances": 0,
+        "raw_bootstrap_p": 0.002
       },
       "A2": {
-        "t_stat": 3.28170901162484,
-        "d_bar": 0.0768326675730953,
-        "raw_bootstrap_p": 0.0
+        "t_stat": 4.74842711252566,
+        "d_bar": 0.07918058229637283,
+        "bootstrap_exceedances": 0,
+        "raw_bootstrap_p": 0.002
       },
       "A3": {
-        "t_stat": 3.126631716534911,
-        "d_bar": 0.07438206059658156,
-        "raw_bootstrap_p": 0.0
+        "t_stat": 4.508070620870011,
+        "d_bar": 0.07410728390998952,
+        "bootstrap_exceedances": 0,
+        "raw_bootstrap_p": 0.002
       },
       "A4": {
-        "t_stat": 4.041648788367642,
-        "d_bar": 0.08448843595977416,
-        "raw_bootstrap_p": 0.0
+        "t_stat": 5.320082148857234,
+        "d_bar": 0.08406155817790334,
+        "bootstrap_exceedances": 0,
+        "raw_bootstrap_p": 0.002
       },
       "A5": {
-        "t_stat": -11.20900929230887,
-        "d_bar": -0.6571646278478944,
-        "raw_bootstrap_p": 1.0
+        "t_stat": 2.0817376668787935,
+        "d_bar": 0.054107902570489363,
+        "bootstrap_exceedances": 5,
+        "raw_bootstrap_p": 0.012
       },
       "A2f": {
-        "t_stat": 3.0634940289277237,
-        "d_bar": 0.06697106828216035,
-        "raw_bootstrap_p": 0.0
+        "t_stat": 4.181458342532271,
+        "d_bar": 0.07087283932583752,
+        "bootstrap_exceedances": 0,
+        "raw_bootstrap_p": 0.002
       },
       "A4f": {
-        "t_stat": 4.1334667187930885,
-        "d_bar": 0.0861258768853484,
-        "raw_bootstrap_p": 0.0
+        "t_stat": 5.320417005409797,
+        "d_bar": 0.08408382231545701,
+        "bootstrap_exceedances": 0,
+        "raw_bootstrap_p": 0.002
       },
       "A3f": {
-        "t_stat": 3.303230399388028,
-        "d_bar": 0.060799540932767224,
-        "raw_bootstrap_p": 0.0
+        "t_stat": 4.495913499936551,
+        "d_bar": 0.0741358203026173,
+        "bootstrap_exceedances": 0,
+        "raw_bootstrap_p": 0.002
       },
       "A2n": {
-        "t_stat": 3.28170901162484,
-        "d_bar": 0.0768326675730953,
-        "raw_bootstrap_p": 0.0
+        "t_stat": 4.74842711252566,
+        "d_bar": 0.07918058229637283,
+        "bootstrap_exceedances": 0,
+        "raw_bootstrap_p": 0.002
       },
       "A4n": {
-        "t_stat": 4.041648788367642,
-        "d_bar": 0.08448843595977416,
-        "raw_bootstrap_p": 0.0
+        "t_stat": 5.320082148857234,
+        "d_bar": 0.08406155817790334,
+        "bootstrap_exceedances": 0,
+        "raw_bootstrap_p": 0.002
       },
-      "B1": {
-        "t_stat": 4.204654737813586,
-        "d_bar": 0.06242772241183504,
-        "raw_bootstrap_p": 0.0
-      },
-      "B2": {
-        "t_stat": 1.3886952615606116,
-        "d_bar": 0.02613763260650694,
-        "raw_bootstrap_p": 0.22444889779559118
-      },
-      "B3": {
-        "t_stat": 3.771057291507994,
-        "d_bar": 0.05240693072249591,
-        "raw_bootstrap_p": 0.0
+      "C1": {
+        "t_stat": 2.931880716616646,
+        "d_bar": 0.03648395417045212,
+        "bootstrap_exceedances": 2,
+        "raw_bootstrap_p": 0.006
       },
       "C2": {
-        "t_stat": -21.06651358551618,
-        "d_bar": -0.9049118549804696,
-        "raw_bootstrap_p": 1.0
+        "t_stat": 2.208571533431158,
+        "d_bar": 0.03238855425410324,
+        "bootstrap_exceedances": 5,
+        "raw_bootstrap_p": 0.012
       },
       "C3": {
-        "t_stat": -9.963159160313067,
-        "d_bar": -0.48154931429470554,
-        "raw_bootstrap_p": 1.0
+        "t_stat": 2.4013076222239653,
+        "d_bar": 0.03336059040916102,
+        "bootstrap_exceedances": 4,
+        "raw_bootstrap_p": 0.01
       }
     }
   },
   "holm_step_down": {
     "alpha": 0.1,
-    "family_size": 15,
-    "n_reject": 11,
+    "family_size": 13,
+    "n_reject": 13,
+    "raw_p_convention": "(exceedances + 1) / (B + 1), then Holm",
     "per_spec": {
       "A1": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+        "raw_p": 0.002,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
       "A2": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+        "raw_p": 0.002,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
       "A3": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+        "raw_p": 0.002,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
       "A4": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+        "raw_p": 0.002,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
       "A5": {
-        "raw_p": 1.0,
-        "holm_adj_p": 1.0,
-        "reject_at_0.10": false
+        "raw_p": 0.012,
+        "holm_adj_p": 0.03,
+        "reject_at_0.10": true
       },
       "A2f": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+        "raw_p": 0.002,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
       "A4f": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+        "raw_p": 0.002,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
       "A3f": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+        "raw_p": 0.002,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
       "A2n": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+        "raw_p": 0.002,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
       "A4n": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+        "raw_p": 0.002,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
-      "B1": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
-        "reject_at_0.10": true
-      },
-      "B2": {
-        "raw_p": 0.22444889779559118,
-        "holm_adj_p": 0.8977955911823647,
-        "reject_at_0.10": false
-      },
-      "B3": {
-        "raw_p": 0.0,
-        "holm_adj_p": 0.0,
+      "C1": {
+        "raw_p": 0.006,
+        "holm_adj_p": 0.026000000000000002,
         "reject_at_0.10": true
       },
       "C2": {
-        "raw_p": 1.0,
-        "holm_adj_p": 1.0,
-        "reject_at_0.10": false
+        "raw_p": 0.012,
+        "holm_adj_p": 0.03,
+        "reject_at_0.10": true
       },
       "C3": {
-        "raw_p": 1.0,
-        "holm_adj_p": 1.0,
-        "reject_at_0.10": false
+        "raw_p": 0.01,
+        "holm_adj_p": 0.03,
+        "reject_at_0.10": true
       }
     }
   },
   "a4f_headline_correction": {
-    "v4_claim": "A4f significantly beats GJR after RC correction (p=0.000)",
-    "v4_pval": 0.0,
-    "what_that_number_actually_is": "single-spec bootstrap DM t-test, no snooping adjustment",
-    "pvalue_floor_note": "p=0.000 is below the bootstrap resolution 1/499=0.0020; it should be reported as p < 0.0020, never as exactly 0.",
-    "a4f_holm_adj_p": 0.0,
+    "base_diagnostic_tail_fraction": 0.0,
+    "base_diagnostic_definition": "single-spec bootstrap DM diagnostic without snooping adjustment",
+    "finite_draw_minimum_p": 0.002,
+    "a4f_holm_adj_p": 0.026000000000000002,
     "a4f_holm_reject_at_0.10": true,
-    "corrected_reading": "The snooping-adjusted joint test gives SPA_c p=0.0000. A4f's Holm-adjusted per-spec p is 0.0000."
+    "corrected_reading": "The snooping-adjusted joint test gives SPA_c p=0.0020. A4f's Holm-adjusted per-spec p is 0.0260."
   },
-  "c3_verdict_corrected": "C3 POSITIVE (snooping-adjusted): SPA_c p=0.0000 (< 1/499) and A4f survives Holm (adj p=0.0000); 11/15 specs reject at FWER 0.10. BOTH v4 numbers were wrong, in OPPOSITE directions: the field named `white_rc_test` was an unadjusted single-spec DM test (overstated), and the field named `hansen_spa_test` (p=0.2886, non-rejecting) was the least-favourable SPA_u whose entire upper tail is produced by three degenerate specs (understated). The correct snooping-adjusted joint test rejects H0. Note this REVERSES the prior reading that 'the properly corrected test does not reject'.",
+  "c3_verdict_corrected": "C3 POSITIVE (snooping-adjusted): SPA_c p=0.0020 and A4f survives Holm (adj p=0.0260); 13/13 specs reject at FWER 0.10. Historical mislabelled fields have been retired from the rebuilt base artifact; the current conclusion comes only from this long-run-scale max-type inference artifact.",
+  "pipeline": {
+    "entrypoint": "run_pipeline.py",
+    "stages": [
+      "k1380_v4.py",
+      "k1380_v4_rc_correction.py"
+    ],
+    "atomic_stage_outputs": true,
+    "full_chain_atomic": false,
+    "partial_failure_detection": "reproduce_spec and reproduce_commit hash-bind every declared output"
+  },
   "code_trace": {
-    "path": "experiments/K1380_v4/k1380_v4_rc_correction.py",
-    "sha256": "f129029cfd900305a09983639ea1278e7e807837b132751b80909dc5cc3fdaa2",
-    "size_bytes": 20241
+    "path": "experiments/K1380_v4/run_pipeline.py",
+    "sha256": "5c5f31b2a42b1288431b25a5cff395740f08db256438f073a38db2bd67e2ca15",
+    "size_bytes": 2723
   },
   "artifact_generation": {
     "schema_version": "volpred.reproduce_commit.v1",
-    "generation_id": "8ee4a8283f501126c5cde41e65087b3b916e330c54b8bf63986e4ad2fa2b000f",
-    "output_identities": []
+    "generation_id": "fc7ce9ef8ad6ca542aaf0d3eafca17af9a6ef06bf171222d829b685c66776836",
+    "output_identities": [
+      {
+        "path": "k1380_v4_losses_all.npy",
+        "sha256": "2b7232b99a7cb9521adfce843f399cf51099581ef9ac6a9d2e2e4f74e35551f4",
+        "size_bytes": 258528
+      },
+      {
+        "path": "k1380_v4_results.json",
+        "sha256": "2c1d81cc469d590c44965660909c4abb6541fd4e56065d5aa9ce3b6abc08ba00",
+        "size_bytes": 92619
+      }
+    ]
   },
-  "runtime_seconds": 0.539,
+  "runtime_seconds": 1400.232,
   "runtime_env": {
     "python": "3.12.10",
     "implementation": "CPython",

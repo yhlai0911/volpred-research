@@ -57,6 +57,65 @@ def _finite_vector(values: Iterable[float], *, name: str) -> np.ndarray:
     return array
 
 
+def monte_carlo_p_value(exceedances: int, draws: int) -> float:
+    """Return the finite-simulation p-value ``(r + 1) / (B + 1)``.
+
+    The observed statistic is treated as the additional draw.  This prevents a
+    finite Monte Carlo experiment from reporting an impossible exact zero.
+    """
+
+    if (
+        isinstance(exceedances, bool)
+        or not isinstance(exceedances, Integral)
+        or isinstance(draws, bool)
+        or not isinstance(draws, Integral)
+    ):
+        raise TypeError("exceedances and draws must be integers")
+    exceedance_count = int(exceedances)
+    draw_count = int(draws)
+    if draw_count < 1 or exceedance_count < 0 or exceedance_count > draw_count:
+        raise ValueError("require draws >= 1 and 0 <= exceedances <= draws")
+    return (exceedance_count + 1.0) / (draw_count + 1.0)
+
+
+def bootstrap_long_run_scale(
+    bootstrap_means: np.ndarray,
+    observed_means: np.ndarray,
+    *,
+    sample_size: int,
+) -> np.ndarray:
+    """Estimate the long-run scale of ``sqrt(T) * mean(d_t)``.
+
+    ``bootstrap_means`` must contain one stationary-bootstrap mean per draw and
+    model.  The returned denominator is the across-draw standard deviation of
+    ``sqrt(T) * (mean_b - mean_observed)`` for each model, rather than the raw
+    observation-level standard deviation that is invalid under serial dependence.
+    """
+
+    bootstrap_array = np.asarray(bootstrap_means, dtype=np.float64)
+    observed_array = np.asarray(observed_means, dtype=np.float64)
+    if bootstrap_array.ndim != 2 or bootstrap_array.shape[0] < 2:
+        raise ValueError("bootstrap_means must be a B-by-model matrix with B >= 2")
+    if observed_array.ndim != 1 or observed_array.shape[0] != bootstrap_array.shape[1]:
+        raise ValueError("observed_means must match the model dimension")
+    if not np.isfinite(bootstrap_array).all() or not np.isfinite(observed_array).all():
+        raise ValueError("bootstrap and observed means must be finite")
+    if (
+        isinstance(sample_size, bool)
+        or not isinstance(sample_size, Integral)
+        or sample_size < 2
+    ):
+        raise ValueError("sample_size must be an integer >= 2")
+
+    centered = np.sqrt(float(sample_size)) * (
+        bootstrap_array - observed_array[None, :]
+    )
+    scale = np.std(centered, axis=0, ddof=1)
+    if not np.isfinite(scale).all() or np.any(scale <= np.finfo(np.float64).eps):
+        raise ValueError("bootstrap long-run scale must be finite and positive")
+    return scale
+
+
 def holm_step_down(
     p_values: Iterable[float],
     *,

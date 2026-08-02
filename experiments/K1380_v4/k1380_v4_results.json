@@ -1,6 +1,6 @@
 {
   "experiment_id": "k1380_v4",
-  "title": "Paper 9 White RC / Hansen SPA Test \u2014 17-Spec Horse Race (v4 3-Strike Fix)",
+  "title": "Paper 9 17-Spec Horse-Race Loss Generation (v4 3-Strike Fix)",
   "metadata": {
     "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
     "oos_start": "2019-01-01",
@@ -11,9 +11,9 @@
     "harvey_threshold": 3.0,
     "qlike_proxy": "r_squared (Patton 2011 proxy-robust)",
     "qlike_formula": "actual_r2 / forecast_variance - log(actual_r2 / forecast_variance) - 1",
-    "duplicate_snapshot_rows_dropped": 10,
+    "duplicate_snapshot_rows_dropped": 0,
     "coverage_threshold": 0.95,
-    "n_eligible_specs": 15,
+    "n_eligible_specs": 13,
     "eligible_specs": [
       "A1",
       "A2",
@@ -25,110 +25,3360 @@
       "A3f",
       "A2n",
       "A4n",
-      "B1",
-      "B2",
-      "B3",
+      "C1",
       "C2",
       "C3"
     ],
     "ineligible_specs": [
-      "C1"
+      "B1",
+      "B2",
+      "B3"
     ],
-    "n_valid_spa": 1879,
-    "elapsed_seconds": 934.5,
-    "timestamp": "2026-07-05T09:58:26.922887+00:00",
+    "n_valid_spa": 1898,
+    "elapsed_seconds": 1396.5,
+    "timestamp": "2026-08-02T03:40:38.386778+00:00",
     "lookahead_free": "signal.shift(1): vix[abs_idx-1] for t-1 VIX lag",
-    "c3_critical_addressed": true,
+    "canonical_inference": "k1380_v4_rc_correction_results.json",
     "v4_fixes": [
       "per-model valid_i masks (no joint mask)",
       "SPA restricted to coverage>=95% specs",
       "per-model NaN coverage diagnostics",
-      "MIDAS B-series lag matrix via slicing (no np.roll)"
+      "MIDAS B-series lag matrix via slicing (no np.roll)",
+      "A-series tau fits are bounded and reject failed/non-finite optimizer results",
+      "C-series likelihood aligns every daily return to prior completed-month VIX lags",
+      "C-series state is filtered through the training tail and excludes partial current-month VIX"
+    ]
+  },
+  "fit_diagnostics": {
+    "A5": [
+      {
+        "refit_date": "2019-01-02",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.66741719616033,
+          0.13039638253671149
+        ],
+        "short_run_params": [
+          0.0001,
+          0.17011418914420154,
+          0.8291784207246496
+        ],
+        "tau_min": 2.821676607547049e-05,
+        "tau_max": 0.004478841613530547,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-04-03",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.692933652561033,
+          0.13211113696084054
+        ],
+        "short_run_params": [
+          0.0001,
+          0.1666357447037537,
+          0.8300016862335743
+        ],
+        "tau_min": 2.794037408427054e-05,
+        "tau_max": 0.004740564400914847,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-07-03",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.682170985990256,
+          0.1326778264360755
+        ],
+        "short_run_params": [
+          0.0001,
+          0.18261254469629537,
+          0.8202569195220805
+        ],
+        "tau_min": 2.838937487799539e-05,
+        "tau_max": 0.004923993862736619,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-10-02",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -12.039439520694845,
+          0.153848992429827
+        ],
+        "short_run_params": [
+          0.0001,
+          0.1655738539910727,
+          0.818224886558241
+        ],
+        "tau_min": 2.4100940892037574e-05,
+        "tau_max": 0.0031146723686644564,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-01-02",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -12.459978244350392,
+          0.17848917800751998
+        ],
+        "short_run_params": [
+          0.0001,
+          0.15279805423293089,
+          0.8011655590633608
+        ],
+        "tau_min": 1.9824597444795884e-05,
+        "tau_max": 0.0055813263553911125,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-04-02",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.496837418425153,
+          0.12521414309447024
+        ],
+        "short_run_params": [
+          0.0001,
+          0.2189372178815071,
+          0.8016080148785868
+        ],
+        "tau_min": 3.1916734043421076e-05,
+        "tau_max": 0.31889938921820976,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-07-02",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.42019540736824,
+          0.12079674503880794
+        ],
+        "short_run_params": [
+          0.0001,
+          0.22728279265910006,
+          0.7970771453845428
+        ],
+        "tau_min": 3.3095503979531835e-05,
+        "tau_max": 0.23894729719512983,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-10-01",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.361863699881496,
+          0.11723295399263738
+        ],
+        "short_run_params": [
+          0.0001,
+          0.2314454393666653,
+          0.7968199825866716
+        ],
+        "tau_min": 3.3959074140122614e-05,
+        "tau_max": 0.18864837470325926,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-12-31",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.321698336638402,
+          0.11296949431416192
+        ],
+        "short_run_params": [
+          0.0001,
+          0.23058028987644025,
+          0.797158953549901
+        ],
+        "tau_min": 3.3999759060742725e-05,
+        "tau_max": 0.1380346448084537,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-04-05",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.33997884172085,
+          0.113823217805065
+        ],
+        "short_run_params": [
+          0.0001,
+          0.23370562946661083,
+          0.7975664955586069
+        ],
+        "tau_min": 3.364538723664877e-05,
+        "tau_max": 0.14544799433245248,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-07-02",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.363877456140514,
+          0.11403692911504444
+        ],
+        "short_run_params": [
+          0.0001,
+          0.2371313198865718,
+          0.7930906158288092
+        ],
+        "tau_min": 3.291507215525252e-05,
+        "tau_max": 0.14454512893683474,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-10-01",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.331706209953124,
+          0.11361000815774774
+        ],
+        "short_run_params": [
+          0.0001,
+          0.2506892968303152,
+          0.7901158191829982
+        ],
+        "tau_min": 3.3858831337963984e-05,
+        "tau_max": 0.1440932876837805,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-12-31",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.284262787459738,
+          0.11335777467522344
+        ],
+        "short_run_params": [
+          0.0001,
+          0.26056588258536195,
+          0.7897766775579843
+        ],
+        "tau_min": 3.542216910219578e-05,
+        "tau_max": 0.14797556461333541,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-04-01",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.336160523358554,
+          0.11312212890665915
+        ],
+        "short_run_params": [
+          0.0001,
+          0.22955839472028136,
+          0.8050464694222438
+        ],
+        "tau_min": 3.355837070326234e-05,
+        "tau_max": 0.13778077996476432,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-07-05",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.243814276621029,
+          0.1118308191821688
+        ],
+        "short_run_params": [
+          0.0001,
+          0.22747640488569632,
+          0.8166031885488839
+        ],
+        "tau_min": 3.63731187907804e-05,
+        "tau_max": 0.1358065862471168,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-10-03",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.303092871141317,
+          0.11360188786486107
+        ],
+        "short_run_params": [
+          0.0001,
+          0.2101532744247273,
+          0.823062816393336
+        ],
+        "tau_min": 3.483905337262835e-05,
+        "tau_max": 0.1481763017320782,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-01-03",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.295302373745471,
+          0.11361651686108866
+        ],
+        "short_run_params": [
+          0.0001,
+          0.20513461450827467,
+          0.8256813299177006
+        ],
+        "tau_min": 3.511622194338437e-05,
+        "tau_max": 0.14951593291945908,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-04-04",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.285334818451634,
+          0.11318562421270278
+        ],
+        "short_run_params": [
+          0.0001,
+          0.1925803128043885,
+          0.8359458624679846
+        ],
+        "tau_min": 3.532858408340529e-05,
+        "tau_max": 0.14572772786337299,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-07-06",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.278493702268552,
+          0.11305689773730065
+        ],
+        "short_run_params": [
+          0.0001,
+          0.19905801057669092,
+          0.8306983922889131
+        ],
+        "tau_min": 3.5529272701121434e-05,
+        "tau_max": 0.1451745376721745,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-10-04",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.302890139582406,
+          0.1124506725958268
+        ],
+        "short_run_params": [
+          0.0001,
+          0.18188977566455122,
+          0.8414428788694946
+        ],
+        "tau_min": 3.448138470043856e-05,
+        "tau_max": 0.13474869577417542,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-01-04",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.308273830228813,
+          0.11192863561441016
+        ],
+        "short_run_params": [
+          0.0001,
+          0.17553256284375449,
+          0.8434874582647587
+        ],
+        "tau_min": 3.4132994450459437e-05,
+        "tau_max": 0.12836279631846723,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-04-05",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.31259929844737,
+          0.11135394662086535
+        ],
+        "short_run_params": [
+          0.0001,
+          0.17212727894036067,
+          0.8421346980124661
+        ],
+        "tau_min": 3.38076250371543e-05,
+        "tau_max": 0.12187721438604483,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-07-08",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.326298068894928,
+          0.11119007424474572
+        ],
+        "short_run_params": [
+          0.0001,
+          0.17210620352766678,
+          0.8420533773705942
+        ],
+        "tau_min": 3.3297749290903246e-05,
+        "tau_max": 0.11860097658983633,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-10-04",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.224928158438475,
+          0.10905081584406377
+        ],
+        "short_run_params": [
+          0.0001,
+          0.17360011819432966,
+          0.8506739186430717
+        ],
+        "tau_min": 3.613662499298609e-05,
+        "tau_max": 0.10997349133940995,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-01-06",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.194591259818644,
+          0.10805880093039835
+        ],
+        "short_run_params": [
+          0.0001,
+          0.17635655580461798,
+          0.8471642703715232
+        ],
+        "tau_min": 3.6913479252833284e-05,
+        "tau_max": 0.10443308505627902,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-04-08",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.111342564480598,
+          0.10680546329700713
+        ],
+        "short_run_params": [
+          0.0001,
+          0.17392665822680575,
+          0.8557648140893979
+        ],
+        "tau_min": 3.966106455196133e-05,
+        "tau_max": 0.1023252775986997,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-07-10",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.065519995221388,
+          0.10487030873372355
+        ],
+        "short_run_params": [
+          0.0001,
+          0.16875262932475718,
+          0.860864058927674
+        ],
+        "tau_min": 4.079278471593474e-05,
+        "tau_max": 0.09128270771800974,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-10-08",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.024333871112916,
+          0.10257232188912845
+        ],
+        "short_run_params": [
+          0.0001,
+          0.17602365191276167,
+          0.8545442544785536
+        ],
+        "tau_min": 4.162445038016882e-05,
+        "tau_max": 0.07865938553394405,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-01-08",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -10.950939350718933,
+          0.1006384970162978
+        ],
+        "short_run_params": [
+          0.0001,
+          0.15617333132835232,
+          0.875385325288913
+        ],
+        "tau_min": 5.22739907336005e-05,
+        "tau_max": 0.07214034748225909,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-04-10",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.115295309515204,
+          0.10276643318356941
+        ],
+        "short_run_params": [
+          0.0001,
+          0.13251930200483247,
+          0.8825226059583907
+        ],
+        "tau_min": 4.5387243604586526e-05,
+        "tau_max": 0.07298227331150942,
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-07-13",
+        "n_training_daily": 2000,
+        "tau_params": [
+          -11.104608042134776,
+          0.10142454686223316
+        ],
+        "short_run_params": [
+          0.0001,
+          0.1344047551197921,
+          0.8751954882566036
+        ],
+        "tau_min": 4.521183496052498e-05,
+        "tau_max": 0.06601904523087268,
+        "optimizer_contract": "successful_finite_in_bounds"
+      }
+    ],
+    "B1": [
+      {
+        "refit_date": "2019-01-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9142658262766175,
+          20.0,
+          0.0001,
+          0.1525236730629136,
+          0.8007432327656032
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-04-03",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9195623298461648,
+          20.0,
+          0.0001,
+          0.1497548449139684,
+          0.8021283146683605
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-07-03",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2019-10-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9137024638263407,
+          20.0,
+          0.0001,
+          0.16323285075849034,
+          0.7927471406134552
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-01-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9100442916252403,
+          20.0,
+          0.0001,
+          0.16572923375406484,
+          0.7873567722236907
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-04-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9292544618613439,
+          20.0,
+          0.0001,
+          0.18892407756058516,
+          0.7774080895135387
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-07-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9333318951931773,
+          20.0,
+          0.0001,
+          0.18098021888865376,
+          0.7717174344981251
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-10-01",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2020-12-31",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2021-04-05",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.92045711825713,
+          20.0,
+          0.0001,
+          0.18974372197109357,
+          0.7684334815259087
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-07-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.917675307433809,
+          20.0,
+          0.0001,
+          0.19779983276823815,
+          0.761374474627618
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-10-01",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9131202945470565,
+          20.0,
+          0.0001,
+          0.20147933448108146,
+          0.7624338748108936
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-12-31",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.911532201256418,
+          20.0,
+          0.0001,
+          0.20241015088456799,
+          0.7627958345017898
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-04-01",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9118172772506474,
+          20.0,
+          0.0001,
+          0.18430150860254188,
+          0.7802781747395365
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-07-05",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9195222536664465,
+          20.0,
+          0.0001,
+          0.17907057276649324,
+          0.7928926416721422
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-10-03",
+        "n_training_daily": 2000,
+        "params": [
+          -13.559425562307979,
+          1.5215763881056124,
+          5.6378102915231025,
+          0.0001,
+          0.22089040076586244,
+          0.8314551020282674
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-01-03",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.932737546549263,
+          20.0,
+          0.0001,
+          0.15776995523652,
+          0.8112781681887379
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-04-04",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2023-07-06",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.937359522067222,
+          20.0,
+          0.0001,
+          0.1523586299190792,
+          0.8213513982358667
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-10-04",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2024-01-04",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2024-04-05",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.928309219772378,
+          20.0,
+          0.0001,
+          0.13873884006364978,
+          0.8243407594554543
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-07-08",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2024-10-04",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9328727216472612,
+          20.0,
+          0.0001,
+          0.13600236585564615,
+          0.8353046160076563
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-01-06",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9352861948005777,
+          20.0,
+          0.0001,
+          0.13400701954053834,
+          0.8327123693881395
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-04-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9462886506641206,
+          20.0,
+          0.0001,
+          0.13869463200016247,
+          0.8384595424922232
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-07-10",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9453717625558449,
+          20.0,
+          0.0001,
+          0.13663645171640107,
+          0.8383892980227917
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-10-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9445893849237732,
+          20.0,
+          0.0001,
+          0.13821128163129703,
+          0.8362101666569286
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-01-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9338683837567898,
+          20.0,
+          0.0001,
+          0.11547344350642104,
+          0.8604356067198593
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-04-10",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.92870660180764,
+          20.0,
+          0.0001,
+          0.10855450515116312,
+          0.86642806703818
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-07-13",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9305282423697274,
+          20.0,
+          0.0001,
+          0.10797672005982113,
+          0.8615836085014271
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      }
+    ],
+    "B2": [
+      {
+        "refit_date": "2019-01-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9314829128279718,
+          20.0,
+          0.0001,
+          0.2108467303952101,
+          0.7418356150478403
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-04-03",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9344254170198842,
+          20.0,
+          0.0001,
+          0.22238926324279507,
+          0.7335959538753098
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-07-03",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9259437747625976,
+          20.0,
+          0.0001,
+          0.21313238704712742,
+          0.7389599137892673
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-10-02",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2020-01-02",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2020-04-02",
+        "n_training_daily": 2000,
+        "params": [
+          -10.137406576906312,
+          0.211774005691784,
+          5.1391166574806615,
+          0.011792313596338252,
+          0.3,
+          0.7744016145050816
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-07-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9571687769807717,
+          20.0,
+          0.0001,
+          0.26720573290835103,
+          0.6994242815028319
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-10-01",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.981582276736455,
+          4.742558865292633,
+          0.01605501528993455,
+          0.29997958799199154,
+          0.7026553311608948
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-12-31",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9439360637499592,
+          20.0,
+          0.0001,
+          0.2688509494300509,
+          0.7029568306090813
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-04-05",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9373875893212371,
+          20.0,
+          0.0001,
+          0.26429305097911454,
+          0.7012636775841231
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-07-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.937706714570653,
+          20.0,
+          0.0001,
+          0.28173079280234736,
+          0.6919898921313618
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-10-01",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2021-12-31",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.931886373218779,
+          20.0,
+          0.0001,
+          0.282671454502234,
+          0.6963390022180252
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-04-01",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2022-07-05",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2022-10-03",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2023-01-03",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.951488520013523,
+          20.0,
+          0.0001,
+          0.2316246506045202,
+          0.7419566328026704
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-04-04",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2023-07-06",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9470853128034806,
+          20.0,
+          0.0001,
+          0.21782449003964752,
+          0.7576840928446559
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-10-04",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.940275220722949,
+          20.0,
+          0.0001,
+          0.2010198275876174,
+          0.7678436866975543
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-01-04",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9396861705063502,
+          20.0,
+          0.0001,
+          0.19758643597083272,
+          0.7656799034406625
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-04-05",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9415072317389244,
+          20.0,
+          0.0001,
+          0.20144777387731527,
+          0.7601471605745069
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-07-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9452147703098317,
+          20.0,
+          0.0001,
+          0.2038136837738182,
+          0.7672488266098283
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-10-04",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2025-01-06",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9495891125710922,
+          20.0,
+          0.0001,
+          0.1945393268317695,
+          0.7646851244228536
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-04-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9606412663495445,
+          20.0,
+          0.0001,
+          0.19310503108418683,
+          0.7777322224406769
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-07-10",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9621899174142305,
+          20.0,
+          0.0001,
+          0.2021298922833153,
+          0.7586287760621023
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-10-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9590453312903466,
+          20.0,
+          0.0001,
+          0.20347915691793192,
+          0.7712504884549476
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-01-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9453991880135082,
+          20.0,
+          0.0001,
+          0.17460481620323245,
+          0.7916047284903915
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-04-10",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.943132300690124,
+          20.0,
+          0.0001,
+          0.16824324411918332,
+          0.7926124972535519
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-07-13",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9437277170173441,
+          20.0,
+          0.0001,
+          0.169623324522587,
+          0.7857027773333408
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      }
+    ],
+    "B3": [
+      {
+        "refit_date": "2019-01-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.950839617628444,
+          20.0,
+          0.0001,
+          0.2670542805303452,
+          0.7162329295225915
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-04-03",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.939373511220571,
+          20.0,
+          0.0001,
+          0.25102391040495503,
+          0.7207380789611769
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-07-03",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2019-10-02",
+        "n_training_daily": 2000,
+        "status": "rejected",
+        "reason": "no successful finite in-bounds optimizer result"
+      },
+      {
+        "refit_date": "2020-01-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9460308259507446,
+          20.0,
+          0.0001,
+          0.27299415470561955,
+          0.7177772562392516
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-04-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.964963028338988,
+          20.0,
+          0.0001,
+          0.3,
+          0.7038071904880253
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-07-02",
+        "n_training_daily": 2000,
+        "params": [
+          -10.886192868626168,
+          0.6940300261584084,
+          5.402387673631303,
+          0.0428472781196626,
+          0.3,
+          0.771040434170855
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-10-01",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.959513876469423,
+          20.0,
+          0.0001,
+          0.3,
+          0.6914678748746247
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-12-31",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9534238832625725,
+          20.0,
+          0.0001,
+          0.3,
+          0.6936891078384189
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-04-05",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9496171638467412,
+          20.0,
+          0.0001,
+          0.3,
+          0.6916919812094887
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-07-02",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9464204820623114,
+          20.0,
+          0.0001,
+          0.3,
+          0.6937439384155328
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-10-01",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9401468382194575,
+          20.0,
+          0.0001,
+          0.3,
+          0.6959690740280845
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-12-31",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9406232709359341,
+          20.0,
+          0.0001,
+          0.3,
+          0.6954328015285651
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-04-01",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9440967197656274,
+          20.0,
+          0.0001,
+          0.3,
+          0.6931063948381974
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-07-05",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9510867472378894,
+          20.0,
+          0.0001,
+          0.2902062045566831,
+          0.7059244483219744
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-10-03",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9550314014368937,
+          20.0,
+          0.0001,
+          0.26798646954442085,
+          0.7222916499587734
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-01-03",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.969725495939402,
+          20.0,
+          0.0001,
+          0.28575750059011407,
+          0.7148678205923916
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-04-04",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9640701453911285,
+          20.0,
+          0.0001,
+          0.26274456202836743,
+          0.7338956394993573
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-07-06",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.959319719794892,
+          20.0,
+          0.0001,
+          0.25873235026802927,
+          0.7346977432801127
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-10-04",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9510111189399721,
+          20.0,
+          0.0001,
+          0.2420548276938917,
+          0.7407909810767966
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-01-04",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9515900499637515,
+          20.0,
+          0.0001,
+          0.24757930443245602,
+          0.7350144839682237
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-04-05",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9601184652643162,
+          20.0,
+          0.0001,
+          0.2516750705490524,
+          0.7365606774775586
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-07-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9625009278230054,
+          20.0,
+          0.0001,
+          0.2511306316650637,
+          0.7367935411011669
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-10-04",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9642892796369942,
+          20.0,
+          0.0001,
+          0.24408311954331754,
+          0.7391093099899163
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-01-06",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.965234629950624,
+          20.0,
+          0.0001,
+          0.2384493565727834,
+          0.7429502641876078
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-04-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9764202113727847,
+          20.0,
+          0.0001,
+          0.2372778897555652,
+          0.7457867741561763
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-07-10",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9767572227031667,
+          20.0,
+          0.0001,
+          0.24309059968344357,
+          0.7420619663175061
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-10-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9627460760213626,
+          20.0,
+          0.0001,
+          0.2269337578754866,
+          0.763470038878348
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-01-08",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9610750348943116,
+          20.0,
+          0.0001,
+          0.2210449424640339,
+          0.7599529935239207
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-04-10",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9592512243262605,
+          20.0,
+          0.0001,
+          0.21640055330700692,
+          0.7579089063014285
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-07-13",
+        "n_training_daily": 2000,
+        "params": [
+          -15.0,
+          1.9514545668846226,
+          20.0,
+          0.0001,
+          0.2285668927843975,
+          0.7417780549807765
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      }
+    ],
+    "C1": [
+      {
+        "refit_date": "2019-01-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.479145910562856,
+          1.1187342795496402,
+          3.397622497882328,
+          0.0001,
+          0.29800798481412444,
+          0.79277634013979
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-04-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.333524659988708,
+          1.0712062134893425,
+          2.8999369771249865,
+          0.0001,
+          0.29882094955026073,
+          0.7949608910270929
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-07-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.217508035020542,
+          1.0284213676979725,
+          3.107250663701152,
+          0.0001,
+          0.3,
+          0.7947577960615947
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-10-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.259476878352872,
+          1.0264159602527367,
+          2.8306757681950794,
+          0.0001,
+          0.3,
+          0.7906993658854077
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-01-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -11.659181067340441,
+          0.7751023314780948,
+          1.512604928034489,
+          0.0001,
+          0.3,
+          0.7879316056238714
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-04-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.868874952664482,
+          1.2332874006783188,
+          1.486084174933522,
+          0.0001,
+          0.3,
+          0.7864234739718019
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-07-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.883415040616756,
+          1.9693169825517003,
+          2.5109707862331883,
+          0.0001,
+          0.3,
+          0.7730498744925182
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-10-01",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.509082231759267,
+          1.8271301453611646,
+          2.626169123160718,
+          0.0001,
+          0.3,
+          0.7711551410507541
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-12-31",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.198703980873667,
+          1.7046714364933673,
+          2.825705534873264,
+          0.0005251042154726379,
+          0.3,
+          0.7697136483620814
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-04-05",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.278476656936713,
+          1.7275509328827838,
+          3.018943605381624,
+          0.0001,
+          0.3,
+          0.7689408756781733
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-07-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.159063229978496,
+          1.6717716911699143,
+          3.350684072059531,
+          0.0001,
+          0.3,
+          0.766306214830192
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-10-01",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.14181607212732,
+          1.6600795526244867,
+          3.4740904641911845,
+          0.00039967564797284844,
+          0.3,
+          0.7667295871501989
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-12-31",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.092696563734108,
+          1.650660663830055,
+          3.4042963025663364,
+          0.0036048793665647326,
+          0.3,
+          0.7659185661953681
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-04-01",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.2066825038504,
+          1.6983973829015653,
+          3.43740559287608,
+          0.0014230484407055345,
+          0.3,
+          0.7711436544699974
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-07-05",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.137340837525759,
+          1.6939168160526537,
+          3.294578906109825,
+          0.0024306259818581456,
+          0.3,
+          0.7759488730085959
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-10-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.368447798454588,
+          1.786889075026541,
+          3.0756344063227385,
+          0.0019001041236762582,
+          0.3,
+          0.7774244138936519
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-01-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.516056230506768,
+          1.8373600885990629,
+          3.5366389942452763,
+          0.0001,
+          0.3,
+          0.775633013642777
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-04-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.528789295921671,
+          1.8466601244432361,
+          3.6086722914603904,
+          0.0001,
+          0.3,
+          0.7756188042449533
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-07-06",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.509760375835686,
+          1.8383496166766813,
+          3.6807929745981753,
+          0.0001,
+          0.3,
+          0.7759393072838902
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-10-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.533613126553519,
+          1.84574419964952,
+          3.6225210980975273,
+          0.0001,
+          0.3,
+          0.7760908004426856
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-01-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.50844317232265,
+          1.8413178464029913,
+          3.7897921577225255,
+          0.0001,
+          0.3,
+          0.7762915467912204
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-04-05",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.484843404164938,
+          1.830076411216538,
+          4.066888540340487,
+          0.0001,
+          0.2999145082250862,
+          0.7704328486921156
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-07-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.584724991154296,
+          1.8571780984518937,
+          4.543952824862557,
+          0.0001,
+          0.299218988536616,
+          0.7696469999009464
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-10-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.506272410967554,
+          1.8449428268818617,
+          4.843065930471917,
+          0.0001,
+          0.3,
+          0.7742008521153622
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-01-06",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.459303458231853,
+          1.8296574418443943,
+          4.855559459658678,
+          0.0001,
+          0.3,
+          0.7714796853430554
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-04-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.431775972653249,
+          1.833827389213175,
+          5.049809757968387,
+          0.0001,
+          0.3,
+          0.7755380875961495
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-07-10",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.229813532185117,
+          1.7671171377453558,
+          5.126444199690785,
+          0.0001,
+          0.3,
+          0.7776655877136037
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-10-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -13.953887046664416,
+          1.6684073724320758,
+          5.95902192064662,
+          0.0001,
+          0.3,
+          0.7772313544250011
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-01-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -13.911681460109344,
+          1.6631927056880267,
+          5.424764190954787,
+          0.0001,
+          0.3,
+          0.7811409605460814
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-04-10",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.246743972492988,
+          1.7533390487329006,
+          4.8855677443127625,
+          0.0001,
+          0.28031913859946045,
+          0.7886773208924768
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-07-13",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.151058223298554,
+          1.7218004919230199,
+          4.786617826564068,
+          0.0001,
+          0.27960973376906356,
+          0.7868791648643653
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      }
+    ],
+    "C2": [
+      {
+        "refit_date": "2019-01-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.700910109374394,
+          1.2038568229770896,
+          1.4078238183609728,
+          0.0001,
+          0.29669165989322405,
+          0.800988585553434
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-04-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.756003018410052,
+          1.2262736366162756,
+          1.5313230851911142,
+          0.0001,
+          0.29472961394944125,
+          0.8016119458430704
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-07-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.737986357672352,
+          1.2285943488528392,
+          1.4336001355706212,
+          0.0001,
+          0.3,
+          0.8006896157779636
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-10-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.811866479351949,
+          1.2354709804305315,
+          1.5767425328307463,
+          0.0001,
+          0.3,
+          0.7956756882773196
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-01-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.372829364559628,
+          1.0320506151461513,
+          1.4757595634902272,
+          0.0001,
+          0.3,
+          0.7876368874570964
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-04-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -13.359451162030151,
+          1.408623341721324,
+          2.06885504052228,
+          0.0001,
+          0.3,
+          0.7859576153100911
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-07-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -15.079358554495075,
+          2.040693667133892,
+          5.172975906753068,
+          0.0001,
+          0.3,
+          0.7717563970456977
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-10-01",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.91993383276933,
+          1.9818081197792172,
+          4.478454572586046,
+          0.0009270650961114853,
+          0.3,
+          0.7712497346762258
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-12-31",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.319671054773963,
+          1.7495938176851542,
+          5.770249738884212,
+          0.0013421753080482704,
+          0.3,
+          0.7682179326440186
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-04-05",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.379953419341852,
+          1.7645067880021519,
+          6.138323044786565,
+          0.0001,
+          0.3,
+          0.7683544209390936
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-07-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.213966630242803,
+          1.691380899514218,
+          7.04800905748177,
+          0.0001,
+          0.3,
+          0.7654647713108667
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-10-01",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.184015373826618,
+          1.6754483096152237,
+          7.367834632557996,
+          0.001069595156308112,
+          0.3,
+          0.7652831190592527
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-12-31",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.132650751629978,
+          1.6652494592042877,
+          7.237858357662127,
+          0.004394864622159563,
+          0.3,
+          0.7643796633107102
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-04-01",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.249488377559135,
+          1.713792191381422,
+          7.317662347837149,
+          0.0021407577713381375,
+          0.3,
+          0.7696031862035974
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-07-05",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.179390657117317,
+          1.7092405556263608,
+          7.0464756400634,
+          0.0033352721766693326,
+          0.3,
+          0.7743267140764849
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-10-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.427023988307198,
+          1.808013508335189,
+          6.570313855539618,
+          0.002922805454317533,
+          0.3,
+          0.7755740241222312
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-01-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.5781259076407,
+          1.858538597123389,
+          7.423507718262477,
+          0.0001,
+          0.3,
+          0.7746917195490649
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-04-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.589394833999243,
+          1.867060457809713,
+          7.605345583083564,
+          0.0001,
+          0.3,
+          0.7745935395635295
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-07-06",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.562505064415477,
+          1.8557105852523548,
+          7.826722124010469,
+          0.0001,
+          0.3,
+          0.7748375079900407
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-10-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.588911851575107,
+          1.8638693079125757,
+          7.730114441921182,
+          0.0001,
+          0.3,
+          0.7749048329378204
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-01-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.559240397645732,
+          1.858114047565862,
+          8.044099181339167,
+          0.0004512621282726537,
+          0.3,
+          0.7748621444354327
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-04-05",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.530553919951487,
+          1.8450994896462005,
+          8.55200460308194,
+          0.0001,
+          0.29977267656074646,
+          0.7695566716770265
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-07-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.619610655843656,
+          1.8687987275431546,
+          9.461827419919253,
+          0.0001,
+          0.2991241675428835,
+          0.7689930306077174
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-10-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.53819115276429,
+          1.8557065338145247,
+          9.975410374186316,
+          0.0001,
+          0.3,
+          0.7737282595240291
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-01-06",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.488019900476122,
+          1.8393443167909371,
+          10.06429470809802,
+          0.0001,
+          0.3,
+          0.7709241754252387
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-04-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.455217434217829,
+          1.8413986724763771,
+          10.5441257033934,
+          0.0001,
+          0.3,
+          0.7748641317337183
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-07-10",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.253541244672922,
+          1.7747539760312598,
+          10.689331498820929,
+          0.0001,
+          0.3,
+          0.776998567733494
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-10-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -13.96325943830714,
+          1.6709124218979823,
+          12.598343038706373,
+          0.0001,
+          0.3,
+          0.7764946390029184
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-01-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -13.936180266884318,
+          1.671105591937112,
+          11.2307942081366,
+          0.0001,
+          0.3,
+          0.7806782437751812
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-04-10",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.297647817271235,
+          1.7706934144720692,
+          9.870360478876314,
+          0.0001,
+          0.2801637957082617,
+          0.7885900061448402
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-07-13",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.181306133065771,
+          1.7317599591125408,
+          9.974931584156796,
+          0.0001,
+          0.27983084654794355,
+          0.786104199723935
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      }
+    ],
+    "C3": [
+      {
+        "refit_date": "2019-01-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.842592326335573,
+          1.2536724546119458,
+          3.6081500542093634,
+          0.0001,
+          0.2970018473909529,
+          0.8002258904742502
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-04-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.86457504302618,
+          1.2644666200669339,
+          4.062700387314293,
+          0.0001,
+          0.2951992791972243,
+          0.8006006422141202
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-07-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.808327403515882,
+          1.2518556561261245,
+          3.8748990263965455,
+          0.0001,
+          0.3,
+          0.7998971455982956
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-10-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.851415756688166,
+          1.2482402282206226,
+          4.225966927181436,
+          0.0001,
+          0.3,
+          0.7949461737549486
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-01-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -12.357589237341449,
+          1.0274530023097808,
+          3.905724984618362,
+          0.0001,
+          0.3,
+          0.787780743497577
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-04-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -13.374164064535222,
+          1.414256163129759,
+          4.878497178084053,
+          0.0001,
+          0.3,
+          0.7860889201252408
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-07-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -15.125495669847892,
+          2.0567270236601565,
+          10.696534232150295,
+          0.0001,
+          0.3,
+          0.7710525415394097
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-10-01",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -15.046477404019551,
+          2.027656725910458,
+          9.112465851019103,
+          0.000836342889517598,
+          0.3,
+          0.7705935612122088
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-12-31",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.37590377493773,
+          1.770177797358934,
+          11.749940525933326,
+          0.0015884728802245975,
+          0.3,
+          0.7674767206302927
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-04-05",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.419383969525335,
+          1.7785670276903727,
+          12.583516541763288,
+          0.0001,
+          0.3,
+          0.7678132425673287
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-07-02",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.233849320806174,
+          1.6982845589575832,
+          14.582161508650191,
+          0.0001,
+          0.3,
+          0.7648935585053073
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-10-01",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.197630543858567,
+          1.6802694878317108,
+          15.30271169516556,
+          0.001370065688841525,
+          0.3,
+          0.7644461232499543
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-12-31",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.144749935613236,
+          1.6695303466124864,
+          15.04587357443379,
+          0.004767212786930237,
+          0.3,
+          0.7634956273130815
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-04-01",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.263333799067127,
+          1.7186164889885038,
+          15.201790597517926,
+          0.0024875221756958414,
+          0.3,
+          0.7687271744825286
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-07-05",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.192652839594485,
+          1.7139336519595578,
+          14.6597570585087,
+          0.0037556759261366413,
+          0.3,
+          0.7734446788524135
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-10-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.445199920166516,
+          1.8142667279249023,
+          13.734028628380367,
+          0.0033486343275189604,
+          0.3,
+          0.7745606786607573
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-01-03",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.599921560377238,
+          1.8657226083474383,
+          15.393883706429015,
+          0.00015286594793496302,
+          0.3,
+          0.7740064994123156
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-04-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.611245605204168,
+          1.8741470238467333,
+          15.776450751167761,
+          0.0001,
+          0.3,
+          0.7739346332705045
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-07-06",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.581503001610766,
+          1.8616808548587398,
+          16.273003110623765,
+          0.0001,
+          0.3,
+          0.774165291002295
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-10-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.608708561887022,
+          1.8700726293737309,
+          16.098273554477263,
+          0.0001,
+          0.3,
+          0.7741952591381089
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-01-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.57846093121037,
+          1.8643368927886987,
+          16.67328226574119,
+          0.0006995774120782377,
+          0.3,
+          0.7740011290655336
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-04-05",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.548434463849206,
+          1.850882108402422,
+          17.641550933621176,
+          0.0001,
+          0.29980093779235667,
+          0.7689847826114518
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-07-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.63484735658544,
+          1.8738125461794968,
+          19.385037860665648,
+          0.0001,
+          0.2991544803649129,
+          0.768555896225884
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-10-04",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.555648267436183,
+          1.861839828661367,
+          20.0,
+          0.0001,
+          0.3,
+          0.7736715214385727
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-01-06",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.506448520828188,
+          1.8460365021297138,
+          20.0,
+          0.0001,
+          0.3,
+          0.771009870516146
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-04-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.481503429599487,
+          1.8515243261961782,
+          20.0,
+          0.0001,
+          0.2996654908416479,
+          0.7758197436169808
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-07-10",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.286894397253603,
+          1.788107876161223,
+          20.0,
+          0.0001,
+          0.3,
+          0.7780535041790774
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-10-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.01787727756259,
+          1.6950959467629463,
+          20.0,
+          0.0001,
+          0.3,
+          0.7802379102352762
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-01-08",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -13.999940409088646,
+          1.6961309520039138,
+          20.0,
+          0.0001,
+          0.3,
+          0.782686376766457
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-04-10",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.319215630759086,
+          1.7779606965878485,
+          19.975135490899348,
+          0.0001,
+          0.280171661103519,
+          0.7883659188711113
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-07-13",
+        "n_training_daily": 2000,
+        "n_likelihood_daily": 2000,
+        "params": [
+          -14.203912245706995,
+          1.7394167025447242,
+          20.0,
+          0.0001,
+          0.2796878205327683,
+          0.7861158825003982
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      }
+    ],
+    "B0": [
+      {
+        "refit_date": "2019-01-02",
+        "n_training_daily": 2000,
+        "params": [
+          3.138973557827393e-06,
+          0.08532380244604187,
+          0.10665642014815932,
+          0.8199892464610427
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-04-03",
+        "n_training_daily": 2000,
+        "params": [
+          4.0015782037425885e-06,
+          0.07964679419621103,
+          0.11882332789150069,
+          0.7986738224187715
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-07-03",
+        "n_training_daily": 2000,
+        "params": [
+          3.206008601192694e-06,
+          0.08464169527826813,
+          0.10580357187449863,
+          0.8174281421658058
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2019-10-02",
+        "n_training_daily": 2000,
+        "params": [
+          3.433376261857133e-06,
+          0.08338148202437609,
+          0.10422791105425837,
+          0.8126964281234252
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-01-02",
+        "n_training_daily": 2000,
+        "params": [
+          3.504746274857571e-06,
+          0.0824345617241704,
+          0.10304396424673075,
+          0.8091410327065177
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-04-02",
+        "n_training_daily": 2000,
+        "params": [
+          3.3040915346177444e-06,
+          0.083803584625414,
+          0.10475567261858142,
+          0.8142812931612553
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-07-02",
+        "n_training_daily": 2000,
+        "params": [
+          3.1356717552060615e-06,
+          0.0848839131692543,
+          0.10610641959377387,
+          0.8183375941825352
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-10-01",
+        "n_training_daily": 2000,
+        "params": [
+          3.182815613324595e-06,
+          0.08480578527088178,
+          0.10600873511232024,
+          0.8180442474290451
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2020-12-31",
+        "n_training_daily": 2000,
+        "params": [
+          3.101838429520148e-06,
+          0.08519942039358866,
+          0.10650090219608331,
+          0.8195222265476042
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-04-05",
+        "n_training_daily": 2000,
+        "params": [
+          3.108308545734587e-06,
+          0.08551559033135814,
+          0.10689621552204115,
+          0.8207093458141581
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-07-02",
+        "n_training_daily": 2000,
+        "params": [
+          3.1662192387166563e-06,
+          0.08527275311681727,
+          0.10659259152198398,
+          0.8197975679234177
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-10-01",
+        "n_training_daily": 2000,
+        "params": [
+          4.420147262891043e-06,
+          0.14044634297649683,
+          0.20042581605308132,
+          0.7290737386484553
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2021-12-31",
+        "n_training_daily": 2000,
+        "params": [
+          3.2361354314010097e-06,
+          0.08504757955739464,
+          0.10631105370974972,
+          0.8189521102721729
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-04-01",
+        "n_training_daily": 2000,
+        "params": [
+          3.078101165996841e-06,
+          0.08610644369864787,
+          0.10763496512080731,
+          0.8229278202342757
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-07-05",
+        "n_training_daily": 2000,
+        "params": [
+          3.061721165323182e-06,
+          0.0866396855705667,
+          0.10830168418889873,
+          0.8249299796945528
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2022-10-03",
+        "n_training_daily": 2000,
+        "params": [
+          4.098946632984401e-06,
+          0.12632915609720438,
+          0.14424411171886903,
+          0.7687233963285748
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-01-03",
+        "n_training_daily": 2000,
+        "params": [
+          3.8730913319713675e-06,
+          0.12109413439405373,
+          0.13975533510366833,
+          0.7799178596109446
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-04-04",
+        "n_training_daily": 2000,
+        "params": [
+          2.81276386586795e-06,
+          0.08871732578499407,
+          0.11089938443688097,
+          0.8327308806452952
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-07-06",
+        "n_training_daily": 2000,
+        "params": [
+          3.2077709472075732e-06,
+          0.08644923704053717,
+          0.11571973711937551,
+          0.824214902744415
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2023-10-04",
+        "n_training_daily": 2000,
+        "params": [
+          2.8062562137929685e-06,
+          0.08868801747433921,
+          0.1108627397362069,
+          0.8326208373189161
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-01-04",
+        "n_training_daily": 2000,
+        "params": [
+          3.1353019629446298e-06,
+          0.08664198402931637,
+          0.11472104228960714,
+          0.8249386090694873
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-04-05",
+        "n_training_daily": 2000,
+        "params": [
+          3.1964070548002665e-06,
+          0.08662523819734166,
+          0.11461106610038672,
+          0.8248757338583744
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-07-08",
+        "n_training_daily": 2000,
+        "params": [
+          2.686773004275147e-06,
+          0.08904491197538064,
+          0.11130896964557244,
+          0.8339608672783398
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2024-10-04",
+        "n_training_daily": 2000,
+        "params": [
+          2.57690685867133e-06,
+          0.08953781347304829,
+          0.11192525072842191,
+          0.8358115609977836
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-01-06",
+        "n_training_daily": 2000,
+        "params": [
+          2.8773022273465086e-06,
+          0.0890466300958523,
+          0.11131111782995985,
+          0.8339673179967916
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-04-08",
+        "n_training_daily": 2000,
+        "params": [
+          2.9189292478170027e-06,
+          0.08955767179570685,
+          0.11195009108099971,
+          0.8358861425318385
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-07-10",
+        "n_training_daily": 2000,
+        "params": [
+          3.1350591747075543e-06,
+          0.08912476601795725,
+          0.1114088331763246,
+          0.8342607275881448
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2025-10-08",
+        "n_training_daily": 2000,
+        "params": [
+          3.5189456851879565e-06,
+          0.08823203602251081,
+          0.11029262086566545,
+          0.8309087669100738
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-01-08",
+        "n_training_daily": 2000,
+        "params": [
+          4.22145818139841e-06,
+          0.08681065109459167,
+          0.1085154449165876,
+          0.8255719028503795
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-04-10",
+        "n_training_daily": 2000,
+        "params": [
+          4.211009042703887e-06,
+          0.08698572308388215,
+          0.10873433970239871,
+          0.8262292448776001
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      },
+      {
+        "refit_date": "2026-07-13",
+        "n_training_daily": 2000,
+        "params": [
+          4.0955545140826435e-06,
+          0.03947853360938178,
+          0.0999704065230391,
+          0.8657929392953547
+        ],
+        "optimizer_contract": "successful_finite_in_bounds"
+      }
     ]
   },
   "per_model_coverage": {
     "A1": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "A2": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "A3": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "A4": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "A5": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "A2f": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "A4f": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "A3f": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "A2n": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "A4n": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "B1": {
-      "n_valid": 1879,
-      "coverage": 0.9989,
-      "eligible": true
-    },
-    "B2": {
-      "n_valid": 1879,
-      "coverage": 0.9989,
-      "eligible": true
-    },
-    "B3": {
-      "n_valid": 1879,
-      "coverage": 0.9989,
-      "eligible": true
-    },
-    "C1": {
-      "n_valid": 0,
-      "coverage": 0.0,
+      "n_valid": 1457,
+      "coverage": 0.7668,
       "eligible": false
     },
+    "B2": {
+      "n_valid": 1395,
+      "coverage": 0.7342,
+      "eligible": false
+    },
+    "B3": {
+      "n_valid": 1772,
+      "coverage": 0.9326,
+      "eligible": false
+    },
+    "C1": {
+      "n_valid": 1898,
+      "coverage": 0.9989,
+      "eligible": true
+    },
     "C2": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "C3": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     },
     "B0": {
-      "n_valid": 1879,
+      "n_valid": 1898,
       "coverage": 0.9989,
       "eligible": true
     }
@@ -137,209 +3387,198 @@
     {
       "rank": 1,
       "spec": "A4f",
-      "mean_qlike": 1.400742651220228
+      "mean_qlike": 1.3983915202146147
     },
     {
       "rank": 2,
       "spec": "A4",
-      "mean_qlike": 1.402380092145802
+      "mean_qlike": 1.3984137843521682
     },
     {
       "rank": 3,
       "spec": "A4n",
-      "mean_qlike": 1.402380092145802
+      "mean_qlike": 1.3984137843521682
     },
     {
       "rank": 4,
-      "spec": "A2",
-      "mean_qlike": 1.4100358605324808
+      "spec": "B1",
+      "mean_qlike": 1.4000253660593776
     },
     {
       "rank": 5,
-      "spec": "A2n",
-      "mean_qlike": 1.4100358605324808
+      "spec": "A2",
+      "mean_qlike": 1.4032947602336987
     },
     {
       "rank": 6,
-      "spec": "A1",
-      "mean_qlike": 1.4124864675089948
+      "spec": "A2n",
+      "mean_qlike": 1.4032947602336987
     },
     {
       "rank": 7,
-      "spec": "A3",
-      "mean_qlike": 1.4124864675089948
+      "spec": "A3f",
+      "mean_qlike": 1.4083395222274542
     },
     {
       "rank": 8,
-      "spec": "A2f",
-      "mean_qlike": 1.419897459823416
+      "spec": "A1",
+      "mean_qlike": 1.4083680586200817
     },
     {
       "rank": 9,
-      "spec": "B1",
-      "mean_qlike": 1.4244408056937412
+      "spec": "A3",
+      "mean_qlike": 1.4083680586200817
     },
     {
       "rank": 10,
-      "spec": "A3f",
-      "mean_qlike": 1.426068987172809
+      "spec": "A2f",
+      "mean_qlike": 1.4116025032042339
     },
     {
       "rank": 11,
       "spec": "B3",
-      "mean_qlike": 1.4344615973830803
+      "mean_qlike": 1.4171097346716675
     },
     {
       "rank": 12,
-      "spec": "B2",
-      "mean_qlike": 1.4607308954990694
+      "spec": "A5",
+      "mean_qlike": 1.428367439959582
     },
     {
       "rank": 13,
-      "spec": "B0",
-      "mean_qlike": 1.4868685281055762
+      "spec": "C1",
+      "mean_qlike": 1.4459913883596194
     },
     {
       "rank": 14,
-      "spec": "A5",
-      "mean_qlike": 2.1440331559534704
+      "spec": "C3",
+      "mean_qlike": 1.4491147521209105
     },
     {
       "rank": 15,
-      "spec": "C1",
-      "mean_qlike": NaN
+      "spec": "C2",
+      "mean_qlike": 1.4500867882759685
     },
     {
       "rank": 16,
-      "spec": "C3",
-      "mean_qlike": 1.9684178424002818
+      "spec": "B2",
+      "mean_qlike": 1.4526795196076023
     },
     {
       "rank": 17,
-      "spec": "C2",
-      "mean_qlike": 2.3917803830860462
+      "spec": "B0",
+      "mean_qlike": 1.4824753425300716
     }
   ],
-  "hansen_spa_test": {
-    "stat": 4.204654737813586,
-    "pval": 0.28857715430861725,
-    "reject_h0_p10": false,
-    "n_specs_tested": 15,
-    "interpretation": "Cannot reject H0: no eligible model significantly beats GJR (SPA p=0.289)",
+  "legacy_raw_scale_joint_diagnostic": {
+    "stat": 4.062019587246049,
+    "empirical_tail_fraction": 0.0,
+    "n_specs_tested": 13,
+    "formal_spa": false,
+    "warning": "Uses raw observation SD, not long-run variance; diagnostic only.",
     "superior_set_nominal": [
       "A1",
       "A2",
       "A3",
       "A4",
+      "A5",
       "A2f",
       "A4f",
       "A3f",
       "A2n",
       "A4n",
-      "B1",
-      "B2",
-      "B3"
+      "C1",
+      "C2",
+      "C3"
     ]
   },
-  "white_rc_test": {
+  "a4f_single_spec_bootstrap_dm": {
     "spec": "A4f",
     "eligible": true,
-    "t_stat": 4.1334667187930885,
-    "pval": 0.0,
-    "reject_h0_p10": true,
-    "interpretation": "A4f significantly beats GJR after RC correction (p=0.000)"
+    "t_stat": 4.062019587246049,
+    "empirical_tail_fraction": 0.0,
+    "snooping_adjusted": false,
+    "warning": "Single-spec diagnostic; not a max-type Reality Check."
   },
   "individual_dm_stats": {
     "A1": {
-      "t_stat": 3.126631716534911,
-      "d_bar": 0.07438206059658156,
+      "t_stat": 3.146321595250321,
+      "d_bar": 0.07410728390998952,
       "harvey_pass": true,
       "included_in_spa": true
     },
     "A2": {
-      "t_stat": 3.28170901162484,
-      "d_bar": 0.0768326675730953,
+      "t_stat": 3.420668972551522,
+      "d_bar": 0.07918058229637283,
       "harvey_pass": true,
       "included_in_spa": true
     },
     "A3": {
-      "t_stat": 3.126631716534911,
-      "d_bar": 0.07438206059658156,
+      "t_stat": 3.146321595250321,
+      "d_bar": 0.07410728390998952,
       "harvey_pass": true,
       "included_in_spa": true
     },
     "A4": {
-      "t_stat": 4.041648788367642,
-      "d_bar": 0.08448843595977416,
+      "t_stat": 4.061380534249354,
+      "d_bar": 0.08406155817790334,
       "harvey_pass": true,
       "included_in_spa": true
     },
     "A5": {
-      "t_stat": -11.20900929230887,
-      "d_bar": -0.6571646278478944,
+      "t_stat": 2.6167388665256834,
+      "d_bar": 0.054107902570489363,
       "harvey_pass": false,
       "included_in_spa": true
     },
     "A2f": {
-      "t_stat": 3.0634940289277237,
-      "d_bar": 0.06697106828216035,
+      "t_stat": 3.011706611234279,
+      "d_bar": 0.07087283932583752,
       "harvey_pass": true,
       "included_in_spa": true
     },
     "A4f": {
-      "t_stat": 4.1334667187930885,
-      "d_bar": 0.0861258768853484,
+      "t_stat": 4.062019587246049,
+      "d_bar": 0.08408382231545701,
       "harvey_pass": true,
       "included_in_spa": true
     },
     "A3f": {
-      "t_stat": 3.303230399388028,
-      "d_bar": 0.060799540932767224,
+      "t_stat": 3.1629969997419143,
+      "d_bar": 0.0741358203026173,
       "harvey_pass": true,
       "included_in_spa": true
     },
     "A2n": {
-      "t_stat": 3.28170901162484,
-      "d_bar": 0.0768326675730953,
+      "t_stat": 3.420668972551522,
+      "d_bar": 0.07918058229637283,
       "harvey_pass": true,
       "included_in_spa": true
     },
     "A4n": {
-      "t_stat": 4.041648788367642,
-      "d_bar": 0.08448843595977416,
+      "t_stat": 4.061380534249354,
+      "d_bar": 0.08406155817790334,
       "harvey_pass": true,
       "included_in_spa": true
     },
-    "B1": {
-      "t_stat": 4.204654737813586,
-      "d_bar": 0.06242772241183504,
-      "harvey_pass": true,
-      "included_in_spa": true
-    },
-    "B2": {
-      "t_stat": 1.3886952615606116,
-      "d_bar": 0.02613763260650694,
+    "C1": {
+      "t_stat": 2.843748484539007,
+      "d_bar": 0.03648395417045212,
       "harvey_pass": false,
       "included_in_spa": true
     },
-    "B3": {
-      "t_stat": 3.771057291507994,
-      "d_bar": 0.05240693072249591,
-      "harvey_pass": true,
-      "included_in_spa": true
-    },
     "C2": {
-      "t_stat": -21.06651358551618,
-      "d_bar": -0.9049118549804696,
+      "t_stat": 2.2610144439577327,
+      "d_bar": 0.03238855425410324,
       "harvey_pass": false,
       "included_in_spa": true
     },
     "C3": {
-      "t_stat": -9.963159160313067,
-      "d_bar": -0.48154931429470554,
+      "t_stat": 2.393792472040139,
+      "d_bar": 0.03336059040916102,
       "harvey_pass": false,
       "included_in_spa": true
     }
   },
-  "c3_verdict": "C3 MIXED: SPA/RC results require nuanced discussion of data snooping in paper body"
+  "c3_status": "PENDING_CANONICAL_CORRECTION_ARTIFACT"
 }

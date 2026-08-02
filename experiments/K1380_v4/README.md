@@ -1,4 +1,4 @@
-# K1380_v4 — Paper 9 White RC / Hansen SPA Test (3-Strike Refactor)
+# K1380_v4 — Paper 9 horse-race loss generation and corrected SPA/RC
 
 ## Background
 
@@ -41,8 +41,12 @@ Column k = lag k+1: `tr_lv[K-1-k : ntr-1-k]`. No wrapping, correct `ntr-K` rows.
 
 - Same 17-spec horse race as K1380 (A1-A5, A2f/A4f/A3f/A2n/A4n, B1-B3, C1-C3, B0)
 - OOS: 2019-01-01 onward, rolling W=2000, refit_every=63
-- Per-model valid masks for QLIKE; SPA uses intersection of ≥95%-coverage specs
+- Per-model valid masks for QLIKE; formal inference uses the intersection of
+  ≥95%-coverage specs
 - Stationary bootstrap B=499, seed=42
+- Hansen studentization uses a stationary-bootstrap estimate of the long-run
+  scale of `sqrt(T) * mean(d_t)`, not raw observation SD
+- Finite Monte Carlo p-values use `(exceedances + 1) / (B + 1)`
 - Harvey threshold |t| > 3.0
 
 ## Success Criteria
@@ -51,7 +55,7 @@ Column k = lag k+1: `tr_lv[K-1-k : ntr-1-k]`. No wrapping, correct `ntr-K` rows.
 - `≥ 12/17 models with coverage ≥ 95%`
 - Script completes without `n_valid=0` error
 
-## 2026-07-05 rerun
+## 2026-07-05 rerun（歷史紀錄；數值已被 2026-08-02 重跑取代）
 
 Task `experiment_k1380v4_rerun_atomic_results_c5` reran v4 after fixing the
 truncated-results failure mode:
@@ -64,23 +68,26 @@ truncated-results failure mode:
   `actual_r2 / forecast_variance - log(actual_r2 / forecast_variance) - 1`.
 - Fresh rerun completed in `934.5s`; `n_valid_spa=1879`, `15` non-benchmark
   specs met the 95% coverage threshold; C1 remained ineligible at 0% coverage.
-- Hansen SPA: `p=0.2886`, so the joint data-snooping null is not rejected.
-- A4f White RC: `t=4.1335`, `p=0.0000`, so A4f beats GJR in the targeted RC
-  comparison.
-- Verdict remains `C3 MIXED`: the paper needs nuanced data-snooping discussion,
-  not a blanket claim that the full 17-spec horse race survives SPA.
+- The historical fields labelled Hansen SPA and White RC were later proven to
+  be mislabelled and are not valid evidence. They are retained only in Git
+  history and the 2026-07-29 audit below.
 
 ## Output
 
-- `k1380_v4_results.json` — SPA/RC test results + per-model coverage
+- `k1380_v4_results.json` — model fit receipts, coverage, rankings, and explicitly
+  non-canonical raw-scale diagnostics
 - `k1380_v4_losses_all.npy` — (17, n_oos) QLIKE loss matrix
+- `k1380_v4_rc_correction_results.json` — canonical SPA/RC/Holm inference
+- `run_pipeline.py` — only canonical entrypoint; runs both stages and emits one
+  full-chain reproduce spec
 
 ## Paper Linkage
 
 **Paper 9** (`paper/garch-x-vix/`), Critical Issue C3:
 > "17-specification ranking requires multiple testing correction (White RC / Hansen SPA)."
 
-K1380_v4 resolves C3 by providing valid SPA + RC test results under corrected per-model masks.
+K1380_v4 addresses C3 only through `k1380_v4_rc_correction_results.json`; the
+base result deliberately does not issue a C3 verdict.
 
 ## Related
 
@@ -91,18 +98,20 @@ K1380_v4 resolves C3 by providing valid SPA + RC test results under corrected pe
 
 ## ⚠️ 2026-07-29 資料窺探修正（RC/SPA 重新分析）
 
-`k1380_v4_results.json` 的 `white_rc_test` 與 `hansen_spa_test` **兩個欄位都被錯誤標示**，
-且方向相反。修正產物：`k1380_v4_rc_correction.py` → `k1380_v4_rc_correction_results.json`。
-v4 原始 results JSON **未被修改**（永遠修流程，不修資料）。
+2026-07-05 版本的 `k1380_v4_results.json` 中，`white_rc_test` 與
+`hansen_spa_test` **兩個欄位都被錯誤標示**，且方向相反。當時的原件可由 Git history
+與 `gate_history/` 回收；現行 base artifact 已由修正後 producer 完整重生，並永久移除這些
+失實欄位，不能再稱為 07-05「未修改原件」。
 
 | 欄位 | v4 宣稱 | 實際是什麼 |
 |---|---|---|
 | `white_rc_test` p=0.000 | 「A4f significantly beats GJR **after RC correction**」 | **單一 spec 的 bootstrap DM t 檢定，完全沒做窺探修正**（`k1380_v4.py:771-782`：`max(0.0, t_b_a4f)` 是對純量取 max，不是跨候選集合取 max）→ **高估** |
 | `hansen_spa_test` p=0.2886 | 「Hansen SPA，不拒絕 H0」 | 每個 spec 都用自己的 d-bar 重新置中 = **least-favourable 的 SPA_u**（studentized White RC），不是 Hansen 建議回報的 consistent SPA_c → **低估** |
 
-**為什麼不需要重跑 GARCH**：`k1380_v4.py:693` 在任何檢定之前就存下完整 17×n_oos QLIKE
-矩陣，缺陷完全在該產物的下游，屬純重新分析。修正腳本內建 4 項 v4 數字的**逐位重現**
-（atol=1e-12）作為前置斷言，重現失敗即中止 — 沒有這道檢查，後面的修正數字無從取信。
+**2026-07-29 修正的有效範圍**：當時只處理 RC/SPA 誤標，所以從已保存的 17×n_oos
+QLIKE 矩陣純重新分析即可；修正腳本以 4 項 base 數字的**逐位重現**（atol=1e-12）作為
+前置斷言。2026-08-02 後續 audit 又發現 A5/C-series 的上游模型實作錯誤，因此舊矩陣與
+其所有數字已失效，必須重跑 GARCH horse race；這不推翻前述統計診斷，而是擴大修復層級。
 
 **關鍵證據（least-favourable 尾部歸因）**：499 次 bootstrap 中有 144 次超過觀測統計量，
 而這 144 次的 max **全部**由 A5(t=-11.2) / C2(t=-21.1) / C3(t=-10.0) 三支
@@ -110,18 +119,58 @@ v4 原始 results JSON **未被修改**（永遠修流程，不修資料）。
 spec 取得。v4 的「不顯著」量到的是這三支的退化程度，不是候選集合的競爭力 —— 這正是
 Hansen SPA_c 要移除的保守性。
 
-**修正後結論**：SPA_c p < 1/499（fixed-omega 與 v4 的 per-resample studentization
-**兩種慣例下皆然**，故非 studentization 選擇的產物）；Holm step-down 在 FWER 0.10 下
-15 支中 11 支拒絕，A4f adj p < 1/499。**聯合窺探修正後的檢定拒絕 H0**。
+**當時的修正結論（已被 2026-08-02 全量重跑取代）**：SPA_c 拒絕 H0；但其
+studentization 仍使用 raw observation SD，且用 `p=0` 表示有限 bootstrap，兩者皆已在
+下節修正。此段只保留問題演進，不是現行數字。
 
 ⚠️ 這**推翻**了先前「真正做了多重檢定修正的檢定沒有拒絕」的讀法 —— 因為當時被當成
 「有做修正」的那個 SPA 數字本身也是錯的。
 
-**遺留待查**：A5/C2/C3 的極端 QLIKE 損失本身可能是數值退化。SPA_c 依統計理由捨棄它們；
-但若它們根本是壞的，就不該出現在候選集合裡。兩條路徑導向同一修正結論，但成因仍需查明。
+**當時遺留（2026-08-02 已定位）**：A5/C2/C3 的極端 QLIKE 損失來自下節所列 optimizer
+與跨頻率 likelihood 缺陷；它們不能被解讀為模型本身的實證表現。
 
 ## Output（更新）
 
-- `k1380_v4_results.json` — v4 原始（RC/SPA 欄位已被上表取代，保留供稽核）
+- `k1380_v4_results.json` — 現行模型結果與非正式 raw-scale diagnostics；不是歷史原件
 - `k1380_v4_losses_all.npy` — (17, n_oos) QLIKE 損失矩陣
 - `k1380_v4_rc_correction_results.json` — **窺探修正後的 canonical RC/SPA 數字**
+
+---
+
+## 2026-08-02 A5/C1-C3 model-integrity closure
+
+上一節的「遺留待查」已定位為實作錯誤，不是三支模型真的差 10–21 個標準誤：
+
+- **A5**：外層 Nelder-Mead 宣告了正向 VIX slope bounds，但實際呼叫沒有傳入 bounds，
+  結果選擇器也接受 optimizer failure。第一個 2,000 日 window 實際選到
+  `theta1=-0.35099`；修正後同 window 為 `theta1=+0.13040`。
+- **C1/C2/C3**：舊 likelihood 只有 `K+1` 筆日報酬（7／13／25），並把月頻 lag row
+  直接配給日頻 return；C1 因 `<10` gate 結構上永遠 0 coverage。新實作以日期映射將
+  每筆 eligible 日報酬對齊前 K 個完整月份的 mean log-VIX；full-history repair 讓第一個
+  window 的 C1/C2/C3 都使用完整 2,000 筆日 likelihood，並把短期 GARCH state 濾到
+  training tail。
+- **共同防線**：所有 bounded multi-start fits 只接受 successful、finite、in-bounds、
+  non-penalty iterate；預測月排除 partial current-month VIX，state recursion 依 fixed-span
+  MIDAS Eq.4 使用當月 `tau_t`。
+
+完整 OOS 與 RC/SPA 結果一律以本輪重新產生的
+`k1380_v4_results.json`、`k1380_v4_losses_all.npy` 與
+`k1380_v4_rc_correction_results.json` 為準。K1583 的舊 MCS 結論已標為 `SUPERSEDED`，
+必須以新矩陣重跑後才能引用。
+
+**最終完整重跑 read-back（1,900 OOS days，1,397 秒）**：A5/C1/C2/C3 coverage 都是
+99.89%，各有 31/31 successful finite in-bounds refits；相對 B0 的 raw-scale diagnostic
+t-stat 分別為 +2.617／+2.844／+2.261／+2.394，舊的極端負值與 C1 0 coverage 已消失。
+B1/B2/B3 在 scheduled refit 被拒時不再沿用 stale state；31 次中分別 24/23/29 次成功，
+coverage 76.68%／73.42%／93.26%，因此依預先存在的 95% gate 排除。其餘 13 支候選與 B0
+共同有 `n_valid_spa=1,898`。
+
+正式推論以 stationary-bootstrap mean distribution 估計 long-run omega；SPA_l/c/u、
+max-type White RC 均為 `p=0.0020`（0/499 exceedances 經 plus-one convention），Holm FWER
+0.10 下 13/13 拒絕，A4f adjusted `p=0.0260`。least-favourable bootstrap 0/499 draws
+超過觀測統計量，舊 A5/C2/C3 上尾歸因不再存在。`run_pipeline.py` 是唯一 canonical
+entrypoint；base/correction 子腳本單獨執行會 fail closed。每個 stage output 是 atomic，
+但 multi-file chain 不是 set-level transaction；中斷後舊 spec/commit 與新輸出 hash 不符，
+artifact gate 會 fail closed。B0 benchmark 同樣先清 stale state，31/31 refits 成功並有
+receipt。成功 full-chain 的 `reproduce_spec.json` runtime 為 1,400 秒並 hash-bind兩階段
+程式、資料、helpers、loss matrix、base result 與 canonical result。

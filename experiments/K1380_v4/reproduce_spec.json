@@ -3,39 +3,56 @@
   "generated_by": "volpred.research.reproduce_spec",
   "generated_at_runtime": true,
   "entrypoint": {
-    "path": "k1380_v4_rc_correction.py",
+    "path": "run_pipeline.py",
     "args": [],
-    "sha256": "f129029cfd900305a09983639ea1278e7e807837b132751b80909dc5cc3fdaa2",
-    "size_bytes": 20241
+    "sha256": "5c5f31b2a42b1288431b25a5cff395740f08db256438f073a38db2bd67e2ca15",
+    "size_bytes": 2723
   },
   "canonical_result": "k1380_v4_rc_correction_results.json",
   "inputs": [
     {
-      "path": "experiments/K1380_v4/k1380_v4_losses_all.npy",
-      "sha256": "25722dd0fced257278511d902b9769da37498159b922ce277941d28827171683",
-      "size_bytes": 255944
+      "path": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+      "sha256": "2aa9e3b70ae1bf2a4e8335f1f4a552b4eca4b6389e2a2a6e4ac87aa87fe9b019",
+      "size_bytes": 3176665
     },
     {
-      "path": "experiments/K1380_v4/k1380_v4_results.json",
-      "sha256": "aed59a115166a0146615ce918e2a95f41f3c336b380d0dfae263f8b2190158e9",
-      "size_bytes": 7454
+      "path": "experiments/K1380_v4/k1380_v4.py",
+      "sha256": "7e0b939f81da9a4946805b9384e0cd701aa77bb18ec280a4080248f186259682",
+      "size_bytes": 41728
+    },
+    {
+      "path": "experiments/K1380_v4/k1380_v4_rc_correction.py",
+      "sha256": "ffb0b5b7879265e4408a142df01c6f35cb17c22e383fc8fba0a82091587e2bd8",
+      "size_bytes": 20647
+    },
+    {
+      "path": "src/volpred/research/optimization.py",
+      "sha256": "594b08da2fc27cf9b6722c12080c51361627edc04e6e95199ee9ba1412f5bff7",
+      "size_bytes": 4630
+    },
+    {
+      "path": "src/volpred/models/garch/fixed_span_midas.py",
+      "sha256": "e04380fcd223cdb95b76073910d98889ab115aaba63a1060028d7ff4cd68f09f",
+      "size_bytes": 10815
+    },
+    {
+      "path": "src/volpred/stats/inference.py",
+      "sha256": "57ec092ce0f9bc6f86efa5e81580318642bffabaa8b00a6b1f4c24843b6d0dd8",
+      "size_bytes": 9164
     },
     {
       "path": "src/volpred/research/reproduce_spec.py",
       "sha256": "93bc7329279e6935da828d2bd0e3c92890c1e223eb4840a0a3a1a77c8d20719f",
       "size_bytes": 19308
-    },
-    {
-      "path": "src/volpred/stats/inference.py",
-      "sha256": "6b2066872c7069dee1d14d0ce6b1ced85460b8f7e7b5f627ff83833ce235cc13",
-      "size_bytes": 6674
     }
   ],
   "outputs": [
+    "k1380_v4_losses_all.npy",
     "k1380_v4_rc_correction_results.json",
+    "k1380_v4_results.json",
     "reproduce_commit.json"
   ],
-  "timeout_seconds": 61,
+  "timeout_seconds": 4260,
   "network": "deny",
   "randomness": {
     "status": "declared",
@@ -47,8 +64,8 @@
     ]
   },
   "runtime": {
-    "runtime_seconds": 0.539,
-    "recorded_at": "2026-08-02T00:14:17Z"
+    "runtime_seconds": 1400.232,
+    "recorded_at": "2026-08-02T03:40:39Z"
   },
   "environment": {
     "python": "3.12.10",
@@ -82,13 +99,24 @@
   },
   "canonical_result_identity": {
     "path": "k1380_v4_rc_correction_results.json",
-    "sha256": "b4571a042e06fd225233fd836f5f38a4fbcad6a97f1fbfc67f5b7762db86cf17",
-    "size_bytes": 10138
+    "sha256": "95c889647095ecfb72bddd2e0ce4ee156a7e87f3c8ebfc600b691ec795159836",
+    "size_bytes": 10980
   },
   "artifact_generation": {
     "schema_version": "volpred.reproduce_commit.v1",
-    "generation_id": "8ee4a8283f501126c5cde41e65087b3b916e330c54b8bf63986e4ad2fa2b000f",
+    "generation_id": "fc7ce9ef8ad6ca542aaf0d3eafca17af9a6ef06bf171222d829b685c66776836",
     "commit_file": "reproduce_commit.json",
-    "output_identities": []
+    "output_identities": [
+      {
+        "path": "k1380_v4_losses_all.npy",
+        "sha256": "2b7232b99a7cb9521adfce843f399cf51099581ef9ac6a9d2e2e4f74e35551f4",
+        "size_bytes": 258528
+      },
+      {
+        "path": "k1380_v4_results.json",
+        "sha256": "2c1d81cc469d590c44965660909c4abb6541fd4e56065d5aa9ce3b6abc08ba00",
+        "size_bytes": 92619
+      }
+    ]
   }
 }

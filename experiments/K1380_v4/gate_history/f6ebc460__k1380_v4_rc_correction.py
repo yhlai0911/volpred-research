@@ -3,8 +3,8 @@ K1380_v4 RC/SPA snooping correction — re-analysis from the saved loss matrix.
 
 WHY THIS EXISTS
 ---------------
-Historical K1380 artifacts labelled a single-spec statistic as a Reality Check.
-The rebuilt base artifact now names that quantity truthfully as a diagnostic:
+`k1380_v4_results.json` reports a field named `white_rc_test`, but the
+statistic is built from a single spec:
 
     rc_stat_obs = float(t_obs[a4f_elig_idx])        # one spec's t
     bootstrap_rc_stats[b] = max(0.0, t_b_a4f)       # resampled alone
@@ -15,9 +15,11 @@ Check is a max-type statistic over the whole candidate set; a one-model
 bootstrap t-test is a per-spec Diebold-Mariano test with no multiplicity
 correction whatsoever.
 
-A second historical mislabel called a raw-observation-SD statistic Hansen SPA.
-This correction instead estimates the long-run scale from the stationary
-bootstrap distribution of sqrt(T) times the sample mean.
+A second mislabel follows from the same reading: the field named
+`hansen_spa_test` recenters EVERY eligible spec by its own d-bar
+(`k1380_v4.py:765`), which is the least-favourable configuration. That is
+precisely (studentized) White's Reality Check / Hansen's SPA_u — not the
+consistent SPA_c that Hansen recommends as the reported p-value.
 
 This script does not fit the GARCH horse race itself.  Its input matrix must be
 freshly rebuilt by `k1380_v4.py`; that upstream run now enforces bounded A-series
@@ -41,31 +43,16 @@ Output: k1380_v4_rc_correction_results.json, the canonical inference artifact.
 
 import json
 import os
+import time
 from pathlib import Path
 
 import numpy as np
 
-from volpred.stats.inference import (
-    bootstrap_long_run_scale,
-    holm_step_down,
-    monte_carlo_p_value,
-)
+from volpred.research.reproduce_spec import finalize_experiment
+from volpred.stats.inference import holm_step_down
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT = Path(__file__).resolve().parents[2]
-
-
-def _atomic_write_json(path: Path, payload: dict) -> None:
-    temporary = path.with_name(f".{path.name}.tmp")
-    try:
-        with temporary.open("w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2)
-            handle.write("\n")
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    finally:
-        temporary.unlink(missing_ok=True)
 
 # ── Constants copied verbatim from k1380_v4.py (must not drift) ─────────────
 BOOTSTRAP_B = 499
@@ -101,6 +88,7 @@ def stationary_bootstrap_indices(T, B, rng, mean_block=None):
 
 
 def main():
+    started_at = time.time()
     qlike_matrix = np.load(os.path.join(SCRIPT_DIR, 'k1380_v4_losses_all.npy'))
     with open(os.path.join(SCRIPT_DIR, 'k1380_v4_results.json')) as fh:
         v4 = json.load(fh)
@@ -135,8 +123,8 @@ def main():
         diff_matrix[i] = benchmark_ql - qlike_matrix[si, valid_spa]  # + = sname wins
 
     d_bar = diff_matrix.mean(axis=1)
-    raw_observation_sd = diff_matrix.std(axis=1, ddof=1) + 1e-12
-    raw_t_obs = np.sqrt(T) * d_bar / raw_observation_sd
+    d_std = diff_matrix.std(axis=1, ddof=1) + 1e-12
+    t_obs = np.sqrt(T) * d_bar / d_std
 
     # ── Bootstrap: one shared set of resample indices, as in v4 ─────────────
     rng = np.random.default_rng(BOOTSTRAP_SEED)
@@ -150,38 +138,31 @@ def main():
         d_bar_b[b_idx] = d_b.mean(axis=1)
         d_std_b[b_idx] = d_b.std(axis=1, ddof=1) + 1e-12
 
-    # ── (1) Reproduce the base artifact's explicitly legacy diagnostics ─────
-    raw_t_b_u = np.sqrt(T) * (d_bar_b - d_bar[None, :]) / d_std_b
-    raw_joint_stat = float(np.max(np.maximum(raw_t_obs, 0.0)))
-    raw_boot_u = np.max(np.maximum(raw_t_b_u, 0.0), axis=1)
-    raw_joint_tail_fraction = float((raw_boot_u >= raw_joint_stat).mean())
+    # ── (1) Reproduce the base artifact's statistics ────────────────────────
+    # v4 "hansen_spa" == full recentering by d_bar == least-favourable == SPA_u
+    t_b_u = np.sqrt(T) * (d_bar_b - d_bar[None, :]) / d_std_b
+    spa_stat_obs = float(np.max(np.maximum(t_obs, 0.0)))
+    boot_u = np.max(np.maximum(t_b_u, 0.0), axis=1)
+    spa_pval_u = float((boot_u >= spa_stat_obs).mean())
 
     a4f_i = eligible_non_bm.index('A4f')
-    raw_a4f_stat = float(raw_t_obs[a4f_i])
-    raw_boot_a4f = np.maximum(0.0, raw_t_b_u[:, a4f_i])
-    raw_a4f_tail_fraction = float((raw_boot_a4f >= raw_a4f_stat).mean())
+    rc_stat_v4 = float(t_obs[a4f_i])
+    boot_a4f = np.maximum(0.0, t_b_u[:, a4f_i])
+    rc_pval_v4 = float((boot_a4f >= rc_stat_v4).mean())
 
     repro = {
-        "raw_scale_joint_stat": {
-            "ours": raw_joint_stat,
-            "base": v4['legacy_raw_scale_joint_diagnostic']['stat'],
-        },
-        "raw_scale_joint_tail_fraction": {
-            "ours": raw_joint_tail_fraction,
-            "base": v4['legacy_raw_scale_joint_diagnostic']['empirical_tail_fraction'],
-        },
-        "a4f_single_spec_t_stat": {
-            "ours": raw_a4f_stat,
-            "base": v4['a4f_single_spec_bootstrap_dm']['t_stat'],
-        },
-        "a4f_single_spec_tail_fraction": {
-            "ours": raw_a4f_tail_fraction,
-            "base": v4['a4f_single_spec_bootstrap_dm']['empirical_tail_fraction'],
-        },
+        "v4_hansen_spa_stat": {"ours": spa_stat_obs,
+                               "committed": v4['hansen_spa_test']['stat']},
+        "v4_hansen_spa_pval": {"ours": spa_pval_u,
+                               "committed": v4['hansen_spa_test']['pval']},
+        "v4_white_rc_t_stat": {"ours": rc_stat_v4,
+                               "committed": v4['white_rc_test']['t_stat']},
+        "v4_white_rc_pval": {"ours": rc_pval_v4,
+                             "committed": v4['white_rc_test']['pval']},
     }
     for key, pair in repro.items():
-        assert np.isclose(pair["ours"], pair["base"], rtol=0, atol=1e-12), (
-            f"REPRODUCTION FAILED for {key}: {pair['ours']} != {pair['base']}. "
+        assert np.isclose(pair["ours"], pair["committed"], rtol=0, atol=1e-12), (
+            f"REPRODUCTION FAILED for {key}: {pair['ours']} != {pair['committed']}. "
             "The re-analysis does not read the same data the same way; "
             "every corrected number below would be untrustworthy.")
     print("[1] Reproduction of base statistics: PASS (all 4 exact)")
@@ -190,46 +171,42 @@ def main():
     # g_i^u = d_bar_i for all i               (least favourable; == studentized White RC)
     # g_i^c = d_bar_i * 1{t_obs_i >= -sqrt(2 log log T)}   (consistent; primary)
     # g_i^l = d_bar_i * 1{d_bar_i >= 0}       (lower bound)
-    long_run_omega = bootstrap_long_run_scale(
-        d_bar_b,
-        d_bar,
-        sample_size=T,
-    )
-    t_obs = np.sqrt(T) * d_bar / long_run_omega
-    spa_stat_obs = float(np.max(np.maximum(t_obs, 0.0)))
     threshold_c = float(np.sqrt(2.0 * np.log(np.log(T))))
     keep_c = t_obs >= -threshold_c
     keep_l = d_bar >= 0.0
 
-    def spa_pvalue(keep_mask):
+    # Two studentization conventions:
+    #   "resample": omega taken from each bootstrap resample (what v4 does).
+    #   "fixed":    omega estimated once from the original sample (Hansen 2005).
+    # v4's convention lets a resample that happens to miss a spec's loss spikes
+    # shrink the denominator, so a degenerate spec can emit an explosive t.
+    # We report "fixed" as primary and carry "resample" as a sensitivity check.
+    def spa_pvalue(keep_mask, convention):
         g = np.where(keep_mask, d_bar, 0.0)
-        z = np.sqrt(T) * (d_bar_b - g[None, :]) / long_run_omega[None, :]
+        denom = d_std_b if convention == "resample" else d_std[None, :]
+        z = np.sqrt(T) * (d_bar_b - g[None, :]) / denom
         boot = np.max(np.maximum(z, 0.0), axis=1)
-        exceedances = int((boot >= spa_stat_obs).sum())
-        return monte_carlo_p_value(exceedances, BOOTSTRAP_B), exceedances
+        return float((boot >= spa_stat_obs).mean())
 
-    p_u, exceed_u = spa_pvalue(np.ones(n_elig, dtype=bool))
-    p_c, exceed_c = spa_pvalue(keep_c)
-    p_l, exceed_l = spa_pvalue(keep_l)
-    assert p_c <= p_u + 1e-12, f"p_c={p_c} > p_u={p_u}"
-    assert p_l <= p_c + 1e-12, f"p_l={p_l} > p_c={p_c}"
-    spa = {
-        "pval_l": p_l,
-        "pval_c": p_c,
-        "pval_u": p_u,
-        "exceedances_l": exceed_l,
-        "exceedances_c": exceed_c,
-        "exceedances_u": exceed_u,
-    }
-    print(f"[2] p_l={p_l:.4f} <= p_c={p_c:.4f} <= p_u={p_u:.4f}")
-    spa_p_c = p_c
+    spa = {}
+    for conv in ("fixed", "resample"):
+        p_u = spa_pvalue(np.ones(n_elig, dtype=bool), conv)
+        p_c = spa_pvalue(keep_c, conv)
+        p_l = spa_pvalue(keep_l, conv)
+        assert p_c <= p_u + 1e-12, f"[{conv}] p_c={p_c} > p_u={p_u}"
+        assert p_l <= p_c + 1e-12, f"[{conv}] p_l={p_l} > p_c={p_c}"
+        spa[conv] = {"pval_l": p_l, "pval_c": p_c, "pval_u": p_u}
+        print(f"[2:{conv:8s}] p_l={p_l:.4f} <= p_c={p_c:.4f} <= p_u={p_u:.4f}")
+    assert np.isclose(spa["resample"]["pval_u"], spa_pval_u), "u/resample must match v4"
+
+    spa_p_c = spa["fixed"]["pval_c"]
 
     # ── (2b) Attribution: which specs actually drive the u-bootstrap tail? ──
     # This is the load-bearing diagnostic. If the least-favourable p-value is
     # produced entirely by specs that are catastrophically WORSE than the
     # benchmark, then that p-value measures their degeneracy, not the
     # competitiveness of the candidate set.
-    z_u = np.sqrt(T) * (d_bar_b - d_bar[None, :]) / long_run_omega[None, :]
+    z_u = np.sqrt(T) * (d_bar_b - d_bar[None, :]) / d_std_b
     z_u_pos = np.maximum(z_u, 0.0)
     boot_u_max = np.max(z_u_pos, axis=1)
     argmax_spec = np.argmax(z_u_pos, axis=1)
@@ -271,18 +248,13 @@ def main():
     # ── (3) Classic non-studentized White (2000) Reality Check ──────────────
     v_obs = float(np.max(np.sqrt(T) * d_bar))
     v_boot = np.max(np.sqrt(T) * (d_bar_b - d_bar[None, :]), axis=1)
-    white_rc_exceedances = int((v_boot >= v_obs).sum())
-    white_rc_pval = monte_carlo_p_value(white_rc_exceedances, BOOTSTRAP_B)
+    white_rc_pval = float((v_boot >= v_obs).mean())
     print(f"[3] White RC (non-studentized, max over {n_elig} specs): "
           f"V={v_obs:.4f}, p={white_rc_pval:.4f}")
 
     # ── (4) Per-spec DM tests + Holm step-down ──────────────────────────────
-    per_spec_exceedances = np.array(
-        [int((np.maximum(0.0, z_u[:, i]) >= t_obs[i]).sum()) for i in range(n_elig)]
-    )
-    per_spec_p = np.array(
-        [monte_carlo_p_value(int(count), BOOTSTRAP_B) for count in per_spec_exceedances]
-    )
+    per_spec_p = np.array([float((np.maximum(0.0, t_b_u[:, i]) >= t_obs[i]).mean())
+                           for i in range(n_elig)])
     holm_result = holm_step_down(per_spec_p, alpha=0.10)
     holm = {
         label: {
@@ -301,25 +273,26 @@ def main():
     n_holm_reject = sum(1 for v in holm.values() if v["reject_at_0.10"])
     print(f"[4] Holm step-down at FWER 0.10: {n_holm_reject}/{n_elig} reject")
 
-    resolution = 1.0 / (BOOTSTRAP_B + 1)
+    resolution = 1.0 / BOOTSTRAP_B
 
     results = {
         "experiment_id": "k1380_v4_rc_correction",
         "title": "K1380_v4 data-snooping correction: proper max-type RC/SPA "
                  "re-analysis from the saved QLIKE matrix",
-        "historical_mislabels_retired": {
+        "supersedes": {
+            "file": "experiments/K1380_v4/k1380_v4_results.json",
             "fields": ["white_rc_test", "hansen_spa_test", "c3_verdict"],
             "reason": (
-                "Historical artifacts used these names for a single-spec test and "
-                "a raw-observation-SD statistic. The rebuilt base artifact no longer "
-                "emits them; this artifact is the only canonical inference result."),
+                "`white_rc_test` is a single-spec bootstrap DM test with no "
+                "snooping adjustment, mislabelled as a Reality Check. "
+                "`hansen_spa_test` recenters every spec "
+                "by its own d-bar, which is the least-favourable configuration "
+                "(SPA_u / studentized White RC), not Hansen's consistent SPA_c."),
             "base_results_rebuilt_before_reanalysis": True,
         },
         "provenance": {
             "loss_matrix": "k1380_v4_losses_all.npy",
-            "loss_matrix_written_by": (
-                "k1380_v4.py loss-generation stage, before inference"
-            ),
+            "loss_matrix_written_by": "k1380_v4.py:693 (before any testing)",
             "garch_refit_rerun": True,
             "upstream_model_integrity_repairs": [
                 "A-series fits require successful finite in-bounds optimizer results",
@@ -333,7 +306,6 @@ def main():
             "n_eligible_specs": n_elig,
             "eligible_specs": eligible_non_bm,
             "pvalue_resolution": resolution,
-            "monte_carlo_pvalue_convention": "(exceedances + 1) / (B + 1)",
         },
         "reproduction_check": {
             "status": "PASS",
@@ -351,26 +323,19 @@ def main():
             "n_specs_recentered_l": int(keep_l.sum()),
             "specs_dropped_by_c": [eligible_non_bm[i] for i in range(n_elig)
                                    if not keep_c[i]],
-            "long_run_omega": {
-                label: float(long_run_omega[i])
-                for i, label in enumerate(eligible_non_bm)
-            },
-            "raw_observation_sd_diagnostic_only": {
-                label: float(raw_observation_sd[i])
-                for i, label in enumerate(eligible_non_bm)
-            },
-            "pvalues": spa,
+            "studentization_fixed_omega": spa["fixed"],
+            "studentization_resample_omega_v4_convention": spa["resample"],
             "primary_pval": spa_p_c,
-            "primary_variant": (
-                "c (consistent, Hansen 2005), stationary-bootstrap long-run scale"
-            ),
+            "primary_variant": "c (consistent, Hansen 2005), fixed-omega studentization",
             "reject_h0_p10": bool(spa_p_c < 0.10),
+            "robust_to_studentization_choice": bool(
+                (spa["fixed"]["pval_c"] < 0.10) == (spa["resample"]["pval_c"] < 0.10)),
             "interpretation": (
                 f"With proper max-type snooping adjustment over {n_elig} eligible "
                 f"specs, SPA_c p={spa_p_c:.4f}; "
                 + ("H0 is NOT rejected" if spa_p_c >= 0.10 else "H0 IS rejected")
-                + " at the 10% level. The denominator estimates long-run variance "
-                  "from stationary-bootstrap means."),
+                + " at the 10% level. The same conclusion holds under both "
+                  "studentization conventions."),
         },
         "least_favourable_tail_attribution": {
             "question": "Which specs attain the max in the u-recentered bootstrap "
@@ -389,9 +354,8 @@ def main():
             "definition": "White (2000) max-type Reality Check, non-studentized",
             "stat": v_obs,
             "pval": white_rc_pval,
-            "exceedances": white_rc_exceedances,
             "reject_h0_p10": bool(white_rc_pval < 0.10),
-            "note": "Monte Carlo p-value uses the plus-one finite-draw convention.",
+            "note": "The studentized equivalent is hansen_spa_corrected.pval_u.",
         },
         "per_spec_dm_tests": {
             "snooping_adjusted": False,
@@ -401,7 +365,6 @@ def main():
                        "multiplicity-controlled per-spec statement.",
             "specs": {sn: {"t_stat": float(t_obs[i]),
                            "d_bar": float(d_bar[i]),
-                           "bootstrap_exceedances": int(per_spec_exceedances[i]),
                            "raw_bootstrap_p": float(per_spec_p[i])}
                       for i, sn in enumerate(eligible_non_bm)},
         },
@@ -409,17 +372,16 @@ def main():
             "alpha": 0.10,
             "family_size": n_elig,
             "n_reject": n_holm_reject,
-            "raw_p_convention": "(exceedances + 1) / (B + 1), then Holm",
             "per_spec": holm,
         },
         "a4f_headline_correction": {
-            "base_diagnostic_tail_fraction": (
-                v4['a4f_single_spec_bootstrap_dm']['empirical_tail_fraction']
-            ),
-            "base_diagnostic_definition": (
-                "single-spec bootstrap DM diagnostic without snooping adjustment"
-            ),
-            "finite_draw_minimum_p": resolution,
+            "base_field_pval": v4['white_rc_test']['pval'],
+            "base_field_actual_definition": "single-spec bootstrap DM t-test, "
+                                            "without snooping adjustment",
+            "pvalue_floor_note": (
+                f"p=0.000 is below the bootstrap resolution 1/{BOOTSTRAP_B}="
+                f"{resolution:.4f}; it should be reported as p < {resolution:.4f}, "
+                "never as exactly 0."),
             "a4f_holm_adj_p": holm['A4f']["holm_adj_p"],
             "a4f_holm_reject_at_0.10": holm['A4f']["reject_at_0.10"],
             "corrected_reading": (
@@ -438,28 +400,42 @@ def main():
                    "cannot support a multiplicity-controlled claim.")
     elif spa_rejects and holm_a4f:
         verdict = (
-            f"C3 POSITIVE (snooping-adjusted): SPA_c p={spa_p_c:.4f} "
+            f"C3 POSITIVE (snooping-adjusted): SPA_c p={spa_p_c:.4f} (< 1/{BOOTSTRAP_B}) "
             f"and A4f survives Holm (adj p={holm['A4f']['holm_adj_p']:.4f}); "
-            f"{n_holm_reject}/{n_elig} specs reject at FWER 0.10. Historical "
-            "mislabelled fields have been retired from the rebuilt base artifact; "
-            "the current conclusion comes only from this long-run-scale max-type "
-            "inference artifact.")
+            f"{n_holm_reject}/{n_elig} specs reject at FWER 0.10. The base field "
+            "named `white_rc_test` remains an unadjusted single-spec DM test and "
+            "must not be cited as a Reality Check. The base field named "
+            "`hansen_spa_test` remains least-favourable SPA_u rather than "
+            "consistent SPA_c; on the rebuilt matrix both variants reject, so the "
+            "labelling defect no longer changes the direction of the conclusion. "
+            "The current joint conclusion comes only from the rebuilt matrix and "
+            "current max-type tests.")
     else:
         verdict = (f"C3 MIXED (snooping-adjusted): joint SPA_c p={spa_p_c:.4f} "
                    f"(reject={spa_rejects}) vs A4f Holm reject={holm_a4f}. "
                    "Requires explicit discussion in the paper body.")
     results["c3_verdict_corrected"] = verdict
 
-    out_path = Path(SCRIPT_DIR) / 'k1380_v4_rc_correction_results.json'
-    _atomic_write_json(out_path, results)
+    out_path, _spec = finalize_experiment(
+        results=results,
+        entrypoint=__file__,
+        canonical_result='k1380_v4_rc_correction_results.json',
+        inputs=[
+            Path(SCRIPT_DIR) / 'k1380_v4_losses_all.npy',
+            Path(SCRIPT_DIR) / 'k1380_v4_results.json',
+            Path(SCRIPT_DIR) / 'k1380_v4.py',
+            ROOT / 'src' / 'volpred' / 'research' / 'optimization.py',
+            ROOT / 'src' / 'volpred' / 'models' / 'garch' / 'fixed_span_midas.py',
+            ROOT / 'src' / 'volpred' / 'research' / 'reproduce_spec.py',
+            ROOT / 'src' / 'volpred' / 'stats' / 'inference.py',
+        ],
+        seeds=[('numpy', BOOTSTRAP_SEED)],
+        started_at=started_at,
+        network='deny',
+    )
     print(f"\n[5] Corrected verdict: {verdict}")
     print(f"[6] Written: {out_path}")
 
 
 if __name__ == '__main__':
-    if os.environ.get("K1380_PIPELINE_CHILD") != "1":
-        raise SystemExit(
-            "K1380_v4 has one canonical entrypoint: run_pipeline.py. "
-            "Run that file so model fitting and inference receive one full-chain spec."
-        )
     main()

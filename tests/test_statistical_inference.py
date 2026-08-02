@@ -8,9 +8,49 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from volpred.stats.inference import exact_label_permutation, holm_step_down
+from volpred.stats.inference import (
+    bootstrap_long_run_scale,
+    exact_label_permutation,
+    holm_step_down,
+    monte_carlo_p_value,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_monte_carlo_p_value_uses_plus_one_correction() -> None:
+    assert monte_carlo_p_value(0, 499) == pytest.approx(1.0 / 500.0)
+    assert monte_carlo_p_value(499, 499) == 1.0
+
+
+@pytest.mark.parametrize(("exceedances", "draws"), [(-1, 499), (500, 499), (0, 0)])
+def test_monte_carlo_p_value_rejects_invalid_counts(
+    exceedances: int, draws: int
+) -> None:
+    with pytest.raises(ValueError):
+        monte_carlo_p_value(exceedances, draws)
+
+
+def test_bootstrap_long_run_scale_uses_sampling_distribution_of_mean() -> None:
+    bootstrap_means = np.array(
+        [
+            [1.0, 2.0],
+            [1.2, 1.8],
+            [0.8, 2.2],
+        ]
+    )
+    observed_means = np.array([1.0, 2.0])
+
+    scale = bootstrap_long_run_scale(
+        bootstrap_means,
+        observed_means,
+        sample_size=25,
+    )
+
+    np.testing.assert_allclose(
+        scale,
+        np.std(5.0 * (bootstrap_means - observed_means), axis=0, ddof=1),
+    )
 
 
 def test_holm_step_down_matches_branch_self_check() -> None:

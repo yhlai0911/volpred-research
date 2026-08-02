@@ -4476,18 +4476,21 @@ fire key exact match。Gate放行後只bootout `com.volpred.compute-worker`；
 **根因**：兩處都是「按統計方法的名字命名欄位，但實作的是另一個統計量」，且沒有任何
 斷言把實作綁回定義（max 型統計量必須跨 spec 取 max；SPA 必須報 c 變體）。
 
-**修復**：`experiments/K1380_v4/k1380_v4_rc_correction.py` 純重新分析 —— `k1380_v4.py:693`
-在檢定前已存下完整 17×n_oos QLIKE 矩陣，缺陷全在其下游，**不需重跑 GARCH**。腳本以
+**修復**：`experiments/K1380_v4/k1380_v4_rc_correction.py` 純重新分析 —— 當時的
+`k1380_v4.py` 在 inference stage 前已存下完整 17×n_oos QLIKE 矩陣，缺陷全在其下游，
+**不需重跑 GARCH**。此處刻意不保存易漂移的行號；腳本以
 **逐位重現 v4 四項數字**（atol=1e-12）為前置斷言，重現失敗即中止；再計算 Hansen 三重
 recentering（u/c/l，斷言 p_l ≤ p_c ≤ p_u）、古典非 studentized White RC、以及 Holm
-step-down。v4 原始 JSON 未被修改。
+step-down。**在 2026-07-29 當班** v4 JSON 未被修改；2026-08-02 的上游模型修復後，
+現行 base artifact 已由 producer 全量重生，歷史 bytes 由 Git／gate_history 保存。
 
 **驗證與新結論**：499 次 bootstrap 中 144 次超過觀測統計量，其 max **全部**由
 A5(t=-11.2)/C2(t=-21.1)/C3(t=-10.0) 三支遠差於 benchmark 的 spec 取得（77/48/19），
 無一次由具競爭力的 spec 取得 —— v4 的「不顯著」量到的是這三支的退化程度。修正後
-SPA_c p < 1/499（fixed-omega 與 per-resample 兩種 studentization 慣例下皆然），
-Holm 在 FWER 0.10 下 15 支中 11 支拒絕。**聯合窺探修正後的檢定拒絕 H0** ——
-與先前記載的方向相反。
+當時 SPA_c 的 empirical tail fraction 為 0/499（fixed-omega 與 per-resample 兩種
+studentization 慣例下皆然），Holm 在 FWER 0.10 下 15 支中 11 支拒絕。這些數字後來因
+上游模型與 raw-SD studentization 缺陷被 2026-08-02 full-chain 結果取代；現行 p-value
+一律採 plus-one convention，不可再寫成 0 或 `<1/499`。
 
 **影響面**：Paper 9 C3 在本單收斂前不得以任何一個舊口徑書寫。C3 verdict 由
 `C3 MIXED` 更新為 `C3 POSITIVE (snooping-adjusted)`，canonical 數字改指
@@ -4495,6 +4498,57 @@ Holm 在 FWER 0.10 下 15 支中 11 支拒絕。**聯合窺探修正後的檢定
 
 **遺留（未關）**：A5/C2/C3 的極端損失可能是數值退化本身。SPA_c 依統計理由捨棄它們，
 但若它們是壞的就不該是候選。已開 followup 追查 + Codex 二審修正腳本。
+
+---
+
+## 2026-08-02 — K1380_v4 A5/C1-C3 不是「真的很差」，而是 optimizer 與跨頻率 likelihood 契約失效
+
+**證據化症狀**：舊 loss matrix 的 A5/C2/C3 分別比 B0 差 11.2／21.1／10.0 個標準誤，
+C1 coverage=0。固定第一個 2,000 日 rolling window 回讀後，A5 外層 optimizer 選到
+`theta=(-2.4740, -0.35099)`；VIX 越高反而讓長期變異數越低。C1/C2/C3 的 training
+matrix 則只有 `K+1` 列：K=6/12/24 時是 7/13/25 筆日報酬，並非 2,000 日 rolling
+window。C1 因 `<10` gate 結構上永遠不可能產生 forecast。
+
+**根因層級**：
+
+1. A-series 程式宣告 `tau_bounds`，呼叫 Nelder-Mead 時卻沒有傳入；結果選擇器也只比較
+   objective，沒有要求 `success`、有限值與 bounds，因而把越界／失敗 iterate 當正式 fit。
+2. C-series 把「K 個月的低頻 lag」誤實作成「K+1 列 likelihood」；月頻 lag row 與日頻
+   return 沒有日期映射，短期 GARCH state 又從 `g=1` 直接拿去 OOS，沒有濾過 training tail。
+3. 同一個 generic one-step helper 混用不同 denominator 契約；fixed-span MIDAS 應按其
+   Eq.4 以當月 `tau_t` 更新 state，且預測月只能讀 M-1…M-K 個完整月份。
+
+**底層修復與制度化**：新增 `volpred.research.optimization.bounded_multistart_minimize`，
+只有 successful、finite、in-bounds 且 objective 非 penalty 的 iterate 能成為 fit；新增
+`volpred.models.garch.fixed_span_midas`，以日期映射把每筆 eligible 日報酬對齊前 K 個
+完整月份 VIX，完整濾過 training tail，並把 prediction-month exclusion 做成公開 seam。
+回歸測試釘住負 slope bounds、failed-iterate rejection、daily/monthly 對齊、partial-month
+排除與 Eq.4 state recursion。K1583 因使用舊矩陣，knowledge 條目已透過 canonical writer
+標為 `SUPERSEDED`，必須以新矩陣重跑。
+
+**完整重跑 read-back**：最終 1,900-day OOS run 完成（1,397 秒）。A5/C1/C2/C3 coverage
+均 99.89%，相對 B0 的 raw-scale diagnostic t-stat 由舊 −11.2／C1 無值／−21.1／−10.0
+變成 +2.617／+2.844／+2.261／+2.394；每支都有 31/31 successful finite in-bounds
+refit receipt。額外 code review 發現 B1-B3 仍有 duplicate fail-open optimizer 與 scheduled
+refit 失敗時沿用上一期 state；修成 canonical bounded helper + refit 前清空 state 後，B1/B2/B3
+分別 24/23/29 次成功、coverage 76.68%／73.42%／93.26%，依既有 95% gate 誠實排除，
+而非用 stale forecast 補滿。13 支 eligible 候選與 B0 的共同 `n_valid_spa=1,898`。
+
+canonical correction 從新 loss matrix 逐位重現 base diagnostics後，以 stationary-bootstrap
+mean distribution 估計 long-run omega；SPA_l/c/u 與 max-type White RC 均 `p=0.0020`
+（0/499 exceedances，採 `(r+1)/(B+1)`，不再報 p=0），Holm 13/13 拒絕，A4f adjusted
+`p=0.0260`。least-favourable exceedance 0/499，舊 A5/C2/C3 上尾歸因完全消失。
+base 亦永久移除失實 SPA/RC/C3 欄位；B0 benchmark 現在同樣在 refit 前清 state，31/31
+成功並留下 receipt。單一 `run_pipeline.py` 執行兩階段並在 1,400 秒 full-chain 結束後
+才產生唯一 reproduce spec，子腳本單獨執行 fail closed；multi-file chain 明確標為
+non-atomic，部分失敗由 output/spec/commit hash mismatch 阻斷。
+
+**結案狀態**：`root_cause_fixed_and_verified`。最終 full-chain 重跑、RC/SPA 重算、strict
+artifact gate、4/4 integrity gates、41 focused regressions與三輪雙軸 code review 已完成；
+前兩輪 FAIL 找到的 false labels、partial-month、raw-SD、zero-p、A/B/C/B0 stale-state、
+partial-stage provenance 與 evidence overclaim 均在後續 fresh run 驗證。第三輪 Spec／Standards
+皆 PASS，machine-readable verdict 綁定現行 bytes。K1583 仍保持 `SUPERSEDED`，其新矩陣
+重跑是獨立 follow-up，不能復活舊結論。
 
 ---
 

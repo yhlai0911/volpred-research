@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-K1380_v4 — Paper 9 17-Spec Horse-Race Loss Generation
-=======================================================
+K1380_v4 — Paper 9 White RC / Hansen SPA Test for 17-Spec Horse Race
+=====================================================================
 3-STRIKE REFACTOR of K1380 (three failures with n_valid=0 from joint mask).
 
 Root-cause fixes applied in v4:
   1. Per-model valid_i masks (was: joint mask → n_valid=0 when any MIDAS fails)
-  2. Joint diagnostic restricted to specs with coverage >= 95%
+  2. SPA/RC test restricted to specs with coverage >= 95% (per-model eligibility)
   3. Non-NaN coverage diagnostics printed per spec (was: single aggregate print)
   4. MIDAS B-series lag matrix: proper column-by-column construction (no np.roll)
      np.roll wraps around → contaminates first rows; replaced with slicing.
@@ -15,14 +15,15 @@ Success criteria: n_valid_spa > 1500, ≥12/17 models with coverage ≥ 95%.
 Output: k1380_v4_results.json + k1380_v4_losses_all.npy
 """
 
-import json
 import os
+import sys
+import json
 import time
 import warnings
-from datetime import UTC, datetime
-
 import numpy as np
 import pandas as pd
+from datetime import datetime, timezone
+from scipy import optimize, stats
 from numba import njit
 
 from volpred.models.garch.fixed_span_midas import (
@@ -31,6 +32,7 @@ from volpred.models.garch.fixed_span_midas import (
     forecast_fixed_span_garch_midas,
 )
 from volpred.research.optimization import bounded_multistart_minimize
+from volpred.research.reproduce_spec import finalize_experiment
 
 warnings.filterwarnings('ignore')
 np.random.seed(42)
@@ -38,39 +40,6 @@ START_TIME = time.time()
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
-
-if os.environ.get("K1380_PIPELINE_CHILD") != "1":
-    raise SystemExit(
-        "K1380_v4 has one canonical entrypoint: run_pipeline.py. "
-        "Run that file so model fitting and inference receive one full-chain spec."
-    )
-
-
-def _atomic_write_json(path, payload):
-    temporary = f"{path}.tmp"
-    try:
-        with open(temporary, "w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2)
-            handle.write("\n")
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    finally:
-        if os.path.exists(temporary):
-            os.unlink(temporary)
-
-
-def _atomic_save_npy(path, array):
-    temporary = f"{path}.tmp"
-    try:
-        with open(temporary, "wb") as handle:
-            np.save(handle, array)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    finally:
-        if os.path.exists(temporary):
-            os.unlink(temporary)
 
 # ── Configuration (matches Paper 9 canonical) ──────────────────────────────
 OOS_START = '2019-01-01'
@@ -94,7 +63,7 @@ BENCHMARK_IDX = 16  # B0 index in SPEC_LABELS
 A4F_IDX = 6         # A4f index
 
 print("=" * 70)
-print("K1380_v4: 17-Spec Horse-Race Loss Generation (3-Strike Fix)")
+print("K1380_v4: White RC / Hansen SPA Test — 17-Spec Horse Race (3-Strike Fix)")
 print("=" * 70)
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -372,7 +341,7 @@ def fit_midas(returns, vix_lags_matrix, Km_mode=False):
     Km_mode: if True, vix_lags_matrix contains monthly VIX averages (K_m months)
     Returns (m, theta, omega2, alpha, gamma, beta) or None
     """
-    _n, K = vix_lags_matrix.shape
+    n, K = vix_lags_matrix.shape
 
     def neg_ll(p):
         m, theta, omega2, a, g, b = p
@@ -390,16 +359,16 @@ def fit_midas(returns, vix_lags_matrix, Km_mode=False):
     ]
     bounds = [(-15.0, 0.0), (0.01, 5.0), (0.1, 20.0),
               (1e-4, 0.3), (1e-4, 0.3), (0.5, 0.999)]
-    try:
-        fit = bounded_multistart_minimize(
-            neg_ll,
-            starts=starts,
-            bounds=bounds,
-            options={'maxiter': 500},
-        )
-    except RuntimeError:
-        return None
-    return fit.params
+    best_ll, best_p = np.inf, None
+    for s in starts:
+        try:
+            res = optimize.minimize(neg_ll, s, method='L-BFGS-B', bounds=bounds,
+                                    options={'maxiter': 500})
+            if res.fun < best_ll:
+                best_ll, best_p = res.fun, res.x
+        except Exception:
+            pass
+    return best_p
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -488,9 +457,7 @@ MIDAS_KM = {'C1': 6, 'C2': 12, 'C3': 24}
 
 # States for all 17 specs
 states = {s: {} for s in SPEC_LABELS}
-fit_diagnostics = {
-    s: [] for s in ('A5', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3', 'B0')
-}
+fit_diagnostics = {s: [] for s in ('A5', 'C1', 'C2', 'C3')}
 
 for t_idx, abs_idx in enumerate(oos_indices):
     if t_idx % 200 == 0:
@@ -513,31 +480,13 @@ for t_idx, abs_idx in enumerate(oos_indices):
         tr_v_lag  = np.empty(ntr); tr_v_lag[0] =tr_v[0];  tr_v_lag[1:] =tr_v[:-1]
 
         # ── B0: GJR-GARCH ────────────────────────────────────────────────
-        states['B0'] = {}
         gjr_p = fit_gjr(tr_ret)
         if gjr_p is not None:
             h_end = _gjr_filter(*gjr_p, tr_ret)[-1]
             states['B0'] = {'params': gjr_p, 'h': h_end}
-            fit_diagnostics['B0'].append({
-                'refit_date': str(df.index[abs_idx].date()),
-                'n_training_daily': ntr,
-                'params': [float(value) for value in gjr_p],
-                'optimizer_contract': 'successful_finite_in_bounds',
-            })
-        else:
-            fit_diagnostics['B0'].append({
-                'refit_date': str(df.index[abs_idx].date()),
-                'n_training_daily': ntr,
-                'status': 'rejected',
-                'reason': 'no successful finite in-bounds optimizer result',
-            })
 
         # Helper: fit τ params then GJR params, store state
         def _fit_store(spec_name, tau_form, omega_mode='constrained', denom='tau_t'):
-            # A rejected scheduled refit invalidates the prior state. Carrying the
-            # previous window forward would silently turn fail-closed fitting back
-            # into a stale-state fail-open path.
-            states[spec_name] = {}
             fit_key = (tau_form, omega_mode, denom)
             if fit_key not in garch_x_fit_cache:
                 garch_x_fit_cache[fit_key] = fit_tau_params(
@@ -545,13 +494,6 @@ for t_idx, abs_idx in enumerate(oos_indices):
                 )
             tau_p, gjr_ps = garch_x_fit_cache[fit_key]
             if tau_p is None or gjr_ps is None:
-                if spec_name == 'A5':
-                    fit_diagnostics['A5'].append({
-                        'refit_date': str(df.index[abs_idx].date()),
-                        'n_training_daily': ntr,
-                        'status': 'rejected',
-                        'reason': 'no successful finite in-bounds optimizer result',
-                    })
                 return
             th0, th1 = tau_p
             if tau_form == 'logexp':
@@ -606,14 +548,7 @@ for t_idx, abs_idx in enumerate(oos_indices):
 
         # B-series: MIDAS rolling window (B1-B3)
         for bspec, K in [('B1', 22), ('B2', 65), ('B3', 125)]:
-            states[bspec] = {}
             if ntr < K + 5:
-                fit_diagnostics[bspec].append({
-                    'refit_date': str(df.index[abs_idx].date()),
-                    'n_training_daily': ntr,
-                    'status': 'rejected',
-                    'reason': f'insufficient history for K={K}',
-                })
                 continue
             # Build (ntr-K, K) lag matrix via slicing (FIX: np.roll wraps around,
             # contaminating first rows with tail data — use explicit slicing instead).
@@ -643,29 +578,14 @@ for t_idx, abs_idx in enumerate(oos_indices):
                 states[bspec] = {
                     'params': midas_p, 'g': gv, 'tau_prev': tau[-1], 'K': K,
                 }
-                fit_diagnostics[bspec].append({
-                    'refit_date': str(df.index[abs_idx].date()),
-                    'n_training_daily': ntr,
-                    'params': [float(value) for value in midas_p],
-                    'optimizer_contract': 'successful_finite_in_bounds',
-                })
-            else:
-                fit_diagnostics[bspec].append({
-                    'refit_date': str(df.index[abs_idx].date()),
-                    'n_training_daily': ntr,
-                    'status': 'rejected',
-                    'reason': 'no successful finite in-bounds optimizer result',
-                })
 
         # C-series: MIDAS fixed span (C1-C3) — monthly VIX averages
         for cspec, Km in [('C1', 6), ('C2', 12), ('C3', 24)]:
-            states[cspec] = {}
             try:
                 fixed_fit = fit_fixed_span_garch_midas(
                     returns=tr_ret,
-                    return_dates=df.index[ts:abs_idx],
-                    vix_history=vix[:abs_idx],
-                    vix_history_dates=df.index[:abs_idx],
+                    vix=tr_v,
+                    dates=df.index[ts:abs_idx],
                     lag_months=Km,
                     min_observations=500,
                 )
@@ -800,12 +720,12 @@ for rank, (sn, ql) in enumerate(sorted_specs, 1):
     print(f"    {rank:2d}. {sn:4s}: {ql:.6f}")
 
 # Save full loss matrix
-_atomic_save_npy(os.path.join(SCRIPT_DIR, 'k1380_v4_losses_all.npy'), qlike_matrix)
+np.save(os.path.join(SCRIPT_DIR, 'k1380_v4_losses_all.npy'), qlike_matrix)
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 6. PRELIMINARY RAW-SCALE DIAGNOSTICS (NOT FORMAL SPA / RC)
+# 6. HANSEN (2005) SPA TEST & WHITE (2000) RC TEST
 # ═══════════════════════════════════════════════════════════════════════════
-print(f"\n[4] Preliminary raw-scale diagnostics (B={BOOTSTRAP_B})...")
+print(f"\n[4] Hansen SPA + White RC tests (B={BOOTSTRAP_B} stationary bootstrap)...")
 
 rng = np.random.default_rng(BOOTSTRAP_SEED)
 
@@ -863,10 +783,8 @@ d_bar = diff_matrix.mean(axis=1)
 d_std = diff_matrix.std(axis=1, ddof=1) + 1e-12
 t_obs = np.sqrt(T) * d_bar / d_std
 
-# This observation-SD statistic is retained only as a reproducibility diagnostic.
-# The canonical correction script estimates a long-run bootstrap scale and performs
-# the formal max-type inference.
-legacy_joint_stat = float(np.max(np.maximum(t_obs, 0.0)))
+# Hansen SPA: test on max(t_i, 0)
+spa_stat_obs = float(np.max(np.maximum(t_obs, 0.0)))
 
 bs_indices = stationary_bootstrap_indices(T, BOOTSTRAP_B, rng)
 bootstrap_spa_stats = np.empty(BOOTSTRAP_B)
@@ -877,13 +795,13 @@ for b_idx, idx in enumerate(bs_indices):
     t_b = np.sqrt(T) * (d_bar_b - d_bar) / d_std_b
     bootstrap_spa_stats[b_idx] = float(np.max(np.maximum(t_b, 0.0)))
 
-legacy_joint_empirical_p = float((bootstrap_spa_stats >= legacy_joint_stat).mean())
+spa_pval = float((bootstrap_spa_stats >= spa_stat_obs).mean())
 
 # White RC: focus on A4f vs GJR (only if A4f is eligible)
 a4f_eligible = 'A4f' in eligible_non_bm
 if a4f_eligible:
     a4f_elig_idx = eligible_non_bm.index('A4f')
-    a4f_dm_stat = float(t_obs[a4f_elig_idx])
+    rc_stat_obs = float(t_obs[a4f_elig_idx])
     bootstrap_rc_stats = np.empty(BOOTSTRAP_B)
     for b_idx, idx in enumerate(bs_indices):
         d_b_a4f = diff_matrix[a4f_elig_idx, idx]
@@ -891,19 +809,21 @@ if a4f_eligible:
         d_std_b_a4f = d_b_a4f.std(ddof=1) + 1e-12
         t_b_a4f = np.sqrt(T) * (d_bar_b_a4f - d_bar[a4f_elig_idx]) / d_std_b_a4f
         bootstrap_rc_stats[b_idx] = float(np.max([0.0, t_b_a4f]))
-    a4f_dm_empirical_p = float((bootstrap_rc_stats >= a4f_dm_stat).mean())
+    rc_pval = float((bootstrap_rc_stats >= rc_stat_obs).mean())
 else:
-    a4f_dm_stat = float('nan')
-    a4f_dm_empirical_p = float('nan')
-    print("  WARNING: A4f not eligible; single-spec diagnostic skipped.")
+    rc_stat_obs = float('nan')
+    rc_pval = float('nan')
+    print("  WARNING: A4f not eligible (coverage < threshold); White RC skipped.")
 
-print(f"\n  Raw-scale max diagnostic over {n_elig} specs: {legacy_joint_stat:.3f}")
-print(f"  Empirical bootstrap tail fraction: {legacy_joint_empirical_p:.4f}")
+print(f"\n  SPA test statistic (max_i over {n_elig} eligible specs): {spa_stat_obs:.3f}")
+print(f"  SPA p-value: {spa_pval:.4f}  (H0: no eligible model beats GJR)")
+print(f"  Reject H0 (p<0.10): {spa_pval < 0.10}")
 if a4f_eligible:
-    print(f"\n  A4f raw-scale t diagnostic vs GJR: {a4f_dm_stat:.3f}")
-    print(f"  Single-spec empirical bootstrap tail fraction: {a4f_dm_empirical_p:.4f}")
+    print(f"\n  A4f t-stat vs GJR: {rc_stat_obs:.3f}")
+    print(f"  White RC p-value: {rc_pval:.4f}  (H0: A4f not better after snooping)")
+    print(f"  Reject H0 (p<0.10): {rc_pval < 0.10}")
 
-print("\n  Individual t-stats for eligible specs:")
+print(f"\n  Individual t-stats for eligible specs:")
 for i, sn in enumerate(eligible_non_bm):
     harvey = " Harvey PASS" if abs(t_obs[i]) > HARVEY_THRESHOLD and d_bar[i] > 0 else ""
     print(f"    {sn:4s}: t={t_obs[i]:6.3f}, d_bar={d_bar[i]:9.6f}{harvey}")
@@ -927,7 +847,7 @@ elapsed = time.time() - START_TIME
 
 results = {
     "experiment_id": "k1380_v4",
-    "title": "Paper 9 17-Spec Horse-Race Loss Generation (v4 3-Strike Fix)",
+    "title": "Paper 9 White RC / Hansen SPA Test — 17-Spec Horse Race (v4 3-Strike Fix)",
     "metadata": {
         "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
         "oos_start": OOS_START,
@@ -945,9 +865,9 @@ results = {
         "ineligible_specs": ineligible_non_bm,
         "n_valid_spa": n_valid_spa,
         "elapsed_seconds": round(elapsed, 1),
-        "timestamp": datetime.now(UTC).isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "lookahead_free": "signal.shift(1): vix[abs_idx-1] for t-1 VIX lag",
-        "canonical_inference": "k1380_v4_rc_correction_results.json",
+        "c3_critical_addressed": True,
         "v4_fixes": [
             "per-model valid_i masks (no joint mask)",
             "SPA restricted to coverage>=95% specs",
@@ -967,21 +887,32 @@ results = {
         {"rank": r+1, "spec": sn, "mean_qlike": float(ql)}
         for r, (sn, ql) in enumerate(sorted_specs)
     ],
-    "legacy_raw_scale_joint_diagnostic": {
-        "stat": legacy_joint_stat,
-        "empirical_tail_fraction": legacy_joint_empirical_p,
+    "hansen_spa_test": {
+        "stat": spa_stat_obs,
+        "pval": spa_pval,
+        "reject_h0_p10": bool(spa_pval < 0.10),
         "n_specs_tested": n_elig,
-        "formal_spa": False,
-        "warning": "Uses raw observation SD, not long-run variance; diagnostic only.",
+        "interpretation": (
+            f"At least one eligible model significantly superior to GJR "
+            f"(SPA p={spa_pval:.3f})"
+            if spa_pval < 0.10 else
+            f"Cannot reject H0: no eligible model significantly beats GJR "
+            f"(SPA p={spa_pval:.3f})"
+        ),
         "superior_set_nominal": superior_set,
     },
-    "a4f_single_spec_bootstrap_dm": {
+    "white_rc_test": {
         "spec": "A4f",
         "eligible": a4f_eligible,
-        "t_stat": a4f_dm_stat,
-        "empirical_tail_fraction": a4f_dm_empirical_p,
-        "snooping_adjusted": False,
-        "warning": "Single-spec diagnostic; not a max-type Reality Check.",
+        "t_stat": rc_stat_obs,
+        "pval": rc_pval,
+        "reject_h0_p10": bool(rc_pval < 0.10) if a4f_eligible else None,
+        "interpretation": (
+            f"A4f significantly beats GJR after RC correction (p={rc_pval:.3f})"
+            if a4f_eligible and rc_pval < 0.10 else
+            (f"RC test: cannot confirm A4f beats GJR after data snooping (p={rc_pval:.3f})"
+             if a4f_eligible else "A4f ineligible (coverage < threshold)")
+        ),
     },
     "individual_dm_stats": {
         sn: {"t_stat": float(t_obs[i]), "d_bar": float(d_bar[i]),
@@ -989,15 +920,37 @@ results = {
              "included_in_spa": True}
         for i, sn in enumerate(eligible_non_bm)
     },
-    "c3_status": "PENDING_CANONICAL_CORRECTION_ARTIFACT",
+    "c3_verdict": (
+        "C3 RESOLVED: SPA + RC confirm A4f horse-race superiority survives multiple testing"
+        if spa_pval < 0.10 and a4f_eligible and rc_pval < 0.10 else
+        "C3 MIXED: SPA/RC results require nuanced discussion of data snooping in paper body"
+    ),
 }
 
-out_path = os.path.join(SCRIPT_DIR, 'k1380_v4_results.json')
-_atomic_write_json(out_path, results)
+out_path, _spec = finalize_experiment(
+    results=results,
+    entrypoint=__file__,
+    canonical_result='k1380_v4_results.json',
+    inputs=[
+        SNAPSHOT_CSV,
+        os.path.join(PROJECT_ROOT, 'src', 'volpred', 'research', 'optimization.py'),
+        os.path.join(
+            PROJECT_ROOT, 'src', 'volpred', 'models', 'garch', 'fixed_span_midas.py'
+        ),
+        os.path.join(
+            PROJECT_ROOT, 'src', 'volpred', 'research', 'reproduce_spec.py'
+        ),
+    ],
+    outputs=['k1380_v4_losses_all.npy'],
+    seeds=[('numpy', BOOTSTRAP_SEED)],
+    started_at=START_TIME,
+    network='deny',
+)
 print(f"\n[5] Results saved to {out_path}")
-print("    Loss matrix saved to k1380_v4_losses_all.npy")
+print(f"    Loss matrix saved to k1380_v4_losses_all.npy")
 print(f"\nTotal elapsed: {elapsed:.0f}s")
 
 print(f"\n{'='*60}")
-print("C3 STATUS: use k1380_v4_rc_correction_results.json for canonical inference")
+print(f"C3 VERDICT: {results['c3_verdict']}")
+print(f"SPA p={spa_pval:.4f} | RC p={rc_pval:.4f}")
 print("="*60)

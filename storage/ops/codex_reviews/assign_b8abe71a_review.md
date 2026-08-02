@@ -19,9 +19,9 @@ Review fixed point: `f200ef1c2cf8cbb852dc185491e945b6239a7302`
 - Old C1/C2/C3 likelihoods contained only K+1 daily returns: 7/13/25 for
   K=6/12/24. C1 was therefore permanently rejected by its `<10` guard; C2/C3
   were estimated on tiny, frequency-misaligned samples and started OOS at `g=1`.
-- The new fixed-span panel uses 1,887/1,760/1,510 daily likelihood rows in the
-  first window, each mapped to M-1…M-K completed-month mean log-VIX values, and
-  filters short-run state through the training tail.
+- After the full-history repair, the new fixed-span panel uses 2,000/2,000/2,000
+  daily likelihood rows in the first C1/C2/C3 window. Each is mapped to M-1…M-K
+  completed-month mean log-VIX values and filters state through the training tail.
 
 ## TDD and institutionalization
 
@@ -29,22 +29,31 @@ Review fixed point: `f200ef1c2cf8cbb852dc185491e945b6239a7302`
   and penalty-objective results; a failed lower-objective iterate cannot win.
 - `fixed_span_midas` owns daily/monthly alignment, completed-month forecast lags,
   bounded fitting, training-tail filtering and Eq.4 current-month-tau recursion.
-- Six focused regressions cover A5's slope bound, failed-iterate rejection,
-  daily/monthly alignment, partial-month exclusion, state recursion and forbidden
-  legacy C3 wording.
+- Focused regressions cover A5's slope bound, failed-iterate rejection,
+  full-history daily/monthly alignment, partial-month exclusion, state recursion,
+  B-series canonical optimizer use, stale-state clearing, finite Monte Carlo
+  p-values, long-run scaling, one full-chain entrypoint and forbidden legacy C3 wording.
 
 ## Full live read-back
 
-- Full 1,900-day OOS run completed in 1,336 seconds; 16/16 non-benchmark specs
+- Final full 1,900-day OOS run completed in 1,397 seconds; 13 non-benchmark specs
   are eligible and `n_valid_spa=1,898`.
 - A5/C1/C2/C3 each have 1,898 valid forecasts (99.89%) and 31 accepted refits.
-  Their new t-statistics versus B0 are +2.617/+2.659/+2.200/+2.378.
+  Their new raw-scale diagnostic t-statistics are +2.617/+2.844/+2.261/+2.394.
+- B1/B2/B3 clear old state before every scheduled refit; 24/23/29 of 31 fits
+  passed the fail-closed contract. Their 76.68%/73.42%/93.26% coverage is below
+  95%, so all three are excluded rather than silently filled with stale forecasts.
+- B0 applies the same stale-state rule and has 31/31 accepted refit receipts.
 - The correction reproduces all four base statistics exactly (`atol=1e-12`),
-  then yields SPA_c/SPA_u/White RC `p < 1/499`, Holm 15/16 rejections, and zero
-  least-favourable exceedances. Historical A5/C2/C3 tail attribution is gone.
-- Final `reproduce_spec.json` hash-binds the base script, optimizer, fixed-span
-  helper, loss matrix, base result, correction, inference helper and finalizer;
-  network policy is `deny`.
+  then yields long-run-scale SPA_l/c/u and White RC `p=0.0020`, Holm 13/13
+  rejections (A4f adjusted `p=0.0260`), and zero least-favourable exceedances.
+  Historical A5/C2/C3 tail attribution is gone.
+- Final `reproduce_spec.json` has `run_pipeline.py` as its only entrypoint and
+  hash-binds both child scripts, data, optimizer, fixed-span and inference helpers,
+  loss matrix, base result and canonical result; runtime=1,400 seconds and network
+  policy is `deny`. Both child scripts refuse standalone execution. Stage files are
+  individually atomic; the multi-file chain is explicitly non-atomic and partial
+  interruption is detected by output/spec/commit hash mismatch.
 
 ## Knowledge audit
 
@@ -59,11 +68,31 @@ Review fixed point: `f200ef1c2cf8cbb852dc185491e945b6239a7302`
 
 - Artifact gate: PASS (strict spec, result identity clean).
 - Experiment-integrity gate: PASS (4/4).
-- Focused assertions: 49 passed. The pre-commit process exits non-zero only
+- Focused assertions: 40 passed. The pre-commit process exits non-zero only
   because CI-parity correctly sees the new test as untracked; normal parity must
   be rerun after the atomic commit.
 
 ## Independent two-axis review
 
-Pending Spec and Standards reviewers. This section must be updated with their
-final P1/P2 disposition before closure.
+The first Spec and Standards rounds both returned FAIL and identified false base
+labels, partial first-month VIX, raw-SD studentization, exact-zero Monte Carlo p-values,
+duplicate B fail-open fitting and partial-stage reproduce specs. The second round
+found stale B0 benchmark state plus three evidence/provenance overclaims. Every item
+was fixed, regression-covered and included in a subsequent full-chain rerun.
+
+Third-round byte-bound verdicts:
+
+- **Spec: PASS**, no remaining P1/P2. It independently read back B0 31/31 receipts,
+  C1/C2/C3 first-window 2,000 rows, truthful non-atomic pipeline metadata and current
+  source/result/spec hashes.
+- **Standards: PASS**, no remaining P1/P2. It independently read back all 7 inputs,
+  2 declared outputs, canonical result identity, stale-report deletion, focused tests,
+  ruff, strict artifact gate and 4/4 integrity gates.
+
+Machine-readable disposition: `experiments/K1380_v4/review_verdict.json`.
+
+After pre-commit required an inline `silent-ok` explanation on the per-start optimizer
+exception, the helper was changed without behavioral effect and the full 1,900-day
+pipeline was rerun again. Final Spec and Standards delta reviews both PASS; they
+verified helper hash `594b08da…`, runtime 1,400.232 seconds and unchanged scientific
+outputs against the current spec/result/verdict bytes.
