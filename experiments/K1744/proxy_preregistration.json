@@ -1,0 +1,142 @@
+{
+  "schema_version": "volpred.proxy_preregistration.v1",
+  "experiment_id": "K1744",
+  "locked_at_utc": "2026-08-02T02:37:52Z",
+  "seed": 42,
+  "research_type": "empirical_predictive_association",
+  "outcome_data_inspected_before_lock": false,
+  "outcome_data_request_made_before_lock": false,
+  "recovery_identity": {
+    "current_worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-5f75cd52-k1744",
+    "current_branch": "wt/dispatch-slot-1-5f75cd52-k1744",
+    "prior_job_id": "agent-brief-k1744-552fde40",
+    "prior_job_classification": "ZERO_SALVAGE",
+    "prior_research_started": false,
+    "prior_artifacts_or_code_permitted": false,
+    "prior_artifacts_or_code_used": [],
+    "zero_salvage_is_not_scientific_null": true
+  },
+  "question": "Does historically observable Latin America private-credit capital-supply announcement intensity predict next-month realized volatility, left-tail loss, or changes in rolling USD sensitivity in fixed LatAm/EM liquid-market proxy channels?",
+  "ideal_latent_variable": {
+    "name": "ex_ante_private_credit_capital_supply_available_to_latin_america_borrowers",
+    "unit": "USD capital genuinely deployable to Latin America private-credit borrowers at each forecast origin",
+    "unobserved_problem": "Private funds disclose closes and deployments sparsely; private loan tape, dry powder by mandate, and vintage histories are not public point-in-time panels."
+  },
+  "primary_exposure_proxy": {
+    "name": "latam_private_credit_final_close_announcement_intensity",
+    "exact_observable_construction": "For each UTC calendar month, count unique final-close announcements for private-debt/private-credit funds whose stated mandate is dedicated to Latin America or allocates at least 50% to Latin America. Enumerate candidate funds from a complete, versioned Private Debt Investor fund database export; verify each retained row against the fund sponsor's official release. Deduplicate by legal fund name, vintage, and final-close date. Compute log1p(monthly unique final-close count). Rows with no verifiable release date are excluded; months are zero only when the complete enumeration frame proves no qualifying close, never because search returned no hits.",
+    "enumeration_source": {
+      "name": "Private Debt Investor fund database / fundraising records",
+      "required_raw_identity": "provider record id, export-as-of timestamp, export file SHA-256, fund legal name, vintage, strategy, geography mandate, close status, close amount if disclosed, and provider record creation/update timestamps",
+      "required_access": "authenticated record-level export with historical coverage and version/as-of metadata"
+    },
+    "point_in_time_verification_source": {
+      "name": "official sponsor final-close release",
+      "required_raw_identity": "canonical URL, publisher, HTTP response SHA-256, datePublished/timePublished metadata, access timestamp, fund legal name, close status, geography language, and amount when disclosed",
+      "availability_rule": "Use the official publication timestamp. If only a calendar date is available, the event becomes observable at 00:00 UTC on the following calendar day. A retrospective article date, fund vintage label, or close period is never substituted for publication availability."
+    },
+    "frequency": "monthly",
+    "transformation": "log1p(unique final-close announcements in month t), aligned to outcome month by an explicit pandas Series.shift(1)",
+    "expected_sign": {
+      "next_month_realized_variance": "negative",
+      "next_month_left_tail_loss": "negative",
+      "next_month_change_in_absolute_uup_beta": "negative"
+    },
+    "known_measurement_error": [
+      "announcement count is not committed USD volume, deployable dry powder, or actual loan origination",
+      "fund mandates can span regions and strategies even when marketing language emphasizes Latin America",
+      "undisclosed closes and manager publicity choices induce coverage bias",
+      "database backfills or revised tags break point-in-time validity unless a versioned export and record timestamps are retained",
+      "official releases can report final closes after capital was economically committed"
+    ],
+    "prohibited_substitutions": [
+      "synthetic or hand-imputed events",
+      "listed BDC or BIZD returns",
+      "Google Trends without point-in-time provenance",
+      "generic private-credit news with no Latin America mandate",
+      "contemporaneous ETF, VIX, credit-spread, or USD variables that rename the outcome",
+      "2026 retrospective fundraising totals backfilled into earlier forecast origins",
+      "single-manager transaction archives treated as a complete regional universe"
+    ]
+  },
+  "feasibility_gate": {
+    "all_required": true,
+    "requirements": {
+      "complete_versioned_enumeration_export": true,
+      "official_release_timestamp_for_every_retained_event": true,
+      "minimum_distinct_eligible_events": 36,
+      "minimum_nonzero_exposure_months": 24,
+      "minimum_common_months_after_all_lags": 60,
+      "no_outcome_guided_proxy_or_threshold_selection": true
+    },
+    "failure_action": "Stop before requesting or loading any ETF outcome series and emit INCONCLUSIVE/INSUFFICIENT_DATA. Unknown coverage is not coded as zero events."
+  },
+  "fixed_market_universe": [
+    "ILF",
+    "EWW",
+    "ECH",
+    "EPU",
+    "EWZ",
+    "CEW",
+    "EMLC",
+    "EMB",
+    "UUP"
+  ],
+  "channel_definitions": {
+    "equity": [
+      "ILF",
+      "EWW",
+      "ECH",
+      "EPU",
+      "EWZ"
+    ],
+    "fx_local_bond": [
+      "CEW",
+      "EMLC"
+    ],
+    "hard_currency_bond": [
+      "EMB"
+    ],
+    "usd_factor_only": [
+      "UUP"
+    ]
+  },
+  "outcome_lock": {
+    "data_source_if_feasible": "Yahoo Finance adjusted daily closes fetched in one frozen snapshot; no forward fill",
+    "ticker_inception_and_delisting_policy": "Report first/last valid observation, missingness, duplicates, timezone, extreme returns, revisions, and common-sample loss for every ticker before estimation.",
+    "forecast_frequency": "monthly",
+    "forecast_origin": "last trading close of calendar month t; only exposure events published by the monthly cutoff are eligible",
+    "horizon": "next calendar month",
+    "channel_return": "equal-weight daily log return across members observed on the strict full-channel common date; no missing member is silently reweighted",
+    "targets": {
+      "realized_variance": "sum of squared daily channel log returns in outcome month",
+      "left_tail_loss": "max(0, negative of the minimum daily channel log return in outcome month)",
+      "change_in_absolute_uup_beta": "absolute 60-trading-day OLS beta of channel daily returns on UUP at outcome-month end minus its value at forecast-origin month end"
+    },
+    "baseline": "one-step monthly expanding AR(1) in the matching target; realized-variance target uses log realized variance",
+    "candidate": "same baseline and common estimation window plus the preregistered lagged exposure proxy",
+    "lag_convention": "Rows are indexed by outcome month; exposure is aligned with Series.shift(1). Baseline target lags use only information through the forecast origin.",
+    "common_sample": "Strict intersection of all nine fixed tickers after target construction and lagging; candidate and baseline use identical rows. Channel-only samples are secondary diagnostics and cannot replace the primary full-basket common sample.",
+    "primary_family": {
+      "cells": 9,
+      "construction": "3 channels x 3 target families",
+      "multiplicity": "Holm step-down family-wise correction across all 9 primary candidate-vs-baseline tests",
+      "dependence_robust_inference": "Because the AR(1)+exposure candidate nests the AR(1) baseline, primary realized-variance loss inference uses a seed=42 recursive expanding-window month-block bootstrap of the QLIKE loss difference under the nested null; ordinary DM/HLN is diagnostic only. Tail-loss and beta-change primary tests use HAC inference on the incremental exposure coefficient with canonical bandwidth max(h-1, ceil(h^(1/3)*n^(1/3))) plus month-block permutation/bootstrap sensitivity. Report loss/residual autocorrelation and lag sensitivity for every target.",
+      "seeded_sparse_event_path": "seed=42 month-block permutation/bootstrap only if the proxy passes all feasibility thresholds"
+    }
+  },
+  "verdict_policy": {
+    "SUPPORTED": "Proxy passes feasibility and at least two channel cells within one prespecified target family have expected-sign effects with Holm-adjusted p<0.05; the matching robustness directions must not reverse.",
+    "NULL": "Proxy passes feasibility and the complete 9-cell primary family is estimated, but the SUPPORTED rule is not met. Secondary analyses cannot rescue the result.",
+    "INCONCLUSIVE": "Any proxy provenance, completeness, event-count, or common-sample feasibility requirement fails, so outcome analysis is not run.",
+    "BLOCKED": "Required provenance cannot be read or artifact identity cannot be established; no scientific claim is made."
+  },
+  "secondary_robustness_only": [
+    "country-level equity ETF cells",
+    "alternative intensity window",
+    "leave-one-country-out equity basket",
+    "excluding COVID-19 months",
+    "alternative USD control or beta window",
+    "public transaction announcements distinct from final closes"
+  ]
+}

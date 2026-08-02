@@ -1,0 +1,34 @@
+{
+  "schema_version": "volpred.gate_history.v1",
+  "entries": [
+    {
+      "sha256": "d96d7ba0a4f217e6686ca586a7d78f247ed71d91aa483c185fbe5ba8bd52a513",
+      "size_bytes": 25636,
+      "source": "K1744.py",
+      "blob": "d96d7ba0__K1744.py",
+      "reason": "K1744 collection audit found README broadened preregistered AR(1) baseline to AR/HAR-family; preserve reviewed runtime bytes before fixing generator and consistency gate",
+      "preserved_at": "2026-08-02T03:17:00Z"
+    },
+    {
+      "sha256": "772134059c88f625ec57acb654ff6f46fe8b137cfd92d83164b6114d96b5419e",
+      "size_bytes": 25810,
+      "source": "K1744.py",
+      "blob": "77213405__K1744.py",
+      "reason": "K1744 full-surface audit found Corsi source metadata still mislabeled HAR-RV as preregistered despite the frozen expanding AR(1) baseline; preserve current runtime bytes before fixing manifest hash pin",
+      "preserved_at": "2026-08-02T03:19:38Z"
+    },
+    {
+      "sha256": "951377efbceedf6dd3355f02f90f45291f680747e875068046ffbd658a6f8bf1",
+      "size_bytes": 25810,
+      "source": "K1744.py",
+      "blob": "951377ef__K1744.py",
+      "reason": "K1744 independent review found nested AR(1) versus AR(1)+exposure design cannot use ordinary QLIKE DM as primary; preserve runtime bytes before changing preregistered inference to nested-aware recursive block bootstrap",
+      "preserved_at": "2026-08-02T03:29:40Z"
+    }
+  ],
+  "_readme": [
+    "Pre-change bytes of gate-bearing experiment scripts, preserved BEFORE the edit.",
+    "Written by scripts/preserve_gate_blob.py. Never edit a blob: it is evidence,",
+    "and an edited original is a reconstruction, which is what K1708 was rejected for."
+  ]
+}

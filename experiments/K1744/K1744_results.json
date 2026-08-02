@@ -1,0 +1,356 @@
+{
+  "schema_version": "volpred.experiment_result.v1",
+  "experiment_id": "K1744",
+  "research_type": "empirical_predictive_association_feasibility_gate",
+  "seed": 42,
+  "execution_status": "COMPLETED_FEASIBILITY_GATE",
+  "conclusion_grade": "INCONCLUSIVE",
+  "conclusion_code": "INSUFFICIENT_DATA",
+  "scientific_null": false,
+  "recovery": {
+    "current_retry_is_distinct": true,
+    "prior_job_id": "agent-brief-k1744-552fde40",
+    "prior_job_classification": "ZERO_SALVAGE",
+    "prior_job_research_started": false,
+    "prior_job_artifacts_used": [],
+    "prior_job_code_or_data_read": false,
+    "zero_salvage_is_not_success": true,
+    "zero_salvage_is_not_scientific_null": true
+  },
+  "research_question": "Does historically observable Latin America private-credit capital-supply announcement intensity predict next-month realized volatility, left-tail loss, or changes in rolling USD sensitivity in fixed LatAm/EM liquid-market proxy channels?",
+  "differentiation": {
+    "estimand": "regional LatAm private-credit funding-supply announcement transmission",
+    "not_generic_bdc_spillover": true,
+    "etfs_are_liquid_market_proxies_not_private_credit_assets": true,
+    "claim_type_if_feasible": "predictive_associational_not_causal",
+    "related_k": {
+      "K1487": "coarse GDELT private-credit news intensity was not a reliable generic RV lead",
+      "K1332": "listed BDC stress had narrow HYG/BKLN predictive content",
+      "K1499": "BDC stress largely collapsed after broad-market controls",
+      "K1367": "daily GDELT plus ETF baskets was too noisy for a tail-risk claim",
+      "K1728": "free attention/sentiment did not improve HAR-RV in US equities"
+    }
+  },
+  "literature": {
+    "primary_sources": [
+      {
+        "source_id": "cfa_latam",
+        "title": "How private credit investment is filling a funding gap in Latin America",
+        "publisher": "CFA Institute",
+        "publication_date": "2026-06-04",
+        "url": "https://www.cfainstitute.org/insights/articles/latin-america-private-credit-investment-growth",
+        "accessed_at_utc": "2026-08-02T02:39:40.527225+00:00",
+        "response_sha256": "64711001ae2c8a12e739dc5d5d377986a5c3cbeb3a3391f0f8635a01257dd0ef",
+        "response_bytes": 259661,
+        "claim_supported": "Latin America private credit differs from the US LBO model and is framed around a USD650 billion annual development-financing gap; the article reports less than 1% private-credit penetration and cites USD800 million of Latin America-focused fundraising in 2025."
+      },
+      {
+        "source_id": "cfa_private_markets_report",
+        "title": "Understanding the Growth of Private Markets: Structural Shifts in the Investment Industry",
+        "publisher": "CFA Institute Research and Policy Center",
+        "publication_date": "2026-06-22",
+        "url": "https://rpc.cfainstitute.org/sites/default/files/docs/research-reports/fti-macro_growth-of-private-markets_online.pdf",
+        "accessed_at_utc": "2026-08-02T02:39:40.980233+00:00",
+        "response_sha256": "e9dba59e1d359c494d331c76385bb63af20d346bac957fe0f0f238811a51c44d",
+        "response_bytes": 764306,
+        "claim_supported": "Private markets alter capital formation and risk transmission while disclosure opacity and bank-nonbank linkages limit transparent measurement."
+      },
+      {
+        "source_id": "eclac_gap",
+        "title": "Faced with Financing for Development Challenges, Latin American and Caribbean Countries Need to Strengthen their Capacities to Mobilize Resources and Forge Renewed Cooperation Mechanisms",
+        "publisher": "United Nations Economic Commission for Latin America and the Caribbean",
+        "publication_date": "2025-07-03",
+        "url": "https://www.cepal.org/en/pressreleases/faced-financing-development-challenges-latin-american-and-caribbean-countries-need",
+        "accessed_at_utc": "2026-08-02T02:39:41.354570+00:00",
+        "response_sha256": "46f11fbf1088c73e16110f1de9c2ebe0998ff6d6e5980e034cdbb436b0469d92",
+        "response_bytes": 113884,
+        "claim_supported": "ECLAC states that Latin America and the Caribbean face an approximately USD650 billion annual development-financing gap."
+      },
+      {
+        "source_id": "nber_private_credit",
+        "title": "Private Credit, Balance Sheets and Financial Stability",
+        "publisher": "National Bureau of Economic Research",
+        "publication_date": "2026-03-18",
+        "url": "https://www.nber.org/papers/w34991",
+        "accessed_at_utc": "2026-08-02T02:39:50.306931+00:00",
+        "response_sha256": "78fef1d0a5e722eb76f034d79c44d755d194550b426515f64750a80ba4263eb1",
+        "response_bytes": 92154,
+        "claim_supported": "Comprehensive private-credit fund and asset analysis relies on licensed MSCI Private Capital Universe data; public disclosures do not reproduce that coverage."
+      },
+      {
+        "source_id": "nber_bank_lending",
+        "title": "The Secular Decline of Bank Balance Sheet Lending",
+        "publisher": "National Bureau of Economic Research",
+        "publication_date": "2024-02-27",
+        "url": "https://www.nber.org/papers/w32176",
+        "accessed_at_utc": "2026-08-02T02:39:51.224864+00:00",
+        "response_sha256": "d50bfafc4855c75b3567e7f469648eba6a353cfa882afaca78088e8baec8eeba",
+        "response_bytes": 94742,
+        "claim_supported": "Credit intermediation has shifted away from bank balance sheets toward securities and nonbank channels, motivating a supply-transmission question without identifying a LatAm point-in-time proxy."
+      },
+      {
+        "source_id": "corsi_har_doi",
+        "title": "A Simple Approximate Long-Memory Model of Realized Volatility",
+        "publisher": "Oxford University Press, Journal of Financial Econometrics",
+        "publication_date": "2008-11-07 online; 2009 volume 7 issue 2",
+        "url": "https://doi.org/10.1093/jjfinec/nbp001",
+        "accessed_at_utc": "2026-08-02T02:39:51.941190+00:00",
+        "response_sha256": "6b4b99a76fccac28ab9e8a1eae8068e60813df28812aa14bd835a831eb45e0ec",
+        "response_bytes": 5587,
+        "claim_supported": "HAR-RV is relevant long-memory volatility-model context, but it is not the preregistered primary baseline; that lock is an expanding AR(1) on the matching target. The publisher page was access-controlled during this audit."
+      }
+    ],
+    "institutional_motivation": {
+      "eclac_annual_financing_gap_usd_billion": 650,
+      "cfa_latam_private_credit_share_of_corporate_lending_upper_bound_pct": 1,
+      "cfa_latam_fundraising_2025_usd_million": 800,
+      "cfa_global_private_debt_fundraising_2025_usd_billion": 356,
+      "use_restriction": "Motivation only. No 2025 or 2026 retrospective total enters a historical forecast origin."
+    }
+  },
+  "inputs": {
+    "proxy_preregistration": {
+      "path": "experiments/K1744/proxy_preregistration.json",
+      "sha256": "a3bc7a47f1b14227b12cc1633cfacb3cd4ad8de1f45a4137462c10c4f9dd56a5",
+      "size_bytes": 9405,
+      "locked_at_utc": "2026-08-02T02:37:52Z"
+    },
+    "raw_cache_manifest": {
+      "path": "experiments/K1744/raw_cache_manifest.json",
+      "sha256": "49f4d3602838862a0e21c24321b7b6e82776433de35753ce9cdb3968e5d00a36",
+      "size_bytes": 12516,
+      "created_at_utc": "2026-08-02T02:39:52Z",
+      "body_retention_policy": "Hash-only metadata. No record-level primary proxy export was accessible, so there are no eligible proxy rows or licensed provider bytes to cache. HTTP response hashes and sizes identify the exact responses examined without republishing third-party pages."
+    }
+  },
+  "proxy": {
+    "name": "latam_private_credit_final_close_announcement_intensity",
+    "ideal_latent_variable": {
+      "name": "ex_ante_private_credit_capital_supply_available_to_latin_america_borrowers",
+      "unit": "USD capital genuinely deployable to Latin America private-credit borrowers at each forecast origin",
+      "unobserved_problem": "Private funds disclose closes and deployments sparsely; private loan tape, dry powder by mandate, and vintage histories are not public point-in-time panels."
+    },
+    "construction": "For each UTC calendar month, count unique final-close announcements for private-debt/private-credit funds whose stated mandate is dedicated to Latin America or allocates at least 50% to Latin America. Enumerate candidate funds from a complete, versioned Private Debt Investor fund database export; verify each retained row against the fund sponsor's official release. Deduplicate by legal fund name, vintage, and final-close date. Compute log1p(monthly unique final-close count). Rows with no verifiable release date are excluded; months are zero only when the complete enumeration frame proves no qualifying close, never because search returned no hits.",
+    "frequency": "monthly",
+    "transformation": "log1p(unique final-close announcements in month t), aligned to outcome month by an explicit pandas Series.shift(1)",
+    "expected_sign": {
+      "next_month_realized_variance": "negative",
+      "next_month_left_tail_loss": "negative",
+      "next_month_change_in_absolute_uup_beta": "negative"
+    },
+    "known_measurement_error": [
+      "announcement count is not committed USD volume, deployable dry powder, or actual loan origination",
+      "fund mandates can span regions and strategies even when marketing language emphasizes Latin America",
+      "undisclosed closes and manager publicity choices induce coverage bias",
+      "database backfills or revised tags break point-in-time validity unless a versioned export and record timestamps are retained",
+      "official releases can report final closes after capital was economically committed"
+    ],
+    "feasibility": {
+      "status": "FAILED_BEFORE_OUTCOME_LOADING",
+      "passed": false,
+      "checks": {
+        "complete_versioned_enumeration_export": false,
+        "official_release_timestamp_for_every_retained_event": false,
+        "minimum_distinct_eligible_events": false,
+        "minimum_nonzero_exposure_months": false,
+        "minimum_common_months_after_all_lags": false,
+        "no_outcome_guided_proxy_or_threshold_selection": true
+      },
+      "thresholds": {
+        "minimum_distinct_eligible_events": 36,
+        "minimum_nonzero_exposure_months": 24,
+        "minimum_common_months_after_all_lags": 60
+      },
+      "observed": {
+        "eligible_event_count": null,
+        "nonzero_month_count": null,
+        "common_month_count": null
+      },
+      "unknown_counts_are_not_zero": true,
+      "exact_failure_reason": "The preregistered Private Debt Investor record-level enumeration/export was not accessible: the inspected public response required sign-in/account creation and exposed neither provider record IDs nor historical version/as-of timestamps. Public sponsor pages supplied isolated examples, not a complete regional fund universe. Therefore missing search hits cannot be coded as zero-event months, event-count thresholds cannot be evaluated, and no point-in-time monthly proxy can be constructed without selection/backfill bias."
+    }
+  },
+  "design": {
+    "fixed_market_universe": [
+      "ILF",
+      "EWW",
+      "ECH",
+      "EPU",
+      "EWZ",
+      "CEW",
+      "EMLC",
+      "EMB",
+      "UUP"
+    ],
+    "fixed_market_universe_count": 9,
+    "channels": {
+      "equity": [
+        "ILF",
+        "EWW",
+        "ECH",
+        "EPU",
+        "EWZ"
+      ],
+      "fx_local_bond": [
+        "CEW",
+        "EMLC"
+      ],
+      "hard_currency_bond": [
+        "EMB"
+      ],
+      "usd_factor_only": [
+        "UUP"
+      ]
+    },
+    "outcome_lock": {
+      "data_source_if_feasible": "Yahoo Finance adjusted daily closes fetched in one frozen snapshot; no forward fill",
+      "ticker_inception_and_delisting_policy": "Report first/last valid observation, missingness, duplicates, timezone, extreme returns, revisions, and common-sample loss for every ticker before estimation.",
+      "forecast_frequency": "monthly",
+      "forecast_origin": "last trading close of calendar month t; only exposure events published by the monthly cutoff are eligible",
+      "horizon": "next calendar month",
+      "channel_return": "equal-weight daily log return across members observed on the strict full-channel common date; no missing member is silently reweighted",
+      "targets": {
+        "realized_variance": "sum of squared daily channel log returns in outcome month",
+        "left_tail_loss": "max(0, negative of the minimum daily channel log return in outcome month)",
+        "change_in_absolute_uup_beta": "absolute 60-trading-day OLS beta of channel daily returns on UUP at outcome-month end minus its value at forecast-origin month end"
+      },
+      "baseline": "one-step monthly expanding AR(1) in the matching target; realized-variance target uses log realized variance",
+      "candidate": "same baseline and common estimation window plus the preregistered lagged exposure proxy",
+      "lag_convention": "Rows are indexed by outcome month; exposure is aligned with Series.shift(1). Baseline target lags use only information through the forecast origin.",
+      "common_sample": "Strict intersection of all nine fixed tickers after target construction and lagging; candidate and baseline use identical rows. Channel-only samples are secondary diagnostics and cannot replace the primary full-basket common sample.",
+      "primary_family": {
+        "cells": 9,
+        "construction": "3 channels x 3 target families",
+        "multiplicity": "Holm step-down family-wise correction across all 9 primary candidate-vs-baseline tests",
+        "dependence_robust_inference": "Because the AR(1)+exposure candidate nests the AR(1) baseline, primary realized-variance loss inference uses a seed=42 recursive expanding-window month-block bootstrap of the QLIKE loss difference under the nested null; ordinary DM/HLN is diagnostic only. Tail-loss and beta-change primary tests use HAC inference on the incremental exposure coefficient with canonical bandwidth max(h-1, ceil(h^(1/3)*n^(1/3))) plus month-block permutation/bootstrap sensitivity. Report loss/residual autocorrelation and lag sensitivity for every target.",
+        "seeded_sparse_event_path": "seed=42 month-block permutation/bootstrap only if the proxy passes all feasibility thresholds"
+      }
+    },
+    "primary_family": {
+      "cells": 9,
+      "construction": "3 channels x 3 target families",
+      "multiplicity": "Holm step-down family-wise correction across all 9 primary candidate-vs-baseline tests",
+      "dependence_robust_inference": "Because the AR(1)+exposure candidate nests the AR(1) baseline, primary realized-variance loss inference uses a seed=42 recursive expanding-window month-block bootstrap of the QLIKE loss difference under the nested null; ordinary DM/HLN is diagnostic only. Tail-loss and beta-change primary tests use HAC inference on the incremental exposure coefficient with canonical bandwidth max(h-1, ceil(h^(1/3)*n^(1/3))) plus month-block permutation/bootstrap sensitivity. Report loss/residual autocorrelation and lag sensitivity for every target.",
+      "seeded_sparse_event_path": "seed=42 month-block permutation/bootstrap only if the proxy passes all feasibility thresholds"
+    },
+    "seed": 42,
+    "explicit_signal_lag": "prepare_exposure_for_outcome returns exposure.shift(1)",
+    "outcome_loading_authorized": false
+  },
+  "data": {
+    "source": null,
+    "period": {
+      "start": null,
+      "end": null
+    },
+    "sample": {
+      "eligible_proxy_events": null,
+      "nonzero_exposure_months": null,
+      "effective_common_months": null,
+      "outcome_rows": 0
+    },
+    "release_time": {
+      "rule": "Use the official publication timestamp. If only a calendar date is available, the event becomes observable at 00:00 UTC on the following calendar day. A retrospective article date, fund vintage label, or close period is never substituted for publication availability.",
+      "verified_event_release_timestamps": 0
+    },
+    "outcome_series_requested": false,
+    "outcome_series_loaded": false,
+    "ticker_diagnostics": {
+      "status": "NOT_RUN_BY_FEASIBILITY_CONTRACT",
+      "inceptions": null,
+      "delistings": null,
+      "missingness": null,
+      "duplicates": null,
+      "timezone": null,
+      "extremes": null,
+      "source_revisions": null,
+      "common_sample_loss": null
+    }
+  },
+  "estimates": {
+    "status": "NOT_ESTIMATED",
+    "reason": "The preregistered Private Debt Investor record-level enumeration/export was not accessible: the inspected public response required sign-in/account creation and exposed neither provider record IDs nor historical version/as-of timestamps. Public sponsor pages supplied isolated examples, not a complete regional fund universe. Therefore missing search hits cannot be coded as zero-event months, event-count thresholds cannot be evaluated, and no point-in-time monthly proxy can be constructed without selection/backfill bias.",
+    "primary_cells": [],
+    "raw_p_values": [],
+    "holm_adjusted_p_values": [],
+    "primary_adjusted_p_value": null,
+    "primary_adjusted_p_value_reason": "No defensible exposure series; inference was prohibited before outcomes."
+  },
+  "robustness": {
+    "status": "NOT_RUN",
+    "direction": "NOT_AVAILABLE",
+    "reason": "Secondary robustness cannot replace a failed primary proxy feasibility gate.",
+    "prespecified_secondary_only": [
+      "country-level equity ETF cells",
+      "alternative intensity window",
+      "leave-one-country-out equity basket",
+      "excluding COVID-19 months",
+      "alternative USD control or beta window",
+      "public transaction announcements distinct from final closes"
+    ]
+  },
+  "diagnostics": {
+    "proxy_lock": "PASS",
+    "release_time_provenance": "FAIL_INACCESSIBLE_ENUMERATION",
+    "lag_contract": "FROZEN_NOT_APPLIED_TO_OUTCOMES",
+    "common_sample": "NOT_CONSTRUCTED",
+    "inference_family": "FROZEN_NOT_RUN",
+    "outcome_access_guard": "PASS_ZERO_OUTCOME_REQUESTS"
+  },
+  "limitations": [
+    "The required record-level, versioned Private Debt Investor enumeration/export was inaccessible without authenticated provider access.",
+    "Sponsor releases establish isolated examples but cannot define complete zero-event months or an unbiased regional manager universe.",
+    "The eligible event count and effective exposure history are unknown, not zero.",
+    "No ETF prices, returns, inception dates, realized volatility, tail endpoint, UUP beta, estimate, p-value, or robustness statistic was computed.",
+    "The 2026 CFA materials motivate the question but are retrospective and cannot be backfilled into historical forecast origins.",
+    "This INCONCLUSIVE result is neither evidence for transmission nor a scientific null against it."
+  ],
+  "conclusion": {
+    "grade": "INCONCLUSIVE",
+    "code": "INSUFFICIENT_DATA",
+    "statement": "The point-in-time LatAm private-credit funding-supply proxy could not be constructed from accessible, complete, versioned record-level data. Outcome analysis stopped as preregistered.",
+    "supported": false,
+    "null": false,
+    "blocked_by": "proxy_provenance_and_enumeration_access"
+  },
+  "code_trace": {
+    "path": "experiments/K1744/K1744.py",
+    "sha256": "1a532a7fc87573f9491ab445803d533f64da72c9e1bb38050cd292ca19dd9092",
+    "size_bytes": 26170
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "8f21860cec7a70e505a25352db56ea08cf8787a881b18d26babafebe4911822b",
+    "output_identities": [
+      {
+        "path": "README.md",
+        "sha256": "234ac7e7e79a41493319162560a3d9ab8ebd129bf5eb1fc7cacc2457b1dd50ae",
+        "size_bytes": 8383
+      },
+      {
+        "path": "diagnostics.json",
+        "sha256": "7b5f9fb88e69cc8025655adbe1090c4d815dad170162e9ba595acdee70353477",
+        "size_bytes": 2436
+      }
+    ]
+  },
+  "runtime_seconds": 0.004,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "pandas",
+        "value": 42
+      }
+    ]
+  }
+}
