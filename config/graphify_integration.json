@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "description": "Canonical Graphify integration. The root graph is the query-first map for backend, operations, tests, configuration, and architecture documentation; the active frontend is an independent repository and receives its own graph.",
+  "corpus_policy": {
+    "root_ignore_file": ".graphifyignore",
+    "included_surfaces": ["AGENTS.md", "src/", "scripts/", "tests/", "config/", "docs/", "ops/", "supabase/"],
+    "excluded_surfaces": ["storage/", "experiments/", "paper/", "graphify-out/", "frontend-v2-fix/", "generated build and dependency directories"],
+    "semantic_documents": "Architecture and operational documents belong to the corpus. Their semantic extraction is performed only by an explicitly configured Graphify backend; scheduled refresh remains AST-only so routine freshness has no API-token cost."
+  },
+  "graphs": [
+    {"id": "root", "root": ".", "output": "graphify-out", "update_command": ["graphify", "update", "."], "report": "graphify-out/GRAPH_REPORT.md"},
+    {"id": "active_frontend", "root": "frontend-v2-fix", "output": "frontend-v2-fix/graphify-out", "update_command": ["graphify", "update", "frontend-v2-fix"], "report": "frontend-v2-fix/graphify-out/GRAPH_REPORT.md"}
+  ],
+  "usage_ledger": "storage/ops/graphify/query_usage.jsonl",
+  "freshness_receipt": "storage/ops/graphify/freshness.json"
+}

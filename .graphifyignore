@@ -1,0 +1,21 @@
+# Canonical Graphify corpus: retain code, tests, configuration, operational
+# definitions, and documentation. Exclude data, generated artifacts, and
+# independent repositories whose graph lifecycle is managed separately.
+.git/
+.venv/
+__pycache__/
+node_modules/
+dist/
+build/
+graphify-out/
+storage/
+experiments/
+paper/
+frontend-v2-fix/
+frontend-v3-design/
+scripts/_legacy/
+artifacts/
+data/
+assets/
+prototypes/
+paper_sections/

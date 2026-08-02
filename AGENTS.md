@@ -474,3 +474,22 @@ complete/release 自動退回 pending**。所以 VSCode 關掉或 crash 不會�
 - 先讓 Codex 審代碼，再信結果。
 - 先改 canonical，再 render 產物。
 - 任務無關當前上下文時，開乾淨 sub-agent，不要污染主線程。
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+VolPred integration additions:
+- `config/graphify_integration.json` and `.graphifyignore` define the canonical corpus and graph roots. Do not broaden the corpus by hand or treat generated `storage/`, experiments, paper artifacts, or the independent active frontend as root-graph source.
+- For an architecture, dependency, owner, legacy-path, impact, or data-flow question, use `uv run python scripts/graphify_integration.py query "<question>"` first. This preserves the Graphify result and writes a retrieval-proxy usage record; source, tests, receipts, or API read-back remain required proof.
+- The active frontend has its own graph at `frontend-v2-fix/graphify-out/`; select it with `--graph active_frontend` instead of inferring frontend behavior from the root graph.
+- `scripts/graphify_integration.py status` is the freshness read-back. `update --graph all` is AST-only/local; semantic document refresh must be an explicit, budgeted Graphify extraction, never an incidental cron side effect.

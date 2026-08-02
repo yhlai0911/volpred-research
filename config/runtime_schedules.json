@@ -181,6 +181,19 @@
         ]
       },
       {
+        "id": "graphify_maintain",
+        "label": "Graphify root + active frontend freshness reconciliation",
+        "cron": "20 3 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_graphify_maintain.sh",
+        "log_path": "storage/logs/cron/graphify_maintain.log",
+        "description": "每日 03:20 Asia/Taipei 對 config/graphify_integration.json 定義的 root 與 active frontend 執行本機 AST-only Graphify update，寫 freshness receipt。root corpus 由 .graphifyignore 定義：程式、測試、設定、ops 與架構文件；排除資料、實驗產物與獨立 frontend repo。此 job 不執行 semantic extraction，故沒有 API token 成本；語意文件 refresh 需另行明確授權。commit/post-checkout hooks 是較快路徑，本 job 是跨 session 的 freshness safety net。",
+        "matchers": [
+          "graphify_integration.py",
+          "cron_graphify_maintain.sh",
+          "graphify_maintain"
+        ]
+      },
+      {
         "id": "arxiv_scan",
         "label": "arXiv q-fin 前沿主題週度掃描",
         "cron": "0 6 * * 1",
