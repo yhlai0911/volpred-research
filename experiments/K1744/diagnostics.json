@@ -21,7 +21,9 @@
     "The preregistered Private Debt Investor record-level enumeration/export was not accessible: the inspected public response required sign-in/account creation and exposed neither provider record IDs nor historical version/as-of timestamps. Public sponsor pages supplied isolated examples, not a complete regional fund universe. Therefore missing search hits cannot be coded as zero-event months, event-count thresholds cannot be evaluated, and no point-in-time monthly proxy can be constructed without selection/backfill bias.",
     "outcome rows 為 **0**",
     "固定為 **9** cells",
-    "seed=42"
+    "seed=42",
+    "one-step monthly expanding AR(1) in the matching target; realized-variance target uses log realized variance",
+    "same baseline and common estimation window plus the preregistered lagged exposure proxy"
   ],
   "json_claim_pointers": [
     "/recovery",

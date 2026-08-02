@@ -25,7 +25,7 @@ Feasibility success 需要至少 **36** 個 distinct events、**24** 個 nonzero
 - 月頻 forecast origin：月末交易日收盤；outcome month 的 exposure 只能來自前一月，程式固定由 `prepare_exposure_for_outcome()` 明確執行 `.shift(1)`（JSON: `/design/explicit_signal_lag`）。
 - 三個分離 channel：equity（ILF/EWW/ECH/EPU/EWZ）、FX/local bond（CEW/EMLC）、hard-currency bond（EMB）；UUP 只作 USD factor（JSON: `/design/channels`）。
 - 三個 outcomes：次月 realized variance、次月最差日 left-tail loss、60-trading-day UUP beta 絕對值的次月變化（JSON: `/design/outcome_lock/targets`）。
-- Baseline 與 candidate 用完全相同資訊集、lag 與 common rows；RV 使用 AR/HAR-family baseline，其他 target 使用對應 AR(1) baseline（JSON: `/design/outcome_lock/baseline`、`/design/outcome_lock/candidate`）。
+- Baseline 與 candidate 用完全相同資訊集、lag 與 common rows；預註冊 baseline 是 **one-step monthly expanding AR(1) in the matching target; realized-variance target uses log realized variance**，candidate 是 **same baseline and common estimation window plus the preregistered lagged exposure proxy**（JSON: `/design/outcome_lock/baseline`、`/design/outcome_lock/candidate`）。
 - Primary family 固定為 **9** cells，Holm step-down 校正整個 family；HAC/DM bandwidth 不得退化成 `h-1`，必須用 repository canonical bandwidth 並報 sensitivity（JSON: `/design/primary_family`）。所有 permutation/bootstrap 路徑固定 **seed=42**（JSON: `/seed`）。
 - 價格診斷原應報 ETF inception、delisting、missingness、duplicate、timezone、extremes、revision 與 full-basket common-sample loss；因 proxy gate 先失敗，這些全部標 `NOT_RUN_BY_FEASIBILITY_CONTRACT`，沒有用 forward fill 掩蓋（JSON: `/data/ticker_diagnostics`）。
 

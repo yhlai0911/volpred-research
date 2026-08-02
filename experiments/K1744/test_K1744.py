@@ -112,6 +112,8 @@ def test_readme_claims_match_results_and_have_json_pointers() -> None:
     assert result["proxy"]["feasibility"]["exact_failure_reason"] in readme
     assert f"outcome rows 為 **{result['data']['sample']['outcome_rows']}**" in readme
     assert f"固定為 **{result['design']['primary_family']['cells']}** cells" in readme
+    assert result["design"]["outcome_lock"]["baseline"] in readme
+    assert result["design"]["outcome_lock"]["candidate"] in readme
     assert "JSON: `/estimates`" in readme
     assert "JSON `/limitations`" in readme
 
