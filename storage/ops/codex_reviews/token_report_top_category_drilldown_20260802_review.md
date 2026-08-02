@@ -2,7 +2,7 @@
 
 - Task: `token_report_top_category_drilldown_20260802`
 - Scope: weekly/daily JSON and Markdown reports plus the owned Email HTML/plain-text report.
-- Commits: pending final writer-lock commit.
+- Commits: `a81356e79` (implementation/tests), `791ddfa49` (verification artifacts/task state).
 
 ## Verification
 
