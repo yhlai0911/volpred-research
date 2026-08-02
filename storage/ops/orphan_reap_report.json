@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-02T15:01:19.923223+00:00",
+  "generated_at": "2026-08-02T16:00:47.800920+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 130.5
+      "age_hours": 131.5
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 130.3
+      "age_hours": 131.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 125.7
+      "age_hours": 126.7
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 124.7
+      "age_hours": 125.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 289.7
+      "age_hours": 290.6
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 93.8
+      "age_hours": 94.8
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 124.6
+      "age_hours": 125.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 141.6
+      "age_hours": 142.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 149.7
+      "age_hours": 150.7
     }
   ],
   "held": [],
@@ -86,7 +86,7 @@
     {
       "path": "storage/drafts/K1357_general_draft.md",
       "adopted": false,
-      "reason": "gate_rejected (rc=5):   Per .claude/rules/publishing.md, every published article needs 2+ real PNG charts. Generate the charts and embed them in a `## 圖表` section, then retry. Use `--no-image-gate` only for genuinely text-"
+      "reason": "gate_rejected (rc=1): requests.exceptions.ConnectionError: HTTPSConnectionPool(host='qxhfgdfzazwpkdgesavm.supabase.co', port=443): Max retries exceeded with url: /storage/v1/object/article-images/K1357_spread_asymmetry.png"
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -130,17 +130,7 @@
       "collections": []
     }
   },
-  "held_escalations": [
-    {
-      "task_id": "assign_88020d6b",
-      "paths": [
-        "experiments/K1322",
-        "experiments/k1307",
-        "experiments/k1324",
-        "experiments/k1325"
-      ]
-    }
-  ],
+  "held_escalations": [],
   "held_escalated_paths": [
     "experiments/K1322",
     "experiments/K1342",
