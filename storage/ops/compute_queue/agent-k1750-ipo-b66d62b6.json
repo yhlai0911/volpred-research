@@ -1,0 +1,53 @@
+{
+  "id": "agent-k1750-ipo-b66d62b6",
+  "title": "K1750 IPO heat incremental volatility forecast experiment",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1750-ipo-b66d62b6.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b66d62b6-k1750",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b66d62b6-k1750/experiments/K1750/K1750_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-k1750-ipo-b66d62b6.json",
+    "--timeout",
+    "10680"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-02T04:23:05Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1750-ipo-b66d62b6.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1750-ipo-b66d62b6.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b66d62b6-k1750/experiments/K1750/K1750_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-k1750-ipo-b66d62b6.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b66d62b6-k1750",
+  "claude_followup": {
+    "brief": "Collect K1750 from dispatch-slot-1-b66d62b6-k1750. Read terminal receipt plus first_seen/evidence timestamps; verify frozen preregistration, adjusted IPO/SPY data and provenance, explicit shift(1), target-end embargo, VIX-controlled common-row delta-QLIKE, restricted-null recursive bootstrap as the nested-aware verdict test, DM-HLN marked diagnostic-only with canonical HAC floor, seed 42, result/reproduce/ledger byte identities, README numeric pointers, scoped tests and gates. Commission independent frozen-byte Codex review; require a gate-generated current-byte PASS before formal merge through scripts/merge_worktree.sh. Missing, failed, partial, or stale artifacts are never scientific success.",
+    "task_type": "platform_ops",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1750",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-02T04:23:05Z",
+    "linked_at": "2026-08-02T04:23:05Z",
+    "error": null
+  },
+  "timeout_seconds": 10800,
+  "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1750-ipo-b66d62b6.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1750-ipo-b66d62b6.md"
+}
