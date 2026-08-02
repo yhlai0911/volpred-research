@@ -167,6 +167,297 @@ def test_scan_jsonl_warns_on_unreadable_usage_path(tmp_path, capsys):
     assert "FileNotFoundError" in err
 
 
+def test_discover_project_dirs_includes_repo_isolation_but_not_other_projects(
+    tmp_path,
+    monkeypatch,
+):
+    token_usage_report = _load_token_usage_report_module()
+    projects = tmp_path / ".claude" / "projects"
+    repo = tmp_path / "volpred-research"
+    dispatch = tmp_path / ".volpred" / "run" / "dispatch_workdirs"
+    assert token_usage_report._claude_project_slug(dispatch).endswith(
+        "-dispatch-workdirs"
+    )
+    main = projects / token_usage_report._claude_project_slug(repo)
+    worktree = projects / (
+        token_usage_report._claude_project_slug(repo / ".claude" / "worktrees")
+        + "-dispatch-slot-1-deadbeef-k1"
+    )
+    scratch = projects / (
+        token_usage_report._claude_project_slug(dispatch)
+        + "-dispatch-slot-1-deadbeef"
+    )
+    unrelated = projects / "-Users-someone-another-volpred-project"
+    lookalike = projects / (
+        token_usage_report._claude_project_slug(tmp_path / "volpred-research-old")
+    )
+    for path in (main, worktree, scratch, unrelated, lookalike):
+        path.mkdir(parents=True)
+
+    monkeypatch.setattr(token_usage_report, "CLAUDE_PROJECTS_DIR", main)
+    monkeypatch.setattr(token_usage_report, "REPO_ROOT", repo)
+    monkeypatch.setattr(token_usage_report, "DISPATCH_WORKDIR_ROOT", dispatch)
+
+    assert token_usage_report.discover_claude_project_dirs() == [
+        scratch,
+        main,
+        worktree,
+    ]
+
+
+def test_iter_session_records_dedupes_copied_jsonl_records_across_isolation_dirs(
+    tmp_path,
+    monkeypatch,
+):
+    token_usage_report = _load_token_usage_report_module()
+    projects = tmp_path / ".claude" / "projects"
+    repo = tmp_path / "volpred-research"
+    dispatch = tmp_path / ".volpred" / "run" / "dispatch_workdirs"
+    main = projects / token_usage_report._claude_project_slug(repo)
+    scratch = projects / (
+        token_usage_report._claude_project_slug(dispatch)
+        + "-dispatch-slot-1-deadbeef"
+    )
+    main.mkdir(parents=True)
+    scratch.mkdir(parents=True)
+    copied = {
+        "type": "assistant",
+        "uuid": "raw-record-1",
+        "timestamp": "2026-08-02T01:02:03Z",
+        "message": {
+            "id": "message-1",
+            "model": "claude-opus-5",
+            "usage": {"input_tokens": 10, "output_tokens": 2},
+            "content": [{"type": "text", "text": "same turn"}],
+        },
+    }
+    unique = {
+        **copied,
+        "uuid": "raw-record-2",
+        "timestamp": "2026-08-02T01:03:03Z",
+        "message": {
+            **copied["message"],
+            "id": "message-2",
+            "usage": {"input_tokens": 20, "output_tokens": 3},
+        },
+    }
+    (main / "session.jsonl").write_text(
+        json.dumps(copied) + "\n",
+        encoding="utf-8",
+    )
+    (scratch / "session.jsonl").write_text(
+        json.dumps(copied) + "\n" + json.dumps(unique) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(token_usage_report, "CLAUDE_PROJECTS_DIR", main)
+    monkeypatch.setattr(token_usage_report, "REPO_ROOT", repo)
+    monkeypatch.setattr(token_usage_report, "DISPATCH_WORKDIR_ROOT", dispatch)
+    monkeypatch.setattr(
+        token_usage_report,
+        "CODEX_SESSIONS_DIR",
+        tmp_path / ".codex" / "sessions",
+    )
+
+    records = list(token_usage_report.iter_session_records())
+
+    assert [record["msg_id"] for record in records] == [
+        "message-1",
+        "message-2",
+    ]
+    assert sum(record["usage"]["input_tokens"] for record in records) == 30
+
+
+def test_iter_session_records_adds_repo_bound_codex_cumulative_deltas(
+    tmp_path,
+    monkeypatch,
+):
+    token_usage_report = _load_token_usage_report_module()
+    projects = tmp_path / ".claude" / "projects"
+    repo = tmp_path / "volpred-research"
+    main = projects / token_usage_report._claude_project_slug(repo)
+    main.mkdir(parents=True)
+    codex_sessions = tmp_path / ".codex" / "sessions"
+    day_dir = codex_sessions / "2026" / "08" / "02"
+    day_dir.mkdir(parents=True)
+    next_local_day_dir = codex_sessions / "2026" / "08" / "03"
+    next_local_day_dir.mkdir(parents=True)
+
+    def _token_count(timestamp, input_tokens, cached, output):
+        return {
+            "timestamp": timestamp,
+            "type": "event_msg",
+            "payload": {
+                "type": "token_count",
+                "info": {
+                    "total_token_usage": {
+                        "input_tokens": input_tokens,
+                        "cached_input_tokens": cached,
+                        "cache_write_input_tokens": 0,
+                        "output_tokens": output,
+                        "reasoning_output_tokens": 0,
+                        "total_tokens": input_tokens + output,
+                    }
+                },
+            },
+        }
+
+    repo_rows = [
+        {
+            "timestamp": "2026-08-02T01:00:00Z",
+            "type": "session_meta",
+            "payload": {"id": "codex-session", "cwd": str(repo)},
+        },
+        {
+            "timestamp": "2026-08-02T01:00:01Z",
+            "type": "turn_context",
+            "payload": {"cwd": str(repo), "model": "gpt-5.6-sol"},
+        },
+        _token_count("2026-08-02T01:01:00Z", 100, 40, 10),
+        _token_count("2026-08-02T01:01:01Z", 100, 40, 10),
+        _token_count("2026-08-02T01:02:00Z", 160, 80, 20),
+    ]
+    unrelated_rows = [
+        {
+            "timestamp": "2026-08-02T02:00:00Z",
+            "type": "session_meta",
+            "payload": {
+                "id": "other-session",
+                "cwd": str(tmp_path / "another-repo"),
+            },
+        },
+        _token_count("2026-08-02T02:01:00Z", 999, 0, 999),
+    ]
+    (day_dir / "repo.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in repo_rows) + "\n",
+        encoding="utf-8",
+    )
+    fork_rows = [
+        {
+            "timestamp": "2026-08-02T01:02:30Z",
+            "type": "session_meta",
+            "payload": {
+                "id": "codex-fork",
+                "cwd": str(repo),
+                "forked_from_id": "codex-session",
+                "parent_thread_id": "codex-session",
+            },
+        },
+        {
+            "timestamp": "2026-08-02T01:02:30Z",
+            "type": "session_meta",
+            "payload": {"id": "codex-session", "cwd": str(repo)},
+        },
+        # Forked files copy the parent cumulative baseline. It is not new use.
+        _token_count("2026-08-02T01:02:00Z", 160, 80, 20),
+        {
+            "timestamp": "2026-08-02T01:02:40Z",
+            "type": "event_msg",
+            "payload": {"type": "thread_settings_applied"},
+        },
+        {
+            "timestamp": "2026-08-02T01:02:41Z",
+            "type": "turn_context",
+            "payload": {"cwd": str(repo), "model": "gpt-5.4-mini"},
+        },
+        _token_count("2026-08-02T01:03:00Z", 200, 100, 30),
+    ]
+    (day_dir / "fork.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in fork_rows) + "\n",
+        encoding="utf-8",
+    )
+    lineage_only_rows = [
+        {
+            "timestamp": "2026-08-02T03:00:00Z",
+            "type": "session_meta",
+            "payload": {
+                "id": "lineage-worker",
+                "cwd": str(repo),
+                "forked_from_id": "codex-session",
+                "parent_thread_id": "codex-session",
+            },
+        },
+        {
+            "timestamp": "2026-08-02T03:00:00Z",
+            "type": "session_meta",
+            "payload": {"id": "codex-session", "cwd": str(repo)},
+        },
+        _token_count("2026-08-02T03:00:01Z", 10_000, 0, 1_000),
+        {
+            "timestamp": "2026-08-02T03:00:01.010Z",
+            "type": "event_msg",
+            "payload": {"type": "task_started"},
+        },
+        {
+            "timestamp": "2026-08-02T03:00:02Z",
+            "type": "turn_context",
+            "payload": {"cwd": str(repo), "model": "gpt-5.6-sol"},
+        },
+        _token_count("2026-08-02T03:00:03Z", 10_100, 50, 1_020),
+    ]
+    (day_dir / "lineage-only.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in lineage_only_rows) + "\n",
+        encoding="utf-8",
+    )
+    (day_dir / "unrelated.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in unrelated_rows) + "\n",
+        encoding="utf-8",
+    )
+    cross_midnight_rows = [
+        {
+            "timestamp": "2026-08-02T23:59:00Z",
+            "type": "session_meta",
+            "payload": {"id": "cross-midnight", "cwd": str(repo)},
+        },
+        {
+            "timestamp": "2026-08-02T23:59:01Z",
+            "type": "turn_context",
+            "payload": {"cwd": str(repo), "model": "gpt-5.4-mini"},
+        },
+        _token_count("2026-08-02T23:59:02Z", 30, 10, 5),
+    ]
+    (next_local_day_dir / "cross-midnight.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in cross_midnight_rows) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(token_usage_report, "CLAUDE_PROJECTS_DIR", main)
+    monkeypatch.setattr(token_usage_report, "REPO_ROOT", repo)
+    monkeypatch.setattr(
+        token_usage_report,
+        "DISPATCH_WORKDIR_ROOT",
+        tmp_path / ".volpred" / "run" / "dispatch_workdirs",
+    )
+    monkeypatch.setattr(
+        token_usage_report,
+        "CODEX_SESSIONS_DIR",
+        codex_sessions,
+    )
+
+    records = list(
+        token_usage_report.iter_session_records(
+            date(2026, 8, 2),
+            date(2026, 8, 3),
+        )
+    )
+
+    observed = sorted(
+        (
+            record["model"],
+            record["usage"]["input_tokens"],
+            record["usage"]["cache_read_input_tokens"],
+            record["usage"]["cache_creation_input_tokens"],
+            record["usage"]["output_tokens"],
+        )
+        for record in records
+    )
+    assert observed == [
+        ("gpt-5.4-mini", 20, 10, 0, 5),
+        ("gpt-5.4-mini", 20, 20, 0, 10),
+        ("gpt-5.6-sol", 20, 40, 0, 10),
+        ("gpt-5.6-sol", 50, 50, 0, 20),
+        ("gpt-5.6-sol", 60, 40, 0, 10),
+    ]
+
+
 def test_bash_command_bucket_classification():
     m = _load_token_usage_report_module()
     cases = [
@@ -284,6 +575,77 @@ def test_daily_report_text_includes_bash_bucket_table(monkeypatch):
 
     assert "## Bash 指令大類（全部 Bash 呼叫）" in text
     assert "| jq/grep/查詢 | 1 | 70 | 100.0% |" in text
+    assert "API 定價等值" in text
+    assert "使用訂閱額度，非實際帳單" in text
+
+
+def test_unknown_model_has_no_invented_api_price_equivalent():
+    token_usage_report = _load_token_usage_report_module()
+    usage = {
+        "input_tokens": 1_000_000,
+        "output_tokens": 1_000_000,
+        "cache_read_tokens": 1_000_000,
+        "cache_create_tokens": 1_000_000,
+    }
+
+    assert token_usage_report.compute_cost_usd(usage, "gpt-unpriced") is None
+
+
+def test_weekly_daily_breakdown_does_not_allocate_unknown_provider_cost(
+    monkeypatch,
+):
+    token_usage_report = _load_token_usage_report_module()
+    week_start = date(2026, 8, 2)
+
+    def _record(day, provider, model, msg_id):
+        return {
+            "timestamp": datetime.combine(
+                day,
+                datetime.min.time(),
+                tzinfo=timezone.utc,
+            ),
+            "date": day,
+            "session_id": f"{provider}/{msg_id}",
+            "provider": provider,
+            "model": model,
+            "usage": {
+                "input_tokens": 100,
+                "output_tokens": 10,
+                "cache_read_input_tokens": 0,
+                "cache_creation_input_tokens": 0,
+            },
+            "category": "unclassified",
+            "is_subagent": False,
+            "content": [],
+            "text_content": "",
+            "msg_id": msg_id,
+        }
+
+    records = [
+        _record(week_start, "claude", "claude-opus-5", "claude-turn"),
+        _record(
+            week_start.replace(day=3),
+            "codex",
+            "gpt-unpriced",
+            "codex-turn",
+        ),
+    ]
+    monkeypatch.setattr(
+        token_usage_report,
+        "iter_session_records",
+        lambda *_args, **_kwargs: iter(records),
+    )
+
+    report = token_usage_report.generate_weekly_report(week_start)
+    text = token_usage_report.format_report_text(report)
+
+    assert report["by_model"]["gpt-unpriced"]["estimated_cost_usd"] is None
+    assert all(
+        "estimated_cost_usd" not in day
+        for day in report["daily_breakdown"].values()
+    )
+    assert "Claude Code / Codex 真實記錄" in text
+    assert "| 日期 | Messages | Billable Tokens |" in text
 
 
 def _load_token_report_email_module():
@@ -302,10 +664,20 @@ def test_email_html_includes_bash_bucket_table(monkeypatch):
     monkeypatch.setattr(mod, "_thinking_estimate", lambda week_range: {})
     week = {
         "totals": {"billable_total": 1000, "cache_read_tokens": 5},
+        "by_provider": {
+            "claude": {"billable_total": 600},
+            "codex": {"billable_total": 400},
+        },
         "week_range": "2026-07-19 → 2026-07-26",
         "daily_breakdown": {"2026-07-19": {"billable_total": 1000}},
         "by_category": {"git_sync": {"billable_total": 1000, "messages": 3}},
-        "by_model": {},
+        "by_model": {
+            "gpt-unpriced": {
+                "billable_total": 400,
+                "messages": 2,
+                "estimated_cost_usd": None,
+            }
+        },
         "drilldown": {
             "bash_commands": {
                 "turns": 2,
@@ -336,3 +708,10 @@ def test_email_html_includes_bash_bucket_table(monkeypatch):
     assert "scripts/ops_snapshot.py" in html_body
     assert "86%" in html_body or "85%" in html_body
     assert "Bash 指令大類前 3" in text_body
+    assert "API 定價等值（非實付）" in html_body
+    assert "Operations Core dispatch scratch" in html_body
+    assert "Claude 本週累計已用" in html_body
+    assert "600" in html_body
+    assert "全 provider 本週 1,000 billable" in text_body
+    assert "N/A" in html_body
+    assert "API等值" in text_body

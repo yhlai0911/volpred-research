@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Token Usage Report — 從 Claude Code 實際 JSONL session 記錄讀取真實 token 用量
+Token Usage Report — 從 Claude Code / Codex session 記錄讀取真實 token 用量
 
-主要數據源：~/.claude/projects/<project>/*.jsonl 中的 message.usage 欄位
-（每個 assistant message 有真實的 input/output/cache tokens）
+主要數據源：~/.claude/projects/ 中所有可證明屬於本 repo 的主 session、
+Operations Core dispatch scratch 與 linked-worktree JSONL，以及 ~/.codex/sessions/
+中 repo-bound session；分別讀取 message.usage 與 cumulative token_count delta。
 
 次要：git commits 分類（僅供參考，不作為 token 估算依據）
 
@@ -28,7 +29,9 @@ from _claude_project_dir import (  # noqa: E402
 )
 
 CLAUDE_PROJECTS_DIR = _detect_claude_projects_dir()
-PROJECT_DIR_SLUG = CLAUDE_PROJECTS_DIR.name  # 實際使用中的目錄名稱（可能是 fallback，非推導 slug）
+CODEX_SESSIONS_DIR = Path.home() / ".codex" / "sessions"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DISPATCH_WORKDIR_ROOT = Path.home() / ".volpred" / "run" / "dispatch_workdirs"
 STORAGE_DIR = Path(__file__).parent.parent / "storage" / "reports" / "token_usage"
 
 # Task categories with emoji + description
@@ -56,6 +59,7 @@ CATEGORY_META = {
     "bash_other": ("💭", "其他 Bash 操作"),
     "file_edit": ("📄", "其他檔案編輯"),
     "agent_delegation": ("🤖", "Agent 派送（非實驗）"),
+    "unclassified": ("◻️", "未分類 provider telemetry"),
     "text_only": ("💬", "純文字回覆（無工具）"),
     "other": ("❔", "其他"),
 }
@@ -600,6 +604,7 @@ def _scan_jsonl(jsonl_path, session_id, is_subagent, target_date_start, target_d
                     "timestamp": ts,
                     "date": ts_date,
                     "session_id": session_id,
+                    "provider": "claude",
                     "model": model,
                     "usage": usage,
                     "category": category,
@@ -609,32 +614,445 @@ def _scan_jsonl(jsonl_path, session_id, is_subagent, target_date_start, target_d
                     # Claude Code writes ONE record per content block, each carrying the
                     # SAME turn-total usage. dedupe by msg_id so usage counts once/turn.
                     "msg_id": msg.get("id"),
+                    # A resumed session can be copied into another Claude project
+                    # directory. The raw event UUID is stable across that copy and
+                    # lets the multi-directory reader avoid counting it twice.
+                    "record_id": obj.get("uuid"),
                 }
     except OSError as exc:
         _warn_token_usage("JSONL file read failed; returning no records", jsonl_path, exc)
         return
 
 
-def iter_session_records(target_date_start=None, target_date_end=None):
-    """遍歷所有 assistant message records（主 session + subagents）。"""
-    if not CLAUDE_PROJECTS_DIR.exists():
+def _claude_project_slug(path: Path) -> str:
+    """Encode a CWD using Claude Code's project-directory convention."""
+
+    return re.sub(r"[^A-Za-z0-9-]", "-", str(path))
+
+
+def discover_claude_project_dirs() -> list[Path]:
+    """Return only Claude project dirs owned by this repository runtime.
+
+    Operations Core intentionally starts workers outside the main checkout and
+    then grants mutating jobs a linked worktree. Claude records those CWDs as
+    sibling project directories, so scanning only ``CLAUDE_PROJECTS_DIR`` loses
+    the platform's actual usage. The allowlist is structural and exact: current
+    repo root, its managed ``.claude/worktrees`` subtree, and the canonical
+    Operations Core dispatch scratch root. A fuzzy ``*volpred*`` scan would mix
+    unrelated repositories into the bill.
+    """
+
+    base = CLAUDE_PROJECTS_DIR.parent
+    if not base.exists():
+        return []
+    main_name = _claude_project_slug(REPO_ROOT)
+    worktree_prefix = _claude_project_slug(
+        REPO_ROOT / ".claude" / "worktrees"
+    ) + "-"
+    dispatch_prefix = _claude_project_slug(DISPATCH_WORKDIR_ROOT) + "-"
+    selected = {
+        path
+        for path in base.iterdir()
+        if path.is_dir()
+        and (
+            path.name == main_name
+            or path.name.startswith(worktree_prefix)
+            or path.name.startswith(dispatch_prefix)
+        )
+    }
+    if CLAUDE_PROJECTS_DIR.exists():
+        selected.add(CLAUDE_PROJECTS_DIR)
+    return sorted(selected)
+
+
+def _iter_claude_session_records(
+    target_date_start=None,
+    target_date_end=None,
+):
+    """遍歷 repo-bound Claude records（主 session + isolated workers）。"""
+
+    seen_record_ids: set[str] = set()
+    for project_dir in discover_claude_project_dirs():
+        sources = (
+            (path, False)
+            for path in sorted(project_dir.glob("*.jsonl"))
+        )
+        subagent_sources = (
+            (path, True)
+            for path in sorted(project_dir.glob("*/subagents/*.jsonl"))
+        )
+        for jsonl_path, is_subagent in (*sources, *subagent_sources):
+            session_id = jsonl_path.stem
+            if is_subagent:
+                session_id = (
+                    jsonl_path.parent.parent.name + "/" + jsonl_path.stem
+                )
+            for record in _scan_jsonl(
+                jsonl_path,
+                session_id,
+                is_subagent,
+                target_date_start,
+                target_date_end,
+            ):
+                record_id = record.get("record_id")
+                if isinstance(record_id, str) and record_id:
+                    if record_id in seen_record_ids:
+                        continue
+                    seen_record_ids.add(record_id)
+                yield record
+
+
+def _repo_bound_cwd(value: object) -> bool:
+    if not isinstance(value, str) or not value.strip():
+        return False
+    cwd = Path(value).expanduser().resolve()
+    repo = REPO_ROOT.resolve()
+    worktrees = (repo / ".claude" / "worktrees").resolve()
+    dispatch = DISPATCH_WORKDIR_ROOT.resolve()
+    return (
+        cwd == repo
+        or cwd == worktrees
+        or worktrees in cwd.parents
+        or cwd == dispatch
+        or dispatch in cwd.parents
+    )
+
+
+def _codex_session_paths(target_date_start, target_date_end):
+    if not CODEX_SESSIONS_DIR.exists():
         return
+    start_timestamp = None
+    if target_date_start is not None:
+        start_timestamp = datetime(
+            target_date_start.year,
+            target_date_start.month,
+            target_date_start.day,
+            tzinfo=timezone.utc,
+        ).timestamp()
+    for path in sorted(CODEX_SESSIONS_DIR.rglob("*.jsonl")):
+        # Codex rollout directories use the desktop's local calendar date,
+        # while event timestamps are UTC. Never use the path date as an upper
+        # bound: Asia/Taipei's next-day directory legitimately contains the
+        # final eight UTC hours of the requested date. Event timestamps below
+        # are the sole authoritative date gate.
+        if start_timestamp is not None:
+            try:
+                if path.stat().st_mtime < start_timestamp:
+                    continue
+            except OSError as exc:
+                _warn_token_usage(
+                    "Codex JSONL stat failed; skipping",
+                    path,
+                    exc,
+                )
+                continue
+        yield path
 
-    # Main session files
-    for jsonl_path in sorted(CLAUDE_PROJECTS_DIR.glob("*.jsonl")):
-        yield from _scan_jsonl(
-            jsonl_path, jsonl_path.stem, False,
-            target_date_start, target_date_end,
-        )
 
-    # Subagent JSONL files (in <session>/subagents/*.jsonl)
-    for sub_path in sorted(CLAUDE_PROJECTS_DIR.glob("*/subagents/*.jsonl")):
-        # session_id is the parent dir of subagents/
-        session_id = sub_path.parent.parent.name + "/" + sub_path.stem
-        yield from _scan_jsonl(
-            sub_path, session_id, True,
-            target_date_start, target_date_end,
+_CODEX_TOKEN_FIELDS = (
+    "input_tokens",
+    "cached_input_tokens",
+    "cache_write_input_tokens",
+    "output_tokens",
+)
+
+
+def _codex_replay_boundary(jsonl_path: Path):
+    """Return canonical identity and the end of a fork's replay preamble.
+
+    Codex desktop fork files serialize the parent thread into the child file.
+    Those replay records receive *new* timestamps, so ordinary event-id or
+    timestamp deduplication cannot distinguish them from real child usage.  A
+    fork starts with its own session_meta and explicit ``forked_from_id``, then
+    repeated parent session_meta records. Desktop forks finish replay with
+    ``thread_settings_applied``. Short-lived worker subagents omit that marker;
+    their replay is a timestamp-compressed preamble followed by the child's
+    task_started and a measurable wall-clock gap. Only token_count events after
+    the proven boundary belong to the child.
+    """
+
+    canonical_session_id = None
+    admitted = False
+    forked = False
+    replay_boundary = None
+    fallback_boundary = None
+    last_foreign_meta_line = 0
+    last_task_started_line = None
+    previous_timestamp = None
+    try:
+        with jsonl_path.open(encoding="utf-8") as handle:
+            for line_no, line in enumerate(handle, start=1):
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    _warn_token_usage(
+                        "Codex JSONL identity line parse failed; skipping",
+                        jsonl_path,
+                        exc,
+                        line_no=line_no,
+                    )
+                    continue
+                payload = obj.get("payload")
+                if not isinstance(payload, dict):
+                    continue
+                if obj.get("type") == "session_meta":
+                    candidate_id = str(
+                        payload.get("id") or jsonl_path.stem
+                    )
+                    if canonical_session_id is None:
+                        canonical_session_id = candidate_id
+                        admitted = _repo_bound_cwd(payload.get("cwd"))
+                        forked = bool(
+                            payload.get("forked_from_id")
+                            or payload.get("parent_thread_id")
+                        )
+                    elif forked and candidate_id != canonical_session_id:
+                        replay_boundary = None
+                        fallback_boundary = None
+                        last_foreign_meta_line = line_no
+                        last_task_started_line = None
+                    continue
+                timestamp_value = obj.get("timestamp")
+                current_timestamp = None
+                if isinstance(timestamp_value, str):
+                    try:
+                        current_timestamp = datetime.fromisoformat(
+                            timestamp_value.replace("Z", "+00:00")
+                        )
+                    except ValueError:
+                        current_timestamp = None
+                if (
+                    forked
+                    and replay_boundary is None
+                    and fallback_boundary is None
+                    and previous_timestamp is not None
+                    and current_timestamp is not None
+                    and (current_timestamp - previous_timestamp).total_seconds()
+                    >= 0.5
+                    and last_task_started_line is not None
+                    and last_task_started_line > last_foreign_meta_line
+                ):
+                    fallback_boundary = last_task_started_line
+                if (
+                    forked
+                    and replay_boundary is None
+                    and obj.get("type") == "event_msg"
+                    and payload.get("type") == "thread_settings_applied"
+                ):
+                    replay_boundary = line_no
+                if (
+                    forked
+                    and obj.get("type") == "event_msg"
+                    and payload.get("type") == "task_started"
+                ):
+                    last_task_started_line = line_no
+                if current_timestamp is not None:
+                    previous_timestamp = current_timestamp
+    except OSError as exc:
+        _warn_token_usage(
+            "Codex JSONL identity scan failed; skipping",
+            jsonl_path,
+            exc,
         )
+        return None, False, None, False
+    return (
+        canonical_session_id,
+        admitted,
+        replay_boundary if replay_boundary is not None else fallback_boundary,
+        forked,
+    )
+
+
+def _iter_codex_session_records(
+    target_date_start=None,
+    target_date_end=None,
+):
+    """Convert Codex cumulative token_count events into per-step deltas."""
+
+    seen_record_ids: set[str] = set()
+    for jsonl_path in _codex_session_paths(
+        target_date_start,
+        target_date_end,
+    ):
+        session_id, admitted, replay_boundary, forked = (
+            _codex_replay_boundary(jsonl_path)
+        )
+        if not admitted or session_id is None:
+            continue
+        if forked and replay_boundary is None:
+            _warn_token_usage(
+                "Codex fork replay boundary missing; skipping",
+                jsonl_path,
+            )
+            continue
+        model = "codex-unknown"
+        previous = {field: 0 for field in _CODEX_TOKEN_FIELDS}
+        try:
+            with jsonl_path.open(encoding="utf-8") as handle:
+                for line_no, line in enumerate(handle, start=1):
+                    try:
+                        obj = json.loads(line)
+                    except json.JSONDecodeError as exc:
+                        _warn_token_usage(
+                            "Codex JSONL line parse failed; skipping",
+                            jsonl_path,
+                            exc,
+                            line_no=line_no,
+                        )
+                        continue
+                    payload = obj.get("payload")
+                    if not isinstance(payload, dict):
+                        continue
+                    if obj.get("type") == "session_meta":
+                        continue
+                    if obj.get("type") == "turn_context":
+                        if replay_boundary is not None and line_no <= replay_boundary:
+                            continue
+                        candidate_model = payload.get("model")
+                        if isinstance(candidate_model, str) and candidate_model:
+                            model = candidate_model
+                        continue
+                    if (
+                        obj.get("type") != "event_msg"
+                        or payload.get("type") != "token_count"
+                    ):
+                        continue
+                    info = payload.get("info")
+                    total = (
+                        info.get("total_token_usage")
+                        if isinstance(info, dict)
+                        else None
+                    )
+                    if not isinstance(total, dict):
+                        continue
+                    current = {}
+                    valid = True
+                    for field in _CODEX_TOKEN_FIELDS:
+                        value = total.get(field, 0)
+                        if isinstance(value, bool) or not isinstance(value, int):
+                            valid = False
+                            break
+                        current[field] = max(0, value)
+                    if not valid:
+                        _warn_token_usage(
+                            "Codex token_count fields are invalid; skipping",
+                            jsonl_path,
+                            line_no=line_no,
+                        )
+                        continue
+                    reset = any(
+                        current[field] < previous[field]
+                        for field in _CODEX_TOKEN_FIELDS
+                    )
+                    delta = {
+                        field: (
+                            current[field]
+                            if reset
+                            else current[field] - previous[field]
+                        )
+                        for field in _CODEX_TOKEN_FIELDS
+                    }
+                    previous = current
+                    if (
+                        replay_boundary is not None
+                        and line_no <= replay_boundary
+                    ):
+                        continue
+                    if not any(delta.values()):
+                        continue
+                    timestamp_value = obj.get("timestamp")
+                    if not isinstance(timestamp_value, str):
+                        _warn_token_usage(
+                            "Codex token_count timestamp missing; skipping",
+                            jsonl_path,
+                            line_no=line_no,
+                        )
+                        continue
+                    try:
+                        timestamp = datetime.fromisoformat(
+                            timestamp_value.replace("Z", "+00:00")
+                        )
+                    except ValueError as exc:
+                        _warn_token_usage(
+                            "Codex token_count timestamp invalid; skipping",
+                            jsonl_path,
+                            exc,
+                            line_no=line_no,
+                        )
+                        continue
+                    observed_date = timestamp.date()
+                    if (
+                        target_date_start is not None
+                        and observed_date < target_date_start
+                    ):
+                        continue
+                    if (
+                        target_date_end is not None
+                        and observed_date >= target_date_end
+                    ):
+                        continue
+                    noncached_input = max(
+                        0,
+                        delta["input_tokens"]
+                        - delta["cached_input_tokens"]
+                        - delta["cache_write_input_tokens"],
+                    )
+                    record_id = (
+                        f"codex:{session_id}:{timestamp.isoformat()}:"
+                        f"{current['input_tokens']}:"
+                        f"{current['cached_input_tokens']}:"
+                        f"{current['cache_write_input_tokens']}:"
+                        f"{current['output_tokens']}"
+                    )
+                    if record_id in seen_record_ids:
+                        continue
+                    seen_record_ids.add(record_id)
+                    yield {
+                        "timestamp": timestamp,
+                        "date": observed_date,
+                        "session_id": f"codex/{session_id}",
+                        "provider": "codex",
+                        "model": model,
+                        "usage": {
+                            "input_tokens": noncached_input,
+                            "cache_read_input_tokens": delta[
+                                "cached_input_tokens"
+                            ],
+                            "cache_creation_input_tokens": delta[
+                                "cache_write_input_tokens"
+                            ],
+                            "output_tokens": delta["output_tokens"],
+                        },
+                        # Codex token_count telemetry contains no authoritative
+                        # task type. Keep attribution explicitly unknown rather
+                        # than mislabelling every interactive/research turn as
+                        # platform operations.
+                        "category": "unclassified",
+                        "is_subagent": False,
+                        "content": [],
+                        "text_content": "",
+                        "msg_id": record_id,
+                        "record_id": record_id,
+                    }
+        except OSError as exc:
+            _warn_token_usage(
+                "Codex JSONL file read failed; returning no records",
+                jsonl_path,
+                exc,
+            )
+
+
+def iter_session_records(target_date_start=None, target_date_end=None):
+    """遍歷本 repo 的 Claude 與 Codex真實 token telemetry。"""
+
+    yield from _iter_claude_session_records(
+        target_date_start,
+        target_date_end,
+    )
+    yield from _iter_codex_session_records(
+        target_date_start,
+        target_date_end,
+    )
 
 
 _GENERIC_CATS = {"text_only", "agent_delegation", "cache_diagnostics"}
@@ -663,6 +1081,7 @@ def aggregate_usage(date_start, date_end):
     (action) category so by_category / by_model sum back to the total."""
     totals = {**_empty_bucket(), "unique_sessions": set(), "subagent_messages": 0, "main_messages": 0}
     by_model = defaultdict(_empty_bucket)
+    by_provider = defaultdict(_empty_bucket)
     by_date = defaultdict(_empty_bucket)
     by_category = defaultdict(_empty_bucket)
 
@@ -674,6 +1093,7 @@ def aggregate_usage(date_start, date_end):
         t = turns.get(mid)
         if t is None:
             t = {"usage": record["usage"], "model": record["model"], "date": record["date"],
+                 "provider": record.get("provider", "unknown"),
                  "session_id": record["session_id"], "is_subagent": record["is_subagent"],
                  "categories": []}
             turns[mid] = t
@@ -686,7 +1106,13 @@ def aggregate_usage(date_start, date_end):
         out = usage["output_tokens"]
         cr = usage["cache_read_tokens"]
         cc = usage["cache_create_tokens"]
-        for bucket in (totals, by_model[t["model"]], by_date[t["date"].isoformat()], by_category[cat]):
+        for bucket in (
+            totals,
+            by_model[t["model"]],
+            by_provider[t["provider"]],
+            by_date[t["date"].isoformat()],
+            by_category[cat],
+        ):
             bucket["input_tokens"] += inp
             bucket["output_tokens"] += out
             bucket["cache_read_tokens"] += cr
@@ -700,7 +1126,13 @@ def aggregate_usage(date_start, date_end):
 
     totals["unique_sessions"] = len(totals["unique_sessions"])
 
-    return totals, dict(by_model), dict(by_date), dict(by_category)
+    return (
+        totals,
+        dict(by_model),
+        dict(by_provider),
+        dict(by_date),
+        dict(by_category),
+    )
 
 
 def generate_drilldown(date_start, date_end):
@@ -930,12 +1362,10 @@ def generate_drilldown(date_start, date_end):
 
 
 def compute_cost_usd(usage, model):
-    """估算 USD 成本（基於 Anthropic pricing）"""
+    """Estimate configured API list-price equivalence, never actual billing."""
     if model not in PRICING:
-        # Fallback: assume Opus pricing
-        pricing = PRICING["claude-opus-4-6"]
-    else:
-        pricing = PRICING[model]
+        return None
+    pricing = PRICING[model]
 
     return (
         usage["input_tokens"] / 1_000_000 * pricing["input"]
@@ -1010,7 +1440,10 @@ def generate_daily_report(target_date=None, include_commits=False):
     date_start = target_date
     date_end = target_date + timedelta(days=1)
 
-    totals, by_model, by_date, by_category = aggregate_usage(date_start, date_end)
+    totals, by_model, by_provider, by_date, by_category = aggregate_usage(
+        date_start,
+        date_end,
+    )
     drilldown = generate_drilldown(date_start, date_end)
 
     # 計算各模型成本
@@ -1019,20 +1452,14 @@ def generate_daily_report(target_date=None, include_commits=False):
     for model, usage in by_model.items():
         cost = compute_cost_usd(usage, model)
         cost_by_model[model] = cost
-        total_cost_usd += cost
-
-    # 各類別成本（按消息比例分配到 Opus，因為幾乎全是 Opus）
-    cost_by_category = {}
-    for cat, usage in by_category.items():
-        # Use the dominant model's pricing
-        dominant_model = max(by_model.keys(), key=lambda m: by_model[m]["messages"]) if by_model else "claude-opus-4-6"
-        cost_by_category[cat] = compute_cost_usd(usage, dominant_model)
+        if cost is not None:
+            total_cost_usd += cost
 
     week_start, week_end = get_friday_week_range(target_date)
 
     report = {
         "report_type": "daily",
-        "source": "claude_code_jsonl",
+        "source": "claude_code_and_codex_jsonl",
         "date": target_date.isoformat(),
         "week_range": f"{week_start.isoformat()} → {week_end.isoformat()}",
         "totals": {
@@ -1052,19 +1479,32 @@ def generate_daily_report(target_date=None, include_commits=False):
         "by_model": {
             model: {
                 **usage,
-                "estimated_cost_usd": round(cost_by_model[model], 4),
+                "estimated_cost_usd": (
+                    round(cost_by_model[model], 4)
+                    if cost_by_model[model] is not None
+                    else None
+                ),
             }
             for model, usage in by_model.items()
+        },
+        "by_provider": {
+            provider: {
+                **usage,
+                "billable_total": _billable_total(usage),
+            }
+            for provider, usage in by_provider.items()
         },
         "by_category": {
             cat: {
                 **usage,
                 "billable_total": _billable_total(usage),
-                "estimated_cost_usd": round(cost_by_category[cat], 4),
                 "emoji": CATEGORY_META.get(cat, ("❔", cat))[0],
                 "description": CATEGORY_META.get(cat, ("❔", cat))[1],
             }
-            for cat, usage in sorted(by_category.items(), key=lambda x: -cost_by_category.get(x[0], 0))
+            for cat, usage in sorted(
+                by_category.items(),
+                key=lambda item: -_billable_total(item[1]),
+            )
         },
         "drilldown": drilldown,
     }
@@ -1085,7 +1525,10 @@ def generate_weekly_report(week_start=None):
         week_start, _ = get_friday_week_range(today)
 
     week_end = week_start + timedelta(days=7)
-    totals, by_model, by_date, by_category = aggregate_usage(week_start, week_end)
+    totals, by_model, by_provider, by_date, by_category = aggregate_usage(
+        week_start,
+        week_end,
+    )
     drilldown = generate_drilldown(week_start, week_end)
 
     cost_by_model = {}
@@ -1093,31 +1536,23 @@ def generate_weekly_report(week_start=None):
     for model, usage in by_model.items():
         cost = compute_cost_usd(usage, model)
         cost_by_model[model] = cost
-        total_cost_usd += cost
+        if cost is not None:
+            total_cost_usd += cost
 
-    # 各類別成本
-    cost_by_category = {}
-    for cat, usage in by_category.items():
-        dominant_model = max(by_model.keys(), key=lambda m: by_model[m]["messages"]) if by_model else "claude-opus-4-6"
-        cost_by_category[cat] = compute_cost_usd(usage, dominant_model)
-
-    # Per-day breakdown with cost
+    # Per-day provider/model attribution is not retained by aggregate_usage.
+    # Keep this table token-only: proportionally distributing known-model API
+    # price across unpriced providers would invent a cost for Codex/AGY.
     daily_breakdown = {}
     for date_key, usage in sorted(by_date.items()):
-        # Approximate per-day cost (can't split by model here, use aggregate)
-        # More accurate: re-aggregate by date and model. For simplicity, we estimate proportionally.
         day_total = usage["input_tokens"] + usage["output_tokens"] + usage["cache_create_tokens"]
-        total_billable = totals["input_tokens"] + totals["output_tokens"] + totals["cache_create_tokens"]
-        day_cost = total_cost_usd * (day_total / total_billable) if total_billable else 0
         daily_breakdown[date_key] = {
             **usage,
             "billable_total": day_total,
-            "estimated_cost_usd": round(day_cost, 4),
         }
 
     report = {
         "report_type": "weekly",
-        "source": "claude_code_jsonl",
+        "source": "claude_code_and_codex_jsonl",
         "week_range": f"{week_start.isoformat()} → {week_end.isoformat()}",
         "totals": {
             "input_tokens": totals["input_tokens"],
@@ -1136,19 +1571,32 @@ def generate_weekly_report(week_start=None):
         "by_model": {
             model: {
                 **usage,
-                "estimated_cost_usd": round(cost_by_model[model], 4),
+                "estimated_cost_usd": (
+                    round(cost_by_model[model], 4)
+                    if cost_by_model[model] is not None
+                    else None
+                ),
             }
             for model, usage in by_model.items()
+        },
+        "by_provider": {
+            provider: {
+                **usage,
+                "billable_total": _billable_total(usage),
+            }
+            for provider, usage in by_provider.items()
         },
         "by_category": {
             cat: {
                 **usage,
                 "billable_total": _billable_total(usage),
-                "estimated_cost_usd": round(cost_by_category[cat], 4),
                 "emoji": CATEGORY_META.get(cat, ("❔", cat))[0],
                 "description": CATEGORY_META.get(cat, ("❔", cat))[1],
             }
-            for cat, usage in sorted(by_category.items(), key=lambda x: -cost_by_category.get(x[0], 0))
+            for cat, usage in sorted(
+                by_category.items(),
+                key=lambda item: -_billable_total(item[1]),
+            )
         },
         "daily_breakdown": daily_breakdown,
         "drilldown": drilldown,
@@ -1168,10 +1616,12 @@ def format_report_text(report):
     t = report["totals"]
 
     if report["report_type"] == "daily":
-        lines.append(f"# Token 用量日報 — {report['date']}（Claude Code 真實記錄）")
+        lines.append(
+            f"# Token 用量日報 — {report['date']}（Claude Code / Codex 真實記錄）"
+        )
         lines.append(f"**週期**: {report['week_range']}")
     else:
-        lines.append("# Token 用量週報（Claude Code 真實記錄）")
+        lines.append("# Token 用量週報（Claude Code / Codex 真實記錄）")
         lines.append(f"**週期**: {report['week_range']}")
 
     lines.append(f"**數據源**: {report['source']}")
@@ -1184,38 +1634,45 @@ def format_report_text(report):
     lines.append("| 類型 | Tokens | 說明 |")
     lines.append("|------|--------|------|")
     lines.append(f"| Input | {t['input_tokens']:,} | 非快取輸入 |")
-    lines.append(f"| Output | {t['output_tokens']:,} | Claude 產生的內容 |")
+    lines.append(f"| Output | {t['output_tokens']:,} | 模型產生的內容 |")
     lines.append(f"| Cache Read | {t['cache_read_tokens']:,} | 重複讀取（便宜）|")
     lines.append(f"| Cache Create | {t['cache_create_tokens']:,} | 首次寫入快取 |")
     lines.append(f"| **Billable** | **{t['billable_total']:,}** | input + output + cache_create |")
-    lines.append(f"| **成本估算** | **${t['estimated_cost_usd']}** | 基於 Anthropic pricing |")
+    lines.append(
+        f"| **API 定價等值** | **${t['estimated_cost_usd']}** | "
+        "僅含已設定價格模型；本平台使用訂閱額度，非實際帳單 |"
+    )
     lines.append("")
 
     # By model
     if report["by_model"]:
         lines.append("## 按模型分布")
-        lines.append("| 模型 | Messages | Input | Output | Cache Read | Cost USD |")
+        lines.append(
+            "| 模型 | Messages | Input | Output | Cache Read | API 等值 USD |"
+        )
         lines.append("|------|----------|-------|--------|-----------|----------|")
         for model, u in sorted(report["by_model"].items(), key=lambda x: -x[1]["messages"]):
+            price = u.get("estimated_cost_usd")
+            price_text = f"${price}" if price is not None else "N/A"
             lines.append(
                 f"| {model} | {u['messages']:,} | "
                 f"{u['input_tokens']:,} | {u['output_tokens']:,} | "
-                f"{u['cache_read_tokens']:,} | ${u['estimated_cost_usd']} |"
+                f"{u['cache_read_tokens']:,} | {price_text} |"
             )
         lines.append("")
 
     # By task category
     if report.get("by_category"):
-        lines.append("## 按任務類別分布（依成本排序）")
-        lines.append("| 類別 | Messages | Billable | Cost USD | 佔比 |")
-        lines.append("|------|----------|----------|----------|------|")
-        total_cost = t.get("estimated_cost_usd", 0) or 0.0001
+        lines.append("## 按任務類別分布（依 Billable tokens 排序）")
+        lines.append("| 類別 | Messages | Billable | 佔比 |")
+        lines.append("|------|----------|----------|------|")
+        total_billable = t.get("billable_total", 0) or 1
         for cat, u in report["by_category"].items():
-            pct = u["estimated_cost_usd"] / total_cost * 100 if total_cost else 0
+            pct = u["billable_total"] / total_billable * 100
             bar = "█" * max(1, int(pct / 5))
             lines.append(
                 f"| {u['emoji']} {u['description']} | {u['messages']:,} | "
-                f"{u['billable_total']:,} | ${u['estimated_cost_usd']} | {pct:.1f}% {bar} |"
+                f"{u['billable_total']:,} | {pct:.1f}% {bar} |"
             )
         lines.append("")
 
@@ -1319,12 +1776,12 @@ def format_report_text(report):
     # Weekly: daily breakdown
     if report["report_type"] == "weekly" and "daily_breakdown" in report:
         lines.append("## 每日分布")
-        lines.append("| 日期 | Messages | Billable Tokens | 成本 USD |")
-        lines.append("|------|----------|-----------------|----------|")
+        lines.append("| 日期 | Messages | Billable Tokens |")
+        lines.append("|------|----------|-----------------|")
         for date_key, d in report["daily_breakdown"].items():
             lines.append(
                 f"| {date_key} | {d['messages']:,} | "
-                f"{d['billable_total']:,} | ${d['estimated_cost_usd']} |"
+                f"{d['billable_total']:,} |"
             )
         lines.append("")
 

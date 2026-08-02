@@ -153,7 +153,9 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
     tot_w = week.get("totals", {})
     day_bill = _bill(tot_t)
     week_bill = _bill(tot_w)
-    cap_pct = week_bill / WEEKLY_CAP * 100 if WEEKLY_CAP else 0
+    claude_week = (week.get("by_provider", {}) or {}).get("claude", {})
+    claude_week_bill = _bill(claude_week)
+    cap_pct = claude_week_bill / WEEKLY_CAP * 100 if WEEKLY_CAP else 0
     week_range = esc(week.get("week_range", ""))
 
     # per-day
@@ -188,18 +190,18 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
     </style>"""
 
     p = [f"<!DOCTYPE html><html><head><meta charset='utf-8'>{css}</head><body>"]
-    p.append(f"<h1>VolPred Token 使用報表</h1>")
+    p.append("<h1>VolPred Token 使用報表</h1>")
     p.append(f"<div class='sub'>{esc(now_tw.strftime('%Y-%m-%d %H:%M'))} 台灣時間 · 本週 {week_range}</div>")
 
     # headline: week cap progress
     cap_color = "#059669" if cap_pct < 70 else ("#d97706" if cap_pct < 90 else "#dc2626")
     p.append("<div class='card'>")
-    p.append(f"<div class='sub'>本週累計已用（billable）</div>")
-    p.append(f"<div class='big' style='color:{cap_color}'>{m(week_bill)} <span style='font-size:15px;color:#6b7280;font-weight:400'>/ {m(WEEKLY_CAP)} cap · {cap_pct:.0f}%</span></div>")
+    p.append("<div class='sub'>Claude 本週累計已用（Claude quota 口徑）</div>")
+    p.append(f"<div class='big' style='color:{cap_color}'>{m(claude_week_bill)} <span style='font-size:15px;color:#6b7280;font-weight:400'>/ {m(WEEKLY_CAP)} Claude cap · {cap_pct:.0f}%</span></div>")
     p.append(_bar(cap_pct, cap_color, 16))
     p.append("<div style='margin-top:14px'>")
     p.append(f"<span class='kpi'><span class='n'>{m(day_bill)}</span><br><span class='l'>今日 billable</span></span>")
-    p.append(f"<span class='kpi'><span class='n'>${float(tot_t.get('estimated_cost_usd',0)):,.0f}</span><br><span class='l'>今日估計成本</span></span>")
+    p.append(f"<span class='kpi'><span class='n'>${float(tot_t.get('estimated_cost_usd',0)):,.0f}</span><br><span class='l'>API 定價等值（非實付）</span></span>")
     p.append(f"<span class='kpi'><span class='n'>{int(tot_t.get('assistant_messages',0)):,}</span><br><span class='l'>今日 AI 訊息</span></span>")
     p.append(f"<span class='kpi'><span class='n'>{int(tot_t.get('unique_sessions',0))}</span><br><span class='l'>今日 session</span></span>")
     p.append("</div></div>")
@@ -256,18 +258,19 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
     p.append("<h2>當週 × 模型</h2><table>")
     for b, k, msgs in mod_rows:
         pct = b / week_bill * 100 if week_bill else 0
-        cost = float(models.get(k, {}).get("estimated_cost_usd", 0))
+        cost = models.get(k, {}).get("estimated_cost_usd")
+        cost_text = f"${float(cost):,.0f}" if cost is not None else "N/A"
         p.append(f"<tr><td class='tag' style='width:170px'>{esc(k)}</td>"
                  f"<td>{_bar(b/(mod_rows[0][0] or 1)*100, '#7c3aed')}</td>"
                  f"<td class='num' style='width:70px'>{m(b)}</td>"
                  f"<td class='num sub' style='width:44px'>{pct:.0f}%</td>"
-                 f"<td class='num sub' style='width:66px'>${cost:,.0f}</td></tr>")
+                 f"<td class='num sub' style='width:66px'>{cost_text}</td></tr>")
     p.append("</table>")
 
     # output composition (reasoning) + cached context
     th = _thinking_estimate(week.get("week_range", ""))
     cr_w = int(tot_w.get("cache_read_tokens", 0) or 0)
-    p.append("<h2>輸出組成（reasoning）＋ cached context</h2><table>")
+    p.append("<h2>Claude main-session 輸出組成（reasoning）＋全來源 cached context</h2><table>")
     if th and th.get("output_total"):
         tk = th["thinking"]; ot = th["output_total"]; tx = max(0, ot - tk)
         p.append(f"<tr><td style='width:150px'>reasoning（thinking）</td>"
@@ -276,8 +279,7 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
         p.append(f"<tr><td>text / 工具輸出</td><td>{_bar(100-th['pct'], '#2563eb')}</td>"
                  f"<td class='num'>{m(tx)}</td><td class='num sub'>{100-th['pct']:.0f}%</td></tr>")
     p.append("</table>")
-    p.append(f"<div class='sub'>reasoning 佔 output 約 {th.get('pct',0):.0f}%（去重後估算：output − text − tool；thinking 已 redact 故用相減）。"
-             f"上表 % 是「佔 output」，output 只是總 billable 的一小片。</div>")
+    p.append(f"<div class='sub'>reasoning 僅掃 Claude main project，佔該 scope output 約 {th.get('pct',0):.0f}%（去重後估算：output − text − tool；thinking 已 redact 故用相減）；不代表 isolated Claude 或 Codex。</div>")
     p.append(f"<div class='card' style='margin-top:12px'><span class='sub'>cached context 本週被重讀（cache_read）</span><br>"
              f"<span class='n' style='font-size:22px;font-weight:700'>{m(cr_w)}</span> "
              f"<span class='sub'>tokens —— 每個 turn 都把整段 context 重讀一次；量最大但以約 0.1× input 計費（不進 billable）。長 session／不 compact 會放大這塊。</span></div>")
@@ -285,17 +287,19 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
     # caveats
     p.append("<h2>說明（誠實 caveat）</h2><div class='sub'>")
     p.append("· billable = input + output + cache_create（cache_read 量大但不以全費計）；per-record 加總，口徑與官方一致。<br>")
-    p.append(f"· 週 cap {m(WEEKLY_CAP)} 由**官方用量顯示校準**（{esc(CALIB.get('reading_date','?'))} 官方 Weekly {int(CALIB.get('official_pct',0.76)*100)}% 反推）；官方是額度 ground truth，飄移時用 `--calibrate <官方%>` 重新錨定。<br>")
-    p.append("· reasoning(thinking) 已 redact 且 output 為合計，無法可靠單獨拆分，故不列。<br>")
-    p.append("· 數據源：~/.claude/projects/*.jsonl 的 message.usage（含 subagent），由 token_usage_report.py 聚合。")
+    p.append(f"· Claude 週 cap {m(WEEKLY_CAP)} 只除 Claude provider telemetry，由**官方 Claude 用量顯示校準**（{esc(CALIB.get('reading_date','?'))} 官方 Weekly {int(CALIB.get('official_pct',0.76)*100)}% 反推）；Codex 不混入此分母。<br>")
+    p.append("· reasoning(thinking) 已 redact；上方只提供 Claude main-session 的 best-effort 估算，不外推到其他來源。<br>")
+    p.append("· 金額只加總已設定價格模型的 API list-price 等值，未定價模型顯示 N/A；本平台使用 Claude/Codex/AGY 訂閱額度，並非實際帳單。<br>")
+    p.append("· 數據源：~/.claude/projects/ 中本 repo 的主 session、Operations Core dispatch scratch、linked worktree、subagent JSONL，以及repo-bound Codex token_count；由 token_usage_report.py 聚合。AGY若provider未提供token receipt則不臆測。")
     p.append("</div>")
 
     p.append("</body></html>")
     html_body = "".join(p)
 
     text_body = (f"VolPred Token 報表 {now_tw.strftime('%Y-%m-%d %H:%M')} 台灣\n"
-                 f"本週 {week_bill:,} / {WEEKLY_CAP:,} billable ({cap_pct:.0f}% cap)\n"
-                 f"今日 {day_bill:,} billable, ${float(tot_t.get('estimated_cost_usd',0)):,.0f}\n"
+                 f"Claude 本週 {claude_week_bill:,} / {WEEKLY_CAP:,} billable ({cap_pct:.0f}% Claude cap)\n"
+                 f"全 provider 本週 {week_bill:,} billable\n"
+                 f"今日 {day_bill:,} billable, API等值 ${float(tot_t.get('estimated_cost_usd',0)):,.0f}（非實付）\n"
                  f"前 3 使用類型: " + ", ".join(f"{k}={m(b)}" for b, k, _ in cat_rows[:3]))
     if bc_rows:
         text_body += "\nBash 指令大類前 3: " + ", ".join(
