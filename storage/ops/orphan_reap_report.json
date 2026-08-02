@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-02T09:01:42.304832+00:00",
+  "generated_at": "2026-08-02T10:01:42.819184+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 124.5
+      "age_hours": 125.5
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 124.3
+      "age_hours": 125.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 119.7
+      "age_hours": 120.7
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 118.7
+      "age_hours": 119.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 283.7
+      "age_hours": 284.7
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 87.9
+      "age_hours": 88.9
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 118.6
+      "age_hours": 119.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 135.6
+      "age_hours": 136.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 143.7
+      "age_hours": 144.7
     }
   ],
   "held": [],
@@ -95,34 +95,9 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [
-    {
-      "job_id": "compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/ops/codex_reviews/k1813_verdict.md"
-      ],
-      "existing_paths": [
-        "storage/ops/codex_reviews/k1813_verdict.md"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    }
-  ],
+  "job_deliverable_candidates": [],
   "job_deliverable_held": [],
-  "job_deliveries": [
-    {
-      "job_id": "compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376",
-      "paths": [
-        "storage/ops/codex_reviews/k1813_verdict.md"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "b88f7905d5b33e0266625b066b83e4fbfefcb25e",
-      "reason": "already_committed"
-    }
-  ],
+  "job_deliveries": [],
   "namespaces": {
     "drafts": {
       "collectable": [],
@@ -148,6 +123,44 @@
       "collectable": [],
       "held": [
         {
+          "path": "experiments/K1322",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/K1322/K1322.py"
+          ]
+        },
+        {
+          "path": "experiments/k1307",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/k1307/k1307.py"
+          ]
+        },
+        {
+          "path": "experiments/k1324",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/k1324/k1324.py"
+          ]
+        },
+        {
+          "path": "experiments/k1325",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/k1325/README.md",
+            "experiments/k1325/k1325.py",
+            "experiments/k1325/revisit_gate.json"
+          ]
+        },
+        {
           "path": "experiments/k528",
           "kind": "atomic_unit_incomplete",
           "reason": "atomic_unit_incomplete",
@@ -159,7 +172,7 @@
         }
       ],
       "skipped": {
-        "grace": 2,
+        "grace": 8,
         "inflight": 0,
         "unclaimed": 0
       },
