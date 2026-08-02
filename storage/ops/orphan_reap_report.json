@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-02T04:00:56.073802+00:00",
+  "generated_at": "2026-08-02T05:00:57.897250+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 119.5
+      "age_hours": 120.5
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 119.3
+      "age_hours": 120.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 114.7
+      "age_hours": 115.7
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 113.7
+      "age_hours": 114.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 278.6
+      "age_hours": 279.7
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 82.8
+      "age_hours": 83.8
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 113.6
+      "age_hours": 114.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 130.6
+      "age_hours": 131.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 138.7
+      "age_hours": 139.7
     }
   ],
   "held": [],
@@ -121,9 +121,19 @@
     },
     "experiments": {
       "collectable": [],
-      "held": [],
+      "held": [
+        {
+          "path": "experiments/K1380_v4",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/K1380_v4/reproduce_report.json"
+          ]
+        }
+      ],
       "skipped": {
-        "grace": 0,
+        "grace": 1,
         "inflight": 0,
         "unclaimed": 0
       },
