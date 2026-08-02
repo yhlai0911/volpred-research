@@ -5769,3 +5769,17 @@ ACL。兩個live owner刻意維持`legacy/1`；fresh census仍為五個預期blo
 因此「缺少安全切換執行器」這個bounded根因為 **`root_cause_fixed_and_verified`**，但#9真實
 七日閘與#12/#13 acceptance未完成，T40 umbrella仍為 **`contained`**，不得提前切owner或開始
 14日retirement clean window。
+
+---
+
+## 2026-08-02 — Token 報告前兩名類別缺少可行動細項
+
+**證據化症狀**：原本週報／日報只列任務類別總額，Email 也無法在同一封通知中回答「這一類由哪個 provider、model、session 產生、細項證據是什麼」。Codex `token_count` 沒有任務 metadata，若硬推任務名稱會造成虛構歸因。
+
+**根因層級（報表契約／歸因邊界）**：報表只把分類聚合到 category，沒有在同一個去重後 turn snapshot 上保留 provider/model/session 與可觀測 tool/content evidence；Bash 一個 turn 多個 family 時也沒有明確分攤與守恆契約。
+
+**底層修復與制度化**：新增 top-two category drilldown 公開報表結構，JSON、Markdown／CLI、Email HTML／plain text 全部輸出 provider/model/session 與 category-specific detail。`unclassified` 明確標註無 authoritative task metadata、不做推斷；Bash family 逐欄位 deterministic allocation 並驗證 billable 守恆；text reason 明示僅為 keyword heuristic。所有 detail 均附可信度／分攤 caveat。
+
+**回歸與 live read-back**：`66 passed`，Ruff F/E9、diff-check、Matt Spec／Standards 雙軸均 PASS；重建 `weekly_2026-07-26` 與 `daily_2026-08-01` 並回讀 top-two、provider/model/session、unclassified 聲明與 Bash allocation note。live weekly top two 為 Codex `unclassified` 221,788,662 billable（82.3%）及 Claude `bash_other` 28,711,166（10.7%）。
+
+本 incident 狀態：**`root_cause_fixed_and_verified`**。
