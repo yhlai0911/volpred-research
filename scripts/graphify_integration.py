@@ -87,12 +87,16 @@ def update(config: dict[str, Any], graph_ids: list[str]) -> int:
     try:
         for graph_id in graph_ids:
             item = graph(config, graph_id)
-            command = list(item["update_command"])
             cwd = ROOT / item.get("working_directory", ".")
-            completed = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
-            runs.append({"graph_id": graph_id, "command": command,
-                         "returncode": completed.returncode, "stdout_tail": completed.stdout[-2000:],
-                         "stderr_tail": completed.stderr[-2000:]})
+            commands = item.get("refresh_commands") or [item["update_command"]]
+            for command_spec in commands:
+                command = list(command_spec)
+                completed = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
+                runs.append({"graph_id": graph_id, "command": command,
+                             "returncode": completed.returncode, "stdout_tail": completed.stdout[-2000:],
+                             "stderr_tail": completed.stderr[-2000:]})
+                if completed.returncode:
+                    break
         receipt = {"generated_at": utc_now(), "runs": runs,
                    "graphs": [graph_status(config, graph_id) for graph_id in graph_ids]}
         write_receipt(config, receipt)
