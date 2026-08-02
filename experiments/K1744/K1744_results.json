@@ -97,7 +97,7 @@
         "accessed_at_utc": "2026-08-02T02:39:51.941190+00:00",
         "response_sha256": "6b4b99a76fccac28ab9e8a1eae8068e60813df28812aa14bd835a831eb45e0ec",
         "response_bytes": 5587,
-        "claim_supported": "The HAR-RV specification is the preregistered volatility-model benchmark family; the publisher page was access-controlled during this audit."
+        "claim_supported": "HAR-RV is relevant long-memory volatility-model context, but it is not the preregistered primary baseline; that lock is an expanding AR(1) on the matching target. The publisher page was access-controlled during this audit."
       }
     ],
     "institutional_motivation": {
@@ -117,8 +117,8 @@
     },
     "raw_cache_manifest": {
       "path": "experiments/K1744/raw_cache_manifest.json",
-      "sha256": "94bfbe4aaa55d5d8283e4189b35a309bf25aac267fa714b88b3f3b2157230475",
-      "size_bytes": 12434,
+      "sha256": "49f4d3602838862a0e21c24321b7b6e82776433de35753ce9cdb3968e5d00a36",
+      "size_bytes": 12516,
       "created_at_utc": "2026-08-02T02:39:52Z",
       "body_retention_policy": "Hash-only metadata. No record-level primary proxy export was accessible, so there are no eligible proxy rows or licensed provider bytes to cache. HTTP response hashes and sizes identify the exact responses examined without republishing third-party pages."
     }
@@ -315,12 +315,12 @@
   },
   "code_trace": {
     "path": "experiments/K1744/K1744.py",
-    "sha256": "772134059c88f625ec57acb654ff6f46fe8b137cfd92d83164b6114d96b5419e",
+    "sha256": "951377efbceedf6dd3355f02f90f45291f680747e875068046ffbd658a6f8bf1",
     "size_bytes": 25810
   },
   "artifact_generation": {
     "schema_version": "volpred.reproduce_commit.v1",
-    "generation_id": "794316e49aad5758a81ef4bd03d1d8c15b983cde2b560af9a7e6542fbd74760b",
+    "generation_id": "d557962f1e5e08e08bc8fadb4aacf0159657d7029d6677097c78db6a2ab2644b",
     "output_identities": [
       {
         "path": "README.md",
@@ -334,7 +334,7 @@
       }
     ]
   },
-  "runtime_seconds": 0.004,
+  "runtime_seconds": 0.003,
   "runtime_env": {
     "python": "3.12.10",
     "implementation": "CPython",

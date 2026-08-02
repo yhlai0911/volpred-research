@@ -103,6 +103,18 @@ def test_full_universe_and_channel_separation_are_frozen() -> None:
     assert prereg["channel_definitions"]["usd_factor_only"] == ["UUP"]
 
 
+def test_methodology_source_does_not_broaden_the_frozen_baseline() -> None:
+    manifest = load_json("raw_cache_manifest.json")
+    result = load_json("K1744_results.json")
+    source = next(row for row in manifest["sources"] if row["source_id"] == "corsi_har_doi")
+
+    assert "not the preregistered primary baseline" in source["institutional_claim_supported"]
+    assert "expanding AR(1)" in source["institutional_claim_supported"]
+    assert result["design"]["outcome_lock"]["baseline"].startswith(
+        "one-step monthly expanding AR(1)"
+    )
+
+
 def test_readme_claims_match_results_and_have_json_pointers() -> None:
     result = load_json("K1744_results.json")
     diagnostics = load_json("diagnostics.json")
