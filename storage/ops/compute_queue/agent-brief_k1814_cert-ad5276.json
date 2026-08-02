@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1814_cert-ad5276",
+  "title": "agent: brief_k1814_cert",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1814_cert-ad5276.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814/experiments/k1814/review_verdict.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1814_cert-ad5276.json",
+    "--timeout",
+    "2580"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-02T09:04:06Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1814_cert-ad5276.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1814_cert-ad5276.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814/experiments/k1814/review_verdict.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1814_cert-ad5276.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+  "claude_followup": {
+    "brief": "K1814 stage 3 收件：讀 experiments/k1814/review_verdict.json。若 verdict=PASS 且 reviewed_sha256 對得上現在的 bytes → 主線程跑 bash scripts/merge_worktree.sh dispatch-slot-1-8af0700e-k1814 完成合併，然後 complete K1814。若 verdict=FAIL → 讀 blocking_defects，依缺陷決定修補或退回，不得為了合併而改裁決檔。knowledge.json 條目 eba9964a 已由主線程寫入（2026-08-02），不要重寫。",
+    "task_type": "platform_ops",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1814",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-02T09:04:06Z",
+    "linked_at": "2026-08-02T09:04:07Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": "/tmp/brief_k1814_cert.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1814_cert-ad5276.md"
+}

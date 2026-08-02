@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-02T08:01:01.218580+00:00",
+  "generated_at": "2026-08-02T09:01:42.304832+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 123.5
+      "age_hours": 124.5
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 123.3
+      "age_hours": 124.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 118.7
+      "age_hours": 119.7
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 117.7
+      "age_hours": 118.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 282.7
+      "age_hours": 283.7
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 86.8
+      "age_hours": 87.9
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 117.6
+      "age_hours": 118.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 134.6
+      "age_hours": 135.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 142.7
+      "age_hours": 143.7
     }
   ],
   "held": [],
@@ -95,9 +95,34 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/ops/codex_reviews/k1813_verdict.md"
+      ],
+      "existing_paths": [
+        "storage/ops/codex_reviews/k1813_verdict.md"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376",
+      "paths": [
+        "storage/ops/codex_reviews/k1813_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "b88f7905d5b33e0266625b066b83e4fbfefcb25e",
+      "reason": "already_committed"
+    }
+  ],
   "namespaces": {
     "drafts": {
       "collectable": [],
@@ -121,9 +146,20 @@
     },
     "experiments": {
       "collectable": [],
-      "held": [],
+      "held": [
+        {
+          "path": "experiments/k528",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/k528/build_article_correction.py",
+            "experiments/k528/k528_nfp_official_dates_results.json"
+          ]
+        }
+      ],
       "skipped": {
-        "grace": 0,
+        "grace": 2,
         "inflight": 0,
         "unclaimed": 0
       },
