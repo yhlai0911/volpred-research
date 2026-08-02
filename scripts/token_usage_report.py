@@ -757,110 +757,16 @@ _CODEX_TOKEN_FIELDS = (
 )
 
 
-def _codex_replay_boundary(jsonl_path: Path):
-    """Return canonical identity and the end of a fork's replay preamble.
-
-    Codex desktop fork files serialize the parent thread into the child file.
-    Those replay records receive *new* timestamps, so ordinary event-id or
-    timestamp deduplication cannot distinguish them from real child usage.  A
-    fork starts with its own session_meta and explicit ``forked_from_id``, then
-    repeated parent session_meta records. Desktop forks finish replay with
-    ``thread_settings_applied``. Short-lived worker subagents omit that marker;
-    their replay is a timestamp-compressed preamble followed by the child's
-    task_started and a measurable wall-clock gap. Only token_count events after
-    the proven boundary belong to the child.
-    """
-
-    canonical_session_id = None
-    admitted = False
-    forked = False
-    replay_boundary = None
-    fallback_boundary = None
-    last_foreign_meta_line = 0
-    last_task_started_line = None
-    previous_timestamp = None
-    try:
-        with jsonl_path.open(encoding="utf-8") as handle:
-            for line_no, line in enumerate(handle, start=1):
-                try:
-                    obj = json.loads(line)
-                except json.JSONDecodeError as exc:
-                    _warn_token_usage(
-                        "Codex JSONL identity line parse failed; skipping",
-                        jsonl_path,
-                        exc,
-                        line_no=line_no,
-                    )
-                    continue
-                payload = obj.get("payload")
-                if not isinstance(payload, dict):
-                    continue
-                if obj.get("type") == "session_meta":
-                    candidate_id = str(
-                        payload.get("id") or jsonl_path.stem
-                    )
-                    if canonical_session_id is None:
-                        canonical_session_id = candidate_id
-                        admitted = _repo_bound_cwd(payload.get("cwd"))
-                        forked = bool(
-                            payload.get("forked_from_id")
-                            or payload.get("parent_thread_id")
-                        )
-                    elif forked and candidate_id != canonical_session_id:
-                        replay_boundary = None
-                        fallback_boundary = None
-                        last_foreign_meta_line = line_no
-                        last_task_started_line = None
-                    continue
-                timestamp_value = obj.get("timestamp")
-                current_timestamp = None
-                if isinstance(timestamp_value, str):
-                    try:
-                        current_timestamp = datetime.fromisoformat(
-                            timestamp_value.replace("Z", "+00:00")
-                        )
-                    except ValueError:
-                        current_timestamp = None
-                if (
-                    forked
-                    and replay_boundary is None
-                    and fallback_boundary is None
-                    and previous_timestamp is not None
-                    and current_timestamp is not None
-                    and (current_timestamp - previous_timestamp).total_seconds()
-                    >= 0.5
-                    and last_task_started_line is not None
-                    and last_task_started_line > last_foreign_meta_line
-                ):
-                    fallback_boundary = last_task_started_line
-                if (
-                    forked
-                    and replay_boundary is None
-                    and obj.get("type") == "event_msg"
-                    and payload.get("type") == "thread_settings_applied"
-                ):
-                    replay_boundary = line_no
-                if (
-                    forked
-                    and obj.get("type") == "event_msg"
-                    and payload.get("type") == "task_started"
-                ):
-                    last_task_started_line = line_no
-                if current_timestamp is not None:
-                    previous_timestamp = current_timestamp
-    except OSError as exc:
-        _warn_token_usage(
-            "Codex JSONL identity scan failed; skipping",
-            jsonl_path,
-            exc,
-        )
-        return None, False, None, False
-    return (
-        canonical_session_id,
-        admitted,
-        replay_boundary if replay_boundary is not None else fallback_boundary,
-        forked,
-    )
+def _codex_token_fields(value):
+    if not isinstance(value, dict):
+        return None
+    parsed = {}
+    for field in _CODEX_TOKEN_FIELDS:
+        item = value.get(field, 0)
+        if isinstance(item, bool) or not isinstance(item, int):
+            return None
+        parsed[field] = max(0, item)
+    return parsed
 
 
 def _iter_codex_session_records(
@@ -874,19 +780,17 @@ def _iter_codex_session_records(
         target_date_start,
         target_date_end,
     ):
-        session_id, admitted, replay_boundary, forked = (
-            _codex_replay_boundary(jsonl_path)
-        )
-        if not admitted or session_id is None:
-            continue
-        if forked and replay_boundary is None:
-            _warn_token_usage(
-                "Codex fork replay boundary missing; skipping",
-                jsonl_path,
-            )
-            continue
+        session_id = jsonl_path.stem
+        canonical_session_id = None
+        admitted = None
+        forked = False
+        replaying = False
+        boundary_proven = True
+        last_task_started_line = None
+        previous_timestamp = None
         model = "codex-unknown"
         previous = {field: 0 for field in _CODEX_TOKEN_FIELDS}
+        file_records = []
         try:
             with jsonl_path.open(encoding="utf-8") as handle:
                 for line_no, line in enumerate(handle, start=1):
@@ -904,9 +808,74 @@ def _iter_codex_session_records(
                     if not isinstance(payload, dict):
                         continue
                     if obj.get("type") == "session_meta":
+                        candidate_id = str(
+                            payload.get("id") or jsonl_path.stem
+                        )
+                        if canonical_session_id is None:
+                            canonical_session_id = candidate_id
+                            session_id = candidate_id
+                            admitted = _repo_bound_cwd(payload.get("cwd"))
+                            if not admitted:
+                                break
+                            forked = bool(
+                                payload.get("forked_from_id")
+                                or payload.get("parent_thread_id")
+                            )
+                            replaying = forked
+                            boundary_proven = not forked
+                        elif forked and candidate_id != canonical_session_id:
+                            # Another parent replay supersedes any earlier
+                            # candidate boundary in this file. Buffering lets us
+                            # retract without a second full-file scan.
+                            replaying = True
+                            boundary_proven = False
+                            last_task_started_line = None
+                            model = "codex-unknown"
+                            file_records.clear()
                         continue
+                    if admitted is not True:
+                        continue
+                    timestamp_value = obj.get("timestamp")
+                    current_timestamp = None
+                    if isinstance(timestamp_value, str):
+                        try:
+                            current_timestamp = datetime.fromisoformat(
+                                timestamp_value.replace("Z", "+00:00")
+                            )
+                        except ValueError:
+                            current_timestamp = None
+                    if (
+                        forked
+                        and replaying
+                        and previous_timestamp is not None
+                        and current_timestamp is not None
+                        and (
+                            current_timestamp - previous_timestamp
+                        ).total_seconds()
+                        >= 0.5
+                        and last_task_started_line is not None
+                    ):
+                        replaying = False
+                        boundary_proven = True
+                    if (
+                        forked
+                        and replaying
+                        and obj.get("type") == "event_msg"
+                        and payload.get("type") == "thread_settings_applied"
+                    ):
+                        replaying = False
+                        boundary_proven = True
+                    if (
+                        forked
+                        and replaying
+                        and obj.get("type") == "event_msg"
+                        and payload.get("type") == "task_started"
+                    ):
+                        last_task_started_line = line_no
+                    if current_timestamp is not None:
+                        previous_timestamp = current_timestamp
                     if obj.get("type") == "turn_context":
-                        if replay_boundary is not None and line_no <= replay_boundary:
+                        if replaying:
                             continue
                         candidate_model = payload.get("model")
                         if isinstance(candidate_model, str) and candidate_model:
@@ -925,15 +894,8 @@ def _iter_codex_session_records(
                     )
                     if not isinstance(total, dict):
                         continue
-                    current = {}
-                    valid = True
-                    for field in _CODEX_TOKEN_FIELDS:
-                        value = total.get(field, 0)
-                        if isinstance(value, bool) or not isinstance(value, int):
-                            valid = False
-                            break
-                        current[field] = max(0, value)
-                    if not valid:
+                    current = _codex_token_fields(total)
+                    if current is None:
                         _warn_token_usage(
                             "Codex token_count fields are invalid; skipping",
                             jsonl_path,
@@ -944,19 +906,40 @@ def _iter_codex_session_records(
                         current[field] < previous[field]
                         for field in _CODEX_TOKEN_FIELDS
                     )
-                    delta = {
-                        field: (
-                            current[field]
-                            if reset
-                            else current[field] - previous[field]
+                    has_last_usage = "last_token_usage" in info
+                    last_usage = (
+                        _codex_token_fields(info["last_token_usage"])
+                        if has_last_usage
+                        else None
+                    )
+                    if has_last_usage and last_usage is None:
+                        # A present-but-malformed exact delta must not silently
+                        # fall back to an interleaved cumulative stream. Keep
+                        # the baseline current and fail closed for this event.
+                        _warn_token_usage(
+                            "Codex last_token_usage fields are invalid; skipping",
+                            jsonl_path,
+                            line_no=line_no,
                         )
-                        for field in _CODEX_TOKEN_FIELDS
-                    }
+                        previous = current
+                        continue
+                    if last_usage is not None:
+                        # Exact per-call telemetry remains valid even when the
+                        # file interleaves several cumulative streams.
+                        delta = last_usage
+                    elif reset:
+                        # A cumulative stream switch has no trustworthy delta.
+                        # Establish a new baseline rather than counting the
+                        # whole snapshot as fresh usage.
+                        previous = current
+                        continue
+                    else:
+                        delta = {
+                            field: current[field] - previous[field]
+                            for field in _CODEX_TOKEN_FIELDS
+                        }
                     previous = current
-                    if (
-                        replay_boundary is not None
-                        and line_no <= replay_boundary
-                    ):
+                    if replaying:
                         continue
                     if not any(delta.values()):
                         continue
@@ -997,17 +980,33 @@ def _iter_codex_session_records(
                         - delta["cached_input_tokens"]
                         - delta["cache_write_input_tokens"],
                     )
-                    record_id = (
-                        f"codex:{session_id}:{timestamp.isoformat()}:"
-                        f"{current['input_tokens']}:"
-                        f"{current['cached_input_tokens']}:"
-                        f"{current['cache_write_input_tokens']}:"
-                        f"{current['output_tokens']}"
-                    )
-                    if record_id in seen_record_ids:
-                        continue
-                    seen_record_ids.add(record_id)
-                    yield {
+                    if last_usage is not None:
+                        # Root rollout resumes can reserialize the exact same
+                        # call with a fresh timestamp. Bind identity to both
+                        # the cumulative state and exact call delta instead of
+                        # that replayable timestamp.
+                        record_id = (
+                            f"codex:{session_id}:"
+                            f"{current['input_tokens']}:"
+                            f"{current['cached_input_tokens']}:"
+                            f"{current['cache_write_input_tokens']}:"
+                            f"{current['output_tokens']}:"
+                            f"{last_usage['input_tokens']}:"
+                            f"{last_usage['cached_input_tokens']}:"
+                            f"{last_usage['cache_write_input_tokens']}:"
+                            f"{last_usage['output_tokens']}"
+                        )
+                    else:
+                        # Legacy events lack last_token_usage. Their cumulative
+                        # tuple is the only stable identity across resume replays.
+                        record_id = (
+                            f"codex:{session_id}:"
+                            f"{current['input_tokens']}:"
+                            f"{current['cached_input_tokens']}:"
+                            f"{current['cache_write_input_tokens']}:"
+                            f"{current['output_tokens']}"
+                        )
+                    file_records.append({
                         "timestamp": timestamp,
                         "date": observed_date,
                         "session_id": f"codex/{session_id}",
@@ -1033,13 +1032,26 @@ def _iter_codex_session_records(
                         "text_content": "",
                         "msg_id": record_id,
                         "record_id": record_id,
-                    }
+                    })
         except OSError as exc:
             _warn_token_usage(
                 "Codex JSONL file read failed; returning no records",
                 jsonl_path,
                 exc,
             )
+            continue
+        if forked and not boundary_proven:
+            _warn_token_usage(
+                "Codex fork replay boundary missing; skipping",
+                jsonl_path,
+            )
+            continue
+        for record in file_records:
+            record_id = record["record_id"]
+            if record_id in seen_record_ids:
+                continue
+            seen_record_ids.add(record_id)
+            yield record
 
 
 def iter_session_records(target_date_start=None, target_date_end=None):
@@ -1070,7 +1082,7 @@ def _primary_category(cats, is_subagent):
     return cats[0] if cats else "text_only"
 
 
-def aggregate_usage(date_start, date_end):
+def aggregate_usage(date_start, date_end, records=None):
     """聚合指定日期區間的 token 用量。
 
     DEDUPE by message.id: Claude Code writes ONE JSONL record per content block
@@ -1086,7 +1098,12 @@ def aggregate_usage(date_start, date_end):
     by_category = defaultdict(_empty_bucket)
 
     turns = {}
-    for record in iter_session_records(date_start, date_end):
+    source_records = (
+        iter_session_records(date_start, date_end)
+        if records is None
+        else records
+    )
+    for record in source_records:
         mid = record.get("msg_id")
         if not mid:  # no id -> synthetic unique key so it is still counted once
             mid = f"_noid::{record['session_id']}::{record['timestamp'].isoformat()}"
@@ -1135,7 +1152,7 @@ def aggregate_usage(date_start, date_end):
     )
 
 
-def generate_drilldown(date_start, date_end):
+def generate_drilldown(date_start, date_end, records=None):
     """更細地拆解 text_only / bash_other 與 cache-create 線索。"""
     text_only = {
         "messages": 0,
@@ -1156,7 +1173,12 @@ def generate_drilldown(date_start, date_end):
     # 因為同一 turn 的每個 content-block record 都帶相同的 turn-total usage。
     bash_turns = {}
 
-    for record in iter_session_records(date_start, date_end):
+    source_records = (
+        iter_session_records(date_start, date_end)
+        if records is None
+        else records
+    )
+    for record in source_records:
         usage = _usage_breakdown(record["usage"])
         billable = _billable_total(usage)
 
@@ -1440,11 +1462,17 @@ def generate_daily_report(target_date=None, include_commits=False):
     date_start = target_date
     date_end = target_date + timedelta(days=1)
 
+    records = list(iter_session_records(date_start, date_end))
     totals, by_model, by_provider, by_date, by_category = aggregate_usage(
         date_start,
         date_end,
+        records=iter(records),
     )
-    drilldown = generate_drilldown(date_start, date_end)
+    drilldown = generate_drilldown(
+        date_start,
+        date_end,
+        records=iter(records),
+    )
 
     # 計算各模型成本
     cost_by_model = {}
@@ -1525,11 +1553,17 @@ def generate_weekly_report(week_start=None):
         week_start, _ = get_friday_week_range(today)
 
     week_end = week_start + timedelta(days=7)
+    records = list(iter_session_records(week_start, week_end))
     totals, by_model, by_provider, by_date, by_category = aggregate_usage(
         week_start,
         week_end,
+        records=iter(records),
     )
-    drilldown = generate_drilldown(week_start, week_end)
+    drilldown = generate_drilldown(
+        week_start,
+        week_end,
+        records=iter(records),
+    )
 
     cost_by_model = {}
     total_cost_usd = 0.0

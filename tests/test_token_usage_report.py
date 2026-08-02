@@ -315,6 +315,16 @@ def test_iter_session_records_adds_repo_bound_codex_cumulative_deltas(
         _token_count("2026-08-02T01:01:00Z", 100, 40, 10),
         _token_count("2026-08-02T01:01:01Z", 100, 40, 10),
         _token_count("2026-08-02T01:02:00Z", 160, 80, 20),
+        # A resumed root session reserializes the same cumulative history with
+        # fresh timestamps; only the new cumulative point is new usage.
+        {
+            "timestamp": "2026-08-02T01:04:00Z",
+            "type": "session_meta",
+            "payload": {"id": "codex-session", "cwd": str(repo)},
+        },
+        _token_count("2026-08-02T01:04:01Z", 100, 40, 10),
+        _token_count("2026-08-02T01:04:02Z", 160, 80, 20),
+        _token_count("2026-08-02T01:05:00Z", 200, 100, 30),
     ]
     unrelated_rows = [
         {
@@ -360,6 +370,20 @@ def test_iter_session_records_adds_repo_bound_codex_cumulative_deltas(
             "payload": {"cwd": str(repo), "model": "gpt-5.4-mini"},
         },
         _token_count("2026-08-02T01:03:00Z", 200, 100, 30),
+        # A later replay segment retracts the earlier candidate record and its
+        # model attribution. The final segment has no turn_context before use.
+        {
+            "timestamp": "2026-08-02T01:03:01Z",
+            "type": "session_meta",
+            "payload": {"id": "codex-session", "cwd": str(repo)},
+        },
+        _token_count("2026-08-02T01:03:02Z", 200, 100, 30),
+        {
+            "timestamp": "2026-08-02T01:03:03Z",
+            "type": "event_msg",
+            "payload": {"type": "thread_settings_applied"},
+        },
+        _token_count("2026-08-02T01:03:04Z", 240, 120, 40),
     ]
     (day_dir / "fork.jsonl").write_text(
         "\n".join(json.dumps(row) for row in fork_rows) + "\n",
@@ -450,12 +474,166 @@ def test_iter_session_records_adds_repo_bound_codex_cumulative_deltas(
         for record in records
     )
     assert observed == [
+        ("codex-unknown", 20, 20, 0, 10),
         ("gpt-5.4-mini", 20, 10, 0, 5),
-        ("gpt-5.4-mini", 20, 20, 0, 10),
+        ("gpt-5.6-sol", 20, 20, 0, 10),
         ("gpt-5.6-sol", 20, 40, 0, 10),
         ("gpt-5.6-sol", 50, 50, 0, 20),
         ("gpt-5.6-sol", 60, 40, 0, 10),
     ]
+
+
+def test_codex_last_usage_survives_interleaved_cumulative_streams(
+    tmp_path,
+    monkeypatch,
+):
+    token_usage_report = _load_token_usage_report_module()
+    repo = tmp_path / "volpred-research"
+    claude_dir = tmp_path / ".claude" / "projects" / "repo"
+    claude_dir.mkdir(parents=True)
+    codex_dir = tmp_path / ".codex" / "sessions" / "2026" / "08" / "02"
+    codex_dir.mkdir(parents=True)
+
+    def _event(timestamp, total_input, total_cached, last_input, last_cached):
+        return {
+            "timestamp": timestamp,
+            "type": "event_msg",
+            "payload": {
+                "type": "token_count",
+                "info": {
+                    "total_token_usage": {
+                        "input_tokens": total_input,
+                        "cached_input_tokens": total_cached,
+                        "cache_write_input_tokens": 0,
+                        "output_tokens": total_input // 10,
+                    },
+                    "last_token_usage": {
+                        "input_tokens": last_input,
+                        "cached_input_tokens": last_cached,
+                        "cache_write_input_tokens": 0,
+                        "output_tokens": 7,
+                    },
+                },
+            },
+        }
+
+    rows = [
+        {
+            "timestamp": "2026-08-02T04:00:00Z",
+            "type": "session_meta",
+            "payload": {"id": "interleaved", "cwd": str(repo)},
+        },
+        {
+            "timestamp": "2026-08-02T04:00:01Z",
+            "type": "turn_context",
+            "payload": {"model": "gpt-5.6-sol"},
+        },
+        _event("2026-08-02T04:00:02Z", 3_000_000, 2_900_000, 200, 150),
+        # Root rollout resume may replay the same exact event with a new
+        # timestamp. The cumulative + exact-call tuple is still identical.
+        _event("2026-08-02T04:00:02.500Z", 3_000_000, 2_900_000, 200, 150),
+        # Another cumulative stream is lower, but last_token_usage is exact.
+        _event("2026-08-02T04:00:03Z", 1_000_000, 900_000, 100, 80),
+    ]
+    (codex_dir / "interleaved.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(token_usage_report, "REPO_ROOT", repo)
+    monkeypatch.setattr(token_usage_report, "CLAUDE_PROJECTS_DIR", claude_dir)
+    monkeypatch.setattr(
+        token_usage_report,
+        "DISPATCH_WORKDIR_ROOT",
+        tmp_path / ".volpred" / "run" / "dispatch_workdirs",
+    )
+    monkeypatch.setattr(
+        token_usage_report,
+        "CODEX_SESSIONS_DIR",
+        tmp_path / ".codex" / "sessions",
+    )
+
+    records = list(
+        token_usage_report.iter_session_records(
+            date(2026, 8, 2),
+            date(2026, 8, 3),
+        )
+    )
+
+    assert [record["usage"]["input_tokens"] for record in records] == [50, 20]
+    assert [
+        record["usage"]["cache_read_input_tokens"] for record in records
+    ] == [150, 80]
+    assert [record["usage"]["output_tokens"] for record in records] == [7, 7]
+
+
+def test_codex_malformed_last_usage_fails_closed(tmp_path, monkeypatch, capsys):
+    token_usage_report = _load_token_usage_report_module()
+    repo = tmp_path / "volpred-research"
+    claude_dir = tmp_path / ".claude" / "projects" / "repo"
+    claude_dir.mkdir(parents=True)
+    codex_dir = tmp_path / ".codex" / "sessions" / "2026" / "08" / "02"
+    codex_dir.mkdir(parents=True)
+
+    def _usage(timestamp, total_input, last_input):
+        return {
+            "timestamp": timestamp,
+            "type": "event_msg",
+            "payload": {
+                "type": "token_count",
+                "info": {
+                    "total_token_usage": {
+                        "input_tokens": total_input,
+                        "cached_input_tokens": total_input - 100,
+                        "cache_write_input_tokens": 0,
+                        "output_tokens": 10,
+                    },
+                    "last_token_usage": {
+                        "input_tokens": last_input,
+                        "cached_input_tokens": 50,
+                        "cache_write_input_tokens": 0,
+                        "output_tokens": 2,
+                    },
+                },
+            },
+        }
+
+    rows = [
+        {
+            "timestamp": "2026-08-02T04:00:00Z",
+            "type": "session_meta",
+            "payload": {"id": "malformed", "cwd": str(repo)},
+        },
+        _usage("2026-08-02T04:00:01Z", 1_000, "not-an-int"),
+        _usage("2026-08-02T04:00:02Z", 1_200, 150),
+    ]
+    (codex_dir / "malformed.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(token_usage_report, "REPO_ROOT", repo)
+    monkeypatch.setattr(token_usage_report, "CLAUDE_PROJECTS_DIR", claude_dir)
+    monkeypatch.setattr(
+        token_usage_report,
+        "DISPATCH_WORKDIR_ROOT",
+        tmp_path / ".volpred" / "run" / "dispatch_workdirs",
+    )
+    monkeypatch.setattr(
+        token_usage_report,
+        "CODEX_SESSIONS_DIR",
+        tmp_path / ".codex" / "sessions",
+    )
+
+    records = list(
+        token_usage_report.iter_session_records(
+            date(2026, 8, 2),
+            date(2026, 8, 3),
+        )
+    )
+
+    assert [record["usage"]["input_tokens"] for record in records] == [100]
+    assert "Codex last_token_usage fields are invalid; skipping" in (
+        capsys.readouterr().err
+    )
 
 
 def test_bash_command_bucket_classification():
@@ -567,12 +745,19 @@ def test_daily_report_text_includes_bash_bucket_table(monkeypatch):
     records = [
         _bash_record("m1", "sess_a", ts, usage, ["jq '.x' storage/next_tasks.json"]),
     ]
-    monkeypatch.setattr(
-        token_usage_report, "iter_session_records", lambda *a, **k: iter(records))
+    scans = 0
+
+    def _records(*_args, **_kwargs):
+        nonlocal scans
+        scans += 1
+        return iter(records)
+
+    monkeypatch.setattr(token_usage_report, "iter_session_records", _records)
 
     report = token_usage_report.generate_daily_report(target_day)
     text = token_usage_report.format_report_text(report)
 
+    assert scans == 1
     assert "## Bash 指令大類（全部 Bash 呼叫）" in text
     assert "| jq/grep/查詢 | 1 | 70 | 100.0% |" in text
     assert "API 定價等值" in text
