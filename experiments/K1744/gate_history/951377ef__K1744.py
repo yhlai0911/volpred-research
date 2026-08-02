@@ -24,7 +24,7 @@ PREREG_PATH = HERE / "proxy_preregistration.json"
 SOURCE_MANIFEST_PATH = HERE / "raw_cache_manifest.json"
 DIAGNOSTICS_PATH = HERE / "diagnostics.json"
 README_PATH = HERE / "README.md"
-EXPECTED_PREREG_SHA256 = "a3bc7a47f1b14227b12cc1633cfacb3cd4ad8de1f45a4137462c10c4f9dd56a5"
+EXPECTED_PREREG_SHA256 = "dc2818640d580014bc305559e25c5d6b2c4ac39d7168124e4a1ef6dd9993da13"
 EXPECTED_SOURCE_MANIFEST_SHA256 = (
     "49f4d3602838862a0e21c24321b7b6e82776433de35753ce9cdb3968e5d00a36"
 )
@@ -317,8 +317,7 @@ Feasibility success 需要至少 **{result['proxy']['feasibility']['thresholds']
 - 三個分離 channel：equity（ILF/EWW/ECH/EPU/EWZ）、FX/local bond（CEW/EMLC）、hard-currency bond（EMB）；UUP 只作 USD factor（JSON: `/design/channels`）。
 - 三個 outcomes：次月 realized variance、次月最差日 left-tail loss、60-trading-day UUP beta 絕對值的次月變化（JSON: `/design/outcome_lock/targets`）。
 - Baseline 與 candidate 用完全相同資訊集、lag 與 common rows；預註冊 baseline 是 **{result['design']['outcome_lock']['baseline']}**，candidate 是 **{result['design']['outcome_lock']['candidate']}**（JSON: `/design/outcome_lock/baseline`、`/design/outcome_lock/candidate`）。
-- Primary family 固定為 **{result['design']['primary_family']['cells']}** cells，Holm step-down 校正整個 family。Candidate 巢狀於 baseline，所以 RV 的 primary QLIKE loss inference 使用 seed={result['seed']} recursive expanding-window month-block bootstrap；普通 DM/HLN 只作 diagnostic。Tail loss 與 beta change 對 incremental exposure coefficient 做 canonical-bandwidth HAC，另報 month-block permutation/bootstrap、autocorrelation 與 lag sensitivity（JSON: `/design/primary_family`、`/seed`）。
-- Machine-locked inference contract: {result['design']['primary_family']['dependence_robust_inference']}
+- Primary family 固定為 **{result['design']['primary_family']['cells']}** cells，Holm step-down 校正整個 family；HAC/DM bandwidth 不得退化成 `h-1`，必須用 repository canonical bandwidth 並報 sensitivity（JSON: `/design/primary_family`）。所有 permutation/bootstrap 路徑固定 **seed={result['seed']}**（JSON: `/seed`）。
 - 價格診斷原應報 ETF inception、delisting、missingness、duplicate、timezone、extremes、revision 與 full-basket common-sample loss；因 proxy gate 先失敗，這些全部標 `NOT_RUN_BY_FEASIBILITY_CONTRACT`，沒有用 forward fill 掩蓋（JSON: `/data/ticker_diagnostics`）。
 
 ## Success / null / blocked criteria
@@ -358,7 +357,6 @@ def build_diagnostics(
         f"seed={result['seed']}",
         result["design"]["outcome_lock"]["baseline"],
         result["design"]["outcome_lock"]["candidate"],
-        result["design"]["primary_family"]["dependence_robust_inference"],
     ]
     return {
         "schema_version": "volpred.K1744.diagnostics.v1",

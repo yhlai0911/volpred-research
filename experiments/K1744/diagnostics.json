@@ -23,7 +23,8 @@
     "固定為 **9** cells",
     "seed=42",
     "one-step monthly expanding AR(1) in the matching target; realized-variance target uses log realized variance",
-    "same baseline and common estimation window plus the preregistered lagged exposure proxy"
+    "same baseline and common estimation window plus the preregistered lagged exposure proxy",
+    "Because the AR(1)+exposure candidate nests the AR(1) baseline, primary realized-variance loss inference uses a seed=42 recursive expanding-window month-block bootstrap of the QLIKE loss difference under the nested null; ordinary DM/HLN is diagnostic only. Tail-loss and beta-change primary tests use HAC inference on the incremental exposure coefficient with canonical bandwidth max(h-1, ceil(h^(1/3)*n^(1/3))) plus month-block permutation/bootstrap sensitivity. Report loss/residual autocorrelation and lag sensitivity for every target."
   ],
   "json_claim_pointers": [
     "/recovery",

@@ -115,6 +115,16 @@ def test_methodology_source_does_not_broaden_the_frozen_baseline() -> None:
     )
 
 
+def test_nested_candidate_uses_nested_aware_primary_inference() -> None:
+    prereg = load_json("proxy_preregistration.json")
+    method = prereg["outcome_lock"]["primary_family"]["dependence_robust_inference"]
+
+    assert "candidate nests" in method
+    assert "recursive expanding-window month-block bootstrap" in method
+    assert "ordinary DM/HLN is diagnostic only" in method
+    assert "seed=42" in method
+
+
 def test_readme_claims_match_results_and_have_json_pointers() -> None:
     result = load_json("K1744_results.json")
     diagnostics = load_json("diagnostics.json")

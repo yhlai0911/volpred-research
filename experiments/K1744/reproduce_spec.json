@@ -5,15 +5,15 @@
   "entrypoint": {
     "path": "K1744.py",
     "args": [],
-    "sha256": "951377efbceedf6dd3355f02f90f45291f680747e875068046ffbd658a6f8bf1",
-    "size_bytes": 25810
+    "sha256": "1a532a7fc87573f9491ab445803d533f64da72c9e1bb38050cd292ca19dd9092",
+    "size_bytes": 26170
   },
   "canonical_result": "K1744_results.json",
   "inputs": [
     {
       "path": "experiments/K1744/proxy_preregistration.json",
-      "sha256": "dc2818640d580014bc305559e25c5d6b2c4ac39d7168124e4a1ef6dd9993da13",
-      "size_bytes": 9107
+      "sha256": "a3bc7a47f1b14227b12cc1633cfacb3cd4ad8de1f45a4137462c10c4f9dd56a5",
+      "size_bytes": 9405
     },
     {
       "path": "experiments/K1744/raw_cache_manifest.json",
@@ -43,8 +43,8 @@
     ]
   },
   "runtime": {
-    "runtime_seconds": 0.003,
-    "recorded_at": "2026-08-02T03:20:25Z"
+    "runtime_seconds": 0.004,
+    "recorded_at": "2026-08-02T03:30:44Z"
   },
   "environment": {
     "python": "3.12.10",
@@ -82,23 +82,23 @@
   },
   "canonical_result_identity": {
     "path": "K1744_results.json",
-    "sha256": "5ad6b4681d52a571758c565de1888073f797a6958e5f616cc587a6e05d7e81a9",
-    "size_bytes": 19697
+    "sha256": "142ab9599d8681f3b2fbd39d48bf0022bf2b9c88e3c68c4d4ed66c20d7744176",
+    "size_bytes": 20293
   },
   "artifact_generation": {
     "schema_version": "volpred.reproduce_commit.v1",
-    "generation_id": "d557962f1e5e08e08bc8fadb4aacf0159657d7029d6677097c78db6a2ab2644b",
+    "generation_id": "8f21860cec7a70e505a25352db56ea08cf8787a881b18d26babafebe4911822b",
     "commit_file": "reproduce_commit.json",
     "output_identities": [
       {
         "path": "README.md",
-        "sha256": "8e53b6cafe1f48a2ac79ada1934f23cfdbb41fcd78855959c9ae998b806f9b77",
-        "size_bytes": 7628
+        "sha256": "234ac7e7e79a41493319162560a3d9ab8ebd129bf5eb1fc7cacc2457b1dd50ae",
+        "size_bytes": 8383
       },
       {
         "path": "diagnostics.json",
-        "sha256": "0ff817eb91f603e99d455eafccbeaec6ad5bbc502491a8e1b96e683006ace7a5",
-        "size_bytes": 1891
+        "sha256": "7b5f9fb88e69cc8025655adbe1090c4d815dad170162e9ba595acdee70353477",
+        "size_bytes": 2436
       }
     ]
   }
