@@ -1,5 +1,5 @@
 {
-  "last_seen_run_id": 30759962701,
+  "last_seen_run_id": 30761291830,
   "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-30736983439",
@@ -9,34 +9,33 @@
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "30759962701:1",
-    "run_id": 30759962701,
+    "key": "30761291830:1",
+    "run_id": 30761291830,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30759962701",
-    "head_sha": "2f0403a7e3af63248ac9923f5e5439492abdc775",
-    "created_at": "2026-08-02T17:55:56Z",
-    "started_at": "2026-08-02T17:55:56Z",
-    "updated_at": "2026-08-02T18:14:49Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30761291830",
+    "head_sha": "54ddf20abaa4b59c5138463837c6e25f03b0d16c",
+    "created_at": "2026-08-02T18:31:04Z",
+    "started_at": "2026-08-02T18:31:04Z",
+    "updated_at": "2026-08-02T18:50:17Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "30759962701:1",
-    "run_id": 30759962701,
+    "key": "30761291830:1",
+    "run_id": 30761291830,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30759962701",
-    "head_sha": "2f0403a7e3af63248ac9923f5e5439492abdc775",
-    "created_at": "2026-08-02T17:55:56Z",
-    "started_at": "2026-08-02T17:55:56Z",
-    "updated_at": "2026-08-02T18:14:49Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30761291830",
+    "head_sha": "54ddf20abaa4b59c5138463837c6e25f03b0d16c",
+    "created_at": "2026-08-02T18:31:04Z",
+    "started_at": "2026-08-02T18:31:04Z",
+    "updated_at": "2026-08-02T18:50:17Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-02T18:25:51.861924+00:00",
+  "updated_at": "2026-08-02T19:10:35.865142+00:00",
   "processed_run_keys": [
-    "29465508725:1",
     "29465538400:1",
     "29467915128:1",
     "29470286001:1",
@@ -535,7 +534,8 @@
     "30753772542:1",
     "30757550356:1",
     "30758660414:1",
-    "30759962701:1"
+    "30759962701:1",
+    "30761291830:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -769,7 +769,7 @@
       "updated_at": "2026-08-02T07:18:25Z",
       "attempt_history_complete": true
     },
-    "root_cause": "2026-08-02T18:14:42.3880729Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
+    "root_cause": "2026-08-02T18:50:08.6142602Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
     "root_cause_status": "complete",
     "failure_run_keys": [
       "30736983439:1",
@@ -790,7 +790,8 @@
       "30753772542:1",
       "30757550356:1",
       "30758660414:1",
-      "30759962701:1"
+      "30759962701:1",
+      "30761291830:1"
     ],
     "repair_task_ids": [
       "ci-red-30736983439"
@@ -827,7 +828,7 @@
         "sent_at": "2026-08-02T08:31:03.142577+00:00"
       }
     },
-    "root_cause_run_key": "30759962701:1",
+    "root_cause_run_key": "30761291830:1",
     "declared_output_paths": [
       "experiments/K1746/K1746.py",
       "scripts/lazypack_layout_guard.py",
@@ -846,18 +847,18 @@
       "tests/test_rollback.py",
       "tests/test_shared_lock.py"
     ],
-    "declared_output_paths_run_key": "30759962701:1",
+    "declared_output_paths_run_key": "30761291830:1",
     "latest_failure": {
-      "key": "30759962701:1",
-      "run_id": 30759962701,
+      "key": "30761291830:1",
+      "run_id": 30761291830,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30759962701",
-      "head_sha": "2f0403a7e3af63248ac9923f5e5439492abdc775",
-      "created_at": "2026-08-02T17:55:56Z",
-      "started_at": "2026-08-02T17:55:56Z",
-      "updated_at": "2026-08-02T18:14:49Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30761291830",
+      "head_sha": "54ddf20abaa4b59c5138463837c6e25f03b0d16c",
+      "created_at": "2026-08-02T18:31:04Z",
+      "started_at": "2026-08-02T18:31:04Z",
+      "updated_at": "2026-08-02T18:50:17Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
@@ -879,9 +880,10 @@
       "ce7d3bc4fbf44a704881fc517bf6106b02f76f01",
       "163f46f015f2093eee369db5f6de03b96e508d3c",
       "cba57b4cd9e1fd8487f3f86166fc64520cad8108",
-      "2f0403a7e3af63248ac9923f5e5439492abdc775"
+      "2f0403a7e3af63248ac9923f5e5439492abdc775",
+      "54ddf20abaa4b59c5138463837c6e25f03b0d16c"
     ],
-    "failure_cycles": 19,
+    "failure_cycles": 20,
     "repair_admission": {
       "status": "admitted",
       "task_id": "ci-red-30736983439",
@@ -890,19 +892,19 @@
     "repair_task_statuses": {
       "ci-red-30736983439": "in_progress"
     },
-    "dispatch_request_count": 40,
-    "last_dispatch_request_at": "2026-08-02T17:55:46.605952+00:00",
+    "dispatch_request_count": 41,
+    "last_dispatch_request_at": "2026-08-02T18:30:54.834170+00:00",
     "push_intent": {
-      "head_sha": "2f0403a7e3af63248ac9923f5e5439492abdc775",
-      "run_key": "30758660414:1",
-      "recorded_at": "2026-08-02T17:55:46.605952+00:00"
+      "head_sha": "54ddf20abaa4b59c5138463837c6e25f03b0d16c",
+      "run_key": "30759962701:1",
+      "recorded_at": "2026-08-02T18:30:54.834170+00:00"
     },
     "last_push_remediation": {
       "attempted": false,
       "reason": "nothing_unpushed"
     },
-    "last_push_remediation_at": "2026-08-02T18:00:43.427828+00:00",
-    "last_verified_push_head": "2f0403a7e3af63248ac9923f5e5439492abdc775",
+    "last_push_remediation_at": "2026-08-02T18:35:39.491992+00:00",
+    "last_verified_push_head": "54ddf20abaa4b59c5138463837c6e25f03b0d16c",
     "remediation_poll_keys": [
       "2026-08-02T07",
       "2026-08-02T08",
@@ -915,9 +917,10 @@
       "2026-08-02T15",
       "2026-08-02T16",
       "2026-08-02T17",
-      "2026-08-02T18"
+      "2026-08-02T18",
+      "2026-08-02T19"
     ],
-    "remediation_checks": 12,
-    "escalation_reason": "ci_failed_more_than_two_cycles: 19"
+    "remediation_checks": 13,
+    "escalation_reason": "ci_failed_more_than_two_cycles: 20"
   }
 }
