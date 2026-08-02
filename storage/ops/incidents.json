@@ -2113,6 +2113,12 @@
      "instance_key": "dispatch-slot-1-1e3a13b6",
      "reason": "worker_superseded_generation",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-02T21:26:00.232871+00:00",
+     "instance_key": "dispatch-slot-1-95470ef5",
+     "reason": "worker_superseded_generation",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -2400,7 +2406,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-02T20:46:34.046110+00:00"
+     "last_seen_at": "2026-08-02T21:25:58.581244+00:00"
     },
     {
      "cleared_at": null,
@@ -2737,14 +2743,28 @@
      "first_seen_at": "2026-08-02T20:46:36.564948+00:00",
      "key": "dispatch-slot-1-1e3a13b6",
      "last_seen_at": "2026-08-02T20:46:36.564948+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "b3b088834c4618f3ed4afe0cfda91bd34ed680f8",
+      "branch": "worktree-dispatch-slot-1-95470ef5",
+      "checkpoint_commit": "",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-95470ef5"
+     },
+     "first_seen_at": "2026-08-02T21:26:00.232871+00:00",
+     "key": "dispatch-slot-1-95470ef5",
+     "last_seen_at": "2026-08-02T21:26:00.232871+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-1e3a13b6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-02T20:46:36.564948+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-95470ef5 unmergeable (worker_superseded_generation)",
+   "last_seen_at": "2026-08-02T21:26:00.232871+00:00",
    "notified_at": null,
-   "occurrence_count": 8570,
+   "occurrence_count": 8573,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3161,6 +3181,11 @@
      "at": "2026-08-02T20:25:51.800326+00:00",
      "instance_key": "30764843573:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-02T21:10:38.332790+00:00",
+     "instance_key": "30766541202:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -3301,14 +3326,20 @@
      "first_seen_at": "2026-08-02T20:25:51.800326+00:00",
      "key": "30764843573:1",
      "last_seen_at": "2026-08-02T20:25:51.800326+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-02T21:10:38.332790+00:00",
+     "key": "30766541202:1",
+     "last_seen_at": "2026-08-02T21:10:38.332790+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-02T20:24:40.3035260Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
-   "last_seen_at": "2026-08-02T20:25:51.800326+00:00",
+   "last_breach_detail": "2026-08-02T21:09:41.6213064Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
+   "last_seen_at": "2026-08-02T21:10:38.332790+00:00",
    "notified_at": null,
-   "occurrence_count": 23,
+   "occurrence_count": 24,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -3332,9 +3363,9 @@
    "clean_streak_started_at": null,
    "control_gate_id": null,
    "current_task_id": null,
-   "episode_count": 8,
+   "episode_count": 9,
    "episode_failures": [],
-   "episode_opened_at": "2026-08-02T20:01:06.896431+00:00",
+   "episode_opened_at": "2026-08-02T21:01:10.525686+00:00",
    "escalation": {
     "at": "2026-07-31T06:00:55.870210+00:00",
     "notification_id": "effect_owned_email_6b431a033897926b7482a6c7bfd790c7",
@@ -3349,11 +3380,11 @@
    "is_control_intervention": false,
    "kind": "draft_pool_low",
    "last_breach_detail": "Draft pool below threshold (<4)",
-   "last_seen_at": "2026-08-02T20:01:06.896431+00:00",
+   "last_seen_at": "2026-08-02T21:01:10.525686+00:00",
    "notified_at": null,
-   "occurrence_count": 38,
+   "occurrence_count": 39,
    "resolution": {
-    "at": "2026-08-02T20:01:06.896431+00:00",
+    "at": "2026-08-02T21:01:10.525686+00:00",
     "by": "inc_a79599a21dbb_rootcause_e1",
     "criterion": "root_cause_task_succeeded"
    },
@@ -3390,6 +3421,11 @@
     },
     {
      "at": "2026-08-02T20:01:06.896431+00:00",
+     "by": "inc_a79599a21dbb_rootcause_e1",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-02T21:01:10.525686+00:00",
      "by": "inc_a79599a21dbb_rootcause_e1",
      "criterion": "root_cause_task_succeeded"
     }
@@ -4422,6 +4458,6 @@
    }
   }
  },
- "updated_at": "2026-08-02T20:46:50.139091+00:00",
+ "updated_at": "2026-08-02T21:26:01.717073+00:00",
  "version": 1
 }
