@@ -4,7 +4,7 @@
   "corpus_policy": {
     "root_ignore_file": ".graphifyignore",
     "included_surfaces": ["AGENTS.md", "src/", "scripts/", "tests/", "config/", "docs/", "ops/", "supabase/"],
-    "excluded_surfaces": ["storage/", "experiments/", "paper/", "graphify-out/", "frontend-v2-fix/", "generated build and dependency directories"],
+    "excluded_surfaces": ["storage/", "experiments/", "paper/", "graphify-out/", "frontend-v2-fix/", "ops/claude_user_backup/", "generated build and dependency directories"],
     "semantic_documents": "Architecture and operational documents belong to the corpus. Their semantic extraction is performed only by an explicitly configured Graphify backend; scheduled refresh remains AST-only so routine freshness has no API-token cost."
   },
   "graphs": [
