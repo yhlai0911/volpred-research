@@ -33615,5 +33615,15 @@
     "owner": "codex-failover-slot-1-94d8dd5579854b4ebc4c6335d5593c79",
     "commit": "73cac199abf3a51ba0809129177848b7957baab4",
     "summary": "Round-4 standards and spec review failed; artifacts frozen on routed branch, formal merge blocked by certification, no knowledge promotion; bounded remediation retained in triage_K1739_salvage_20260802."
+  },
+  {
+    "timestamp": "2026-08-02T16:13:16+08:00",
+    "task_type": "experiment",
+    "task_id": "K1813",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-1-d5220c5a6fc7400593ea87b5d3c720e9",
+    "owner": "hourly-slot-1-d5220c5a6fc7400593ea87b5d3c720e9",
+    "commit": "7a41cb362",
+    "summary": "K1813 collected from compute job agent-brief_k1813-5f38bb (runner exit 1 = transient provider 500 AFTER artifacts were written; artifacts complete). Independently re-derived every verdict from K1813_results.json: H3 REJECT (0/25 asset x calendar-rule combos reach delta-Sharpe>0 with bootstrap p<0.05 at 1bp/side on OOS n=2909; 9 combos significantly LOSE to buy-and-hold; the 5bp wins are a turnover artifact 205 vs 504 sides/yr), H2a REJECT on the tradable return axis, H2b ACCEPT on the variance axis but only QQQ/TLT/GLD survive the calendar-day-span control, H1a ACCEPT / H1b REJECT. Verified code_trace sha256 == k1813.py on disk, runtime-generated reproduce_spec identity clean, lookahead probe 0 violations/12 dates. Wrote knowledge ccbccb6a (main thread, numbers pulled programmatically). Artifact gate now PASS; committed 7a41cb362 in worktree dispatch-slot-1-8af0700e-k1813. Merge blocked by review certification (no review_verdict.json) - primary-path Codex review enqueued as compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376 (2400s, read-only sandbox), which will land the merge on collection. K1813 -> awaiting_agent_job."
   }
 ]

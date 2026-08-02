@@ -1,0 +1,44 @@
+{
+  "id": "compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376",
+  "title": "K1813 primary-path Codex review (overnight VRP day-of-week, NULL)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1813_prompt.md",
+    "storage/ops/codex_reviews/k1813_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-02T08:12:56Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1813_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1813_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Land K1813. The experiment is already committed as 7a41cb362 on branch wt/dispatch-slot-1-8af0700e-k1813 in worktree .claude/worktrees/dispatch-slot-1-8af0700e-k1813, artifact gate PASSES, and knowledge entry ccbccb6a is already written by the main thread from the results JSON (do NOT write a second one). The only thing missing was review certification. Read storage/ops/codex_reviews/k1813_verdict.md: (1) if Codex returned FAIL or listed blocking defects, do NOT merge - open a remediation task quoting the defects and settle K1813 as failed with the defect list; (2) if PASS, parse the LAST fenced json block out of that file, write it verbatim to experiments/k1813/review_verdict.json inside the worktree, confirm reviewed_sha256 still matches the on-disk claim surface via uv run python scripts/experiment_gates.py, commit it in the worktree, then integrate with bash scripts/merge_worktree.sh dispatch-slot-1-8af0700e-k1813 and settle K1813 succeeded. If the job timed out (exit 124) or the verdict file is empty/quota-exhausted, that is a failed review, never an approval - re-enqueue the review, do not hand-write a verdict.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1813",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-02T08:12:56Z",
+    "linked_at": "2026-08-02T08:12:56Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null
+}
