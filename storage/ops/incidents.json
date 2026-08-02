@@ -2304,7 +2304,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-02T08:15:51.383290+00:00"
+     "last_seen_at": "2026-08-02T08:34:42.046887+00:00"
     },
     {
      "cleared_at": null,
@@ -2422,9 +2422,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-02T08:15:51.383290+00:00",
+   "last_seen_at": "2026-08-02T08:34:42.046887+00:00",
    "notified_at": null,
-   "occurrence_count": 8450,
+   "occurrence_count": 8452,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2736,6 +2736,11 @@
      "at": "2026-08-02T07:51:00.061452+00:00",
      "instance_key": "30737971163:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-02T08:31:05.986362+00:00",
+     "instance_key": "30739114346:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -2750,14 +2755,20 @@
      "first_seen_at": "2026-08-02T07:51:00.061452+00:00",
      "key": "30737971163:1",
      "last_seen_at": "2026-08-02T07:51:00.061452+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-02T08:31:05.986362+00:00",
+     "key": "30739114346:1",
+     "last_seen_at": "2026-08-02T08:31:05.986362+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-02T07:49:51.8364312Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
-   "last_seen_at": "2026-08-02T07:51:00.061452+00:00",
+   "last_breach_detail": "2026-08-02T08:26:30.8277431Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
+   "last_seen_at": "2026-08-02T08:31:05.986362+00:00",
    "notified_at": null,
-   "occurrence_count": 2,
+   "occurrence_count": 3,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -3841,6 +3852,6 @@
    }
   }
  },
- "updated_at": "2026-08-02T08:15:51.411451+00:00",
+ "updated_at": "2026-08-02T08:34:42.077400+00:00",
  "version": 1
 }
