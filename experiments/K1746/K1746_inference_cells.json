@@ -1,0 +1,553 @@
+{
+  "backtests": {
+    "bottom_up|0.01": {
+      "method": "bottom_up",
+      "alpha": 0.01,
+      "oos_count": 4095,
+      "violations": 52,
+      "expected_violations": 40.95,
+      "violation_rate": 0.012698412698412698,
+      "kupiec_uc": {
+        "statistic": 2.7749045099955083,
+        "p_value": 0.09575236687993632,
+        "p_value_holm_all_methods_alphas_tests": 0.7660189350394906,
+        "reject_holm_5pct": false
+      },
+      "christoffersen_independence": {
+        "statistic": 8.176624701242986,
+        "p_value": 0.004243364480204657,
+        "n00": 3994,
+        "n01": 48,
+        "n10": 48,
+        "n11": 4,
+        "p_value_holm_all_methods_alphas_tests": 0.06280538853339893,
+        "reject_holm_5pct": false
+      },
+      "christoffersen_conditional_coverage": {
+        "statistic": 10.951529211238494,
+        "p_value": 0.004187025902226595,
+        "p_value_holm_all_methods_alphas_tests": 0.06280538853339893,
+        "reject_holm_5pct": false
+      },
+      "dynamic_quantile": {
+        "statistic": 41.94368802131721,
+        "p_value": 1.8864511464359657e-07,
+        "df": 6,
+        "lags": 4,
+        "p_value_holm_all_methods_alphas_tests": 4.527482751446318e-06,
+        "reject_holm_5pct": true
+      },
+      "expected_shortfall_z2": {
+        "mean": 0.3143871694836304,
+        "p_value_two_sided": 0.13543228385807096,
+        "p_value_less": 0.9175412293853074,
+        "p_value_greater": 0.08295852073963018,
+        "reps": 2000,
+        "block_length": 10,
+        "name": "Acerbi-Szekely Z2 all-observation moment",
+        "null": "E[y*I(y<=VaR)/(alpha*ES)-1]=0",
+        "orientation": "positive means realized lower-tail losses are more severe relative to the negative ES forecast",
+        "finite_sample_caveat": "moving-block bootstrap is asymptotic and 1% tails have few effective exceptions",
+        "p_value_holm_all_methods_alphas_tests": 0.9480259870064968,
+        "reject_holm_5pct": false
+      },
+      "fz0_mean_loss": -3.913137417791089,
+      "fz0_loss_std": 4.186242562664949
+    },
+    "bottom_up|0.05": {
+      "method": "bottom_up",
+      "alpha": 0.05,
+      "oos_count": 4095,
+      "violations": 212,
+      "expected_violations": 204.75,
+      "violation_rate": 0.051770451770451774,
+      "kupiec_uc": {
+        "statistic": 0.2672577657506281,
+        "p_value": 0.6051772463485726,
+        "p_value_holm_all_methods_alphas_tests": 1.0,
+        "reject_holm_5pct": false
+      },
+      "christoffersen_independence": {
+        "statistic": 6.793845689025829,
+        "p_value": 0.009147264773569648,
+        "n00": 3690,
+        "n01": 192,
+        "n10": 192,
+        "n11": 20,
+        "p_value_holm_all_methods_alphas_tests": 0.10976717728283578,
+        "reject_holm_5pct": false
+      },
+      "christoffersen_conditional_coverage": {
+        "statistic": 7.0611034547764575,
+        "p_value": 0.029288752001780775,
+        "p_value_holm_all_methods_alphas_tests": 0.263598768016027,
+        "reject_holm_5pct": false
+      },
+      "dynamic_quantile": {
+        "statistic": 29.755303887423413,
+        "p_value": 4.375016719926396e-05,
+        "df": 6,
+        "lags": 4,
+        "p_value_holm_all_methods_alphas_tests": 0.0009187535111845432,
+        "reject_holm_5pct": true
+      },
+      "expected_shortfall_z2": {
+        "mean": 0.05510657006948684,
+        "p_value_two_sided": 0.5282358820589705,
+        "p_value_less": 0.728135932033983,
+        "p_value_greater": 0.2723638180909545,
+        "reps": 2000,
+        "block_length": 10,
+        "name": "Acerbi-Szekely Z2 all-observation moment",
+        "null": "E[y*I(y<=VaR)/(alpha*ES)-1]=0",
+        "orientation": "positive means realized lower-tail losses are more severe relative to the negative ES forecast",
+        "finite_sample_caveat": "moving-block bootstrap is asymptotic and 1% tails have few effective exceptions",
+        "p_value_holm_all_methods_alphas_tests": 1.0,
+        "reject_holm_5pct": false
+      },
+      "fz0_mean_loss": -4.377207273775093,
+      "fz0_loss_std": 2.2003013751142335
+    },
+    "naive_marginal_sum|0.01": {
+      "method": "naive_marginal_sum",
+      "alpha": 0.01,
+      "oos_count": 4095,
+      "violations": 8,
+      "expected_violations": 40.95,
+      "violation_rate": 0.0019536019536019536,
+      "kupiec_uc": {
+        "statistic": 40.04051997168979,
+        "p_value": 2.4874901508986583e-10,
+        "p_value_holm_all_methods_alphas_tests": 6.2187253772466456e-09,
+        "reject_holm_5pct": true
+      },
+      "christoffersen_independence": {
+        "statistic": 6.601650440945875,
+        "p_value": 0.010188428339256416,
+        "n00": 4079,
+        "n01": 7,
+        "n10": 7,
+        "n11": 1,
+        "p_value_holm_all_methods_alphas_tests": 0.11207271173182057,
+        "reject_holm_5pct": false
+      },
+      "christoffersen_conditional_coverage": {
+        "statistic": 46.642170412635664,
+        "p_value": 7.443571817331261e-11,
+        "p_value_holm_all_methods_alphas_tests": 1.935328672506128e-09,
+        "reject_holm_5pct": true
+      },
+      "dynamic_quantile": {
+        "statistic": 39.55847115017196,
+        "p_value": 5.561871357180507e-07,
+        "df": 6,
+        "lags": 4,
+        "p_value_holm_all_methods_alphas_tests": 1.2792304121515166e-05,
+        "reject_holm_5pct": true
+      },
+      "expected_shortfall_z2": {
+        "mean": -0.8260743711196143,
+        "p_value_two_sided": 0.0004997501249375312,
+        "p_value_less": 0.0004997501249375312,
+        "p_value_greater": 1.0,
+        "reps": 2000,
+        "block_length": 10,
+        "name": "Acerbi-Szekely Z2 all-observation moment",
+        "null": "E[y*I(y<=VaR)/(alpha*ES)-1]=0",
+        "orientation": "positive means realized lower-tail losses are more severe relative to the negative ES forecast",
+        "finite_sample_caveat": "moving-block bootstrap is asymptotic and 1% tails have few effective exceptions",
+        "p_value_holm_all_methods_alphas_tests": 0.008775472915631716,
+        "reject_holm_5pct": true
+      },
+      "fz0_mean_loss": -3.6778102245936,
+      "fz0_loss_std": 0.683542350877374
+    },
+    "naive_marginal_sum|0.05": {
+      "method": "naive_marginal_sum",
+      "alpha": 0.05,
+      "oos_count": 4095,
+      "violations": 44,
+      "expected_violations": 204.75,
+      "violation_rate": 0.010744810744810745,
+      "kupiec_uc": {
+        "statistic": 192.74393742177153,
+        "p_value": 8.005911058099526e-44,
+        "p_value_holm_all_methods_alphas_tests": 2.3217142068488625e-42,
+        "reject_holm_5pct": true
+      },
+      "christoffersen_independence": {
+        "statistic": 15.510411748313004,
+        "p_value": 8.205206125871469e-05,
+        "n00": 4011,
+        "n01": 39,
+        "n10": 39,
+        "n11": 5,
+        "p_value_holm_all_methods_alphas_tests": 0.0016410412251742937,
+        "reject_holm_5pct": true
+      },
+      "christoffersen_conditional_coverage": {
+        "statistic": 208.25434917008454,
+        "p_value": 5.999881341908001e-46,
+        "p_value_holm_all_methods_alphas_tests": 1.7999644025724003e-44,
+        "reject_holm_5pct": true
+      },
+      "dynamic_quantile": {
+        "statistic": 154.64129579236962,
+        "p_value": 8.069797237261438e-31,
+        "df": 6,
+        "lags": 4,
+        "p_value_holm_all_methods_alphas_tests": 2.2595432264332027e-29,
+        "reject_holm_5pct": true
+      },
+      "expected_shortfall_z2": {
+        "mean": -0.798026389025973,
+        "p_value_two_sided": 0.0004997501249375312,
+        "p_value_less": 0.0004997501249375312,
+        "p_value_greater": 1.0,
+        "reps": 2000,
+        "block_length": 10,
+        "name": "Acerbi-Szekely Z2 all-observation moment",
+        "null": "E[y*I(y<=VaR)/(alpha*ES)-1]=0",
+        "orientation": "positive means realized lower-tail losses are more severe relative to the negative ES forecast",
+        "finite_sample_caveat": "moving-block bootstrap is asymptotic and 1% tails have few effective exceptions",
+        "p_value_holm_all_methods_alphas_tests": 0.008775472915631716,
+        "reject_holm_5pct": true
+      },
+      "fz0_mean_loss": -4.130223698386891,
+      "fz0_loss_std": 0.7191941292524605
+    },
+    "top_down|0.01": {
+      "method": "top_down",
+      "alpha": 0.01,
+      "oos_count": 4095,
+      "violations": 46,
+      "expected_violations": 40.95,
+      "violation_rate": 0.011233211233211233,
+      "kupiec_uc": {
+        "statistic": 0.6049351660762454,
+        "p_value": 0.43670120786867117,
+        "p_value_holm_all_methods_alphas_tests": 1.0,
+        "reject_holm_5pct": false
+      },
+      "christoffersen_independence": {
+        "statistic": 14.647397584842338,
+        "p_value": 0.00012961348323582984,
+        "n00": 4007,
+        "n01": 41,
+        "n10": 41,
+        "n11": 5,
+        "p_value_holm_all_methods_alphas_tests": 0.002462656181480767,
+        "reject_holm_5pct": true
+      },
+      "christoffersen_conditional_coverage": {
+        "statistic": 15.252332750918583,
+        "p_value": 0.00048752627309065085,
+        "p_value_holm_all_methods_alphas_tests": 0.008775472915631716,
+        "reject_holm_5pct": true
+      },
+      "dynamic_quantile": {
+        "statistic": 70.00101687020629,
+        "p_value": 4.0869051721196104e-13,
+        "df": 6,
+        "lags": 4,
+        "p_value_holm_all_methods_alphas_tests": 1.1034643964722948e-11,
+        "reject_holm_5pct": true
+      },
+      "expected_shortfall_z2": {
+        "mean": 0.1655054068646048,
+        "p_value_two_sided": 0.4352823588205897,
+        "p_value_less": 0.7706146926536732,
+        "p_value_greater": 0.22988505747126436,
+        "reps": 2000,
+        "block_length": 10,
+        "name": "Acerbi-Szekely Z2 all-observation moment",
+        "null": "E[y*I(y<=VaR)/(alpha*ES)-1]=0",
+        "orientation": "positive means realized lower-tail losses are more severe relative to the negative ES forecast",
+        "finite_sample_caveat": "moving-block bootstrap is asymptotic and 1% tails have few effective exceptions",
+        "p_value_holm_all_methods_alphas_tests": 1.0,
+        "reject_holm_5pct": false
+      },
+      "fz0_mean_loss": -3.864965458957993,
+      "fz0_loss_std": 4.608941041591136
+    },
+    "top_down|0.05": {
+      "method": "top_down",
+      "alpha": 0.05,
+      "oos_count": 4095,
+      "violations": 208,
+      "expected_violations": 204.75,
+      "violation_rate": 0.050793650793650794,
+      "kupiec_uc": {
+        "statistic": 0.054032376288432715,
+        "p_value": 0.8161895639356598,
+        "p_value_holm_all_methods_alphas_tests": 1.0,
+        "reject_holm_5pct": false
+      },
+      "christoffersen_independence": {
+        "statistic": 7.59274151206796,
+        "p_value": 0.005860376373856859,
+        "n00": 3698,
+        "n01": 188,
+        "n10": 188,
+        "n11": 20,
+        "p_value_holm_all_methods_alphas_tests": 0.07618489286013917,
+        "reject_holm_5pct": false
+      },
+      "christoffersen_conditional_coverage": {
+        "statistic": 7.6467738883563925,
+        "p_value": 0.021853658285996416,
+        "p_value_holm_all_methods_alphas_tests": 0.21853658285996416,
+        "reject_holm_5pct": false
+      },
+      "dynamic_quantile": {
+        "statistic": 31.060605856625752,
+        "p_value": 2.468273186236232e-05,
+        "df": 6,
+        "lags": 4,
+        "p_value_holm_all_methods_alphas_tests": 0.0005430201009719711,
+        "reject_holm_5pct": true
+      },
+      "expected_shortfall_z2": {
+        "mean": 0.029811029717952974,
+        "p_value_two_sided": 0.728135932033983,
+        "p_value_less": 0.6331834082958521,
+        "p_value_greater": 0.36731634182908546,
+        "reps": 2000,
+        "block_length": 10,
+        "name": "Acerbi-Szekely Z2 all-observation moment",
+        "null": "E[y*I(y<=VaR)/(alpha*ES)-1]=0",
+        "orientation": "positive means realized lower-tail losses are more severe relative to the negative ES forecast",
+        "finite_sample_caveat": "moving-block bootstrap is asymptotic and 1% tails have few effective exceptions",
+        "p_value_holm_all_methods_alphas_tests": 1.0,
+        "reject_holm_5pct": false
+      },
+      "fz0_mean_loss": -4.368773640341877,
+      "fz0_loss_std": 2.3687549937800734
+    }
+  },
+  "proper_score_inference": {
+    "alpha_0.01": {
+      "mean": -0.04817195883309561,
+      "p_value_two_sided": 0.095952023988006,
+      "p_value_less": 0.05747126436781609,
+      "p_value_greater": 0.9430284857571214,
+      "reps": 2000,
+      "block_length": 10,
+      "orientation": "bottom_up_minus_top_down; negative favors bottom-up",
+      "bottom_up_mean": -3.913137417791089,
+      "top_down_mean": -3.864965458957993,
+      "p_value_holm_two_alphas": 0.191904047976012
+    },
+    "alpha_0.05": {
+      "mean": -0.008433633433214068,
+      "p_value_two_sided": 0.45327336331834084,
+      "p_value_less": 0.24437781109445278,
+      "p_value_greater": 0.7561219390304847,
+      "reps": 2000,
+      "block_length": 10,
+      "orientation": "bottom_up_minus_top_down; negative favors bottom-up",
+      "bottom_up_mean": -4.377207273775093,
+      "top_down_mean": -4.368773640341877,
+      "p_value_holm_two_alphas": 0.45327336331834084
+    }
+  },
+  "model_confidence_set": {
+    "alpha_0.01": {
+      "candidate_set": [
+        "bottom_up",
+        "top_down"
+      ],
+      "loss": "FZ0 joint VaR/ES, lower better",
+      "bootstrap": "paired moving-date-block bootstrap of centered daily loss differential",
+      "block_length": 10,
+      "resamples": 2000,
+      "seed": 42,
+      "elimination_statistic": "absolute mean pairwise loss differential",
+      "elimination_rule": "eliminate higher-mean-loss method if two-sided block-bootstrap p < 0.1",
+      "confidence_level": 0.9,
+      "mean_losses": {
+        "bottom_up": -3.913137417791089,
+        "top_down": -3.864965458957993
+      },
+      "loss_difference_bottom_minus_top": {
+        "mean": -0.04817195883309561,
+        "p_value_two_sided": 0.095952023988006,
+        "p_value_less": 0.05747126436781609,
+        "p_value_greater": 0.9430284857571214,
+        "reps": 2000,
+        "block_length": 10
+      },
+      "included_set": [
+        "bottom_up"
+      ],
+      "eliminated": "top_down"
+    },
+    "alpha_0.05": {
+      "candidate_set": [
+        "bottom_up",
+        "top_down"
+      ],
+      "loss": "FZ0 joint VaR/ES, lower better",
+      "bootstrap": "paired moving-date-block bootstrap of centered daily loss differential",
+      "block_length": 10,
+      "resamples": 2000,
+      "seed": 42,
+      "elimination_statistic": "absolute mean pairwise loss differential",
+      "elimination_rule": "eliminate higher-mean-loss method if two-sided block-bootstrap p < 0.1",
+      "confidence_level": 0.9,
+      "mean_losses": {
+        "bottom_up": -4.377207273775093,
+        "top_down": -4.368773640341877
+      },
+      "loss_difference_bottom_minus_top": {
+        "mean": -0.008433633433214068,
+        "p_value_two_sided": 0.45327336331834084,
+        "p_value_less": 0.24437781109445278,
+        "p_value_greater": 0.7561219390304847,
+        "reps": 2000,
+        "block_length": 10
+      },
+      "included_set": [
+        "bottom_up",
+        "top_down"
+      ],
+      "eliminated": null
+    }
+  },
+  "mcs_sensitivity": {
+    "alpha_0.01_block20_reps1000": {
+      "candidate_set": [
+        "bottom_up",
+        "top_down"
+      ],
+      "loss": "FZ0 joint VaR/ES, lower better",
+      "bootstrap": "paired moving-date-block bootstrap of centered daily loss differential",
+      "block_length": 20,
+      "resamples": 1000,
+      "seed": 42,
+      "elimination_statistic": "absolute mean pairwise loss differential",
+      "elimination_rule": "eliminate higher-mean-loss method if two-sided block-bootstrap p < 0.1",
+      "confidence_level": 0.9,
+      "mean_losses": {
+        "bottom_up": -3.913137417791089,
+        "top_down": -3.864965458957993
+      },
+      "loss_difference_bottom_minus_top": {
+        "mean": -0.04817195883309561,
+        "p_value_two_sided": 0.13986013986013987,
+        "p_value_less": 0.07892107892107893,
+        "p_value_greater": 0.922077922077922,
+        "reps": 1000,
+        "block_length": 20
+      },
+      "included_set": [
+        "bottom_up",
+        "top_down"
+      ],
+      "eliminated": null
+    },
+    "alpha_0.05_block20_reps1000": {
+      "candidate_set": [
+        "bottom_up",
+        "top_down"
+      ],
+      "loss": "FZ0 joint VaR/ES, lower better",
+      "bootstrap": "paired moving-date-block bootstrap of centered daily loss differential",
+      "block_length": 20,
+      "resamples": 1000,
+      "seed": 42,
+      "elimination_statistic": "absolute mean pairwise loss differential",
+      "elimination_rule": "eliminate higher-mean-loss method if two-sided block-bootstrap p < 0.1",
+      "confidence_level": 0.9,
+      "mean_losses": {
+        "bottom_up": -4.377207273775093,
+        "top_down": -4.368773640341877
+      },
+      "loss_difference_bottom_minus_top": {
+        "mean": -0.008433633433214068,
+        "p_value_two_sided": 0.5394605394605395,
+        "p_value_less": 0.28471528471528473,
+        "p_value_greater": 0.7162837162837162,
+        "reps": 1000,
+        "block_length": 20
+      },
+      "included_set": [
+        "bottom_up",
+        "top_down"
+      ],
+      "eliminated": null
+    }
+  },
+  "sensitivities": {
+    "gaussian|0.01": {
+      "oos_count": 4095,
+      "bottom_minus_top_fz0": -0.03566988343790481,
+      "direction": "bottom_up",
+      "positive_definite_rate": 1.0
+    },
+    "gaussian|0.05": {
+      "oos_count": 4095,
+      "bottom_minus_top_fz0": -0.0055289184894562115,
+      "direction": "bottom_up",
+      "positive_definite_rate": 1.0
+    },
+    "independent_margins|0.01": {
+      "oos_count": 4095,
+      "bottom_minus_top_fz0": 0.3594480279701369,
+      "direction": "top_down",
+      "positive_definite_rate": 1.0
+    },
+    "independent_margins|0.05": {
+      "oos_count": 4095,
+      "bottom_minus_top_fz0": 0.12373189636138861,
+      "direction": "top_down",
+      "positive_definite_rate": 1.0
+    },
+    "primary_joint_fhs_w756_daily|0.01": {
+      "oos_count": 4095,
+      "bottom_minus_top_fz0": -0.04817195883309561,
+      "direction": "bottom_up",
+      "positive_definite_rate": 1.0
+    },
+    "primary_joint_fhs_w756_daily|0.05": {
+      "oos_count": 4095,
+      "bottom_minus_top_fz0": -0.008433633433214068,
+      "direction": "bottom_up",
+      "positive_definite_rate": 1.0
+    },
+    "weekly_rebalance|0.01": {
+      "oos_count": 4095,
+      "bottom_minus_top_fz0": -0.044056970304424306,
+      "direction": "bottom_up",
+      "positive_definite_rate": 1.0
+    },
+    "weekly_rebalance|0.05": {
+      "oos_count": 4095,
+      "bottom_minus_top_fz0": -0.006980365224099546,
+      "direction": "bottom_up",
+      "positive_definite_rate": 1.0
+    },
+    "window_504|0.01": {
+      "oos_count": 4347,
+      "bottom_minus_top_fz0": -0.05441251500156289,
+      "direction": "bottom_up",
+      "positive_definite_rate": 1.0
+    },
+    "window_504|0.05": {
+      "oos_count": 4347,
+      "bottom_minus_top_fz0": -0.006463421572195906,
+      "direction": "bottom_up",
+      "positive_definite_rate": 1.0
+    },
+    "crisis_2020_plus|0.01": {
+      "oos_count": 1649,
+      "bottom_minus_top_fz0": -0.11184086968257965,
+      "direction": "bottom_up"
+    },
+    "crisis_2020_plus|0.05": {
+      "oos_count": 1649,
+      "bottom_minus_top_fz0": -0.03933210175825654,
+      "direction": "bottom_up"
+    }
+  }
+}
