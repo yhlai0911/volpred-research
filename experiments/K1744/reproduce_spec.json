@@ -1,0 +1,105 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1744.py",
+    "args": [],
+    "sha256": "d96d7ba0a4f217e6686ca586a7d78f247ed71d91aa483c185fbe5ba8bd52a513",
+    "size_bytes": 25636
+  },
+  "canonical_result": "K1744_results.json",
+  "inputs": [
+    {
+      "path": "experiments/K1744/proxy_preregistration.json",
+      "sha256": "dc2818640d580014bc305559e25c5d6b2c4ac39d7168124e4a1ef6dd9993da13",
+      "size_bytes": 9107
+    },
+    {
+      "path": "experiments/K1744/raw_cache_manifest.json",
+      "sha256": "94bfbe4aaa55d5d8283e4189b35a309bf25aac267fa714b88b3f3b2157230475",
+      "size_bytes": 12434
+    }
+  ],
+  "outputs": [
+    "K1744_results.json",
+    "README.md",
+    "diagnostics.json",
+    "reproduce_commit.json"
+  ],
+  "timeout_seconds": 60,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "pandas",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 0.003,
+    "recorded_at": "2026-08-02T02:45:24Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "pandas",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1744_results.json",
+    "sha256": "9f75b7e3e8ae651048ca850784e9f2ae80b4b69c93f8db060329ca32abc32d62",
+    "size_bytes": 19615
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "13d47f7487f3408c956db4f22f33f28af239102af505df89bebb2c8cc848d60f",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": [
+      {
+        "path": "README.md",
+        "sha256": "cee50071a7401d18bbf6496120573904e2474ac156f2bb90c9c3bdd69ad5d1d2",
+        "size_bytes": 7461
+      },
+      {
+        "path": "diagnostics.json",
+        "sha256": "142168700655d28e001fa7b0b5c254226b587546bcd27c351a9bbde2a21a28bf",
+        "size_bytes": 1680
+      }
+    ]
+  }
+}

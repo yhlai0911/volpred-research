@@ -1,0 +1,38 @@
+{
+  "schema_version": "volpred.K1744.diagnostics.v1",
+  "experiment_id": "K1744",
+  "checks": {
+    "proxy_preregistration_hash_matches": true,
+    "source_manifest_hash_matches": true,
+    "proxy_locked_before_outcome_inspection": true,
+    "zero_salvage_predecessor_not_used": true,
+    "explicit_shift_1_in_signal_path": true,
+    "runtime_lag_probe_on_empty_non_outcome_series": true,
+    "outcome_request_count_is_zero": true,
+    "common_sample_not_constructed_after_failed_gate": true,
+    "primary_inference_family_frozen": true,
+    "raw_and_adjusted_p_values_empty": true,
+    "readme_result_consistency": true
+  },
+  "required_readme_fragments": [
+    "INCONCLUSIVE",
+    "INSUFFICIENT_DATA",
+    "ZERO_SALVAGE",
+    "The preregistered Private Debt Investor record-level enumeration/export was not accessible: the inspected public response required sign-in/account creation and exposed neither provider record IDs nor historical version/as-of timestamps. Public sponsor pages supplied isolated examples, not a complete regional fund universe. Therefore missing search hits cannot be coded as zero-event months, event-count thresholds cannot be evaluated, and no point-in-time monthly proxy can be constructed without selection/backfill bias.",
+    "outcome rows 為 **0**",
+    "固定為 **9** cells",
+    "seed=42"
+  ],
+  "json_claim_pointers": [
+    "/recovery",
+    "/conclusion",
+    "/proxy/feasibility",
+    "/data/sample/outcome_rows",
+    "/estimates",
+    "/robustness",
+    "/limitations"
+  ],
+  "common_sample_status": "NOT_CONSTRUCTED_BY_FEASIBILITY_CONTRACT",
+  "inference_family_status": "FROZEN_9_CELLS_NOT_RUN",
+  "readme_consistency_status": "PASS"
+}
