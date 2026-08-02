@@ -81,6 +81,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 KNOWLEDGE_REL = Path("storage/memory/knowledge.json")
 SPEC_NAME = "reproduce_spec.json"
 SPEC_SCHEMA = "volpred.reproduce_spec.v1"
+COMMIT_NAME = "reproduce_commit.json"
+COMMIT_SCHEMA = "volpred.reproduce_commit.v1"
 EXCLUSIONS_REL = Path("config/experiment_artifact_exclusions.json")
 
 # Same shape reproduce_check.knowledge_recorded_ids scans for. Two entry shapes coexist
@@ -355,6 +357,102 @@ def _canonical_result_identity_violation(
     return None, "clean"
 
 
+def _artifact_generation_violation(exp_dir: Path) -> tuple[str | None, str]:
+    """Verify a runtime generation's last-written completion receipt and outputs.
+
+    This is a forward ratchet: old specs without ``artifact_generation`` remain
+    valid. New finalizer runs carry the block and therefore cannot pass while a
+    killed writer has exposed a mixed result/spec/figure generation.
+    """
+    try:
+        spec_bytes = (exp_dir / SPEC_NAME).read_bytes()
+        spec = json.loads(spec_bytes)
+    except (OSError, ValueError):
+        return None, "skipped-unreadable"
+    generation = spec.get("artifact_generation") if isinstance(spec, dict) else None
+    if generation is None:
+        return None, "skipped-legacy"
+    if not isinstance(generation, dict):
+        return "artifact_generation must be an object", "invalid"
+    generation_id = generation.get("generation_id")
+    commit_name = generation.get("commit_file")
+    identities = generation.get("output_identities")
+    if (
+        generation.get("schema_version") != COMMIT_SCHEMA
+        or not isinstance(generation_id, str)
+        or not re.fullmatch(r"[0-9a-f]{64}", generation_id)
+        or commit_name != COMMIT_NAME
+        or not isinstance(identities, list)
+    ):
+        return "artifact_generation metadata is malformed", "invalid"
+
+    for item in identities:
+        if not isinstance(item, dict):
+            return "declared output identity is malformed", "invalid"
+        rel, digest, size = item.get("path"), item.get("sha256"), item.get("size_bytes")
+        if (
+            not isinstance(rel, str)
+            or Path(rel).is_absolute()
+            or ".." in Path(rel).parts
+            or not isinstance(digest, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", digest)
+            or not isinstance(size, int)
+            or isinstance(size, bool)
+        ):
+            return "declared output identity is malformed", "invalid"
+        try:
+            data = (exp_dir / rel).read_bytes()
+        except OSError as exc:
+            return f"declared output identity target is unreadable: {rel}: {exc}", "output-unreadable"
+        actual = hashlib.sha256(data).hexdigest()
+        if actual != digest or len(data) != size:
+            return (
+                (
+                    f"declared output identity mismatch for {rel}: "
+                    f"receipt {digest[:12]}/{size}, disk {actual[:12]}/{len(data)}"
+                ),
+                "output-mismatch",
+            )
+
+    try:
+        commit = json.loads((exp_dir / COMMIT_NAME).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return f"artifact completion receipt is missing or unreadable: {exc}", "commit-missing"
+    if (
+        not isinstance(commit, dict)
+        or commit.get("schema_version") != COMMIT_SCHEMA
+        or commit.get("generation_id") != generation_id
+        or commit.get("output_identities") != identities
+    ):
+        return "artifact completion receipt does not match the spec generation", "commit-mismatch"
+    if commit.get("canonical_result_identity") != spec.get("canonical_result_identity"):
+        return "artifact completion receipt does not match the canonical result", "result-mismatch"
+    result_identity = commit.get("canonical_result_identity")
+    canonical = spec.get("canonical_result")
+    if not isinstance(result_identity, dict) or not isinstance(canonical, str):
+        return "artifact completion receipt lacks canonical result identity", "result-mismatch"
+    try:
+        result_bytes = (exp_dir / canonical).read_bytes()
+    except OSError as exc:
+        return f"artifact completion result is unreadable: {exc}", "result-mismatch"
+    if (
+        result_identity.get("path") != canonical
+        or result_identity.get("sha256") != hashlib.sha256(result_bytes).hexdigest()
+        or result_identity.get("size_bytes") != len(result_bytes)
+    ):
+        return "artifact completion receipt does not match canonical result bytes", "result-mismatch"
+    spec_identity = commit.get("spec_identity")
+    if not isinstance(spec_identity, dict):
+        return "artifact completion receipt lacks spec identity", "commit-mismatch"
+    if (
+        spec_identity.get("path") != SPEC_NAME
+        or spec_identity.get("sha256") != hashlib.sha256(spec_bytes).hexdigest()
+        or spec_identity.get("size_bytes") != len(spec_bytes)
+    ):
+        return "artifact completion receipt does not match reproduce_spec.json", "commit-mismatch"
+    return None, "clean"
+
+
 def _preserved_shas_fallback(exp_dir: Path) -> set[str]:
     """``preserve_gate_blob.preserved_shas`` inlined for the bare-python3 merge path.
 
@@ -408,6 +506,7 @@ def audit_experiment(
         "spec_check_mode": None,
         "entrypoint_drift": None,
         "canonical_result_identity": None,
+        "artifact_generation": None,
     }
 
     if kid and kid in exclusions:
@@ -462,6 +561,10 @@ def audit_experiment(
         record["canonical_result_identity"] = result_status
         if result_violation:
             record["violations"].append(result_violation)
+        generation_violation, generation_status = _artifact_generation_violation(exp_dir)
+        record["artifact_generation"] = generation_status
+        if generation_violation:
+            record["violations"].append(generation_violation)
 
     return record
 

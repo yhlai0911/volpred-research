@@ -46,12 +46,16 @@ file is left byte-identical — "fix the process, not the data").
 
 import json
 import os
+import time
+from pathlib import Path
 
 import numpy as np
 
+from volpred.research.reproduce_spec import finalize_experiment
 from volpred.stats.inference import holm_step_down
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT = Path(__file__).resolve().parents[2]
 
 # ── Constants copied verbatim from k1380_v4.py (must not drift) ─────────────
 BOOTSTRAP_B = 499
@@ -87,6 +91,7 @@ def stationary_bootstrap_indices(T, B, rng, mean_block=None):
 
 
 def main():
+    started_at = time.time()
     qlike_matrix = np.load(os.path.join(SCRIPT_DIR, 'k1380_v4_losses_all.npy'))
     with open(os.path.join(SCRIPT_DIR, 'k1380_v4_results.json')) as fh:
         v4 = json.load(fh)
@@ -394,9 +399,20 @@ def main():
                    "Requires explicit discussion in the paper body.")
     results["c3_verdict_corrected"] = verdict
 
-    out_path = os.path.join(SCRIPT_DIR, 'k1380_v4_rc_correction_results.json')
-    with open(out_path, 'w') as fh:
-        json.dump(results, fh, indent=2)
+    out_path, _spec = finalize_experiment(
+        results=results,
+        entrypoint=__file__,
+        canonical_result='k1380_v4_rc_correction_results.json',
+        inputs=[
+            Path(SCRIPT_DIR) / 'k1380_v4_losses_all.npy',
+            Path(SCRIPT_DIR) / 'k1380_v4_results.json',
+            ROOT / 'src' / 'volpred' / 'research' / 'reproduce_spec.py',
+            ROOT / 'src' / 'volpred' / 'stats' / 'inference.py',
+        ],
+        seeds=[('numpy', BOOTSTRAP_SEED)],
+        started_at=started_at,
+        network='deny',
+    )
     print(f"\n[5] Corrected verdict: {verdict}")
     print(f"[6] Written: {out_path}")
 

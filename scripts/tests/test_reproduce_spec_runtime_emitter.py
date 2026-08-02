@@ -89,6 +89,42 @@ def test_finalize_pins_the_complete_canonical_result_bytes(tmp_path: Path) -> No
     }
 
 
+def test_finalize_binds_declared_outputs_and_writes_completion_receipt(
+    tmp_path: Path,
+) -> None:
+    """A generation is complete only when every declared output is hash-bound."""
+    exp, entry = _experiment(tmp_path)
+    figure = exp / "figures" / "chart.png"
+    figure.parent.mkdir()
+    figure.write_bytes(b"chart-v1")
+
+    results_path, spec = rs.finalize_experiment(
+        results={"verdict": "NULL"},
+        entrypoint=entry,
+        canonical_result="k9100_results.json",
+        exp_dir=exp,
+        outputs=["figures/chart.png"],
+    )
+
+    identities = spec["artifact_generation"]["output_identities"]
+    assert identities == [
+        {
+            "path": "figures/chart.png",
+            "sha256": hashlib.sha256(b"chart-v1").hexdigest(),
+            "size_bytes": len(b"chart-v1"),
+        }
+    ]
+    commit = json.loads((exp / rs.COMMIT_NAME).read_text(encoding="utf-8"))
+    assert commit["generation_id"] == spec["artifact_generation"]["generation_id"]
+    assert commit["canonical_result_identity"] == spec["canonical_result_identity"]
+    assert commit["spec_identity"]["sha256"] == hashlib.sha256(
+        (exp / rs.SPEC_NAME).read_bytes()
+    ).hexdigest()
+    assert hashlib.sha256(results_path.read_bytes()).hexdigest() == commit[
+        "canonical_result_identity"
+    ]["sha256"]
+
+
 def test_writer_pins_an_existing_canonical_result(tmp_path: Path) -> None:
     """The lower-level public writer must enforce the same result identity."""
     exp, entry = _experiment(tmp_path)

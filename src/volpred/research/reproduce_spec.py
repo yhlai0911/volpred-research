@@ -65,22 +65,27 @@ import json
 import os
 import platform
 import sys
+import tempfile
 import time
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any
 
 __all__ = [
+    "COMMIT_NAME",
     "SPEC_NAME",
     "SPEC_SCHEMA",
-    "trace_file",
-    "runtime_environment",
     "build_reproduce_spec",
-    "write_reproduce_spec",
     "finalize_experiment",
+    "runtime_environment",
+    "trace_file",
+    "write_reproduce_spec",
 ]
 
 SPEC_NAME = "reproduce_spec.json"
 SPEC_SCHEMA = "volpred.reproduce_spec.v1"
+COMMIT_NAME = "reproduce_commit.json"
+COMMIT_SCHEMA = "volpred.reproduce_commit.v1"
 
 # reproduce_check.MAX_TIMEOUT_SECONDS (24h — raised 2026-07-22 so K1730's honest
 # 13448s run could declare a timeout it does not blow through). Duplicated rather
@@ -131,6 +136,44 @@ def trace_file(path: str | os.PathLike[str], *, root: Path | None = None) -> dic
     target = Path(path).resolve()
     data = target.read_bytes()
     return _trace_bytes(target, data, root=root or _repo_root())
+
+
+def _atomic_write_bytes(path: Path, data: bytes) -> None:
+    """Promote one complete file; a killed writer never exposes truncation."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+    )
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp_name, path)
+    except BaseException:
+        Path(tmp_name).unlink(missing_ok=True)
+        raise
+
+
+def _declared_output_identities(exp_path: Path, outputs: Iterable[str]) -> list[dict[str, Any]]:
+    """Hash every non-result output inside the experiment directory."""
+    identities: list[dict[str, Any]] = []
+    for value in sorted(set(outputs)):
+        rel = Path(value)
+        if rel.is_absolute() or ".." in rel.parts:
+            raise ValueError(f"output path escapes experiment directory: {value!r}")
+        target = (exp_path / rel).resolve()
+        try:
+            target.relative_to(exp_path)
+        except ValueError:
+            raise ValueError(f"output path escapes experiment directory: {value!r}") from None
+        if not target.is_file() or target.is_symlink():
+            raise ValueError(f"declared output is not a regular file: {value!r}")
+        trace = trace_file(target, root=exp_path)
+        identities.append(trace)
+    return identities
 
 
 def _version(module_name: str) -> str | None:
@@ -354,8 +397,32 @@ def finalize_experiment(
     root = exp_path.parents[1] if len(exp_path.parents) >= 2 else _repo_root()
     trace = trace_file(entry, root=root)
 
+    declared_outputs = sorted(set(outputs))
+    if canonical_result in declared_outputs:
+        declared_outputs.remove(canonical_result)
+    output_identities = _declared_output_identities(exp_path, declared_outputs)
+    generation_material = {
+        "entrypoint": trace,
+        "outputs": output_identities,
+        "scientific_payload": results,
+    }
+    generation_id = hashlib.sha256(
+        json.dumps(
+            generation_material,
+            sort_keys=True,
+            ensure_ascii=False,
+            default=str,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+
     payload = dict(results)
     payload["code_trace"] = trace
+    payload["artifact_generation"] = {
+        "schema_version": COMMIT_SCHEMA,
+        "generation_id": generation_id,
+        "output_identities": output_identities,
+    }
     if elapsed is not None:
         payload.setdefault("runtime_seconds", round(float(elapsed), 3))
     payload.setdefault("runtime_env", runtime_environment(seeds))
@@ -370,23 +437,41 @@ def finalize_experiment(
         result_bytes,
         root=exp_path,
     )
-    results_path.write_bytes(result_bytes)
-
     spec = build_reproduce_spec(
         exp_dir=exp_path,
         entrypoint=entry,
         canonical_result=canonical_result,
         inputs=inputs,
-        outputs=sorted({*outputs, canonical_result}),
+        outputs=sorted({*declared_outputs, canonical_result, COMMIT_NAME}),
         seeds=seeds,
         runtime_seconds=elapsed,
         entrypoint_trace=trace,
         canonical_result_trace=result_trace,
         **spec_kwargs,
     )
-    (exp_path / SPEC_NAME).write_text(
-        json.dumps(spec, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    spec["artifact_generation"] = {
+        "schema_version": COMMIT_SCHEMA,
+        "generation_id": generation_id,
+        "commit_file": COMMIT_NAME,
+        "output_identities": output_identities,
+    }
+    spec_bytes = (json.dumps(spec, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+    spec_trace = _trace_bytes(exp_path / SPEC_NAME, spec_bytes, root=exp_path)
+    commit = {
+        "schema_version": COMMIT_SCHEMA,
+        "generation_id": generation_id,
+        "entrypoint_identity": trace,
+        "canonical_result_identity": spec["canonical_result_identity"],
+        "spec_identity": spec_trace,
+        "output_identities": output_identities,
+    }
+    commit_bytes = (json.dumps(commit, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+
+    # The marker is promoted last. Any interruption before then leaves either the
+    # previous marker or no marker; the artifact gate fails closed on the mismatch.
+    _atomic_write_bytes(results_path, result_bytes)
+    _atomic_write_bytes(exp_path / SPEC_NAME, spec_bytes)
+    _atomic_write_bytes(exp_path / COMMIT_NAME, commit_bytes)
     print(
         f"[reproduce_spec] wrote {results_path.name} + {SPEC_NAME} "
         f"(entrypoint {trace['sha256'][:12]}, {trace['size_bytes']} bytes)",

@@ -1,0 +1,113 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1707.py",
+    "args": [],
+    "sha256": "2281626883fb5fb4342b25e576c3a72521b2b79a2b1890adfb6adf292396b300",
+    "size_bytes": 23664
+  },
+  "canonical_result": "K1707_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1707/data/raw_aggregate_snapshot.json",
+      "sha256": "6d01530d98a5184315aae84ac0e0983c1e9d20c8cef8f199dfaa098f093a6b96",
+      "size_bytes": 1940
+    },
+    {
+      "path": "experiments/k1707/data/daily_auction_panel.csv.gz",
+      "sha256": "107a3cd8ed66040adef5a5d2cc5ef43d69b0494bf4220c001e3f13a47c01d90b",
+      "size_bytes": 3097
+    },
+    {
+      "path": "experiments/k1707/data/vix_fred_2020.csv",
+      "sha256": "cc3575202272b4cf18a43b4ab95fc6cabd82195e224999a2da39337341bffb78",
+      "size_bytes": 1862
+    },
+    {
+      "path": "src/volpred/research/reproduce_spec.py",
+      "sha256": "93bc7329279e6935da828d2bd0e3c92890c1e223eb4840a0a3a1a77c8d20719f",
+      "size_bytes": 19308
+    }
+  ],
+  "outputs": [
+    "K1707_results.json",
+    "data/source_manifest.json",
+    "figures/k1707_descriptive_benefits.png",
+    "figures/k1707_stress_support.png",
+    "reproduce_commit.json"
+  ],
+  "timeout_seconds": 60,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 0.315,
+    "recorded_at": "2026-08-02T00:18:12Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1707_results.json",
+    "sha256": "58714b31757ad6571463d07fa84f179a4823fac32635a5df62d25643dd22936b",
+    "size_bytes": 6766
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "586126246cb70cf6095748d7023c2f59abc4f869fb4fdc1073aad687d161e2e7",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": [
+      {
+        "path": "data/source_manifest.json",
+        "sha256": "4ed2c4d9029b958cead0aa386fe54f4b037556318635c2cc3bee35c0414c8861",
+        "size_bytes": 714
+      },
+      {
+        "path": "figures/k1707_descriptive_benefits.png",
+        "sha256": "ef7037e890db5606ce6bbe4889971acc46a8833fd03a90781d6e10455b3cd22f",
+        "size_bytes": 57554
+      },
+      {
+        "path": "figures/k1707_stress_support.png",
+        "sha256": "95c95d11f74b1ae2395b55609f762e5f3b82e76f77e23726ea760c0f091e772d",
+        "size_bytes": 93580
+      }
+    ]
+  }
+}

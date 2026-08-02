@@ -119,6 +119,49 @@ def test_runtime_result_number_tamper_is_blocked(tmp_path: Path) -> None:
     )
 
 
+def test_runtime_declared_output_tamper_is_blocked(tmp_path: Path) -> None:
+    exp = tmp_path / "experiments" / "k9011"
+    exp.mkdir(parents=True)
+    entry = exp / "k9011.py"
+    entry.write_text("print('science')\n", encoding="utf-8")
+    chart = exp / "chart.png"
+    chart.write_bytes(b"chart-v1")
+    rs.finalize_experiment(
+        results={"verdict": "NULL"},
+        entrypoint=entry,
+        canonical_result="k9011_results.json",
+        exp_dir=exp,
+        outputs=["chart.png"],
+    )
+    chart.write_bytes(b"chart-v2")
+
+    record = gate.audit_experiment(exp, knowledge_ids={"k9011"}, exclusions={})
+    assert record["artifact_generation"] == "output-mismatch"
+    assert any("declared output identity mismatch" in v for v in record["violations"])
+
+
+def test_runtime_partial_generation_is_blocked_by_completion_receipt(
+    tmp_path: Path,
+) -> None:
+    exp = tmp_path / "experiments" / "k9012"
+    exp.mkdir(parents=True)
+    entry = exp / "k9012.py"
+    entry.write_text("print('science')\n", encoding="utf-8")
+    results_path, _ = rs.finalize_experiment(
+        results={"stage": 1},
+        entrypoint=entry,
+        canonical_result="k9012_results.json",
+        exp_dir=exp,
+    )
+    # Simulate termination after a new result became visible but before the
+    # completion receipt was promoted.
+    results_path.write_text('{"stage": 2}\n', encoding="utf-8")
+
+    record = gate.audit_experiment(exp, knowledge_ids={"k9012"}, exclusions={})
+    assert record["artifact_generation"] in {"result-mismatch", "commit-mismatch"}
+    assert record["violations"]
+
+
 def test_directory_with_no_results_is_not_gated(tmp_path: Path) -> None:
     """No archived result = no finding to record and no output to pin.
 

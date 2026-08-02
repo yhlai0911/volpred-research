@@ -1,0 +1,94 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "k1380_v4_rc_correction.py",
+    "args": [],
+    "sha256": "f129029cfd900305a09983639ea1278e7e807837b132751b80909dc5cc3fdaa2",
+    "size_bytes": 20241
+  },
+  "canonical_result": "k1380_v4_rc_correction_results.json",
+  "inputs": [
+    {
+      "path": "experiments/K1380_v4/k1380_v4_losses_all.npy",
+      "sha256": "25722dd0fced257278511d902b9769da37498159b922ce277941d28827171683",
+      "size_bytes": 255944
+    },
+    {
+      "path": "experiments/K1380_v4/k1380_v4_results.json",
+      "sha256": "aed59a115166a0146615ce918e2a95f41f3c336b380d0dfae263f8b2190158e9",
+      "size_bytes": 7454
+    },
+    {
+      "path": "src/volpred/research/reproduce_spec.py",
+      "sha256": "93bc7329279e6935da828d2bd0e3c92890c1e223eb4840a0a3a1a77c8d20719f",
+      "size_bytes": 19308
+    },
+    {
+      "path": "src/volpred/stats/inference.py",
+      "sha256": "6b2066872c7069dee1d14d0ce6b1ced85460b8f7e7b5f627ff83833ce235cc13",
+      "size_bytes": 6674
+    }
+  ],
+  "outputs": [
+    "k1380_v4_rc_correction_results.json",
+    "reproduce_commit.json"
+  ],
+  "timeout_seconds": 61,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 0.539,
+    "recorded_at": "2026-08-02T00:14:17Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "k1380_v4_rc_correction_results.json",
+    "sha256": "b4571a042e06fd225233fd836f5f38a4fbcad6a97f1fbfc67f5b7762db86cf17",
+    "size_bytes": 10138
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "8ee4a8283f501126c5cde41e65087b3b916e330c54b8bf63986e4ad2fa2b000f",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": []
+  }
+}

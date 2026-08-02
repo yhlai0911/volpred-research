@@ -15,6 +15,7 @@ import math
 import os
 import shutil
 import tempfile
+import time
 import urllib.request
 from collections import defaultdict
 from pathlib import Path
@@ -27,7 +28,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-
 ROOT = Path(__file__).resolve().parents[2]
 EXP = ROOT / "experiments" / "k1707"
 DATA = EXP / "data"
@@ -36,6 +36,7 @@ CACHE = ROOT / "storage" / "cache" / "k1707"
 RAW = CACHE / "opra_pseudo.sas7bdat"
 VIX_CACHE = CACHE / "vix_fred_2020.csv"
 RESULTS = EXP / "K1707_results.json"
+AGGREGATE_SNAPSHOT = DATA / "raw_aggregate_snapshot.json"
 
 SEED = 42
 RAW_FILE_ID = 10844401
@@ -321,6 +322,50 @@ def write_panel(panel: pd.DataFrame) -> Path:
     return path
 
 
+def write_aggregate_snapshot(
+    *, pooled: pd.DataFrame, date_roster: pd.DataFrame, data_audit: dict[str, Any], panel_path: Path
+) -> None:
+    """Persist sufficient statistics so the analytical run needs no network."""
+    atomic_json(
+        AGGREGATE_SNAPSHOT,
+        {
+            "schema_version": "volpred.k1707.aggregate_snapshot.v1",
+            "raw_source": {
+                "file_id": RAW_FILE_ID,
+                "md5": RAW_MD5,
+                "bytes": RAW.stat().st_size,
+            },
+            "analysis_panel_sha256": sha256(panel_path),
+            "data_audit": data_audit,
+            "date_roster": [value.strftime("%Y-%m-%d") for value in date_roster["date"]],
+            "pooled_records": pooled.to_dict(orient="records"),
+        },
+    )
+
+
+def load_aggregate_snapshot() -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
+    """Load and validate the committed source-materialization receipt."""
+    with AGGREGATE_SNAPSHOT.open(encoding="utf-8") as fh:
+        snapshot = json.load(fh)
+    if snapshot.get("schema_version") != "volpred.k1707.aggregate_snapshot.v1":
+        raise RuntimeError("unexpected aggregate snapshot schema")
+    expected_raw = {"file_id": RAW_FILE_ID, "md5": RAW_MD5, "bytes": 420_675_584}
+    if snapshot.get("raw_source") != expected_raw:
+        raise RuntimeError("aggregate snapshot raw-source identity drift")
+    panel_path = DATA / "daily_auction_panel.csv.gz"
+    if sha256(panel_path) != snapshot.get("analysis_panel_sha256"):
+        raise RuntimeError("aggregate snapshot panel identity drift")
+    frozen_vix = DATA / "vix_fred_2020.csv"
+    if sha256(frozen_vix) != VIX_SHA256:
+        raise RuntimeError("aggregate snapshot VIX identity drift")
+    pooled = pd.DataFrame(snapshot["pooled_records"])
+    date_roster = pd.DataFrame(
+        {"date": pd.to_datetime(snapshot["date_roster"], errors="raise")}
+    )
+    data_audit = dict(snapshot["data_audit"])
+    return pooled, date_roster, data_audit
+
+
 def make_figures(stress_dates: pd.DataFrame, gate: dict[str, Any], overall: list[dict[str, Any]]) -> list[Path]:
     FIGURES.mkdir(parents=True, exist_ok=True)
     dates = stress_dates.sort_values("date")
@@ -366,11 +411,46 @@ def make_figures(stress_dates: pd.DataFrame, gate: dict[str, Any], overall: list
     return [support_path, desc_path]
 
 
-def run(refresh_source: bool = False) -> dict[str, Any]:
-    np.random.seed(SEED)
-    ensure_sources(refresh=refresh_source)
+def materialize_sources() -> dict[str, Any]:
+    """Fetch and reduce raw sources; never finalize the canonical experiment."""
+    ensure_sources(refresh=True)
     panel, pooled, date_roster, data_audit = aggregate_raw(RAW)
-    stress_dates, vix_audit = build_stress_audit(date_roster, VIX_CACHE)
+    panel_path = write_panel(panel)
+    frozen_vix = DATA / "vix_fred_2020.csv"
+    DATA.mkdir(parents=True, exist_ok=True)
+    frozen_vix_tmp = frozen_vix.with_name(f".{frozen_vix.name}.tmp")
+    shutil.copyfile(VIX_CACHE, frozen_vix_tmp)
+    os.replace(frozen_vix_tmp, frozen_vix)
+    # Written last: a killed materializer leaves the old snapshot disagreeing
+    # with the new panel/VIX, so the network-denied analytical run fails closed.
+    write_aggregate_snapshot(
+        pooled=pooled,
+        date_roster=date_roster,
+        data_audit=data_audit,
+        panel_path=panel_path,
+    )
+    load_aggregate_snapshot()
+    return {
+        "status": "SOURCE_MATERIALIZED",
+        "network": "allow",
+        "raw_md5": md5(RAW),
+        "raw_bytes": RAW.stat().st_size,
+        "aggregate_snapshot_sha256": sha256(AGGREGATE_SNAPSHOT),
+        "analysis_panel_sha256": sha256(panel_path),
+        "vix_sha256": sha256(frozen_vix),
+        "next_step": "run K1707.py without --refresh-source for canonical network-denied analysis",
+    }
+
+
+def run() -> dict[str, Any]:
+    from volpred.research.reproduce_spec import finalize_experiment
+
+    started_at = time.time()
+    np.random.seed(SEED)
+    frozen_vix = DATA / "vix_fred_2020.csv"
+    panel_path = DATA / "daily_auction_panel.csv.gz"
+    pooled, date_roster, data_audit = load_aggregate_snapshot()
+    stress_dates, vix_audit = build_stress_audit(date_roster, frozen_vix)
     gate = support_gate(data_audit, vix_audit)
     if gate["passed"]:
         raise RuntimeError(
@@ -378,12 +458,6 @@ def run(refresh_source: bool = False) -> dict[str, Any]:
             "interaction estimator must be implemented and independently reviewed before use."
         )
     overall, auction_only = descriptive_benefits(pooled)
-    panel_path = write_panel(panel)
-    DATA.mkdir(parents=True, exist_ok=True)
-    frozen_vix = DATA / "vix_fred_2020.csv"
-    frozen_vix_tmp = frozen_vix.with_name(f".{frozen_vix.name}.tmp")
-    shutil.copyfile(VIX_CACHE, frozen_vix_tmp)
-    os.replace(frozen_vix_tmp, frozen_vix)
     figures = make_figures(stress_dates, gate, overall)
 
     verdict = "INSUFFICIENT_STRESS_SUPPORT"
@@ -399,8 +473,8 @@ def run(refresh_source: bool = False) -> dict[str, Any]:
             "doi": DATAVERSE_DOI,
             "license": "CC0-1.0",
             "raw_datafile_id": RAW_FILE_ID,
-            "raw_md5": md5(RAW),
-            "raw_bytes": RAW.stat().st_size,
+            "raw_md5": RAW_MD5,
+            "raw_bytes": 420_675_584,
             "author_caveat": "Randomized, independently noised, anonymized and smaller pseudo-data; cannot reproduce paper results; timestamps differ from original OPRA.",
             **data_audit,
             **vix_audit,
@@ -441,7 +515,7 @@ def run(refresh_source: bool = False) -> dict[str, Any]:
 
     manifest = {
         "experiment_id": "K1707",
-        "raw": {"file_id": RAW_FILE_ID, "md5": RAW_MD5, "bytes": RAW.stat().st_size},
+        "raw": {"file_id": RAW_FILE_ID, "md5": RAW_MD5, "bytes": 420_675_584},
         "vix_sha256": sha256(frozen_vix),
         "expected_vix_sha256": VIX_SHA256,
         "analysis_panel_sha256": sha256(panel_path),
@@ -450,16 +524,46 @@ def run(refresh_source: bool = False) -> dict[str, Any]:
     }
     atomic_json(DATA / "source_manifest.json", manifest)
     result["artifacts"]["source_manifest"] = "experiments/k1707/data/source_manifest.json"
-    atomic_json(RESULTS, result)
+    finalize_experiment(
+        results=result,
+        entrypoint=__file__,
+        canonical_result=RESULTS.name,
+        inputs=[
+            AGGREGATE_SNAPSHOT,
+            panel_path,
+            frozen_vix,
+            ROOT / "src" / "volpred" / "research" / "reproduce_spec.py",
+        ],
+        outputs=[
+            "data/source_manifest.json",
+            "figures/k1707_descriptive_benefits.png",
+            "figures/k1707_stress_support.png",
+        ],
+        seeds=[("numpy", SEED)],
+        started_at=started_at,
+        network="deny",
+    )
     return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--refresh-source", action="store_true")
+    parser.add_argument(
+        "--refresh-source",
+        action="store_true",
+        help="network-enabled source materialization only; does not finalize canonical results",
+    )
     args = parser.parse_args()
-    result = run(refresh_source=args.refresh_source)
-    print(json.dumps({"status": result["status"], "gate": result["pre_registered_support_gate"]}, indent=2))
+    if args.refresh_source:
+        print(json.dumps(materialize_sources(), indent=2))
+        return 0
+    result = run()
+    print(
+        json.dumps(
+            {"status": result["status"], "gate": result["pre_registered_support_gate"]},
+            indent=2,
+        )
+    )
     return 0
 
 

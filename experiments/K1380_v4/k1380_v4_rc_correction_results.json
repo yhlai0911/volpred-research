@@ -98,7 +98,7 @@
       "C2": 48,
       "C3": 19
     },
-    "finding": "Every exceeding draw is attained by a spec that is catastrophically WORSE than the benchmark (A5 t=-11.2, C2 t=-21.1, C3 t=-10.0). No draw is attained by a competitive spec. The v4 non-rejection therefore measures the degeneracy of the three worst specs under least-favourable recentering, not the competitiveness of the candidate set \u2014 which is exactly the conservativeness Hansen's SPA_c removes.",
+    "finding": "Every exceeding draw is attained by a spec that is catastrophically WORSE than the benchmark (A5 t=-11.2, C2 t=-21.1, C3 t=-10.0). No draw is attained by a competitive spec. The v4 non-rejection therefore measures the degeneracy of the three worst specs under least-favourable recentering, not the competitiveness of the candidate set — which is exactly the conservativeness Hansen's SPA_c removes.",
     "caveat": "The three specs' extreme QLIKE losses (10-21 sigma below benchmark) are themselves worth investigating for numerical degeneracy; they are dropped by SPA_c on statistical grounds, but if they are simply broken they should not be candidates at all. Either route yields the same corrected verdict."
   },
   "white_rc_corrected": {
@@ -280,5 +280,30 @@
     "a4f_holm_reject_at_0.10": true,
     "corrected_reading": "The snooping-adjusted joint test gives SPA_c p=0.0000. A4f's Holm-adjusted per-spec p is 0.0000."
   },
-  "c3_verdict_corrected": "C3 POSITIVE (snooping-adjusted): SPA_c p=0.0000 (< 1/499) and A4f survives Holm (adj p=0.0000); 11/15 specs reject at FWER 0.10. BOTH v4 numbers were wrong, in OPPOSITE directions: the field named `white_rc_test` was an unadjusted single-spec DM test (overstated), and the field named `hansen_spa_test` (p=0.2886, non-rejecting) was the least-favourable SPA_u whose entire upper tail is produced by three degenerate specs (understated). The correct snooping-adjusted joint test rejects H0. Note this REVERSES the prior reading that 'the properly corrected test does not reject'."
+  "c3_verdict_corrected": "C3 POSITIVE (snooping-adjusted): SPA_c p=0.0000 (< 1/499) and A4f survives Holm (adj p=0.0000); 11/15 specs reject at FWER 0.10. BOTH v4 numbers were wrong, in OPPOSITE directions: the field named `white_rc_test` was an unadjusted single-spec DM test (overstated), and the field named `hansen_spa_test` (p=0.2886, non-rejecting) was the least-favourable SPA_u whose entire upper tail is produced by three degenerate specs (understated). The correct snooping-adjusted joint test rejects H0. Note this REVERSES the prior reading that 'the properly corrected test does not reject'.",
+  "code_trace": {
+    "path": "experiments/K1380_v4/k1380_v4_rc_correction.py",
+    "sha256": "f129029cfd900305a09983639ea1278e7e807837b132751b80909dc5cc3fdaa2",
+    "size_bytes": 20241
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "8ee4a8283f501126c5cde41e65087b3b916e330c54b8bf63986e4ad2fa2b000f",
+    "output_identities": []
+  },
+  "runtime_seconds": 0.539,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  }
 }
