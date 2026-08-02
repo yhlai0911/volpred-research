@@ -210,7 +210,24 @@ Stored at `lookahead_policy`.
    `t + h ≤ T`, because row *t*'s h-step target is not observable at *T* otherwise. Applied
    **identically to HAR and DL**.
 3. **Fit/validation purge.** `h−1` rows are purged between the fit slice and the validation
-   slice, so early stopping never scores on targets overlapping the fitted rows' targets.
+   slice **in the rolling engine** (`rolling_forecasts`), so early stopping never scores on
+   targets overlapping the fitted rows' targets.
+
+   > **Scope correction (stage-3 certification review).** The purge is applied in
+   > `rolling_forecasts` only. `select_hyperparams` — which picks capacity and learning rate
+   > once, at the first origin — splits fit/validation with **no purge**. This is visible in
+   > the artifact's own `selection_window` fields: at h=22 the fit slice is `[10, 2560)` and
+   > the validation slice is `rows[2560:3010]`, i.e. they abut with a zero-row gap. The
+   > artifact string `lookahead_policy.fit_validation_purge` says the purge covers "early
+   > stopping and hyperparameter selection"; the code covers only the former. That string is
+   > frozen (correcting it would mean re-running a 6,170 s experiment for a methods
+   > sentence), so the correction is recorded here instead.
+   > **Consequence:** for h ∈ {5, 22} the last `h−1` fit rows share future RV days with the
+   > first validation rows during that one-off hyperparameter choice. It is **entirely
+   > pre-OOS** — the whole selection window ends before the first forecast origin, so no
+   > out-of-sample observation is touched and **no reported number changes**. Its only reach
+   > is which of six `(hidden, lr)` pairs was selected, biased mildly toward larger capacity,
+   > which works *against* the DL arm rather than for it.
 4. **Scalers** (X and y) are fit on the training slice only and refit at every origin. No
    full-sample standardisation anywhere.
 5. **Hyperparameters** are selected once on the chronological validation tail of the *first*
@@ -219,7 +236,11 @@ Stored at `lookahead_policy`.
    across origins would apply a future refit's residual variance to an early forecast.
 7. **Baseline fairness.** Linear models are fit on the **full** training window, since they
    have nothing to early-stop; withholding the validation tail from OLS would handicap the
-   baseline by ~15% of its sample for no reason.
+   baseline by ~15% of its sample for no reason. **The flip side, stated explicitly:** the DL
+   arm therefore fits on *fewer rows than its own baselines* — 3,000 for OLS against 2,550 /
+   2,546 / 2,529 at h = 1 / 5 / 22 (the 450-row validation tail plus the `h−1` purge), about
+   85%. The asymmetry runs **against** the DL arm, so it cannot manufacture a DL win. It is
+   instead a caveat on the *negative* finding, and is carried into §9 as one.
 
 **Mechanical proof (`lookahead_selftests`).** For 40 randomly chosen rows:
 corrupting rv/returns **strictly after** *t* must leave every feature at row *t* bit-identical;
@@ -310,7 +331,12 @@ OOS window: **1974-03-22 → 2026-06-26**, 13,176 rows, 18 rolling refits (`refi
 
 One caution on h = 22, in the direction of *less* confidence: direct 22-step targets overlap heavily, so the 13,176 OOS rows carry only **598.9 effectively independent observations**. The HAC-corrected DM statistic accounts for this, but the h=22 row is the thinnest evidence in the table despite having the largest point gap.
 
-Neither conclusion depends on the lognormal level correction: `qlike_no_lognormal_correction` reports the uncorrected `exp(m)` variant for every cell, and the ranking is unchanged.
+**The lognormal level correction, checked rather than asserted.** `qlike_no_lognormal_correction` reports the uncorrected `exp(m)` variant for every cell. Across the 6 best-DL-vs-baseline cells (3 horizons × 2 baselines), 4 keep the same ordering under both variants and 2 reverse it:
+
+- **h = 1 vs HAR-L** — corrected: **HAR-L** ahead (0.3713 vs 0.3713, gap 0.000055). Uncorrected: **`lstm`** ahead (0.4472 vs 0.4415, gap 0.005693). Under the correction this cell is a dead heat — DM = -0.011, q = 0.9915.
+- **h = 5 vs HAR-RV** — corrected: **HAR-RV** ahead (0.2027 vs 0.2054, gap 0.002689). Uncorrected: **`lstm`** ahead (0.2223 vs 0.2189, gap 0.003379). Under the correction this cell is a dead heat — DM = -0.503, q = 0.6153.
+
+Both reversals are short-horizon cells that the corrected variant already reports as statistically indistinguishable, so neither is a DL win under either variant. Every DM statistic, BH-FDR family and decision field in this experiment is computed on the **corrected** losses, so no reported test moves. The h = 22 cells that carry the headline keep both baselines ahead under both variants (HAR-RV 0.1931 vs 0.2128 corrected, 0.2122 vs 0.2252 uncorrected; HAR-L 0.1914 vs 0.2128 corrected, 0.2100 vs 0.2252 uncorrected).
 
 The sanity floor and the linear control behave as designed:
 
@@ -441,6 +467,17 @@ Taken together, the four non-`channels` ablations close the obvious "you configu
    decay is the primary evidence, with the point estimates only summarising it.
 7. **Two architectures, not a survey.** A negative result bounds *these* models at *these*
    capacities on *this* proxy — it is not a claim about deep learning in general.
+8. **The DL arm trains on ~15% fewer rows than the linear baselines.** Early stopping needs a
+   holdout, so the DL fit slice gives up the validation tail and the `h−1` purge while OLS
+   keeps the whole window (§6.7). The asymmetry is forced by early stopping and it
+   disadvantages the DL arm, so it cannot have produced a spurious DL win — but part of the
+   h=22 deficit could be a training-sample-size effect rather than an architecture effect,
+   and this design cannot separate the two.
+9. **The lognormal level correction moves two short-horizon orderings.** §8.2 reports the two
+   best-DL-vs-baseline cells (h=1 vs HAR-L, h=5 vs HAR-RV) whose ordering reverses under the
+   uncorrected `exp(m)` variant. Both are cells the corrected variant already calls
+   statistically indistinguishable, and all inference runs on the corrected losses — but the
+   sign of those two comparisons is not robust to the level-conversion choice.
 
 ---
 

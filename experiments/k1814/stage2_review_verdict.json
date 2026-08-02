@@ -1,0 +1,436 @@
+{
+  "schema": "volpred.k1814.review_verdict.v1",
+  "split_stage": "verify_and_merge",
+  "split_index": "2/2",
+  "parent_job_id": "agent-brief_k1814-a3ea90",
+  "parent_task_id": "K1814",
+  "worktree": ".claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+  "reviewed_at": "2026-08-02",
+  "reviewed_against": "k1814_stage1_landing.json (stage 1/2) + K1814_results.json (canonical artifact)",
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_rationale": "Every substantive check passes. The one blocking must-fix handed over by stage 1 (F1: README sections 7 and 8 were unrendered placeholders while line 10 asserted they were filled) is closed: both sections are now rendered from K1814_results.json by a committed script that reads every number programmatically, and an independent text-parsing pass re-verified 346 rendered numbers against the artifact with zero mismatches. The lookahead audit, baseline-fairness audit, refit-reality check and ablation-basis check all pass on the archived entrypoint bytes. The verdict is CONDITIONAL rather than PASS for exactly one reason, which is not the agent's to resolve: scripts/check_experiment_artifacts.py still reports BLOCKED because no storage/memory/knowledge.json entry mentions k1814. Per K1259 that entry is MAIN THREAD ONLY. Merge is appropriate; the condition below must be discharged by the main thread immediately after.",
+  "merge_recommendation": "MERGE",
+  "conditions_on_merge": [
+    "MAIN THREAD: write the storage/memory/knowledge.json entry for k1814, taking every number programmatically from experiments/k1814/K1814_results.json. This is the sole remaining artifacts-gate complaint. The finding to record is a NULL that is negative at the long horizon — see verdict_headline below; recording it as a plain 'no significant difference' would lose the actual result.",
+    "MAIN THREAD: do NOT re-point reproduce_spec.json at the current k1814.py sha. The spec correctly pins the bytes that produced the results; those bytes are preserved at gate_history/b1a67269__k1814.py and the divergence is now documented in README section 10."
+  ],
+  "verdict_headline": {
+    "result_class": "NULL, and negative at the longest horizon",
+    "h_star": null,
+    "H2_boundary_exists": false,
+    "dl_beats_both_baselines_by_horizon": {
+      "h1": false,
+      "h5": false,
+      "h22": false
+    },
+    "per_horizon": {
+      "h1": {
+        "qlike_har": 0.3768240363197611,
+        "qlike_harl": 0.371266436552393,
+        "qlike_best_dl": 0.37132179243096347,
+        "best_dl_model": "lstm",
+        "dm_hln_vs_harl": -0.010610690622973975,
+        "q_bh_fdr_vs_harl": 0.9915342132863909,
+        "decision_vs_har": "FAIL_TO_REJECT",
+        "decision_vs_harl_strong": "FAIL_TO_REJECT"
+      },
+      "h5": {
+        "qlike_har": 0.2026623848409849,
+        "qlike_harl": 0.19816732061867634,
+        "qlike_best_dl": 0.20535096636162672,
+        "best_dl_model": "lstm",
+        "dm_hln_vs_harl": -1.2858057094420048,
+        "q_bh_fdr_vs_harl": 0.23824017037146508,
+        "decision_vs_har": "FAIL_TO_REJECT",
+        "decision_vs_harl_strong": "FAIL_TO_REJECT"
+      },
+      "h22": {
+        "qlike_har": 0.1931167396951244,
+        "qlike_harl": 0.19140472139559994,
+        "qlike_best_dl": 0.21284071210716077,
+        "best_dl_model": "lstm",
+        "dm_hln_vs_harl": -2.3133070767238935,
+        "q_bh_fdr_vs_harl": 0.041442162570333174,
+        "decision_vs_har": "FAIL_TO_REJECT",
+        "decision_vs_harl_strong": "HARL_BETTER"
+      }
+    },
+    "correction_to_brief": "The dispatch brief's orientation numbers stated h=22 decision 'FAIL_TO_REJECT' against HAR-L. The artifact records decision_vs_harl_strong='HARL_BETTER' at h=22 (DM=-2.3133, q=0.0414). FAIL_TO_REJECT at h=22 applies only to the vs-HAR-RV comparison (q=0.0693). All rendered numbers were taken from the artifact, not from the brief.",
+    "strongest_negative_evidence": "Across the two 6-test BH-FDR families there are 5 rejections at q=0.05 spanning 3 distinct tests (h5_transformer, h22_lstm, h22_transformer), and EVERY one records direction='baseline_better'. Not one test in either family rejects in favour of DL. The DL deficit grows with the horizon, so the motivating hypothesis ('ML earns its keep at longer horizons') is contradicted, not merely unsupported.",
+    "only_positive_signal": "Ablation channels_with_returns: LSTM beats its OWN HAR-L at h=1 (DM=+3.088, raw p=0.0020) and h=5 (DM=+2.085, raw p=0.0371), but not h=22 (DM=-0.343). Reported in README section 8.5 with its caveats (outside the pre-registered FDR families so p is uncorrected; n_seeds=2 vs 5; refit_every=3000 also degrades that arm's own baselines). It points at SHORT horizons and the leverage channel, i.e. opposite to the tested hypothesis. Flagged as a follow-up lead, not a result."
+  },
+  "checklist": [
+    {
+      "item": 1,
+      "name": "Data calibre gate — README provenance matches what the code used",
+      "status": "PASS",
+      "evidence": [
+        "data_calibre_gate.route_taken == 'B_realized_range_proxy'.",
+        "gate_history/b1a67269__k1814.py:1125-1131 — main() calls probe_intraday_limits() and proxy_validation('SPY') purely to populate data_calibre_gate and fig5; neither return value is ever passed to run_arm(). The 5-min/1-h data is documentation of why Route A was rejected, never a model input.",
+        "gate_history/b1a67269__k1814.py:1133 — primary arm is run_arm('^GSPC', '1962-01-01', 'parkinson', cfg, do_selftest=True); load_daily() (line 120) downloads interval='1d' only. Daily Parkinson is genuinely the modelling data.",
+        "Primary arm figures re-read from artifact and stated accurately in the newly rendered section 7: n_daily_bars=16251, n_panel_rows=16208, span 1962-01-02 -> 2026-07-29, n_oos=13176.",
+        "Newly rendered section 7 opens by restating the proxy calibre ('These are proxy figures, not 5-minute RV') so the calibre discipline survives into the new prose."
+      ],
+      "must_fix": "none — stage-1 finding F2 re-confirmed and extended to the new sections"
+    },
+    {
+      "item": 2,
+      "name": "README <-> results json number-for-number agreement",
+      "status": "PASS",
+      "evidence": [
+        "Rendering is programmatic: render_readme_results.py reads K1814_results.json and emits sections 7 and 8; no number is retyped.",
+        "SEPARATE verification pass (not a re-render): a script parsed the rendered markdown tables as TEXT and compared every numeric cell back to the artifact at the displayed precision. Covered section 8.2 main table (all 3 horizons x 16 fields), the AR1/ridge/HAR floor table, both 6-test FDR tables, all 9 robustness rows, all 15 ablation rows, and the section 7 annualised-vol, ACF, log-RV and Hurst tables. Result: 'checks run : 346 / FAILURES : 0'.",
+        "Idempotence/drift gate: 'uv run python render_readme_results.py --check' -> 'OK: README sections 7 and 8 match K1814_results.json' (rc=0). This is a committed mechanical gate against future prose drift.",
+        "Non-numeric fields checked too: best_dl_model, decision_vs_har, decision_vs_harl_strong, reject_at_q05 and direction all string-compared against the artifact."
+      ],
+      "must_fix": "none"
+    },
+    {
+      "item": 3,
+      "name": "Lookahead (highest-risk item)",
+      "status": "PASS",
+      "evidence": [
+        "SCALERS TRAIN-ONLY: fit_dl() lines 410-412 compute mu/sd from seq_tr and ymu/ysd from y_tr (the training slice), then apply them to val and test (lines 414-415, 462). ridge_lags (line 582) computes zmu/zsd from Z=panel.lag_x[lin_sl] (train slice) and applies to panel.lag_x[te]. No full-sample standardisation anywhere.",
+        "HP SELECTED PRE-OOS: select_hyperparams() (line 486) fits on the first origin's chronological validation tail. Verified numerically, not just from the docstring: oos_start = train_len + max(HORIZONS) + 10 = 3000+22+10 = 3032 (line 854), while the recorded selection_window values end at rows 3031 (h=1), 3027 (h=5) and 3010 (h=22) — each strictly before OOS, with the gap widening with h exactly as the embargo requires. Selection dates 1974-03-20 / 1974-03-14 / 1974-02-19 all precede oos_start 1974-03-22.",
+        "REFIT IS REAL (empirical answer, as briefed): primary refit_every=750 produces n_refits=18 at every horizon; ablation refit_250 (refit_every=250) produces n_refits=53 on the identical OOS row set (both n_oos=13176). A 2.9x change in origin count from a 3x change in cadence is arithmetically consistent with origins() = range(oos_start, n, refit_every) (line 480) and proves the origins loop genuinely re-fits rather than reusing one fit.",
+        "EXPLICIT LAG / TARGET-FEATURE ALIGNMENT: build_panel() back_mean() sums rv[rows - i] for i in 0..k-1 (line 183, strictly index <= t) while targets sum rv[rows + i] for i in 1..h (line 209, strictly index > t). The t -> t+1 boundary is the explicit lag; there is no shift(1) call because features and targets are built by disjoint index windows, which is a stronger construction than shifting a joined frame.",
+        "DIRECT-h-STEP EMBARGO: rolling_forecasts() line 548 sets tr_end = min(T-h+1, T), so a model forecasting from origin T trains only on rows whose h-step target ends at or before raw day row_of(T). Applied identically to linear and DL arms.",
+        "FIT/VAL PURGE: line 563-565 purges h-1 rows between fit_sl and val_sl, so early stopping never scores on targets overlapping the fitted rows'.",
+        "PER-ROW LEVEL CORRECTION: s2 is stored per row (lines 536-540) and to_level() uses each row's own origin residual variance, so no later refit's variance touches an earlier forecast.",
+        "SELFTESTS ARE MEANINGFUL, NOT VACUOUS — this was checked specifically. primary.lookahead_selftests = {\"future_cannot_move_features\": 40, \"past_cannot_move_targets\": 40, \"naive_reconstruction\": 40, \"n_probe_rows\": 40, \"n_raw\": 16251}. Reading lookahead_selftests() (lines 221-272): it does not assert a flag, it PERTURBS data and demands exact invariance. (a) rv[t+1:] *= 7.3 and ret[t+1:] += 0.9, then requires np.array_equal (atol=0, NOT allclose) on har_x, harl_x, lag_x and seq at row t — a genuine multiplicative+additive corruption of the entire future. (b) rv[:t+1] *= 5.1, then requires exact equality of logy and levy at row t. (c) an independent naive reconstruction re-derives har_x columns, levy and both ends of the seq window by direct slicing. All three run on 40 probe rows and RAISE AssertionError on violation rather than recording a count. Crucially, floor_positive() is applied INSIDE the perturbed rebuilds (lines 242, 253), so a data-dependent floor would surface as a violation — the test covers the exact leak that a sample-quantile floor would introduce. The counts 40/40/40 therefore mean 40 rows survived real corruption, not 40 no-ops.",
+        "FLOOR IS NOT DATA-DEPENDENT: floor_positive() (line 143) uses the module constant RV_FLOOR=1e-7, never a sample quantile, so no 2020 observation can set the floor applied to a 1963 one."
+      ],
+      "must_fix": "none"
+    },
+    {
+      "item": 4,
+      "name": "HAR baseline not weakened",
+      "status": "PASS",
+      "evidence": [
+        "SAME OOS ROW SET: score() (lines 612-616) builds ONE mask requiring every model in the arm to be finite, then scores all models on the identical idx. HAR, HAR-L and the DL arms cannot be evaluated on different rows by construction.",
+        "SAME LOSS: every model goes through the same qlike(actual[idx], f) call (line 626) and the same to_level() conversion (line 625).",
+        "SAME LAG CONVENTION: all models read from the same Panel built by one build_panel() call — har_x, harl_x, lag_x and seq are all indexed by the same `rows` array, and all are forecast on the same te slice.",
+        "BASELINE IS FAVOURED, NOT HANDICAPPED: line 558 gives the linear models the FULL training window (lin_sl = slice(tr_beg, tr_end)) while DL loses the validation tail plus the purge to early stopping. The asymmetry runs in the baseline's favour and is documented in the code comment at lines 554-557.",
+        "DL IS ALSO FAVOURED WHERE IT MATTERS: fit_dl() line 472 estimates resid_var from HELD-OUT validation residuals rather than in-sample, deliberately avoiding an optimistic variance that would under-inflate DL level forecasts and be punished by QLIKE. Both thumbs on the scale point away from the reported conclusion.",
+        "HAR-L EXISTS PRECISELY TO PREVENT A WEAK-BASELINE WIN and it does its job: at h=1 the apparent DL edge over plain HAR-RV (0.005502) is fully absorbed by HAR-L, leaving -0.000055. Reporting only vs HAR-RV would have been the classic weakened-baseline result; the design forecloses it.",
+        "LINEAR CONTROL CONFIRMS NO FREE LUNCH: ridge on all 22 individual lags is worse than HAR's 3 aggregates at every horizon (h1 0.3832 vs 0.3768), so the HAR restriction is not hiding a richer linear structure.",
+        "DM SIGN CONVENTION VERIFIED IN CODE: dm_hln() line 305 sets d = loss_base - loss_alt so positive favours DL, matching the README's stated convention; the HLN factor (line 310) and HAC lag h-1 (line 307) are the textbook forms, and BH-FDR (lines 331-341) is a correct monotone step-up.",
+        "A baseline that WINS is itself evidence the comparison was fair, but it was verified rather than assumed, as briefed."
+      ],
+      "must_fix": "none"
+    },
+    {
+      "item": 5,
+      "name": "Ablation comparison basis (own har/harl, never the primary arm's)",
+      "status": "PASS",
+      "evidence": [
+        "ablations._settings_note requires it: \" instead chosen on validation in the primary arm). Compare each ablation against ITS OWN har/harl columns, never the primary arm's: the OOS row set changes when seq_len or train_len changes.\"",
+        "The rendered section 8.5 obeys it structurally: the table columns are literally labelled 'own HAR' and 'own HAR-L', the DM column is 'DM LSTM vs own HAR-L', and every DM value is read from that ablation's own horizons[h].dm_vs_harl node.",
+        "A dedicated 'Comparison basis' paragraph states the rule and quantifies why it matters, citing the differing row sets: window_L66 n_oos=13132, train_len1500 n_oos=14676, primary n_oos=13176.",
+        "Verified the rule is not merely stated but needed: channels_with_returns has the SAME n_oos as primary (13176) yet its own har=0.3867 against primary har=0.3768, because refit_every=3000 vs 750 moves the baselines too. Every per-ablation narrative sentence in 8.5 compares within-arm only; the prose explicitly notes that part of the channels_with_returns margin is a weaker in-arm baseline rather than a better model.",
+        "The independent text-parsing check (item 2) re-read all 15 ablation rows and confirmed each DM/p cell resolves to that ablation's own dm_vs_harl node."
+      ],
+      "must_fix": "none"
+    },
+    {
+      "item": 6,
+      "name": "Nan columns (stage-1 finding F4) — by design, and no conclusion rests on them",
+      "status": "PASS",
+      "evidence": [
+        "ROOT CAUSE IDENTIFIED, and it is milder than 'nan values in the artifact': the nans exist ONLY in run_full.log, as a fixed-width console formatting placeholder. Verified by key enumeration on the artifact — ablation arms carry models keys ['har','harl','lstm','transformer'] and refit_250 carries ['har','harl','lstm']. ar1/ridge_lags/transformer are ABSENT from the json entirely, not present-as-nan.",
+        "run_full.log:45-67 shows the log lines (e.g. 'AR1=nan RIDGE=nan') that stage 1 saw; the corresponding artifact nodes simply have no such key.",
+        "By design and documented: ablations._settings_note explains refit_250 uses 1 seed and drops the Transformer for compute-budget reasons.",
+        "NO CONCLUSION RESTS ON A NAN: section 8.5's table renders 'not run' (not a number and not 'nan') for refit_250's Transformer, and every ablation conclusion is drawn from har/harl/lstm only. The rendered prose states explicitly that these models are absent from the artifact and that no claim rests on them.",
+        "Primary and all 3 robustness arms carry the full 6-model set, so the headline and the robustness evidence are untouched by this."
+      ],
+      "must_fix": "none"
+    },
+    {
+      "item": 7,
+      "name": "Artifacts gate",
+      "status": "EXPECTED_BLOCK_ONLY",
+      "evidence": [
+        "Command: uv run python scripts/check_experiment_artifacts.py check --path experiments/k1814",
+        "Output (stderr): '[artifacts] BLOCKED — experiment(s) merged without their artifacts: experiments/k1814 - no entry in storage/memory/knowledge.json mentions k1814'.",
+        "That is the ONLY complaint. Re-run after all stage-2 edits: still exactly one complaint, the knowledge.json entry. No reproduce_spec, canonical-result, or input-hash complaint.",
+        "Per the brief and K1259 this is correct and NOT the agent's to fix — the main thread writes knowledge.json after PASS. The gate's own FIX text says 'MAIN THREAD ONLY'.",
+        "Reproducibility inputs independently re-verified beyond what the gate checks: all 5 cached inputs pinned in reproduce_spec.json hash-match the files on disk — {\"GSPC_daily.csv\": true, \"QQQ_daily.csv\": true, \"SPY_daily.csv\": true, \"intraday_probe.json\": true, \"proxy_validation_SPY.json\": true}."
+      ],
+      "must_fix": "carried to main thread as a merge condition (see conditions_on_merge)"
+    },
+    {
+      "item": 8,
+      "name": "Ruff — 21 findings, all pre-existing, none substantive",
+      "status": "PASS",
+      "evidence": [
+        "Counts confirmed identical before and after the honesty fix by running ruff on BOTH files. Working k1814.py: 21 findings. Archived gate_history/b1a67269__k1814.py (the pre-fix bytes): 21 findings. Rule histograms are byte-identical: RUF046 x7, C408 x5, BLE001 x4, PLR0402 x1, I001 x1, F401 x1, EXE001 x1, B023 x1.",
+        "The fix is therefore ruff-neutral, confirming stage 1's claim by direct measurement rather than by trusting it.",
+        "SUBSTANTIVE REVIEW OF THE 21: none affects correctness of the reported numbers. RUF046 (redundant int() around an already-int call), C408 (dict() instead of a literal), PLR0402/I001/F401/EXE001 are pure style/import hygiene. BLE001 x4 (blind 'except Exception') is the deliberate per-arm error containment that lets one failed robustness or ablation arm be recorded as {'error': ...} instead of killing the 6170s run — the errors are captured into the artifact, and in this run no arm errored. B023 (function defined in a loop uses a loop variable) is the only one worth a second look; it is in figure-plotting code, not in the estimation or inference path, and every figure rendered correctly.",
+        "One NEW file was added by this stage (render_readme_results.py); ruff on it: 'All checks passed!' (rc=0) after making the shebang'd file executable."
+      ],
+      "must_fix": "none — pre-existing style debt, explicitly not attributed to the fix"
+    }
+  ],
+  "artifact_hashes_verified": {
+    "method": "sha256 recomputed from bytes on disk at stage 2 and compared to k1814_stage1_landing.json.artifact_hashes",
+    "result": "10 of 11 stage-1-tracked artifacts match EXACTLY. The single mismatch is README.md, which is this stage's deliverable. Every result-bearing artifact (K1814_results.json, reproduce_spec.json, run_full.log, k1814.py, all 5 figures, gate_history/b1a67269__k1814.py) is byte-identical to stage 1 — no number moved under review.",
+    "n_tracked": 11,
+    "n_match": 10,
+    "mismatches": [
+      "README.md"
+    ],
+    "entrypoint_divergence": {
+      "status": "VERIFIED_INTENTIONAL_AND_NOW_DOCUMENTED",
+      "reproduce_spec_pins": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
+      "gate_history_blob_sha": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
+      "pin_matches_blob": true,
+      "working_k1814_sha": "d5b851a99cfcfda07962bc05f74a7268f38c233bdd7aaf475352ca1b91f0f212",
+      "diff_audited": "Ran diff gate_history/b1a67269__k1814.py k1814.py. The ENTIRE delta is 4 added lines (a pending_ablations list) and 1 changed line (checkpoint(f'ablation:{name}', []) -> checkpoint with the outstanding spec names). Nothing else differs. It cannot affect any estimate, loss, test statistic or verdict — it changes only what a future PARTIAL artifact reports about its own completeness.",
+      "actions_not_taken": "Did not repin reproduce_spec.json, did not re-run k1814.py, did not touch gate_history/ — all per the brief.",
+      "gap_closed_by_this_stage": "A reader following README section 10 would previously have hashed k1814.py, found it did not match the pin, and had no explanation. A new subsection 'Entrypoint hash: k1814.py no longer matches the pin, on purpose' now documents the divergence, points audits at the gate_history blob, and warns against repinning."
+    },
+    "reproduce_spec_input_hashes_match": {
+      "GSPC_daily.csv": true,
+      "QQQ_daily.csv": true,
+      "SPY_daily.csv": true,
+      "intraday_probe.json": true,
+      "proxy_validation_SPY.json": true
+    },
+    "files": [
+      {
+        "path": "K1814_results.json",
+        "sha256_observed_stage2": "73fa1562cfdf92b514212686f434970401a14149749fc764d1a8fb2f0c4637d7",
+        "size_bytes": 265512,
+        "sha256_stage1": "73fa1562cfdf92b514212686f434970401a14149749fc764d1a8fb2f0c4637d7",
+        "match": true,
+        "note": null
+      },
+      {
+        "path": "README.md",
+        "sha256_observed_stage2": "f46c1706c4ad37c734b541a96a565ecc02caad9b2aaccb3109fd62f6e5897bbf",
+        "size_bytes": 36245,
+        "sha256_stage1": "8cf0b74f6be85d913213cb6c4c4c15b91b83bb01b85d80cf4c99929a26876d22",
+        "match": false,
+        "note": "EXPECTED CHANGE — this stage's deliverable was to render README sections 7 and 8. No result-bearing artifact changed."
+      },
+      {
+        "path": "data/GSPC_daily.csv",
+        "sha256_observed_stage2": "921235759096695f3063a6cc4df38660867af297cd864bcedc25e3d003e81034",
+        "size_bytes": 1315480,
+        "sha256_stage1": null,
+        "match": "not_tracked_by_stage1"
+      },
+      {
+        "path": "data/QQQ_daily.csv",
+        "sha256_observed_stage2": "b1a6a4df4aea1965e63ac07c2edbcec236a958f082a54bb023fb677bc8f1ee53",
+        "size_bytes": 545281,
+        "sha256_stage1": null,
+        "match": "not_tracked_by_stage1"
+      },
+      {
+        "path": "data/SPY_daily.csv",
+        "sha256_observed_stage2": "ccac2c8635320df75cb97be836fffa162582616f2dd6bcfc37096f4ec1984498",
+        "size_bytes": 619159,
+        "sha256_stage1": null,
+        "match": "not_tracked_by_stage1"
+      },
+      {
+        "path": "data/intraday_probe.json",
+        "sha256_observed_stage2": "efe6bf436c2c60c9e963ab811a34c5c08e8fba1ce76a1844d4c25a9ca293b993",
+        "size_bytes": 1068,
+        "sha256_stage1": null,
+        "match": "not_tracked_by_stage1"
+      },
+      {
+        "path": "data/proxy_validation_SPY.json",
+        "sha256_observed_stage2": "feaed7a03e743c0360494397a3fb8f677923173264720f1fcb0a121b1b781091",
+        "size_bytes": 2070,
+        "sha256_stage1": null,
+        "match": "not_tracked_by_stage1"
+      },
+      {
+        "path": "fig1_longmemory_regimes.png",
+        "sha256_observed_stage2": "643bb9efe1d36122922c16a25a85d0dc461c06f77c5c3cc8e27053f1ebaccc57",
+        "size_bytes": 120875,
+        "sha256_stage1": "643bb9efe1d36122922c16a25a85d0dc461c06f77c5c3cc8e27053f1ebaccc57",
+        "match": true,
+        "note": null
+      },
+      {
+        "path": "fig2_qlike_by_horizon.png",
+        "sha256_observed_stage2": "06ab80d31b044016ef9c4d9a0e888f4385ce17146c8b8d7e645c710f7763346d",
+        "size_bytes": 46732,
+        "sha256_stage1": "06ab80d31b044016ef9c4d9a0e888f4385ce17146c8b8d7e645c710f7763346d",
+        "match": true,
+        "note": null
+      },
+      {
+        "path": "fig3_dm_statistics.png",
+        "sha256_observed_stage2": "37ede784b5c127f98b32ab7089a61bb6cec82341bd048fb3b57882e091b9c849",
+        "size_bytes": 32590,
+        "sha256_stage1": "37ede784b5c127f98b32ab7089a61bb6cec82341bd048fb3b57882e091b9c849",
+        "match": true,
+        "note": null
+      },
+      {
+        "path": "fig4_forecast_vs_actual.png",
+        "sha256_observed_stage2": "ee8c631fa0283578cff2780302da7f63e649198c55b5a7445f7fbeaac07b02e0",
+        "size_bytes": 230612,
+        "sha256_stage1": "ee8c631fa0283578cff2780302da7f63e649198c55b5a7445f7fbeaac07b02e0",
+        "match": true,
+        "note": null
+      },
+      {
+        "path": "fig5_proxy_validation.png",
+        "sha256_observed_stage2": "50698259bd7c7e494064396c12efeacc4aee9f7cfb3bfff8cc12f4ff861a99fa",
+        "size_bytes": 35601,
+        "sha256_stage1": "50698259bd7c7e494064396c12efeacc4aee9f7cfb3bfff8cc12f4ff861a99fa",
+        "match": true,
+        "note": null
+      },
+      {
+        "path": "gate_history/b1a67269__k1814.py",
+        "sha256_observed_stage2": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
+        "size_bytes": 66724,
+        "sha256_stage1": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
+        "match": true,
+        "note": null
+      },
+      {
+        "path": "gate_history/manifest.json",
+        "sha256_observed_stage2": "27d3f5ca21e2626ed0e02f649e83452dab43717f9a8152b9a4b03b1b1c17c808",
+        "size_bytes": 1043,
+        "sha256_stage1": null,
+        "match": "not_tracked_by_stage1"
+      },
+      {
+        "path": "k1814.py",
+        "sha256_observed_stage2": "d5b851a99cfcfda07962bc05f74a7268f38c233bdd7aaf475352ca1b91f0f212",
+        "size_bytes": 67086,
+        "sha256_stage1": "d5b851a99cfcfda07962bc05f74a7268f38c233bdd7aaf475352ca1b91f0f212",
+        "match": true,
+        "note": null
+      },
+      {
+        "path": "k1814_stage1_landing.json",
+        "sha256_observed_stage2": "14cdf1b093600f41a3aa58512ff197e79465f474adf8e55b924583da9836e020",
+        "size_bytes": 12712,
+        "sha256_stage1": null,
+        "match": "not_tracked_by_stage1"
+      },
+      {
+        "path": "render_readme_results.py",
+        "sha256_observed_stage2": "a28669029e79f0a3405be0c11957c15a95d8e7b5362c1f0d48079d91f878d4d0",
+        "size_bytes": 28865,
+        "sha256_stage1": null,
+        "match": "not_tracked_by_stage1"
+      },
+      {
+        "path": "reproduce_spec.json",
+        "sha256_observed_stage2": "74c68fc83d26c9151a880d9a45429e17aacae745edd37193974ff176eac94477",
+        "size_bytes": 3116,
+        "sha256_stage1": "74c68fc83d26c9151a880d9a45429e17aacae745edd37193974ff176eac94477",
+        "match": true,
+        "note": null
+      },
+      {
+        "path": "run_full.log",
+        "sha256_observed_stage2": "c83e54f5266f4799a2f37ae07903599bb05378dbfe37a5388f0c4f82f027162d",
+        "size_bytes": 7520,
+        "sha256_stage1": "c83e54f5266f4799a2f37ae07903599bb05378dbfe37a5388f0c4f82f027162d",
+        "match": true,
+        "note": null
+      }
+    ]
+  },
+  "readme_render": {
+    "blocking_item_closed": "F1 — sections 7 and 8 were literal unrendered '<!-- RESULTS:DESCRIPTIVE -->' and '<!-- RESULTS:MAIN -->' tokens. Both are now rendered.",
+    "how_numbers_were_sourced": "100% programmatic. render_readme_results.py (new, committed) loads K1814_results.json and emits both sections; no number is typed by hand, and in particular no number was taken from the dispatch brief, run_full.log or the stage-1 landing file. The brief's own orientation numbers were re-derived from the artifact and one discrepancy was found (see verdict_headline.correction_to_brief).",
+    "mechanical_gate_added": "render_readme_results.py --check re-renders and diffs, exiting non-zero on drift. This converts 'the README matches the artifact' from a claim into a runnable check, so the F1 class of defect (prose out of sync with artifact) cannot silently recur.",
+    "sections_rendered": {
+      "7_descriptive": [
+        "Sourced from primary.descriptive and primary.data.",
+        "Sample framing (n, span, floored count, usable panel rows) with an explicit restatement that these are proxy figures, not 5-minute RV.",
+        "Annualised volatility percentiles table (mean/sd/min/p1/p25/median/p75/p99/max).",
+        "Log-vs-level shape table (mean, sd, skew, excess kurtosis) plus the Jarque-Bera p, framed as the justification for modelling in logs.",
+        "ACF of log RV at lags 1..250 as the primary long-memory evidence.",
+        "GPH d with all three bandwidth-sensitivity values and Hurst R/S, carrying the artifact's own long_memory_caveat verbatim as a blockquote and stating the estimates are descriptive, not inferential."
+      ],
+      "8_results": [
+        "8.1 Headline — h*=None, dl_beats_both_baselines false at every horizon, and an explicit statement that the hypothesis is CONTRADICTED (not merely unsupported) because the h=22 DL model is significantly worse than HAR-L after BH-FDR.",
+        "8.2 Per-horizon table — the briefed columns: QLIKE for HAR, HAR-L, ridge control and best DL; DM vs BOTH baselines; raw p and BH-FDR q vs BOTH; n_oos; seed sd; and BOTH decisions. Adds effective_independent_obs, plus the AR(1)/ridge/HAR floor table.",
+        "8.3 FDR — states the family construction explicitly from fdr_families (two separate 6-test families, q=0.05, not pooled, named members) and renders BOTH families in full, all 6 tests each, with reject flags and directions.",
+        "8.4 Robustness — all 3 arms x 3 horizons as its own table, each against its own baselines, with the settings note quoted and an explicit warning that these p-values are raw, not FDR-adjusted.",
+        "8.5 Ablations — all 5 ablations x 3 horizons as its own table, each against its OWN har/harl, with the nan/'not run' situation explained.",
+        "8.6 What this closes and what it does not — bounds the claim to two architectures on a proxy and states the proxy noise tilts the design AGAINST the DL arm."
+      ]
+    },
+    "honesty_constraint_compliance": {
+      "required": "Report the NULL as-is; do not soften the h=22 sign; conclusions may not exceed evidence in EITHER direction.",
+      "how_met": [
+        "The h=22 negative is stated in the FIRST paragraph of 8.1, not buried in a table: the DL model is named 'significantly worse' than HAR-L with the DM statistic and q inline.",
+        "The phrase 'no significant difference' is NOT used as the headline. The headline says the hypothesis is contradicted and the DL deficit GROWS with the horizon.",
+        "All 5 FDR rejections are shown to point toward the baseline, with an explicit sentence that not one test in either family rejects in favour of DL.",
+        "Counter-evidence is NOT suppressed: the channels_with_returns ablation (the only place DL wins, significantly, at h=1 and h=5) is reported in full with its DM and p, with an explicit note that burying it would be selective reporting — and with the three specific reasons it does not carry the headline.",
+        "Evidence is weakened where honesty requires it: 8.2 flags that h=22's 13,176 OOS rows carry only 598.9 effectively independent observations, i.e. the row with the largest point gap is also the thinnest evidence. This argues AGAINST the strength of the paper's own strongest negative finding.",
+        "8.6 explicitly refuses the overclaim available here: it states the result bounds two architectures at these capacities on this proxy, and that the proxy's measurement noise plausibly penalises flexible models more than rigid ones — i.e. the design is tilted against DL, so the null must not be read as a general claim about deep learning."
+      ]
+    },
+    "other_readme_corrections": [
+      "Line 10 asserted 'Status: results section filled from K1814_results.json at run completion.' That was FALSE (README mtime predated the results json by 100 minutes, and the sections were empty). Replaced with an accurate status naming the renderer and the --check command.",
+      "Section 10 gained the entrypoint-sha-divergence subsection described above.",
+      "Section 11 files table: added render_readme_results.py and gate_history/; corrected the review_verdict.json row, which described it as a 'Codex second-review verdict' when this review was not performed by Codex."
+    ]
+  },
+  "residual_risks": [
+    {
+      "risk": "Process-end for detached pid 52501 is inferred, not a wait() receipt.",
+      "why_unverifiable": "The parent agent that would have reaped the process was itself killed by a 5279s timeout at 2026-07-29T21:30:24Z. No exit status was ever captured and it cannot be recovered now.",
+      "assessment": "Low. The inference is well-corroborated and I re-checked its basis: stages_completed ends with 'complete', run_full.log ends with the script's own normal-exit line, all three run outputs share mtime 2026-07-30T06:40:30, and all 8 declared arms are present and error-free with all 3 horizons. A truncated run could not have produced the terminal checkpoint.",
+      "carried_from": "stage 1"
+    },
+    {
+      "risk": "h=22 rests on few effectively independent observations (598.9 vs 13176 raw rows).",
+      "assessment": "Disclosed, not hidden — stated explicitly in the rendered 8.2. The HAC-corrected DM accounts for the overlap, and effective_independent_obs is a crude n/h proxy (code line 876) rather than a formal ESS, so it should be read as an order-of-magnitude caution. Note this cuts AGAINST the headline's strongest negative claim, which is why it is surfaced rather than omitted.",
+      "mitigation_in_artifact": "dm_hln_auto_lag / p_value_auto_lag with a data-driven bandwidth and loss_diff_acf1 are stored for every test, so the verdict does not hinge on the h-1 lag choice."
+    },
+    {
+      "risk": "Numbers were not reproduced by re-execution.",
+      "why": "The brief explicitly forbids re-running k1814.py, and the run costs 6170s. Every number was instead verified for INTERNAL consistency (artifact <-> README, 346 checks) and for METHODOLOGICAL soundness (code audit of the archived bytes). Verification is that the reported numbers faithfully reflect the artifact and that the code producing them is free of the audited defects — not that a fresh run would reproduce them bit-for-bit.",
+      "assessment": "Accepted per brief. Reproduction is well-supported for a future attempt: the entrypoint bytes are preserved and hash-pinned, and all 5 cached inputs hash-match the spec.",
+      "note": "yfinance is a live source; a future re-download could differ from the cached CSVs. The cached inputs in data/ are the reproducible path and they are hash-pinned."
+    },
+    {
+      "risk": "Non-determinism in the DL arms.",
+      "why": "fit_dl() sets torch.use_deterministic_algorithms(False) (line 408), so exact bit-reproduction of DL forecasts is not guaranteed even with fixed seeds.",
+      "assessment": "Low for the conclusion. The design pre-committed to 5 seeds and reports per-seed QLIKE and per-seed DM statistics, so the verdict does not rest on a single trajectory. The LSTM's seed sd is small (0.0036 at h=1). The Transformer's is NOT (0.2390 at h=1, per-seed range 0.4001-0.9749) — this is disclosed in the rendered 8.3 with the explicit observation that a single seed of that model could have supported almost any story."
+    },
+    {
+      "risk": "The channels_with_returns ablation could be over-read by a downstream reader as 'DL does win after all'.",
+      "assessment": "Mitigated in prose but worth flagging to the main thread for the knowledge.json entry. The rendered 8.5 gives the three reasons it does not carry the headline (uncorrected p outside the pre-registered families; n_seeds=2 vs 5; its own baselines degraded by refit_every=3000) and labels it a hypothesis for a future pre-registered test. The knowledge entry should record the NULL as the finding and this ablation only as a follow-up lead."
+    },
+    {
+      "risk": "Figures were not re-verified against the artifact.",
+      "why": "The 5 PNGs are byte-identical to stage 1, so they are the ones the run produced, but their pixel content was not machine-checked against K1814_results.json the way the README tables were. fig3 is titled 'DM-HLN statistics vs HAR by horizon', i.e. the vs-HAR family only; a reader looking only at fig3 would not see the vs-HAR-L family where the h=22 rejection lives.",
+      "assessment": "Low, and bounded: no claim in the rendered sections 7 or 8 is sourced from a figure — every number comes from the json. The README figure table labels fig3 accurately."
+    }
+  ],
+  "actions_taken_in_worktree": [
+    "Added experiments/k1814/render_readme_results.py (renders sections 7 and 8 from the artifact; --check gates against drift).",
+    "Rendered README sections 7 and 8; corrected the false status line; documented the entrypoint sha divergence in section 10; corrected and extended the section 11 files table.",
+    "Added this review_verdict.json.",
+    "Removed stray .ruff_cache/ and __pycache__/ generated during review."
+  ],
+  "boundaries_respected": {
+    "did_not_write_knowledge_json": true,
+    "did_not_run_merge_worktree_sh": true,
+    "did_not_rerun_k1814_py": true,
+    "did_not_repin_reproduce_spec": true,
+    "did_not_touch_gate_history": true,
+    "did_not_forward_brief_numbers": true
+  },
+  "unresolved": [
+    "storage/memory/knowledge.json entry for k1814 — MAIN THREAD ONLY per K1259. This is the sole remaining artifacts-gate complaint and the sole condition on merge.",
+    "Merge itself — bash scripts/merge_worktree.sh is reserved for the main thread per the brief."
+  ]
+}

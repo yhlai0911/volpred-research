@@ -256,11 +256,68 @@ def render_main(d: dict) -> str:
         f"evidence in the table despite having the largest point gap."
     )
     L.append("")
+
+    # ------------------------------------------------ lognormal-correction robustness
+    # Derived, never asserted. A hardcoded "the ranking is unchanged" sentence lives
+    # INSIDE this drift-gated block, so `--check` would certify it as matching the
+    # artifact while it was in fact false: the corrected and uncorrected variants
+    # disagree in 2 of the 6 best-DL-vs-baseline cells. What the headline actually
+    # needs is that no DM test or FDR decision moves -- every one is computed on the
+    # corrected losses -- not that every ordering is stable. So report both.
+    cells = []
+    for h in HORIZONS:
+        hh = prim["horizons"][h]
+        nc = hh["qlike_no_lognormal_correction"]
+        best = per[f"h{h}"]["best_dl_model"]
+        for bname, blabel, dmk, qk in (
+            ("har", "HAR-RV", "dm_hln_vs_har", "p_bh_fdr_vs_har"),
+            ("harl", "HAR-L", "dm_hln_vs_harl", "p_bh_fdr_vs_harl"),
+        ):
+            cb = hh["models"][bname]["qlike_ensemble"]
+            cd = hh["models"][best]["qlike_ensemble"]
+            ub, ud = nc[bname], nc[best]
+            cells.append({
+                "h": h, "best": best, "label": blabel,
+                "cb": cb, "cd": cd, "ub": ub, "ud": ud,
+                "dm": per[f"h{h}"][dmk], "q": per[f"h{h}"][qk],
+                "flipped": (cb < cd) != (ub < ud),
+            })
+    flips = [c for c in cells if c["flipped"]]
+    stable = [c for c in cells if not c["flipped"]]
     L.append(
-        "Neither conclusion depends on the lognormal level correction: "
-        "`qlike_no_lognormal_correction` reports the uncorrected `exp(m)` variant for every "
-        "cell, and the ranking is unchanged."
+        f"**The lognormal level correction, checked rather than asserted.** "
+        f"`qlike_no_lognormal_correction` reports the uncorrected `exp(m)` variant for every "
+        f"cell. Across the {len(cells)} best-DL-vs-baseline cells (3 horizons × 2 baselines), "
+        f"{len(stable)} keep the same ordering under both variants and {len(flips)} reverse it"
+        + (":" if flips else ".")
     )
+    if flips:
+        L.append("")
+        for c in flips:
+            cw = c["label"] if c["cb"] < c["cd"] else f"`{c['best']}`"
+            uw = c["label"] if c["ub"] < c["ud"] else f"`{c['best']}`"
+            L.append(
+                f"- **h = {c['h']} vs {c['label']}** — corrected: **{cw}** ahead "
+                f"({q(c['cb'])} vs {q(c['cd'])}, gap {abs(c['cb'] - c['cd']):.6f}). "
+                f"Uncorrected: **{uw}** ahead ({q(c['ub'])} vs {q(c['ud'])}, gap "
+                f"{abs(c['ub'] - c['ud']):.6f}). Under the correction this cell is a dead "
+                f"heat — DM = {c['dm']:.3f}, q = {pv(c['q'])}."
+            )
+        L.append("")
+        L.append(
+            f"Both reversals are short-horizon cells that the corrected variant already "
+            f"reports as statistically indistinguishable, so neither is a DL win under "
+            f"either variant. Every DM statistic, BH-FDR family and decision field in this "
+            f"experiment is computed on the **corrected** losses, so no reported test moves. "
+            f"The h = 22 cells that carry the headline keep both baselines ahead under both "
+            f"variants ("
+            + "; ".join(
+                f"{c['label']} {q(c['cb'])} vs {q(c['cd'])} corrected, "
+                f"{q(c['ub'])} vs {q(c['ud'])} uncorrected"
+                for c in cells if c["h"] == "22"
+            )
+            + ")."
+        )
     L.append("")
 
     # ---------------------------------------------------------------- ar1 floor
