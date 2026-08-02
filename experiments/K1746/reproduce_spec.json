@@ -1,0 +1,140 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1746.py",
+    "args": [],
+    "sha256": "c60c99944d837e099abdc362cde9b8ddf336e45926871168e4dc86cda01e425c",
+    "size_bytes": 41828
+  },
+  "canonical_result": "K1746_results.json",
+  "inputs": [
+    {
+      "path": "experiments/K1746/data/prices.csv",
+      "sha256": "4bd92dd20579489cca28326da1e6ef604f5d60175d6d3a23cf226cb226d8811d",
+      "size_bytes": 870759
+    }
+  ],
+  "outputs": [
+    "K1746_forecasts.csv.gz",
+    "K1746_inference_cells.json",
+    "K1746_results.json",
+    "K1746_score_comparison.svg",
+    "README.md",
+    "data_diagnostics.json",
+    "references.json",
+    "reproduce_commit.json",
+    "source_manifest.json"
+  ],
+  "timeout_seconds": 149,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "bootstrap",
+        "value": 42
+      },
+      {
+        "library": "MCS",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 29.852,
+    "recorded_at": "2026-08-02T07:22:51Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "bootstrap",
+        "value": 42
+      },
+      {
+        "library": "MCS",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/artifact_generation/generation_id",
+      "/created_at",
+      "/run_utc",
+      "/runtime_env",
+      "/runtime_seconds"
+    ],
+    "ignore_reasons": {
+      "/artifact_generation/generation_id": "The generation receipt intentionally incorporates the ignored execution timestamp; output identities and every scientific scalar remain compared separately.",
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1746_results.json",
+    "sha256": "8fe8aa69ba46a1a41e512282749fc68ccb3d5a2ca240cbe50c162b6f8f47dd7e",
+    "size_bytes": 32955
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "3326dfd5964ba4fd6b66cc596d6d1a73197611c72779d275bec07dc804b50987",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": [
+      {
+        "path": "K1746_forecasts.csv.gz",
+        "sha256": "b24f8998e7a447cf68c0058e6c2520404e989b1663ccd8389fad8d028044e6c0",
+        "size_bytes": 3720846
+      },
+      {
+        "path": "K1746_inference_cells.json",
+        "sha256": "8eb33b074b0c1c41bc6bd99a39b9f28a2c3571033115f298631a6c79e80abba9",
+        "size_bytes": 19432
+      },
+      {
+        "path": "K1746_score_comparison.svg",
+        "sha256": "3e5391e2afa93aebebe3007f46b09ab078a8027797067c602c1397a2eb615504",
+        "size_bytes": 1397
+      },
+      {
+        "path": "README.md",
+        "sha256": "2e1c7533fc2a42fab5722be8e2295f834d1f01cc9b6eb884f214066d9b1122ec",
+        "size_bytes": 5644
+      },
+      {
+        "path": "data_diagnostics.json",
+        "sha256": "f6674cf2628a9275dd06593aed7c4b823814c769dd831ba89ec822d47d2cdaa0",
+        "size_bytes": 3290
+      },
+      {
+        "path": "references.json",
+        "sha256": "ef86ad30c68cf5b6d579f824549b4e7907de5f6fa3dc670f48579aee3ff697ae",
+        "size_bytes": 2565
+      },
+      {
+        "path": "source_manifest.json",
+        "sha256": "0b0440773c21938eff53dd0320801cdfe234bfc9d542af2de0bc0388aa3d6899",
+        "size_bytes": 1020
+      }
+    ]
+  }
+}
