@@ -43120,5 +43120,19 @@
   "outcome_rows": 0,
   "prior_job_classification": "ZERO_SALVAGE",
   "created_at": "2026-08-02T03:42:01.630447+00:00"
+ },
+ {
+  "item_id": "e1874ec2",
+  "category": "research_finding",
+  "content": "[K1746 收件 PASS；科學結論=NULL_NO_MULTIPLICITY_AWARE_DIRECTIONAL_SUPERIORITY] Equal-weight SPY/TLT/GLD/HYG/QQQ，common adjusted-price sample 2007-04-11–2026-07-27，identical OOS origins n=4095。Bottom-up dependence-aware FHS 對 top-down FHS 的 FZ0 差（bottom-minus-top；負值偏 bottom-up）在 alpha=1% 為 -0.04817196，Holm p=0.191904；alpha=5% 為 -0.00843363，Holm p=0.453273，兩者皆未達 multiplicity-aware gate。90% pairwise MCS included sets：1%=['bottom_up']（p=0.095952），5%=['bottom_up', 'top_down']（p=0.453273）。Global-Holm calibration rejection counts={'bottom_up': 2, 'top_down': 4, 'naive_marginal_sum': 9}；這些 rejection counts 不能單獨當排名。結論僅為沒有 multiplicity-aware directional superiority；不可把未拒絕校準檢定解讀為優越。限制含 current-vintage yfinance、有限 FHS tail support、1% 尾端事件稀少、weekly sensitivity 未含成本，以及兩候選 MCS。先前 Claude quota receipt 維持 ZERO_SALVAGE，與本次科學 NULL 不同。",
+  "evidence": [
+   "experiment_id: K1746",
+   "experiments/K1746/K1746_results.json (sha256=8fe8aa69ba46a1a41e512282749fc68ccb3d5a2ca240cbe50c162b6f8f47dd7e)",
+   "experiments/K1746/review_verdict.json (PASS; sha256=1b73110d6aeeac86a1701b8b317dd2ebf2a78011c85a76a57688eeb573cd7acc; blocking_defects=[])",
+   "experiments/K1746/reproduce_spec.json (network=deny; seed=42)",
+   "independent fresh-context Codex audit; 11 tests, Ruff, integrity gates, and deterministic scalar read-back passed"
+  ],
+  "confidence": 0.9,
+  "created_at": "2026-08-02T15:27:20.027004"
  }
 ]

@@ -5,12 +5,12 @@
   "interpreter": "bash /Users/yhlai0911/volpred-research/scripts/codex_exec_bounded.sh --timeout 10680 -C /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-2b0f34d8-k1746 -s danger-full-access --dangerously-bypass-hook-trust",
   "args": [],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-08-02T06:20:22Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-08-02T06:30:36Z",
+  "completed_at": "2026-08-02T06:54:41Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-k1746-var-es-2b0f34d8.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-k1746-var-es-2b0f34d8.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-2b0f34d8-k1746/experiments/K1746/K1746_results.json",
@@ -24,7 +24,7 @@
     "task_type": "platform_ops",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1746",
   "source_task_link": {
     "state": "linked",
@@ -34,5 +34,25 @@
   },
   "timeout_seconds": 10800,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 52266,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:a5411fae46f6bc168d9fa75c",
+    "scheduled_for": "2026-08-02T06:30:00Z"
+  },
+  "claimed_by_pid_start_wall": "Sun Aug  2 14:30:35 2026",
+  "source_task_settlement": {
+    "task_id": "K1746",
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-08-02T07:29:15Z"
+  },
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-2b0f34d8-k1746/experiments/K1746"
+  },
+  "followup_dispatched_at": "2026-08-02T07:29:15Z",
+  "followup_next_task_id": "K1746"
 }

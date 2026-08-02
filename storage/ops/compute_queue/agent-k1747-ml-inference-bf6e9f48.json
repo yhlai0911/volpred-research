@@ -20,12 +20,12 @@
     "10680"
   ],
   "env": {},
-  "status": "queued",
+  "status": "failed",
   "queue_priority": 5,
   "queued_at": "2026-08-01T19:18:14Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-08-02T06:54:42Z",
+  "completed_at": "2026-08-02T06:54:50Z",
+  "exit_code": 1,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1747-ml-inference-bf6e9f48.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1747-ml-inference-bf6e9f48.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bf6e9f48-k1747/experiments/K1747/K1747_results.json",
@@ -39,7 +39,7 @@
     "task_type": "experiment",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1747",
   "source_task_link": {
     "state": "linked",
@@ -50,19 +50,19 @@
   "timeout_seconds": 10800,
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1747-ml-inference-bf6e9f48.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1747-ml-inference-bf6e9f48.md",
-  "claimed_by_pid": 67204,
+  "claimed_by_pid": 52266,
   "schedule_dispatch": {
     "owner": "operations_core",
     "job_id": "volpred-compute-worker",
-    "fire_key": "operations-core-v1:volpred-compute-worker:7c3b083c4501c2fe6079ae33",
-    "scheduled_for": "2026-08-02T05:45:00Z"
+    "fire_key": "operations-core-v1:volpred-compute-worker:a5411fae46f6bc168d9fa75c",
+    "scheduled_for": "2026-08-02T06:30:00Z"
   },
-  "claimed_by_pid_start_wall": "Sun Aug  2 13:45:40 2026",
+  "claimed_by_pid_start_wall": "Sun Aug  2 14:30:35 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "K1747",
-    "settled_at": "2026-08-02T06:03:54Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-08-02T07:12:52Z"
   },
   "quota_requeues": 16,
   "requeue_history": [
@@ -181,5 +181,7 @@
   ],
   "not_before": "2026-08-02T06:33:54.757675+00:00",
   "attempt_status": "quota_exhausted",
-  "quota_reset_at": null
+  "quota_reset_at": null,
+  "followup_dispatched_at": "2026-08-02T07:12:52Z",
+  "followup_next_task_id": "triage_K1747_zero_output_20260802"
 }

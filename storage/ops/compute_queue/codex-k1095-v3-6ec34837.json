@@ -1,0 +1,38 @@
+{
+  "id": "codex-k1095-v3-6ec34837",
+  "title": "K1095 v3 four-defect remediation Codex",
+  "script_path": "Read and execute the full K1095 v3 remediation brief at /Users/yhlai0911/volpred-research/storage/ops/agent_briefs/codex-k1095-v3-6ec34837.md. Follow it exactly, preserve K1095-v2 as failed history, create and commit only experiments/k1095_v3 in the registered worktree, and report an honest receipt.",
+  "interpreter": "bash /Users/yhlai0911/volpred-research/scripts/codex_exec_bounded.sh --timeout 10680 -C /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-6ec34837-k1095v3 -s danger-full-access --dangerously-bypass-hook-trust",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-02T07:34:32Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-k1095-v3-6ec34837.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-k1095-v3-6ec34837.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-6ec34837-k1095v3/experiments/k1095_v3/k1095_v3_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Collect codex-k1095-v3-6ec34837 from the registered worktree dispatch-slot-1-6ec34837-k1095v3. Preserve K1095-v2 and its FAIL review unchanged. Treat failed, zero-output, stale, or contract-mismatched artifacts as failure, never success. Verify all four blocking remediations independently: exactly one decision/execution timing lag with weekday, weekend, holiday and direct-mask tests; point-in-time statutory schedule and frozen primary-source evidence including pre-2013 consolidated annual 45-day regime, FSC GL000593 FY2022-plus TWD10bn 75-day annual rule, FSC GL000473 financial six-month two-month rule and Q1/Q3 45-day plus 60-day correction, Q2 August 31 where applicable, and 2010-06-02 provenance; paired dependence-aware block-bootstrap Sharpe differences with seed 42 and explicit multiplicity family/control; and event-level, strictly OOS, actual-traded-mask capture with reconciled counts. Verify historical capital classification or honest narrowing/blocking, no lookahead, common return alignment, grid definition, claims, README numbers, reproduce_spec identity, focused tests, Ruff, experiment gates, and artifact gates. Commission an independent fresh-context review outside the worktree and pin review_verdict.json with exact artifact hashes. Only after PASS, add main-thread knowledge that explicitly supersedes know_20260413013008_k1095, settle the canonical task honestly including valid NULL or blocked outcomes, and integrate solely through bash scripts/merge_worktree.sh dispatch-slot-1-6ec34837-k1095v3.",
+    "task_type": "platform_ops",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "k1095_v3_remediation",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-02T07:34:32Z",
+    "linked_at": "2026-08-02T07:34:33Z",
+    "error": null
+  },
+  "timeout_seconds": 10800,
+  "brief_source": null,
+  "brief_snapshot": null
+}
