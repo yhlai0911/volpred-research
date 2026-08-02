@@ -2304,7 +2304,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-02T06:27:03.905147+00:00"
+     "last_seen_at": "2026-08-02T07:37:50.147805+00:00"
     },
     {
      "cleared_at": null,
@@ -2422,9 +2422,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-02T06:27:03.905147+00:00",
+   "last_seen_at": "2026-08-02T07:37:50.147805+00:00",
    "notified_at": null,
-   "occurrence_count": 8405,
+   "occurrence_count": 8446,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2700,6 +2700,62 @@
      "episode": 1,
      "opened_at": "2026-07-28T13:20:33.751584+00:00",
      "task_id": "ci-red-30361505394"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
+  "inc_9b9e4ef75bbe": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
+   "control_gate_id": null,
+   "current_task_id": "ci-red-30736983439",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-08-02T07:20:44.976813+00:00",
+   "escalation": null,
+   "fingerprint": "9b9e4ef75bbeb1813020d6cb4c5e78776e9d02dfd0ac63db1b853a64ec4e78f6",
+   "fingerprint_parts": [
+    "ci-red-30736983439"
+   ],
+   "first_seen_at": "2026-08-02T07:20:44.976813+00:00",
+   "incident_id": "inc_9b9e4ef75bbe",
+   "instance_transition_baselined_at": "2026-08-02T07:20:44.976813+00:00",
+   "instance_transition_tracking": true,
+   "instance_transitions": [
+    {
+     "at": "2026-08-02T07:20:44.976813+00:00",
+     "instance_key": "30736983439:1",
+     "transition": "opened"
+    }
+   ],
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-02T07:20:44.976813+00:00",
+     "key": "30736983439:1",
+     "last_seen_at": "2026-08-02T07:20:44.976813+00:00"
+    }
+   ],
+   "is_control_intervention": false,
+   "kind": "ci_red",
+   "last_breach_detail": "2026-08-02T07:18:16.8628649Z E AssertionError: unclassified scheduled process(es): ['graphify_maintain']",
+   "last_seen_at": "2026-08-02T07:20:44.976813+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-08-02T07:20:45.235111+00:00",
+     "task_id": "ci-red-30736983439"
     }
    ],
    "task_mode": "external",
@@ -3774,6 +3830,6 @@
    }
   }
  },
- "updated_at": "2026-08-02T06:27:03.961863+00:00",
+ "updated_at": "2026-08-02T07:37:50.181576+00:00",
  "version": 1
 }

@@ -768,5 +768,164 @@
         }
       ]
     }
+  },
+  "top_category_drilldown": {
+    "top_n": 2,
+    "top_categories": [
+      {
+        "category": "unclassified",
+        "description": "未分類 provider telemetry",
+        "messages": 8463,
+        "billable_total": 38766176,
+        "share_pct": 89.7,
+        "attribution_note": "Codex token_count has no authoritative task metadata; task category not inferred.",
+        "by_provider": [
+          {
+            "name": "codex",
+            "messages": 8463,
+            "billable_total": 38766176
+          }
+        ],
+        "by_model": [
+          {
+            "name": "gpt-5.6-sol",
+            "messages": 8422,
+            "billable_total": 38592246
+          },
+          {
+            "name": "gpt-5.4-mini",
+            "messages": 41,
+            "billable_total": 173930
+          }
+        ],
+        "by_session": [
+          {
+            "name": "codex/019f8e4d-ca99-73e2-a3d0-a7aa7a8cac5f",
+            "messages": 4963,
+            "billable_total": 20048403
+          },
+          {
+            "name": "codex/019fbd3d-de61-7a71-a7e4-90f2c7659505",
+            "messages": 351,
+            "billable_total": 2918835
+          },
+          {
+            "name": "codex/019fbd3d-9fa3-7ee2-9b74-13247cd314ac",
+            "messages": 335,
+            "billable_total": 2218185
+          },
+          {
+            "name": "codex/019fbb9c-2a0e-7881-896a-b1d44b010c5b",
+            "messages": 270,
+            "billable_total": 994667
+          },
+          {
+            "name": "codex/019fbb9c-0439-7d22-8539-b4d66d20752b",
+            "messages": 248,
+            "billable_total": 953678
+          },
+          {
+            "name": "codex/019fbcf7-342a-7b83-9b72-b20f53781c8f",
+            "messages": 183,
+            "billable_total": 929847
+          }
+        ],
+        "detail": {
+          "bash_family": [],
+          "text_reason": []
+        },
+        "detail_note": ""
+      },
+      {
+        "category": "bash_other",
+        "description": "其他 Bash 操作",
+        "messages": 757,
+        "billable_total": 2419964,
+        "share_pct": 5.6,
+        "attribution_note": "Category derived from recorded tool/content classification.",
+        "by_provider": [
+          {
+            "name": "claude",
+            "messages": 757,
+            "billable_total": 2419964
+          }
+        ],
+        "by_model": [
+          {
+            "name": "claude-opus-5",
+            "messages": 757,
+            "billable_total": 2419964
+          }
+        ],
+        "by_session": [
+          {
+            "name": "6a0bff89-3338-4765-bb28-65e9f7b9d05d",
+            "messages": 65,
+            "billable_total": 298666
+          },
+          {
+            "name": "4d3b7a60-96a3-4acf-99de-4cf6af7cd3e0",
+            "messages": 52,
+            "billable_total": 164463
+          },
+          {
+            "name": "f832aa66-da8f-4b6f-b51b-06bbd1ac45d1",
+            "messages": 46,
+            "billable_total": 157927
+          },
+          {
+            "name": "2e0e8a4b-de58-4676-9130-78908222ffd0",
+            "messages": 38,
+            "billable_total": 152862
+          },
+          {
+            "name": "8fcd4702-427e-424d-a609-89de80c28ca3",
+            "messages": 67,
+            "billable_total": 150521
+          },
+          {
+            "name": "2af5f32c-4523-4966-8d50-94a31224d867",
+            "messages": 56,
+            "billable_total": 137781
+          }
+        ],
+        "detail": {
+          "bash_family": [
+            {
+              "name": "other bash",
+              "messages": 413,
+              "billable_total": 1109502
+            },
+            {
+              "name": "repo navigation",
+              "messages": 160,
+              "billable_total": 528570
+            },
+            {
+              "name": "inline parsing/json inspection",
+              "messages": 148,
+              "billable_total": 351016
+            },
+            {
+              "name": "log tailing",
+              "messages": 63,
+              "billable_total": 199255
+            },
+            {
+              "name": "shell glue",
+              "messages": 17,
+              "billable_total": 190738
+            },
+            {
+              "name": "scheduler/cron inspection",
+              "messages": 10,
+              "billable_total": 19040
+            }
+          ],
+          "text_reason": []
+        },
+        "detail_note": "Bash family messages are evidence counts and may overlap; billable tokens are mechanically allocated across distinct families."
+      }
+    ]
   }
 }
