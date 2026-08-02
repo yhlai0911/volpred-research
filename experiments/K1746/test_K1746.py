@@ -102,3 +102,18 @@ def test_runtime_artifacts_are_byte_traceable_and_consistent() -> None:
 def test_frozen_source_hash() -> None:
     path = HERE / "data" / "prices.csv"
     assert hashlib.sha256(path.read_bytes()).hexdigest() == k.UPSTREAM["sha256"]
+
+
+def test_source_manifest_is_stable_provenance() -> None:
+    first = k.source_manifest()
+    second = k.source_manifest()
+    assert first == second
+    assert first["copied_for_k1746_at_utc"] == k.SOURCE_COPIED_AT_UTC
+    assert first["local_sha256"] == k.UPSTREAM["sha256"]
+    assert k.UPSTREAM["retrieved_at_utc"] == "2026-07-27T19:36:36.183381+00:00"
+
+
+def test_wang_wang_claim_does_not_overstate_portfolio_aggregation() -> None:
+    claim = k.REFERENCES[0]["verified_claim"]
+    assert "does not study portfolio-constituent" in claim
+    assert "terminological inspiration" in claim

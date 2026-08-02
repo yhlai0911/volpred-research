@@ -53,9 +53,12 @@ UPSTREAM = {
     "path": "experiments/K1727/data/prices.csv",
     "git_commit": "1d9348c7e914fa93faf5846515dd828cdd14a18b",
     "git_authored_at": "2026-07-28T12:13:11+08:00",
+    "retrieved_at_utc": "2026-07-27T19:36:36.183381+00:00",
+    "retrieval_evidence": "experiments/K1727/K1727_results.json#/run_timestamp",
     "sha256": "4bd92dd20579489cca28326da1e6ef604f5d60175d6d3a23cf226cb226d8811d",
     "policy": "yfinance download(start=2003-01-01, auto_adjust=True); adjusted Close",
 }
+SOURCE_COPIED_AT_UTC = "2026-08-02T06:46:33.872387+00:00"
 
 REFERENCES = [
     {
@@ -63,7 +66,7 @@ REFERENCES = [
         "citation": "Jie Wang and Yongqiao Wang (2025), Forecasting Expected Shortfall and Value-at-Risk With Cross-Sectional Aggregation, Journal of Forecasting 44(2), 391-423.",
         "doi": "10.1002/for.3195",
         "url": "https://doi.org/10.1002/for.3195",
-        "verified_claim": "Directly motivates comparing cross-sectional aggregation with direct tail-risk forecasts; metadata and DOI verified on the publisher/index pages.",
+        "verified_claim": "Studies cross-sectional aggregation of short-memory processes as a route to long memory inside a CAViaR-FZ VaR/ES model. It does not study portfolio-constituent bottom-up versus portfolio-level top-down aggregation; K1746 uses it only as VaR/ES aggregation background and terminological inspiration.",
         "accessed_at_utc": "2026-08-02T06:44:39Z",
     },
     {
@@ -120,6 +123,19 @@ def finite(value: Any) -> Any:
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def source_manifest() -> dict[str, Any]:
+    """Return stable provenance for the frozen, byte-identical source copy."""
+    return {
+        "source": "frozen yfinance adjusted-close cache inherited byte-for-byte from committed K1727 artifact",
+        "local_path": "experiments/K1746/data/prices.csv",
+        "local_sha256": sha256(PRICE_PATH),
+        "local_size_bytes": PRICE_PATH.stat().st_size,
+        "upstream": UPSTREAM,
+        "copied_for_k1746_at_utc": SOURCE_COPIED_AT_UTC,
+        "retrieval_as_of_policy": "No network retrieval in K1746; the upstream K1727 run timestamp records acquisition time and the pinned commit/hash establish immutable source identity.",
+    }
 
 
 def load_data() -> tuple[pd.DataFrame, dict[str, Any]]:
@@ -622,13 +638,7 @@ def main() -> None:
     }
     sensitivity = sensitivity_summary(forecasts)
     verdict = derive_verdict(cells, score, sensitivity)
-    manifest = {
-        "source": "frozen yfinance adjusted-close cache inherited byte-for-byte from committed K1727 artifact",
-        "local_path": "experiments/K1746/data/prices.csv",
-        "local_sha256": sha256(PRICE_PATH), "local_size_bytes": PRICE_PATH.stat().st_size,
-        "upstream": UPSTREAM, "copied_for_k1746_at_utc": datetime.now(UTC).isoformat(),
-        "retrieval_as_of_policy": "No network retrieval in K1746; upstream commit timestamp is the latest independently evidenced acquisition bound.",
-    }
+    manifest = source_manifest()
     if manifest["local_sha256"] != UPSTREAM["sha256"]:
         raise AssertionError("frozen price cache hash differs from upstream")
     forecasts.to_csv(FORECAST_PATH, index=False, compression={"method": "gzip", "mtime": 0})
@@ -683,6 +693,22 @@ def main() -> None:
         inputs=[PRICE_PATH], outputs=outputs,
         seeds=[("numpy", SEED), ("bootstrap", SEED), ("MCS", SEED)],
         started_at=started, network="deny",
+        comparison={
+            "ignore_pointers": [
+                "/artifact_generation/generation_id",
+                "/created_at",
+                "/run_utc",
+                "/runtime_env",
+                "/runtime_seconds",
+            ],
+            "ignore_reasons": {
+                "/artifact_generation/generation_id": "The generation receipt intentionally incorporates the ignored execution timestamp; output identities and every scientific scalar remain compared separately.",
+                "/created_at": "Execution timestamp; written after every scientific value is computed.",
+                "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+                "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction.",
+                "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+            },
+        },
     )
     print(json.dumps({"grade": verdict["grade"], "result": str(RESULT_PATH), "result_sha256": sha256(RESULT_PATH), "oos_count": next(iter(cells.values()))["oos_count"]}, indent=2))
 

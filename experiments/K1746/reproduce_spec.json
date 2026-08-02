@@ -5,8 +5,8 @@
   "entrypoint": {
     "path": "K1746.py",
     "args": [],
-    "sha256": "fcafcd6904c6575838736e92c00ae75ff8d3933ee0991e20341add8c37b1b080",
-    "size_bytes": 40319
+    "sha256": "c60c99944d837e099abdc362cde9b8ddf336e45926871168e4dc86cda01e425c",
+    "size_bytes": 41828
   },
   "canonical_result": "K1746_results.json",
   "inputs": [
@@ -27,7 +27,7 @@
     "reproduce_commit.json",
     "source_manifest.json"
   ],
-  "timeout_seconds": 234,
+  "timeout_seconds": 149,
   "network": "deny",
   "randomness": {
     "status": "declared",
@@ -47,8 +47,8 @@
     ]
   },
   "runtime": {
-    "runtime_seconds": 58.112,
-    "recorded_at": "2026-08-02T06:46:36Z"
+    "runtime_seconds": 29.852,
+    "recorded_at": "2026-08-02T07:22:51Z"
   },
   "environment": {
     "python": "3.12.10",
@@ -76,26 +76,28 @@
     "rtol": 1e-09,
     "atol": 1e-12,
     "ignore_pointers": [
+      "/artifact_generation/generation_id",
       "/created_at",
-      "/runtime_seconds",
       "/run_utc",
-      "/runtime_env"
+      "/runtime_env",
+      "/runtime_seconds"
     ],
     "ignore_reasons": {
+      "/artifact_generation/generation_id": "The generation receipt intentionally incorporates the ignored execution timestamp; output identities and every scientific scalar remain compared separately.",
       "/created_at": "Execution timestamp; written after every scientific value is computed.",
-      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
       "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
-      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict."
     }
   },
   "canonical_result_identity": {
     "path": "K1746_results.json",
-    "sha256": "2d160bb7d643f0461676649782667ac9895337b9fc46e0ed1050c3b668d393b4",
-    "size_bytes": 32612
+    "sha256": "8fe8aa69ba46a1a41e512282749fc68ccb3d5a2ca240cbe50c162b6f8f47dd7e",
+    "size_bytes": 32955
   },
   "artifact_generation": {
     "schema_version": "volpred.reproduce_commit.v1",
-    "generation_id": "3e0fc0158a6be3f53482cd11d6f2307dbb0c735e161c170c5cf4bcf0fcccaef6",
+    "generation_id": "3326dfd5964ba4fd6b66cc596d6d1a73197611c72779d275bec07dc804b50987",
     "commit_file": "reproduce_commit.json",
     "output_identities": [
       {
@@ -125,13 +127,13 @@
       },
       {
         "path": "references.json",
-        "sha256": "b32eb8635ca8c07cfcfb714dc2a67123b4f08e1651d18aed83e963265c7ca5fb",
-        "size_bytes": 2411
+        "sha256": "ef86ad30c68cf5b6d579f824549b4e7907de5f6fa3dc670f48579aee3ff697ae",
+        "size_bytes": 2565
       },
       {
         "path": "source_manifest.json",
-        "sha256": "7f0905bc39bfb7aaa8f2e49f6911a0e7dd8080a9e85a0faaf752e2da899a972c",
-        "size_bytes": 840
+        "sha256": "0b0440773c21938eff53dd0320801cdfe234bfc9d542af2de0bc0388aa3d6899",
+        "size_bytes": 1020
       }
     ]
   }

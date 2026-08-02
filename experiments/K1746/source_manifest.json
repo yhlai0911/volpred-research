@@ -7,9 +7,11 @@
     "path": "experiments/K1727/data/prices.csv",
     "git_commit": "1d9348c7e914fa93faf5846515dd828cdd14a18b",
     "git_authored_at": "2026-07-28T12:13:11+08:00",
+    "retrieved_at_utc": "2026-07-27T19:36:36.183381+00:00",
+    "retrieval_evidence": "experiments/K1727/K1727_results.json#/run_timestamp",
     "sha256": "4bd92dd20579489cca28326da1e6ef604f5d60175d6d3a23cf226cb226d8811d",
     "policy": "yfinance download(start=2003-01-01, auto_adjust=True); adjusted Close"
   },
   "copied_for_k1746_at_utc": "2026-08-02T06:46:33.872387+00:00",
-  "retrieval_as_of_policy": "No network retrieval in K1746; upstream commit timestamp is the latest independently evidenced acquisition bound."
+  "retrieval_as_of_policy": "No network retrieval in K1746; the upstream K1727 run timestamp records acquisition time and the pinned commit/hash establish immutable source identity."
 }

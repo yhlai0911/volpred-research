@@ -123,11 +123,13 @@
         "path": "experiments/K1727/data/prices.csv",
         "git_commit": "1d9348c7e914fa93faf5846515dd828cdd14a18b",
         "git_authored_at": "2026-07-28T12:13:11+08:00",
+        "retrieved_at_utc": "2026-07-27T19:36:36.183381+00:00",
+        "retrieval_evidence": "experiments/K1727/K1727_results.json#/run_timestamp",
         "sha256": "4bd92dd20579489cca28326da1e6ef604f5d60175d6d3a23cf226cb226d8811d",
         "policy": "yfinance download(start=2003-01-01, auto_adjust=True); adjusted Close"
       },
       "copied_for_k1746_at_utc": "2026-08-02T06:46:33.872387+00:00",
-      "retrieval_as_of_policy": "No network retrieval in K1746; upstream commit timestamp is the latest independently evidenced acquisition bound."
+      "retrieval_as_of_policy": "No network retrieval in K1746; the upstream K1727 run timestamp records acquisition time and the pinned commit/hash establish immutable source identity."
     }
   },
   "portfolio": {
@@ -790,7 +792,7 @@
       "citation": "Jie Wang and Yongqiao Wang (2025), Forecasting Expected Shortfall and Value-at-Risk With Cross-Sectional Aggregation, Journal of Forecasting 44(2), 391-423.",
       "doi": "10.1002/for.3195",
       "url": "https://doi.org/10.1002/for.3195",
-      "verified_claim": "Directly motivates comparing cross-sectional aggregation with direct tail-risk forecasts; metadata and DOI verified on the publisher/index pages.",
+      "verified_claim": "Studies cross-sectional aggregation of short-memory processes as a route to long memory inside a CAViaR-FZ VaR/ES model. It does not study portfolio-constituent bottom-up versus portfolio-level top-down aggregation; K1746 uses it only as VaR/ES aggregation background and terminological inspiration.",
       "accessed_at_utc": "2026-08-02T06:44:39Z"
     },
     {
@@ -826,15 +828,15 @@
       "accessed_at_utc": "2026-08-02T06:44:39Z"
     }
   ],
-  "run_utc": "2026-08-02T06:46:36.189151+00:00",
+  "run_utc": "2026-08-02T07:22:51.514583+00:00",
   "code_trace": {
     "path": "experiments/K1746/K1746.py",
-    "sha256": "fcafcd6904c6575838736e92c00ae75ff8d3933ee0991e20341add8c37b1b080",
-    "size_bytes": 40319
+    "sha256": "c60c99944d837e099abdc362cde9b8ddf336e45926871168e4dc86cda01e425c",
+    "size_bytes": 41828
   },
   "artifact_generation": {
     "schema_version": "volpred.reproduce_commit.v1",
-    "generation_id": "3e0fc0158a6be3f53482cd11d6f2307dbb0c735e161c170c5cf4bcf0fcccaef6",
+    "generation_id": "3326dfd5964ba4fd6b66cc596d6d1a73197611c72779d275bec07dc804b50987",
     "output_identities": [
       {
         "path": "K1746_forecasts.csv.gz",
@@ -863,17 +865,17 @@
       },
       {
         "path": "references.json",
-        "sha256": "b32eb8635ca8c07cfcfb714dc2a67123b4f08e1651d18aed83e963265c7ca5fb",
-        "size_bytes": 2411
+        "sha256": "ef86ad30c68cf5b6d579f824549b4e7907de5f6fa3dc670f48579aee3ff697ae",
+        "size_bytes": 2565
       },
       {
         "path": "source_manifest.json",
-        "sha256": "7f0905bc39bfb7aaa8f2e49f6911a0e7dd8080a9e85a0faaf752e2da899a972c",
-        "size_bytes": 840
+        "sha256": "0b0440773c21938eff53dd0320801cdfe234bfc9d542af2de0bc0388aa3d6899",
+        "size_bytes": 1020
       }
     ]
   },
-  "runtime_seconds": 58.112,
+  "runtime_seconds": 29.852,
   "runtime_env": {
     "python": "3.12.10",
     "implementation": "CPython",
