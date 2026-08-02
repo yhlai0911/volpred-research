@@ -17,8 +17,8 @@ class SupabaseIncidentOwnerStore(SupabaseOwnerAttestationStore):
     contract = OwnerAttestationContract(
         schema_version="incident-owner-attestation.v1",
         capability="incident.lifecycle",
-        owner="legacy",
-        generation=1,
+        allowed_owners=frozenset({"legacy", "operations_core"}),
+        minimum_generation=1,
         contract_ref="contract://issue-13/durable-incident-owner",
         rpc_name="volpred_read_incident_owner",
         label="Incident owner",

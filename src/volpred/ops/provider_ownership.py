@@ -17,8 +17,8 @@ class SupabaseProviderOwnerStore(SupabaseOwnerAttestationStore):
     contract = OwnerAttestationContract(
         schema_version="provider-owner-attestation.v1",
         capability="provider.execution",
-        owner="legacy",
-        generation=1,
+        allowed_owners=frozenset({"legacy", "operations_core"}),
+        minimum_generation=1,
         contract_ref="contract://issue-12/zero-paid-provider-registry",
         rpc_name="volpred_read_provider_owner",
         label="Provider owner",

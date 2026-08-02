@@ -108,22 +108,43 @@ def test_read_owner_remains_available_when_remote_writes_are_disabled(
     assert _store().read_owner().owner == "legacy"
 
 
+def test_read_owner_accepts_receipt_bound_operations_core_generation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        lambda *_args, **_kwargs: _Response(
+            _payload(
+                owner="operations_core",
+                generation=2,
+                changed_by="operator:incident-cutover",
+                change_reason="issue 13 acceptance passed",
+                receipt_sequence=2,
+                receipt_owner="operations_core",
+                receipt_generation=2,
+                receipt_actor_ref="operator:incident-cutover",
+                receipt_reason="issue 13 acceptance passed",
+            )
+        ),
+    )
+
+    owner = _store().read_owner()
+
+    assert (owner.owner, owner.generation, owner.receipt_sequence) == (
+        "operations_core",
+        2,
+        2,
+    )
+
+
 @pytest.mark.parametrize(
     ("overrides", "message"),
     [
         ({"schema_version": "incident-owner-attestation.v0"}, "schema"),
         ({"capability": "other"}, "capability"),
         ({"owner": "other"}, "owner"),
-        ({"owner": "operations_core"}, "owner"),
         ({"owner": " legacy "}, "owner"),
         ({"generation": 0}, "generation"),
-        (
-            {
-                "generation": 2,
-                "receipt_generation": 2,
-            },
-            "generation",
-        ),
         ({"contract_ref": "other"}, "contract"),
         ({"changed_at": "not-a-time"}, "changed_at"),
         ({"changed_by": ""}, "changed_by"),

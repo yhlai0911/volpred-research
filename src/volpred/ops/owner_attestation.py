@@ -55,8 +55,8 @@ class OwnerAttestation:
 class OwnerAttestationContract:
     schema_version: str
     capability: str
-    owner: str
-    generation: int
+    allowed_owners: frozenset[str]
+    minimum_generation: int
     contract_ref: str
     rpc_name: str
     label: str
@@ -111,7 +111,7 @@ def _timestamp(
     return observed.astimezone(UTC).isoformat()
 
 
-def _parse_attestation(
+def parse_owner_attestation(
     payload: object,
     *,
     contract: OwnerAttestationContract,
@@ -134,14 +134,14 @@ def _parse_attestation(
             f"{contract.label} RPC returned another capability"
         )
     owner = _text(payload, "owner", label=contract.label)
-    if owner != contract.owner:
+    if owner not in contract.allowed_owners:
         raise ValueError(f"{contract.label} RPC returned an invalid owner")
     generation = _positive_integer(
         payload,
         "generation",
         label=contract.label,
     )
-    if generation != contract.generation:
+    if generation < contract.minimum_generation:
         raise ValueError(
             f"{contract.label} RPC returned an invalid generation"
         )
@@ -310,7 +310,7 @@ class SupabaseOwnerAttestationStore:
             raise RuntimeError(
                 f"{self.contract.label.lower()} RPC failed: {exc}"
             ) from None
-        return _parse_attestation(
+        return parse_owner_attestation(
             decoded,
             contract=self.contract,
             backend_sha256=self._client.backend_sha256,
@@ -321,4 +321,5 @@ __all__ = [
     "OwnerAttestation",
     "OwnerAttestationContract",
     "SupabaseOwnerAttestationStore",
+    "parse_owner_attestation",
 ]
