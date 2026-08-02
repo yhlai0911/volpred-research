@@ -333,6 +333,20 @@ unknown-observability slice為 **`root_cause_fixed_and_verified`**；#9→#12尚
 retirement，T40 umbrella仍為
 **`contained`**。
 
+**T40 Incident／Provider formal owner transfer actuator 增量（2026-08-02）**：
+commit `cb3e9f30f`補上先前僅有read-only attestation、卻沒有正式切換出口的共同缺口。
+`formal-owner-cutover-manifest.v1`以SHA-256綁定acceptance、regression、live preflight
+三份exact evidence與15分鐘TTL；private PostgreSQL transaction要求
+`work.coordinate=operations_core`、parent generation精確相符且Work gate已consumed，
+再以generation CAS切換incident/provider owner，支援exact replay與receipt-backed rollback。
+Stage／transfer固定相同lock order，避免retry與原交易形成deadlock；兩張gate表FORCE RLS，
+service role只可讀public STABLE attestations，不能stage、transfer或讀私表。相鄰
+**125 passed**，Matt Spec／Standards雙軸PASS。Migration `20260802054000`已用exact-file
+query部署並登記production receipt；live回讀owner仍為`legacy/1`、private ACL關閉、
+fresh census仍是預期五個`wrong_owner`且`probe_errors=[]`。本actuator缺口為
+**`root_cause_fixed_and_verified`**；#9真實時間閘與#12/#13 acceptance尚未完成，故沒有
+準備manifest或轉owner，T40 umbrella仍為 **`contained`**。
+
 **T40 canonical observation recorder 增量（2026-07-28）**：commits
 `9ae555a47`,`84adc3d84`把 `legacy_retirement_signal_materialize`（`*/5`）與
 `legacy_retirement_observe`（每小時 `:02`）納入 Operations Core；兩者皆

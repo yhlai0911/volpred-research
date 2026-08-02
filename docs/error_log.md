@@ -5708,3 +5708,33 @@ exact fire reconciliation 後定向 **43 passed**；Matt
 Spec／Standards 最終雙 PASS。此「舊 auditor 可誤綠／Stage 3 可被錯誤證據復活」根因為
 **`root_cause_fixed_and_verified`**；Issue #41／#44 umbrellas 仍須各自完成正式 cutover／physical
 retirement，維持 **`contained`**，不得由本歷史 audit 提前結案。
+
+---
+
+## 2026-08-02 — Incident／Provider 只有 owner attestation，父 gate 成熟後仍無正式切換出口
+
+**證據化症狀**：fresh formal-owner census持續有五個`wrong_owner`。其中
+`incident.lifecycle`與`provider.execution`雖已有production-pinned read-only RPC、immutable
+receipt與#9 blocking edge，但repo只有bootstrap／attestation migration；不存在可把兩者由
+`legacy/1`安全轉成`operations_core/2`的stage、CAS、rollback transaction。若等到#9七日閘
+成熟才發現，只能臨時手改DB或讓#12/#13永久卡住。
+
+**根因層級（cutover lifecycle／authority dependency）**：觀測契約誤當成切換契約，且incident、
+provider未把自己的owner generation與父層Work Coordinator consumed gate綁進同一個交易邊界。
+因此「acceptance已完成」與「具備mutation authority」之間沒有可稽核、可重試的狀態轉換。
+
+**底層修復與制度化**：新增共同`formal-owner-cutover-manifest.v1`，以exact bytes SHA-256綁
+acceptance／regression／live-preflight evidence、source owner/generation、parent Work owner
+generation與15分鐘TTL。Private PostgreSQL stage／transfer在同一鎖序
+`work owner → gate → capability owner`中驗父owner及其consumed gate，再執行generation CAS；
+exact retry回同一receipt，rollback新增generation且保留原cutover關聯。Gate與receipt表皆
+FORCE RLS，`service_role`只保留兩個public STABLE attestation RPC，無私表或mutation權限。
+
+**回歸、部署與狀態界線**：PostgreSQL 17覆蓋migration重放、parent未切換、stage後parent
+回滾、incident/provider切換、重試、rollback與ACL；相鄰總計**125 passed**，Ruff、compile、
+diff gate及Matt Spec／Standards雙軸PASS。commit=`cb3e9f30f`；production migration
+`20260802054000 gated_incident_provider_owner_transfer`以exact-file query部署並回讀RLS／owner／
+ACL。兩個live owner刻意維持`legacy/1`；fresh census仍為五個預期blocker且無probe error。
+因此「缺少安全切換執行器」這個bounded根因為 **`root_cause_fixed_and_verified`**，但#9真實
+七日閘與#12/#13 acceptance未完成，T40 umbrella仍為 **`contained`**，不得提前切owner或開始
+14日retirement clean window。
