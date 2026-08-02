@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "title": "AI 回本四帳法",
+  "subtitle": "從需求到尾部風險，把回收問題拆成可核對的帳",
+  "evidence": {
+    "digest": {
+      "path": "storage/lazypack_jobs/daily_digest_20260802/evidence.json",
+      "sha256": "c83a25a5955acb1c10d40e706c24a30d5eb628791cdda7732746c8011582fee4",
+      "label": "AI 回本四帳證據快照（digest date 2026-08-02）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_framework",
+      "info": "concept",
+      "style": "editorial",
+      "title": "AI 回本四帳法",
+      "subtitle": "同一筆基建支出，要依序通過需求、現金、耗材與風險的驗收",
+      "alt": "框架卡：用訂單帳、現金帳、耗材帳與風險帳檢查人工智慧投資是否接近回本",
+      "sources": ["digest"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "訂單帳",
+          "body": [
+            "先問需求有沒有變成可收款的生意。",
+            "營收、訂單與待履約合約要分開看，不能用故事互相代替。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "現金帳",
+          "body": [
+            "再問營業現金能不能負擔建設。",
+            "自由現金愈薄、負債愈快，回收期限就愈不能只看營收。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "耗材帳",
+          "body": [
+            "把晶片、電力、機房與折舊都放回單位經濟。",
+            "市場題材升溫，不等於實體成本已經被收入吸收。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "風險帳",
+          "body": [
+            "最後看保險買在個股、板塊還是指數。",
+            "風險換了地址，對沖工具與保費也要一起重算。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_numbers",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "固定 archive 的四個驗收讀數",
+      "subtitle": "每張卡只回答一筆帳，不把不同口徑混算",
+      "alt": "數字卡：用營收增速、現金覆蓋、電力板塊波動與指數下檔偏斜逐帳驗收",
+      "sources": ["digest"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "訂單帳｜合計營收增速上限",
+          "value": {
+            "source": "digest",
+            "path": "/metrics/order_account/aggregate_revenue_growth_upper_bound_pct",
+            "format": {"kind": "number", "digits": 0, "prefix": "<", "suffix": "%"}
+          },
+          "note": {
+            "template": "同篇合計資本支出增速為 {capex}",
+            "bindings": {
+              "capex": {
+                "source": "digest",
+                "path": "/metrics/order_account/aggregate_capex_growth_pct",
+                "format": {"kind": "number", "digits": 0, "suffix": "%"}
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "現金帳｜支出占營業現金流",
+          "value": {
+            "source": "digest",
+            "path": "/metrics/cash_account/capex_to_operating_cash_flow_end_pct",
+            "format": {"kind": "number", "digits": 1, "suffix": "%"}
+          },
+          "note": {
+            "template": "同季自由現金流降至 {fcf}",
+            "bindings": {
+              "fcf": {
+                "source": "digest",
+                "path": "/metrics/cash_account/free_cash_flow_end_usd_billion",
+                "format": {"kind": "number", "digits": 1, "prefix": "$", "suffix": "B"}
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "耗材帳｜公用事業實現波動",
+          "value": {
+            "source": "digest",
+            "path": "/metrics/consumables_account/utilities_realized_vol_pct",
+            "format": {"kind": "number", "digits": 1, "suffix": "%"}
+          },
+          "note": {
+            "template": "同窗半導體仍在 {semis}",
+            "bindings": {
+              "semis": {
+                "source": "digest",
+                "path": "/metrics/consumables_account/semiconductor_realized_vol_pct",
+                "format": {"kind": "number", "digits": 1, "suffix": "%"}
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "風險帳｜指數下檔偏斜",
+          "value": {
+            "source": "digest",
+            "path": "/metrics/risk_account/spy_put_skew_points",
+            "format": {"kind": "number", "digits": 1, "suffix": " pt", "show_plus": true}
+          },
+          "note": {
+            "template": "同窗個股平均風險逆轉僅 {stocks}",
+            "bindings": {
+              "stocks": {
+                "source": "digest",
+                "path": "/metrics/risk_account/six_stock_average_risk_reversal_points",
+                "format": {"kind": "number", "digits": 1, "suffix": " pt", "show_plus": true}
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "決策前，逐帳打勾",
+      "subtitle": "任何一帳答不清，都只算故事還沒算回本",
+      "alt": "決策清單卡：先驗收需求，再驗收現金與耗材，最後定位風險和保險成本",
+      "sources": ["digest"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "驗收清單",
+          "body": [
+            "訂單帳：需求是否轉成收入，待履約合約是否持續兌現。",
+            "現金帳：建設是否仍由營業現金負擔，自由現金是否止跌。",
+            "耗材帳：新增收入扣掉晶片、電力與折舊後，單位經濟是否改善。",
+            "風險帳：尾部保險買在哪一層，保費是否已經先反映擔憂。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "先停止下結論的情況",
+          "body": [
+            "沒有實際訂單資料時，不把營收增速寫成訂單成長。",
+            "沒有一致會計口徑時，不把不同 archive 的資本支出相加。",
+            "市場波動只能說明定價，不能代替實體耗用與單位成本。",
+            "選擇權切片會變動，只拿來定位保險買在哪裡。"
+          ]
+        }
+      ]
+    }
+  ]
+}

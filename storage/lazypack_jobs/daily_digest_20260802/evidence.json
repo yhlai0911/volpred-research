@@ -1,0 +1,175 @@
+{
+  "_provenance": {
+    "built_for": "daily_digest_20260802 AI payback four-ledger lazypack",
+    "snapshot_source_path": "storage/reports/feed.json",
+    "snapshot_source_sha256": "8182c752e7f8e274cf82a30fbb3db96361ff6b6b7e9e6ccb414489b4c1c9a52b",
+    "selection_method": "Exact eight-id allowlist matched against feed records; dates are UTC published_at calendar dates and values are transcribed from the selected records' content.",
+    "content_hash_method": "SHA-256 of each exact UTF-8 content string without an added trailing newline.",
+    "digest_date": "2026-08-02",
+    "deep_archive_definition": "Published more than 30 calendar days before the digest date."
+  },
+  "selected_archive_ids": [
+    "mile_08b69f7c",
+    "mile_2d1d356b",
+    "mile_50ce135b",
+    "mile_08fefa59",
+    "mile_f5f4cb43",
+    "mile_312204b2",
+    "mile_31b2b0bb",
+    "mile_89889d46"
+  ],
+  "source_dates": {
+    "mile_08b69f7c": "2026-07-28",
+    "mile_2d1d356b": "2026-07-22",
+    "mile_50ce135b": "2026-07-15",
+    "mile_08fefa59": "2026-07-06",
+    "mile_f5f4cb43": "2026-06-30",
+    "mile_312204b2": "2026-06-13",
+    "mile_31b2b0bb": "2026-06-03",
+    "mile_89889d46": "2026-05-26"
+  },
+  "archive_span_days": 63,
+  "deep_archive_count": 4,
+  "deep_archive_ids": [
+    "mile_f5f4cb43",
+    "mile_312204b2",
+    "mile_31b2b0bb",
+    "mile_89889d46"
+  ],
+  "sources": {
+    "mile_08b69f7c": {
+      "published_date": "2026-07-28",
+      "title": "七千億資本支出的恐懼，藏在指數裡，不在個股裡",
+      "content_sha256": "ac2383a614d0c32c98d5196d83f8807b214241f05fc0e4ca63fc30887e3f7714"
+    },
+    "mile_2d1d356b": {
+      "published_date": "2026-07-22",
+      "title": "AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債",
+      "content_sha256": "eb878c442eed676e9fe2117d20ea489f792f9f1f430f48ac144284c87a03f930"
+    },
+    "mile_50ce135b": {
+      "published_date": "2026-07-15",
+      "title": "「AI 瓶頸轉電力」的口號很響，但波動率還沒買單",
+      "content_sha256": "78c834bf6f28c99c09e188f18fccdcd8624ececcfb8b4d489dfb1ec460b5ad46"
+    },
+    "mile_08fefa59": {
+      "published_date": "2026-07-06",
+      "title": "AI 基建變現疑慮升溫，科技股與防禦板塊的波動率黃金交叉",
+      "content_sha256": "e43c118844f50b39eca1b123eaa5d79678a4ff9688d648f89f8363f04c11fd58"
+    },
+    "mile_f5f4cb43": {
+      "published_date": "2026-06-30",
+      "title": "科技巨頭資本支出爆表，AI 變現期的隱含波動率拐點",
+      "content_sha256": "f30a3912fc1849acfc5bd3b53516b803086823743107e24423ae2c80eed18665"
+    },
+    "mile_312204b2": {
+      "published_date": "2026-06-13",
+      "title": "砍人和燒錢同時進行：為什麼大型科技股的波動率是 SPY 的兩倍半",
+      "content_sha256": "b84699f8a890e88cd324b884135c1c922f9af224920ef89e44dfb7b2179294b5"
+    },
+    "mile_31b2b0bb": {
+      "published_date": "2026-06-03",
+      "title": "AI 五層產業鏈，我們不講故事，看波動率怎麼說",
+      "content_sha256": "60fb425a498e0f8376a90572a2048c3f143233a9f5e2a28a674a8f346c8d62d9"
+    },
+    "mile_89889d46": {
+      "published_date": "2026-05-26",
+      "title": "裁員八千人，同一季燒掉 $680 億 — 矽谷的 CapEx 帳要怎麼算",
+      "content_sha256": "6213971d462d8d2bfc914cf0fb30ef7e29cee1c8cce16b15a0aa89cd89527375"
+    }
+  },
+  "metrics": {
+    "order_account": {
+      "source_id": "mile_f5f4cb43",
+      "source_date": "2026-06-30",
+      "period": "FY2024 to FY2025",
+      "company_scope": "MSFT, AMZN, GOOGL, META",
+      "aggregate_capex_2024_usd_billion": 215.7,
+      "aggregate_capex_2025_usd_billion": 357.5,
+      "aggregate_capex_growth_pct": 66.0,
+      "aggregate_revenue_growth_upper_bound_pct": 15.0,
+      "revenue_growth_relation": "less_than",
+      "boundary": "Revenue growth is only a monetization proxy; the selected archive does not provide a comparable contracts or backlog series."
+    },
+    "cash_account": {
+      "source_id": "mile_2d1d356b",
+      "source_date": "2026-07-22",
+      "period": "2025Q1 to 2026Q1",
+      "company_scope": "META, MSFT, GOOGL, AMZN",
+      "quarterly_capex_start_usd_billion": 71.9,
+      "quarterly_capex_end_usd_billion": 129.8,
+      "operating_cash_flow_start_usd_billion": 114.2,
+      "operating_cash_flow_end_usd_billion": 150.7,
+      "capex_to_operating_cash_flow_start_pct": 62.9,
+      "capex_to_operating_cash_flow_end_pct": 86.1,
+      "free_cash_flow_start_usd_billion": 42.3,
+      "free_cash_flow_end_usd_billion": 21.0,
+      "liabilities_increase_usd_billion": 177.2,
+      "liabilities_growth_pct": 66.0,
+      "unit_note": "Archive figures stated in 億美元 are divided by ten for USD billions."
+    },
+    "consumables_account": {
+      "source_id": "mile_50ce135b",
+      "source_date": "2026-07-15",
+      "measurement_window_trading_days": 20,
+      "semiconductor_realized_vol_pct": 61.1,
+      "semiconductor_one_year_median_vol_pct": 33.0,
+      "utilities_realized_vol_pct": 15.6,
+      "utilities_one_year_median_vol_pct": 14.2,
+      "power_basket_semiconductor_correlation_60d": 0.6,
+      "boundary": "These are market-price volatility proxies, not physical electricity use, chip consumption, depreciation, or unit cost."
+    },
+    "risk_account": {
+      "source_id": "mile_08b69f7c",
+      "source_date": "2026-07-28",
+      "option_snapshot_date": "2026-07-28",
+      "option_tenor_approx_days": 30,
+      "six_stock_average_atm_iv_pct": 43.0,
+      "six_stock_average_risk_reversal_points": 1.4,
+      "spy_atm_iv_pct": 17.0,
+      "spy_put_skew_points": 8.0,
+      "spy_risk_reversal_points": 11.8,
+      "boundary": "One live option-chain snapshot locates protection demand but does not establish a stable causal relationship."
+    }
+  },
+  "archive_cross_checks": {
+    "sector_rotation": {
+      "source_id": "mile_08fefa59",
+      "source_date": "2026-07-06",
+      "qqq_realized_vol_pct": 35.28,
+      "defensive_basket_realized_vol_pct": 16.02,
+      "vix_close": 15.57
+    },
+    "stock_specific_risk": {
+      "source_id": "mile_312204b2",
+      "source_date": "2026-06-13",
+      "msft_realized_vol_pct": 36.6,
+      "spy_realized_vol_pct": 15.0,
+      "msft_to_spy_ratio": 2.45
+    },
+    "chain_coupling": {
+      "source_id": "mile_31b2b0bb",
+      "source_date": "2026-06-03",
+      "sample_trading_days": 855,
+      "infrastructure_annualized_vol_pct": 51.7,
+      "model_application_annualized_vol_pct": 25.1,
+      "average_cross_layer_correlation_2023": 0.49,
+      "average_cross_layer_correlation_2024": 0.53,
+      "average_cross_layer_correlation_2025": 0.65
+    },
+    "earliest_capex_snapshot": {
+      "source_id": "mile_89889d46",
+      "source_date": "2026-05-26",
+      "mag4_q1_2026_capex_usd_billion": 80.2,
+      "year_over_year_growth_pct": 36.0
+    }
+  },
+  "limitations": [
+    "The allowlist ends with a 2026-07-28 archive written before that week's four-company earnings; it cannot support claims about post-earnings results as of the digest date.",
+    "The order account uses reported revenue growth as a proxy because the selected archive set has no harmonized bookings, contracts, remaining-performance-obligation, or backlog series.",
+    "Archive accounting scopes are not harmonized. In particular, mile_89889d46 reports 2026Q1 four-company CapEx of USD 80.2B while mile_2d1d356b reports USD 129.8B; this snapshot preserves both and does not combine them.",
+    "The consumables account uses securities volatility to test whether chip and power narratives are priced; it does not measure physical quantities or unit economics.",
+    "Option-chain figures are a single dated cross-section and can change after earnings or market moves.",
+    "All results are descriptive archive evidence, not causal tests, strategy backtests, forecasts, or investment advice."
+  ]
+}
