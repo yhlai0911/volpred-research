@@ -676,13 +676,13 @@ def test_project_registry_lists_known_problematic_gates() -> None:
         "sequence_coverage_gap",
         "unjoined",
     ]
-    assert starvation["lifecycle"]["last_action"] == "recalibrate"
+    assert starvation["lifecycle"]["last_action"] == "retain"
     assert starvation["lifecycle"]["last_reviewed_at"] == (
-        "2026-08-01T20:17:11.647362+00:00"
+        "2026-08-02T05:09:50.683132+00:00"
     )
     assert starvation["lifecycle"]["review_task_id"] == (
         "control_gate_review_dispatch_starvation_lockout_"
-        "20260731T001249_aa6a90fc96a5"
+        "20260801T074611_bc23c9199928"
     )
     worktree = gates["worktree_merge_ownership"]
     assert (
