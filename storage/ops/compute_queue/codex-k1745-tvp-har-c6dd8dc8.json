@@ -5,10 +5,10 @@
   "interpreter": "bash /Users/yhlai0911/volpred-research/scripts/codex_exec_bounded.sh --timeout 10680 -C /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-c6dd8dc8-k1745 -s danger-full-access --dangerously-bypass-hook-trust",
   "args": [],
   "env": {},
-  "status": "queued",
+  "status": "running",
   "queue_priority": 5,
   "queued_at": "2026-08-02T05:41:19Z",
-  "started_at": null,
+  "started_at": "2026-08-02T05:45:41Z",
   "completed_at": null,
   "exit_code": null,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-k1745-tvp-har-c6dd8dc8.stdout",
@@ -34,5 +34,13 @@
   },
   "timeout_seconds": 10800,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 67204,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:7c3b083c4501c2fe6079ae33",
+    "scheduled_for": "2026-08-02T05:45:00Z"
+  },
+  "claimed_by_pid_start_wall": "Sun Aug  2 13:45:40 2026"
 }

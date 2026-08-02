@@ -43,28 +43,28 @@
   "source_task_id": "K1750",
   "source_task_link": {
     "state": "linked",
-    "attempted_at": "2026-08-02T05:01:04Z",
-    "linked_at": "2026-08-02T05:01:05Z",
+    "attempted_at": "2026-08-02T05:45:48Z",
+    "linked_at": "2026-08-02T05:45:48Z",
     "error": null
   },
   "timeout_seconds": 10800,
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1750-ipo-b66d62b6.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1750-ipo-b66d62b6.md",
-  "claimed_by_pid": 7243,
+  "claimed_by_pid": 67204,
   "schedule_dispatch": {
     "owner": "operations_core",
     "job_id": "volpred-compute-worker",
-    "fire_key": "operations-core-v1:volpred-compute-worker:8b774d81cd0200ce040c0b32",
-    "scheduled_for": "2026-08-02T05:00:00Z"
+    "fire_key": "operations-core-v1:volpred-compute-worker:7c3b083c4501c2fe6079ae33",
+    "scheduled_for": "2026-08-02T05:45:00Z"
   },
-  "claimed_by_pid_start_wall": "Sun Aug  2 13:00:57 2026",
+  "claimed_by_pid_start_wall": "Sun Aug  2 13:45:40 2026",
   "source_task_settlement": {
     "state": "pending_collection",
     "task_id": "K1750",
-    "settled_at": "2026-08-02T05:01:04Z",
+    "settled_at": "2026-08-02T05:45:46Z",
     "error": null
   },
-  "quota_requeues": 2,
+  "quota_requeues": 3,
   "requeue_history": [
     {
       "at": "2026-08-02T04:30:43Z",
@@ -79,9 +79,16 @@
       "exit_code": 1,
       "started_at": "2026-08-02T05:00:59Z",
       "reset_at": null
+    },
+    {
+      "at": "2026-08-02T05:45:47Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-08-02T05:45:41Z",
+      "reset_at": null
     }
   ],
-  "not_before": "2026-08-02T05:31:04.579743+00:00",
+  "not_before": "2026-08-02T06:15:47.484701+00:00",
   "attempt_status": "quota_exhausted",
   "quota_reset_at": null
 }
