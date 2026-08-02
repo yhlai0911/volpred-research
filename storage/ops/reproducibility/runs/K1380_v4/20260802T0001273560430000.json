@@ -1,0 +1,119 @@
+{
+  "schema_version": "volpred.reproduce_report.v1",
+  "generated_at": "2026-08-02T00:01:27.356043+00:00",
+  "experiment_id": "K1380_v4",
+  "engine": {
+    "name": "scripts/reproduce_check.py",
+    "schema": "volpred.reproduce_report.v1",
+    "path": "scripts/reproduce_check.py",
+    "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+    "committed_at_repo_head": true
+  },
+  "repo_head": "ee8d9b4cd300f1763a0f2d7b9207d70518c24f85",
+  "methodology_references": [
+    {
+      "citation": "Peng (2011), Reproducible Research in Computational Science",
+      "doi": "10.1126/science.1213847",
+      "principle": "computational reproducibility is a minimum standard, not a validity verdict"
+    },
+    {
+      "citation": "Sandve et al. (2013), Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "principle": "record provenance and preserve the exact workflow behind every result"
+    },
+    {
+      "citation": "Stodden et al. (2016), Enhancing Reproducibility for Computational Methods",
+      "doi": "10.1126/science.aah6168",
+      "principle": "disclose code, data, workflow, and computational environment"
+    }
+  ],
+  "discovery": {
+    "inventory_record": {
+      "experiment": "K1380_v4",
+      "path": "experiments/K1380_v4",
+      "priority_sources": [],
+      "code_count": 2,
+      "results_count": 2,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "k1380_v4_rc_correction.py",
+      "result_file": "k1380_v4_rc_correction_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    "subject_files": [
+      {
+        "path": "experiments/K1380_v4/k1380_v4.py",
+        "sha256": "f88bc609fa7a94eb10d43021dc72821ba4ebe97b2fa472db21ca2e41321511b0",
+        "size": 38672
+      },
+      {
+        "path": "experiments/K1380_v4/k1380_v4_losses_all.npy",
+        "sha256": "25722dd0fced257278511d902b9769da37498159b922ce277941d28827171683",
+        "size": 255944
+      },
+      {
+        "path": "experiments/K1380_v4/k1380_v4_rc_correction.py",
+        "sha256": "61d37ee279fde0335787dec57c4040e5d29ab0c304bd89500979e4a267d1f912",
+        "size": 20168
+      },
+      {
+        "path": "experiments/K1380_v4/k1380_v4_rc_correction_results.json",
+        "sha256": "9e919831542a90ca27dba0c6dc408e4e40369ba6f2cec998ad9e2a2727924743",
+        "size": 9936
+      },
+      {
+        "path": "experiments/K1380_v4/k1380_v4_results.json",
+        "sha256": "aed59a115166a0146615ce918e2a95f41f3c336b380d0dfae263f8b2190158e9",
+        "size": 7454
+      },
+      {
+        "path": "experiments/K1380_v4/reproduce_spec.json",
+        "sha256": "7a756d4fcd07b7ce788bdac903be1a9ce6a88f512b0e990404ca8c658df35feb",
+        "size": 2356
+      },
+      {
+        "path": "scripts/reproduce_check.py",
+        "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+        "size": 65995
+      },
+      {
+        "path": "src/volpred/stats/inference.py",
+        "sha256": "6b2066872c7069dee1d14d0ce6b1ced85460b8f7e7b5f627ff83833ce235cc13",
+        "size": 6674
+      }
+    ],
+    "entrypoint": "experiments/K1380_v4/k1380_v4_rc_correction.py",
+    "canonical_result": "experiments/K1380_v4/k1380_v4_rc_correction_results.json",
+    "spec_sha256": "7a756d4fcd07b7ce788bdac903be1a9ce6a88f512b0e990404ca8c658df35feb",
+    "subject_sha256": "8ae49aea02d54018bcec8acdd01848ada9859e27a6110a0339f6b371e0b18047"
+  },
+  "environment": {
+    "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "uv_lock_sha256": "340b8dc87c7b1e0f1fc852bab3f62e2d084582c77831cee59a3729064706edf0",
+    "pythonhashseed": "0",
+    "package_versions": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "arch": "8.0.0",
+      "yfinance": "1.2.0",
+      "scikit-learn": "1.8.0"
+    }
+  },
+  "execution": null,
+  "comparison": null,
+  "integrity": null,
+  "outcome": {
+    "status": "unverified",
+    "reason_code": "WORKING_TREE_DRIFT",
+    "severity": "warn",
+    "reproducible": null,
+    "summary": "committed snapshot differs for: ['experiments/K1380_v4/k1380_v4_rc_correction.py', 'experiments/K1380_v4/k1380_v4_rc_correction_results.json', 'experiments/K1380_v4/reproduce_spec.json']"
+  }
+}
