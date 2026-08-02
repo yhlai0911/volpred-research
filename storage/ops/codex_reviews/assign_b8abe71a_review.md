@@ -36,7 +36,7 @@ Review fixed point: `f200ef1c2cf8cbb852dc185491e945b6239a7302`
 
 ## Full live read-back
 
-- Final full 1,900-day OOS run completed in 1,397 seconds; 13 non-benchmark specs
+- Final full 1,900-day OOS run completed in 1,415 seconds; 13 non-benchmark specs
   are eligible and `n_valid_spa=1,898`.
 - A5/C1/C2/C3 each have 1,898 valid forecasts (99.89%) and 31 accepted refits.
   Their new raw-scale diagnostic t-statistics are +2.617/+2.844/+2.261/+2.394.
@@ -50,7 +50,7 @@ Review fixed point: `f200ef1c2cf8cbb852dc185491e945b6239a7302`
   Historical A5/C2/C3 tail attribution is gone.
 - Final `reproduce_spec.json` has `run_pipeline.py` as its only entrypoint and
   hash-binds both child scripts, data, optimizer, fixed-span and inference helpers,
-  loss matrix, base result and canonical result; runtime=1,400 seconds and network
+  loss matrix, base result and canonical result; runtime=1,419 seconds and network
   policy is `deny`. Both child scripts refuse standalone execution. Stage files are
   individually atomic; the multi-file chain is explicitly non-atomic and partial
   interruption is detected by output/spec/commit hash mismatch.
@@ -94,5 +94,17 @@ Machine-readable disposition: `experiments/K1380_v4/review_verdict.json`.
 After pre-commit required an inline `silent-ok` explanation on the per-start optimizer
 exception, the helper was changed without behavioral effect and the full 1,900-day
 pipeline was rerun again. Final Spec and Standards delta reviews both PASS; they
-verified helper hash `594b08da…`, runtime 1,400.232 seconds and unchanged scientific
-outputs against the current spec/result/verdict bytes.
+verified helper hash `594b08da…` and unchanged scientific outputs.
+
+The first post-commit clean-clone rerun matched all 112 numeric scalars but correctly
+failed on two artifact-generation pointers: the base output hash and its derived
+generation ID. Root cause was wall-clock elapsed/timestamp embedded in the declared
+base output. Those non-scientific fields were removed rather than ignored, and a fifth
+full-chain run rebuilt deterministic base/canonical artifacts (1,419.066-second spec).
+
+Final reproducibility-delta review also passed on both axes with no P1/P2. The Spec
+review verified that model, loss, valid-mask, B0 comparator, RC/SPA/Holm and verdict
+bytes did not change; the Standards review verified all pinned hashes and confirmed
+that the delta introduced no new lint finding. Both reviewers require the same final
+closure gate: commit these deterministic bytes, then replace the retained pre-fix FAIL
+report only with a new clean-clone PASS receipt.

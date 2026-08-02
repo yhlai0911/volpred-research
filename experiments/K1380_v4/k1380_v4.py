@@ -19,7 +19,6 @@ import json
 import os
 import time
 import warnings
-from datetime import UTC, datetime
 
 import numpy as np
 import pandas as pd
@@ -944,8 +943,6 @@ results = {
         "eligible_specs": eligible_non_bm,
         "ineligible_specs": ineligible_non_bm,
         "n_valid_spa": n_valid_spa,
-        "elapsed_seconds": round(elapsed, 1),
-        "timestamp": datetime.now(UTC).isoformat(),
         "lookahead_free": "signal.shift(1): vix[abs_idx-1] for t-1 VIX lag",
         "canonical_inference": "k1380_v4_rc_correction_results.json",
         "v4_fixes": [

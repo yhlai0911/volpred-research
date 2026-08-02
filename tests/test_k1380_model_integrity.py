@@ -211,6 +211,7 @@ def test_archived_k1380_artifacts_enforce_the_corrected_inference_contract() -> 
 
     assert {"hansen_spa_test", "white_rc_test", "c3_verdict"}.isdisjoint(base)
     assert base["c3_status"] == "PENDING_CANONICAL_CORRECTION_ARTIFACT"
+    assert {"elapsed_seconds", "timestamp"}.isdisjoint(base["metadata"])
     assert spec["entrypoint"]["path"] == "run_pipeline.py"
     assert spec["runtime"]["runtime_seconds"] > 1_000
 

@@ -158,7 +158,7 @@ studentization 仍使用 raw observation SD，且用 `p=0` 表示有限 bootstra
 `k1380_v4_rc_correction_results.json` 為準。K1583 的舊 MCS 結論已標為 `SUPERSEDED`，
 必須以新矩陣重跑後才能引用。
 
-**最終完整重跑 read-back（1,900 OOS days，1,397 秒）**：A5/C1/C2/C3 coverage 都是
+**最終完整重跑 read-back（1,900 OOS days，1,415 秒）**：A5/C1/C2/C3 coverage 都是
 99.89%，各有 31/31 successful finite in-bounds refits；相對 B0 的 raw-scale diagnostic
 t-stat 分別為 +2.617／+2.844／+2.261／+2.394，舊的極端負值與 C1 0 coverage 已消失。
 B1/B2/B3 在 scheduled refit 被拒時不再沿用 stale state；31 次中分別 24/23/29 次成功，
@@ -172,5 +172,6 @@ max-type White RC 均為 `p=0.0020`（0/499 exceedances 經 plus-one convention�
 entrypoint；base/correction 子腳本單獨執行會 fail closed。每個 stage output 是 atomic，
 但 multi-file chain 不是 set-level transaction；中斷後舊 spec/commit 與新輸出 hash 不符，
 artifact gate 會 fail closed。B0 benchmark 同樣先清 stale state，31/31 refits 成功並有
-receipt。成功 full-chain 的 `reproduce_spec.json` runtime 為 1,400 秒並 hash-bind兩階段
+receipt。base result 不含 wall-clock elapsed/timestamp，避免 declared-output hash 每次重跑
+必然漂移。成功 full-chain 的 `reproduce_spec.json` runtime 為 1,419 秒並 hash-bind兩階段
 程式、資料、helpers、loss matrix、base result 與 canonical result。

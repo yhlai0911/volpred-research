@@ -4526,7 +4526,7 @@ window。C1 因 `<10` gate 結構上永遠不可能產生 forecast。
 排除與 Eq.4 state recursion。K1583 因使用舊矩陣，knowledge 條目已透過 canonical writer
 標為 `SUPERSEDED`，必須以新矩陣重跑。
 
-**完整重跑 read-back**：最終 1,900-day OOS run 完成（1,397 秒）。A5/C1/C2/C3 coverage
+**完整重跑 read-back**：最終 1,900-day OOS run 完成（1,415 秒）。A5/C1/C2/C3 coverage
 均 99.89%，相對 B0 的 raw-scale diagnostic t-stat 由舊 −11.2／C1 無值／−21.1／−10.0
 變成 +2.617／+2.844／+2.261／+2.394；每支都有 31/31 successful finite in-bounds
 refit receipt。額外 code review 發現 B1-B3 仍有 duplicate fail-open optimizer 與 scheduled
@@ -4539,9 +4539,15 @@ mean distribution 估計 long-run omega；SPA_l/c/u 與 max-type White RC 均 `p
 （0/499 exceedances，採 `(r+1)/(B+1)`，不再報 p=0），Holm 13/13 拒絕，A4f adjusted
 `p=0.0260`。least-favourable exceedance 0/499，舊 A5/C2/C3 上尾歸因完全消失。
 base 亦永久移除失實 SPA/RC/C3 欄位；B0 benchmark 現在同樣在 refit 前清 state，31/31
-成功並留下 receipt。單一 `run_pipeline.py` 執行兩階段並在 1,400 秒 full-chain 結束後
+成功並留下 receipt。單一 `run_pipeline.py` 執行兩階段並在 1,419 秒 full-chain 結束後
 才產生唯一 reproduce spec，子腳本單獨執行 fail closed；multi-file chain 明確標為
 non-atomic，部分失敗由 output/spec/commit hash mismatch 阻斷。
+
+第一次 post-commit clean-clone reproduction 的 112 個 numeric scalars 全相符，但 report
+仍以 `RESULT_MISMATCH` 阻擋：base declared output 內含 wall-clock `elapsed_seconds/timestamp`，
+使 base SHA 與連帶 generation ID 每次必然不同。修復不是放寬 comparator，而是移除 base
+scientific output 的非決定性欄位；runtime 只留在 canonical spec／log，output identity
+仍維持強比較。此修復納入第五次 full-chain fresh run。
 
 **結案狀態**：`root_cause_fixed_and_verified`。最終 full-chain 重跑、RC/SPA 重算、strict
 artifact gate、4/4 integrity gates、41 focused regressions與三輪雙軸 code review 已完成；
