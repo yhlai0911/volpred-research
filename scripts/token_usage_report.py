@@ -1082,6 +1082,36 @@ def _primary_category(cats, is_subagent):
     return cats[0] if cats else "text_only"
 
 
+def _deduplicated_turns(records):
+    """Collapse content-block records into one turn at the reporting seam."""
+    turns = {}
+    for record in records:
+        mid = record.get("msg_id")
+        if not mid:
+            mid = f"_noid::{record['session_id']}::{record['timestamp'].isoformat()}"
+        turn = turns.get(mid)
+        if turn is None:
+            turn = {
+                "usage": record["usage"],
+                "model": record["model"],
+                "date": record["date"],
+                "provider": record.get("provider", "unknown"),
+                "session_id": record["session_id"],
+                "is_subagent": record["is_subagent"],
+                "categories": [],
+                "content": [],
+                "text_content": "",
+                "timestamp": record["timestamp"],
+            }
+            turns[mid] = turn
+        turn["categories"].append(record["category"])
+        turn["content"].extend(record.get("content") or [])
+        text = record.get("text_content") or ""
+        if text:
+            turn["text_content"] += text
+    return list(turns.values())
+
+
 def aggregate_usage(date_start, date_end, records=None):
     """聚合指定日期區間的 token 用量。
 
@@ -1097,26 +1127,14 @@ def aggregate_usage(date_start, date_end, records=None):
     by_date = defaultdict(_empty_bucket)
     by_category = defaultdict(_empty_bucket)
 
-    turns = {}
     source_records = (
         iter_session_records(date_start, date_end)
         if records is None
         else records
     )
-    for record in source_records:
-        mid = record.get("msg_id")
-        if not mid:  # no id -> synthetic unique key so it is still counted once
-            mid = f"_noid::{record['session_id']}::{record['timestamp'].isoformat()}"
-        t = turns.get(mid)
-        if t is None:
-            t = {"usage": record["usage"], "model": record["model"], "date": record["date"],
-                 "provider": record.get("provider", "unknown"),
-                 "session_id": record["session_id"], "is_subagent": record["is_subagent"],
-                 "categories": []}
-            turns[mid] = t
-        t["categories"].append(record["category"])
+    turns = _deduplicated_turns(source_records)
 
-    for t in turns.values():
+    for t in turns:
         usage = _usage_breakdown(t["usage"])
         cat = _primary_category(t["categories"], t["is_subagent"])
         inp = usage["input_tokens"]
@@ -1150,6 +1168,145 @@ def aggregate_usage(date_start, date_end, records=None):
         dict(by_date),
         dict(by_category),
     )
+
+
+def generate_top_category_drilldown(
+    date_start,
+    date_end,
+    *,
+    records=None,
+    top_n=2,
+):
+    """拆解 billable 排名前 N 類別，保留可證明的 attribution。"""
+    source_records = (
+        iter_session_records(date_start, date_end)
+        if records is None
+        else records
+    )
+    turns = _deduplicated_turns(source_records)
+    buckets = {}
+    total_billable = 0
+
+    def _bucket(mapping, name, usage):
+        row = mapping.setdefault(
+            name,
+            {"messages": 0, "billable_total": 0},
+        )
+        row["messages"] += 1
+        row["billable_total"] += _billable_total(usage)
+
+    def _allocated_usage(usage, parts, index):
+        """Allocate a turn's token fields across distinct evidence families."""
+        allocated = dict(usage)
+        for field in (
+            "input_tokens",
+            "output_tokens",
+            "cache_read_tokens",
+            "cache_create_tokens",
+        ):
+            quotient, remainder = divmod(int(usage.get(field, 0) or 0), parts)
+            allocated[field] = quotient + (1 if index < remainder else 0)
+        return allocated
+
+    for turn in turns:
+        usage = _usage_breakdown(turn["usage"])
+        billable = _billable_total(usage)
+        total_billable += billable
+        category = _primary_category(turn["categories"], turn["is_subagent"])
+        bucket = buckets.setdefault(
+            category,
+            {
+                "messages": 0,
+                "billable_total": 0,
+                "by_provider": {},
+                "by_model": {},
+                "by_session": {},
+                "detail": {
+                    "bash_family": {},
+                    "text_reason": {},
+                },
+            },
+        )
+        bucket["messages"] += 1
+        bucket["billable_total"] += billable
+        _bucket(bucket["by_provider"], turn["provider"], usage)
+        _bucket(bucket["by_model"], turn["model"], usage)
+        _bucket(bucket["by_session"], turn["session_id"], usage)
+
+        commands = _extract_bash_commands(turn["content"])
+        if commands:
+            families = sorted({_classify_bash_family(command) for command in commands})
+            for index, family in enumerate(families):
+                _bucket(
+                    bucket["detail"]["bash_family"],
+                    family,
+                    _allocated_usage(usage, len(families), index),
+                )
+        if category == "text_only":
+            _bucket(
+                bucket["detail"]["text_reason"],
+                _classify_text_only_reason(turn["text_content"]),
+                usage,
+            )
+
+    ranked = sorted(
+        buckets.items(),
+        key=lambda item: (-item[1]["billable_total"], -item[1]["messages"], item[0]),
+    )[: max(0, int(top_n))]
+
+    def _rows(mapping, limit=6):
+        return [
+            {"name": name, **row}
+            for name, row in sorted(
+                mapping.items(),
+                key=lambda item: (-item[1]["billable_total"], -item[1]["messages"], item[0]),
+            )[:limit]
+        ]
+
+    result = []
+    for category, bucket in ranked:
+        if category == "unclassified":
+            note = (
+                "Codex token_count has no authoritative task metadata; "
+                "task category not inferred."
+            )
+        else:
+            note = "Category derived from recorded tool/content classification."
+        detail = {
+            "bash_family": _rows(bucket["detail"]["bash_family"]),
+            "text_reason": _rows(bucket["detail"]["text_reason"]),
+        }
+        detail_notes = []
+        if detail["bash_family"]:
+            detail_notes.append(
+                "Bash family messages are evidence counts and may overlap; billable "
+                "tokens are mechanically allocated across distinct families."
+            )
+        if detail["text_reason"]:
+            detail_notes.append(
+                "Text reason is a keyword heuristic attribution, not authoritative "
+                "task metadata."
+            )
+        detail_note = " ".join(detail_notes)
+        result.append(
+            {
+                "category": category,
+                "description": CATEGORY_META.get(category, ("❔", category))[1],
+                "messages": bucket["messages"],
+                "billable_total": bucket["billable_total"],
+                "share_pct": round(
+                    100 * bucket["billable_total"] / total_billable,
+                    1,
+                ) if total_billable else 0.0,
+                "attribution_note": note,
+                "by_provider": _rows(bucket["by_provider"]),
+                "by_model": _rows(bucket["by_model"]),
+                "by_session": _rows(bucket["by_session"]),
+                "detail": detail,
+                "detail_note": detail_note,
+            }
+        )
+    return {"top_n": top_n, "top_categories": result}
 
 
 def generate_drilldown(date_start, date_end, records=None):
@@ -1473,6 +1630,11 @@ def generate_daily_report(target_date=None, include_commits=False):
         date_end,
         records=iter(records),
     )
+    top_category_drilldown = generate_top_category_drilldown(
+        date_start,
+        date_end,
+        records=iter(records),
+    )
 
     # 計算各模型成本
     cost_by_model = {}
@@ -1535,6 +1697,7 @@ def generate_daily_report(target_date=None, include_commits=False):
             )
         },
         "drilldown": drilldown,
+        "top_category_drilldown": top_category_drilldown,
     }
 
     if include_commits:
@@ -1560,6 +1723,11 @@ def generate_weekly_report(week_start=None):
         records=iter(records),
     )
     drilldown = generate_drilldown(
+        week_start,
+        week_end,
+        records=iter(records),
+    )
+    top_category_drilldown = generate_top_category_drilldown(
         week_start,
         week_end,
         records=iter(records),
@@ -1634,6 +1802,7 @@ def generate_weekly_report(week_start=None):
         },
         "daily_breakdown": daily_breakdown,
         "drilldown": drilldown,
+        "top_category_drilldown": top_category_drilldown,
     }
 
     return report
@@ -1708,6 +1877,46 @@ def format_report_text(report):
                 f"| {u['emoji']} {u['description']} | {u['messages']:,} | "
                 f"{u['billable_total']:,} | {pct:.1f}% {bar} |"
             )
+        lines.append("")
+
+    top_category_drilldown = report.get("top_category_drilldown") or {}
+    top_categories = top_category_drilldown.get("top_categories") or []
+    if top_categories:
+        lines.append("## 前兩名任務類別細項")
+        for item in top_categories[:2]:
+            lines.append(
+                f"### {item.get('description', item.get('category'))} — "
+                f"{item.get('billable_total', 0):,} billable "
+                f"({item.get('share_pct', 0):.1f}%)"
+            )
+            lines.append(f"- Messages: {item.get('messages', 0):,}")
+            lines.append(f"- Attribution: {item.get('attribution_note', '')}")
+            for label, key in (("Provider", "by_provider"), ("Model", "by_model"), ("Session", "by_session")):
+                rows = item.get(key) or []
+                if rows:
+                    lines.append(
+                        f"- {label}: " + ", ".join(
+                            f"{row['name']}={row['billable_total']:,}"
+                            for row in rows[:6]
+                        )
+                    )
+            detail = item.get("detail") or {}
+            if detail.get("bash_family"):
+                lines.append(
+                    "- Bash family: " + ", ".join(
+                        f"{row['name']}={row['billable_total']:,}"
+                        for row in detail["bash_family"][:6]
+                    )
+                )
+            if detail.get("text_reason"):
+                lines.append(
+                    "- Text reason: " + ", ".join(
+                        f"{row['name']}={row['billable_total']:,}"
+                        for row in detail["text_reason"][:6]
+                    )
+                )
+            if item.get("detail_note"):
+                lines.append(f"- Detail note: {item['detail_note']}")
         lines.append("")
 
     drilldown = report.get("drilldown") or {}

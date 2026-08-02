@@ -218,6 +218,25 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
                  f"<td class='num' style='width:70px'>{m(b)}</td></tr>")
     p.append("</table>")
 
+    # Provider totals are shown explicitly; Claude quota remains a separate
+    # denominator and Codex/AGY are never silently folded into it.
+    provider_rows = sorted(
+        ((int(v.get("billable_total", 0) or 0), k, int(v.get("messages", 0) or 0))
+         for k, v in (week.get("by_provider", {}) or {}).items()),
+        reverse=True,
+    )
+    if provider_rows:
+        p.append("<h2>當週 × Provider</h2><table>")
+        provider_max = provider_rows[0][0] or 1
+        for i, (billable, provider, messages) in enumerate(provider_rows):
+            p.append(
+                f"<tr><td class='tag' style='width:130px'>{esc(provider)}</td>"
+                f"<td>{_bar(billable / provider_max * 100, BARS[i % len(BARS)])}</td>"
+                f"<td class='num' style='width:80px'>{m(billable)}</td>"
+                f"<td class='num sub' style='width:72px'>{messages:,} msgs</td></tr>"
+            )
+        p.append("</table>")
+
     # by category
     p.append("<h2>當週 × 使用類型 / 任務內容</h2><table>")
     for b, k, msgs in cat_rows[:12]:
@@ -267,6 +286,47 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
                  f"<td class='num sub' style='width:66px'>{cost_text}</td></tr>")
     p.append("</table>")
 
+    # Top two task categories: show actionable attribution instead of only a
+    # ranked total. Categories without authoritative metadata remain explicit.
+    top_categories = (
+        week.get("top_category_drilldown", {}) or {}
+    ).get("top_categories", [])
+    if top_categories:
+        p.append("<h2>前兩名任務類別細項</h2>")
+        for item in top_categories[:2]:
+            category = esc(item.get("description") or item.get("category"))
+            p.append(
+                f"<div class='card'><strong>{category}</strong> · "
+                f"{m(item.get('billable_total', 0))} billable · "
+                f"{float(item.get('share_pct', 0) or 0):.1f}% · "
+                f"{int(item.get('messages', 0) or 0):,} messages<br>"
+                f"<span class='sub'>{esc(item.get('attribution_note', ''))}</span>"
+            )
+            for label, key in (("Provider", "by_provider"), ("Model", "by_model"), ("Session", "by_session")):
+                rows = item.get(key) or []
+                if not rows:
+                    continue
+                p.append(f"<div class='sub' style='margin-top:8px'><strong>{label}</strong>: ")
+                p.append(" · ".join(
+                    f"{esc(row.get('name'))} {m(row.get('billable_total', 0))}"
+                    for row in rows[:4]
+                ))
+                p.append("</div>")
+            detail = item.get("detail") or {}
+            for label, key in (("Bash family", "bash_family"), ("Text reason", "text_reason")):
+                rows = detail.get(key) or []
+                if not rows:
+                    continue
+                p.append(f"<div class='sub' style='margin-top:8px'><strong>{label}</strong>: ")
+                p.append(" · ".join(
+                    f"{esc(row.get('name'))} {m(row.get('billable_total', 0))}"
+                    for row in rows[:5]
+                ))
+                p.append("</div>")
+            if item.get("detail_note"):
+                p.append(f"<div class='sub' style='margin-top:8px'>{esc(item['detail_note'])}</div>")
+            p.append("</div>")
+
     # output composition (reasoning) + cached context
     th = _thinking_estimate(week.get("week_range", ""))
     cr_w = int(tot_w.get("cache_read_tokens", 0) or 0)
@@ -301,9 +361,28 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
                  f"全 provider 本週 {week_bill:,} billable\n"
                  f"今日 {day_bill:,} billable, API等值 ${float(tot_t.get('estimated_cost_usd',0)):,.0f}（非實付）\n"
                  f"前 3 使用類型: " + ", ".join(f"{k}={m(b)}" for b, k, _ in cat_rows[:3]))
+    if provider_rows:
+        text_body += "\nProvider: " + ", ".join(
+            f"{provider}={m(billable)} ({messages:,} msgs)"
+            for billable, provider, messages in provider_rows
+        )
     if bc_rows:
         text_body += "\nBash 指令大類前 3: " + ", ".join(
             f"{r.get('name')}={m(r.get('input_output_tokens', 0))}" for r in bc_rows[:3])
+    if top_categories:
+        text_body += "\n前兩名任務類別細項: " + "; ".join(
+            f"{item.get('description', item.get('category'))}="
+            f"{m(item.get('billable_total', 0))} billable; "
+            f"attribution={item.get('attribution_note', '')}; "
+            f"provider[{', '.join(f'{row.get('name')}={m(row.get('billable_total', 0))}' for row in (item.get('by_provider') or [])[:3])}]; "
+            f"model[{', '.join(f'{row.get('name')}={m(row.get('billable_total', 0))}' for row in (item.get('by_model') or [])[:3])}]; "
+            f"session[{', '.join(f'{row.get('name')}={m(row.get('billable_total', 0))}' for row in (item.get('by_session') or [])[:3])}]; "
+            f"detail[{', '.join(f'{key}=' + ', '.join(f'{row.get('name')}={m(row.get('billable_total', 0))}' for row in (item.get('detail', {}).get(key) or [])[:3]) for key in ('bash_family', 'text_reason') if item.get('detail', {}).get(key))}]"
+            for item in top_categories[:2]
+        )
+        notes = [item.get("detail_note") for item in top_categories[:2] if item.get("detail_note")]
+        if notes:
+            text_body += "\n細項說明: " + " | ".join(notes)
     return html_body, text_body
 
 

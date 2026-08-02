@@ -833,6 +833,202 @@ def test_weekly_daily_breakdown_does_not_allocate_unknown_provider_cost(
     assert "| 日期 | Messages | Billable Tokens |" in text
 
 
+def test_top_category_drilldown_ranks_two_categories_and_preserves_attribution():
+    token_usage_report = _load_token_usage_report_module()
+    target_day = date(2026, 7, 19)
+    ts = datetime(2026, 7, 19, 3, 0, tzinfo=timezone.utc)
+
+    records = [
+        _bash_record(
+            "bash-1",
+            "claude/session",
+            ts,
+            {
+                "input_tokens": 100,
+                "output_tokens": 20,
+                "cache_read_input_tokens": 0,
+                "cache_creation_input_tokens": 30,
+            },
+            ["git status"],
+        ),
+        _bash_record(
+            "bash-1",
+            "claude/session",
+            ts,
+            {
+                "input_tokens": 100,
+                "output_tokens": 20,
+                "cache_read_input_tokens": 0,
+                "cache_creation_input_tokens": 30,
+            },
+            [],
+            category="text_only",
+        ),
+        {
+            "timestamp": ts.replace(minute=4),
+            "date": target_day,
+            "session_id": "codex/session",
+            "provider": "codex",
+            "model": "gpt-5.6-sol",
+            "usage": {
+                "input_tokens": 90,
+                "output_tokens": 10,
+                "cache_read_input_tokens": 20,
+                "cache_creation_input_tokens": 0,
+            },
+            "category": "unclassified",
+            "is_subagent": False,
+            "content": [],
+            "text_content": "",
+            "msg_id": "codex-1",
+        },
+        {
+            "timestamp": ts.replace(minute=5),
+            "date": target_day,
+            "session_id": "claude/low",
+            "provider": "claude",
+            "model": "claude-opus-5",
+            "usage": {
+                "input_tokens": 10,
+                "output_tokens": 2,
+                "cache_read_input_tokens": 0,
+                "cache_creation_input_tokens": 0,
+            },
+            "category": "text_only",
+            "is_subagent": False,
+            "content": [{"type": "text", "text": "status update"}],
+            "text_content": "status update",
+            "msg_id": "text-1",
+        },
+    ]
+
+    report = token_usage_report.generate_top_category_drilldown(
+        target_day,
+        target_day,
+        records=records,
+    )
+
+    assert [row["category"] for row in report["top_categories"]] == [
+        "bash_other",
+        "unclassified",
+    ]
+    bash = report["top_categories"][0]
+    assert bash["messages"] == 1
+    assert bash["detail"]["bash_family"][0]["name"] == "git inspection"
+    unknown = report["top_categories"][1]
+    assert unknown["by_provider"][0]["name"] == "codex"
+    assert "no authoritative task metadata" in unknown["attribution_note"]
+
+    formatted = token_usage_report.format_report_text(
+        {
+            "report_type": "daily",
+            "date": target_day.isoformat(),
+            "week_range": "2026-07-19 → 2026-07-26",
+            "source": "test",
+            "totals": {
+                "input_tokens": 1,
+                "output_tokens": 1,
+                "cache_read_tokens": 0,
+                "cache_create_tokens": 0,
+                "billable_total": 1,
+                "assistant_messages": 1,
+                "unique_sessions": 1,
+                "estimated_cost_usd": 0,
+            },
+            "by_model": {},
+            "by_category": {},
+            "top_category_drilldown": report,
+            "drilldown": {},
+        }
+    )
+    assert "## 前兩名任務類別細項" in formatted
+    assert "no authoritative task metadata" in formatted
+    assert "mechanically allocated" in formatted
+
+
+def test_top_category_bash_family_billable_allocation_conserves_category_total():
+    token_usage_report = _load_token_usage_report_module()
+    target_day = date(2026, 7, 19)
+    ts = datetime(2026, 7, 19, 3, 0, tzinfo=timezone.utc)
+    report = token_usage_report.generate_top_category_drilldown(
+        target_day,
+        target_day,
+        records=[
+            _bash_record(
+                "multi-family",
+                "sess_a",
+                ts,
+                {
+                    "input_tokens": 80,
+                    "output_tokens": 20,
+                    "cache_read_input_tokens": 0,
+                    "cache_creation_input_tokens": 0,
+                },
+                ["git status", "cat README.md"],
+            )
+        ],
+    )
+    category = report["top_categories"][0]
+    family_total = sum(
+        row["billable_total"] for row in category["detail"]["bash_family"]
+    )
+    assert category["billable_total"] == 100
+    assert family_total == category["billable_total"]
+    assert "mechanically allocated" in category["detail_note"]
+
+
+def test_top_category_text_reason_discloses_heuristic_attribution():
+    token_usage_report = _load_token_usage_report_module()
+    target_day = date(2026, 7, 19)
+    report = token_usage_report.generate_top_category_drilldown(
+        target_day,
+        target_day,
+        records=[
+            _bash_record(
+                "text-only",
+                "sess_text",
+                datetime(2026, 7, 19, 4, 0, tzinfo=timezone.utc),
+                {
+                    "input_tokens": 12,
+                    "output_tokens": 8,
+                    "cache_read_input_tokens": 0,
+                    "cache_creation_input_tokens": 0,
+                },
+                [],
+                category="text_only",
+            )
+        ],
+    )
+
+    category = report["top_categories"][0]
+    assert category["detail"]["text_reason"]
+    assert "keyword heuristic" in category["detail_note"]
+
+    formatted = token_usage_report.format_report_text(
+        {
+            "report_type": "daily",
+            "date": target_day.isoformat(),
+            "week_range": "2026-07-19 → 2026-07-26",
+            "source": "test",
+            "totals": {
+                "input_tokens": 1,
+                "output_tokens": 1,
+                "cache_read_tokens": 0,
+                "cache_create_tokens": 0,
+                "billable_total": 1,
+                "assistant_messages": 1,
+                "unique_sessions": 1,
+                "estimated_cost_usd": 0,
+            },
+            "by_model": {},
+            "by_category": {},
+            "top_category_drilldown": report,
+            "drilldown": {},
+        }
+    )
+    assert "keyword heuristic" in formatted
+
+
 def _load_token_report_email_module():
     import importlib.util
     root = Path(__file__).resolve().parents[1]
@@ -883,6 +1079,34 @@ def test_email_html_includes_bash_bucket_table(monkeypatch):
                 ],
             }
         },
+        "top_category_drilldown": {
+            "top_categories": [
+                {
+                    "category": "bash_other",
+                    "description": "其他 Bash 操作",
+                    "messages": 3,
+                    "billable_total": 600,
+                    "share_pct": 60.0,
+                    "attribution_note": "authoritative task category",
+                    "by_provider": [{"name": "claude", "messages": 3, "billable_total": 600}],
+                    "by_model": [],
+                    "by_session": [],
+                    "detail": {"bash_family": [{"name": "git", "messages": 2, "billable_total": 400}]},
+                },
+                {
+                    "category": "unclassified",
+                    "description": "未分類 provider telemetry",
+                    "messages": 2,
+                    "billable_total": 400,
+                    "share_pct": 40.0,
+                    "attribution_note": "Codex token_count has no authoritative task metadata; task category not inferred.",
+                    "by_provider": [{"name": "codex", "messages": 2, "billable_total": 400}],
+                    "by_model": [{"name": "gpt-5.6-sol", "messages": 2, "billable_total": 400}],
+                    "by_session": [],
+                    "detail": {},
+                },
+            ]
+        },
     }
     today = {"totals": {"billable_total": 500}}
     now_tw = datetime(2026, 7, 20, 8, 0, tzinfo=timezone.utc)
@@ -896,7 +1120,15 @@ def test_email_html_includes_bash_bucket_table(monkeypatch):
     assert "API 定價等值（非實付）" in html_body
     assert "Operations Core dispatch scratch" in html_body
     assert "Claude 本週累計已用" in html_body
+    assert "當週 × Provider" in html_body
     assert "600" in html_body
     assert "全 provider 本週 1,000 billable" in text_body
     assert "N/A" in html_body
     assert "API等值" in text_body
+    assert "Provider:" in text_body
+    assert "model[" in text_body
+    assert "session[" in text_body
+    assert "no authoritative task metadata" in text_body
+    assert "前兩名任務類別細項" in html_body
+    assert "git" in html_body
+    assert "no authoritative task metadata" in html_body
