@@ -9,12 +9,12 @@
     "2400"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-08-02T08:12:56Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-08-02T08:38:23Z",
+  "completed_at": "2026-08-02T08:46:06Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1813-primary-path-codex-review-overnight-vrp-day-of-week-nu-1785658376.stderr",
   "result_artifact": "storage/ops/codex_reviews/k1813_verdict.md",
@@ -40,5 +40,22 @@
   },
   "timeout_seconds": 2700,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 70603,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:c7285004ec4fc21ac6bbe736",
+    "scheduled_for": "2026-08-02T07:45:00Z"
+  },
+  "claimed_by_pid_start_wall": "Sun Aug  2 15:45:47 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "K1813",
+    "settled_at": "2026-08-02T08:46:06Z",
+    "error": null
+  },
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
 }

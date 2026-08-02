@@ -1,0 +1,63 @@
+{
+  "id": "agent-brief_k1814_stage2-237513",
+  "title": "K1814 split 2/2: verify numbers/lookahead/HAR-baseline + render README results + artifacts gate",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1814_stage2-237513.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814/experiments/k1814/review_verdict.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1814_stage2-237513.json",
+    "--timeout",
+    "2280"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-08-02T08:42:04Z",
+  "started_at": "2026-08-02T08:46:06Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1814_stage2-237513.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1814_stage2-237513.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814/experiments/k1814/review_verdict.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1814_stage2-237513.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+  "claude_followup": {
+    "brief": "K1814 stage 2 collection: read experiments/k1814/review_verdict.json in worktree dispatch-slot-1-8af0700e-k1814. Confirm verdict is CONDITIONAL_PASS or better AND that README sections 7/8 are now actually rendered (no residual '<!-- RESULTS:MAIN -->' placeholder) AND that artifact sha256s match k1814_stage1_landing.json. Verify the write-up states the NULL honestly including that h=22 DL is significantly WORSE than HAR-L (DM -2.31, BH-FDR q=0.0414) — dl_beats_both_baselines is false at every horizon. Do NOT accept a write-up that softens this. Confirm reproduce_spec.json still pins the ORIGINAL entrypoint sha b1a67269d6f6 (preserved at experiments/k1814/gate_history/b1a67269__k1814.py); repinning it to the post-fix sha is a regression, not a fix. Only on PASS: main thread writes knowledge.json programmatically from K1814_results.json (K1259 - never from README or agent summary), then merge via bash scripts/merge_worktree.sh dispatch-slot-1-8af0700e-k1814, then settle K1814 succeeded. On FAIL: do not merge; record blocking defect and judge remediate vs 3-strike escalate.",
+    "task_type": "platform_ops",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_a8867b27",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-02T08:42:04Z",
+    "linked_at": "2026-08-02T08:42:05Z",
+    "error": null
+  },
+  "timeout_seconds": 2400,
+  "brief_source": "/tmp/brief_k1814_stage2.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1814_stage2-237513.md",
+  "parent_timeout_job_id": "agent-brief_k1814-a3ea90",
+  "split_stage": "verify_and_merge",
+  "claimed_by_pid": 70603,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:c7285004ec4fc21ac6bbe736",
+    "scheduled_for": "2026-08-02T07:45:00Z"
+  },
+  "claimed_by_pid_start_wall": "Sun Aug  2 15:45:47 2026"
+}
