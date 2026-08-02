@@ -52,7 +52,10 @@ def report_commit(report: Path) -> str | None:
 def graph_status(config: dict[str, Any], graph_id: str) -> dict[str, Any]:
     item = graph(config, graph_id)
     output, report = ROOT / item["output"], ROOT / item["report"]
-    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
+    # The active frontend is its own repository. Its graph freshness must be
+    # compared to that repository's HEAD, never to the root research checkout.
+    source_root = ROOT / item["root"]
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=source_root, check=True,
                           text=True, capture_output=True).stdout.strip()
     built = report_commit(report)
     return {"graph_id": graph_id, "graph_exists": (output / "graph.json").exists(),
@@ -83,8 +86,10 @@ def update(config: dict[str, Any], graph_ids: list[str]) -> int:
     runs: list[dict[str, Any]] = []
     try:
         for graph_id in graph_ids:
-            command = list(graph(config, graph_id)["update_command"])
-            completed = subprocess.run(command, cwd=ROOT, text=True, capture_output=True)
+            item = graph(config, graph_id)
+            command = list(item["update_command"])
+            cwd = ROOT / item.get("working_directory", ".")
+            completed = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
             runs.append({"graph_id": graph_id, "command": command,
                          "returncode": completed.returncode, "stdout_tail": completed.stdout[-2000:],
                          "stderr_tail": completed.stderr[-2000:]})

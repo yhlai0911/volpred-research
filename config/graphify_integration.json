@@ -9,7 +9,7 @@
   },
   "graphs": [
     {"id": "root", "root": ".", "output": "graphify-out", "update_command": ["graphify", "update", "."], "report": "graphify-out/GRAPH_REPORT.md"},
-    {"id": "active_frontend", "root": "frontend-v2-fix", "output": "frontend-v2-fix/graphify-out", "update_command": ["graphify", "update", "frontend-v2-fix"], "report": "frontend-v2-fix/graphify-out/GRAPH_REPORT.md"}
+    {"id": "active_frontend", "root": "frontend-v2-fix", "working_directory": "frontend-v2-fix", "output": "frontend-v2-fix/graphify-out", "update_command": ["graphify", "update", "."], "report": "frontend-v2-fix/graphify-out/GRAPH_REPORT.md"}
   ],
   "usage_ledger": "storage/ops/graphify/query_usage.jsonl",
   "freshness_receipt": "storage/ops/graphify/freshness.json"
