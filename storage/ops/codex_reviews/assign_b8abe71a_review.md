@@ -108,3 +108,11 @@ bytes did not change; the Standards review verified all pinned hashes and confir
 that the delta introduced no new lint finding. Both reviewers require the same final
 closure gate: commit these deterministic bytes, then replace the retained pre-fix FAIL
 report only with a new clean-clone PASS receipt.
+
+That closure gate passed from commit `c05db9ace`: the network-denied clean clone ran
+the full chain for 1,407.325 seconds and returned
+`pass_tolerated/WITHIN_PREDECLARED_TOLERANCE`. All 220/220 scalars matched (112 numeric),
+`mismatch_count=0`, and the canonical working copy remained unchanged. The tolerated
+surface is only the predeclared top-level execution/runtime metadata; the base output
+identity and generation ID that failed the first run now match under the strong scalar
+comparison.

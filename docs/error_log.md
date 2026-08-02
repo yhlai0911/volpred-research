@@ -4547,10 +4547,16 @@ non-atomic，部分失敗由 output/spec/commit hash mismatch 阻斷。
 仍以 `RESULT_MISMATCH` 阻擋：base declared output 內含 wall-clock `elapsed_seconds/timestamp`，
 使 base SHA 與連帶 generation ID 每次必然不同。修復不是放寬 comparator，而是移除 base
 scientific output 的非決定性欄位；runtime 只留在 canonical spec／log，output identity
-仍維持強比較。此修復納入第五次 full-chain fresh run。
+仍維持強比較。此修復納入第五次 full-chain fresh run。修正 commit `c05db9ace` 後的
+network-denied clean-clone reproduction 再完整執行 1,407 秒：220/220 scalars（含 112
+numeric）全相符、`mismatch_count=0`、canonical working copy unchanged；結果為
+`pass_tolerated/WITHIN_PREDECLARED_TOLERANCE`，容差／ignore surface 僅限事前宣告的
+top-level 執行環境與 runtime metadata，先前失敗的 base output SHA／generation ID 已在
+強比較內相符。
 
 **結案狀態**：`root_cause_fixed_and_verified`。最終 full-chain 重跑、RC/SPA 重算、strict
-artifact gate、4/4 integrity gates、41 focused regressions與三輪雙軸 code review 已完成；
+artifact gate、4/4 integrity gates、50 post-commit focused regressions、clean-clone reproduction
+與三輪雙軸 code review 已完成；
 前兩輪 FAIL 找到的 false labels、partial-month、raw-SD、zero-p、A/B/C/B0 stale-state、
 partial-stage provenance 與 evidence overclaim 均在後續 fresh run 驗證。第三輪 Spec／Standards
 皆 PASS，machine-readable verdict 綁定現行 bytes。K1583 仍保持 `SUPERSEDED`，其新矩陣
