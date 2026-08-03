@@ -34192,5 +34192,15 @@
     "owner": "hourly-slot-1-c84e4a3f0dac40dbb88de6f5c9f7e704",
     "commit": null,
     "summary": "每日精選導讀（2026-08-03）已發佈：mile_8a39f5a0「VIX 掉回 15.99，市場說沒事了：指數的平靜是淨額，你的持倉付的是毛額」。\n\n時事驅動主題：FOMC（決議日 VIX 收 20.66，近七年第 95 百分位）＋四大雲端財報交卷後，兩個交易日 VIX 崩回 15.99、GARCH 年化 15.5%，讀者問「風險過去了、可以加碼嗎」。\n\n策展：跨 archive 8 篇已發佈文章（mile_8d4345b9 08-02 / mile_08b69f7c 07-28 / mile_d26308ba 07-20 / mile_aff342df 07-19 / mile_78899a5c 07-18 / mile_e7b6e075 07-06 / mile_39b81aa5 06-20 / mile_312204b2 06-13），跨度 50 天、深庫來源 2 篇，過 _audit_digest_archive_span。具名心智模型「淨額帳 vs 毛額帳」；具名可操作清單「波動率對帳三步」放全文前 1/3 當骨幹。\n\nGates：check_arc_dedup（--candidate-id daily_digest_20260803 --audience general）exit 0、僅 arc near-miss（event/macro 主題，與本篇 netting 主題不同）；anti_ai_gate --no-fb-mode PASS（0 MUST / 0 WARN）；publish_draft dry-run 過；lazypack 由 lazypack_render.py 依 data-bound plan（storage/lazypack_plans/daily_digest_20260803_plan.json + evidence storage/drafts/assets/digest_netgross_20260803.json，sha256 e36bd2cb…）零 LLM 渲染 3 張 summary poster，非內文證據圖充數；內文另 inline 8 張來源研究證據圖。\n\n驗證：feed details.content_type=daily_digest、digest_articles 8 筆順序正確、status=published、13,462 字元；feed-sync --apply acknowledged；live readback https://volpred.zeabur.app/v3/reports/mile_8a39f5a0 HTTP 200、標題與懶人包圖組皆已出現。"
+  },
+  {
+    "timestamp": "2026-08-03T18:24:09+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1654_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-c9077e6bb4d7448a9d133365c94b16e4",
+    "owner": "hourly-slot-1-c9077e6bb4d7448a9d133365c94b16e4",
+    "commit": null,
+    "summary": "K1654 一般讀者向文章完稿並以 draft 進池：mile_dc8c018c「百天只該破一次的風險線，四個股市全被破了兩倍多」。\n\n證據來源：experiments/k1654/k1654_results.json（sha256 abc5584c…），所有數字以程式化方式讀取，未從 README 或 task prose 轉抄。發稿前跑自動核對腳本，49/49 個 reader-visible 數值與 results.json 逐值相符（破線天數、承諾次數、突破比率、尾端虧損檢定值、預測準度變化、偏態/峰態、樣本天數、視窗 1500 / refit 63 / seed 42）。\n\n內容主軸：對稱常態假設的 1% 損失線在 SPY/QQQ/^TWII/^N225 實測期（2020-01-02 至 2026-07-06）分別被破 34/35/38/35 天，承諾約 16 天；換成允許偏斜厚尾的形狀假設後降到 22/18/20/14 天。尾端虧損規模檢定 M0 八組全不通過、M2 八組全通過。誠實保留 null 的那一半：震幅預測準度四個市場全部沒有進步（-1.61%/-0.59%/-1.42%/-1.76%），且破線日群聚在 QQQ 與 ^TWII 仍未改善（最嚴格標準 2/4 通過）。\n\nGates：check_arc_dedup（--k-id k1654 --audience general）exit 0，無 K-COVERAGE；arc warn 命中 mile_de666838（階層式配置法主題），經比對主題與證據皆不同，屬 fuzzy 誤報，已差異化。層 2 feed grep 確認 K1654 在 feed 中 0 命中。anti_ai_gate --no-fb-mode PASS（warn 0/3）。_infer_audience 回讀 = general；validate_feed_audience.py PASS（1933 entries, 0 mismatches）。\n\n產出：storage/drafts/k1654_general_draft.md（正文 3,275 字元 / CJK 1,976 字）、scripts/gen_k1654_general_charts.py（資料綁定，兩張圖 run-time 由 results.json 讀值）、storage/drafts/assets/k1654_general_{breaches,tailsize}.png（已上傳 Supabase）、storage/lazypack_plans/k1654_general_plan.json（3 panel strict data-bound plan，已 enqueue async render）。\n\ntopology_override: subagent→inline。原因：本 task 為 attempt 2（attempt 1 於 10:06 failure 中止，已留下可用的 charts 腳本），evidence 擷取已在主線程完成，另派 subagent 需重讀 29KB results.json 並重做同樣的證據萃取，無收益且增加 50min cap 內收不了尾的風險。"
   }
 ]
