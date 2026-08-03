@@ -5839,3 +5839,42 @@ shadow/cutover/next_tasks/canonical 範圍 465 passed（67 個 postgres/supabase
 本 slice 狀態：**`root_cause_fixed_and_verified`**。Issue #9 umbrella 仍為 **`contained`**／OPEN：
 七日 clean 窗因本次重設，最早成熟時間為 `2026-08-09T09:16:08.343576Z`，且屆時仍須由
 `work_shadow_cutover_ready_v1` live assessment 判定，不得以 `blocked_until` 到期取代。
+
+---
+
+## 2026-08-04 — 改已認證實驗：數值等價不足以構成授權
+
+**證據化症狀**：`test_canonical_stat_helper_ratchet` 抓到
+`experiments/K1746/K1746.py::holm_adjust` 是 canonical
+`volpred.stats.inference.holm_step_down` 的本地重寫（CI 兩個獨立紅因之一）。第一次處置只把
+本地函式換成 canonical 委派，並以 23,376 次差分比對證明輸出 bit-identical —— 隨即被
+`experiment_gates.py certify` 擋下（reviewed sha 漂移），且該實驗自帶的
+`test_runtime_artifacts_are_byte_traceable_and_consistent` 也轉紅。
+
+**根因層級（產物契約，不是程式錯誤）**：`K1746_results.json` 的 `code_trace.sha256` 與
+`reproduce_spec.json` 的 `entrypoint.sha256` 把結果**綁在產生它的那份 script bytes** 上。
+因此「我證明了數值不變」**不構成**改動授權：即使每個統計量都相同，不重跑就改 script 會讓
+provenance chain 說謊 —— 結果宣稱由 A 產生，實際檔案是 B。同理，實驗自帶的測試檔若引用了被
+刪除的函式，也會一起壞掉（`test_K1746.py` 直接呼叫 `k.holm_adjust`）。**能改的唯一路徑是
+「改 code → 修測試 → 重跑 → 重審 → 重簽裁決」，四步缺一不可。**
+
+**底層修復與制度化**：K1746 走完整條路徑。改用 canonical 委派；`test_K1746.py` 的舊測試改走
+canonical，並**新增**一個測試在測試檔內重建已退役的本地定義、對 500 組家族（含平手與 0/1 邊界）
+斷言兩者相等 —— 把「這次重構是 inert」變成常駐 regression，而不是一次性的 session 證據。
+實驗重跑（24s，固定 seed、凍結資料源）以刷新 provenance。
+
+**回歸與 live read-back**：重跑前後結果 JSON 全樹差分 = **5 個 leaf，全部是 provenance/timing**
+（`artifact_generation.generation_id`、`code_trace.sha256`、`code_trace.size_bytes`、`run_utc`、
+`runtime_seconds`）；**統計量零變動**。`K1746_inference_cells.json` byte-identical；
+`K1746_score_comparison.svg` byte-identical 且仍等於**原始**裁決 pin 的 sha。
+`experiment_gates.py certify` PASS、`run` 4 gates PASS、38 tests 綠。
+
+**獨立複審 reviewer source**：Codex primary path 本 session 不可用
+（`provider policy denied codex: forbidden ANTHROPIC-BASE-URL in environment`），改用
+**agy 1.1.9 `--effort high` read-only fresh-context audit**，VERDICT PASS / 0 blocking defects，
+且複審者**自行找出**唯一真實行為差異（空家族：canonical raise、舊版回 `{}`）並判定在 K1746
+不可達（已另行實測確認）。依 `.claude/rules/experiments.md`，裁決檔已註明 reviewer source 非
+Codex primary path；Codex 恢復後若要升格為 primary-path closure，須以同一份 frozen bytes 二次驗證。
+複審 brief 與 raw transcript 依 K1715 教訓存 `storage/ops/agent_briefs/`，**不落在被審的樹裡**。
+
+commit `3161a8e3d`。本 incident 狀態：**`root_cause_fixed_and_verified`**。
