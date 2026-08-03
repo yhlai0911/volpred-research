@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：選擇權結算日真的會壓住波動嗎，第二次用更嚴的尺再測一次",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1354/K1354_results.json",
+      "sha256": "827c0cce3fa7fc6e238ea573dc3e6e0bec3f6bbd56559557387e89d93fa31084",
+      "label": "experiment K1354 results (event study of SPY monthly option-expiration days on Parkinson high-low range variance, testing the practitioner gamma-cliff story of pre-expiration compression and post-expiration release against a pre-registered |t|>3.0 / Bonferroni 0.0125 / bootstrap gate)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "傳說拆成兩句話，各自都能被打臉",
+      "alt": "市場流傳選擇權結算前波動被壓抑、結算後釋放。這次把它拆成兩句可檢定的話，改用當天最高價到最低價的距離當尺，對 SPY 自上市以來的每一個月度到期日前後各三天逐一比對同月平常日子。面板列出涵蓋的交易日數、可評估的月度到期事件數，以及其中屬於四巫日的次數。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩句話，分開測",
+          "body": [
+            "壓抑句：到期前三天比平常安靜。釋放句：到期後三天補跳回來。",
+            "這兩句常被綁在一起講，但它們是兩個獨立主張，可以一個成立、另一個不成立。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "涵蓋交易日",
+          "value": {
+            "source": "results",
+            "path": "/data/trading_days",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "可評估的月度到期事件",
+          "value": {
+            "source": "results",
+            "path": "/event_calendar/evaluable_events",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "其中四巫日",
+          "value": {
+            "source": "results",
+            "path": "/event_calendar/quad_witching_events",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "professional",
+      "title": "到期前連方向都沒給，到期後也沒有補跳",
+      "alt": "到期前三天相對同月平常日子的統計強度接近零，點估計還是正的，方向跟傳說相反，未達顯著水準。到期後三天相對到期前三天的統計強度同樣是負的且未達顯著水準，釋放沒有發生。面板列出這兩個統計強度，以及到期日當天在全部到期事件中高於同月對照的比例。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩道正式關卡的成績",
+          "body": [
+            "到期前三天的點估計是正的：傳說說該變安靜，資料連方向都沒給。",
+            "到期後三天相對到期前三天也是負的，跟釋放的預期反著走。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "到期前三天的統計強度",
+          "value": {
+            "source": "results",
+            "path": "/tests/pre3_vs_control/t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "未達顯著水準，方向與傳說相反"
+        },
+        {
+          "kind": "metric",
+          "label": "到期後三天減到期前三天的統計強度",
+          "value": {
+            "source": "results",
+            "path": "/tests/post3_vs_pre3/t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "未達顯著水準，釋放沒發生"
+        },
+        {
+          "kind": "metric",
+          "label": "到期日當天事件中偏高的比例",
+          "value": {
+            "source": "results",
+            "path": "/tests/expiration_vs_control/share_positive",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "全部到期事件中只有這個比例高於同月對照"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "門檻是事前立的，所以這次判定是空的",
+      "alt": "到期日當天的統計強度用一般標準看是達顯著水準的，但開跑前就訂死了更嚴的門檻，所以整體判定為空。四巫日與普通月結算之間也沒測出差別。面板列出到期日當天的統計強度、事前訂死的多重比較校正門檻，以及四巫日與普通月結算的差異檢定結果。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "顯著與否是門檻的性質",
+          "body": [
+            "同一個到期日效應，用一般的百分之五標準看是達顯著水準的，用這次事前訂死的標準看就不是。",
+            "七月那篇沒有被推翻。兩篇方向一致，差別在尺與門檻。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "到期日當天的統計強度",
+          "value": {
+            "source": "results",
+            "path": "/tests/expiration_vs_control/t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "沒有達到事前訂死的門檻"
+        },
+        {
+          "kind": "metric",
+          "label": "到期日當天的顯著性",
+          "value": {
+            "source": "results",
+            "path": "/tests/expiration_vs_control/t_p_two_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "過得了一般標準，過不了事前訂死的更嚴門檻"
+        },
+        {
+          "kind": "metric",
+          "label": "四巫日與普通月結算的差異檢定",
+          "value": {
+            "source": "results",
+            "path": "/tests/quad_vs_nonquad_pre3_minus_control/welch_p_two_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "沒測出差別"
+        }
+      ]
+    }
+  ]
+}
