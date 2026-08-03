@@ -265,7 +265,7 @@ def admit_one(task: dict[str, Any], *, dry_run: bool = False) -> dict[str, Any]:
     task_id = str(task.get("id") or "")
     try:
         spec = normalize_compute_spec(task)
-    except ValueError as exc:
+    except (TypeError, ValueError) as exc:
         return {"task_id": task_id, "status": "invalid", "reason": str(exc)}
     route = pick_topology(task.get("task_type"), task)
     if route["topology"] != "compute_queue":
