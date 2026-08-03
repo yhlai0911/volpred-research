@@ -2442,7 +2442,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-03T18:26:38.239588+00:00"
+     "last_seen_at": "2026-08-03T18:57:39.910618+00:00"
     },
     {
      "cleared_at": null,
@@ -2792,7 +2792,7 @@
      },
      "first_seen_at": "2026-08-02T21:26:00.232871+00:00",
      "key": "dispatch-slot-1-95470ef5",
-     "last_seen_at": "2026-08-03T18:04:58.156186+00:00"
+     "last_seen_at": "2026-08-03T18:30:53.409881+00:00"
     },
     {
      "cleared_at": null,
@@ -2806,7 +2806,7 @@
      },
      "first_seen_at": "2026-08-03T06:31:26.826223+00:00",
      "key": "dispatch-slot-1-3381ab14",
-     "last_seen_at": "2026-08-03T18:05:05.019500+00:00"
+     "last_seen_at": "2026-08-03T18:30:59.385554+00:00"
     },
     {
      "cleared_at": null,
@@ -2820,7 +2820,7 @@
      },
      "first_seen_at": "2026-08-03T07:20:23.020263+00:00",
      "key": "dispatch-slot-1-963e82b6",
-     "last_seen_at": "2026-08-03T18:05:15.309883+00:00"
+     "last_seen_at": "2026-08-03T18:31:07.525501+00:00"
     },
     {
      "cleared_at": null,
@@ -2834,7 +2834,7 @@
      },
      "first_seen_at": "2026-08-03T08:28:35.957693+00:00",
      "key": "dispatch-slot-1-a82478f1",
-     "last_seen_at": "2026-08-03T18:05:26.439120+00:00"
+     "last_seen_at": "2026-08-03T18:31:20.291563+00:00"
     },
     {
      "cleared_at": null,
@@ -2848,7 +2848,7 @@
      },
      "first_seen_at": "2026-08-03T09:27:28.118145+00:00",
      "key": "dispatch-slot-1-795237a6",
-     "last_seen_at": "2026-08-03T18:05:33.342121+00:00"
+     "last_seen_at": "2026-08-03T18:31:25.768599+00:00"
     },
     {
      "cleared_at": null,
@@ -2862,7 +2862,7 @@
      },
      "first_seen_at": "2026-08-03T11:25:05.244107+00:00",
      "key": "dispatch-slot-1-d5ed8442",
-     "last_seen_at": "2026-08-03T18:05:42.605535+00:00"
+     "last_seen_at": "2026-08-03T18:31:33.953954+00:00"
     },
     {
      "cleared_at": null,
@@ -2882,9 +2882,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-03T18:26:38.239588+00:00",
+   "last_seen_at": "2026-08-03T18:57:39.910618+00:00",
    "notified_at": null,
-   "occurrence_count": 9691,
+   "occurrence_count": 9701,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3173,7 +3173,7 @@
    "clean_observations": [],
    "clean_streak_started_at": null,
    "control_gate_id": null,
-   "current_task_id": "ci-root-30839308043",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-08-02T07:20:44.976813+00:00",
@@ -3636,9 +3636,19 @@
    "last_seen_at": "2026-08-03T18:20:25.506075+00:00",
    "notified_at": null,
    "occurrence_count": 40,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-08-03T18:45:48.332704+00:00",
+    "by": "ci-red-30736983439",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-08-03T18:45:48.332704+00:00",
+     "by": "ci-red-30736983439",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -3685,16 +3695,11 @@
    "notified_at": null,
    "occurrence_count": 57,
    "resolution": {
-    "at": "2026-08-03T17:00:45.430644+00:00",
+    "at": "2026-08-03T19:02:07.104398+00:00",
     "by": "inc_a79599a21dbb_rootcause_e1",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
-    {
-     "at": "2026-08-03T03:01:33.810536+00:00",
-     "by": "inc_a79599a21dbb_rootcause_e1",
-     "criterion": "root_cause_task_succeeded"
-    },
     {
      "at": "2026-08-03T04:01:36.487394+00:00",
      "by": "inc_a79599a21dbb_rootcause_e1",
@@ -3749,9 +3754,14 @@
      "at": "2026-08-03T17:00:45.430644+00:00",
      "by": "inc_a79599a21dbb_rootcause_e1",
      "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-03T19:02:07.104398+00:00",
+     "by": "inc_a79599a21dbb_rootcause_e1",
+     "criterion": "root_cause_task_succeeded"
     }
    ],
-   "state": "escalated",
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [],
    "task_mode": "none",
@@ -4779,6 +4789,6 @@
    }
   }
  },
- "updated_at": "2026-08-03T18:26:38.270443+00:00",
+ "updated_at": "2026-08-03T19:02:33.647039+00:00",
  "version": 1
 }
