@@ -94,6 +94,12 @@ from volpred.ops.machine_churn import (
 from volpred.ops.next_tasks import backfill_ci_repair_commit
 
 from .child_env import external_child_environment
+from .procutil import (
+    IDENTITY_DEAD,
+    IDENTITY_MISMATCH,
+    check_identity,
+    get_process_start_wall,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -1903,6 +1909,119 @@ def _base_tree_entries(
     return {path: parsed.get(path, ()) for path in paths}
 
 
+#: How long a provably-dead holder's lock must sit before anyone reclaims it.
+#: Not a liveness signal — liveness is proven separately and must already say
+#: "gone". This only keeps a reclaim from racing a holder that is mid-adopt.
+_INDEX_LOCK_RECLAIM_MIN_AGE_S = 120.0
+
+
+def _index_lock_owner_path(lock_path: Path) -> Path:
+    return lock_path.with_name(lock_path.name + ".volpred-owner.json")
+
+
+def _write_index_lock_owner(lock_path: Path) -> None:
+    """Stamp who holds `.git/index.lock`, so a crash is later provable.
+
+    Git's own index.lock carries no owner identity: the file's existence *is*
+    the claim. That works when the holder always gets to run its cleanup, and
+    this holder does not — the supervisor SIGTERMs itself on stale-code reload
+    and SIGKILLs workers on custody loss, neither of which runs a `finally`.
+    A leaked lock then blocks every writer in the repo with no way to tell
+    "held" from "abandoned", which is exactly what stranded three commits for
+    43 minutes, 80 seconds and 43 minutes again on 2026-08-04.
+
+    Best-effort by construction: failing to write the sidecar must not fail the
+    refresh. The cost of a missing sidecar is only that the lock becomes
+    unreclaimable-by-us, which is the same safe state as before this existed.
+    """
+    try:
+        _index_lock_owner_path(lock_path).write_text(
+            json.dumps(
+                {
+                    "actor": "phase_z",
+                    "pid": os.getpid(),
+                    "pid_start_wall": get_process_start_wall(os.getpid()),
+                    "host": os.uname().nodename,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+            ),
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        LOG.warning("phase_z: could not stamp index-lock owner (%s)", exc)
+
+
+def _clear_index_lock_owner(lock_path: Path) -> None:
+    try:
+        _index_lock_owner_path(lock_path).unlink(missing_ok=True)
+    except OSError:
+        pass  # silent-ok: sidecar is advisory; a stale one fails closed on reclaim
+
+
+def reclaim_leaked_index_lock(
+    repo_root: Path,
+    *,
+    now: datetime | None = None,
+    min_age_s: float = _INDEX_LOCK_RECLAIM_MIN_AGE_S,
+) -> dict:
+    """Release `.git/index.lock` only when its holder is provably gone.
+
+    Fails closed at every step. A lock with no sidecar is never touched: that is
+    either real Git mid-write or another tool, and deleting it would corrupt a
+    live index update — the exact damage a naive "stale lock cleaner" does. We
+    reclaim only a lock this module stamped, on this host, whose holder pid
+    `procutil` reports as DEAD or REUSED (never `unverified`, which means the
+    probe itself failed and proves nothing), and only after `min_age_s`.
+    """
+    index_lock = repo_root / ".git" / "index.lock"
+    owner_path = _index_lock_owner_path(index_lock)
+    if not index_lock.exists():
+        return {"reclaimed": False, "reason": "no_lock"}
+    if not owner_path.exists():
+        return {"reclaimed": False, "reason": "not_ours"}
+    try:
+        owner = json.loads(owner_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return {"reclaimed": False, "reason": "owner_unreadable", "detail": str(exc)[:200]}
+    if owner.get("host") != os.uname().nodename:
+        return {"reclaimed": False, "reason": "foreign_host"}
+
+    pid = owner.get("pid")
+    if not isinstance(pid, int) or pid <= 0:
+        return {"reclaimed": False, "reason": "owner_pid_invalid"}
+    if pid == os.getpid():
+        return {"reclaimed": False, "reason": "self_held"}
+    identity = check_identity(pid, owner.get("pid_start_wall"))
+    if identity not in {IDENTITY_DEAD, IDENTITY_MISMATCH}:
+        return {"reclaimed": False, "reason": f"holder_{identity}"}
+
+    current = now or datetime.now(timezone.utc)
+    try:
+        created = datetime.fromisoformat(str(owner.get("created_at")))
+    except ValueError:
+        return {"reclaimed": False, "reason": "owner_timestamp_invalid"}
+    if created.tzinfo is None:
+        created = created.replace(tzinfo=timezone.utc)
+    age_s = (current - created).total_seconds()
+    if age_s < min_age_s:
+        return {"reclaimed": False, "reason": "too_fresh", "age_s": age_s}
+
+    try:
+        index_lock.unlink(missing_ok=True)
+        owner_path.unlink(missing_ok=True)
+    except OSError as exc:
+        return {"reclaimed": False, "reason": "unlink_failed", "detail": str(exc)[:200]}
+    receipt = {
+        "reclaimed": True,
+        "holder_pid": pid,
+        "holder_identity": identity,
+        "age_s": round(age_s, 1),
+        "reclaimed_at": current.isoformat(),
+    }
+    LOG.warning("phase_z: reclaimed leaked index.lock %s", receipt)
+    return receipt
+
+
 def _refresh_shared_index_cas(
     repo_root: Path,
     *,
@@ -1939,6 +2058,7 @@ def _refresh_shared_index_cas(
     try:
         fd = os.open(lock_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         owns_lock = True
+        _write_index_lock_owner(lock_path)
         with os.fdopen(fd, "wb") as handle:
             fd = None
             with index_path.open("rb") as source:
@@ -1973,6 +2093,11 @@ def _refresh_shared_index_cas(
     finally:
         if fd is not None:
             os.close(fd)
+        if owns_lock:
+            # Unconditional: `os.replace` consumes the lock on adopt but leaves
+            # the sidecar, and a stray sidecar would later describe a lock that
+            # a *different* writer owns.
+            _clear_index_lock_owner(lock_path)
         if owns_lock and not adopted:
             try:
                 lock_path.unlink(missing_ok=True)
@@ -3345,6 +3470,13 @@ def run_phase_z(
             if supplied_alert_fn is None
             else lambda **_kwargs: {"resolved": False, "reason": "injected_alert_test_seam"}
         )
+    # Self-heal our own crash debris before touching Git. If a previous tick was
+    # SIGTERMed by the stale-code reloader (or SIGKILLed on custody loss) while
+    # holding the shared-index lock, its `finally` never ran and every writer in
+    # the repo is blocked until someone proves the holder is dead. That proof is
+    # exactly what the owner sidecar exists for, so the next tick can do it
+    # without a human deciding whether a lock looks old enough.
+    reclaim_leaked_index_lock(repo_root)
     # Read-and-consume up front: every exit path below is now incapable of leaving
     # a receipt behind to caption the next fire's commit. See the receipt block above.
     consumed_receipt = _read_and_consume_fire_receipt(repo_root, runner)
