@@ -1012,6 +1012,25 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
             selected_mutating = task
             break
 
+        # Explicit response work (PHASE-Z / CI incidents) is already
+        # materialized and carries its own preemption bit.  Seat it before
+        # starvation rotation, including platform_ops rows that use an
+        # observe-only contract and therefore still need supervisor admission.
+        if selected_mutating is None:
+            for task in ordered_tasks:
+                if task.get("dispatch_preempt") is not True or not _eligible(task):
+                    continue
+                if not requires_supervisor_preassignment(task):
+                    return {
+                        "ok": True,
+                        "assigned": False,
+                        "reason": "preemptive_non_mutating_task",
+                        "selected_task_id": _task_key(task),
+                        "blocked_contracts": blockers[:20],
+                    }
+                selected_mutating = task
+                break
+
         # The generic dispatcher owns fresh scheduled rotation, but its
         # starvation verdict must still own the *real* admission boundary.
         # Compare all runnable rows at the shared policy seam before splitting

@@ -3712,6 +3712,59 @@ def test_dispatch_preassign_seats_preemptive_observe_only_incident(
     assert rows["generic-article"]["status"] == "pending"
 
 
+def test_dispatch_preassign_binds_preemptive_platform_incident_before_generic(
+    tmp_path, monkeypatch
+) -> None:
+    """A PHASE-Z platform incident wins even when a generic mutator is older."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "phase-z-platform-live-e1",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
+                    "dispatch_preempt": True,
+                    "write_intent": "observe_only",
+                    "declared_output_paths": [],
+                    "post_merge_actions": [],
+                },
+                {
+                    "id": "older-generic-mutator",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "platform_ops",
+                    "dispatch_lane": "agent",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": ["scripts/fix.py"],
+                    "post_merge_actions": [],
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-phase-z-platform",
+            job_id="job-phase-z-platform",
+        )
+    )
+
+    assert assigned["ok"] is True
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "phase-z-platform-live-e1"
+    assert assigned["contract"]["write_intent"] == "observe_only"
+    rows = {row["id"]: row for row in json.loads(next_tasks.read_text())}
+    assert rows["phase-z-platform-live-e1"]["status"] == "in_progress"
+    assert rows["older-generic-mutator"]["status"] == "pending"
+
+
 def test_dispatch_preassign_ignores_expired_event_before_mutating_task(
     tmp_path, monkeypatch
 ) -> None:
