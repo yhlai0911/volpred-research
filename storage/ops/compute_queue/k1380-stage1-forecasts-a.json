@@ -32,5 +32,11 @@
   "parent_timeout_job_id": "compute-k1380-paper-9-white-rc-hansen-spa-test-17-spec-multiple-test-1779189466",
   "split_stage": "forecasts_a",
   "cancelled_at": "2026-07-21T06:56:05Z",
-  "cancel_reason": "staged k1380.py lives on wt/dispatch-slot-1-375ba0e3-k1380 and is not yet merged; the compute worker runs with cwd=REPO_ROOT where experiments/k1380/k1380.py is still the pre-refactor monolith with no --stage flag, so all three stages would fail on argparse. Re-enqueue verbatim (same ids, priorities 3/4/5, timeouts 5400/1800/900, same --timeout-parent-job-id and --split-stage) once the branch merges to main. Enqueue commands and the stage-3 followup brief are recorded in experiments/k1380/k1380_stage_refactor_report.json."
+  "cancel_reason": "staged k1380.py lives on wt/dispatch-slot-1-375ba0e3-k1380 and is not yet merged; the compute worker runs with cwd=REPO_ROOT where experiments/k1380/k1380.py is still the pre-refactor monolith with no --stage flag, so all three stages would fail on argparse. Re-enqueue verbatim (same ids, priorities 3/4/5, timeouts 5400/1800/900, same --timeout-parent-job-id and --split-stage) once the branch merges to main. Enqueue commands and the stage-3 followup brief are recorded in experiments/k1380/k1380_stage_refactor_report.json.",
+  "source_task_settlement": {
+    "state": "not_required",
+    "task_id": "k1380_rerun_staged_correct_qlike",
+    "settled_at": "2026-08-03T11:40:34Z",
+    "reason": "source_task_unbound:succeeded"
+  }
 }

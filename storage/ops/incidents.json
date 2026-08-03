@@ -2143,6 +2143,18 @@
      "instance_key": "dispatch-slot-1-795237a6",
      "reason": "worker_superseded_generation",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-03T11:25:05.244107+00:00",
+     "instance_key": "dispatch-slot-1-d5ed8442",
+     "reason": "worker_superseded_generation",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-03T12:17:25.956907+00:00",
+     "instance_key": "dispatch-slot-1-db30a837",
+     "reason": "worker_killed_timeout",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -2430,7 +2442,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-03T11:19:46.853227+00:00"
+     "last_seen_at": "2026-08-03T12:17:36.904315+00:00"
     },
     {
      "cleared_at": null,
@@ -2780,7 +2792,7 @@
      },
      "first_seen_at": "2026-08-02T21:26:00.232871+00:00",
      "key": "dispatch-slot-1-95470ef5",
-     "last_seen_at": "2026-08-03T10:34:12.786910+00:00"
+     "last_seen_at": "2026-08-03T11:24:32.516601+00:00"
     },
     {
      "cleared_at": null,
@@ -2794,7 +2806,7 @@
      },
      "first_seen_at": "2026-08-03T06:31:26.826223+00:00",
      "key": "dispatch-slot-1-3381ab14",
-     "last_seen_at": "2026-08-03T10:34:18.570613+00:00"
+     "last_seen_at": "2026-08-03T11:24:37.351087+00:00"
     },
     {
      "cleared_at": null,
@@ -2808,7 +2820,7 @@
      },
      "first_seen_at": "2026-08-03T07:20:23.020263+00:00",
      "key": "dispatch-slot-1-963e82b6",
-     "last_seen_at": "2026-08-03T10:34:25.598727+00:00"
+     "last_seen_at": "2026-08-03T11:24:43.995694+00:00"
     },
     {
      "cleared_at": null,
@@ -2822,7 +2834,7 @@
      },
      "first_seen_at": "2026-08-03T08:28:35.957693+00:00",
      "key": "dispatch-slot-1-a82478f1",
-     "last_seen_at": "2026-08-03T10:34:35.793676+00:00"
+     "last_seen_at": "2026-08-03T11:24:54.006633+00:00"
     },
     {
      "cleared_at": null,
@@ -2836,15 +2848,43 @@
      },
      "first_seen_at": "2026-08-03T09:27:28.118145+00:00",
      "key": "dispatch-slot-1-795237a6",
-     "last_seen_at": "2026-08-03T10:34:39.621929+00:00"
+     "last_seen_at": "2026-08-03T11:24:58.401050+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "f6fd701301f8a075c4141b2ae74cf43954749ac4",
+      "branch": "worktree-dispatch-slot-1-d5ed8442",
+      "checkpoint_commit": "c53faef44cf5cc253e38f984ccd87ec83c46c06d",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-d5ed8442"
+     },
+     "first_seen_at": "2026-08-03T11:25:05.244107+00:00",
+     "key": "dispatch-slot-1-d5ed8442",
+     "last_seen_at": "2026-08-03T11:25:05.244107+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "85d5ba1441bbebab36397b3d38dcba866537b355",
+      "branch": "worktree-dispatch-slot-1-db30a837",
+      "checkpoint_commit": "0d682767515c648d4b6c55f74edf1af3af5fded9",
+      "detail_tail": "fire ended with outcome=killed_timeout; dirty=True unique_commits=0",
+      "reason": "worker_killed_timeout",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-db30a837"
+     },
+     "first_seen_at": "2026-08-03T12:17:25.956907+00:00",
+     "key": "dispatch-slot-1-db30a837",
+     "last_seen_at": "2026-08-03T12:17:25.956907+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-03T11:19:46.853227+00:00",
+   "last_seen_at": "2026-08-03T12:17:36.904315+00:00",
    "notified_at": null,
-   "occurrence_count": 9480,
+   "occurrence_count": 9489,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3311,6 +3351,16 @@
      "at": "2026-08-03T11:06:58.358290+00:00",
      "instance_key": "30806887972:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-03T11:26:37.485168+00:00",
+     "instance_key": "30808370615:1",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-03T11:55:32.059091+00:00",
+     "instance_key": "30810158803:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -3511,14 +3561,26 @@
      "first_seen_at": "2026-08-03T11:06:58.358290+00:00",
      "key": "30806887972:1",
      "last_seen_at": "2026-08-03T11:06:58.358290+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-03T11:26:37.485168+00:00",
+     "key": "30808370615:1",
+     "last_seen_at": "2026-08-03T11:26:37.485168+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-03T11:55:32.059091+00:00",
+     "key": "30810158803:1",
+     "last_seen_at": "2026-08-03T11:55:32.059091+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-03T11:05:11.8460469Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
-   "last_seen_at": "2026-08-03T11:06:58.358290+00:00",
+   "last_breach_detail": "2026-08-03T11:54:52.0529751Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
+   "last_seen_at": "2026-08-03T11:55:32.059091+00:00",
    "notified_at": null,
-   "occurrence_count": 33,
+   "occurrence_count": 35,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -3542,9 +3604,9 @@
    "clean_streak_started_at": null,
    "control_gate_id": null,
    "current_task_id": null,
-   "episode_count": 23,
+   "episode_count": 24,
    "episode_failures": [],
-   "episode_opened_at": "2026-08-03T11:04:03.928961+00:00",
+   "episode_opened_at": "2026-08-03T12:01:47.537652+00:00",
    "escalation": {
     "at": "2026-07-31T06:00:55.870210+00:00",
     "notification_id": "effect_owned_email_6b431a033897926b7482a6c7bfd790c7",
@@ -3559,20 +3621,15 @@
    "is_control_intervention": false,
    "kind": "draft_pool_low",
    "last_breach_detail": "Draft pool below threshold (<4)",
-   "last_seen_at": "2026-08-03T11:04:03.928961+00:00",
+   "last_seen_at": "2026-08-03T12:01:47.537652+00:00",
    "notified_at": null,
-   "occurrence_count": 53,
+   "occurrence_count": 54,
    "resolution": {
-    "at": "2026-08-03T11:04:03.928961+00:00",
+    "at": "2026-08-03T12:01:47.537652+00:00",
     "by": "inc_a79599a21dbb_rootcause_e1",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
-    {
-     "at": "2026-08-03T00:01:15.566116+00:00",
-     "by": "inc_a79599a21dbb_rootcause_e1",
-     "criterion": "root_cause_task_succeeded"
-    },
     {
      "at": "2026-08-03T00:05:00.149245+00:00",
      "by": "inc_a79599a21dbb_rootcause_e1",
@@ -3625,6 +3682,11 @@
     },
     {
      "at": "2026-08-03T11:04:03.928961+00:00",
+     "by": "inc_a79599a21dbb_rootcause_e1",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-03T12:01:47.537652+00:00",
      "by": "inc_a79599a21dbb_rootcause_e1",
      "criterion": "root_cause_task_succeeded"
     }
@@ -4657,6 +4719,6 @@
    }
   }
  },
- "updated_at": "2026-08-03T11:19:46.886664+00:00",
+ "updated_at": "2026-08-03T12:17:49.420277+00:00",
  "version": 1
 }
