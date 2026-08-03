@@ -323,6 +323,92 @@ def test_complete_defers_linked_issue_close_until_real_commit(
     assert "issue_closed_commit" not in saved
 
 
+def test_self_optimization_completion_requires_verification_evidence(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "repair-1",
+                    "status": "in_progress",
+                    "claimed_by": "worker",
+                    "repair_lane": "self_optimization",
+                    "alert_key": "silent_fallback_new",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="repair-1",
+            status="succeeded",
+            result="patched the owner",
+        )
+    )
+
+    assert result["ok"] is False
+    assert result["reason"] == "repair_verification_required"
+    assert json.loads(next_tasks.read_text(encoding="utf-8"))[0]["status"] == (
+        "in_progress"
+    )
+
+
+def test_self_optimization_success_notice_contains_verified_receipt(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "repair-2",
+                    "status": "in_progress",
+                    "claimed_by": "worker",
+                    "repair_lane": "self_optimization",
+                    "alert_key": "silent_fallback_new",
+                    "incident_id": "incident-2",
+                    "title": "silent fallback detected",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    import volpred.ops.repair_success as repair_success
+
+    notices: list[dict] = []
+    monkeypatch.setattr(
+        repair_success,
+        "notify_verified_repair_success",
+        lambda task: notices.append(task) or {"sent": True, "notification_id": "n2"},
+    )
+
+    out = task_pool_claim.cmd_complete(
+        argparse.Namespace(
+            id="repair-2",
+            status="succeeded",
+            result="patched the owner and reran detector",
+            repair_verification_json=json.dumps(
+                {
+                    "method": "patched owner and reran detector",
+                    "tests": "pytest tests/test_dispatch_supervisor.py",
+                    "readback": "detector clean; incident observe_clean recorded",
+                }
+            ),
+            issue_disposition="contained",
+        )
+    )
+
+    assert out["ok"] is True
+    assert out["repair_success_notification"]["sent"] is True
+    assert notices[0]["repair_verification"]["tests"].startswith("pytest")
+
+
 def test_linked_success_defaults_to_contained_without_issue_close_receipt(
     tmp_path,
     monkeypatch,

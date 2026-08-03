@@ -11,7 +11,9 @@
 3. dispatcher 仍是唯一 claim／slot／execution owner；ingress 不直接執行
    agent，也不繞過 `task_pool_claim`、execution contract 或 worktree custody。
 4. worker 完成後必須以 task receipt、測試／detector read-back、必要時
-   `issue_tracker_sync` 回寫。incident 只有通過 sustained-clean 才能 resolved。
+   `issue_tracker_sync` 回寫；`task_pool_claim complete` 必須帶
+   `repair_verification(method/tests/readback)`。incident 只有通過 sustained-clean
+   才能 resolved，成功通知也只在這個 gate 後寄出。
 5. machine-self repair 僅允許 `incident.MACHINE_SELF_REPAIR_OUTPUT_PATHS`
    登記的 kind；episode 失敗或逾時會升級 root-cause task，不會無限重試。
 
@@ -41,6 +43,12 @@ GitHub comment ingress 是 observation／audit transport，不是任意程式碼
 但實體 worker slot、provider quota、single-flight、execution contract 與
 incident deadline 仍是硬性安全閘；若資源已滿，系統會留下 durable pending receipt，
 而不是偷偷同時啟動第二個修復者。
+
+## 通知契約
+
+修復建立、排隊、進度、逾時或失敗都不寄 owner notification。成功通知只由
+`volpred.ops.repair_success.notify_verified_repair_success` 產生，且固定列出：
+發生的問題、最終解決步驟／方法、測試證據、detector/runtime read-back 與完成時間。
 
 快速驗證：
 

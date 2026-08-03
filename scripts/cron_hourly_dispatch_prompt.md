@@ -11,6 +11,9 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 2. **派工前先 claim**：先確認 `$VOLPRED_TASK_CLAIM_OWNER` 非空，再跑 `uv run python scripts/task_pool_claim.py claim --id <id> --owner "$VOLPRED_TASK_CLAIM_OWNER"`。這是 supervisor 依 slot_id + job_id 產生的唯一且 retry-stable ownership token；缺值必須停止並回報 dispatcher identity error，禁止退回日期/小時或自訂名稱。拒絕 `wrong_status` / `already_claimed` 時換另一 task，禁強推。若 task 帶 `issue_ref`，後續 Git writer 必須傳同一個 `--task-id <id>`。
 3. 開工標 in_progress：`uv run python scripts/task_pool_claim.py start --id <id>`
 4. 完工標 succeeded/failed：`uv run python scripts/task_pool_claim.py complete --id <id> --status succeeded --result "<摘要>"`。`trending_repost` / `event_article` 若摘要宣告 feed 已發佈 `mile_<id>`，同班必先產出 `storage/drafts/fb_mile_<id>.md`；缺稿時 complete 會 fail-closed，禁止用 `fb_repost_*` follow-up 代替完稿。
+   若 task 帶 `repair_lane=self_optimization`，succeeded 前必須另傳
+   `--repair-verification-json '{"method":"...","tests":"...","readback":"..."}'`；
+   沒有三項真實證據不得結案，也不會寄修復成功通知。
 5. 雙 session 撞題保護：claim 機制已 cross-session atomic（fcntl LOCK_EX on next_tasks.json）— 互動 session 與 hourly session claim 同 id 時後者得 `already_claimed`，自動換工。
 
 PRE-PHASE-0 — Auto-unblock expired blocked tasks（2026-06-05 加，治本 NFP T+0 卡死案例）:

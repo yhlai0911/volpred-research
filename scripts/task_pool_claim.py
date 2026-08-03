@@ -117,6 +117,53 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _repair_verification_from_args(
+    task: dict[str, Any], args: argparse.Namespace
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Require structured evidence before a self-repair can announce success."""
+    if str(task.get("repair_lane") or "") != "self_optimization":
+        return None, None
+    if str(getattr(args, "status", "")) != "succeeded":
+        return None, None
+    raw = getattr(args, "repair_verification_json", None)
+    if not raw:
+        return None, {
+            "ok": False,
+            "reason": "repair_verification_required",
+            "task_id": task.get("id"),
+            "required": ["method", "tests", "readback"],
+        }
+    try:
+        payload = json.loads(raw)
+    except (TypeError, json.JSONDecodeError) as exc:
+        return None, {
+            "ok": False,
+            "reason": "repair_verification_invalid_json",
+            "task_id": task.get("id"),
+            "error": str(exc),
+        }
+    if not isinstance(payload, dict):
+        return None, {
+            "ok": False,
+            "reason": "repair_verification_not_object",
+            "task_id": task.get("id"),
+        }
+    missing = [
+        key
+        for key in ("method", "tests", "readback")
+        if payload.get(key) in (None, "", [], {})
+    ]
+    if missing:
+        return None, {
+            "ok": False,
+            "reason": "repair_verification_fields_missing",
+            "task_id": task.get("id"),
+            "missing": missing,
+        }
+    payload["verified_at"] = _now()
+    return payload, None
+
+
 def _write_claim_window(task: dict[str, Any], claimed_at: str) -> None:
     """Persist the deterministic lease boundary used by stale cleanup."""
     task["claimed_at"] = claimed_at
@@ -1757,6 +1804,39 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
         args,
         completion_base_commit=_current_repo_head(),
     )
+    if (
+        out.get("ok") is True
+        and out.get("status") == "succeeded"
+        and not out.get("already_completed")
+    ):
+        # Queue completion is authoritative; the success notice is a separate
+        # owned transport and is never sent for admission/progress/failure.
+        try:
+            with _locked_load() as (_fh, tasks):
+                completed_task = next(
+                    (
+                        dict(task)
+                        for task in tasks
+                        if isinstance(task, dict)
+                        and str(task.get("id") or "") == str(args.id)
+                    ),
+                    None,
+                )
+            if completed_task is not None:
+                from volpred.ops.repair_success import (
+                    notify_verified_repair_success,
+                )
+
+                success_notice = notify_verified_repair_success(completed_task)
+                if success_notice is not None:
+                    out["repair_success_notification"] = success_notice
+        except Exception as exc:  # noqa: BLE001 - completion must not roll back
+            out["repair_success_notification"] = {
+                "sent": False,
+                "skipped": True,
+                "reason": "success_notification_failed",
+                "error": f"{type(exc).__name__}: {exc}",
+            }
     if burst:
         # The supervisor owns a separate lock; never hold queue LOCK_EX while
         # requesting the next fire.
@@ -1784,6 +1864,11 @@ def _complete_locked(
         issue_disposition = getattr(
             args, "issue_disposition", "contained"
         )
+        repair_verification, repair_verification_error = (
+            _repair_verification_from_args(task, args)
+        )
+        if repair_verification_error is not None:
+            return repair_verification_error, None
         if issue_disposition not in {"contained", "close"}:
             raise ValueError(
                 "issue_disposition must be contained or close"
@@ -1857,6 +1942,8 @@ def _complete_locked(
         if args.result:
             task["result"] = result_text
             result_text = task["result"]
+        if repair_verification is not None:
+            task["repair_verification"] = repair_verification
         effect = None
         if args.status == "succeeded":
             effect = _apply_codex_review_followup_fail(tasks, task, result_text)
@@ -2364,7 +2451,7 @@ def main() -> int:
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
-    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.add_argument("--issue-disposition", choices=["contained", "close"], default="contained", help="GitHub issue lifecycle: keep open by default; close only after all issue acceptance gates pass"); p.add_argument("--gate-decision", choices=sorted(_GATE_REVIEW_ACTIONS), help="Required for succeeded control-gate reviews; must match registry lifecycle.last_action"); p.add_argument("--gate-live-readback", help="Required downstream read-back for succeeded control-gate reviews"); p.set_defaults(fn=cmd_complete)
+    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.add_argument("--repair-verification-json", help="Required for self_optimization success: JSON object with method/tests/readback"); p.add_argument("--issue-disposition", choices=["contained", "close"], default="contained", help="GitHub issue lifecycle: keep open by default; close only after all issue acceptance gates pass"); p.add_argument("--gate-decision", choices=sorted(_GATE_REVIEW_ACTIONS), help="Required for succeeded control-gate reviews; must match registry lifecycle.last_action"); p.add_argument("--gate-live-readback", help="Required downstream read-back for succeeded control-gate reviews"); p.set_defaults(fn=cmd_complete)
     p = sub.add_parser("annotate", help="set free-form metadata fields on a task (locked canonical write; replaces jq-edit)")
     p.add_argument("--id", required=True)
     p.add_argument("--set", action="append", metavar="FIELD=VALUE", help="set FIELD to a string VALUE (repeatable)")
