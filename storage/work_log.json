@@ -34222,5 +34222,15 @@
     "owner": "hourly-slot-1-5d5981d0cb774cdabeab2f46badcb671",
     "commit": null,
     "summary": "更正前一筆 K1706_article_general work_log：該筆寫「已建 followup task K1706_lazypack_publish」，實際上本班未建立該 task（50min cap 用盡，來不及走 task 建立流程）。真實狀態：lazypack plan 尚未撰寫、文章尚未發佈。\n\n不會靜默遺失的理由（已回讀確認）：`storage/reports/feed.json` 內無任何 K1706 條目，`scripts/article_continuity.py` 的 uncovered-K 掃描仍會把 K1706 判為未覆蓋並重新產生 article task。下一班承接時應直接接續既有草稿 `storage/drafts/k1706_general_draft.md`（已通過 anti_ai_gate exit 0 + 數字逐項驗證），只需補 lazypack plan 後 publish，不需重寫。"
+  },
+  {
+    "timestamp": "2026-08-04T00:53:17+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1354_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e84d35c324fe4e1891a0f1bdcef83577",
+    "owner": "hourly-slot-1-e84d35c324fe4e1891a0f1bdcef83577",
+    "commit": null,
+    "summary": "K1354 一般讀者向文章完成並入草稿池：mile_b4223d34（status=draft，release cron 接手發佈；lazypack render 已 queue）。\n\n**選題與查重**：dedup gate（`check_arc_dedup.py --k-id k1354 --audience general`）exit 0、無 K-COVERAGE，但回報 `warn_coverage_metadata_gap`。主線程照 publishing.md 自做 layer-2 feed 查重，找出高度相關的既published 文章 `mile_2b424e20`（2026-07-13，general，實驗 K1703）：同一組「結算週壓抑波動、結算後釋放」傳說、同一標的 SPY、幾乎同一樣本期，結論「只釘一天」。gate 沒擋是因為該文無可抽取的 experiment ref。判定為**可寫但必須重新定位**，非重複稿。\n\n**差異化（寫進 brief 當硬約束）**：K1354 是同一問題的第二次更嚴測試 —— (1) 尺換成 Parkinson 高低價區間變異數（K1703 用收盤對收盤，且自承測不到日內）；(2) 窗口從「週 vs 週」改成 399 個到期事件的日級事件研究，對照組為同月扣除到期日 ±5 日的其餘交易日；(3) 事前訂死 |t|>3.0 + Bonferroni 0.0125 + bootstrap CI 排除零；(4) 四巫日 132 次 vs 普通月結算 267 次單獨切分（K1703 完全沒做）。文章主題定為「顯著與否是門檻的性質」，並明寫兩篇方向一致、前篇未被推翻。\n\n**verdict = NULL**：pre3_vs_control t=+0.31 (p=0.760，點估計方向與傳說相反)；post3_vs_pre3 t=-0.51 (p=0.607)；expiration_vs_control t=-2.22 (p=0.027，bootstrap 雙尾 0.0288，CI 排除零，share_positive=0.288) 過 5% 但未過事前門檻；quad vs nonquad Welch p=0.208 / 0.221。\n\n**主線程獨立驗算（未全盤採信 agent）**：以 offset panel 重算 11 個 offset 的配對檢定，數字與 agent 回報完全一致。確認兩件 agent 主動揭露的不利發現屬實並保留在文中 —— (a) offset +5 偏離 -17.12%、t=-2.80，比到期日 -16.00%、t=-2.22 更深，文章誠實列為多重檢定的運氣、不給解釋；(b) 11 個 offset 的 Wilcoxon 全部顯著（最寬鬆 p=0.0056）且中位數全為負，故 pre3 的 Wilcoxon p=0.0070 是「短窗均值 vs 長窗均值在右偏分布下」的結構性產物，不是到期效應 —— 文章採用此較嚴格解釋，避免用單一有利檢定編故事。\n\n**主線程修正**：agent 原標題與 description、三十秒版本寫「當天振幅窄了 16%」。16% 是平方過的變異數尺度，實際高低價寬度只窄 8.35%（均方根 1.619% → 1.484%）。對一般讀者「振幅」= 寬度，等於誇大約兩倍。已改為「當天振幅窄了 0.14 個百分點」，並在 description 與三十秒版本補上換算口徑。另修掉 publisher content-vs-source 擋下的科學記號寫法。\n\n**Gates**：anti_ai_gate exit 0（1 WARN，未達 3 條阻擋線，未用 --force）；publisher content-vs-source audit PASS（0 claims vs 99 source values）；比值陷阱已迴避（`mean_*_ratio_control` 三個右偏平均數完全未出現在正文，單一事件最高達 6.68 倍）。兩張圖由 `scripts/gen_k1354_general_charts.py` run-time 讀 JSON/CSV 產生、零硬編，主線程目視確認中文正常且數值與獨立驗算相符。\n\n產出：`storage/drafts/k1354_general_draft.md`、`storage/drafts/assets/k1354_general_{offset,quad}.png`、`scripts/gen_k1354_general_charts.py`、`storage/lazypack_plans/k1354_general_plan.json`。未寫 knowledge.json（K1354 條目早已存在）。"
   }
 ]

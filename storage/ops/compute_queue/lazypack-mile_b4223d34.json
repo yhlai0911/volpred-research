@@ -1,0 +1,61 @@
+{
+  "id": "lazypack-mile_b4223d34",
+  "title": "lazypack render mile_b4223d34",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_b4223d34",
+    "--article-id",
+    "mile_b4223d34",
+    "--plan",
+    "storage/lazypack_jobs/mile_b4223d34/runs/lazypack-mile_b4223d34/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_b4223d34/runs/lazypack-mile_b4223d34/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "mile_b4223d34 懶人包"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 1,
+  "queued_at": "2026-08-03T16:52:16Z",
+  "started_at": "2026-08-03T17:00:22Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_b4223d34.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_b4223d34.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_b4223d34/runs/lazypack-mile_b4223d34/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_b4223d34/runs/lazypack-mile_b4223d34/plan.json",
+    "storage/lazypack_jobs/mile_b4223d34/runs/lazypack-mile_b4223d34/panels/panel_question.png",
+    "storage/lazypack_jobs/mile_b4223d34/runs/lazypack-mile_b4223d34/panels/panel_results.png",
+    "storage/lazypack_jobs/mile_b4223d34/runs/lazypack-mile_b4223d34/panels/panel_takeaway.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "routing": {
+    "lane": "compute_queue",
+    "token_cost_estimate": 0,
+    "router": "manual_enqueue"
+  },
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "source_task_link": null,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 86662,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:38393c8c5b6eff540377fe22",
+    "scheduled_for": "2026-08-03T17:00:00Z"
+  },
+  "claimed_by_pid_start_wall": "Tue Aug  4 01:00:22 2026"
+}
