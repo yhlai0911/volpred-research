@@ -93,9 +93,26 @@ fi
 # 1. In-flight guard — never yank the rug from a running worker.
 ACTIVE_COUNT="$(read_active_count)"
 if [ "$ACTIVE_COUNT" != "0" ] && [ "$FORCE" -ne 1 ]; then
-  echo "REFUSED: current_jobs has ${ACTIVE_COUNT} in-flight worker(s):" >&2
-  jq -c '.current_jobs // (if .current_job then [.current_job] else [] end)' "$STATE" >&2 || true
-  echo "Wait for it to finish, --defer to reload when it does, or --force (kills the worker)." >&2
+  # Name the actual blocker. `read_active_count` sums TWO independent sources —
+  # worker jobs and pending PHASE-Z work — and the old message reported only the
+  # first, then printed a worker list that could not explain the count. A
+  # PHASE-Z-only block therefore rendered as "1 in-flight worker(s): []", which
+  # reads like the guard is broken and invites --force, i.e. it nudged the
+  # operator toward the one action that kills live work (observed 2026-08-04).
+  WORKER_COUNT="$(jq -er '(((.current_jobs // []) as $jobs
+      | if ($jobs | length) > 0 then $jobs
+        elif .current_job then [.current_job] else [] end) | length)' "$STATE" 2>/dev/null || echo 0)"
+  PHASE_Z_COUNT="$(jq -er '((.phase_z_pending // []) | length)' "$STATE" 2>/dev/null || echo 0)"
+  echo "REFUSED: reload blocked (${WORKER_COUNT} worker job(s), ${PHASE_Z_COUNT} pending PHASE-Z item(s))" >&2
+  if [ "$WORKER_COUNT" != "0" ]; then
+    echo "  worker jobs:" >&2
+    jq -c '.current_jobs // (if .current_job then [.current_job] else [] end)' "$STATE" >&2 || true
+  fi
+  if [ "$PHASE_Z_COUNT" != "0" ]; then
+    echo "  phase_z_pending:" >&2
+    jq -c '.phase_z_pending // []' "$STATE" >&2 || true
+  fi
+  echo "Wait for it to finish, --defer to reload when it does, or --force (kills in-flight work)." >&2
   exit 1
 fi
 
