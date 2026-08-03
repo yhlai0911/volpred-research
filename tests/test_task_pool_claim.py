@@ -3662,6 +3662,56 @@ def test_dispatch_preassign_yields_to_higher_ranked_event_article(
     assert rows["a-platform-backlog"]["status"] == "pending"
 
 
+def test_dispatch_preassign_seats_preemptive_observe_only_incident(
+    tmp_path, monkeypatch
+) -> None:
+    """Materialized incident work must not be displaced by generic work."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "phase-z-foreign-live-e1",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "daily_article",
+                    "dispatch_lane": "agent",
+                    "dispatch_preempt": True,
+                },
+                {
+                    "id": "generic-article",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "daily_article",
+                    "dispatch_lane": "agent",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-phase-z",
+            job_id="job-phase-z",
+        )
+    )
+
+    assert assigned == {
+        "ok": True,
+        "assigned": False,
+        "reason": "preemptive_non_mutating_task",
+        "selected_task_id": "phase-z-foreign-live-e1",
+        "blocked_contracts": [],
+    }
+    rows = {row["id"]: row for row in json.loads(next_tasks.read_text())}
+    assert rows["phase-z-foreign-live-e1"]["status"] == "pending"
+    assert rows["generic-article"]["status"] == "pending"
+
+
 def test_dispatch_preassign_ignores_expired_event_before_mutating_task(
     tmp_path, monkeypatch
 ) -> None:

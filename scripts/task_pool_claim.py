@@ -1042,11 +1042,23 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
             if not _eligible(task):
                 continue
             if not requires_supervisor_preassignment(task):
-                if is_immediate_dispatch_task(task):
+                # ``dispatch_preempt`` is an explicit, already-materialized
+                # response lane (PHASE-Z / CI incidents).  It must bypass the
+                # generic scheduled menu even when the task is intentionally
+                # observe-only and therefore has no isolated mutating
+                # workspace to preassign.
+                if (
+                    is_immediate_dispatch_task(task)
+                    or task.get("dispatch_preempt") is True
+                ):
                     return {
                         "ok": True,
                         "assigned": False,
-                        "reason": "immediate_non_mutating_task",
+                        "reason": (
+                            "immediate_non_mutating_task"
+                            if is_immediate_dispatch_task(task)
+                            else "preemptive_non_mutating_task"
+                        ),
                         "selected_task_id": _task_key(task),
                         "blocked_contracts": blockers[:20],
                     }
