@@ -34,9 +34,27 @@ LOG_DIR = PROJECT_ROOT / "storage" / "logs" / "diagnostics"
 _TRUE = {"1", "true", "yes", "on"}
 _MAX_CTX_VALUE_LEN = 200
 
+# Persistence is bounded by construction. A warning that fires every tick is
+# exactly the case this log exists to catch, so the log must survive that case
+# without becoming the next disk incident: at most one rotation generation is
+# kept, capping a tag at 2 * _MAX_LOG_BYTES no matter how long the loop runs.
+# (The FileReceiptStore reached 27.6 MB on the same premise that "it will not
+# grow much" — an unbounded append-only diagnostic file is a known failure.)
+_MAX_LOG_BYTES = 2 * 1024 * 1024
+
 
 def _persist_enabled() -> bool:
     return os.environ.get("VOLPRED_DIAGNOSTICS_PERSIST", "").strip().lower() in _TRUE
+
+
+def _rotate_if_oversized(path: Path) -> None:
+    """Keep `<tag>.jsonl` under the cap, retaining one previous generation."""
+    try:
+        if path.stat().st_size < _MAX_LOG_BYTES:
+            return
+    except FileNotFoundError:
+        return  # silent-ok: nothing written yet, nothing to rotate
+    path.replace(path.with_suffix(".jsonl.1"))
 
 
 def _stringify(value: Any) -> str:
@@ -94,7 +112,9 @@ def warn(tag: str, msg: str, *, stream=None, **ctx: Any) -> None:
                 "msg": msg,
                 "ctx": {str(k): _safe(v) for k, v in ctx.items()},
             }
-            with (LOG_DIR / f"{tag}.jsonl").open("a", encoding="utf-8") as fh:
+            log_path = LOG_DIR / f"{tag}.jsonl"
+            _rotate_if_oversized(log_path)
+            with log_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps(record, ensure_ascii=False) + "\n")
         except Exception as exc:
             print(

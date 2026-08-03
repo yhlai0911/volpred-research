@@ -102,3 +102,31 @@ def test_warn_bytes_ctx(capsys):
     warn("foo", "bytes", payload=b"hello")
     err = capsys.readouterr().err
     assert "payload=hello" in err
+
+
+def test_warn_persist_rotates_at_size_cap(tmp_path, monkeypatch, capsys):
+    """A warning stuck in a loop must not become an unbounded file."""
+    monkeypatch.setenv("VOLPRED_DIAGNOSTICS_PERSIST", "1")
+    log_dir = tmp_path / "diag"
+    monkeypatch.setattr(diagnostics, "LOG_DIR", log_dir)
+    # The size cap lives on the canonical module; the ops shim only forwards.
+    from volpred import diagnostics as canonical
+
+    monkeypatch.setattr(canonical, "_MAX_LOG_BYTES", 512)
+
+    for i in range(200):
+        warn("loopy", "stuck reconciler", i=i)
+    capsys.readouterr()
+
+    live = log_dir / "loopy.jsonl"
+    rotated = log_dir / "loopy.jsonl.1"
+    assert live.exists()
+    assert rotated.exists()
+    # One live generation plus at most one rotated generation, each bounded by
+    # the cap plus the single record that crossed it.
+    assert live.stat().st_size < 512 * 2
+    assert rotated.stat().st_size < 512 * 2
+    assert not list(log_dir.glob("loopy.jsonl.2"))
+    # The newest record is still readable and well-formed.
+    last = json.loads(live.read_text(encoding="utf-8").strip().splitlines()[-1])
+    assert last["ctx"]["i"] == 199

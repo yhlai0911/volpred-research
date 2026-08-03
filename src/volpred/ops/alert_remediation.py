@@ -84,6 +84,10 @@ ALERT_TASK_TYPE: dict[str, str] = {
     "paper_website_drift": "paper_review",
     "paper_adjudication_gap": "paper_review",  # 2026-07-14 K1686 incident: gating task done, ruling missing — main-thread adjudication
     "content_quality": "governance",
+    # A warning that repeats for hours names a periodic path with no terminal
+    # edge. Diagnosing which path, and what its "nothing to do" state should be,
+    # is bespoke every time — there is no generic actuator, so this stays a task.
+    "recurring_diagnostic_warning": "platform_ops",
     "cluster_cap_drift": "governance",
     "loop_health": "governance",
     # assign_5195e5ae D4c: downgraded from SELF_REMEDIATING — the alert audits

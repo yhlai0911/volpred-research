@@ -3682,7 +3682,12 @@ def _release_cancelled_source_task(
     return True
 
 
-def _ack_cancelled_source_task_settlement(path: Path) -> None:
+def _ack_cancelled_source_task_settlement(
+    path: Path,
+    *,
+    state: str = "settled",
+    reason: str | None = None,
+) -> None:
     with _receipt_lock():
         current = _read_job_file(path, context="cancel-settlement-ack")
         if (
@@ -3691,15 +3696,36 @@ def _ack_cancelled_source_task_settlement(path: Path) -> None:
             or not current.get("source_task_id")
         ):
             return
-        current["source_task_settlement"] = {
-            "state": "settled",
+        record: dict[str, Any] = {
+            "state": state,
             "task_id": str(current["source_task_id"]),
             "settled_at": utc_now(),
         }
+        if reason:
+            record["reason"] = reason
+        current["source_task_settlement"] = record
         _write_job_file(path, current)
 
 
 def _reconcile_cancelled_source_task(path: Path, job: dict[str, Any]) -> None:
+    """Settle a cancelled job's claim on its source task, exactly once.
+
+    Cancellation only ever owes the pool one thing: give the task back if this
+    job is still holding it. Three outcomes are all terminal, and each must
+    write a settlement so the next queue scan skips this receipt:
+
+    * the task is still bound here and releasable — release it (`settled`);
+    * the task no longer binds to this job at all, because another path already
+      released, completed, failed or archived it — there is nothing to release
+      (`not_required`);
+    * the task is still bound here but sits in a state this function does not
+      know how to unwind — genuinely ambiguous, so warn and leave it for a human.
+
+    Only the third case is a warning. Treating the second as a mismatch is what
+    made `k1380-stage1-forecasts-a` re-warn on every compute-worker tick from
+    2026-07-21 onward: its source task had long since succeeded, so there was
+    never anything left to release and never anything to fix.
+    """
     settlement = job.get("source_task_settlement")
     if (
         job.get("status") != "cancelled"
@@ -3712,19 +3738,44 @@ def _reconcile_cancelled_source_task(path: Path, job: dict[str, Any]) -> None:
         return
     from scripts import task_pool_claim as tpc
 
+    job_id = str(job.get("id") or "")
+    task_id = str(job["source_task_id"])
     with _task_pool_locked_load(tpc) as (_fh, tasks):
-        task = tpc._find(tasks, str(job["source_task_id"]))
-        if task.get("status") == "pending" and not task.get("compute_job_id"):
-            pass
-        elif not _release_cancelled_source_task(task, job, tpc=tpc):
+        try:
+            task = tpc._find(tasks, task_id)
+        except SystemExit as exc:
+            # `_find` exits the process on a missing or ambiguous id. That is
+            # right for an operator CLI and fatal here: this runs inside the
+            # worker's readiness scan, so letting it through would take down
+            # the whole drain loop over one stale receipt.
+            warn(
+                "compute_queue",
+                "cancelled source task not resolvable; settling as not_required",
+                job=job_id,
+                task_id=task_id,
+                err=str(exc),
+            )
+            task = None
+        if task is None or str(task.get("compute_job_id") or "") != job_id:
+            _ack_state = "not_required"
+            _ack_reason = (
+                "source_task_absent"
+                if task is None
+                else f"source_task_unbound:{task.get('status') or 'unknown'}"
+            )
+        elif _release_cancelled_source_task(task, job, tpc=tpc):
+            _ack_state, _ack_reason = "settled", None
+        else:
             warn(
                 "compute_queue",
                 "cancelled source task settlement did not match",
-                job=job.get("id"),
-                task_id=job.get("source_task_id"),
+                job=job_id,
+                task_id=task_id,
+                task_status=task.get("status"),
+                blocked_reason=task.get("blocked_reason"),
             )
             return
-    _ack_cancelled_source_task_settlement(path)
+    _ack_cancelled_source_task_settlement(path, state=_ack_state, reason=_ack_reason)
 
 
 def requeue(args) -> int:

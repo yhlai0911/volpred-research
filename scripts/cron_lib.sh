@@ -11,6 +11,16 @@ if [ -z "${VOLPRED_CRON_LIB_LOADED:-}" ]; then
   _VOLPRED_CRON_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   VOLPRED_REPO_ROOT="${VOLPRED_REPO_ROOT:-$(dirname "${_VOLPRED_CRON_LIB_DIR}")}"
 
+  # Scheduled jobs write their diagnostics somewhere a detector can read.
+  # `volpred.diagnostics.warn()` — the helper .claude/rules/no-silent-fallback.md
+  # mandates across the codebase — defaulted to stderr only, which in a wrapper
+  # means a per-job log file nobody polls. That is how compute_queue's settlement
+  # loop warned ~2,500 times over 13 days without raising anything (2026-08-03).
+  # The JSONL is what alerts.py:_parse_recurring_diagnostic_warning_state reads,
+  # and it is size-capped with one rotation generation, so turning it on here
+  # cannot become the next unbounded-file incident.
+  export VOLPRED_DIAGNOSTICS_PERSIST="${VOLPRED_DIAGNOSTICS_PERSIST:-1}"
+
   cron_now_iso() {
     date '+%Y-%m-%d %H:%M:%S %Z'
   }

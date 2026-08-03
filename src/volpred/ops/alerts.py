@@ -4141,6 +4141,186 @@ def _parse_telegram_reply_backlog_state(storage_dir: str, now: datetime) -> dict
     }
 
 
+RECURRING_WARN_MIN_COUNT = 20
+RECURRING_WARN_MIN_SPAN_HOURS = 6.0
+RECURRING_WARN_ACTIVE_WITHIN_HOURS = 2.0
+RECURRING_WARN_CRITICAL_SPAN_HOURS = 48.0
+RECURRING_WARN_LOOKBACK_HOURS = 168.0
+RECURRING_WARN_MAX_REPORTED = 5
+
+
+def _recurring_warning_groups(
+    log_dir: Path,
+    now: datetime,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Group persisted `warn()` records by (tag, msg) over the lookback window.
+
+    Identity is the tag and the human message only, deliberately excluding
+    `ctx`. A reconciler stuck on one receipt re-emits identical context, but a
+    reconciler stuck on a *class* of receipts varies the id while repeating the
+    same message — both are the same defect, and keying on ctx would hide the
+    second. Callers get counts, first/last sight and one sample ctx.
+    """
+    cutoff = now - timedelta(hours=RECURRING_WARN_LOOKBACK_HOURS)
+    groups: dict[tuple[str, str], dict[str, Any]] = {}
+    read_errors: list[str] = []
+    if not log_dir.is_dir():
+        return [], read_errors
+
+    for path in sorted(log_dir.glob("*.jsonl")):
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except Exception as exc:
+            read_errors.append(f"{path.name}: {type(exc).__name__}")
+            continue  # silent-ok: recorded in read_errors and reported in the alert body/details
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                record = json.loads(line)
+            except Exception:
+                # A torn final line is normal for a file being appended to by
+                # another process; it is not evidence about any warning.
+                continue  # silent-ok: partial append, next read sees it whole
+            if not isinstance(record, dict):
+                continue
+            ts = _parse_iso_datetime(record.get("ts"))
+            if ts is None or ts < cutoff:
+                continue
+            key = (str(record.get("tag") or path.stem), str(record.get("msg") or ""))
+            group = groups.get(key)
+            if group is None:
+                groups[key] = {
+                    "tag": key[0],
+                    "msg": key[1],
+                    "count": 1,
+                    "first_seen": ts,
+                    "last_seen": ts,
+                    "sample_ctx": record.get("ctx") or {},
+                }
+                continue
+            group["count"] += 1
+            group["first_seen"] = min(group["first_seen"], ts)
+            group["last_seen"] = max(group["last_seen"], ts)
+    return list(groups.values()), read_errors
+
+
+def _parse_recurring_diagnostic_warning_state(
+    storage_dir: str,
+    now: datetime,
+) -> dict[str, Any]:
+    """A `warn()` repeating for hours is a repair that never happened.
+
+    2026-08-03: `compute_queue` warned "cancelled source task settlement did not
+    match" twice per compute-worker tick — roughly 2,500 times across 13 days —
+    because the reconciler had no terminal edge for an already-settled source
+    task. Nothing noticed. The canonical `warn()` helper that
+    `.claude/rules/no-silent-fallback.md` mandates everywhere wrote to stderr
+    only, so every warning landed in a per-job log file that no detector reads.
+    Fixing that one reconciler does not fix the class: any periodic path that
+    warns instead of repairing stays invisible for exactly as long as nobody
+    tails its log.
+
+    So this promotes persistent repetition itself into the alert framework. The
+    thresholds separate a stuck loop from an ordinary burst: a warning must
+    repeat at least `RECURRING_WARN_MIN_COUNT` times, span at least
+    `RECURRING_WARN_MIN_SPAN_HOURS`, and still be firing now. A job that warned
+    fifty times in five minutes and recovered is noisy, not stuck, and does not
+    breach. There is no generic auto-remediation — the repair is specific to
+    whatever is looping — so this deliberately stays out of `SELF_REMEDIATING`
+    and takes the framework's default disposition: it becomes a task.
+    """
+    log_dir = _storage_root(storage_dir) / "logs" / "diagnostics"
+    groups, read_errors = _recurring_warning_groups(log_dir, now)
+
+    stuck: list[dict[str, Any]] = []
+    for group in groups:
+        span_hours = (
+            group["last_seen"] - group["first_seen"]
+        ).total_seconds() / 3600.0
+        idle_hours = (now - group["last_seen"]).total_seconds() / 3600.0
+        if (
+            group["count"] < RECURRING_WARN_MIN_COUNT
+            or span_hours < RECURRING_WARN_MIN_SPAN_HOURS
+            or idle_hours > RECURRING_WARN_ACTIVE_WITHIN_HOURS
+        ):
+            continue
+        stuck.append(
+            {
+                "tag": group["tag"],
+                "msg": group["msg"],
+                "count": group["count"],
+                "span_hours": round(span_hours, 1),
+                "first_seen": group["first_seen"].isoformat(),
+                "last_seen": group["last_seen"].isoformat(),
+                "sample_ctx": group["sample_ctx"],
+            }
+        )
+    stuck.sort(key=lambda item: (-item["span_hours"], -item["count"]))
+    reported = stuck[:RECURRING_WARN_MAX_REPORTED]
+
+    breached = bool(stuck)
+    worst_span = max((item["span_hours"] for item in stuck), default=0.0)
+    level = (
+        "critical"
+        if worst_span >= RECURRING_WARN_CRITICAL_SPAN_HOURS
+        else "warn"
+    )
+
+    lines = [
+        "## 觸發條件",
+        f"同一則診斷警告（tag + 訊息）在 {RECURRING_WARN_LOOKBACK_HOURS:.0f}h 內重複 "
+        f"≥{RECURRING_WARN_MIN_COUNT} 次、持續 ≥{RECURRING_WARN_MIN_SPAN_HOURS:.0f}h，"
+        f"且最近 {RECURRING_WARN_ACTIVE_WITHIN_HOURS:.0f}h 內仍在發生。",
+        f"- 來源: {_relative_repo_path(log_dir)}",
+        f"- 卡住的警告數: {len(stuck)}",
+    ]
+    for item in reported:
+        lines.append(
+            f"- [{item['tag']}] {item['msg']} — {item['count']} 次 / "
+            f"{item['span_hours']}h（最後 {item['last_seen']}）"
+        )
+    if len(stuck) > len(reported):
+        lines.append(f"- （另有 {len(stuck) - len(reported)} 則未列出）")
+    if read_errors:
+        lines.append(f"- 讀取失敗: {', '.join(read_errors[:3])}")
+    lines.extend(
+        [
+            "",
+            "## 影響",
+            "一則警告重複數小時代表某個週期性流程每輪都偵測到同一個問題、卻沒有任何"
+            "修復或終止語意 —— 它在空轉，而下游狀態一直是壞的。這正是 2026-08-03 "
+            "compute_queue settlement 迴圈 13 天無人發現的形狀。",
+            "",
+            "## 處理步驟（任務已自動建立）",
+            "1. 用 tag + 訊息定位發出警告的程式路徑。",
+            "2. 判斷該路徑「無事可做」時是否有終止狀態可寫；沒有就是根因。",
+            "3. 補上終止邊界並加回歸測試，讓警告只保留給真正待人判斷的歧義。",
+        ]
+    )
+
+    return {
+        "id": "recurring_diagnostic_warning",
+        "breached": breached,
+        "level": level if breached else "info",
+        "title": (
+            f"診斷警告空轉：{len(stuck)} 則警告重複 ≥{RECURRING_WARN_MIN_SPAN_HOURS:.0f}h 未修復"
+            if breached
+            else "recurring_diagnostic_warning ok"
+        ),
+        "body": "\n".join(lines) if breached else "",
+        "details": {
+            "log_dir": str(log_dir),
+            "stuck_count": len(stuck),
+            "stuck": reported,
+            "read_errors": read_errors,
+            "min_count": RECURRING_WARN_MIN_COUNT,
+            "min_span_hours": RECURRING_WARN_MIN_SPAN_HOURS,
+        },
+    }
+
+
 def _parse_work_log_freshness_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     """work_log latest timestamp >24h (or unreadable) → stale (warn).
 
@@ -5636,6 +5816,7 @@ def build_alert_condition_report(
         _parse_push_backlog_state(storage_dir, current),          # 2026-07-04 26h push-hold incident: persistent unpushed-backlog escalation
         _parse_orphan_branch_state(storage_dir, current),         # 2026-07-10 worktree 清掉、branch 留下未合併工作，無人接手
         _parse_work_log_freshness_state(storage_dir, current),    # 2026-06-28 Codex/dispatch diversity dead-man switch
+        _parse_recurring_diagnostic_warning_state(storage_dir, current),  # 2026-08-03 compute_queue settlement 迴圈 13 天無訊號：warn() 只進 stderr，沒有 detector 讀得到
         _parse_event_receipt_state(storage_dir, current),         # 2026-07-05 event jobs: claimed zombie / queued past deadline
         _parse_member_qa_state(storage_dir, current),
         _parse_supabase_sync_state(storage_dir),

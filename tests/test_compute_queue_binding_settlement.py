@@ -948,3 +948,162 @@ def test_readiness_scan_and_worker_settlement_share_process_local_lock(
     tasks = json.loads(pool_path.read_text(encoding="utf-8"))
     running = next(task for task in tasks if task["id"] == "task-running")
     assert running["blocked_reason"] == "external_compute_receipt_pending_collection"
+
+
+def _cancelled_receipt(queue_dir: Path, job_id: str, task_id: str) -> Path:
+    path = queue_dir / f"{job_id}.json"
+    path.write_text(
+        json.dumps(
+            {
+                "id": job_id,
+                "status": "cancelled",
+                "source_task_id": task_id,
+                "cancel_reason": "staged script not merged yet",
+                "cancelled_at": "2026-07-21T06:56:05Z",
+                "followup_dispatched": True,
+                "source_task_settlement": None,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_cancelled_job_settles_when_source_task_already_terminal(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A source task that finished elsewhere owes this cancelled job nothing.
+
+    Regression for `k1380-stage1-forecasts-a`, which re-warned on every
+    compute-worker tick for 13 days because a `succeeded` source task was read
+    as a binding mismatch rather than as nothing-left-to-release.
+    """
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text(
+        json.dumps([{"id": "task-done", "status": "succeeded"}]),
+        encoding="utf-8",
+    )
+    job_path = _cancelled_receipt(queue_dir, "job-cancelled", "task-done")
+    warnings: list[tuple] = []
+    monkeypatch.setattr(
+        compute_queue,
+        "warn",
+        lambda *a, **k: warnings.append((a, k)),
+    )
+
+    compute_queue._scan_queue_readiness("test-terminal-source-settlement")
+
+    settlement = json.loads(job_path.read_text(encoding="utf-8"))[
+        "source_task_settlement"
+    ]
+    assert settlement["state"] == "not_required"
+    assert settlement["reason"] == "source_task_unbound:succeeded"
+    assert warnings == []
+
+    # Second scan must be a no-op: the settlement is what stops the loop.
+    compute_queue._scan_queue_readiness("test-terminal-source-settlement-again")
+    assert warnings == []
+    assert (
+        json.loads(job_path.read_text(encoding="utf-8"))["source_task_settlement"]
+        == settlement
+    )
+
+
+def test_cancelled_job_settles_when_source_task_missing_from_pool(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """An archived source task must not take the readiness scan down with it."""
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text("[]", encoding="utf-8")
+    job_path = _cancelled_receipt(queue_dir, "job-orphaned", "task-archived")
+    warnings: list[tuple] = []
+    monkeypatch.setattr(
+        compute_queue,
+        "warn",
+        lambda *a, **k: warnings.append((a, k)),
+    )
+
+    compute_queue._scan_queue_readiness("test-missing-source-settlement")
+
+    settlement = json.loads(job_path.read_text(encoding="utf-8"))[
+        "source_task_settlement"
+    ]
+    assert settlement["state"] == "not_required"
+    assert settlement["reason"] == "source_task_absent"
+    # The unresolvable id is still reported once, but only once.
+    assert len(warnings) == 1
+    compute_queue._scan_queue_readiness("test-missing-source-settlement-again")
+    assert len(warnings) == 1
+
+
+def test_cancelled_job_releases_still_bound_source_task(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """The ordinary case still hands the task back to the pool."""
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "task-bound",
+                    "status": "awaiting_agent_job",
+                    "compute_job_id": "job-bound",
+                    "blocked_reason": "external_compute_job_active",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    job_path = _cancelled_receipt(queue_dir, "job-bound", "task-bound")
+
+    compute_queue._scan_queue_readiness("test-bound-source-settlement")
+
+    task = json.loads(pool_path.read_text(encoding="utf-8"))[0]
+    assert task["status"] == "pending"
+    assert "compute_job_id" not in task
+    assert "blocked_reason" not in task
+    settlement = json.loads(job_path.read_text(encoding="utf-8"))[
+        "source_task_settlement"
+    ]
+    assert settlement["state"] == "settled"
+    assert "reason" not in settlement
+
+
+def test_cancelled_job_still_warns_on_genuine_binding_ambiguity(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Bound but un-unwindable is the one case a human still has to look at."""
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "task-weird",
+                    "status": "in_progress",
+                    "compute_job_id": "job-weird",
+                    "blocked_reason": "external_compute_job_active",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    job_path = _cancelled_receipt(queue_dir, "job-weird", "task-weird")
+    warnings: list[tuple] = []
+    monkeypatch.setattr(
+        compute_queue,
+        "warn",
+        lambda *a, **k: warnings.append((a, k)),
+    )
+
+    compute_queue._scan_queue_readiness("test-ambiguous-source-settlement")
+
+    assert len(warnings) == 1
+    assert warnings[0][0][1] == "cancelled source task settlement did not match"
+    assert warnings[0][1]["task_status"] == "in_progress"
+    assert json.loads(job_path.read_text(encoding="utf-8"))[
+        "source_task_settlement"
+    ] is None
