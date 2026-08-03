@@ -1,27 +1,37 @@
 # Feed Index
 
-_Last built: 2026-08-01 06:02 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-08-03 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1921**  (with thumbnail: 91)
+- Total articles: **1931**  (with thumbnail: 92)
 - Last 30 days: **206**
-- Total chars (content): 5,991,419
+- Total chars (content): 6,038,542
 
-**Status**: published=1717, archived=124, unpublished=66, retracted=13, wont_fix=1
+**Status**: published=1727, archived=124, unpublished=66, retracted=13, wont_fix=1
 
-**Audience**: research=1144, general=506, daily=169, unknown=77, member_qa=15, event=10
+**Audience**: research=1144, general=514, daily=171, unknown=77, member_qa=15, event=10
 
-**Category**: milestone=921, general=878, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
+**Category**: milestone=922, general=887, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
 
 ## 最近 30 天 (206)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-08-03 | `mile_aca7eb30` | 每日策略建議：VIX 15.99（正常）— 2026-08-03 | daily | general | published | 1519 | Y | 每日建議, VIX, 策略配置 |
+| 2026-08-03 | `mile_5139a796` | 2026-08-03 本日持倉比率建議（依據 2026-07-31 收盤數據） | daily | milestone | published | 942 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
+| 2026-08-02 | `mile_8d4345b9` | 成分股各走各的路，能提前告訴你大盤要變天嗎？12 年資料的答案很掃興 | general | general | published | 5080 |  | 一般讀者, dispersion, correlation, volatility-forecast, risk-management |
+| 2026-08-02 | `mile_3445217e` | 三個分數全贏，我們還是判它不能用：82 天撐不起一個結論 | general | general | published | 3948 |  | 一般讀者, 0050, 波動預測, 樣本量, 誠實回報 |
+| 2026-08-02 | `mile_a415679b` | 比特幣 ETF 的每日申贖金流，能預告明天的震盪嗎？兩年半資料把答案指回同一天 | general | general | published | 4835 |  | 一般讀者, bitcoin, ethereum, etf-flow, volatility-forecast, null-result |
+| 2026-08-02 | `mile_7915ffcb` | 四大雲端財報交卷後，半導體該追、科技股該避？先攤開 AI 回本四帳 | general | general | published | 11587 |  | 一般讀者, 精選導讀, AI資本支出, 科技股, 半導體, 風險管理 |
+| 2026-08-01 | `mile_5378daa1` | 升息時，房地產 ETF 會變得更像股票嗎？20 年資料指向另一個地方 | general | general | published | 3539 |  | 一般讀者 |
+| 2026-08-01 | `mile_e96cad4e` | 社交連結最廣的那三分之一，財報日波動看起來低了 0.1754。控制產業和年份之後，這個差距沒了 | general | general | published | 4619 |  | 一般讀者, social-connectedness, earnings-event, volatility, null-result, cross-section |
+| 2026-08-01 | `mile_04438b53` | 順著盤尾買賣壓做，平均每次虧 4.13 個基點。那反著做？我這次沒資格回答 | general | general | published | 4919 |  | 一般讀者, moc-imbalance, closing-auction, intraday, null-result, market-microstructure |
+| 2026-08-01 | `mile_3dc2b5da` | 印度股市明天抖不抖？印度自己的恐慌指數贏了華爾街，我們還是判它沒過 | general | general | published | 4158 |  | 一般讀者, india, vix, nifty, volatility-forecast, pre-registration |
 | 2026-08-01 | `mile_a379f63d` | 下週五非農值不值得避險？放大鏡不會自己發光，先填完這四格 | general | general | published | 11423 |  | 一般讀者, 精選導讀, 非農, VIX, 事件交易, 避險 |
 | 2026-07-31 | `mile_4b10546f` | 我們以為找到了新指標，結果兩個模型的預測值到小數點後 16 位都一樣 | general | general | published | 3164 |  | 一般讀者, volatility, index, dispersion, methodology, reader_facing |
 | 2026-07-31 | `mile_461ff729` | Fed 這次沒動，卻有人要求升息：你手上的四張避險保單，各自只賠哪一種跌？ | general | general | published | 12017 |  | 一般讀者, 精選導讀, 波動率, 利率, 避險, 資產配置 |
-| 2026-07-31 | `mile_84e3be0a` | 非農前一週的 VIX，和沒有非農的那一週幾乎一樣：191 次公佈日的對照組檢定 | event | milestone | published | 3319 |  | nfp_us, event_article, macro, reader_facing, volatility, vix |
+| 2026-07-31 | `mile_84e3be0a` | 🌡️ 事件溫度計｜非農前一週的 VIX，未偵測到比一般週多漲：191 次公佈日的對照組檢定 | event | milestone | published | 4030 |  | nfp_us, event_article, macro, reader_facing, volatility, vix |
 | 2026-07-31 | `mile_9d740075` | 每日策略建議：VIX 17.09（正常）— 2026-07-31 | daily | general | published | 1707 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-31 | `mile_9292e320` | 2026-07-31 本日持倉比率建議（依據 2026-07-30 收盤數據） | daily | milestone | published | 1130 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-31 | `mile_dd7e7aa4` | 通膨預期升溫時，股市不見得更抖，但公債的保護力會變薄 | general | general | published | 4043 |  | 一般讀者, 通膨預期, 股債相關, 資產配置, 波動率, 多重比較 |
@@ -214,6 +224,11 @@ _Last built: 2026-08-01 06:02 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-07-04 | `mile_4fe0a026` | 🧪 迷思實驗室｜股票快貼近漲跌停,隔天真的比較震盪?61萬筆台股資料的檢驗結果 | general | general | published | 2949 |  | 一般讀者, 台股, 漲跌停, 自然實驗, 波動率, TWSE |
 | 2026-07-04 | `mile_a656a042` | 新興市場主權債的波動率,能提前預告 EM 股市風暴嗎?一次誠實的否定(K1621) | research | experiment | published | 6430 |  | 研究, EMB, 新興市場, 跨資產, HAR-RV, DM-test |
 | 2026-07-04 | `mile_167ed77b` | 現在進場太晚了嗎？上車前先問四件事，唯獨別問「今天算不算高點」 | general | general | published | 6898 |  | 一般讀者, 精選導讀, 進場時機, 資產配置, 定期定額, VIX |
+
+<details><summary>## 2026-Q3 (21)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-07-03 | `mile_64c33170` | 夏天太平靜，是暴風雨前的寧靜嗎？我用 21 年 VIX 數據查了這個直覺 | general | general | published | 3096 |  | 一般讀者, VIX, 波動率季節性, 夏季波動, 波動率持續性, 尾部風險 |
 | 2026-07-03 | `mile_8bf06fde` | VIX 跌破 16 之後：三個波動率裂縫，比恐慌指數本身更值得留意 | general | general | published | 2626 |  | 一般讀者, VIX, 台股, 美股, 波動率快照, 市場觀察 |
 | 2026-07-03 | `mile_a30cfe89` | VIX 只有十幾點，選擇權市場卻在偏心加價：偏斜三讀法，讀懂它正替誰的恐懼定價 | general | general | published | 7127 |  | 一般讀者, 精選導讀, 選擇權偏斜, VIX, 半導體, 波動率 |
@@ -224,17 +239,12 @@ _Last built: 2026-08-01 06:02 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-07-02 | `mile_c1ce6550` | USDC 脫鉤那幾天：1-3 年短券日波動飆 2.8 倍，1-3 個月卻沒事 | research | milestone | published | 3952 |  | 研究, 穩定幣, 短期公債, USDC, SVB, duration |
 | 2026-07-02 | `mile_cd5d5740` | 波動率「測不準」能不能當減碼訊號？六檔 ETF、六十天的老實答案 | general | general | published | 2833 |  | 一般讀者, 波動率, 風險管理, 波動率預測, ETF, 研究誠實 |
 | 2026-07-02 | `mile_b88ee7bc` | 把五分鐘資料切得更細，預測真的會更準嗎？台指期給了一個保守答案 | general | general | published | 2217 |  | 一般讀者, 波動率預測, 台指期, 高頻資料, 研究誠實, 模型比較 |
-
-<details><summary>## 2026-Q3 (11)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-07-02 | `mile_cc2f70db` | AI agent 的記憶問題：把所有東西建成圖譜，救得了量化研究平台嗎 | general | general | unpublished | 2968 |  | 一般讀者, trending, AI工具, agent記憶, 知識庫, 檢索架構 |
 | 2026-07-02 | `mile_e511ff94` | 下半年調倉前，先過三道風險安檢 | general | general | published | 5483 |  | 一般讀者, 精選導讀, 下半年調倉, 風險管理, VIX, 分散投資 |
 | 2026-07-02 | `mile_9ac0c44b` | 每日策略建議：VIX 16.59（正常）— 2026-07-02 | daily | general | published | 1649 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-02 | `mile_c3621a1b` | 2026-07-02 本日持倉比率建議（依據 2026-07-01 收盤數據） | daily | milestone | published | 1048 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-02 | `mile_c8468b0d` | 你花錢升級了預測模型，對帳單卻更難看：一個關於「準」與「賺」的實測 | general | general | published | 3749 |  | 一般讀者, 波動率目標, 交易成本, 換手率, 策略回測, 研究誠實 |
-| 2026-07-01 | `mile_35eef830` | 6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%：讓市場抖動的從來不是「就業數字」本身 | general | general | published | 3929 |  | 一般讀者, NFP, 非農就業, VIX, 勞動市場, 總經事件 |
+| 2026-07-01 | `mile_35eef830` | 6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%：讓市場抖動的從來不是「就業數字」本身 | general | general | published | 5195 |  | 一般讀者, NFP, 非農就業, VIX, 勞動市場, 總經事件 |
 | 2026-07-01 | `mile_c0d6676f` | K 棒記了四個價格，收盤只用一個——剩下三個能預測明天的波動嗎？ | general | general | published | 2661 |  | 一般讀者, ETF, 波動率, K棒, 隔日波動, 量化方法 |
 | 2026-07-01 | `mile_cfa5eb89` | K1586：穩定幣儲備變化與短端 T-bill realized vol 的領先性檢定 | research | milestone | published | 7790 |  | 研究, 穩定幣, 短期公債, USDC, SVB, Granger |
 | 2026-07-01 | `mile_4901f7bc` | AI 一季燒五百億，該擔心嗎？別看 VIX，看波動率市場真正在怕的三件事 | general | general | published | 6256 |  | 一般讀者, 精選導讀, AI, 資本支出, 科技股, 波動率 |
