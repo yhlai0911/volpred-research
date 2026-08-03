@@ -233,3 +233,10 @@ storage/ops/producer_custody_receipts.jsonl.lock
 .!*!*
 # 一次性大檔備份（work_log 已有 git 歷史；.bak 只會讓 foreign-path incident 越滾越大）
 storage/work_log.json.bak_*
+
+# Graphify 的本機 AST 索引輸出。config/graphify_integration.json 早就把
+# graphify-out/ 列為 excluded surface，圖也是每次由 hook 或每日 job 從原始碼重建的
+# 純衍生物。manifest.json 是唯一被追蹤的一個，而它只有一筆 commit：PHASE-Z 的
+# safety-net 把某次沒 commit 的衍生輸出掃了進去。它以絕對 mtime 浮點數為鍵，
+# 單次重建就產生 7,306 insertions / 1,071 deletions 的假 diff，跨機器毫無意義。
+graphify-out/
