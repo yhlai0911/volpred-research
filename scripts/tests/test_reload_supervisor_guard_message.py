@@ -66,7 +66,7 @@ def test_phase_z_only_block_is_not_reported_as_a_phantom_worker(
     assert result.returncode == 1
     err = result.stderr
     # The count must be attributed, and the attribution must be the true one.
-    assert "0 worker job(s)" in err
+    assert "0 in-flight worker job(s)" in err
     assert "1 pending PHASE-Z item(s)" in err
     assert "foreign-abc" in err
     # The old, misleading rendering must not come back.
@@ -83,7 +83,7 @@ def test_worker_block_still_names_and_lists_the_worker(tmp_path: Path) -> None:
 
     assert result.returncode == 1
     err = result.stderr
-    assert "1 worker job(s)" in err
+    assert "1 in-flight worker job(s)" in err
     assert "0 pending PHASE-Z item(s)" in err
     assert "job-live" in err
 
@@ -101,7 +101,7 @@ def test_both_blockers_are_reported_together(tmp_path: Path) -> None:
 
     assert result.returncode == 1
     err = result.stderr
-    assert "1 worker job(s)" in err
+    assert "1 in-flight worker job(s)" in err
     assert "1 pending PHASE-Z item(s)" in err
     assert "job-live" in err and "foreign-abc" in err
 
@@ -128,3 +128,43 @@ def test_clean_state_reports_safe_under_check_only(tmp_path: Path) -> None:
 
     assert result.returncode == 0
     assert "SAFE" in result.stdout
+
+
+def test_legacy_current_job_is_listed_not_rendered_as_empty(tmp_path: Path) -> None:
+    """`//` is the wrong operator here, and this is where it showed.
+
+    In jq only null and false are falsy, so an EMPTY `current_jobs` array does
+    not fall back to `current_job`. The count already handled that with an
+    explicit length check; the printed list did not, so a legacy-shaped state
+    counted 1 and printed []. The list has to be derived exactly like the count
+    or it cannot explain it.
+    """
+    state = _write_state(tmp_path, {"current_jobs": [], "current_job": {"pid": 123}})
+
+    result = _run(state)
+
+    assert result.returncode == 1
+    assert "1 in-flight worker job(s)" in result.stderr
+    assert '"pid":123' in result.stderr.replace(" ", "")
+
+
+def test_unreadable_state_says_so_instead_of_claiming_nothing_blocks(
+    tmp_path: Path,
+) -> None:
+    """Refusing while reporting "0 and 0" reads as a broken guard.
+
+    read_active_count returns ERR for malformed state and the guard correctly
+    fails closed, but the per-source counts have no meaningful value to report.
+    Printing zeros would deny there is any blocker in the same breath as
+    refusing — which is precisely the reading that sends an operator to --force.
+    """
+    state = tmp_path / "dispatch_state.json"
+    state.write_text("{not-json", encoding="utf-8")
+
+    result = _run(state)
+
+    assert result.returncode == 1
+    assert "unreadable" in result.stderr
+    assert "0 in-flight worker job(s)" not in result.stderr
+    # The legacy contract in tests/test_reload_dispatch_supervisor.py still holds.
+    assert "in-flight worker" in result.stderr

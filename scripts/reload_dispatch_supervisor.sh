@@ -99,18 +99,31 @@ if [ "$ACTIVE_COUNT" != "0" ] && [ "$FORCE" -ne 1 ]; then
   # PHASE-Z-only block therefore rendered as "1 in-flight worker(s): []", which
   # reads like the guard is broken and invites --force, i.e. it nudged the
   # operator toward the one action that kills live work (observed 2026-08-04).
-  WORKER_COUNT="$(jq -er '(((.current_jobs // []) as $jobs
+  if [ "$ACTIVE_COUNT" = "ERR" ]; then
+    # Unreadable state is refused, and must SAY it is unreadable. Printing
+    # "0 workers, 0 PHASE-Z" here would assert nothing is blocking while
+    # refusing to proceed — the operator's only reading of that is "the guard
+    # is broken", which is exactly the push toward --force this fix removes.
+    echo "REFUSED: dispatch state unreadable, failing closed as though an in-flight worker were present: ${STATE}" >&2
+  else
+    # `//` is the wrong operator for these: in jq only null and false are falsy,
+    # so an EMPTY current_jobs array does not fall back to current_job. That is
+    # how the pre-existing list came to print [] beside a non-zero count. The
+    # list must be derived exactly like the count, or it cannot explain it.
+    JOBS_EXPR='((.current_jobs // []) as $jobs
       | if ($jobs | length) > 0 then $jobs
-        elif .current_job then [.current_job] else [] end) | length)' "$STATE" 2>/dev/null || echo 0)"
-  PHASE_Z_COUNT="$(jq -er '((.phase_z_pending // []) | length)' "$STATE" 2>/dev/null || echo 0)"
-  echo "REFUSED: reload blocked (${WORKER_COUNT} worker job(s), ${PHASE_Z_COUNT} pending PHASE-Z item(s))" >&2
-  if [ "$WORKER_COUNT" != "0" ]; then
-    echo "  worker jobs:" >&2
-    jq -c '.current_jobs // (if .current_job then [.current_job] else [] end)' "$STATE" >&2 || true
-  fi
-  if [ "$PHASE_Z_COUNT" != "0" ]; then
-    echo "  phase_z_pending:" >&2
-    jq -c '.phase_z_pending // []' "$STATE" >&2 || true
+        elif .current_job then [.current_job] else [] end)'
+    WORKER_COUNT="$(jq -er "${JOBS_EXPR} | length" "$STATE" 2>/dev/null || echo 0)"
+    PHASE_Z_COUNT="$(jq -er '((.phase_z_pending // []) | length)' "$STATE" 2>/dev/null || echo 0)"
+    echo "REFUSED: reload blocked - ${WORKER_COUNT} in-flight worker job(s), ${PHASE_Z_COUNT} pending PHASE-Z item(s)" >&2
+    if [ "$WORKER_COUNT" != "0" ]; then
+      echo "  worker jobs:" >&2
+      jq -c "${JOBS_EXPR}" "$STATE" >&2 || true
+    fi
+    if [ "$PHASE_Z_COUNT" != "0" ]; then
+      echo "  phase_z_pending:" >&2
+      jq -c '.phase_z_pending // []' "$STATE" >&2 || true
+    fi
   fi
   echo "Wait for it to finish, --defer to reload when it does, or --force (kills in-flight work)." >&2
   exit 1
