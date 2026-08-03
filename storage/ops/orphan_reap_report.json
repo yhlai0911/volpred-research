@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-03T12:00:46.662973+00:00",
+  "generated_at": "2026-08-03T13:00:36.239901+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 151.5
+      "age_hours": 152.4
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 151.3
+      "age_hours": 152.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 146.7
+      "age_hours": 147.6
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 145.7
+      "age_hours": 146.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 310.6
+      "age_hours": 311.6
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 114.8
+      "age_hours": 115.8
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 145.6
+      "age_hours": 146.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 162.6
+      "age_hours": 163.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,14 +71,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 170.7
+      "age_hours": 171.7
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 92,
-    "grace": 1,
+    "registered": 93,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 9,
@@ -86,7 +86,7 @@
     {
       "path": "storage/drafts/K1357_general_draft.md",
       "adopted": false,
-      "reason": "gate_rejected (rc=5):   Per .claude/rules/publishing.md, every published article needs 2+ real PNG charts. Generate the charts and embed them in a `## 圖表` section, then retry. Use `--no-image-gate` only for genuinely text-"
+      "reason": "gate_rejected (rc=1): requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='qxhfgdfzazwpkdgesavm.supabase.co', port=443): Max retries exceeded with url: /storage/v1/object/article-images/K1357_spread_asymmetry.png "
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -100,14 +100,56 @@
   "job_deliveries": [],
   "namespaces": {
     "drafts": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "storage/drafts/assets/k1654_general_breaches.png",
+          "kind": "png",
+          "reason": "untracked",
+          "admission_snapshot": {
+            "head": "066a97450a18b33125156a16e5d06a90fabee345",
+            "sha256": "297e0ebc4b8dc7661ba7fef3a994843fdc548418e45a9d360aecf2d41e196511",
+            "git_blob": "bac863bb367f451c180f961aa5b6b2eb02134f9a"
+          }
+        },
+        {
+          "path": "storage/drafts/assets/k1654_general_tailsize.png",
+          "kind": "png",
+          "reason": "untracked",
+          "admission_snapshot": {
+            "head": "066a97450a18b33125156a16e5d06a90fabee345",
+            "sha256": "b361e48f187783682fe95c83ba708fc3f26528c883fc3f0e49763b4960a543d8",
+            "git_blob": "cd86b8856748a47021d01ee34d623c802793a3fe"
+          }
+        },
+        {
+          "path": "storage/drafts/k1654_general_draft.md",
+          "kind": "md",
+          "reason": "untracked",
+          "admission_snapshot": {
+            "head": "066a97450a18b33125156a16e5d06a90fabee345",
+            "sha256": "1deb078d74df522dbffc1a1c9b6bef3070bc2509591eec0f9ec8bf20296e1822",
+            "git_blob": "0eac0615ba0eef2f8a51217bffa5667faa3a2240"
+          }
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 3,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "drafts",
+          "paths": [
+            "storage/drafts/assets/k1654_general_breaches.png",
+            "storage/drafts/assets/k1654_general_tailsize.png",
+            "storage/drafts/k1654_general_draft.md"
+          ],
+          "committed": true,
+          "detail": "[b59b2b5331150f7e02c6f870cd8ea5d5bf5e0de0] chore(draft-reap): collect orphaned draft artifacts (3 files)\n"
+        }
+      ]
     },
     "paper": {
       "collectable": [],

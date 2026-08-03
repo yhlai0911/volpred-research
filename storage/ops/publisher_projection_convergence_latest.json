@@ -1,16 +1,21 @@
 {
   "schema_version": "publisher-projection-convergence.v2",
   "audit": "publish_sync",
-  "convergence_status": "converged",
+  "convergence_status": "unavailable",
   "window_hours": 72,
-  "window_start": "2026-07-31T12:15:29Z",
+  "window_start": "2026-07-31T13:29:55Z",
   "feed_sha256": "fd363403ee92b314f2a6e50652dae989e90d8940dbb541c556c11f4e0c819aaa",
   "local_published_count": 13,
-  "supabase_published_count": 13,
+  "supabase_published_count": 0,
   "missing_supabase": [],
   "orphan_supabase": [],
   "live_404": [],
-  "observation_errors": [],
+  "observation_errors": [
+    {
+      "surface": "supabase",
+      "reason": "supabase_observation_unavailable"
+    }
+  ],
   "public_projection_contract": {
     "schema_version": "public-article-projection-contract.v1",
     "policy_sha256": "6d125ff39bdb951026cdecf6e314d4cd56eb6877cc1cf478333375bc78306888",
@@ -18,5 +23,5 @@
     "matches": true
   },
   "mismatch_total": 0,
-  "generated_at": "2026-08-03T12:15:29Z"
+  "generated_at": "2026-08-03T13:29:55Z"
 }
