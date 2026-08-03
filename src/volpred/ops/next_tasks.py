@@ -725,6 +725,27 @@ _TOMBSTONE_KEEP_FIELDS = (
 )
 
 
+def is_tombstoned(task: Any) -> bool:
+    """True when this row is a compacted archive stub, not a live task.
+
+    One owner for "is this row still evidence about itself?". Compaction keeps
+    only ``_TOMBSTONE_KEEP_FIELDS``; the full record moves to
+    ``storage/next_tasks_archive/``. So a tombstone has structurally lost
+    ``blocked_reason``, ``follows_up_on``, ``k_id`` and ``status_history`` —
+    every field a reader would use to ask "was this task ever disposed of?".
+
+    Any detector that judges a row by the *absence* of such a field must call
+    this first, or it will keep re-deriving the same answer from data that was
+    deleted on purpose. Terminal rows are compacted at 3 days
+    (``unblock_expired_blocked_tasks.COMPACT_AGE_DAYS``) while dreaming's
+    ``detect_missing_retry_strategy`` looks back 14
+    (``loop_health.LOOP_HEALTH_WINDOW_DAYS``): that 11-day overlap made every
+    failed row look like an undisposed orphan once it crossed day 3, which is
+    where 31 of 32 standing findings came from on 2026-08-03.
+    """
+    return isinstance(task, dict) and bool(task.get("tombstone"))
+
+
 def _task_terminal_ts(task: dict) -> str | None:
     """Best-effort terminal timestamp for age gating; None = not compactable."""
     for key in ("completed_at", "finished_at", "closed_at", "updated_at"):

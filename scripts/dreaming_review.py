@@ -65,6 +65,7 @@ from volpred.ops.loop_health import (  # noqa: E402
     _task_terminal_time,
     loop_health_snapshot,
 )
+from volpred.ops.next_tasks import is_tombstoned  # noqa: E402
 from _claude_project_dir import detect_claude_projects_dir  # noqa: E402
 
 
@@ -467,6 +468,13 @@ def detect_missing_retry_strategy(
 
     for t in tasks:
         if not _is_execution_failure(t.get("status")):
+            continue
+        if is_tombstoned(t):
+            # A compacted stub cannot answer "was this disposed of?" — the
+            # fields that would say so are stripped at 3 days while this
+            # detector looks back 14. Judging it here does not surface dropped
+            # work; it manufactures a finding about an archived receipt, every
+            # night, forever. The full record is in storage/next_tasks_archive/.
             continue
         tt = _task_terminal_time(t)
         if tt is None or tt < cutoff:

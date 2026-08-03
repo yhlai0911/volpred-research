@@ -1775,3 +1775,58 @@ def test_a_finished_task_is_not_reprioritized_back_to_life(tmp_path):
     assert dr.apply_auto_dispatch([crit], str(storage), NOW) == []
     assert _queued(storage, tid)["priority"] == 3
     assert _queued(storage, tid)["status"] == "succeeded"
+
+
+def test_missing_retry_strategy_skips_tombstoned_rows(tmp_path):
+    """A compacted stub cannot testify about its own disposition.
+
+    Terminal rows are tombstoned at 3 days
+    (`unblock_expired_blocked_tasks.COMPACT_AGE_DAYS`), which strips
+    `blocked_reason`, `follows_up_on`, `k_id` and `status_history` — every field
+    this detector reads to decide whether a failure was dealt with. The window
+    here is 14 days, so between day 3 and day 14 a *properly retried* failure is
+    byte-for-byte identical to an abandoned one. On 2026-08-03 that overlap was
+    producing 31 of 32 standing findings, all about archived receipts, and
+    regenerating them nightly.
+    """
+    storage = _storage(tmp_path)
+    _write(
+        storage / "next_tasks.json",
+        [
+            # Compacted stub: exactly the fields tombstoning keeps, nothing else.
+            # Indistinguishable from an orphan by construction — must be skipped.
+            {
+                "id": "T_ARCHIVED",
+                "status": "failed",
+                "task_type": "experiment",
+                "title": "long-settled failure",
+                "priority": 3,
+                "source": "agent",
+                "created_at": _iso(9),
+                "completed_at": _iso(8),
+                "tombstone": True,
+                "archived_at": _iso(4),
+            },
+            # A genuinely live failure inside the window still gets flagged.
+            {"id": "T_LIVE", "k_id": "KLIVE", "status": "failed", "completed_at": _iso(2)},
+        ],
+    )
+
+    sigs = {f.signature for f in dr.detect_missing_retry_strategy(str(storage), {}, NOW)}
+
+    assert "missing_retry_strategy:T_ARCHIVED" not in sigs
+    assert "missing_retry_strategy:KLIVE" in sigs
+
+
+def test_tombstone_predicate_is_the_canonical_one(tmp_path):
+    """The detector must not grow its own idea of what a tombstone is."""
+    from volpred.ops.next_tasks import _TOMBSTONE_KEEP_FIELDS, is_tombstoned
+
+    assert is_tombstoned({"tombstone": True}) is True
+    assert is_tombstoned({"tombstone": False}) is False
+    assert is_tombstoned({}) is False
+    assert is_tombstoned(None) is False
+    # None of the fields compaction keeps can carry disposition evidence, which
+    # is precisely why the detector cannot judge a stub.
+    for field in ("blocked_reason", "follows_up_on", "k_id", "status_history"):
+        assert field not in _TOMBSTONE_KEEP_FIELDS
