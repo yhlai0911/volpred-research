@@ -73,11 +73,49 @@ def test_dependence_aware_aggregation_differs_from_naive_sum() -> None:
     assert abs(bottom_q - marginal_q) > 0.1
 
 
+def _adjust(raw: dict[str, float]) -> dict[str, float]:
+    """Mirror the experiment's canonical-Holm call shape (name -> adjusted p)."""
+    keys = list(raw)
+    return dict(zip(keys, k.holm_step_down([raw[key] for key in keys]).adjusted_p_values))
+
+
 def test_holm_adjustment_is_monotone_and_not_below_raw() -> None:
     raw = {"a": 0.01, "b": 0.02, "c": 0.5}
-    adjusted = k.holm_adjust(raw)
+    adjusted = _adjust(raw)
     assert all(adjusted[name] >= p for name, p in raw.items())
     assert adjusted["a"] <= adjusted["b"] <= adjusted["c"]
+
+
+def test_canonical_holm_matches_the_retired_local_definition() -> None:
+    """Pin the refactor: canonical Holm == the local copy this file used to hold.
+
+    K1746 originally carried its own ``holm_adjust``; the canonical-stat-helper
+    ratchet flagged it as a re-implementation of
+    ``volpred.stats.inference.holm_step_down``.  This reproduces the retired
+    definition here (test files are outside the ratchet's scan) and asserts the
+    canonical helper is indistinguishable from it, including ties and the 0/1
+    boundaries, so the swap cannot silently move a published p-value.
+    """
+
+    def retired_local_holm(named_p: dict[str, float]) -> dict[str, float]:
+        ordered = sorted(named_p.items(), key=lambda kv: kv[1])
+        m, running = len(ordered), 0.0
+        out: dict[str, float] = {}
+        for rank, (name, p) in enumerate(ordered):
+            running = max(running, min(1.0, (m - rank) * p))
+            out[name] = running
+        return out
+
+    rng = np.random.default_rng(20260804)
+    for trial in range(500):
+        size = int(rng.integers(1, 12))
+        values = rng.random(size)
+        if trial % 3 == 0:  # force exact ties
+            values = np.repeat(values[: max(1, size // 2)], 2)[:size]
+        if trial % 7 == 0:  # force boundary p-values
+            values = rng.choice([0.0, 1.0, 1e-12, 0.5], size=size)
+        raw = {f"cell_{i}": float(v) for i, v in enumerate(values)}
+        assert _adjust(raw) == retired_local_holm(raw)
 
 
 def test_runtime_artifacts_are_byte_traceable_and_consistent() -> None:

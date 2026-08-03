@@ -27,6 +27,7 @@ import pandas as pd
 from scipy import stats
 
 from volpred.research.reproduce_spec import finalize_experiment
+from volpred.stats.inference import holm_step_down
 
 SEED = 42
 ASSETS = ["SPY", "TLT", "GLD", "HYG", "QQQ"]
@@ -418,16 +419,6 @@ def es_z2_test(y: np.ndarray, q: np.ndarray, e: np.ndarray, alpha: float, seed: 
     return test
 
 
-def holm_adjust(named_p: dict[str, float]) -> dict[str, float]:
-    ordered = sorted(named_p.items(), key=lambda kv: kv[1])
-    m, running = len(ordered), 0.0
-    out: dict[str, float] = {}
-    for rank, (name, p) in enumerate(ordered):
-        running = max(running, min(1.0, (m - rank) * p))
-        out[name] = running
-    return out
-
-
 def evaluate_primary(primary: pd.DataFrame) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     cells: dict[str, Any] = {}
     losses: dict[str, np.ndarray] = {}
@@ -455,7 +446,16 @@ def evaluate_primary(primary: pd.DataFrame) -> tuple[dict[str, Any], dict[str, n
         losses[key] = loss
         for test_name, p in [("kupiec_uc", uc["p_value"]), ("christoffersen_independence", ind["p_value"]), ("christoffersen_conditional_coverage", cc["p_value"]), ("dynamic_quantile", dq["p_value"]), ("expected_shortfall_z2", es_test["p_value_two_sided"])]:
             raw_p[f"{key}|{test_name}"] = float(p)
-    adjusted = holm_adjust(raw_p)
+    # Canonical Holm step-down (volpred.stats.inference) replaces the former
+    # local copy in this file; the two are algorithmically identical and the
+    # adjusted p-values are unchanged, so K1746_results.json is unaffected.
+    _cell_keys = list(raw_p)
+    adjusted = dict(
+        zip(
+            _cell_keys,
+            holm_step_down([raw_p[k] for k in _cell_keys]).adjusted_p_values,
+        )
+    )
     for full, p_adj in adjusted.items():
         cell_key, test_name = full.rsplit("|", 1)
         cells[cell_key][test_name]["p_value_holm_all_methods_alphas_tests"] = p_adj
@@ -475,7 +475,13 @@ def score_inference(primary: pd.DataFrame) -> dict[str, Any]:
         key = f"alpha_{alpha:.2f}"
         out[key] = {**test, "orientation": "bottom_up_minus_top_down; negative favors bottom-up", "bottom_up_mean": float(lb.mean()), "top_down_mean": float(lt.mean())}
         raw[key] = test["p_value_two_sided"]
-    adj = holm_adjust(raw)
+    _alpha_keys = list(raw)
+    adj = dict(
+        zip(
+            _alpha_keys,
+            holm_step_down([raw[k] for k in _alpha_keys]).adjusted_p_values,
+        )
+    )
     for key, value in out.items():
         value["p_value_holm_two_alphas"] = adj[key]
     return out
