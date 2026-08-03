@@ -480,6 +480,18 @@ def _reconcile_incremental(
             # the cursor. It never appends the comment twice.
             _advance_source_cursor(state, comment)
             continue
+        repair = repair_by_key.get(comment.delivery_key)
+        if repair is not None and repair.get("action") != "notify_only":
+            # An explicit repair request is an execution ingress, not an owner
+            # notification.  Keep the durable receipt/cursor, then let the
+            # verified completion path send the only owner-visible message.
+            deliveries[comment.delivery_key] = {
+                "comment": asdict(comment),
+                "status": "repair_pending",
+                "repair": repair,
+            }
+            _advance_source_cursor(state, comment)
+            continue
         batch = _open_subject_batch(batches, comment, now=now)
         if batch is None:
             batch_id = (

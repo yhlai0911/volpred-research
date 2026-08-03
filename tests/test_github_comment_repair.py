@@ -77,9 +77,10 @@ def test_marked_comment_with_unknown_kind_is_blocked(tmp_path: Path) -> None:
 
 def test_incremental_ingress_persists_repair_admission_receipt(tmp_path: Path) -> None:
     state_path = tmp_path / "state.json"
+    email: list[object] = []
     reconcile_github_comments(
         fetch_comments=lambda _since: [],
-        deliver_email=lambda _notification: {"sent": True},
+        deliver_email=lambda notification: (email.append(notification) or {"sent": True}),
         deliver_telegram=lambda _notification: {"sent": True},
         state_path=state_path,
         now=NOW,
@@ -88,7 +89,7 @@ def test_incremental_ingress_persists_repair_admission_receipt(tmp_path: Path) -
 
     result = reconcile_github_comments(
         fetch_comments=lambda _since: [comment],
-        deliver_email=lambda _notification: {"sent": True},
+        deliver_email=lambda notification: (email.append(notification) or {"sent": True}),
         deliver_telegram=lambda _notification: {"sent": True},
         state_path=state_path,
         now=NOW.replace(minute=2),
@@ -106,6 +107,9 @@ def test_incremental_ingress_persists_repair_admission_receipt(tmp_path: Path) -
             "task_id": "task-1",
         }
     ]
+    assert result["delivery_status"] == "idle"
+    assert email == []
     state = json.loads(state_path.read_text(encoding="utf-8"))
     delivery = state["deliveries"]["issue_comment:901"]
+    assert delivery["status"] == "repair_pending"
     assert delivery["repair"]["task_id"] == "task-1"
