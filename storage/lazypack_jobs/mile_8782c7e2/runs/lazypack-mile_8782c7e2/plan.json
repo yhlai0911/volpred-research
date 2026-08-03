@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：查了九個來源，這題連第一格數字都填不進去",
+  "subtitle": "拉美私募信貸募資能不能領先當地市場波動——研究在抓任何一筆價格之前就停手",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1744/K1744_results.json",
+      "sha256": "142ab9599d8681f3b2fbd39d48bf0022bf2b9c88e3c68c4d4ed66c20d7744176",
+      "label": "experiment K1744 results (preregistered feasibility gate for a point-in-time Latin America private-credit funding-supply proxy; the gate failed before any outcome market data was loaded, so the conclusion is INCONCLUSIVE / INSUFFICIENT_DATA)"
+    },
+    "manifest": {
+      "path": "experiments/k1744/raw_cache_manifest.json",
+      "sha256": "49f4d3602838862a0e21c24321b7b6e82776433de35753ce9cdb3968e5d00a36",
+      "label": "experiment K1744 raw source audit manifest (nine inspected sources with URL, access timestamp, HTTP status, response hash and byte count; records that no complete versioned record-level enumeration was accessible)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "想問的問題，和它為什麼有意思",
+      "alt": "拉丁美洲私募信貸市場的規模對比面板：三個數字分別是聯合國拉美暨加勒比海經委會估計的當地年度發展融資缺口、CFA Institute 報告的拉美主題私募信貸年度募資金額，以及私募信貸在當地企業放款的滲透率上限，全部由圖面直接讀出。研究要問的是這個市場的募資動能能否領先當地股票、債券、匯率下個月的波動。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一個很小、但敘事很大的市場",
+          "body": [
+            "私募信貸＝不走銀行、也不走公開債券市場的企業放款，錢來自基金。",
+            "問題：拉美這類基金什麼時候募到錢，會不會提前透露當地股票、債券、匯率下個月會不會更顛簸。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "當地每年發展融資缺口（十億美元）",
+          "value": {
+            "source": "results",
+            "path": "/literature/institutional_motivation/eclac_annual_financing_gap_usd_billion",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "聯合國拉美暨加勒比海經委會新聞稿"
+        },
+        {
+          "kind": "metric",
+          "label": "拉美主題私募信貸年度募資（百萬美元）",
+          "value": {
+            "source": "results",
+            "path": "/literature/institutional_motivation/cfa_latam_fundraising_2025_usd_million",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "同年全球私募債募資規模遠大於此，拉美佔比約千分之二"
+        },
+        {
+          "kind": "metric",
+          "label": "私募信貸在當地企業放款的滲透率上限（%）",
+          "value": {
+            "source": "results",
+            "path": "/literature/institutional_motivation/cfa_latam_private_credit_share_of_corporate_lending_upper_bound_pct",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "以上三項為近期回顧數字，只說明研究動機，不可回填歷史時點"
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "professional",
+      "title": "先把門檻寫死，再去看資料",
+      "alt": "研究設計面板：規格檔先鎖檔存證，兩分鐘後才第一次抓取外部來源。事前寫死三道最低樣本門檻，分別是不同的募集完成公告件數、當月有公告的月份數、對齊時間差後留下的共同月份數，數值由圖面直接讀出。觀測標的固定九檔在美國掛牌的拉美與新興市場基金，分股票、當地貨幣與當地公債、美元計價債券三個管道，乘上三種要預測的結果，共九格檢定在看到任何價格前就凍結。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "順序是刻意的",
+          "body": [
+            "門檻先定並鎖檔，才不會等到看見資料再回頭把標準調成剛好過關。",
+            "觀測標的與檢定格數同樣事前凍結，不准事後挑贏的那格來報。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "至少要有幾件不同的募集完成公告",
+          "value": {
+            "source": "results",
+            "path": "/proxy/feasibility/thresholds/minimum_distinct_eligible_events",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "至少要有幾個「當月有公告」的月份",
+          "value": {
+            "source": "results",
+            "path": "/proxy/feasibility/thresholds/minimum_nonzero_exposure_months",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "對齊時間差後至少要留下幾個共同月份",
+          "value": {
+            "source": "results",
+            "path": "/proxy/feasibility/thresholds/minimum_common_months_after_all_lags",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "觀測標的固定九檔，三管道乘三種結果共九格檢定，全部事前凍結"
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "professional",
+      "title": "九個來源查完，名冊一份都沒有",
+      "alt": "來源稽核面板：九個外部來源全部留下網址、抓取時間、回應狀態、回應雜湊與位元組數，其中八個正常回應、一個被拒。能提供完整、逐筆、且每筆帶得出當時公開時間的基金募集完成名冊者為零。規格上唯一相符的私募債募資資料庫回應大小、整份研究抓取的市場價格筆數、經核實公開時間的事件數，三個數值由圖面直接讀出。",
+      "sources": [
+        "results",
+        "manifest"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "問題不在幾個好用，在一個都沒有",
+          "body": [
+            "三個是事後總量報告、兩個是講機制的研究綜述、兩個是單筆或單一管理人公告、一個本來就不是資料源。",
+            "規格上唯一相符的那份資料庫要先建帳號，公開頁面看不到逐筆編號與版本時間。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "唯一規格相符來源的回應大小（位元組）",
+          "value": {
+            "source": "manifest",
+            "path": "/sources/3/response_bytes",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "內容是要求先註冊登入"
+        },
+        {
+          "kind": "metric",
+          "label": "整份研究抓取的市場價格筆數",
+          "value": {
+            "source": "results",
+            "path": "/data/sample/outcome_rows",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "停手發生在碰任何一檔基金價格之前"
+        },
+        {
+          "kind": "metric",
+          "label": "經核實公開時間的事件數",
+          "value": {
+            "source": "results",
+            "path": "/data/release_time/verified_event_release_timestamps",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "沒有官方時間戳，就無法還原「當時看得到什麼」"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "「搜尋沒查到」不等於「那個月沒發生」",
+      "alt": "結論面板：三道事前門檻對應的實際值在結果檔中全部記為未知而非零，因為搜尋沒有命中可能代表那個月真的沒有基金完成募集，也可能代表有基金完成但沒發稿、被付費牆擋住或當時未被歸類到拉丁美洲。兩者在公開搜尋結果中無法區分，硬記為零會讓整條時間序列偏向公關較勤的基金。研究結論等級為不確定，既不是支持也不是反對資金供給與市場波動之間存在關聯。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "為什麼那個零不能寫",
+          "body": [
+            "搜不到有兩種可能：那個月真的沒有，或有但沒發稿、被付費牆擋住、當時沒被歸到拉美這一類。",
+            "兩者在公開搜尋結果裡長得一樣。硬記成零，整條序列會偏向公關做得比較勤的基金。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "所以結論只有一句：不確定",
+          "body": [
+            "不能說私募信貸資金供給對拉美市場沒有影響——這次沒測。",
+            "也不能說有影響。獨立審查通過的是「這個停手的決定可信」，不是「問題有答案了」。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "實際數出來的合格公告件數",
+          "value": {
+            "source": "results",
+            "path": "/proxy/feasibility/thresholds/minimum_distinct_eligible_events",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "這是門檻值；實際值在結果檔中記為未知，不是零"
+        },
+        {
+          "kind": "text",
+          "heading": "可以帶走的問法",
+          "body": [
+            "下次看到「某某活動熱度領先市場」，先問：被算成「沒有活動」的期間，是真的沒有，還是只是沒被記錄？",
+            "這題答不出來時，後面的相關係數不管多漂亮，都還沒開始算。"
+          ]
+        }
+      ]
+    }
+  ]
+}
