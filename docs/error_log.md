@@ -5786,3 +5786,54 @@ ACL。兩個live owner刻意維持`legacy/1`；fresh census仍為五個預期blo
 **回歸與 live read-back**：`66 passed`，Ruff F/E9、diff-check、Matt Spec／Standards 雙軸均 PASS；重建 `weekly_2026-07-26` 與 `daily_2026-08-01` 並回讀 top-two、provider/model/session、unclassified 聲明與 Bash allocation note。live weekly top two 為 Codex `unclassified` 221,788,662 billable（82.3%）及 Claude `bash_other` 28,711,166（10.7%）。
 
 本 incident 狀態：**`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-08-03 — 一筆殘留 claim trace 重設 Issue #9 七日 clean soak
+
+**證據化症狀**：Issue #9 的 live `work-shadow-assess` 回報 `ready_for_cutover=false`，
+`clean_recorded_from` 由既有 comment 記載的 `2026-07-27T12:40:16.244030Z` 跳到
+`2026-08-02T09:16:08.343576Z`，`next_eligible_at` 由 `2026-08-03T12:40Z` 推遲到
+`2026-08-09T09:16Z`。全量掃 205 份 append-only receipt：22 份 blocking，最後一份是
+`scheduled_20260802T081548102477Z`，其中只有**一筆** reconciliation issue ——
+`assign_ae004ae2` / `invalid_lifecycle` / 「unclaimed status carries active claim trace」。
+該 task 的 status_history 顯示 `blocked → pending`（`blocked_until_expired`）發生在
+`2026-08-02T08:05:18Z`，observer 在 10 分 30 秒後拍到那個不一致狀態。assessor 對
+`reconciliation_issues` 非空是 any-match 阻擋，故單筆即可重設整個七日窗。
+
+**根因層級（責任分配／狀態機，非 typo）**：`task_pool_claim._repend_task` 的 docstring 宣稱
+自己是 blocked/claimed → pending 的「single mutation site」，但那個不變式只在**單一 module 內**
+成立。全量 class sweep（AST 掃 `<task>["status"] = "pending"`）找到**四個**執行同一 lifecycle
+transition 的實作，只有 `_repend_task` 會清 claim ownership 欄位；
+`unblock_expired_blocked_tasks._sweep_unblock` 只 pop `BLOCKED_FIELDS`、
+`mark_task_blocked --unblock` 只 pop blocked metadata，兩者都把前一位持有者的
+`claimed_by` / `claimed_at` / `claim_session_id` / `started_at` 留在一個已無人持有的 row 上。
+私有欄位清單複製在各自 module 內，正是它們得以各自漂移的原因。
+
+**底層修復與制度化**：`CLAIM_OWNERSHIP_FIELDS` 與 `clear_claim_ownership()` 落在
+`src/volpred/ops/next_tasks.py`，成為該欄位集合的唯一 owner；三條我方 owned 的 re-pend path
+（expiry sweeper、`mark_task_blocked --unblock`、`_repend_task`）全部改呼叫它，`_repend_task`
+的私有複本刪除。清除與 status 變更在**同一次 locked write** 內完成，讀者不可能觀察到中間態；
+sweeper 另把實際清掉的欄位寫進 swept receipt（不做未驗證的乾淨宣稱）。機械 gate =
+`tests/test_repend_claim_ownership.py::test_every_repend_site_clears_claim_ownership`，
+以 AST 掃描四個 script，新增未接線的 re-pend site 一律轉紅；已知未接線者以
+`KNOWN_UNCONVERTED_REPEND_SITES` 精確集合宣告（非寬鬆白名單），修好後必須在同一 commit 刪除。
+
+**回歸與 live read-back**：新測 9 passed；相鄰 lifecycle 套件 200 passed；
+shadow/cutover/next_tasks/canonical 範圍 465 passed（67 個 postgres/supabase error 為
+`pg_ctl start` 環境問題，未改動的 main 上同形）；canonical-writer audit PASS
+（0 unguarded / 0 routing violation）。Break-then-verify：在隔離 worktree 內拿掉 sweeper 的
+清除呼叫，行為測試與 AST gate 兩者同時轉紅，還原後全綠。Live read-back 對**真實 queue**
+（3806 rows）重放：現存 5 筆 blocked-with-claim-trace 地雷（最近一顆
+`k_reruns_0050_snapshot_contaminated_20260719` 於 `2026-08-04T16:08Z` 到期）在舊碼下全部產生
+`invalid_lifecycle`，新碼下全部 clean，且全 queue reconciliation issue 總數 843 → 843 未新增。
+
+**未涵蓋範圍（明示，不靜默截斷）**：`scripts/compute_queue.py` 的
+`_release_collected_source_task` 與 `_release_cancelled_source_task` 有同一缺陷，但該檔屬
+並行 Graphify／resource-aware-dispatch session 的 owned path
+（`docs/handoffs/2026-08-03_volpred_optimization_continuation.md` §3），本 lane 不得修改；
+已在 gate 內具名宣告並回報於 Issue #9。
+
+本 slice 狀態：**`root_cause_fixed_and_verified`**。Issue #9 umbrella 仍為 **`contained`**／OPEN：
+七日 clean 窗因本次重設，最早成熟時間為 `2026-08-09T09:16:08.343576Z`，且屆時仍須由
+`work_shadow_cutover_ready_v1` live assessment 判定，不得以 `blocked_until` 到期取代。

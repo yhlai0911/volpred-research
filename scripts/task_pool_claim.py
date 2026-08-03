@@ -63,6 +63,7 @@ if str(_REPO_ROOT / "scripts") not in sys.path:
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import (  # noqa: E402
     TERMINAL_COMPACTABLE_STATUSES,
+    clear_claim_ownership,
     enforce_blocked_until,
     normalize_priority,
     normalize_task_priority,
@@ -1431,15 +1432,10 @@ def _repend_task(
     prev_owner = task.get("claimed_by")
     prev_status = (task.get("status") or "").lower() or "claimed"
     task["status"] = "pending"
-    task.pop("claimed_by", None)
-    task.pop("claimed_at", None)
-    task.pop("claim_expires_at", None)
-    task.pop("claim_session_id", None)
-    task.pop("started_at", None)
-    task.pop("dispatch_managed", None)
-    task.pop("dispatch_managed_owner", None)
-    task.pop("dispatch_job_id", None)
-    task.pop("dispatch_settlement_pending", None)
+    # The field list lives in volpred.ops.next_tasks so the expiry sweeper and
+    # mark_task_blocked --unblock clear exactly the same set; keeping a private
+    # copy here is what let those paths drift (Issue #9, 2026-08-02).
+    clear_claim_ownership(task)
     task["last_released_at"] = _now()
     if reason:
         task["last_release_reason"] = reason

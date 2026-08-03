@@ -307,6 +307,50 @@ MAIN_THREAD_DISPATCH_LANES: frozenset[str] = frozenset(
 BLOCKED_DISPATCH_LANES: frozenset[str] = frozenset({"blocked", "blocked_on_user", "hold"})
 
 
+#: Fields that assert "a worker owns this row *right now*".  They are only
+#: legal while the status is claimed/running: ``volpred.ops.work.legacy``
+#: reports any pending/awaiting_approval row still carrying one as
+#: ``invalid_lifecycle`` -- "unclaimed status carries active claim trace".
+#:
+#: This tuple is the single owner of that field list.  Before it existed, four
+#: modules performed the same blocked/claimed -> pending transition and only
+#: ``task_pool_claim._repend_task`` cleared the trace; its "single mutation
+#: site" docstring was true within one module and false across the queue.  On
+#: 2026-08-02 the expiry sweeper re-pended ``assign_ae004ae2`` at 08:05:18Z, the
+#: shadow observer recorded the resulting invalid row at 08:15:48Z, and that one
+#: receipt reset the Issue #9 seven-day clean soak from 2026-08-03 to 2026-08-09.
+CLAIM_OWNERSHIP_FIELDS: tuple[str, ...] = (
+    "claimed_by",
+    "claimed_at",
+    "claim_expires_at",
+    "claim_session_id",
+    "started_at",
+    "dispatch_managed",
+    "dispatch_managed_owner",
+    "dispatch_job_id",
+    "dispatch_settlement_pending",
+)
+
+
+def clear_claim_ownership(task: dict[str, Any]) -> tuple[str, ...]:
+    """Strip every active-ownership marker from ``task``; return what was removed.
+
+    Call this from *any* transition that leaves a row unowned (-> pending,
+    awaiting_approval, or a terminal state reached without a worker).  It only
+    touches ownership: status, blocked metadata and ``status_history`` are the
+    caller's business, so the audit trail of who held the row survives in
+    ``status_history`` even though the live claim fields are gone.
+
+    Returning the removed keys lets callers log what they actually cleared
+    instead of asserting a clean state they never verified.
+    """
+    if not isinstance(task, dict):
+        return ()
+    return tuple(
+        field for field in CLAIM_OWNERSHIP_FIELDS if task.pop(field, None) is not None
+    )
+
+
 def normalize_dispatch_lane(task: dict) -> str:
     """Return the task's normalized schema-level dispatch lane ("" if unset).
 

@@ -49,6 +49,7 @@ from volpred.ops.blocked_reasons import (
 )
 from volpred.ops.diagnostics import warn
 from volpred.ops.next_tasks import (
+    clear_claim_ownership,
     compact_terminal_tasks,
     default_blocked_until,
     write_tasks_to_handle,
@@ -289,6 +290,14 @@ def _sweep_unblock(
         )
         if apply:
             t["status"] = "pending"
+            # An expired block re-pends a row that may still be carrying the
+            # claim trace of whoever held it before it was blocked.  Leaving it
+            # produces an unclaimed row with active ownership -- the exact
+            # invalid_lifecycle the Work Coordinator shadow observer recorded on
+            # 2026-08-02, which reset the Issue #9 seven-day soak.  Clear it in
+            # the same locked write as the status change so no reader can ever
+            # observe the inconsistent pair.
+            released = clear_claim_ownership(t)
             t.setdefault("status_history", []).append(
                 {
                     "at": datetime.now(timezone.utc).isoformat(),
@@ -297,6 +306,8 @@ def _sweep_unblock(
                     "reason": unblock_reason,
                 }
             )
+            if released:
+                swept[-1]["cleared_claim_fields"] = list(released)
             for k in BLOCKED_FIELDS:
                 t.pop(k, None)
     return swept, gated

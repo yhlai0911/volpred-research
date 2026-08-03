@@ -62,6 +62,7 @@ from volpred.ops.diagnostics import warn as _diag_warn
 # 2026-07-18: the 14-day default window used to be this module's own constant.
 # It is now owned by volpred.ops.next_tasks (which enforces the same invariant on
 # every writer, not just this CLI) so the number cannot drift into two.
+from volpred.ops.next_tasks import clear_claim_ownership
 from volpred.ops.next_tasks import (
     default_blocked_until as _default_blocked_until,
 )
@@ -172,6 +173,10 @@ def _mutate_tasks(args: argparse.Namespace, tasks: list) -> int:
         status_before = (matched.get("status") or "").lower()
         if status_before in {"blocked", "closed_no_action", "superseded"}:
             matched["status"] = "pending"
+            # Same duty as the expiry sweeper and _repend_task: a row returning
+            # to pending must not keep the claim trace of its previous holder,
+            # or the Work Coordinator reconciler reports invalid_lifecycle.
+            clear_claim_ownership(matched)
         for key in (
             "blocked_reason",
             "blocked_at",
