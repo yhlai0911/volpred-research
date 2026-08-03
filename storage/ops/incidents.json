@@ -2442,7 +2442,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-03T18:00:34.733663+00:00"
+     "last_seen_at": "2026-08-03T18:26:38.239588+00:00"
     },
     {
      "cleared_at": null,
@@ -2792,7 +2792,7 @@
      },
      "first_seen_at": "2026-08-02T21:26:00.232871+00:00",
      "key": "dispatch-slot-1-95470ef5",
-     "last_seen_at": "2026-08-03T18:00:39.343064+00:00"
+     "last_seen_at": "2026-08-03T18:04:58.156186+00:00"
     },
     {
      "cleared_at": null,
@@ -2806,7 +2806,7 @@
      },
      "first_seen_at": "2026-08-03T06:31:26.826223+00:00",
      "key": "dispatch-slot-1-3381ab14",
-     "last_seen_at": "2026-08-03T18:00:45.795172+00:00"
+     "last_seen_at": "2026-08-03T18:05:05.019500+00:00"
     },
     {
      "cleared_at": null,
@@ -2820,7 +2820,7 @@
      },
      "first_seen_at": "2026-08-03T07:20:23.020263+00:00",
      "key": "dispatch-slot-1-963e82b6",
-     "last_seen_at": "2026-08-03T18:00:53.368690+00:00"
+     "last_seen_at": "2026-08-03T18:05:15.309883+00:00"
     },
     {
      "cleared_at": null,
@@ -2834,7 +2834,7 @@
      },
      "first_seen_at": "2026-08-03T08:28:35.957693+00:00",
      "key": "dispatch-slot-1-a82478f1",
-     "last_seen_at": "2026-08-03T18:01:01.475061+00:00"
+     "last_seen_at": "2026-08-03T18:05:26.439120+00:00"
     },
     {
      "cleared_at": null,
@@ -2848,7 +2848,7 @@
      },
      "first_seen_at": "2026-08-03T09:27:28.118145+00:00",
      "key": "dispatch-slot-1-795237a6",
-     "last_seen_at": "2026-08-03T18:01:07.967825+00:00"
+     "last_seen_at": "2026-08-03T18:05:33.342121+00:00"
     },
     {
      "cleared_at": null,
@@ -2862,7 +2862,7 @@
      },
      "first_seen_at": "2026-08-03T11:25:05.244107+00:00",
      "key": "dispatch-slot-1-d5ed8442",
-     "last_seen_at": "2026-08-03T18:01:18.287839+00:00"
+     "last_seen_at": "2026-08-03T18:05:42.605535+00:00"
     },
     {
      "cleared_at": null,
@@ -2881,10 +2881,10 @@
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-d5ed8442 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-03T18:01:18.287839+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-810125e6 unmergeable (worker_superseded_generation)",
+   "last_seen_at": "2026-08-03T18:26:38.239588+00:00",
    "notified_at": null,
-   "occurrence_count": 9680,
+   "occurrence_count": 9691,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3173,7 +3173,7 @@
    "clean_observations": [],
    "clean_streak_started_at": null,
    "control_gate_id": null,
-   "current_task_id": "ci-red-30736983439",
+   "current_task_id": "ci-root-30839308043",
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-08-02T07:20:44.976813+00:00",
@@ -3380,6 +3380,11 @@
     {
      "at": "2026-08-03T17:40:24.095200+00:00",
      "instance_key": "30835947270:1",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-03T18:20:25.506075+00:00",
+     "instance_key": "30839308043:1",
      "transition": "opened"
     }
    ],
@@ -3617,14 +3622,20 @@
      "first_seen_at": "2026-08-03T17:40:24.095200+00:00",
      "key": "30835947270:1",
      "last_seen_at": "2026-08-03T17:40:24.095200+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-03T18:20:25.506075+00:00",
+     "key": "30839308043:1",
+     "last_seen_at": "2026-08-03T18:20:25.506075+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-03T17:35:08.8711979Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
-   "last_seen_at": "2026-08-03T17:40:24.095200+00:00",
+   "last_breach_detail": "2026-08-03T18:18:50.1154218Z E AssertionError: assert 'in-flight worker' in 'REFUSED: reload blocked (1 worker job(s), 0 pending PHASE-Z item(s))\\n worker jobs:\\n[]\\nWait for it to finish, --defer to ",
+   "last_seen_at": "2026-08-03T18:20:25.506075+00:00",
    "notified_at": null,
-   "occurrence_count": 39,
+   "occurrence_count": 40,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -3634,6 +3645,11 @@
      "episode": 1,
      "opened_at": "2026-08-02T07:20:45.235111+00:00",
      "task_id": "ci-red-30736983439"
+    },
+    {
+     "episode": 1,
+     "opened_at": "2026-08-03T18:20:25.896955+00:00",
+     "task_id": "ci-root-30839308043"
     }
    ],
    "task_mode": "external",
@@ -4763,6 +4779,6 @@
    }
   }
  },
- "updated_at": "2026-08-03T18:02:08.582331+00:00",
+ "updated_at": "2026-08-03T18:26:38.270443+00:00",
  "version": 1
 }
