@@ -349,6 +349,25 @@ def is_immediate_dispatch_task(task: Mapping[str, Any]) -> bool:
     return classify_urgency(dict(task)) in {LANE_URGENT, LANE_TIME_CRITICAL}
 
 
+def dispatch_preempt_rank_key(
+    task: Mapping[str, Any],
+) -> tuple[int, tuple[int, int, str, str]]:
+    """Rank already-materialized scheduled preemption requests.
+
+    Human urgent and perishable task lanes are seated before this function is
+    consulted.  This key only arbitrates scheduled preempts, allowing a dry
+    article pipeline to reserve one next fire instead of losing every safe
+    single slot to a recurring machine incident.
+    """
+
+    raw = task.get("dispatch_preempt_rank", 0)
+    try:
+        rank = int(raw)
+    except (TypeError, ValueError):
+        rank = 0
+    return rank, dispatch_admission_rank_key(task)
+
+
 def is_pending_list_candidate(
     task: Mapping[str, Any],
     *,
@@ -606,6 +625,7 @@ __all__ = [
     "normalize_task_type_value",
     "normalized_task_type",
     "dispatch_admission_rank_key",
+    "dispatch_preempt_rank_key",
     "find_starved",
     "is_immediate_dispatch_task",
     "requires_supervisor_preassignment",

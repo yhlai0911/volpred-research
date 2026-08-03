@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -286,6 +287,55 @@ def test_file_store_has_same_claim_contract(tmp_path: Path) -> None:
 
     assert store.status(fire.fire_key)["state"] == "succeeded"
     assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_file_store_compacts_terminal_history_but_preserves_actionable_rows(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "receipts.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "fires": {
+                    "old": {
+                        "state": "succeeded",
+                        "finished_at": "2026-08-01T00:00:00Z",
+                    },
+                    "new": {
+                        "state": "succeeded",
+                        "finished_at": "2026-08-03T00:00:00Z",
+                    },
+                    "retry": {
+                        "state": "failed",
+                        "finished_at": "2026-07-01T00:00:00Z",
+                    },
+                    "running": {
+                        "state": "running",
+                        "started_at": "2026-07-01T00:00:00Z",
+                    },
+                },
+                "shadow": {
+                    "shadow-old": {"last_seen_at": "2026-08-01T00:00:00Z"},
+                    "shadow-new": {"last_seen_at": "2026-08-03T00:00:00Z"},
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    store = FileReceiptStore(
+        path,
+        max_terminal_records=1,
+        max_shadow_records=1,
+    )
+
+    store._mutate(lambda _payload: None)
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert set(payload["fires"]) == {"new", "retry", "running"}
+    assert set(payload["shadow"]) == {"shadow-new"}
+    assert payload["retention"]["last_pruned_fires"] == 1
+    assert payload["retention"]["last_pruned_shadow"] == 1
 
 
 def test_loader_rejects_unknown_canary_job() -> None:

@@ -13,6 +13,11 @@
     "active_since": "2026-07-26T10:38:00Z",
     "timezone": "Asia/Taipei",
     "receipt_path": "storage/ops/schedule_receipts.json",
+    "receipt_retention": {
+      "max_terminal_records": 6000,
+      "max_shadow_records": 2000,
+      "policy": "Preserve every live/retryable fire; retain the newest bounded terminal and retired-shadow histories so the one-minute dispatch tick cannot grow the atomic JSON ledger without limit."
+    },
     "daemon_label": "com.volpred.operations-core-scheduler",
     "daemon_plist": "ops/launchd/com.volpred.operations-core-scheduler.plist",
     "tick_seconds": 30,
@@ -755,10 +760,11 @@
         "cron": "* * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_agent_dispatch_tick.sh",
         "log_path": "storage/logs/cron/agent_dispatch_tick.log",
-        "description": "Every minute Operations Core delivers one local Unix-socket tick to the KeepAlive dispatch executor. Operations Core is the only schedule owner; the executor has no independent scheduler and only owns admission, four worker slots, retry/failover, health monitoring and PHASE-Z. The tick is cheap and model-free when no hourly slot or explicit request is due. A missed tick is retried; after app/daemon/Mac restart the next tick re-evaluates canonical last_fire_at and fire_requested_at without duplicate execution.",
+        "description": "Every minute Operations Core first runs the model-free article-continuity actuator: when the canonical release preview has eligible=0 it batch-promotes pending daily_article work, nominates exactly one oldest article as a continuity preempt, and records a durable fire request that waits behind any occupied safe slot; stocked pools clear only continuity-owned markers. It then delivers one local Unix-socket tick to the KeepAlive dispatch executor. Operations Core is the only schedule owner; the executor has no independent scheduler and only owns admission, the safety-limited worker slots, retry/failover, health monitoring and PHASE-Z. A missed tick is retried; after app/daemon/Mac restart the next tick re-evaluates canonical last_fire_at and fire_requested_at without duplicate execution.",
         "host_crontab_managed": false,
         "matchers": [
           "cron_agent_dispatch_tick.sh",
+          "scripts.article_continuity",
           "scripts.dispatch_supervisor.trigger",
           "dispatch-trigger.sock"
         ]

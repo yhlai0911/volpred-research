@@ -390,9 +390,19 @@ class MemoryReceiptStore:
 class FileReceiptStore:
     """Atomic JSON receipt adapter shared by every local scheduler process."""
 
-    def __init__(self, path: Path) -> None:
+    def __init__(
+        self,
+        path: Path,
+        *,
+        max_terminal_records: int = 6_000,
+        max_shadow_records: int = 2_000,
+    ) -> None:
         self.path = Path(path)
         self.lock_path = self.path.with_name(f"{self.path.name}.lock")
+        if max_terminal_records < 1 or max_shadow_records < 1:
+            raise ValueError("receipt retention limits must be positive")
+        self.max_terminal_records = max_terminal_records
+        self.max_shadow_records = max_shadow_records
 
     def _read(self) -> dict[str, Any]:
         if not self.path.exists():
@@ -405,6 +415,7 @@ class FileReceiptStore:
 
     def _write(self, payload: dict[str, Any]) -> None:
         guard_canonical_write(self.path)
+        self._compact(payload)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         fd, tmp_name = tempfile.mkstemp(
             dir=str(self.path.parent), prefix=f".{self.path.name}.", suffix=".tmp"
@@ -419,6 +430,71 @@ class FileReceiptStore:
         except BaseException:
             Path(tmp_name).unlink(missing_ok=True)
             raise
+
+    @staticmethod
+    def _record_order(item: tuple[str, Any]) -> tuple[str, str]:
+        key, raw = item
+        record = raw if isinstance(raw, dict) else {}
+        return (
+            str(
+                record.get("finished_at")
+                or record.get("started_at")
+                or record.get("claimed_at")
+                or record.get("scheduled_for")
+                or record.get("last_seen_at")
+                or ""
+            ),
+            str(key),
+        )
+
+    def _compact(self, payload: dict[str, Any]) -> None:
+        """Bound settled history while preserving every actionable receipt.
+
+        The one-minute dispatch tick otherwise grows a monolithic JSON ledger
+        forever and rewrites the whole file on every fire.  Live/retryable rows
+        are never removed.  Terminal history and retired shadow observations
+        keep their newest bounded windows, which is sufficient for liveness and
+        parity readers while making disk use converge.
+        """
+
+        fires = payload.get("fires")
+        shadow = payload.get("shadow")
+        if not isinstance(fires, dict) or not isinstance(shadow, dict):
+            return
+
+        actionable: dict[str, Any] = {}
+        terminal: list[tuple[str, Any]] = []
+        for key, record in fires.items():
+            state = str(record.get("state") or "") if isinstance(record, dict) else ""
+            if state in TERMINAL_STATES:
+                terminal.append((str(key), record))
+            else:
+                actionable[str(key)] = record
+        terminal.sort(key=self._record_order, reverse=True)
+        kept_terminal = terminal[: self.max_terminal_records]
+        pruned_fires = max(0, len(terminal) - len(kept_terminal))
+        payload["fires"] = {
+            **actionable,
+            **{key: record for key, record in kept_terminal},
+        }
+
+        shadow_rows = sorted(
+            ((str(key), record) for key, record in shadow.items()),
+            key=self._record_order,
+            reverse=True,
+        )
+        kept_shadow = shadow_rows[: self.max_shadow_records]
+        pruned_shadow = max(0, len(shadow_rows) - len(kept_shadow))
+        payload["shadow"] = {key: record for key, record in kept_shadow}
+        payload["retention"] = {
+            "max_terminal_records": self.max_terminal_records,
+            "max_shadow_records": self.max_shadow_records,
+            "terminal_records": len(kept_terminal),
+            "actionable_records": len(actionable),
+            "shadow_records": len(kept_shadow),
+            "last_pruned_fires": pruned_fires,
+            "last_pruned_shadow": pruned_shadow,
+        }
 
     def _mutate(self, callback: Callable[[dict[str, Any]], Any]) -> Any:
         guard_canonical_write(self.path)

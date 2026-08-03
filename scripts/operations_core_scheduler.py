@@ -72,10 +72,21 @@ def build_materializer(
     if mode_override is not None:
         policy = replace(policy, mode=mode_override)
     jobs = load_schedule_jobs(config)
+    retention = (config.get("schedule_materialization") or {}).get(
+        "receipt_retention"
+    ) or {}
     return ScheduleMaterializer(
         policy=policy,
         jobs=jobs,
-        receipts=FileReceiptStore(_receipt_path(config, override=receipts_path)),
+        receipts=FileReceiptStore(
+            _receipt_path(config, override=receipts_path),
+            max_terminal_records=int(
+                retention.get("max_terminal_records", 6_000)
+            ),
+            max_shadow_records=int(
+                retention.get("max_shadow_records", 2_000)
+            ),
+        ),
         repo_root=ROOT,
         legacy_last_success=legacy_success_evidence(
             config,

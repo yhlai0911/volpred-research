@@ -80,6 +80,7 @@ from volpred.ops import dreaming_revalidate  # noqa: E402
 from volpred.ops.task_pool_selection import (  # noqa: E402
     CODEX_ELIGIBLE_TASK_TYPES,  # noqa: F401 - compatibility re-export
     dispatch_admission_rank_key,
+    dispatch_preempt_rank_key,
     evaluate_task_claim,
     find_starved,
     is_immediate_dispatch_task,
@@ -1017,7 +1018,7 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
         # starvation rotation, including platform_ops rows that use an
         # observe-only contract and therefore still need supervisor admission.
         if selected_mutating is None:
-            for task in ordered_tasks:
+            for task in sorted(ordered_tasks, key=dispatch_preempt_rank_key):
                 if task.get("dispatch_preempt") is not True or not _eligible(task):
                     continue
                 if not requires_supervisor_preassignment(task):
