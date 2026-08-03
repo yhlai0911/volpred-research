@@ -62,6 +62,11 @@ def test_task_field_overrides_default() -> None:
     assert out == {"topology": "compute_queue", "source": "task_field"}
 
 
+def test_compute_spec_defaults_to_local_queue() -> None:
+    out = mr.pick_topology("experiment", {"compute_spec": {"script": "scripts/job.py"}})
+    assert out == {"topology": "compute_queue", "source": "compute_spec"}
+
+
 @pytest.mark.parametrize(
     ("task_type", "topology"),
     [

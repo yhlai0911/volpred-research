@@ -51,6 +51,25 @@ ownership field before relying on title/description wording:
   usually agentable.
 - `dispatch_lane="blocked"`: surface in blocked queue until explicitly fixed.
 
+### Local compute admission (zero Claude tokens)
+
+Tasks that are fully executable by a repository script may declare a
+`compute_spec` object (relative `script`, string `args`, optional `env`,
+`result_artifact`, `output_paths`, `timeout_seconds`, and `followup`).
+`scripts/model_router.py::pick_topology()` then defaults them to
+`compute_queue`, and `scripts/compute_task_admission.py` reserves the pending
+row and enqueues it during every compute-worker tick. This path is independent
+of the shared-launchd Claude slot and has no artificial task-count cap; CPU
+parallelism remains bounded by the canonical `volpred-compute-worker`
+`max_parallel` schedule field. The adapter refuses prose-only or missing
+scripts — it never guesses an executable from a task description.
+
+Every admitted receipt carries `routing.lane=compute_queue` and
+`routing.token_cost_estimate=0`, giving token A/B reporting a durable, auditable
+baseline. A task with both compute and interpretation work should keep the
+interpretation as a follow-up task rather than putting Claude in the compute
+critical path.
+
 Legacy tasks without `dispatch_lane` still fall back to the `task_type` decision
 tree below and then to free-text markers. Do not encode ownership solely in
 `description`; workflow prose often contains phrases such as `主線程派...`.

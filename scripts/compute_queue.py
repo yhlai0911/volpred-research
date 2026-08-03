@@ -841,6 +841,21 @@ def enqueue(args) -> int:
         "output_paths_updated_at": None,
         "job_metadata": getattr(args, "job_metadata", None),
         "kind": getattr(args, "job_kind", "compute"),
+        # Routing receipt: compute jobs are admitted to a local worker and do
+        # not consume Claude tokens.  Keep this on the durable job so token
+        # A/B reporting can compare the same source task before/after routing
+        # without inferring from the process table.
+        "routing": getattr(args, "routing", None) or {
+            "lane": (
+                "compute_queue"
+                if getattr(args, "job_kind", "compute") == "compute"
+                else "agent"
+            ),
+            "token_cost_estimate": (
+                0 if getattr(args, "job_kind", "compute") == "compute" else None
+            ),
+            "router": "manual_enqueue",
+        },
         "cwd": getattr(args, "job_cwd", None),
         "claude_followup": followup,
         "followup_dispatched": False,

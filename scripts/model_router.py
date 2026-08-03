@@ -123,6 +123,7 @@ def pick_topology(task_type: str | None, task: dict | None = None) -> dict:
     派工路徑不可因 metadata 打錯字炸掉；invalid 值可被 report 消費者看見）。
     """
     task_type = normalize_task_type_value(task_type)
+    task = task if isinstance(task, dict) else {}
     field = (task or {}).get("topology")
     normalized_field = field.strip().lower() if isinstance(field, str) else None
     if task_type in CLAUDE_ONLY_TASK_TYPES:
@@ -137,6 +138,17 @@ def pick_topology(task_type: str | None, task: dict | None = None) -> dict:
         return out
     if normalized_field in TOPOLOGIES:
         return {"topology": normalized_field, "source": "task_field"}
+    # A compute-only task is an explicit local execution contract.  Treat the
+    # presence of a validated ``compute_spec`` as the default topology even
+    # when an older task producer forgot to materialize ``topology``.  This is
+    # intentionally below an explicit task field so an owner can still route a
+    # compute-capable task through a Claude review lane when the task contains
+    # both execution and interpretation work.
+    if isinstance(task.get("compute_spec"), dict):
+        out = {"topology": "compute_queue", "source": "compute_spec"}
+        if field is not None:
+            out["invalid_field"] = str(field)
+        return out
     out: dict = {}
     if field is not None:
         out["invalid_field"] = str(field)

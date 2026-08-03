@@ -22,6 +22,18 @@ STARTED_AT=$SECONDS
 cron_emit_start volpred-compute-worker
 
 echo "[wrapper $(date '+%H:%M:%S')] DISPATCH label=operations-core.compute-worker pid=$$ fire_key=${VOLPRED_SCHEDULE_FIRE_KEY:-legacy}"
+# Mechanical admission is deliberately separate from the Claude supervisor:
+# explicit compute_spec tasks reserve their pool row and enter the local queue
+# even while the shared-launchd Claude coalition is at its one-slot safety cap.
+# The command is idempotent and has no artificial task-count limit; the queue
+# worker still owns CPU parallelism via its canonical max_parallel bound.
+/opt/homebrew/bin/uv run python scripts/compute_task_admission.py \
+  >> /Users/yhlai0911/.volpred/logs/compute_worker.log 2>&1
+ADMISSION_EXIT=$?
+if [ "$ADMISSION_EXIT" -ne 0 ]; then
+  echo "[wrapper $(date '+%H:%M:%S')] WARN compute admission rc=$ADMISSION_EXIT; continuing queue drain"
+fi
+
 nohup /opt/homebrew/bin/uv run python scripts/compute_queue.py run-loop \
   >> /Users/yhlai0911/.volpred/logs/compute_worker.log 2>&1 </dev/null &
 WORKER_PID=$!
