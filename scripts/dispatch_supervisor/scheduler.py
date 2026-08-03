@@ -691,23 +691,72 @@ def _settle_mutating_task(
     workspace: dict[str, Any],
     disposition: str,
     result: str,
+    repair_verification: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    args = [
+        "dispatch-settle",
+        "--id",
+        str(workspace["task_id"]),
+        "--session",
+        str(workspace["claim_session_id"]),
+        "--job-id",
+        str(workspace.get("dispatch_job_id") or ""),
+        "--disposition",
+        disposition,
+        "--result",
+        result[:800],
+    ]
+    if repair_verification is not None:
+        args.extend([
+            "--repair-verification-json",
+            json.dumps(repair_verification, ensure_ascii=False, sort_keys=True),
+        ])
     return _task_pool_command(
         repo_root=repo_root,
-        args=[
-            "dispatch-settle",
-            "--id",
-            str(workspace["task_id"]),
-            "--session",
-            str(workspace["claim_session_id"]),
-            "--job-id",
-            str(workspace.get("dispatch_job_id") or ""),
-            "--disposition",
-            disposition,
-            "--result",
-            result[:800],
-        ],
+        args=args,
     )
+
+
+def _repair_verification_for_workspace(
+    workspace: dict[str, Any],
+    workspace_outcome: dict[str, Any],
+    *,
+    worker_outcome: str = "",
+) -> dict[str, Any] | None:
+    """Build the supervisor-owned evidence receipt for a merged self-repair."""
+    if str(workspace.get("repair_lane") or "") != "self_optimization":
+        return None
+    if str(workspace_outcome.get("disposition") or "") != "merged":
+        return None
+    if worker_outcome and worker_outcome not in {
+        "success", "codex_failover_recovered"
+    }:
+        return None
+    gate = workspace_outcome.get("gate")
+    if not isinstance(gate, dict) or str(gate.get("verdict") or "") != "green":
+        return None
+    main_sha = str(workspace_outcome.get("main_sha") or "")
+    candidate_sha = str(workspace_outcome.get("gated_head_sha") or "")
+    if not main_sha or not candidate_sha:
+        return None
+    return {
+        "method": (
+            "isolated workspace patch; targeted merge gate; canonical merge "
+            "through merge_worktree.sh"
+        ),
+        "tests": {
+            "verdict": gate.get("verdict"),
+            "returncode": gate.get("rc"),
+            "targets": gate.get("targets") or [],
+            "duration_s": gate.get("duration_s"),
+        },
+        "readback": {
+            "merged": True,
+            "candidate_head_sha": candidate_sha,
+            "main_sha": main_sha,
+            "ancestor_check": "passed",
+        },
+    }
 
 
 def _observe_mutating_task_generation(
@@ -926,6 +975,11 @@ def reconcile_task_settlements(
             result=(
                 f"reconciled workspace={final.get('disposition')}; "
                 f"main_sha={final.get('main_sha', '')}"
+            ),
+            repair_verification=_repair_verification_for_workspace(
+                workspace,
+                final,
+                worker_outcome=str(pending.get("worker_outcome") or "failure"),
             ),
         )
         if (
@@ -1308,6 +1362,11 @@ async def _run_reserved_fire(
                             f"worker={getattr(result, 'outcome', 'failure')}; "
                             f"workspace={workspace_disposition}; "
                             f"main_sha={(workspace_outcome or {}).get('main_sha', '')}"
+                        ),
+                        repair_verification=_repair_verification_for_workspace(
+                            fire_workspace,
+                            workspace_outcome or {},
+                            worker_outcome=worker_outcome,
                         ),
                     )
                     if settlement.get("ok"):

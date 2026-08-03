@@ -3431,6 +3431,76 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
     assert replay["already_settled"] is True
 
 
+def test_dispatch_settle_self_repair_requires_evidence_and_notifies_success(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps([{
+            "id": "repair-bound",
+            "status": "pending",
+            "task_type": "platform_ops",
+            "dispatch_lane": "agent",
+            "repair_lane": "self_optimization",
+            "alert_key": "github_comment_repair",
+            "incident_id": "incident-repair-bound",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["src/volpred/ops"],
+            "post_merge_actions": [],
+            "title": "Repair bound",
+        }]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    from volpred.ops import repair_success
+
+    monkeypatch.setattr(
+        repair_success,
+        "notify_verified_repair_success",
+        lambda task: {"sent": True, "task_id": task["id"]},
+    )
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="dispatch-supervisor",
+            session="repair-session",
+            job_id="repair-job",
+        )
+    )
+    assert assigned["contract"]["repair_lane"] == "self_optimization"
+
+    missing = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="repair-bound",
+            session="repair-session",
+            job_id="repair-job",
+            disposition="merged",
+            result="merged",
+        )
+    )
+    assert missing["reason"] == "repair_verification_required"
+    assert json.loads(next_tasks.read_text())[0]["status"] == "in_progress"
+
+    settled = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="repair-bound",
+            session="repair-session",
+            job_id="repair-job",
+            disposition="merged",
+            result="merged and read back",
+            repair_verification_json=json.dumps({
+                "method": "merge gate",
+                "tests": {"verdict": "green"},
+                "readback": {"main_sha": "abc"},
+            }),
+        )
+    )
+    assert settled["status"] == "succeeded"
+    assert settled["repair_success_notification"]["sent"] is True
+    row = json.loads(next_tasks.read_text())[0]
+    assert row["repair_verification"]["tests"]["verdict"] == "green"
+
+
 def test_dispatch_generation_distinguishes_owned_superseded_and_wrong_job(
     tmp_path, monkeypatch
 ) -> None:

@@ -123,7 +123,10 @@ def _repair_verification_from_args(
     """Require structured evidence before a self-repair can announce success."""
     if str(task.get("repair_lane") or "") != "self_optimization":
         return None, None
-    if str(getattr(args, "status", "")) != "succeeded":
+    is_success = str(getattr(args, "status", "")) == "succeeded" or str(
+        getattr(args, "disposition", "")
+    ) in {"merged", "observed"}
+    if not is_success:
         return None, None
     raw = getattr(args, "repair_verification_json", None)
     if not raw:
@@ -867,6 +870,9 @@ def _dispatch_execution_contract(
         "title": str(task.get("title") or ""),
         "description": str(task.get("description") or ""),
         "issue_ref": task.get("issue_ref"),
+        "repair_lane": task.get("repair_lane"),
+        "alert_key": task.get("alert_key"),
+        "incident_id": task.get("incident_id"),
     }, None
 
 
@@ -1101,6 +1107,8 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
     """CAS-settle a supervisor-owned task after landing/adjudication."""
     if not _dispatch_supervisor_authorized():
         return {"ok": False, "reason": "supervisor_capability_required"}
+    success_task_id: str | None = None
+    settlement_result: dict[str, Any] | None = None
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
         supplied_job_id = str(getattr(args, "job_id", "") or "")
@@ -1172,6 +1180,11 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
                 "write_intent": write_intent,
             }
         if args.disposition in {"merged", "observed"}:
+            repair_verification, repair_verification_error = (
+                _repair_verification_from_args(task, args)
+            )
+            if repair_verification_error is not None:
+                return repair_verification_error
             task["status"] = "succeeded"
             task["completed_at"] = _now()
             task["result"] = args.result or (
@@ -1179,6 +1192,9 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
                 if args.disposition == "observed"
                 else "workspace merged and read back"
             )
+            if repair_verification is not None:
+                task["repair_verification"] = repair_verification
+                success_task_id = args.id
             _record_status_history(
                 task, frm=current, to="succeeded", by=owner,
                 note=(
@@ -1231,7 +1247,41 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
         task.pop("claimed_at", None)
         task.pop("claim_expires_at", None)
         task.pop("claim_session_id", None)
-        return {"ok": True, "task_id": args.id, "status": task["status"]}
+        settlement_result = {
+            "ok": True, "task_id": args.id, "status": task["status"]
+        }
+    if success_task_id is not None and settlement_result is not None:
+        try:
+            with _locked_readonly() as tasks:
+                completed_task = next(
+                    (
+                        dict(item)
+                        for item in tasks
+                        if isinstance(item, dict)
+                        and str(item.get("id") or "") == success_task_id
+                    ),
+                    None,
+                )
+            if completed_task is not None:
+                from volpred.ops.repair_success import (
+                    notify_verified_repair_success,
+                )
+
+                settlement_result["repair_success_notification"] = (
+                    notify_verified_repair_success(completed_task)
+                )
+        except Exception as exc:  # noqa: BLE001 — settlement must not roll back
+            settlement_result["repair_success_notification"] = {
+                "sent": False,
+                "skipped": True,
+                "reason": "success_notification_failed",
+                "error": f"{type(exc).__name__}: {exc}",
+            }
+    return settlement_result or {
+        "ok": False,
+        "reason": "dispatch_settlement_missing_result",
+        "task_id": args.id,
+    }
 
 
 def cmd_dispatch_generation(args: argparse.Namespace) -> dict[str, Any]:
@@ -2439,6 +2489,10 @@ def main() -> int:
         ],
     )
     p.add_argument("--result")
+    p.add_argument(
+        "--repair-verification-json",
+        help="Required for self_optimization success: JSON object with method/tests/readback",
+    )
     p.set_defaults(fn=cmd_dispatch_settle)
     p = sub.add_parser(
         "dispatch-generation",

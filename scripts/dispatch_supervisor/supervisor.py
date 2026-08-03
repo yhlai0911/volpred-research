@@ -540,6 +540,11 @@ def _finalize_restart_workspace(orphan: dict, *, outcome: str) -> bool:
             workspace=workspace,
             disposition=settlement_disposition,
             result=f"restart orphan adjudication: {disposition}",
+            repair_verification=scheduler._repair_verification_for_workspace(
+                workspace,
+                final,
+                worker_outcome=outcome,
+            ),
         )
         if not settled.get("ok"):
             logging.error(
