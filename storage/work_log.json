@@ -34363,5 +34363,15 @@
     "owner": "codex",
     "backfilled_at": "2026-08-03T20:35:29.180586+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-04T06:19:24+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1744_article_general",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-dd3923aa32f340e087e043dd8fcba32e",
+    "owner": "hourly-slot-1-dd3923aa32f340e087e043dd8fcba32e",
+    "commit": null,
+    "summary": "K1744 一般讀者文章完稿並進草稿池：mile_8782c7e2「查了九個來源，這題連第一格數字都填不進去」（audience=general, status=draft, 3,861 字元）。\n\n主題：拉美私募信貸募資動能能否領先當地股債匯波動。該實驗在 proxy feasibility gate 就停手（conclusion INCONCLUSIVE / INSUFFICIENT_DATA），文章因此寫的是「為什麼搜尋沒命中不能當成那個月為零」的可攜方法論，而非任何 outcome 結果。\n\n證據包（全部 programmatic 讀自 experiments/k1744/K1744_results.json 與 raw_cache_manifest.json，未從 README 抄數字）：9 個來源稽核（8×HTTP 200 / 1×403，0 個提供 record-level enumeration）；3 道事前門檻 36 件 / 24 月 / 60 月，observed 三項皆 null 且明標 unknown≠0；6 項 feasibility checks 過 1 失 5；outcome_rows=0、verified_event_release_timestamps=0；9 檔標的 × 3 管道 × 3 target = 9 格檢定凍結未跑；動機數字 650bn / <1% / 800mn vs 356bn（算出 0.22%，僅標動機用途、不回填歷史）。\n\n產出：scripts/gen_k1744_general_charts.py（兩張 data-bound 圖：來源稽核分類、門檻 vs 數不出來）、storage/drafts/k1744_general_draft.md、storage/drafts/assets/k1744_general_{sources,thresholds}.png、storage/lazypack_plans/k1744_general_plan.json（strict v1，4 panels，validate-only PASS）。\n\nGates：check_arc_dedup --k-id K1744 --audience general → clean（無 K-coverage、無 arc dup）；feed grep K1744 = 0 命中；anti_ai_gate --no-fb-mode → PASS exit 0（warn 0/3）；publisher _infer_audience(title, body, tags) 回讀 = general（正文與標題已清空所有 K-id 與學術關鍵詞，provenance 只留 frontmatter experiment_refs）；publish_draft content-vs-source audit PASS（0 claims vs 23 source values）。lazypack async render job lazypack-mile_8782c7e2 已 queued，release_pool 會等圖組落地才 flip published。\n\ntopology_override: subagent→inline — router 給 daily_article 預設 subagent，但本 fire 主線程已在選題階段把兩份 evidence 檔完整讀進 context（且 task 明令禁止從 README 抄數字），再派 subagent 等於重讀一次同樣的檔案並增加轉抄風險；改為 inline 完成，圖表與發佈仍走既有 script/CLI。"
   }
 ]
