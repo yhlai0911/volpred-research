@@ -1,8 +1,8 @@
 # Codex CLI — 完整指令與參數對照（機器產生，勿手改）
 
-- **產生時間**：2026-07-27 09:01 台灣時間
-- **來源**：本機 `codex help` 逐節點輸出（`codex-cli 0.145.0`）
-- **npm `@openai/codex` latest**：0.145.0
+- **產生時間**：2026-08-03 09:02 台灣時間
+- **來源**：本機 `codex help` 逐節點輸出（`codex-cli 0.146.0`）
+- **npm `@openai/codex` latest**：0.146.0
 - **重新產生**：`uv run python scripts/gen_codex_cli_reference.py`
 
 > 這份檔是**本機實際安裝的 binary 自己吐的**，不是人寫的摘要。任何與這裡衝突的說明，以這裡為準；要改內容請改 CLI 版本或重跑產生器，不要手改本檔。
@@ -12,8 +12,8 @@
 ## 本機 config 實測值（`~/.codex/config.toml`）
 
 ```toml
-model = "gpt-5.6-sol"
-model_reasoning_effort = "xhigh"
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
 personality = "pragmatic"
 sandbox_mode = "danger-full-access"
 ```
@@ -1089,6 +1089,9 @@ Options:
 
       --disable <FEATURE>
           Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
+
+      --code-mode-host <WS_URL>
+          Connect to a remote code-mode host instead of starting a local host
 
       --strict-config
           Error out when config.toml contains fields that are not recognized by this version of
