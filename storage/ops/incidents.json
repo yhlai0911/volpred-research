@@ -2442,7 +2442,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-03T15:40:29.258206+00:00"
+     "last_seen_at": "2026-08-03T16:19:41.060843+00:00"
     },
     {
      "cleared_at": null,
@@ -2792,7 +2792,7 @@
      },
      "first_seen_at": "2026-08-02T21:26:00.232871+00:00",
      "key": "dispatch-slot-1-95470ef5",
-     "last_seen_at": "2026-08-03T15:40:33.419590+00:00"
+     "last_seen_at": "2026-08-03T16:19:45.239776+00:00"
     },
     {
      "cleared_at": null,
@@ -2806,7 +2806,7 @@
      },
      "first_seen_at": "2026-08-03T06:31:26.826223+00:00",
      "key": "dispatch-slot-1-3381ab14",
-     "last_seen_at": "2026-08-03T15:40:39.092753+00:00"
+     "last_seen_at": "2026-08-03T16:19:49.133326+00:00"
     },
     {
      "cleared_at": null,
@@ -2820,7 +2820,7 @@
      },
      "first_seen_at": "2026-08-03T07:20:23.020263+00:00",
      "key": "dispatch-slot-1-963e82b6",
-     "last_seen_at": "2026-08-03T15:40:47.964976+00:00"
+     "last_seen_at": "2026-08-03T16:19:57.441511+00:00"
     },
     {
      "cleared_at": null,
@@ -2834,7 +2834,7 @@
      },
      "first_seen_at": "2026-08-03T08:28:35.957693+00:00",
      "key": "dispatch-slot-1-a82478f1",
-     "last_seen_at": "2026-08-03T15:40:57.560407+00:00"
+     "last_seen_at": "2026-08-03T16:20:08.440073+00:00"
     },
     {
      "cleared_at": null,
@@ -2848,7 +2848,7 @@
      },
      "first_seen_at": "2026-08-03T09:27:28.118145+00:00",
      "key": "dispatch-slot-1-795237a6",
-     "last_seen_at": "2026-08-03T15:41:01.962809+00:00"
+     "last_seen_at": "2026-08-03T16:20:13.059228+00:00"
     },
     {
      "cleared_at": null,
@@ -2862,7 +2862,7 @@
      },
      "first_seen_at": "2026-08-03T11:25:05.244107+00:00",
      "key": "dispatch-slot-1-d5ed8442",
-     "last_seen_at": "2026-08-03T15:41:10.874095+00:00"
+     "last_seen_at": "2026-08-03T16:20:23.138888+00:00"
     },
     {
      "cleared_at": null,
@@ -2882,9 +2882,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-d5ed8442 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-03T15:41:10.874095+00:00",
+   "last_seen_at": "2026-08-03T16:20:23.138888+00:00",
    "notified_at": null,
-   "occurrence_count": 9566,
+   "occurrence_count": 9582,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3361,6 +3361,11 @@
      "at": "2026-08-03T11:55:32.059091+00:00",
      "instance_key": "30810158803:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-03T16:05:48.233312+00:00",
+     "instance_key": "30811821909:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -3573,14 +3578,20 @@
      "first_seen_at": "2026-08-03T11:55:32.059091+00:00",
      "key": "30810158803:1",
      "last_seen_at": "2026-08-03T11:55:32.059091+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-03T16:05:48.233312+00:00",
+     "key": "30811821909:1",
+     "last_seen_at": "2026-08-03T16:05:48.233312+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-03T11:54:52.0529751Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
-   "last_seen_at": "2026-08-03T11:55:32.059091+00:00",
+   "last_breach_detail": "2026-08-03T12:19:53.9198492Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
+   "last_seen_at": "2026-08-03T16:05:48.233312+00:00",
    "notified_at": null,
-   "occurrence_count": 35,
+   "occurrence_count": 36,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -3604,9 +3615,9 @@
    "clean_streak_started_at": null,
    "control_gate_id": null,
    "current_task_id": null,
-   "episode_count": 25,
+   "episode_count": 26,
    "episode_failures": [],
-   "episode_opened_at": "2026-08-03T15:01:42.767428+00:00",
+   "episode_opened_at": "2026-08-03T16:01:17.136640+00:00",
    "escalation": {
     "at": "2026-07-31T06:00:55.870210+00:00",
     "notification_id": "effect_owned_email_6b431a033897926b7482a6c7bfd790c7",
@@ -3621,20 +3632,15 @@
    "is_control_intervention": false,
    "kind": "draft_pool_low",
    "last_breach_detail": "Draft pool below threshold (<4)",
-   "last_seen_at": "2026-08-03T15:01:42.767428+00:00",
+   "last_seen_at": "2026-08-03T16:01:17.136640+00:00",
    "notified_at": null,
-   "occurrence_count": 55,
+   "occurrence_count": 56,
    "resolution": {
-    "at": "2026-08-03T15:01:42.767428+00:00",
+    "at": "2026-08-03T16:01:17.136640+00:00",
     "by": "inc_a79599a21dbb_rootcause_e1",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
-    {
-     "at": "2026-08-03T01:01:37.085454+00:00",
-     "by": "inc_a79599a21dbb_rootcause_e1",
-     "criterion": "root_cause_task_succeeded"
-    },
     {
      "at": "2026-08-03T02:01:14.075172+00:00",
      "by": "inc_a79599a21dbb_rootcause_e1",
@@ -3687,6 +3693,11 @@
     },
     {
      "at": "2026-08-03T15:01:42.767428+00:00",
+     "by": "inc_a79599a21dbb_rootcause_e1",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-03T16:01:17.136640+00:00",
      "by": "inc_a79599a21dbb_rootcause_e1",
      "criterion": "root_cause_task_succeeded"
     }
@@ -4719,6 +4730,6 @@
    }
   }
  },
- "updated_at": "2026-08-03T15:41:34.579102+00:00",
+ "updated_at": "2026-08-03T16:20:23.167719+00:00",
  "version": 1
 }
