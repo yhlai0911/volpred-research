@@ -1135,9 +1135,9 @@
    "is_control_intervention": false,
    "kind": "publishing_freshness",
    "last_breach_detail": "發文脫班（無新文超過 release 節奏門檻）",
-   "last_seen_at": "2026-08-01T09:02:28.954487+00:00",
+   "last_seen_at": "2026-08-03T09:04:02.112041+00:00",
    "notified_at": null,
-   "occurrence_count": 6,
+   "occurrence_count": 7,
    "resolution": null,
    "resolutions": [],
    "state": "escalated",
@@ -2137,6 +2137,12 @@
      "instance_key": "dispatch-slot-1-a82478f1",
      "reason": "worker_orphan_gone_or_reused",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-03T09:27:28.118145+00:00",
+     "instance_key": "dispatch-slot-1-795237a6",
+     "reason": "worker_superseded_generation",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -2424,7 +2430,7 @@
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-03T08:31:05.374261+00:00"
+     "last_seen_at": "2026-08-03T09:36:57.936467+00:00"
     },
     {
      "cleared_at": null,
@@ -2774,7 +2780,7 @@
      },
      "first_seen_at": "2026-08-02T21:26:00.232871+00:00",
      "key": "dispatch-slot-1-95470ef5",
-     "last_seen_at": "2026-08-03T08:31:09.162182+00:00"
+     "last_seen_at": "2026-08-03T09:37:01.618888+00:00"
     },
     {
      "cleared_at": null,
@@ -2788,7 +2794,7 @@
      },
      "first_seen_at": "2026-08-03T06:31:26.826223+00:00",
      "key": "dispatch-slot-1-3381ab14",
-     "last_seen_at": "2026-08-03T08:31:14.235273+00:00"
+     "last_seen_at": "2026-08-03T09:37:07.045155+00:00"
     },
     {
      "cleared_at": null,
@@ -2802,7 +2808,7 @@
      },
      "first_seen_at": "2026-08-03T07:20:23.020263+00:00",
      "key": "dispatch-slot-1-963e82b6",
-     "last_seen_at": "2026-08-03T08:31:21.427311+00:00"
+     "last_seen_at": "2026-08-03T09:37:14.995032+00:00"
     },
     {
      "cleared_at": null,
@@ -2816,15 +2822,29 @@
      },
      "first_seen_at": "2026-08-03T08:28:35.957693+00:00",
      "key": "dispatch-slot-1-a82478f1",
-     "last_seen_at": "2026-08-03T08:31:30.300515+00:00"
+     "last_seen_at": "2026-08-03T09:37:24.233178+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "0fcfe084901aa443a3bace8ef28574fa9b76cdbb",
+      "branch": "worktree-dispatch-slot-1-795237a6",
+      "checkpoint_commit": "",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=1",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-795237a6"
+     },
+     "first_seen_at": "2026-08-03T09:27:28.118145+00:00",
+     "key": "dispatch-slot-1-795237a6",
+     "last_seen_at": "2026-08-03T09:37:29.224559+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-a82478f1 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-03T08:31:30.300515+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-795237a6 unmergeable (worker_superseded_generation)",
+   "last_seen_at": "2026-08-03T09:37:29.224559+00:00",
    "notified_at": null,
-   "occurrence_count": 9440,
+   "occurrence_count": 9463,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -3271,6 +3291,11 @@
      "at": "2026-08-03T06:31:15.726060+00:00",
      "instance_key": "30789178266:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-03T09:30:59.921837+00:00",
+     "instance_key": "30799764751:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -3447,14 +3472,20 @@
      "first_seen_at": "2026-08-03T06:31:15.726060+00:00",
      "key": "30789178266:1",
      "last_seen_at": "2026-08-03T06:31:15.726060+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-03T09:30:59.921837+00:00",
+     "key": "30799764751:1",
+     "last_seen_at": "2026-08-03T09:30:59.921837+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-03T06:27:01.3724413Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
-   "last_seen_at": "2026-08-03T06:31:15.726060+00:00",
+   "last_breach_detail": "2026-08-03T09:26:28.2280849Z E AssertionError: assert [LocalHelperS...t', line=421)] == []",
+   "last_seen_at": "2026-08-03T09:30:59.921837+00:00",
    "notified_at": null,
-   "occurrence_count": 29,
+   "occurrence_count": 30,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -3478,9 +3509,9 @@
    "clean_streak_started_at": null,
    "control_gate_id": null,
    "current_task_id": null,
-   "episode_count": 21,
+   "episode_count": 22,
    "episode_failures": [],
-   "episode_opened_at": "2026-08-03T07:02:18.047684+00:00",
+   "episode_opened_at": "2026-08-03T09:04:02.112041+00:00",
    "escalation": {
     "at": "2026-07-31T06:00:55.870210+00:00",
     "notification_id": "effect_owned_email_6b431a033897926b7482a6c7bfd790c7",
@@ -3495,20 +3526,15 @@
    "is_control_intervention": false,
    "kind": "draft_pool_low",
    "last_breach_detail": "Draft pool below threshold (<4)",
-   "last_seen_at": "2026-08-03T07:02:18.047684+00:00",
+   "last_seen_at": "2026-08-03T09:04:02.112041+00:00",
    "notified_at": null,
-   "occurrence_count": 51,
+   "occurrence_count": 52,
    "resolution": {
-    "at": "2026-08-03T07:02:18.047684+00:00",
+    "at": "2026-08-03T09:04:02.112041+00:00",
     "by": "inc_a79599a21dbb_rootcause_e1",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
-    {
-     "at": "2026-08-02T22:01:24.083717+00:00",
-     "by": "inc_a79599a21dbb_rootcause_e1",
-     "criterion": "root_cause_task_succeeded"
-    },
     {
      "at": "2026-08-02T23:01:24.963141+00:00",
      "by": "inc_a79599a21dbb_rootcause_e1",
@@ -3561,6 +3587,11 @@
     },
     {
      "at": "2026-08-03T07:02:18.047684+00:00",
+     "by": "inc_a79599a21dbb_rootcause_e1",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-03T09:04:02.112041+00:00",
      "by": "inc_a79599a21dbb_rootcause_e1",
      "criterion": "root_cause_task_succeeded"
     }
@@ -4593,6 +4624,6 @@
    }
   }
  },
- "updated_at": "2026-08-03T08:31:46.802815+00:00",
+ "updated_at": "2026-08-03T09:41:13.219260+00:00",
  "version": 1
 }
