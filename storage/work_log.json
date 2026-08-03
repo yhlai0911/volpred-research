@@ -34242,5 +34242,126 @@
     "owner": "hourly-slot-1-aa4a574b3f144f43877b1a7de0af680c",
     "commit": null,
     "summary": "K1714 一般讀者向文章完成並入草稿池：mile_d3d4aebd（audience=general、status=draft，release cron 接手發佈；lazypack render 已 queue，plan 落在 storage/lazypack_jobs/mile_d3d4aebd/runs/lazypack-mile_d3d4aebd/plan.json）。\n\n**選題與查重**：`check_arc_dedup.py --k-id K1714 --audience general` exit 0、無 K-COVERAGE 封鎖，但回 `warn_arc_dup`，撞到兩篇既有文章（entity_conclusion_arc），最相近的是 `mile_de666838`「跑完 4,585 天：4 種階層式配置法，沒一個贏過『誰波動小就多買一點』」。主線程另照 publishing.md 自做 layer-2 feed 查重：`grep -c K1714 storage/reports/feed.json` = 0，「組合／配置／共變異數」標題掃描亦無同題。判定可寫，但必須換敘事軸。\n\n**差異化（寫進 brief 當硬約束）**：被 flag 那篇講的是「N 種方法打平」；K1714 是 (1) **顯著更輸**而非打平（對指數衰減加權 t=4.5636、Holm 校正後 1.5086e-05、2,000 次區塊重抽樣 0.00049975，|t| 反向通過 Harvey 門檻 3）；(2) 教訓方向相反且更細 ——「**估計本身有用**（等權 11.433% → 8.724%，減 2.708pp／23.7%），失敗的是在估好的矩陣上**再疊一層預測模型**」。文章標題與骨架依此定，開頭不用「複雜方法又輸」的舊框。\n\n**主結果（block_5d，樣本外年化波動）**：受測（三段外推套在已實現共變異數上，三角形因子參數化）9.256% / 滾動 252 日 8.933% / 收縮 9.029% / 指數衰減加權 8.724% / 等權 11.433%。判定 LOSE，且 `model_beats_no_benchmark_in_any_specification=true`。另外兩條對照未過（t=2.0018 Holm 0.0906；t=1.4313 Holm 0.1524），文章明寫成「沒測出差別」而非「一樣好」。\n\n**主線程獨立驗算（未全盤採信 agent）**：逐項 jq 回讀 K1714_results.json 核對 —— block_10d 的 sample t=-1.1155/Holm 0.5293、ledoit_wolf t=-1.7891/Holm 0.2208、n_days 4660、n_rebalances 466、oos_end 2026-07-08；matrix-log 的 `widened_correction_over_both_specs` 六比較 Holm = [0.1812, 0.4571, 0.0000302, 1.0, 1.0, 0.0573] 與文中「主寫法 0.0000302、另一寫法 0.0573 掉出 0.05」完全一致；子期間落差 0.660/0.396/0.677pp、換手比 11.6×/8.9×、相對減幅 23.7% 皆重算相符。兩張圖目視確認中文字型正常、數值與 JSON 一致。\n\n**保留的不利證據（研究誠實原則 9/10）**：(a) 換 10 日區塊判定翻成 TIE_NULL（8.811% vs 8.807%，t=0.0518、Holm 0.9587），`verdicts_agree_across_block_lengths=false`，以「誠實的裂縫」獨立成節寫進正文，不塞免責聲明；(b) 同設定下受測點估計反而低於滾動樣本 8.991% 與收縮 9.076%，一併寫出；(c) matrix-log 那條 t=2.53 未達門檻 3、且六比較重新校正後掉出 0.05，文章沒有只引 0.0344。\n\n**口徑防呆**：`cost_sensitivity_descriptive` 的波動是**區塊報酬**口徑（受測 8.854%），與日報酬年化波動（9.256%）不同套算法。brief 明令不得混用，最終稿只引該區塊的夏普衰減（受測 0.949→0.495、指數衰減加權 1.041→0.674、收縮 1.054→1.014、等權 1.014→1.000）並單獨成段標註口徑不可互比。\n\n**Gates**：`anti_ai_gate.py` exit 0（1 WARN 段落長度，未達 3 條阻擋線，未用 --force）；讀者可見文字 grep K1714/HAR/EWMA/Cholesky/Ledoit/QLIKE/DM/Harvey/bootstrap/p 值/t 值/MLE = 0 命中（K-id 只在 frontmatter experiment_refs）；`publish_draft` content-vs-source audit PASS（9 claims vs 737 source values）、sanitize_applied=0；publisher `infer_publish_audience` 回讀 = general（task description 的完成條件）；lazypack plan 過 `validate_runnable_plan`，三個 panel 全部 evidence-bound 到 K1714_results.json（sha256 ffff1ea4…630a），alt/body 零未綁定數字。\n\n產出：`storage/drafts/k1714_general_draft.md`、`storage/drafts/assets/k1714_general_{annvol,robustness}.png`、`scripts/gen_k1714_general_charts.py`（數字 run-time 讀 JSON、零硬編）、`storage/lazypack_plans/k1714_general_plan.json`。未寫 knowledge.json（K1714 條目已存在）。\n\n**留給後續的觀察**：publish 過程印出 `WARN ignored malformed publish receipt: JSONDecodeError: Expecting value: line 1 column 64` —— 發佈本身 rc=0 且 milestone 已落地，但 receipt 檔有一列格式壞掉。本班未追根因，僅記錄。"
+  },
+  {
+    "timestamp": "2026-08-03T16:32:54+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-385fcb499",
+    "outcome": "succeeded",
+    "summary": "add immediate self-optimization repair lane",
+    "commit": "385fcb4993380f46d2621952ebe89ffa069f7a95",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180890+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T16:37:28+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-0fcfe0849",
+    "outcome": "succeeded",
+    "summary": "notify only verified repair success",
+    "commit": "0fcfe084901aa443a3bace8ef28574fa9b76cdbb",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180885+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T16:39:04+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-800d0d42f",
+    "outcome": "succeeded",
+    "summary": "suppress repair ingress notices until success",
+    "commit": "800d0d42fb82467dfbb54a7fe1933d0cc7972f6f",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180880+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T16:49:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-e5172ac06",
+    "outcome": "succeeded",
+    "summary": "enforce verified repair settlement evidence",
+    "commit": "e5172ac062341d0b0eccc2ec66415888de8b5150",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180875+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T17:37:27+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-2e4d71932",
+    "outcome": "succeeded",
+    "summary": "repair phase-z incident dispatch contract and checkout timeout",
+    "commit": "2e4d719321cc6094c20c99bb21eb9a10e3bfe3b2",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180869+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T18:15:07+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-fae79e934",
+    "outcome": "succeeded",
+    "summary": "prioritize preemptive observe-only dispatch",
+    "commit": "fae79e9346bb8adaf65cb5edb76f79f22da41d41",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180860+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T18:17:30+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-1569e7df2",
+    "outcome": "succeeded",
+    "summary": "seat preemptive incident work before scheduled tasks",
+    "commit": "1569e7df28fef3b3e49539c15983b09c95fcf1aa",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180854+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T18:42:43+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-f97baedc1",
+    "outcome": "succeeded",
+    "summary": "add automatic zero-token compute admission lane",
+    "commit": "f97baedc11c06117d1256d7a02789947a3fb2499",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180848+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T18:44:40+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-de7c7c9af",
+    "outcome": "succeeded",
+    "summary": "catch invalid compute specs during admission",
+    "commit": "de7c7c9afec163dbb2b33c0742842a1b80b0089b",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180840+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T19:31:28+08:00",
+    "task_type": "daily_article",
+    "task_id": "codex-commit-f8da0b7a2",
+    "outcome": "succeeded",
+    "summary": "close article continuity dispatch loop",
+    "commit": "f8da0b7a228b55e9596a2585b61f00ca613daddc",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180832+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-08-03T19:34:27+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-cf8ba8258",
+    "outcome": "succeeded",
+    "summary": "add Claude Code optimization handoff",
+    "commit": "cf8ba8258b97f56f300ca2514829af0e7cae8ef5",
+    "owner": "codex",
+    "backfilled_at": "2026-08-03T20:35:29.180586+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
