@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import click
 import yaml
@@ -607,6 +609,50 @@ def _growth_echo(payload: object) -> None:
     )
 
 
+def _growth_reconcile_projection(result: object) -> object:
+    """Shrink a no-op reconcile to the fields that actually move.
+
+    The lifecycle reconciler fires every 5 minutes and is a no-op for almost all
+    of an experiment's life, but it echoed the entire snapshot every time -- the
+    full spec, every variant and the whole policy block, none of which change
+    between fires.  That is ~338 KB/day of identical bytes, and because
+    ``cron_log_rotate.sh`` truncates on a byte threshold to a fixed line count,
+    the bulk also capped the log's usable history at ~3.5 days.
+
+    Only a no-op is projected, and only to the varying signal (lifecycle status
+    plus per-variant exposure and qualified-action counts).  Any real lifecycle
+    edge -- activate, stop, close -- still echoes in full, and the unabridged
+    snapshot always remains available from ``growth-experiment read``.  If the
+    payload is not the shape we expect, it is returned untouched: emitting
+    everything is self-evidencing, never a silent drop.
+    """
+    if not isinstance(result, Mapping) or result.get("action") != "noop":
+        return result
+    snapshot = result.get("snapshot")
+    if not isinstance(snapshot, Mapping):
+        return result
+    measurement = snapshot.get("measurement")
+    if not isinstance(measurement, Mapping):
+        return result
+    variants: dict[str, Any] = {}
+    for name, arm in measurement.items():
+        if not isinstance(arm, Mapping):
+            return result
+        variants[str(name)] = {
+            "exposures": arm.get("exposures"),
+            "qualified_actions": arm.get("qualified_actions"),
+        }
+    projected = {
+        key: value for key, value in result.items() if key != "snapshot"
+    }
+    projected["snapshot_digest"] = {
+        "status": snapshot.get("status"),
+        "variants": variants,
+        "detail": "projected no-op; full snapshot via growth-experiment read",
+    }
+    return projected
+
+
 @ops_growth_experiment.command("preregister")
 @click.option(
     "--spec-json",
@@ -698,9 +744,11 @@ def ops_growth_reconcile_template(
                 "growth preregistration template omitted experiment_id"
             )
         _growth_echo(
-            _growth_registry().reconcile(
-                experiment_id,
-                expected_template=template,
+            _growth_reconcile_projection(
+                _growth_registry().reconcile(
+                    experiment_id,
+                    expected_template=template,
+                )
             )
         )
     except (

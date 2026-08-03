@@ -640,3 +640,84 @@ def test_ops_cli_reconcile_template_and_operations_core_schedule(
         root / "scripts" / "cron_growth_experiment_lifecycle.sh"
     ).read_text()
     assert "growth-experiment reconcile-template" in wrapper
+
+
+def test_reconcile_noop_projection_drops_the_invariant_snapshot_bulk() -> None:
+    """A no-op fire must log the moving parts, not the whole spec every 5 minutes.
+
+    The lifecycle job fires 288x/day and is a no-op for nearly all of an
+    experiment's life. Echoing the full snapshot each time wrote ~338 KB/day of
+    identical bytes and, because cron_log_rotate.sh truncates on a byte
+    threshold to a fixed line count, capped the log's usable history at ~3.5
+    days. The projection keeps the varying signal and drops the invariant bulk.
+    """
+    snapshot = _lifecycle_snapshot(status="active")
+    snapshot["measurement"] = {
+        "control": {
+            "exposures": 58,
+            "qualified_actions": 0,
+            "read_depth_75": 42,
+            "read_depth_75_rate": 0.724138,
+        },
+        "treatment": {
+            "exposures": 59,
+            "qualified_actions": 0,
+            "read_depth_75": 43,
+            "read_depth_75_rate": 0.728814,
+        },
+    }
+    result = {
+        "contract": "growth-lifecycle-reconcile.v1",
+        "action": "noop",
+        "reason": "exposure_window_open",
+        "experiment_id": "article-share-cta-copy-v1",
+        "snapshot": snapshot,
+    }
+
+    projected = cli_module._growth_reconcile_projection(result)
+
+    # Routing identity survives: the cron log and its readers still see these.
+    assert projected["contract"] == "growth-lifecycle-reconcile.v1"
+    assert projected["action"] == "noop"
+    assert projected["reason"] == "exposure_window_open"
+    assert projected["experiment_id"] == "article-share-cta-copy-v1"
+    # The bulk is gone...
+    assert "snapshot" not in projected
+    # ...but every field that actually moves between fires is retained.
+    assert projected["snapshot_digest"]["status"] == "active"
+    assert projected["snapshot_digest"]["variants"] == {
+        "control": {"exposures": 58, "qualified_actions": 0},
+        "treatment": {"exposures": 59, "qualified_actions": 0},
+    }
+    # And it is materially smaller, which is the entire point.
+    before = len(json.dumps(result))
+    after = len(json.dumps(projected))
+    assert after < before / 2, f"projection saved too little: {before} -> {after}"
+
+
+def test_reconcile_projection_never_abridges_a_real_lifecycle_edge() -> None:
+    """activate / stop / close must keep full evidence; only no-ops shrink."""
+    snapshot = _lifecycle_snapshot(status="closed")
+    snapshot["measurement"] = {
+        "control": {"exposures": 58, "qualified_actions": 0},
+    }
+    for action in ("activate", "stop", "close"):
+        result = {
+            "contract": "growth-lifecycle-reconcile.v1",
+            "action": action,
+            "experiment_id": "article-share-cta-copy-v1",
+            "snapshot": snapshot,
+        }
+        assert cli_module._growth_reconcile_projection(result) == result
+
+
+def test_reconcile_projection_returns_unexpected_shapes_untouched() -> None:
+    """Fail-open must be self-evidencing: emit everything rather than guess."""
+    for result in (
+        {"action": "noop"},                                   # no snapshot
+        {"action": "noop", "snapshot": "not-a-mapping"},
+        {"action": "noop", "snapshot": {"status": "active"}},  # no measurement
+        {"action": "noop", "snapshot": {"measurement": {"control": 7}}},
+        "not-a-mapping-at-all",
+    ):
+        assert cli_module._growth_reconcile_projection(result) == result
