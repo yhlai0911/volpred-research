@@ -377,7 +377,7 @@
         "host_crontab_managed": false,
         "piggy_back_skip": true,
         "piggy_back_skip_reason": "Operations Core owns the five-minute ingress; no host cron or hourly piggy-back duplicate caller.",
-        "description": "每 5 分鐘由 Operations Core 讀 GitHub issue conversation + PR review comments，以 GitHub comment id 作 durable identity；同一 Issue/PR 固定 15 分鐘窗合併成一封 Email，窗口不因新留言延長，Telegram 保留給互動／progress owner。comment 完整寫入 durable batch 後才前進 cursor；外送以 in-flight／unknown receipt 防重複，失敗只重試該 Email batch。首次啟用仍將近 7 日留言合併成一封摘要。狀態位於 ~/.volpred/run，不污染 Git working tree。",
+        "description": "每 5 分鐘由 Operations Core 讀 GitHub issue conversation + PR review comments，以 GitHub comment id 作 durable identity；同一 Issue/PR 固定 15 分鐘窗合併成一封 Email，窗口不因新留言延長，Telegram 保留給互動／progress owner。repo owner 自己的進度留言寫入 ignored_self_authored audit receipt，不再寄信；增量留言只有明確 `<!-- volpred-repair kind=<registered-kind> -->` marker 才經 incident execution contract 建 repair task，task admission 後立即 request_fire + dispatch_preempt，跳過普通 backlog 與 cron 等待。comment 完整寫入 durable batch 後才前進 cursor；外送以 in-flight／unknown receipt 防重複，失敗只重試該 Email batch。首次啟用仍將近 7 日留言合併成一封摘要（不重播歷史 repair marker）。狀態位於 ~/.volpred/run，不污染 Git working tree。",
         "matchers": [
           "scripts/github_comment_notifications.py",
           "cron_github_comment_notifications.sh",

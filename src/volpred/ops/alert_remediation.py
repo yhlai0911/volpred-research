@@ -315,6 +315,69 @@ def _utc_now(now: datetime | None) -> datetime:
     return current.astimezone(timezone.utc)
 
 
+def _request_internal_repair_dispatch(
+    *,
+    alert_key: str,
+    incident_id: str,
+    task_id: str,
+    storage_dir: str,
+) -> dict[str, Any]:
+    """Wake Operations Core after admitting a machine-owned repair.
+
+    Creating a P2 repair task used to be the end of the path: the hourly
+    dispatcher would eventually notice it, but a five-minute alert tick could
+    report ``created=true`` while the repair sat idle for nearly an hour.  The
+    dispatcher already owns admission/concurrency, so this function only sends
+    its durable out-of-band wake-up; it never claims or executes the task.
+
+    Isolated test storage must not mutate the production supervisor state.  The
+    production queue is the repository's ``storage/`` directory; callers using
+    another directory receive an explicit non-production receipt instead.
+    """
+    repo_root = Path(__file__).resolve().parents[3]
+    queue_root = Path(storage_dir)
+    if not queue_root.is_absolute():
+        queue_root = (repo_root / queue_root).resolve()
+    canonical_storage = (repo_root / "storage").resolve()
+    if queue_root != canonical_storage:
+        return {
+            "requested": False,
+            "reason": "non_production_storage",
+            "alert_key": alert_key,
+            "incident_id": incident_id,
+            "task_id": task_id,
+        }
+    try:
+        from scripts.dispatch_supervisor import state as dispatch_state
+
+        reason = f"self_optimization_repair:{alert_key}:{incident_id}:{task_id}"
+        dispatch_state.request_fire(reason[:200])
+    except Exception as exc:  # noqa: BLE001 - queue admission remains durable
+        warn(
+            "alert_remediation",
+            "repair task admitted but dispatcher wake failed",
+            alert_key=alert_key,
+            incident_id=incident_id,
+            task_id=task_id,
+            err=str(exc),
+        )
+        return {
+            "requested": False,
+            "reason": "dispatch_wake_failed",
+            "error": str(exc),
+            "alert_key": alert_key,
+            "incident_id": incident_id,
+            "task_id": task_id,
+        }
+    return {
+        "requested": True,
+        "reason": "repair_task_admitted_dispatch_requested",
+        "alert_key": alert_key,
+        "incident_id": incident_id,
+        "task_id": task_id,
+    }
+
+
 def _close_cleared_task(task_id: str, storage_dir: str, now: datetime) -> bool:
     """Close a still-pending disposition row after its incident resolved."""
     path = _tasks_path(storage_dir)
@@ -497,6 +560,11 @@ def remediate_internal_alert(
             "description": _internal_task_description(condition, alert_key),
             "task_type": "platform_ops",
             "dispatch_lane": "agent",
+            # Self-optimization is a reactive lane: once admitted it must not
+            # wait behind ordinary queue ordering.  The supervisor still owns
+            # the physical slot, custody and provider/quota gates.
+            "dispatch_preempt": True,
+            "repair_lane": "self_optimization",
             "write_intent": "repo_patch",
             "declared_output_paths": declared_output_paths,
             "post_merge_actions": [],
@@ -512,6 +580,11 @@ def remediate_internal_alert(
             "created_at": current.isoformat(),
             "deadline": (current + incident.MACHINE_REPAIR_DEADLINE).isoformat(),
         }
+        if condition.get("issue_ref") is not None:
+            task["issue_ref"] = condition.get("issue_ref")
+        for metadata_key in ("github_comment_url", "github_comment_key"):
+            if condition.get(metadata_key):
+                task[metadata_key] = str(condition[metadata_key])
         try:
             from volpred.ops.next_tasks import append_task_record
 
@@ -540,11 +613,26 @@ def remediate_internal_alert(
             incident.record_throttled(store, str(outcome.get("incident_id")), now=current)
             return {**base, "reason": "remediation_throttled", "task_id": task["id"]}
         incident.bind_task(store, str(outcome.get("incident_id")), str(stored.get("id")), now=current)
+        dispatch_request = (
+            _request_internal_repair_dispatch(
+                alert_key=alert_key,
+                incident_id=str(outcome.get("incident_id") or ""),
+                task_id=str(stored.get("id") or ""),
+                storage_dir=storage_dir,
+            )
+            if created
+            else {
+                "requested": False,
+                "reason": "repair_already_active",
+                "task_id": str(stored.get("id") or ""),
+            }
+        )
         return {
             **base,
             "created": bool(created),
             "reason": "incident_disposition_created" if created else "remediation_active",
             "task_id": stored.get("id"),
+            "dispatch_request": dispatch_request,
         }
 
     if action == "expire_task":

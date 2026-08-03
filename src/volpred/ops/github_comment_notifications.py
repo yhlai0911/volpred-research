@@ -19,7 +19,7 @@ from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 SCHEMA_VERSION = 3
 LEGACY_SCHEMA_VERSION = 2
@@ -63,6 +63,7 @@ class Notification:
 FetchComments = Callable[[datetime], list[GitHubComment]]
 DeliverNotification = Callable[[Notification], dict[str, Any]]
 GitHubRunner = Callable[[list[str]], subprocess.CompletedProcess[str]]
+ResolveRepair = Callable[[GitHubComment], dict[str, Any]]
 
 
 def run_github_comment_notifications(
@@ -75,8 +76,27 @@ def run_github_comment_notifications(
     fetch_comments: FetchComments | None = None,
     deliver_email: DeliverNotification | None = None,
     deliver_telegram: DeliverNotification | None = None,
+    self_authors: Iterable[str] | None = None,
+    resolve_repair: ResolveRepair | None = None,
 ) -> dict[str, Any]:
-    """Run one production reconciliation using existing owned transports."""
+    """Run one production reconciliation using existing owned transports.
+
+    Production callers default self-authorship to the repository owner.  Tests
+    and library callers can pass an explicit empty iterable to preserve every
+    comment as an owner-visible event.
+    """
+    authors = (
+        default_self_authors(repo)
+        if self_authors is None
+        else _normalize_authors(self_authors)
+    )
+    repair_resolver = resolve_repair
+    if repair_resolver is None:
+        from volpred.ops.github_comment_repair import resolve_github_comment_repair
+
+        repair_resolver = lambda comment: resolve_github_comment_repair(  # noqa: E731
+            comment, storage_dir=storage_dir
+        )
     return reconcile_github_comments(
         fetch_comments=fetch_comments
         or (lambda since: fetch_github_comments(repo=repo, since=since)),
@@ -92,6 +112,8 @@ def run_github_comment_notifications(
         state_path=state_path,
         now=now,
         lookback_days=lookback_days,
+        self_authors=authors,
+        resolve_repair=repair_resolver,
     )
 
 
@@ -175,6 +197,8 @@ def reconcile_github_comments(
     state_path: Path,
     now: datetime | None = None,
     lookback_days: int = DEFAULT_LOOKBACK_DAYS,
+    self_authors: Iterable[str] = (),
+    resolve_repair: ResolveRepair | None = None,
 ) -> dict[str, Any]:
     """Durably ingest GitHub comments and reconcile their owner notification.
 
@@ -185,6 +209,7 @@ def reconcile_github_comments(
     being replayed.
     """
     observed_at = _aware(now or datetime.now(UTC))
+    normalized_self_authors = _normalize_authors(self_authors)
     if lookback_days < 1:
         raise ValueError("lookback_days must be positive")
     state_path = Path(state_path)
@@ -204,17 +229,29 @@ def reconcile_github_comments(
                 fetch_comments=fetch_comments,
                 deliver_email=deliver_email,
                 deliver_telegram=deliver_telegram,
+                self_authors=normalized_self_authors,
             )
 
         comments = _new_comments(
             fetch_comments(_cursor_since(state)),
             cursors=state.get("cursors"),
         )
+        comments, ignored_comments = _partition_self_authored(
+            comments, normalized_self_authors
+        )
+        ignored_count = _record_ignored_self_authored(
+            state, ignored_comments
+        )
+        repair_results = _resolve_repairs(comments, resolve_repair)
         if not comments and not state.get("pending_batches"):
+            if ignored_count:
+                _save_state(state_path, state)
             return {
                 "schema_version": SCHEMA_VERSION,
                 "mode": "incremental",
                 "comment_count": 0,
+                "ignored_self_authored_count": ignored_count,
+                "repair_results": repair_results,
                 "delivery_status": "idle",
                 "pending_batch_count": 0,
                 "cursor": _latest_cursor(state),
@@ -228,6 +265,8 @@ def reconcile_github_comments(
             now=observed_at,
             deliver_email=deliver_email,
             deliver_telegram=deliver_telegram,
+            ignored_count=ignored_count,
+            repair_results=repair_results,
         )
 
 
@@ -240,11 +279,34 @@ def _reconcile_backfill(
     fetch_comments: FetchComments,
     deliver_email: DeliverNotification,
     deliver_telegram: DeliverNotification,
+    self_authors: frozenset[str],
 ) -> dict[str, Any]:
     pending = state.get("pending_backfill")
     if not isinstance(pending, dict):
         since = now - timedelta(days=lookback_days)
-        comments = _sort_comments(fetch_comments(since))
+        all_comments = _sort_comments(fetch_comments(since))
+        comments, ignored_comments = _partition_self_authored(
+            all_comments, self_authors
+        )
+        ignored_count = _record_ignored_self_authored(state, ignored_comments)
+        if not comments:
+            state["backfill_completed_at"] = now.isoformat()
+            state["cursors"] = _merge_cursors(
+                state.get("cursors"), _cursors_for(all_comments, baseline=now)
+            )
+            state["pending_backfill"] = None
+            _save_state(state_path, state)
+            return {
+                "schema_version": SCHEMA_VERSION,
+                "mode": "backfill",
+                "comment_count": 0,
+                "ignored_self_authored_count": ignored_count,
+                "delivery_status": "idle",
+                "cursor": _latest_cursor(state),
+                "cursors": state.get("cursors"),
+                "receipt_count": _receipt_count(state),
+                "channels": {},
+            }
         notification = _backfill_notification(
             comments,
             since=since,
@@ -253,6 +315,7 @@ def _reconcile_backfill(
         pending = {
             "notification": asdict(notification),
             "comments": [asdict(comment) for comment in comments],
+            "ignored_self_authored_count": ignored_count,
             "email": {"status": "pending"},
             "telegram": {"status": "pending"},
         }
@@ -302,13 +365,18 @@ def _reconcile_backfill(
                 "receipt_keys": dict(receipt_keys),
             }
         state["backfill_completed_at"] = now.isoformat()
-        state["cursors"] = _cursors_for(comments, baseline=now)
+        state["cursors"] = _merge_cursors(
+            state.get("cursors"), _cursors_for(comments, baseline=now)
+        )
         state["pending_backfill"] = None
         _save_state(state_path, state)
     return {
         "schema_version": SCHEMA_VERSION,
         "mode": "backfill",
         "comment_count": len(comments),
+        "ignored_self_authored_count": int(
+            pending.get("ignored_self_authored_count") or 0
+        ),
         "delivery_status": delivery_status,
         **(
             {"blocked_reason": "delivery_unknown"}
@@ -383,6 +451,8 @@ def _reconcile_incremental(
     now: datetime,
     deliver_email: DeliverNotification,
     deliver_telegram: DeliverNotification,
+    ignored_count: int = 0,
+    repair_results: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Stage comments durably, then deliver due per-issue email batches.
 
@@ -395,6 +465,11 @@ def _reconcile_incremental(
     batches = state.setdefault("pending_batches", {})
     if not isinstance(batches, dict):
         raise TypeError("pending_batches must be an object")
+    repair_by_key = {
+        str(item.get("comment_key")): item
+        for item in (repair_results or [])
+        if isinstance(item, dict) and item.get("comment_key")
+    }
 
     staged = 0
     for comment in comments:
@@ -422,11 +497,15 @@ def _reconcile_incremental(
             }
             batches[batch_id] = batch
         batch["comments"].append(asdict(comment))
-        deliveries[comment.delivery_key] = {
+        delivery_receipt = {
             "comment": asdict(comment),
             "status": "buffered",
             "batch_id": batch["batch_id"],
         }
+        repair = repair_by_key.get(comment.delivery_key)
+        if repair is not None:
+            delivery_receipt["repair"] = repair
+        deliveries[comment.delivery_key] = delivery_receipt
         _advance_source_cursor(state, comment)
         staged += 1
     if comments:
@@ -501,6 +580,8 @@ def _reconcile_incremental(
         "schema_version": SCHEMA_VERSION,
         "mode": "incremental",
         "comment_count": staged,
+        "ignored_self_authored_count": ignored_count,
+        "repair_results": repair_results or [],
         "delivery_status": delivery_status,
         "pending_batch_count": pending_count,
         "delivered_batch_count": delivered_batches,
@@ -682,6 +763,86 @@ def _summary(body: str, *, limit: int = 180) -> str:
     return first if len(first) <= limit else f"{first[: limit - 1]}…"
 
 
+def default_self_authors(repo: str = DEFAULT_REPO) -> frozenset[str]:
+    """Return production self-authors from env, falling back to repo owner."""
+    configured = os.environ.get("VOLPRED_GITHUB_SELF_AUTHORS", "")
+    if configured.strip():
+        return _normalize_authors(configured.split(","))
+    owner = repo.split("/", 1)[0].strip() if "/" in repo else ""
+    return _normalize_authors((owner,)) if owner else frozenset()
+
+
+def _normalize_authors(authors: Iterable[str]) -> frozenset[str]:
+    return frozenset(
+        text.lower()
+        for item in authors
+        if (text := str(item or "").strip())
+    )
+
+
+def _partition_self_authored(
+    comments: list[GitHubComment], self_authors: frozenset[str]
+) -> tuple[list[GitHubComment], list[GitHubComment]]:
+    if not self_authors:
+        return comments, []
+    owner_comments: list[GitHubComment] = []
+    external_comments: list[GitHubComment] = []
+    for comment in comments:
+        if comment.author.strip().lower() in self_authors:
+            owner_comments.append(comment)
+        else:
+            external_comments.append(comment)
+    return external_comments, owner_comments
+
+
+def _record_ignored_self_authored(
+    state: dict[str, Any], comments: list[GitHubComment]
+) -> int:
+    """Advance cursors and preserve a non-delivery audit receipt for self comments."""
+    if not comments:
+        return 0
+    deliveries = state.setdefault("deliveries", {})
+    observed_at = datetime.now(UTC).isoformat()
+    for comment in comments:
+        if comment.delivery_key in deliveries:
+            _advance_source_cursor(state, comment)
+            continue
+        deliveries[comment.delivery_key] = {
+            "comment": asdict(comment),
+            "status": "ignored_self_authored",
+            "ignored_reason": "self_authored_progress_or_receipt",
+            "ignored_at": observed_at,
+        }
+        _advance_source_cursor(state, comment)
+    return len(comments)
+
+
+def _resolve_repairs(
+    comments: list[GitHubComment],
+    resolver: ResolveRepair | None,
+) -> list[dict[str, Any]]:
+    """Run the bounded repair adapter without hiding a resolver failure."""
+    if resolver is None:
+        return []
+    results: list[dict[str, Any]] = []
+    for comment in comments:
+        try:
+            result = resolver(comment)
+        except Exception as exc:  # noqa: BLE001 - notification must still reconcile
+            result = {
+                "comment_key": comment.delivery_key,
+                "comment_url": comment.url,
+                "action": "repair_error",
+                "reason": f"{type(exc).__name__}: {exc}",
+            }
+        results.append(result if isinstance(result, dict) else {
+            "comment_key": comment.delivery_key,
+            "action": "repair_error",
+            "reason": "resolver_returned_non_object",
+        })
+    return results
+
+
 def _new_comments(
     comments: list[GitHubComment],
     *,
@@ -747,6 +908,34 @@ def _cursors_for(
         if matches:
             cursors[source] = _cursor_for(max(matches, key=_source_comment_key))
     return cursors
+
+
+def _merge_cursors(
+    existing: object,
+    candidate: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Keep the furthest cursor per source across ignored and delivered rows."""
+    merged = {
+        source: dict(value)
+        for source, value in candidate.items()
+        if isinstance(value, dict)
+    }
+    if not isinstance(existing, dict):
+        return merged
+    for source, value in existing.items():
+        if not isinstance(value, dict) or not value.get("created_at"):
+            continue
+        current = merged.setdefault(source, dict(value))
+        if _cursor_value(value) > _cursor_value(current):
+            merged[source] = dict(value)
+    return merged
+
+
+def _cursor_value(cursor: dict[str, Any]) -> tuple[str, int]:
+    return (
+        str(cursor.get("created_at") or ""),
+        int(cursor.get("comment_id") or 0),
+    )
 
 
 def _advance_source_cursor(state: dict[str, Any], comment: GitHubComment) -> None:

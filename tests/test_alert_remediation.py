@@ -302,9 +302,13 @@ def test_internal_breach_mints_one_bounded_machine_self_repair(pool) -> None:
     )
     assert first["notify_due"] is False
     assert first["created"] is True
+    assert first["dispatch_request"]["requested"] is False
+    assert first["dispatch_request"]["reason"] == "non_production_storage"
     [repair] = _tasks(pool)
     assert repair["source"] == "internal_alert_remediation_router"
     assert repair["dispatch_lane"] == "agent"
+    assert repair["dispatch_preempt"] is True
+    assert repair["repair_lane"] == "self_optimization"
     contract, error = _dispatch_execution_contract(repair)
     assert error is None
     assert contract is not None
@@ -323,6 +327,25 @@ def test_internal_breach_mints_one_bounded_machine_self_repair(pool) -> None:
     assert rows[0]["occurrence_count"] == 2
     assert rows[0]["class"] == incident.CLASS_MACHINE_SELF
     assert rows[0]["task_mode"] == incident.TASK_MODE_AUTO_REPAIR
+
+
+def test_machine_repair_admission_wakes_operations_core(monkeypatch) -> None:
+    from scripts.dispatch_supervisor import state as dispatch_state
+
+    requested: list[str] = []
+    monkeypatch.setattr(dispatch_state, "request_fire", requested.append)
+
+    receipt = ar._request_internal_repair_dispatch(
+        alert_key="silent_fallback_new",
+        incident_id="incident-1",
+        task_id="task-1",
+        storage_dir="storage",
+    )
+
+    assert receipt["requested"] is True
+    assert requested == [
+        "self_optimization_repair:silent_fallback_new:incident-1:task-1"
+    ]
 
 
 def test_internal_repair_uses_exact_incident_identity_not_semantic_neighbour(

@@ -100,6 +100,75 @@ def test_initial_reconcile_delivers_one_digest_then_replay_is_quiet(
     }
 
 
+def test_self_authored_comments_are_audit_only_and_advance_cursor(
+    tmp_path: Path,
+) -> None:
+    own = _comment(13, created_at="2026-07-29T04:01:00+00:00")
+    external = GitHubComment(
+        source="issue_comment",
+        comment_id=14,
+        number=42,
+        author="reviewer",
+        created_at="2026-07-29T04:02:00+00:00",
+        url="https://github.com/yhlai0911/volpred-research/issues/42#issuecomment-14",
+        body="Please fix the failing gate",
+    )
+    email: list[Notification] = []
+    telegram: list[Notification] = []
+
+    result = reconcile_github_comments(
+        fetch_comments=lambda _since: [own, external],
+        deliver_email=lambda notification: (
+            email.append(notification) or {"sent": True}
+        ),
+        deliver_telegram=lambda notification: (
+            telegram.append(notification) or {"sent": True}
+        ),
+        state_path=tmp_path / "state.json",
+        now=NOW,
+        self_authors={"yhlai0911"},
+    )
+
+    assert result["comment_count"] == 1
+    assert result["ignored_self_authored_count"] == 1
+    assert result["delivery_status"] == "delivered"
+    assert len(email) == 1
+    assert len(telegram) == 1
+    state = json.loads((tmp_path / "state.json").read_text(encoding="utf-8"))
+    assert state["deliveries"]["issue_comment:13"]["status"] == (
+        "ignored_self_authored"
+    )
+    assert state["deliveries"]["issue_comment:14"]["status"] == "delivered"
+    assert state["cursors"]["issue_comment"]["comment_id"] == 14
+
+
+def test_all_self_authored_backfill_sends_nothing_but_records_receipt(
+    tmp_path: Path,
+) -> None:
+    own = _comment(15, created_at="2026-07-29T04:03:00+00:00")
+    sent: list[Notification] = []
+
+    result = reconcile_github_comments(
+        fetch_comments=lambda _since: [own],
+        deliver_email=lambda notification: (sent.append(notification) or {"sent": True}),
+        deliver_telegram=lambda notification: (sent.append(notification) or {"sent": True}),
+        state_path=tmp_path / "state.json",
+        now=NOW,
+        self_authors={"yhlai0911"},
+    )
+
+    assert result["mode"] == "backfill"
+    assert result["delivery_status"] == "idle"
+    assert result["comment_count"] == 0
+    assert result["ignored_self_authored_count"] == 1
+    assert sent == []
+    state = json.loads((tmp_path / "state.json").read_text(encoding="utf-8"))
+    assert state["backfill_completed_at"] == NOW.isoformat()
+    assert state["deliveries"]["issue_comment:15"]["status"] == (
+        "ignored_self_authored"
+    )
+
+
 def test_incremental_email_batch_retries_without_telegram_mirror(
     tmp_path: Path,
 ) -> None:
