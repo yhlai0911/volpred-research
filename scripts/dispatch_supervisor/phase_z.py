@@ -101,6 +101,13 @@ LOG = logging.getLogger(__name__)
 # commit=60). status/ls-files/rm/add share the short ceiling; commit gets long.
 _SHORT_TIMEOUT_S = 30
 _COMMIT_TIMEOUT_S = 60
+# Materialising a full candidate tree is proportional to the repository size,
+# not to the number of paths this fire owns.  The old 30-second short ceiling
+# was safe for small fixtures but repeatedly timed out on the live checkout
+# after Graphify and the generated research corpus grew, leaving
+# ``phase_z_pending`` occupied forever until its retry cap.  Keep all other git
+# probes fail-fast; give this one bounded, explicit headroom.
+_CANDIDATE_CHECKOUT_TIMEOUT_S = 180
 
 # post-commit test gate — see run_phase_z's post-commit block. Bound the pytest
 # subset so a hung / pathological test suite can never wedge the supervisor tick
@@ -4045,7 +4052,7 @@ def run_phase_z(
             candidate_root.mkdir()
             checkout = _git(
                 repo_root, "checkout-index", "--all", f"--prefix={candidate_root}{os.sep}",
-                timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=candidate_env,
+                timeout_s=_CANDIDATE_CHECKOUT_TIMEOUT_S, runner=runner, env=candidate_env,
             )
             if checkout.returncode != 0:
                 return {"committed": False, "reason": "candidate_gate_error", "rolled_back": True}

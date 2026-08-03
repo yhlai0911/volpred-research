@@ -116,6 +116,94 @@ def _is_open(task: dict) -> bool:
     return str(task.get("status") or "").strip().lower() not in _CLOSED_STATUSES
 
 
+def _ensure_dispatch_contract(task: dict[str, Any]) -> bool:
+    """Materialize the supervisor contract owned by a PHASE-Z incident.
+
+    These incidents never own repository mutations: ownership decisions must go
+    through ``foreign_disposition`` on the canonical checkout.  The task is
+    still agent-dispatchable, so the contract has to say that explicitly.  The
+    helper only fills fields that this incident generator owns and leaves a
+    conflicting non-empty value untouched; the dispatcher will then fail closed
+    instead of silently changing an operator's declared write intent.
+
+    Returning whether anything changed lets callers wake the supervisor exactly
+    once when repairing rows created by older versions of this generator.
+    """
+    changed = False
+    defaults: dict[str, Any] = {
+        "dispatch_lane": "agent",
+        "dispatch_preempt": True,
+        "write_intent": "observe_only",
+        "declared_output_paths": [],
+        "post_merge_actions": [],
+    }
+    for key, expected in defaults.items():
+        current = task.get(key)
+        missing = key not in task or current is None or current == ""
+        if missing:
+            # Lists must be copied per task; sharing the default list would let
+            # one caller mutate the contract of every later incident.
+            task[key] = list(expected) if isinstance(expected, list) else expected
+            changed = True
+    return changed
+
+
+def _repair_dispatch_contract(path: Path, task_id: str) -> bool:
+    """Repair one legacy incident row through the canonical queue writer."""
+    guard_canonical_write(path)
+    with path.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            tasks = _load_tasks(handle)
+            target = next(
+                (
+                    task for task in tasks
+                    if isinstance(task, dict) and str(task.get("id") or "") == task_id
+                ),
+                None,
+            )
+            if target is None or not _is_incident(target):
+                return False
+            changed = _ensure_dispatch_contract(target)
+            if changed:
+                write_tasks_to_handle(handle, tasks)
+            return changed
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def _request_incident_dispatch(path: Path, task_id: str, fingerprint_value: str) -> dict[str, Any]:
+    """Wake the single supervisor after an incident is created or repaired.
+
+    This is only a durable out-of-band wake-up.  ``request_fire`` never claims
+    or spawns a parallel worker; an occupied slot remains authoritative.
+    Scratch/test queues are explicitly prevented from touching production state.
+    """
+    repo_root = Path(__file__).resolve().parents[3]
+    canonical = (repo_root / "storage" / "next_tasks.json").resolve()
+    try:
+        if path.resolve() != canonical:
+            return {"requested": False, "reason": "non_production_storage"}
+    except OSError:
+        return {"requested": False, "reason": "queue_path_unresolvable"}
+    try:
+        from scripts.dispatch_supervisor import state as dispatch_state
+
+        dispatch_state.request_fire(
+            f"phase_z_incident:{fingerprint_value}:{task_id}"[:200]
+        )
+    except Exception as exc:  # noqa: BLE001 — durable task remains, wake failure stays visible
+        warn(
+            "foreign_incident",
+            "incident task admitted but dispatcher wake failed",
+            task_id=task_id,
+            fingerprint=fingerprint_value,
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        return {"requested": False, "reason": "dispatch_wake_failed", "error": str(exc)}
+    return {"requested": True, "reason": "incident_task_admitted_dispatch_requested"}
+
+
 def open_incidents(tasks_path: str | Path) -> list[dict]:
     """Every unclosed PHASE-Z stuck-path incident in the queue.
 
@@ -630,6 +718,7 @@ def upsert_incident(
         "updated": False, "page_required": False, "page_claim_token": None,
         "page_transport_id": None, "page_transport_alias_ids": [],
         "reason": "", "fires": 0,
+        "dispatch_request": {"requested": False, "reason": "not_needed"},
     }
     if not ordered:
         receipt["reason"] = "no_stuck_paths"
@@ -663,6 +752,7 @@ def upsert_incident(
             )
             if existing is not None:
                 payload = existing["payload"]
+                contract_repaired = _ensure_dispatch_contract(existing)
                 payload["fires"] = int(payload.get("fires", 1)) + 1
                 payload["streaks"] = {p: int(streaks.get(p, 0)) for p in ordered}
                 payload["last_seen_at"] = now.isoformat()
@@ -680,6 +770,7 @@ def upsert_incident(
                     "task_id": existing.get("id"), "updated": True,
                     "reason": "updated_existing", "fires": payload["fires"],
                 })
+                receipt["contract_repaired"] = contract_repaired
                 existing_task_id = str(existing.get("id") or "")
             else:
                 generations = [
@@ -708,6 +799,10 @@ def upsert_incident(
         receipt["page_transport_alias_ids"] = [
             value for value in transport_ids if value != transport_id
         ]
+        if receipt.get("contract_repaired"):
+            receipt["dispatch_request"] = _request_incident_dispatch(
+                path, existing_task_id, fp,
+            )
         return receipt
 
     # Phase 2: 沒有未關的同 fingerprint 單 → 走 canonical append gateway。
@@ -740,6 +835,11 @@ def upsert_incident(
             "priority": 1,
             "status": "pending",
             "source": "phase_z",
+            "dispatch_lane": "agent",
+            "dispatch_preempt": True,
+            "write_intent": "observe_only",
+            "declared_output_paths": [],
+            "post_merge_actions": [],
             "created_at": now.isoformat(),
             "payload": payload,
         },
@@ -748,6 +848,12 @@ def upsert_incident(
         semantic_dedupe=False,
     )
     candidate_id = str(record.get("id") or "")
+    # An append race can return a legacy row created before the execution
+    # contract existed.  Repair that row under the same canonical writer rather
+    # than leaving the incident permanently invisible to the dispatcher.
+    contract_repaired = False
+    if not created:
+        contract_repaired = _repair_dispatch_contract(path, candidate_id)
     persisted, page_required, page_token, transport_id, transport_ids = (
         _claim_related_family_page(
             path, candidate_id, now=now,
@@ -764,7 +870,12 @@ def upsert_incident(
         ],
         "reason": "created" if created else "existing_after_append_race",
         "fires": 1,
+        "contract_repaired": contract_repaired,
     })
+    if persisted and (created or contract_repaired):
+        receipt["dispatch_request"] = _request_incident_dispatch(
+            path, candidate_id, fp,
+        )
     receipt["superseded"] = (
         _supersede_subsumed(
             path, keep_id=candidate_id, paths=set(ordered), now=now,
@@ -1208,6 +1319,7 @@ def reconcile_incidents(
 
     closed: list[dict[str, Any]] = []
     deferred: list[dict[str, Any]] = []
+    repaired_fingerprints: dict[str, str] = {}
     with path.open("r+", encoding="utf-8") as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
@@ -1218,6 +1330,11 @@ def reconcile_incidents(
                 # 重讀後再確認一次仍未關：鎖外算的判準，鎖內才可信。
                 if tid not in verdicts or not (_is_incident(task) and _is_open(task)):
                     continue
+                if _ensure_dispatch_contract(task):
+                    repaired_fingerprints[tid] = str(
+                        (task.get("payload") or {}).get("fingerprint") or "unknown"
+                    )
+                    dirty = True
                 verdict = verdicts[tid]
                 if verdict["closeable"]:
                     task["status"] = "succeeded"
@@ -1242,6 +1359,10 @@ def reconcile_incidents(
                 write_tasks_to_handle(handle, tasks)
         finally:
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    for task_id, fp in repaired_fingerprints.items():
+        _request_incident_dispatch(
+            path, task_id, fp,
+        )
     return {"closed": closed, "deferred": deferred}
 
 

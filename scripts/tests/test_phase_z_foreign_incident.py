@@ -21,17 +21,18 @@ this could be implemented so it looks right in a log and still changes nothing:
 """
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
 import json
 import os
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
 from scripts.dispatch_supervisor import phase_z
+from scripts.task_pool_claim import _dispatch_execution_contract
 from volpred.ops import alerts as ops_alerts
 from volpred.ops import foreign_incident as fi
 
@@ -317,6 +318,77 @@ def test_an_ordinary_semantic_duplicate_cannot_swallow_the_incident(
     assert receipt["page_required"] is True
     assert receipt["task_id"] == f"phase-z-foreign-{fp}-e1"
     assert len(fi.open_incidents(tasks)) == 1
+
+
+def test_new_incident_is_dispatchable_with_an_observe_only_contract(
+    tmp_path: Path,
+):
+    """A PHASE-Z incident must reach the supervisor instead of failing closed.
+
+    The incident task does not own repository mutations: the formal
+    ``foreign_disposition`` actuator remains the only write path.  It therefore
+    needs an explicit, empty observe-only output declaration so the dispatcher
+    can admit and settle the observation.
+    """
+    tasks = tmp_path / "next_tasks.json"
+    tasks.write_text("[]\n", encoding="utf-8")
+
+    receipt = fi.upsert_incident(paths=["a.py"], tasks_path=tasks)
+    row = next(
+        task for task in json.loads(tasks.read_text(encoding="utf-8"))
+        if task.get("id") == receipt["task_id"]
+    )
+
+    assert row["dispatch_lane"] == "agent"
+    assert row["write_intent"] == "observe_only"
+    assert row["declared_output_paths"] == []
+    assert row["post_merge_actions"] == []
+    contract, error = _dispatch_execution_contract(row)
+    assert error is None
+    assert contract is not None
+    assert contract["write_intent"] == "observe_only"
+
+
+def test_existing_legacy_incident_is_repaired_through_the_queue_writer(
+    tmp_path: Path,
+):
+    """Rows materialized before the contract change must self-heal on update."""
+    tasks = tmp_path / "next_tasks.json"
+    paths = ["a.py"]
+    fp = fi.fingerprint(paths)
+    tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": f"phase-z-foreign-{fp}-e1",
+                    "title": "legacy PHASE-Z incident",
+                    "description": "legacy row",
+                    "task_type": "platform_ops",
+                    "priority": 2,
+                    "status": "pending",
+                    "source": "phase_z",
+                    "payload": {
+                        "incident_kind": fi.INCIDENT_KIND,
+                        "fingerprint": fp,
+                        "paths": paths,
+                        "fires": 1,
+                    },
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    receipt = fi.upsert_incident(paths=paths, tasks_path=tasks)
+    row = json.loads(tasks.read_text(encoding="utf-8"))[0]
+
+    assert receipt["updated"] is True
+    assert receipt["contract_repaired"] is True
+    assert row["dispatch_lane"] == "agent"
+    assert row["dispatch_preempt"] is True
+    contract, error = _dispatch_execution_contract(row)
+    assert error is None
+    assert contract is not None
 
 
 def test_terminal_fingerprint_recurrence_opens_a_new_episode(tmp_path: Path):

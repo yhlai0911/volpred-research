@@ -510,10 +510,13 @@ def test_candidate_hook_does_not_leak_supervisor_private_environment(
     phase_z.run_pre_fire_guard(repo_root=repo)
     _write(repo, "storage/ops/ours.txt", "candidate bytes\n")
     hook_envs: list[dict[str, str]] = []
+    checkout_timeouts: list[float] = []
 
     def recording_runner(cmd, **kwargs):
         if cmd and cmd[0] == "bash" and "trusted-pre-commit" in cmd[1]:
             hook_envs.append(dict(kwargs["env"]))
+        if cmd and cmd[:2] == ["git", "-C"] and "checkout-index" in cmd:
+            checkout_timeouts.append(kwargs["timeout"])
         return subprocess.run(cmd, **kwargs)
 
     outcome = phase_z.run_phase_z(
@@ -526,6 +529,7 @@ def test_candidate_hook_does_not_leak_supervisor_private_environment(
 
     assert outcome["committed"] is True
     assert len(hook_envs) == 1
+    assert checkout_timeouts == [phase_z._CANDIDATE_CHECKOUT_TIMEOUT_S]
     child_env = hook_envs[0]
     assert child_env["PATH"] == marker_path
     assert child_env["VOLPRED_ACTOR"] == "phase-z-owner"
