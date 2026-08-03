@@ -85,6 +85,12 @@
       "tracked_outputs": [],
       "reason": "Writes ignored scheduler receipt, lock, and log state only; each materialized job retains its separately registered writer policy."
     },
+    "graphify_maintain": {
+      "entrypoint": "scripts/cron_graphify_maintain.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Rebuilds the local Graphify AST index under graphify-out/, which config/graphify_integration.json already declares an excluded surface and .gitignore now ignores. The one tracked file (graphify-out/manifest.json) was a PHASE-Z safety-net accident and was retired in 961f4f053; the index is derived from source and rebuilt by the commit hook and this job, so it owns no repo-tracked output."
+    },
     "knowledge_index_maintain": {
       "entrypoint": "scripts/cron_knowledge_index_maintain.sh",
       "policy": "phase_z_machine_state",
