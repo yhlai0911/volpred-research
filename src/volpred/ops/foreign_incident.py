@@ -180,15 +180,18 @@ def _request_incident_dispatch(path: Path, task_id: str, fingerprint_value: str)
     or spawns a parallel worker; an occupied slot remains authoritative.
     Scratch/test queues are explicitly prevented from touching production state.
     """
-    # Refractory: episode 2+ of a fingerprint means a fire was already burned
-    # on episode 1 and did not discharge it. Waking the supervisor again buys
-    # a repeat of the same read-only diagnosis at the cost of a whole slot —
-    # four fires went that way on 2026-08-04 alone. The durable row stays (a
-    # cron fire or the repair task can still pick it up); only the out-of-band
-    # wake-up is suppressed.
-    episode = re.search(r"-e(\d+)$", task_id)
-    if episode and int(episode.group(1)) >= 2:
-        return {"requested": False, "reason": "repeat_episode_refractory"}
+    # Refractory (widened 2026-08-05): no incident episode gets an out-of-band
+    # wake-up any more, e1 included. The first-diagnosis value of an eager e1
+    # fire was already harvested and institutionalized on 2026-08-04 (the
+    # adjudication channel, dependency-closure preflight, C-quoting fix); every
+    # dirty-set change after that minted a new family whose e1 burned a whole
+    # read-only slot re-deriving "this binding cannot close anything" (21:55
+    # b6c701b3 hang-killed, 00:06 4a85f887). The durable row still lands in the
+    # canonical queue where cron fires and the repair task see it — incident
+    # remediation was never a minutes-grade emergency, so losing the eager
+    # wake-up costs nothing but the burn.
+    if re.search(r"-e(\d+)$", task_id):
+        return {"requested": False, "reason": "episode_refractory_all"}
     repo_root = Path(__file__).resolve().parents[3]
     canonical = (repo_root / "storage" / "next_tasks.json").resolve()
     try:

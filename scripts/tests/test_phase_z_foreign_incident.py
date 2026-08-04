@@ -1395,15 +1395,10 @@ def test_repeat_episode_never_requests_an_out_of_band_fire(tmp_path: Path):
     queue = tmp_path / "next_tasks.json"
     queue.write_text("[]\n", encoding="utf-8")
 
-    second = fi._request_incident_dispatch(
-        queue, "phase-z-foreign-abcdef1234567890-e2", "abcdef1234567890",
-    )
-    assert second == {
-        "requested": False, "reason": "repeat_episode_refractory",
-    }
-    # Episode 1 still falls through to the storage guard (and in production
-    # would wake the supervisor once).
-    first = fi._request_incident_dispatch(
-        queue, "phase-z-foreign-abcdef1234567890-e1", "abcdef1234567890",
-    )
-    assert first["reason"] == "non_production_storage"
+    for episode in ("e1", "e2"):
+        got = fi._request_incident_dispatch(
+            queue, f"phase-z-foreign-abcdef1234567890-{episode}", "abcdef1234567890",
+        )
+        assert got == {
+            "requested": False, "reason": "episode_refractory_all",
+        }, episode
