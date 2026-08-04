@@ -1,0 +1,34 @@
+warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730/.venv` and will be ignored; use `--active` to target the active environment instead
+[13:44:33] [1] Validating GEV implementation against scipy...
+[13:44:33]     max |logpdf - scipy| = 4.55e-13
+[13:44:33] [2] Building point-in-time data...
+[13:44:33]   SPY RV from cache (spy_daily_rv.csv)
+[13:44:34]   Weekly blocks: 1640 weeks, 1995-02-06 → 2026-07-16
+[13:44:34]   CPI from cache
+[13:44:34]   NFP from cache
+[13:44:34]   IP from cache
+[13:44:34]   UNRATE from cache
+[13:44:34]   VIX from cache
+[13:44:34]   DGS10 from cache
+[13:44:34]   DTB3 from cache
+[13:44:34]     CPI: 425 months, availability lag median 44d, min 37d
+[13:44:34]     NFP: 426 months, availability lag median 34d, min 31d
+[13:44:34]     IP: 426 months, availability lag median 45d, min 41d
+[13:44:34]     UNRATE: 425 months, availability lag median 34d, min 31d
+[13:44:34]     VIX: 439 months, availability lag median 31d, min 28d
+[13:44:34]     TERM: 439 months, availability lag median 31d, min 28d
+[13:44:34]   Lookahead check PASSED (118,080 macro cells, 1640 blocks)
+[13:44:34] [3] Rolling out-of-sample estimation...
+[13:44:34]   [main] 967 OOS blocks, 19 annual refits
+[13:45:35]     2008: n_est=672 omega=1.01 xi=-0.113 | CPI=0.11, NFP=0.66, IP=0.19, UNRATE=0.60, VIX=0.87, TERM=0.14 | 61s
+[13:46:39]     2009: n_est=724 omega=1.01 xi=-0.112 | CPI=0.11, NFP=0.46, IP=0.18, UNRATE=0.42, VIX=0.70, TERM=0.11 | 64s
+[13:47:44]     2010: n_est=777 omega=1.01 xi=-0.116 | CPI=0.42, NFP=0.22, IP=0.22, UNRATE=0.11, VIX=0.63, TERM=0.13 | 65s
+[13:48:52]     2011: n_est=829 omega=2.0 xi=-0.095 | CPI=0.52, NFP=0.24, IP=0.13, UNRATE=0.18, VIX=0.66, TERM=0.12 | 68s
+[13:50:00]     2012: n_est=881 omega=12.0 xi=-0.101 | CPI=0.39, NFP=0.18, IP=0.09, UNRATE=0.19, VIX=0.81, TERM=0.11 | 67s
+[13:51:09]     2013: n_est=933 omega=12.0 xi=-0.106 | CPI=0.24, NFP=0.17, IP=0.10, UNRATE=0.17, VIX=0.61, TERM=0.09 | 69s
+[13:52:18]     2014: n_est=985 omega=2.0 xi=-0.117 | CPI=0.61, NFP=0.19, IP=0.10, UNRATE=0.21, VIX=0.66, TERM=0.12 | 70s
+[13:53:31]     2015: n_est=1037 omega=3.0 xi=-0.131 | CPI=0.99, NFP=0.76, IP=0.09, UNRATE=0.88, VIX=0.96, TERM=0.14 | 73s
+[13:54:44]     2016: n_est=1090 omega=12.0 xi=-0.129 | CPI=0.95, NFP=0.48, IP=0.12, UNRATE=0.78, VIX=0.93, TERM=0.14 | 73s
+[13:56:00]     2017: n_est=1142 omega=2.0 xi=-0.129 | CPI=0.97, NFP=0.45, IP=0.12, UNRATE=0.54, VIX=0.91, TERM=0.14 | 75s
+[13:57:16]     2018: n_est=1194 omega=2.0 xi=-0.128 | CPI=1.00, NFP=0.42, IP=0.10, UNRATE=0.54, VIX=0.92, TERM=0.13 | 77s
+[13:58:35]     2019: n_est=1246 omega=1.01 xi=-0.128 | CPI=0.97, NFP=0.44, IP=0.11, UNRATE=0.47, VIX=0.89, TERM=0.16 | 79s

@@ -1,0 +1,26 @@
+{
+  "kid": "k1730",
+  "verdict": "PASS",
+  "reviewer": "FALLBACK PATH x2, independent dual review (Codex primary quota-locked until 2026-08-08 12:01): (1) agy/Antigravity (Gemini 3.6 Flash) full-surface PASS, none blocking, 3 residuals (SSVS PIP stays diagnostic-only, placebo resolution floor 0.167, fallback caveat); (2) claude/feature-dev:code-reviewer fresh-context PASS, none blocking, bit-level verification of all README tables vs results JSON, lookahead code trace, canonical HAC formula cross-check, gate_history diff verification. Primary-path Codex re-verification owed: folded into codex_primary_reverify_k1714_k1735_20260808 (K1730 addition). Historical primary-path trail: codex_review_v1.md (FAIL) -> REMEDIATION_v2.md, preserved in-suite.",
+  "reviewed_at": "2026-08-04T21:06:27Z",
+  "reviewed_commit": "c669226f5 (worktree k1730-adopt; bytes pinned by reviewed_sha256; landed by the merge that carries this verdict)",
+  "review_artifact": "storage/ops/agent_briefs/K1730_cert_review_20260805.md (brief); scratchpad k1730_agy_review2.log (agy verdict-first round, archived to storage/ops/agent_briefs/K1730_review_agy_20260805.log); fresh-context review in session 553594d7 task a8267561d45a19a74 (207k tokens, 45 tool uses)",
+  "blocking_defects": [],
+  "reviewed_sha256": {
+    "README.md": "e33c951b896e1379a855e06a759382c05f40bc6230b1d279aa163fcbd522b634",
+    "fig1_rolling_coverage.png": "52d027479339d8d427836b0bf7cef0491ae84fab38f46895c910259bd3a106d0",
+    "fig2_ssvs_pip.png": "d0b14641ad918fa2a501cc3dc9797f250e710424b3703f7f73435473d9a52ec1",
+    "fig3_interval_vs_realized.png": "89c2cb241e3b8be5e9d07ae868ed59af320646ffb9a3fb645056cc897258704a",
+    "fig4_pit_calibration.png": "56b665d0a500b9201911b6c60ad15b338d22ad37a9ef5451b3c9df22499d4288",
+    "gate_history/e751a203__k1730_gevreg_midas_ssvs.py": "e751a203aaab9477806f59fab5d7b60aa1086fbc2144e85436026109b7c9f972",
+    "k1730_data.py": "6e4c2171a48e89b01cab391cf32b93abfc5195fee5835b9a13399c2744a516f5",
+    "k1730_gevreg_midas_ssvs.py": "d07826f066bf50777e8846143d428ed354fbb24f2ff8783a84a72d17f5754760",
+    "k1730_gevreg_midas_ssvs_results.json": "cf7298c8eeb0fedf7a7dcf020d7740098658aceaf48925c80506118397baab0c",
+    "k1730_models.py": "ce1fc8c2e38d698ce2730ed414c747d0f5c72eed762a3cbb77eba79269b4f51c",
+    "k1730_quickmode_results.json": "4b0a8bb07434143cb06f97448406598ac055ae988bfbc68da8902785a2977586",
+    "k1730_report_tables.py": "c095946950e1e4dd0924fe3ab9eb52e5577d916287bfa91d0da11ac0596c7e35",
+    "k1730_scoring.py": "9091c57bc02fcffc673ee36914c019f74b067903760aab60e80e9e8d22607283",
+    "test_k1730_recovery.py": "102ffc193e1ab8b96692bd7cdd9859dbf4def60b814f04bd6838e1a121448ed2",
+    "verify_readme_alignment.py": "e7631c3945a9c8a8b371d99dfa75a84e8f44f8221ea90c5f7651b86fa286c673"
+  }
+}
