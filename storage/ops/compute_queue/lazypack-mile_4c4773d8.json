@@ -1,0 +1,53 @@
+{
+  "id": "lazypack-mile_4c4773d8",
+  "title": "lazypack render mile_4c4773d8",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_4c4773d8",
+    "--article-id",
+    "mile_4c4773d8",
+    "--plan",
+    "storage/lazypack_jobs/mile_4c4773d8/runs/lazypack-mile_4c4773d8/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_4c4773d8/runs/lazypack-mile_4c4773d8/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "mile_4c4773d8 懶人包"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 1,
+  "queued_at": "2026-08-04T14:35:10Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_4c4773d8.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_4c4773d8.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_4c4773d8/runs/lazypack-mile_4c4773d8/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_4c4773d8/runs/lazypack-mile_4c4773d8/plan.json",
+    "storage/lazypack_jobs/mile_4c4773d8/runs/lazypack-mile_4c4773d8/panels/1_concept.png",
+    "storage/lazypack_jobs/mile_4c4773d8/runs/lazypack-mile_4c4773d8/panels/2_result.png",
+    "storage/lazypack_jobs/mile_4c4773d8/runs/lazypack-mile_4c4773d8/panels/3_conclusion.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "routing": {
+    "lane": "compute_queue",
+    "token_cost_estimate": 0,
+    "router": "manual_enqueue"
+  },
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "source_task_link": null,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null
+}
