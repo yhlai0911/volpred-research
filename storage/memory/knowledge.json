@@ -43235,5 +43235,17 @@
   ],
   "confidence": 0.9,
   "created_at": "2026-08-04T13:10:39.164053"
+ },
+ {
+  "item_id": "6fa9b7f6",
+  "category": "experiment_result",
+  "content": "[K1733 verdict=PASS reviewer=agy high-effort independent read-only full-surface review (Codex primary path quota-exhausted to 2026-08-08; K1259 primary-path re-verification owed)] AI-infrastructure funding-chain volatility transmission: hyperscaler/semis x power-grid/utility x credit. H1 ACCEPT: total connectedness index 60.27 pp against an independent-AR no-spillover null floor q95 of 2.03 pp, surrogate p=0.001996 (limit resolution 1/501 at 500 surrogates). DIRECTION: measured with order-invariant KPPS generalized FEVD, not Cholesky - 200 random orderings move the KPPS result by at most 3e-13 while Cholesky sign-stability falls to 0.315, so the direction claim does not depend on variable ordering. Net variance share runs from the AI leg OUTWARD (8/8 negative, bootstrap sign stability 0.98-1.00), not inward. IN-SAMPLE vs OUT-OF-SAMPLE: the physical/credit leg does carry BH-FDR-surviving in-sample Granger lead information for AI volatility, and none of it converts out of sample - M3 vs M2 wins 0/12, so H4 is recorded NOT_RUN_PRECONDITION_NOT_MET rather than run and reported weakly. A naive M0+Exog contrast gives t=+7.25 and is explicitly labelled an identification defect in the README rather than used as the headline. SYNTHESIS: Total spillover across the AI / power / credit system is large and real; the net variance-share direction runs from the AI leg OUTWARD, not inward; the physical/credit leg does carry FDR-surviving in-sample Granger lead information for AI volatility, and none of it converts into out-of-sample foreca LIMITS: equity/bond ETF shadow proxies (XLU/PAVE/HYG/LQD) are not direct physical or private-credit contracts and carry market beta; KPPS is not structural causality; daily log-Parkinson frequency cannot exclude intraday funding-chain transmission.",
+  "evidence": [
+   "experiments/k1733/K1733_results.json",
+   "experiments/k1733/README.md",
+   "storage/ops/agent_briefs/K1733_review_agy_20260804.md"
+  ],
+  "confidence": 0.8,
+  "created_at": "2026-08-04T14:52:50.185565"
  }
 ]
