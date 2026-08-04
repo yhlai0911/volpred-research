@@ -20,6 +20,7 @@ from types import SimpleNamespace
 
 from scripts.dispatch_supervisor import identity, scheduler, supervisor, worker
 from volpred.ops import writer_log
+from volpred.ops.execution import registry
 
 
 class _FakeProc:
@@ -141,6 +142,13 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
     # environment, so the loop compared the supervisor's job id against the one
     # the worker just stamped. It went red the first time the hourly agent ran
     # the suite (2026-07-14). A test must not depend on who is running it.
+    # Forbidden alternate-auth variables are stripped fail-safe before the
+    # provider spawn (2026-08-04) — an ambient OPENAI_API_KEY in whatever
+    # process runs this suite must not make the extension assertion red.
+    _, sanitizer_stripped = registry.sanitize_provider_spawn_environment(
+        contract_id="dispatch-supervisor.claude",
+        environment=dict(os.environ),
+    )
     for key, value in os.environ.items():
         if key in (
             "VOLPRED_ACTOR", "VOLPRED_DISPATCH_SLOT",
@@ -148,7 +156,7 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
             "VOLPRED_PROVIDER_ID", "VOLPRED_PROVIDER_REGISTRY_SHA256",
         ) or key.startswith(
             ("VOLPRED_SUPERVISOR_", "VOLPRED_DEFERRED_RELOAD_")
-        ) or key == "VOLPRED_CANONICAL_REPO_ROOT":
+        ) or key == "VOLPRED_CANONICAL_REPO_ROOT" or key in sanitizer_stripped:
             continue
         assert env.get(key) == value
     assert not any(
@@ -156,6 +164,60 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
         for key in env
     )
     assert "VOLPRED_CANONICAL_REPO_ROOT" not in env
+
+
+def test_run_one_attempt_strips_forbidden_provider_env(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """2026-08-04 backbone outage regression: an alternate-auth variable
+    absorbed into the daemon's os.environ at runtime (EmailNotifier primed
+    .env's OPENAI_API_KEY via an in-process alert) must be stripped fail-safe
+    before authorization — the registry's fail-closed check otherwise denied
+    every claude spawn while ops_snapshot stayed green."""
+    _neutralize_state(monkeypatch)
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    monkeypatch.setenv("OPENAI_API_KEY", "runtime-absorbed-secret")
+
+    authorized: dict[str, dict[str, str]] = {}
+
+    def _fake_authorize(**kwargs):
+        authorized["environment"] = dict(kwargs["environment"])
+        return SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-claude-settings.json",
+            environment=lambda: {
+                "VOLPRED_PROVIDER_ID": "claude-cli",
+                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+            },
+        )
+
+    monkeypatch.setattr(worker, "authorize_provider_spawn", _fake_authorize)
+    monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
+
+    captured: dict[str, dict[str, str]] = {}
+
+    def _capture_spawn(*, argv, log_path, env=None, cwd=None):
+        captured["env"] = env
+        return _FakeProc(os.getpid())
+
+    monkeypatch.setattr(worker, "_spawn", _capture_spawn)
+
+    worker._run_one_attempt(
+        prompt_text="x",
+        model="claude-opus-5",
+        timeout_s=10,
+        log_path=tmp_path / "worker.log",
+        attempt=1,
+        schedule_id="volpred-hourly-dispatch",
+        state_path=tmp_path / "state.json",
+    )
+
+    # The REAL sanitizer ran (it is not patched): authorization and the child
+    # both must never see the forbidden variable.
+    assert "OPENAI_API_KEY" not in authorized["environment"]
+    assert "OPENAI_API_KEY" not in captured["env"]
+    # Sanity: stripping is surgical — ordinary environment still flows through.
+    assert captured["env"]["PATH"] == "/usr/bin:/bin"
 
 
 def test_task_claim_owner_is_unique_across_same_hour_slots_and_stable_on_retry() -> None:

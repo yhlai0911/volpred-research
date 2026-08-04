@@ -42,6 +42,33 @@ def _warn_email_notifier(message: str, path: Path, exc: Exception) -> None:
     )
 
 
+# The ONLY keys email delivery may prime into the process environment from
+# project .env files. Those files also hold third-party auth secrets
+# (OPENAI_API_KEY, TELEGRAM_BOT_TOKEN, ...) that a long-lived importer must
+# never absorb: the dispatch-supervisor daemon sends alerts in-process, and a
+# bulk .env load here put OPENAI_API_KEY into the daemon's os.environ, so the
+# provider registry fail-closed every subsequent claude spawn (2026-08-04
+# backbone outage). Consumers of non-delivery keys load their own scoped env
+# (e.g. supabase_rpc.runtime_environment, volpred.ops.telegram).
+_DELIVERY_ENV_ALLOWLIST = frozenset({
+    "ADMIN_NOTIFICATION_EMAILS",
+    "EMAIL_FROM",
+    "EMAIL_FROM_NAME",
+    "GMAIL_POLL_IMAP_TIMEOUT_SEC",
+    "IMAP_HOST",
+    "IMAP_PORT",
+    "IMAP_SENT_MAILBOX",
+    "NEXT_PUBLIC_SITE_URL",
+    "OPS_ADMIN_EMAILS",
+    "SMTP_HOST",
+    "SMTP_PASSWORD",
+    "SMTP_PORT",
+    "SMTP_USERNAME",
+    "SMTP_USE_TLS",
+    "VOLPRED_REMOTE_URL",
+})
+
+
 def _load_env_file(path: Path) -> None:
     if not path.exists():
         return
@@ -52,7 +79,7 @@ def _load_env_file(path: Path) -> None:
                 continue
             key, value = line.split("=", 1)
             key = key.strip()
-            if not key or key in os.environ:
+            if not key or key not in _DELIVERY_ENV_ALLOWLIST or key in os.environ:
                 continue
             os.environ[key] = value.strip()
     except Exception as exc:

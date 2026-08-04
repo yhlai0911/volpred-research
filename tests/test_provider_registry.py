@@ -12,6 +12,7 @@ from volpred.ops.execution.registry import (
     ProviderRegistryError,
     authorize_provider_spawn,
     load_provider_registry,
+    sanitize_provider_spawn_environment,
     verify_spawn_receipt,
 )
 
@@ -282,6 +283,59 @@ def test_nonempty_api_key_environment_is_denied_before_spawn(
             executable_path=str(executable),
             environment={key: "secret"},
             path=path,
+        )
+
+
+def test_sanitize_strips_forbidden_variables_then_authorize_passes(
+    tmp_path: Path,
+) -> None:
+    """2026-08-04 backbone outage contract: spawn sites strip the contract's
+    forbidden alternate-auth variables fail-safe BEFORE authorization (a
+    long-lived daemon can absorb them at runtime via import side effects);
+    the authorize check stays fail-closed for anything not stripped."""
+    executable, path = _fixture_executable(
+        tmp_path, provider_index=0, name="claude"
+    )
+    polluted = {
+        "PATH": "/usr/bin",
+        "CLAUDE_CODE_OAUTH_TOKEN": "subscription",
+        "OPENAI_API_KEY": "runtime-absorbed",
+        "ANTHROPIC_API_KEY": "metered",
+    }
+
+    clean, stripped = sanitize_provider_spawn_environment(
+        contract_id="dispatch-supervisor.claude",
+        environment=polluted,
+        path=path,
+    )
+
+    assert stripped == ("ANTHROPIC_API_KEY", "OPENAI_API_KEY")
+    assert set(clean) == {"PATH", "CLAUDE_CODE_OAUTH_TOKEN"}
+    # The unsanitized environment is still denied ...
+    with pytest.raises(ProviderRegistryError, match="forbidden.*variables"):
+        authorize_provider_spawn(
+            contract_id="dispatch-supervisor.claude",
+            model_id="claude-opus-5",
+            executable_path=str(executable),
+            environment=polluted,
+            path=path,
+        )
+    # ... and the sanitized one passes the same gate.
+    receipt = authorize_provider_spawn(
+        contract_id="dispatch-supervisor.claude",
+        model_id="claude-opus-5",
+        executable_path=str(executable),
+        environment=clean,
+        path=path,
+    )
+    assert receipt.environment()["VOLPRED_PROVIDER_ID"] == "claude-cli"
+
+
+def test_sanitize_unknown_contract_fails_closed() -> None:
+    with pytest.raises(ProviderRegistryError, match="launch contract"):
+        sanitize_provider_spawn_environment(
+            contract_id="caller-invented-contract",
+            environment={},
         )
 
 

@@ -25,6 +25,57 @@ def isolate_project_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(email_notifier, "_prime_project_env", lambda: None)
 
 
+def test_load_env_file_only_primes_delivery_allowlist(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """2026-08-04 backbone outage regression: bulk-loading .env into
+    os.environ put OPENAI_API_KEY into the dispatch-supervisor daemon (alerts
+    construct EmailNotifier in-process), and the provider registry then denied
+    every claude spawn. Only delivery-scoped keys may be primed."""
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "SMTP_HOST=smtp.test\n"
+        "OPENAI_API_KEY=leaked-secret\n"
+        "TELEGRAM_BOT_TOKEN=leaked-token\n"
+        "SUPABASE_SERVICE_ROLE_KEY=leaked-role\n"
+    )
+    for key in (
+        "SMTP_HOST",
+        "OPENAI_API_KEY",
+        "TELEGRAM_BOT_TOKEN",
+        "SUPABASE_SERVICE_ROLE_KEY",
+    ):
+        monkeypatch.delenv(key, raising=False)
+
+    email_notifier._load_env_file(env_file)
+
+    import os
+
+    assert os.environ.get("SMTP_HOST") == "smtp.test"
+    for key in (
+        "OPENAI_API_KEY",
+        "TELEGRAM_BOT_TOKEN",
+        "SUPABASE_SERVICE_ROLE_KEY",
+    ):
+        assert key not in os.environ
+    monkeypatch.delenv("SMTP_HOST", raising=False)
+
+
+def test_delivery_allowlist_never_overlaps_provider_forbidden_env() -> None:
+    """Mechanical cross-gate: no provider-forbidden alternate-auth variable
+    may ever become primeable delivery config."""
+    from volpred.ops.execution.registry import load_provider_registry
+
+    registry = load_provider_registry()
+    for provider in registry.providers:
+        overlap = email_notifier._DELIVERY_ENV_ALLOWLIST & provider.forbidden_env
+        assert not overlap, (
+            f"delivery allowlist overlaps {provider.provider_id} forbidden env: "
+            f"{sorted(overlap)} — priming these would re-create the 2026-08-04 "
+            "dispatch outage"
+        )
+
+
 @pytest.fixture
 def notifier(tmp_path: Path, monkeypatch) -> EmailNotifier:
     # Configure SMTP envs so is_configured() returns True; _send_email still

@@ -57,6 +57,7 @@ from volpred.ops.execution.registry import (
     ProviderRegistryError,
     ProviderSpawnReceipt,
     authorize_provider_spawn,
+    sanitize_provider_spawn_environment,
     verify_spawn_receipt,
 )
 
@@ -134,14 +135,31 @@ def _authorize_codex(
     environment: dict[str, str],
     *,
     contract_id: str,
-) -> ProviderSpawnReceipt:
-    """Reload zero-paid policy immediately before one Codex subprocess."""
-    return authorize_provider_spawn(
+) -> tuple[ProviderSpawnReceipt, dict[str, str]]:
+    """Reload zero-paid policy immediately before one Codex subprocess.
+
+    Returns (receipt, environment) where the environment has the contract's
+    forbidden alternate-auth variables stripped fail-safe — the daemon can
+    absorb such variables at runtime via import side effects (2026-08-04),
+    and the child must never see them. Callers spawn with the returned env.
+    """
+    clean_env, stripped = sanitize_provider_spawn_environment(
+        contract_id=contract_id,
+        environment=environment,
+    )
+    if stripped:
+        LOG.warning(
+            "stripped forbidden provider auth variables from codex child env "
+            "before spawn (names only): %s",
+            list(stripped),
+        )
+    receipt = authorize_provider_spawn(
         contract_id=contract_id,
         model_id=CODEX_MODEL,
         executable_path=codex_bin,
-        environment=environment,
+        environment=clean_env,
     )
+    return receipt, clean_env
 
 
 @dataclass
@@ -182,7 +200,7 @@ def preflight(
     """`codex --version`. Returns (ok, rc, detail)."""
     try:
         child_env = external_child_environment(environment)
-        receipt = _authorize_codex(
+        receipt, child_env = _authorize_codex(
             codex_bin,
             child_env,
             contract_id=CODEX_PROBE_CONTRACT_ID,
@@ -228,7 +246,7 @@ def check_reachable(
     """
     try:
         child_env = external_child_environment(environment)
-        receipt = _authorize_codex(
+        receipt, child_env = _authorize_codex(
             codex_bin,
             child_env,
             contract_id=CODEX_PROBE_CONTRACT_ID,
@@ -774,7 +792,7 @@ def _run_codex_failover_impl(
     try:
         # The version and reachability calls were independently authorized;
         # reload once more for the process that can claim and mutate work.
-        provider_receipt = _authorize_codex(
+        provider_receipt, child_env = _authorize_codex(
             codex_bin,
             child_env,
             contract_id=CODEX_WORK_CONTRACT_ID,

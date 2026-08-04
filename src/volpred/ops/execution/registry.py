@@ -1005,6 +1005,49 @@ def authorize_provider_probe(
     )
 
 
+def sanitize_provider_spawn_environment(
+    *,
+    contract_id: str,
+    environment: Mapping[str, str],
+    path: Path = DEFAULT_REGISTRY_PATH,
+) -> tuple[dict[str, str], tuple[str, ...]]:
+    """Drop the contract's forbidden auth variables before authorization.
+
+    Fail-safe counterpart to the fail-closed check in
+    ``authorize_provider_spawn``: a provider child never legitimately needs a
+    forbidden alternate-auth variable, but a long-lived daemon can absorb one
+    into ``os.environ`` at runtime through library import side effects that a
+    boot-time environment audit cannot see (2026-08-04: an in-process alert
+    primed .env's OPENAI_API_KEY into the dispatch supervisor and every
+    subsequent spawn was denied). Spawn sites strip here and log the stripped
+    NAMES ONLY; the authorize check stays authoritative for anything that
+    still reaches it.
+    """
+    contract = _LAUNCH_CONTRACTS.get(contract_id)
+    if contract is None:
+        raise ProviderRegistryError(
+            f"unknown provider launch contract {contract_id!r}"
+        )
+    registry = load_provider_registry(path)
+    matches = [
+        provider
+        for provider in registry.providers
+        if provider.provider_id == contract.provider_id
+    ]
+    if len(matches) != 1:
+        raise ProviderRegistryError(
+            f"provider {contract.provider_id!r} is not uniquely registered"
+        )
+    forbidden = matches[0].forbidden_env
+    stripped = tuple(sorted(key for key in environment if key in forbidden))
+    if not stripped:
+        return dict(environment), ()
+    return (
+        {key: value for key, value in environment.items() if key not in forbidden},
+        stripped,
+    )
+
+
 def authorize_provider_spawn(
     *,
     contract_id: str,

@@ -2835,30 +2835,65 @@ def test_worker_registry_denial_happens_before_popen(
         )
 
 
-def test_worker_api_key_environment_halts_before_popen(
+def test_worker_ambient_api_key_is_stripped_before_popen(
     tmp_path: Path, monkeypatch,
 ) -> None:
+    """2026-08-04 backbone outage contract: an alternate-auth variable in the
+    daemon's runtime environment (absorbed via import side effects) is
+    stripped fail-safe by the REAL sanitizer before authorization — neither
+    the registry check nor the child process ever sees it, and the spawn
+    proceeds instead of turning one polluted env into a total dispatch
+    outage."""
+    _stub_worker_custody(monkeypatch)
     monkeypatch.setenv("ANTHROPIC_API_KEY", "metered-secret")
-    monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kw: object())
-    monkeypatch.setattr(worker.fire_manifest, "open_manifest", lambda *_a, **_kw: None)
+
+    class ExitedProc:
+        pid = 123
+
+    authorized: dict[str, dict[str, str]] = {}
+    spawned: dict[str, dict[str, str]] = {}
+
+    def _authorize(**kwargs):
+        authorized["env"] = dict(kwargs["environment"])
+        return SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-settings.json",
+            environment=lambda: {},
+        )
+
+    monkeypatch.setattr(worker, "authorize_provider_spawn", _authorize)
+    monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
+
+    def _capture_spawn(**kwargs):
+        spawned["env"] = dict(kwargs["env"])
+        return ExitedProc()
+
+    monkeypatch.setattr(worker, "_spawn", _capture_spawn)
     monkeypatch.setattr(
-        worker,
-        "_spawn",
-        lambda **_kw: pytest.fail("API key denial must precede Popen"),
+        worker, "_wait_with_fatal_probe", lambda *_a, **_kw: ("exited", 0),
+    )
+    monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kw: object())
+    monkeypatch.setattr(worker.state, "attach_process", lambda **_kw: None)
+    monkeypatch.setattr(worker.state, "update_started_wall", lambda **_kw: None)
+    monkeypatch.setattr(
+        worker.procutil, "get_process_start_wall", lambda _pid: "start-id",
+    )
+    monkeypatch.setattr(worker.fire_manifest, "open_manifest", lambda *_a, **_kw: None)
+
+    worker._run_one_attempt(
+        prompt_text="prompt",
+        model=worker.OPUS_MODEL,
+        timeout_s=10,
+        log_path=tmp_path / "worker.log",
+        attempt=1,
+        schedule_id="hourly_dispatch",
+        state_path=tmp_path / "state.json",
+        job_id="job-api-key-strip",
+        slot_id="slot-1",
     )
 
-    with pytest.raises(worker.ProviderRegistryError, match="API-key"):
-        worker._run_one_attempt(
-            prompt_text="prompt",
-            model=worker.OPUS_MODEL,
-            timeout_s=10,
-            log_path=tmp_path / "worker.log",
-            attempt=1,
-            schedule_id="hourly_dispatch",
-            state_path=tmp_path / "state.json",
-            job_id="job-api-key-denial",
-            slot_id="slot-1",
-        )
+    assert "ANTHROPIC_API_KEY" not in authorized["env"]
+    assert "ANTHROPIC_API_KEY" not in spawned["env"]
 
 
 def test_unresolved_system_attempt_is_not_mislabeled_unknown_external(

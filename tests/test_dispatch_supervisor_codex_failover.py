@@ -33,6 +33,11 @@ VALID_PRODUCER_CUSTODY = {
 }
 
 
+# Captured BEFORE the autouse stub below replaces it, so individual tests can
+# exercise the real strip-then-authorize path against the real registry.
+_REAL_AUTHORIZE_CODEX = codex_failover._authorize_codex
+
+
 @pytest.fixture(autouse=True)
 def _provider_guard_stub(monkeypatch):
     def authorize(
@@ -41,15 +46,14 @@ def _provider_guard_stub(monkeypatch):
         *,
         contract_id,
     ):
-        forbidden = [
-            key
-            for key in ("OPENAI_API_KEY", "CODEX_API_KEY")
-            if environment.get(key)
-        ]
-        if forbidden:
-            raise codex_failover.ProviderRegistryError(
-                f"forbidden API-key variables {forbidden}"
-            )
+        # Mirrors the production contract (2026-08-04): forbidden alternate-auth
+        # variables are stripped fail-safe before authorization — never passed
+        # through, never a reason to refuse the spawn outright.
+        environment = {
+            key: value
+            for key, value in environment.items()
+            if key not in ("OPENAI_API_KEY", "CODEX_API_KEY")
+        }
         reasoning_effort_profile = (
             "probe"
             if contract_id == codex_failover.CODEX_PROBE_CONTRACT_ID
@@ -86,7 +90,7 @@ def _provider_guard_stub(monkeypatch):
                 reasoning_effort=effort,
                 registry_sha256=registry_sha256,
             ),
-        )
+        ), dict(environment)
 
     monkeypatch.setattr(codex_failover, "_authorize_codex", authorize)
     monkeypatch.setattr(
@@ -289,20 +293,48 @@ def test_registry_denial_prevents_any_codex_subprocess(monkeypatch) -> None:
     assert "paid overflow" in result.detail
 
 
-def test_api_key_environment_prevents_all_codex_subprocesses(
+def test_ambient_api_key_never_reaches_codex_subprocess(
     monkeypatch,
 ) -> None:
-    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
-    monkeypatch.setenv("OPENAI_API_KEY", "metered-secret")
+    """2026-08-04 backbone outage contract: a metered API key absorbed into the
+    daemon's os.environ (import side effect) must be stripped fail-safe before
+    authorization and must never reach a codex subprocess — the old behavior
+    (fail-closed denial of every spawn) turned one polluted daemon env into a
+    total dispatch outage while ops_snapshot stayed green."""
     monkeypatch.setattr(
-        codex_failover.subprocess,
-        "run",
-        lambda *_a, **_k: pytest.fail("API key denial must precede provider I/O"),
+        codex_failover, "_authorize_codex", _REAL_AUTHORIZE_CODEX
     )
+    monkeypatch.setenv("OPENAI_API_KEY", "metered-secret")
+    authorized: list[dict[str, str]] = []
 
-    result = codex_failover.run_codex_failover(reason="quota", enabled=True)
+    def fake_authorize(**kwargs):
+        authorized.append(dict(kwargs["environment"]))
+        return SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            model_id=kwargs["model_id"],
+            environment=lambda: {"VOLPRED_PROVIDER_ID": "codex-cli"},
+        )
 
-    assert result.exit_code == codex_failover.RC_POLICY_DENIED
+    monkeypatch.setattr(
+        codex_failover, "authorize_provider_spawn", fake_authorize
+    )
+    monkeypatch.setattr(
+        codex_failover, "verify_spawn_receipt", lambda _receipt: None
+    )
+    spawned: list[dict[str, str]] = []
+
+    def run(argv, **kwargs):
+        spawned.append(dict(kwargs["env"]))
+        return SimpleNamespace(returncode=0, stdout="codex-cli 1.0", stderr="")
+
+    monkeypatch.setattr(codex_failover.subprocess, "run", run)
+
+    ok, rc, detail = codex_failover.preflight("/bin/codex")
+
+    assert ok, detail
+    assert authorized and spawned
+    for env in (*authorized, *spawned):
+        assert "OPENAI_API_KEY" not in env
 
 
 def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
@@ -377,7 +409,7 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
                 reasoning_effort=effort,
                 registry_sha256="a" * 64,
             ),
-        )
+        ), dict(environment)
 
     def run(argv, **kwargs):
         spawned.append(dict(kwargs["env"]))

@@ -44,6 +44,7 @@ from volpred.ops.execution.registry import (
     ProviderExecutionContract,
     ProviderRegistryError,
     authorize_provider_spawn,
+    sanitize_provider_spawn_environment,
     verify_spawn_receipt,
 )
 
@@ -676,6 +677,16 @@ def _run_one_attempt(
     # provider can exist yet, so a policy/wrapper error is a mechanically proven
     # no-spawn outcome rather than a pid=None ambiguity.
     try:
+        child_env, stripped_env = sanitize_provider_spawn_environment(
+            contract_id="dispatch-supervisor.claude",
+            environment=child_env,
+        )
+        if stripped_env:
+            LOG.warning(
+                "stripped forbidden provider auth variables from claude child "
+                "env before spawn (names only): %s",
+                list(stripped_env),
+            )
         provider_receipt = authorize_provider_spawn(
             contract_id="dispatch-supervisor.claude",
             model_id=model,
