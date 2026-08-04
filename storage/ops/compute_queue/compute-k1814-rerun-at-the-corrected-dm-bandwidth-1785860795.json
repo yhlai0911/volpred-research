@@ -1,0 +1,50 @@
+{
+  "id": "compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795",
+  "title": "K1814 rerun at the corrected DM bandwidth",
+  "script_path": "experiments/k1814/k1814.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-04T16:26:35Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795.stderr",
+  "result_artifact": "experiments/k1814/K1814_results.json",
+  "output_paths": [
+    "experiments/k1814/K1814_results.json",
+    "experiments/k1814/fig1_longmemory_regimes.png",
+    "experiments/k1814/fig2_qlike_by_horizon.png",
+    "experiments/k1814/fig3_dm_statistics.png",
+    "experiments/k1814/fig4_forecast_vs_actual.png",
+    "experiments/k1814/fig5_proxy_validation.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "routing": {
+    "lane": "compute_queue",
+    "token_cost_estimate": 0,
+    "router": "manual_enqueue"
+  },
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1814 reran at the corrected HAC bandwidth (aea1646fb: lag = max(h-1, ceil(h^(1/3) n^(1/3))), 24/41/67 for h=1/5/22 instead of 0/4/21). Three things remain, and the first is the one that matters.\n\n1. VERIFY THE DIRECTION HELD. Before the rerun, every h=1 loss-differential acf(1) was positive or near zero, so the prediction is that every |t| SHRANK and the null verdict got more conservative. Check that against the new K1814_results.json: verdict.horizons_with_dl_win must still be empty and verdict.H1_short_horizon must still be FAIL_TO_REJECT. If any horizon now shows dl_beats_both_baselines true, STOP -- that contradicts the pre-measured direction and means something other than the bandwidth changed. Do not publish it, report it.\n\n2. RE-RENDER THE README. Run experiments/k1814/render_readme_results.py so the prose and tables quote the new numbers. Do not hand-edit README.md -- it is generated, and the whole point of this repair is that the artifact is the code's output. The renderer already documents that nested models (harl/ar1/ridge_lags) reach the reader as QLIKE levels only, never as a p-value.\n\n3. RE-CERTIFY. experiments/k1814/review_verdict.json pins a stage-3 PASS against a sha that the bandwidth fix has drifted. That is the designed behaviour, not an obstacle: a verdict is only worth the snapshot it reviewed. Regenerate the template with 'uv run python scripts/experiment_gates.py verdict-template --path experiments/k1814 --out experiments/k1814/review_verdict.json' and commission a fresh review against the new bytes. Note in the brief that an independent review (agy) already passed the METHODOLOGY of the fix on 2026-08-05; what needs certifying now is the rerun output, not the decision to floor the bandwidth. Codex quota is exhausted until 08-08, so use agy or a code-reviewer fallback and record which one in the verdict.\n\nContext: CLAUDE.md methodology rules (K1655) and docs/error_log.md 2026-08-04.",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_64275152",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-04T16:26:35Z",
+    "linked_at": "2026-08-04T16:26:36Z",
+    "error": null
+  },
+  "timeout_seconds": 9000,
+  "brief_source": null,
+  "brief_snapshot": null
+}
