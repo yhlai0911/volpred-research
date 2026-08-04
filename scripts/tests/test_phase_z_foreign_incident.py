@@ -1368,3 +1368,20 @@ def test_cjk_paths_are_covered_and_dirty_with_their_real_names(repo: Path):
         assert not any(p.startswith('"') for p in got), (
             "raw C-quoted names leaked through instead of UTF-8"
         )
+
+
+def test_a_path_landed_in_head_counts_as_covered(repo: Path):
+    """A path committed to HEAD and clean in the working tree is preserved in
+    the strongest form there is; demanding a quarantine ref on top left landed
+    paths permanently 'uncovered' and their incidents undead (2026-08-04)."""
+    rel = "storage/landed_artifact.json"
+    _write(repo, rel, "{}\n")
+    _git(repo, "add", rel)
+    _git(repo, "commit", "-qm", "land the artifact")
+
+    verdict = fi.incident_closeable(repo, [rel])
+
+    info = verdict["paths"][rel]
+    assert info["covered"] is True
+    assert info["still_dirty_in_main"] is False
+    assert verdict["closeable"] is True

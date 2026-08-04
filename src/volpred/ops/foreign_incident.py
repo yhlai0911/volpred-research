@@ -1229,11 +1229,18 @@ def incident_closeable(
     evidence: dict[str, dict[str, Any]] = {}
     blockers: list[str] = []
     deferred: list[str] = []
+    head_tracked = set(
+        _git_lines(repo_root, "ls-files", "--", *ordered, runner=runner)
+    )
     for rel in ordered:
         in_quarantine = rel in quarantined
         workspace = workspaces.get(rel)
         dirty = rel in still_dirty
-        covered = bool(in_quarantine or workspace)
+        # A path committed to HEAD and no longer dirty is preserved in the
+        # strongest form there is — requiring a quarantine ref on top of git
+        # history left landed paths permanently "uncovered" (2026-08-04).
+        landed = rel in head_tracked and not dirty
+        covered = bool(in_quarantine or workspace or landed)
         idle_s = _seconds_since_authored(repo_root, rel, now=now) if dirty else None
         live_authoring = bool(covered and dirty
                               and idle_s is not None and idle_s < grace_s)
