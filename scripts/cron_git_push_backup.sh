@@ -132,7 +132,16 @@ if [ "$AUDIT_RC" -eq 0 ] && [ "${NEW_COUNT:-0}" = "0" ]; then
 fi
 
 # 3) fast-forward push
-if git_auth push origin "${PUSH_SHA}:refs/heads/main" >> "$LOG" 2>&1; then
+# Capture as well as log: the alert below has to say WHY this failed, and the
+# only non-speculative evidence is what the remote actually printed. Held in a
+# variable rather than a temp file on purpose -- a `trap ... EXIT` for cleanup
+# would REPLACE the cron_emit_exit trap installed above, and losing that banner
+# is the 2026-06-30 incident where host_cron_fail could never heal
+# (.claude/rules/hooks-exit-code.md).
+PUSH_OUTPUT="$(git_auth push origin "${PUSH_SHA}:refs/heads/main" 2>&1)"
+PUSH_RC=$?
+printf '%s\n' "$PUSH_OUTPUT" >> "$LOG"
+if [ "$PUSH_RC" -eq 0 ]; then
   echo "[$(ts)] pushed ${ahead} commit(s) OK through ${PUSH_SHA}" >> "$LOG"
   exit 0
 else
@@ -155,9 +164,29 @@ else
     fi
   fi
   if [ "${VOLPRED_SUPPRESS_PUSH_ALERTS:-0}" != "1" ]; then
+    # Classify from the real push output. The previous body was a fixed string
+    # blaming auth / network / keychain; on 2026-08-04 the true cause was a
+    # 129 MiB file hitting GitHub's 100 MiB ceiling and all three suggestions
+    # were wrong, costing a full diagnostic round. The classifier reports
+    # "unclassified" plus the remote's own words rather than inventing a lead.
+    PUSH_CLASS_TITLE="git-push-backup: push 失敗"
+    PUSH_CLASS_BODY=""
+    if PUSH_CLASS_JSON="$("$UV_BIN" run python "${REPO}/scripts/classify_push_failure.py" \
+          --ahead "${ahead}" --json <<<"$PUSH_OUTPUT" 2>/dev/null)"; then
+      PUSH_CLASS_TITLE="$(printf '%s' "$PUSH_CLASS_JSON" | jq -r '.title // empty')"
+      PUSH_CLASS_BODY="$(printf '%s' "$PUSH_CLASS_JSON" | jq -r '.body // empty')"
+    fi
+    if [ -z "$PUSH_CLASS_BODY" ]; then
+      # Classifier itself failed. Do not fall back to the old guess: quote the
+      # raw tail so the reader still gets evidence instead of a fabricated cause.
+      PUSH_CLASS_TITLE="git-push-backup: push 失敗 (classifier unavailable)"
+      PUSH_CLASS_BODY="git push origin main 失敗，本地領先 ${ahead} commit 未備份到遠端。無法分類失敗原因；以下為 push 原始輸出末段：
+
+$(printf '%s\n' "$PUSH_OUTPUT" | tail -20)"
+    fi
     "$UV_BIN" run volpred ops send-alert --level warn \
-      --title "git-push-backup: push 失敗" \
-      --body "git push origin main 失敗，本地領先 ${ahead} commit 未備份到遠端。最近 90 min 內無成功 push（已超 piggy-back 寬限）。需檢查認證 / 網路 / gh keychain。" >> "$LOG" 2>&1 || true
+      --title "$PUSH_CLASS_TITLE" \
+      --body "$PUSH_CLASS_BODY" >> "$LOG" 2>&1 || true
   else
     echo "[$(ts)] child alert suppressed — CI incident watcher owns terminal notification" >> "$LOG"
   fi
