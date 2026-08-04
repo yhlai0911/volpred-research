@@ -69,18 +69,49 @@
 
 > **UNTRUSTWORTHY_SMALL_SAMPLE**
 
-## Revisit Gate
+## Revisit Gate（2026-08-02 重新校準）
 
-至少滿足以下其中兩項再考慮升級成正式可發表證據：
+原本的條件是 `n_total_days >= 200` 或 `n_test >= 50`。這兩個數字沒有推導來源，
+而且 K1325 自己的結果就證明它們訂得太鬆：DM-HLN `t = 0.883 @ n_test = 18`，
+t 大致隨 `sqrt(n_test)` 成長，`n_test = 50` 只推到 `|t| ≈ 1.47`，距離專案的
+Harvey `|t| > 3` 及格線還很遠。舊 gate 一旦觸發，只會再產出一份一模一樣的
+「不足以下結論」判決。公開文章 `mile_3445217e` 已對讀者承認這件事並承諾修正。
 
-- `n_total_days >= 200`
-- `n_test >= 50`
+**新條件不是另一個寫死的數字，而是由觀察到的效果量推導出來的**：
 
-在那之前，這條線適合作為 methodology checkpoint，不適合作為強結論文章依據。
+| 項目 | 值 |
+|---|---|
+| 需要的測試天數 | **208**（`n_test × (3 / 0.883)²`） |
+| 換算原始交易日 | **716**（`ceil(208 / 0.3) + 22` 天 HAR 暖身） |
+| 目前（k1325 當時） | 82 天原始 / 18 測試日 → 還差 634 個交易日 ≈ 2.5 年 |
+| 判決 | **`DESIGN_CHANGE_REQUIRED`** |
+
+因為缺口超過 2 年的等待上限（`max_wait_trading_days = 504`），正確的行動不是排一個
+「以後回來再跑」的檢查點，而是**改設計**：跨資產 pooling、買更長的歷史資料，或換到
+效果量更大的頻率。單純等資料不再是計畫。
+
+需要留意的誠實但難看的一點：`t = 0.883` 本身是從 18 個測試日估出來的，t 統計量的
+標準誤約為 1，所以「需要 208 天」這個數字自己的不確定性就有一個數量級
+（樂觀端 21 天，悲觀端無上界）。gate 的決策採點估計，但 `required_test_days_ci`
+會把這個帶寬明寫出來，避免有人把 208 當成承諾。
+
+**Owner / 產生方式**（不要手改）：
+
+- 政策：`config/revisit_gates.json`（pipeline `tw50_5min_har_rv`）
+- 算術：`src/volpred/research/revisit_gate.py`
+- 現行判決：`experiments/k1325/revisit_gate.json`，由
+  `uv run python scripts/eval_revisit_gate.py --pipeline tw50_5min_har_rv --write` 產生
+- 同一條 pipeline 的 `k1307` / `K1322` / `k1324` / `k1325` 腳本都已改成向上面取值，
+  不再各自寫死門檻（K1307 原本另外寫死 `POWERED_OOS_TARGET = 252`，同樣過鬆）
+
+`k1325_results.json` 裡的 `revisit_gate` 區塊仍記著舊的 200/50 —— 它是 2026-06 那次
+執行留下的產物，不做事後改寫（改資料不改流程正是要避免的事）。現行判決以
+`revisit_gate.json` 為準。
 
 ## 產物
 
 - `k1325.py`
 - `k1325_results.json`
+- `revisit_gate.json`（generated；現行 revisit 判決）
 - `k1325_rv_forecasts.png`
 - `data/0050_tw_daily_rv_rebuilt.csv`

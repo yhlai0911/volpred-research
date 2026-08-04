@@ -4,11 +4,23 @@ K1325: 0050.TW 5-min HAR-RV continuation checkpoint.
 
 Fresh rerun of the same lookahead-safe HAR-RV pipeline used in K1324, now
 including the latest available 0050.TW intraday files.
+
+Revisit gate (2026-08-02): the hardcoded ``REVISIT_GATE_TOTAL_DAYS = 200`` /
+``REVISIT_GATE_TEST_DAYS = 50`` pair this script used to carry is gone. Those
+numbers were never derived from anything, and at n_test = 50 the implied DM-HLN
+|t| is only ~1.47 -- the gate would have fired and produced the same
+inconclusive verdict again. The condition now comes from
+``volpred.research.revisit_gate`` (policy in ``config/revisit_gates.json``),
+which derives the required test window from the effect size actually observed.
+The archived ``k1325_results.json`` in this directory still records the old
+200/50 block because it is the artifact of the 2026-06 run and is not rewritten
+after the fact; the live decision is ``experiments/k1325/revisit_gate.json``.
 """
 
 from __future__ import annotations
 
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -31,9 +43,12 @@ DATA_DIR = ROOT / "data"
 RESULTS_PATH = ROOT / "k1325_results.json"
 SYMBOL = "0050_TW_5min"
 SOURCE_DIR = PROJECT_ROOT / "data" / "intraday"
-REVISIT_GATE_TOTAL_DAYS = 200
-REVISIT_GATE_TEST_DAYS = 50
 K1324_RESULTS_PATH = PROJECT_ROOT / "experiments" / "k1324" / "k1324_results.json"
+
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
+from volpred.research.revisit_gate import gate_for_pipeline  # noqa: E402
+
+REVISIT_PIPELINE = "tw50_5min_har_rv"
 
 
 def ensure_dirs() -> None:
@@ -236,7 +251,15 @@ def main() -> None:
     har_r2 = r2_oos(y[idx_test], yhat_har)
     rw_r2 = r2_oos(y[idx_test], yhat_rw)
 
-    if n_test < REVISIT_GATE_TEST_DAYS:
+    gate = gate_for_pipeline(
+        REVISIT_PIPELINE,
+        observed_abs_t=dm_t,
+        observed_test_days=int(n_test),
+        current_total_days=int(len(daily)),
+        effect_favours_challenger=dm_t > 0,
+    )
+
+    if not gate.gate_passed:
         verdict = "UNTRUSTWORTHY_SMALL_SAMPLE"
     elif abs(dm_t) > 3.0 and har_qlike < rw_qlike:
         verdict = "PASS"
@@ -317,15 +340,7 @@ def main() -> None:
             ),
         },
         "verdict": verdict,
-        "revisit_gate": {
-            "n_total_days_required": REVISIT_GATE_TOTAL_DAYS,
-            "n_test_days_required": REVISIT_GATE_TEST_DAYS,
-            "current_n_total_days": int(len(daily)),
-            "current_n_test_days": int(n_test),
-            "gate_passed": bool(
-                len(daily) >= REVISIT_GATE_TOTAL_DAYS and n_test >= REVISIT_GATE_TEST_DAYS
-            ),
-        },
+        "revisit_gate": gate.to_dict(),
         "key_findings": [
             (
                 f"Daily 5-min RV sample increased from {k1324['sample']['n_total_days']} to {len(daily)} days, "
