@@ -33,6 +33,7 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
+import re
 import subprocess
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -179,6 +180,15 @@ def _request_incident_dispatch(path: Path, task_id: str, fingerprint_value: str)
     or spawns a parallel worker; an occupied slot remains authoritative.
     Scratch/test queues are explicitly prevented from touching production state.
     """
+    # Refractory: episode 2+ of a fingerprint means a fire was already burned
+    # on episode 1 and did not discharge it. Waking the supervisor again buys
+    # a repeat of the same read-only diagnosis at the cost of a whole slot —
+    # four fires went that way on 2026-08-04 alone. The durable row stays (a
+    # cron fire or the repair task can still pick it up); only the out-of-band
+    # wake-up is suppressed.
+    episode = re.search(r"-e(\d+)$", task_id)
+    if episode and int(episode.group(1)) >= 2:
+        return {"requested": False, "reason": "repeat_episode_refractory"}
     repo_root = Path(__file__).resolve().parents[3]
     canonical = (repo_root / "storage" / "next_tasks.json").resolve()
     try:

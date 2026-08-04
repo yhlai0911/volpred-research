@@ -1385,3 +1385,25 @@ def test_a_path_landed_in_head_counts_as_covered(repo: Path):
     assert info["covered"] is True
     assert info["still_dirty_in_main"] is False
     assert verdict["closeable"] is True
+
+
+def test_repeat_episode_never_requests_an_out_of_band_fire(tmp_path: Path):
+    """Episode 2+ of a fingerprint proves an out-of-band fire was already
+    spent on it without discharge; requesting another buys the same read-only
+    diagnosis for the price of a slot (4 fires burned on 2026-08-04). The
+    durable row remains dispatchable by cron — only the wake-up stops."""
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text("[]\n", encoding="utf-8")
+
+    second = fi._request_incident_dispatch(
+        queue, "phase-z-foreign-abcdef1234567890-e2", "abcdef1234567890",
+    )
+    assert second == {
+        "requested": False, "reason": "repeat_episode_refractory",
+    }
+    # Episode 1 still falls through to the storage guard (and in production
+    # would wake the supervisor once).
+    first = fi._request_incident_dispatch(
+        queue, "phase-z-foreign-abcdef1234567890-e1", "abcdef1234567890",
+    )
+    assert first["reason"] == "non_production_storage"
