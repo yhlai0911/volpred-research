@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-04T03:11:38.386377Z",
+  "generated_at": "2026-08-04T19:21:57.515508Z",
   "runs": [
     {
       "graph_id": "root",
@@ -11,8 +11,8 @@
         "--force"
       ],
       "returncode": 0,
-      "stdout_tail": "[graphify extract] --force: full re-scan, semantic cache reads skipped\n[graphify extract] scanning /Users/yhlai0911/volpred-research\n[graphify extract] --code-only: skipping 368 non-code file(s) (362 docs, 4 papers, 2 images) — no LLM extraction\n[graphify extract] found 1244 code, 0 docs, 0 papers, 0 images\n[graphify extract] 24 file(s) not classified (no supported extension or shebang), skipped: .env.example, .gitattributes, .gitignore, .graphify_version, .graphifyignore, .python-version (+18 more)\n[graphify extract] 1 file(s) skipped as potentially sensitive (rename or move if wrongly flagged): token_policy.json\n[graphify extract] AST extraction on 1244 code files...\n  AST extraction: 39/39 uncached files (100%) [10 workers]\n[graphify] Deduplicated 1 node(s) (1 fuzzy).\n[graphify] backed up curated graph (5 files) -> 2026-08-04/\n[graphify extract] wrote /Users/yhlai0911/volpred-research/graphify-out/graph.json: 23507 nodes, 60244 edges, 982 communities\n[graphify extract] wrote /Users/yhlai0911/volpred-research/graphify-out/.graphify_analysis.json\n[graphify extract] next: run `graphify cluster-only /Users/yhlai0911/volpred-research` to generate GRAPH_REPORT.md and name communities\n",
-      "stderr_tail": "  warning: 37 source file(s) produced zero nodes and are absent from the graph: settings.json, hooks.json, article_series.json, control_gate_registry.json, cron_wrapper_manifest.json (+32 more). A re-run will retry them (empties are no longer cached); if it persists, please report the file(s) (#1666).\n"
+      "stdout_tail": "[graphify extract] --force: full re-scan, semantic cache reads skipped\n[graphify extract] scanning /Users/yhlai0911/volpred-research\n[graphify extract] --code-only: skipping 374 non-code file(s) (368 docs, 4 papers, 2 images) — no LLM extraction\n[graphify extract] found 1261 code, 0 docs, 0 papers, 0 images\n[graphify extract] 23 file(s) not classified (no supported extension or shebang), skipped: .env.example, .gitattributes, .gitignore, .graphify_version, .graphifyignore, .python-version (+17 more)\n[graphify extract] 1 file(s) skipped as potentially sensitive (rename or move if wrongly flagged): token_policy.json\n[graphify extract] AST extraction on 1261 code files...\n  AST extraction: 41/41 uncached files (100%) [10 workers]\n[graphify] Deduplicated 1 node(s) (1 fuzzy).\n[graphify] backed up curated graph (5 files) -> 2026-08-05/\n[graphify extract] wrote /Users/yhlai0911/volpred-research/graphify-out/graph.json: 23764 nodes, 60723 edges, 977 communities\n[graphify extract] wrote /Users/yhlai0911/volpred-research/graphify-out/.graphify_analysis.json\n[graphify extract] next: run `graphify cluster-only /Users/yhlai0911/volpred-research` to generate GRAPH_REPORT.md and name communities\n",
+      "stderr_tail": "  warning: 38 source file(s) produced zero nodes and are absent from the graph: settings.json, hooks.json, article_series.json, ci_test_repo_dependencies.json, control_gate_registry.json (+33 more). A re-run will retry them (empties are no longer cached); if it persists, please report the file(s) (#1666).\n"
     },
     {
       "graph_id": "root",
@@ -24,8 +24,8 @@
         "--no-label"
       ],
       "returncode": 0,
-      "stdout_tail": "Loading existing graph...\nGraph: 23507 nodes, 60244 edges\nRe-clustering...\n[graphify] backed up curated graph (5 files) -> 2026-08-04/\nDone - 983 communities. GRAPH_REPORT.md and graph.json updated (--no-viz; graph.html removed).\n",
-      "stderr_tail": "[graphify] community set changed since labeling (974 saved labels, 983 communities now; renamed 958 community(ies) by their hub). Run `graphify label` to refresh names with the LLM.\n"
+      "stdout_tail": "Loading existing graph...\nGraph: 23764 nodes, 60723 edges\nRe-clustering...\n[graphify] backed up curated graph (5 files) -> 2026-08-05/\nDone - 978 communities. GRAPH_REPORT.md and graph.json updated (--no-viz; graph.html removed).\n",
+      "stderr_tail": "[graphify] community set changed since labeling (1065 saved labels, 978 communities now; renamed 967 community(ies) by their hub). Run `graphify label` to refresh names with the LLM.\n"
     },
     {
       "graph_id": "active_frontend",
@@ -44,8 +44,8 @@
       "graph_id": "root",
       "graph_exists": true,
       "report_exists": true,
-      "built_from_commit": "6fea1719",
-      "head": "6fea17196e3d5d1281da40eb2d9065f40812f668",
+      "built_from_commit": "1c8749ba",
+      "head": "1c8749ba8d0a5d2584a7f8613832e36c0865644c",
       "fresh": true
     },
     {
@@ -53,7 +53,7 @@
       "graph_exists": true,
       "report_exists": true,
       "built_from_commit": "2b6bc57d",
-      "head": "56ab0a7637386df11f29295658c0f80d8f50d8d0",
+      "head": "9b32196847d206b357aabfa597433d713aaa1a43",
       "fresh": false
     }
   ]
