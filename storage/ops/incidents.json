@@ -1983,7 +1983,7 @@
    "clean_streak_started_at": null,
    "control_gate_id": "dispatch_worker_ownership",
    "current_task_id": null,
-   "episode_count": 9,
+   "episode_count": 14,
    "episode_failures": [
     {
      "at": "2026-08-04T04:16:20.228925+00:00",
@@ -1993,7 +1993,7 @@
      "task_id": "inc_792a94b0ecf4_e1"
     }
    ],
-   "episode_opened_at": "2026-08-04T06:55:40.479741+00:00",
+   "episode_opened_at": "2026-08-04T07:46:21.551654+00:00",
    "escalation": {
     "at": "2026-08-04T04:16:20.270924+00:00",
     "notification_id": "effect_owned_email_5b3a5d4b722faea245a48bbb9ca01d93",
@@ -2172,6 +2172,18 @@
     {
      "at": "2026-08-04T06:55:40.479741+00:00",
      "instance_key": "dispatch-slot-1-3175c52f",
+     "reason": "worker_superseded_generation",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-04T07:21:54.991363+00:00",
+     "instance_key": "dispatch-slot-1-1675be8d",
+     "reason": "worker_superseded_generation",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-04T07:46:21.551654+00:00",
+     "instance_key": "dispatch-slot-1-592ef34e",
      "reason": "worker_superseded_generation",
      "transition": "opened"
     }
@@ -2909,17 +2921,45 @@
      },
      "first_seen_at": "2026-08-04T06:55:40.479741+00:00",
      "key": "dispatch-slot-1-3175c52f",
-     "last_seen_at": "2026-08-04T06:55:40.479741+00:00"
+     "last_seen_at": "2026-08-04T07:45:42.254763+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "7259388ed20df1c52a60e724eed4d2866ecec629",
+      "branch": "worktree-dispatch-slot-1-1675be8d",
+      "checkpoint_commit": "",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=1",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1675be8d"
+     },
+     "first_seen_at": "2026-08-04T07:21:54.991363+00:00",
+     "key": "dispatch-slot-1-1675be8d",
+     "last_seen_at": "2026-08-04T07:45:53.112284+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "c469cfa1f53f5bdb660875e015b40e42d70489e7",
+      "branch": "worktree-dispatch-slot-1-592ef34e",
+      "checkpoint_commit": "bc966558bc60794765bc8b2d75ba944a48d27324",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-592ef34e"
+     },
+     "first_seen_at": "2026-08-04T07:46:21.551654+00:00",
+     "key": "dispatch-slot-1-592ef34e",
+     "last_seen_at": "2026-08-04T07:46:21.551654+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-3175c52f unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-04T06:55:40.479741+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-592ef34e unmergeable (worker_superseded_generation)",
+   "last_seen_at": "2026-08-04T07:46:21.551654+00:00",
    "notified_at": null,
-   "occurrence_count": 10313,
+   "occurrence_count": 10318,
    "resolution": {
-    "at": "2026-08-04T06:07:09.086952+00:00",
+    "at": "2026-08-04T07:46:21.551654+00:00",
     "by": "inc_792a94b0ecf4_rootcause_e2",
     "criterion": "root_cause_task_succeeded"
    },
@@ -2956,6 +2996,31 @@
     },
     {
      "at": "2026-08-04T06:07:09.086952+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T07:21:43.494957+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T07:21:54.991363+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T07:45:42.254763+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T07:45:53.112284+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T07:46:21.551654+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     }
@@ -4731,6 +4796,11 @@
      "at": "2026-08-04T06:50:38.498550+00:00",
      "instance_key": "30884267057:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-04T07:30:25.548869+00:00",
+     "instance_key": "30886613973:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -4763,14 +4833,20 @@
      "first_seen_at": "2026-08-04T06:50:38.498550+00:00",
      "key": "30884267057:1",
      "last_seen_at": "2026-08-04T06:50:38.498550+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-04T07:30:25.548869+00:00",
+     "key": "30886613973:1",
+     "last_seen_at": "2026-08-04T07:30:25.548869+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-04T06:49:23.3019078Z E AttributeError: 'Namespace' object has no attribute 'knowledge_ref'",
-   "last_seen_at": "2026-08-04T06:50:38.498550+00:00",
+   "last_breach_detail": "2026-08-04T07:27:22.5895849Z E AttributeError: 'Namespace' object has no attribute 'knowledge_ref'",
+   "last_seen_at": "2026-08-04T07:30:25.548869+00:00",
    "notified_at": null,
-   "occurrence_count": 5,
+   "occurrence_count": 6,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -4967,6 +5043,6 @@
    }
   }
  },
- "updated_at": "2026-08-04T07:13:57.144137+00:00",
+ "updated_at": "2026-08-04T07:47:32.735084+00:00",
  "version": 1
 }
