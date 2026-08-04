@@ -66,7 +66,56 @@ on:
     #     | grep -vE 'tmp_path|tmp_dir|test_dir|\$wt|workdir|/tmp/'
     paths-ignore:
       - 'paper/**'
-      - 'storage/**/*.md'
+      # NOT 'storage/**/*.md': tests read storage/event_articles/*/fb_draft.md.
+      # That blanket entry was added 2026-08-04 on a grep-based check and the
+      # dependency audit caught it the same day — the exact failure mode this
+      # file's whole comment block is about.
+      - 'storage/*.md'
+      - 'storage/analytics/**/*.md'
+      - 'storage/drafts/**/*.md'
+      - 'storage/lazypack_jobs/**/*.md'
+      - 'storage/ops/**/*.md'
+      - 'storage/reports/**/*.md'
+      # Supervisor state churn. Every entry below is verified absent from
+      # config/ci_test_repo_dependencies.json, and
+      # scripts/audit_ci_paths_ignore.py check (wired into
+      # tests/test_ci_paths_ignore.py) fails the build if that stops holding.
+      # Omitting a daemon path here is safe — it only costs an extra run.
+      # Listing a path the suite reads is the dangerous direction, which is
+      # exactly what the audit blocks.
+      - 'storage/ops/agent_briefs/**'
+      - 'storage/ops/agent_jobs/**'
+      - 'storage/ops/checkup/**'
+      - 'storage/ops/compute_queue/**'
+      - 'storage/ops/dreaming/**'
+      - 'storage/ops/graphify/**'
+      - 'storage/ops/liveness_receipts/**'
+      - 'storage/ops/reproducibility/**'
+      - 'storage/ops/task_execution_fences/**'
+      # Listed one by one, not as 'storage/ops/*_state.json': pregate_state.json
+      # sits in the same namespace and IS read by the suite.
+      - 'storage/ops/ci_watch_state.json'
+      - 'storage/ops/claude_version_state.json'
+      - 'storage/ops/daily_reader_facing_scan_state.json'
+      - 'storage/ops/drain_first_state.json'
+      - 'storage/ops/fred_backfill_guard_state.json'
+      - 'storage/ops/orphan_held_state.json'
+      - 'storage/ops/*_latest.json'
+      - 'storage/ops/*-latest.json'
+      - 'storage/ops/autonomous_decisions.jsonl'
+      - 'storage/ops/incident_candidates.jsonl'
+      - 'storage/ops/incidents.json'
+      - 'storage/ops/orphan_reap_report.json'
+      - 'storage/ops/progress_reports.jsonl'
+      - 'storage/ops/release_deadlock_remediation.json'
+      - 'storage/ops/remediation_throttle_ledger.jsonl'
+      - 'storage/drafts/assets/**'
+      - 'storage/logs/**'
+      - 'storage/macro/**'
+      - 'storage/next_tasks_archive/**'
+      - 'storage/reports/token_usage/**'
+      - 'storage/work_log.json'
+      - 'storage/.knowledge_index_state.json'
   workflow_dispatch:
 
 # Rapid successive pushes to main (many land <120s apart, well under the 9-min
