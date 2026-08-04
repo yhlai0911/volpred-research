@@ -53,7 +53,14 @@ bash "$CODEX_BOUNDED" --timeout "$TIMEOUT" -s read-only - < "$PROMPT_FILE" > "$T
 RC=$?
 set -e
 
-if rg -qi "you.ve hit your usage limit|usage limit.*try again at" "${OUT}.stderr"; then
+# `grep -Eqi`, not `rg`: this script runs non-interactively (compute queue, cron), and on
+# 2026-08-01 `rg` turned out to be only a shell function from a Claude Code shell
+# snapshot -- no ripgrep binary exists on this machine. So this branch could never fire
+# where it matters: every quota rejection fell through to the generic "EMPTY verdict"
+# path and was reported as a FAILED review rather than QUOTA_EXHAUSTED. That is the
+# failure-class confusion error_log A already paid for once (K1709): quota/auth must
+# re-enqueue, not be recorded as a research verdict. grep is POSIX and always present.
+if grep -Eqi "you.?ve hit your usage limit|usage limit.*try again at" "${OUT}.stderr"; then
   # Shell redirection used to create OUT before Codex even started.  A quota
   # rejection therefore left a normal-looking, zero-byte verdict behind.  Keep
   # quota output quarantined in TMP_OUT and remove only legacy empty artifacts.
