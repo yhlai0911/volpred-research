@@ -220,7 +220,20 @@ def cmd_freeze(args: argparse.Namespace) -> int:
 
 
 def cmd_simulate(args: argparse.Namespace) -> int:
+    """Estimate the skip rate the CURRENT rules would produce going forward.
+
+    Paths that history touched but Git no longer tracks are excluded. They
+    cannot appear in a future commit, so counting them answers a question
+    nobody asked ("what would these rules have done then") and understates the
+    rules badly: the workspace receipt ledger, retired in 3fb25fabc, blocked 66
+    of the last 200 commits and dragged a measured 37% down to a reported 15%.
+    """
     patterns = load_paths_ignore()
+    tracked = set(
+        subprocess.run(
+            ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=True
+        ).stdout.split()
+    )
     revs = subprocess.run(
         ["git", "log", "--format=%H", f"-{args.commits}", args.ref],
         cwd=ROOT,
@@ -231,14 +244,17 @@ def cmd_simulate(args: argparse.Namespace) -> int:
 
     skipped = 0
     triggered = 0
+    retired = 0
     for rev in revs:
-        files = subprocess.run(
+        changed = subprocess.run(
             ["git", "show", "--name-only", "--format=", rev],
             cwd=ROOT,
             capture_output=True,
             text=True,
             check=True,
         ).stdout.split()
+        files = [f for f in changed if f in tracked]
+        retired += len(changed) - len(files)
         if not files:
             continue
         # GitHub skips a run only when EVERY changed file matches.
@@ -255,6 +271,8 @@ def cmd_simulate(args: argparse.Namespace) -> int:
         f"{args.commits} commits on {args.ref}: {skipped} skipped, "
         f"{triggered} would run the suite ({100 * skipped / total:.0f}% skipped)"
     )
+    if retired:
+        print(f"  ({retired} path(s) in those commits are no longer tracked; excluded)")
     return 0
 
 

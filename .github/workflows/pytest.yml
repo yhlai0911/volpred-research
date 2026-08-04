@@ -116,6 +116,12 @@ on:
       - 'storage/reports/token_usage/**'
       - 'storage/work_log.json'
       - 'storage/.knowledge_index_state.json'
+      # The single biggest source of cancelled runs: the supervisor rewrites
+      # this on every fire, ~90 of the last 200 commits touched it, and until
+      # the real_queue split it dragged the whole 15-minute suite along. The
+      # ratchets that genuinely read it now live in queue-invariants.yml, which
+      # DOES trigger here — the queue is verified faster, not less.
+      - 'storage/next_tasks.json'
   workflow_dispatch:
 
 # Rapid successive pushes to main (many land <120s apart, well under the 9-min
