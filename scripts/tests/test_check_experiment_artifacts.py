@@ -13,7 +13,6 @@ this gate exists to prevent.
 
 from __future__ import annotations
 
-import argparse
 import json
 import sys
 from pathlib import Path
@@ -221,7 +220,10 @@ def test_cmd_check_exits_nonzero_and_prints_a_runnable_remedy(
     monkeypatch.setattr(gate, "load_knowledge_ids", lambda root=None: set())
     monkeypatch.setattr(gate, "load_exclusions", lambda root=None: {})
 
-    args = argparse.Namespace(path=[str(exp)], changed_since=None)
+    # Built through the real parser, not a hand-rolled Namespace: a copy of the
+    # CLI signature drifts the moment a flag is added, and asserts on an args
+    # object no caller ever produces.
+    args = gate.build_parser().parse_args(["check", "--path", str(exp)])
     assert gate.cmd_check(args) == 1
     err = capsys.readouterr().err
     assert "BLOCKED" in err
@@ -230,7 +232,7 @@ def test_cmd_check_exits_nonzero_and_prints_a_runnable_remedy(
 
 
 def test_cmd_check_passes_when_nothing_was_touched(monkeypatch, capsys) -> None:
-    args = argparse.Namespace(path=[], changed_since=None)
+    args = gate.build_parser().parse_args(["check"])
     assert gate.cmd_check(args) == 0
     assert "PASS" in capsys.readouterr().out
 

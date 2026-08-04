@@ -881,7 +881,15 @@ def cmd_sweep(args: argparse.Namespace) -> int:
     return 0
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """The one place the CLI surface is defined.
+
+    Exposed so tests can build args through it instead of hand-rolling an
+    argparse.Namespace. A hand-rolled namespace is a copy of this signature,
+    and copies drift: --knowledge-ref was added here on 2026-08-04 and two
+    tests carrying their own Namespace went red with AttributeError, having
+    asserted on an args object no caller ever produces.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="cmd", required=True)
 
@@ -901,7 +909,11 @@ def main() -> int:
     swp.add_argument("--generated-at", default="", help="timestamp to stamp into the report")
     swp.set_defaults(func=cmd_sweep)
 
-    args = parser.parse_args()
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
     return args.func(args)
 
 
