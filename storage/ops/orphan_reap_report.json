@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-04T05:00:27.784819+00:00",
+  "generated_at": "2026-08-04T06:00:55.285436+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 168.4
+      "age_hours": 169.5
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 168.3
+      "age_hours": 169.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 163.6
+      "age_hours": 164.7
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 162.7
+      "age_hours": 163.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 327.6
+      "age_hours": 328.6
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 131.8
+      "age_hours": 132.8
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 162.6
+      "age_hours": 163.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 179.6
+      "age_hours": 180.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 187.7
+      "age_hours": 188.7
     },
     {
       "path": "storage/drafts/k1706_general_draft.md",
@@ -79,7 +79,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 4605,
-      "age_hours": 12.8
+      "age_hours": 13.8
     }
   ],
   "held": [],
@@ -129,9 +129,43 @@
     },
     "experiments": {
       "collectable": [],
-      "held": [],
+      "held": [
+        {
+          "path": "experiments/k1308",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/k1308/k1308.py",
+            "experiments/k1308/k1308_results.json"
+          ]
+        },
+        {
+          "path": "experiments/k1399",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/k1399/k1399_qlike_comparison.png",
+            "experiments/k1399/k1399_vix_decomp.py",
+            "experiments/k1399/k1399_vix_decomp_results.json"
+          ]
+        },
+        {
+          "path": "experiments/snapaudit_rerun_k1308_k1399_20260804",
+          "kind": "atomic_unit_incomplete",
+          "reason": "atomic_unit_incomplete",
+          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
+          "members": [
+            "experiments/snapaudit_rerun_k1308_k1399_20260804/README.md",
+            "experiments/snapaudit_rerun_k1308_k1399_20260804/reproduce_spec.json",
+            "experiments/snapaudit_rerun_k1308_k1399_20260804/rerun_dedup_corrections.py",
+            "experiments/snapaudit_rerun_k1308_k1399_20260804/snapaudit_rerun_k1308_k1399_20260804_results.json"
+          ]
+        }
+      ],
       "skipped": {
-        "grace": 0,
+        "grace": 9,
         "inflight": 0,
         "unclaimed": 0
       },

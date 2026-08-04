@@ -1,12 +1,12 @@
 {
-  "last_seen_run_id": 30880485051,
+  "last_seen_run_id": 30882533316,
   "last_seen_conclusion": "cancelled",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-root-30875762101",
   "last_push_remediation": {
     "attempted": true,
-    "ahead": 4,
-    "head_sha": "65901f044b6f90236e8084ca20a2e280e1d69624",
+    "ahead": 1,
+    "head_sha": "a122751813acd82cb5e7da4d54de9a5af237bb3b",
     "pushed": true,
     "rc": 0,
     "outcome": "pushed",
@@ -14,36 +14,33 @@
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "30881214658:1",
-    "run_id": 30881214658,
+    "key": "30882954731:1",
+    "run_id": 30882954731,
     "attempt": 1,
     "status": "in_progress",
     "conclusion": "",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30881214658",
-    "head_sha": "9346cf0f3a45039ba8c08d47076f9bcdbdb2cd00",
-    "created_at": "2026-08-04T05:36:25Z",
-    "started_at": "2026-08-04T05:36:25Z",
-    "updated_at": "2026-08-04T05:36:55Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30882954731",
+    "head_sha": "5f7c38acc9860b1b1e3a95d8476a880bf98eac0e",
+    "created_at": "2026-08-04T06:08:10Z",
+    "started_at": "2026-08-04T06:08:10Z",
+    "updated_at": "2026-08-04T06:08:32Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "30880485051:1",
-    "run_id": 30880485051,
+    "key": "30882533316:1",
+    "run_id": 30882533316,
     "attempt": 1,
     "status": "completed",
     "conclusion": "cancelled",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30880485051",
-    "head_sha": "0e8e3391e6b549b877d24a54ffb16aab7cf0820d",
-    "created_at": "2026-08-04T05:22:26Z",
-    "started_at": "2026-08-04T05:22:26Z",
-    "updated_at": "2026-08-04T05:36:45Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30882533316",
+    "head_sha": "a122751813acd82cb5e7da4d54de9a5af237bb3b",
+    "created_at": "2026-08-04T06:00:58Z",
+    "started_at": "2026-08-04T06:00:58Z",
+    "updated_at": "2026-08-04T06:08:29Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-04T05:50:30.600840+00:00",
+  "updated_at": "2026-08-04T06:25:20.397523+00:00",
   "processed_run_keys": [
-    "29633253123:1",
-    "29635005723:1",
-    "29636730319:1",
     "29638440252:1",
     "29640128797:1",
     "29643556777:1",
@@ -540,7 +537,10 @@
     "30878782539:1",
     "30879353636:1",
     "30879999313:1",
-    "30880485051:1"
+    "30880485051:1",
+    "30881214658:1",
+    "30882256935:1",
+    "30882533316:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -861,7 +861,7 @@
   },
   "active_incident": {
     "incident_id": "ci-red-30875762101",
-    "phase": "verifying",
+    "phase": "escalated",
     "opened_at": "2026-08-04T04:10:17.874389+00:00",
     "first_failure": {
       "key": "30875762101:1",
@@ -876,11 +876,12 @@
       "updated_at": "2026-08-04T04:06:10Z",
       "attempt_history_complete": true
     },
-    "root_cause": "2026-08-04T04:37:14.0943577Z E AssertionError: assert 'GitHub Issue #3' in '# 自主波動率預測研究系統\\n原則上使用繁體中文互動\\n\\n<!-- shared:Bootstrap 原則:begin -->\\n<!-- 本區由 scripts/sync_governance.py 從 config/govern...g、知識庫、文獻，再做實驗。\\n- 先修流程，不修資料。\\n- 先讓 Codex 審代碼，再信結果。\\n- 任務無關當前上下文時，開乾淨 sub-agent，不要污染主",
+    "root_cause": "2026-08-04T05:55:28.2621231Z E AttributeError: 'Namespace' object has no attribute 'knowledge_ref'",
     "root_cause_status": "complete",
     "failure_run_keys": [
       "30875762101:1",
-      "30877298384:1"
+      "30877298384:1",
+      "30881214658:1"
     ],
     "repair_task_ids": [
       "ci-root-30875762101"
@@ -901,21 +902,33 @@
         "status": "sent",
         "sent_at": "2026-08-04T04:10:17.874389+00:00",
         "reported_cause": "2026-08-04T04:06:00.5846422Z tests/test_cron_git_push_backup.py:54: AssertionError"
+      },
+      "escalation": {
+        "status": "sent",
+        "attempts": 1,
+        "last_attempt_at": "2026-08-04T05:55:42.556622+00:00",
+        "last_delivery": {
+          "sent": true,
+          "skipped": false,
+          "notification_id": "effect_owned_email_4ae85583eaf2a0cb676186a49db3d622",
+          "send_error": null
+        },
+        "delivery_accepted": true,
+        "delivery_accepted_at": "2026-08-04T05:55:42.556622+00:00",
+        "sent_at": "2026-08-04T05:55:42.556622+00:00"
       }
     },
-    "root_cause_run_key": "30877298384:1",
+    "root_cause_run_key": "30881214658:1",
     "declared_output_paths": [
-      "config/govern...g",
-      "scripts/check_matt_skills_installation.py",
+      "scripts/check_experiment_artifacts.py",
       "scripts/lazypack_layout_guard.py",
-      "scripts/sync_governance.py",
+      "scripts/tests/test_check_experiment_artifacts.py",
       "scripts/tests/test_git_writer_lock.py",
       "scripts/tests/test_lazypack_layout_guard.py",
       "src/volpred/charts/article_charts.py",
       "src/volpred/evaluation/statistical_tests.py",
       "src/volpred/ops/rollback.py",
       "tests/test_append_work_log.py",
-      "tests/test_check_matt_skills_installation.py",
       "tests/test_cpi_t0_official_release_dates.py",
       "tests/test_daily_update_tw_staleness.py",
       "tests/test_evaluation_metrics.py",
@@ -923,25 +936,26 @@
       "tests/test_rollback.py",
       "tests/test_shared_lock.py"
     ],
-    "declared_output_paths_run_key": "30877298384:1",
+    "declared_output_paths_run_key": "30881214658:1",
     "latest_failure": {
-      "key": "30877298384:1",
-      "run_id": 30877298384,
+      "key": "30881214658:1",
+      "run_id": 30881214658,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30877298384",
-      "head_sha": "93452ab0ccc0bd4a7209d744419c47cef185fdbc",
-      "created_at": "2026-08-04T04:18:41Z",
-      "started_at": "2026-08-04T04:18:41Z",
-      "updated_at": "2026-08-04T04:37:21Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30881214658",
+      "head_sha": "9346cf0f3a45039ba8c08d47076f9bcdbdb2cd00",
+      "created_at": "2026-08-04T05:36:25Z",
+      "started_at": "2026-08-04T05:36:25Z",
+      "updated_at": "2026-08-04T05:55:36Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
       "a1ca746311bcf007b1681f9a440839b281783246",
-      "93452ab0ccc0bd4a7209d744419c47cef185fdbc"
+      "93452ab0ccc0bd4a7209d744419c47cef185fdbc",
+      "9346cf0f3a45039ba8c08d47076f9bcdbdb2cd00"
     ],
-    "failure_cycles": 2,
+    "failure_cycles": 3,
     "repair_admission": {
       "status": "fallback_escalation_admitted",
       "denied_task_id": "ci-red-30875762101",
@@ -952,28 +966,30 @@
     "repair_task_statuses": {
       "ci-root-30875762101": "pending"
     },
-    "dispatch_request_count": 4,
-    "last_dispatch_request_at": "2026-08-04T04:45:16.555868+00:00",
+    "dispatch_request_count": 6,
+    "last_dispatch_request_at": "2026-08-04T06:00:40.312973+00:00",
     "push_intent": {
-      "head_sha": "65901f044b6f90236e8084ca20a2e280e1d69624",
-      "run_key": "30877298384:1",
-      "recorded_at": "2026-08-04T04:45:16.555868+00:00"
+      "head_sha": "a122751813acd82cb5e7da4d54de9a5af237bb3b",
+      "run_key": "30881214658:1",
+      "recorded_at": "2026-08-04T06:00:40.312973+00:00"
     },
     "last_push_remediation": {
       "attempted": true,
-      "ahead": 4,
-      "head_sha": "65901f044b6f90236e8084ca20a2e280e1d69624",
+      "ahead": 1,
+      "head_sha": "a122751813acd82cb5e7da4d54de9a5af237bb3b",
       "pushed": true,
       "rc": 0,
       "outcome": "pushed",
       "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-08-04T04:45:16.555868+00:00",
-    "last_verified_push_head": "65901f044b6f90236e8084ca20a2e280e1d69624",
+    "last_push_remediation_at": "2026-08-04T06:00:40.312973+00:00",
+    "last_verified_push_head": "a122751813acd82cb5e7da4d54de9a5af237bb3b",
     "remediation_poll_keys": [
       "2026-08-04T04",
-      "2026-08-04T05"
+      "2026-08-04T05",
+      "2026-08-04T06"
     ],
-    "remediation_checks": 2
+    "remediation_checks": 3,
+    "escalation_reason": "ci_failed_more_than_two_cycles: 3"
   }
 }
