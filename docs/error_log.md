@@ -5880,3 +5880,38 @@ Codex primary path；Codex 恢復後若要升格為 primary-path closure，須�
 複審 brief 與 raw transcript 依 K1715 教訓存 `storage/ops/agent_briefs/`，**不落在被審的樹裡**。
 
 commit `3161a8e3d`。本 incident 狀態：**`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-08-04 — 洩漏的 index.lock 只擋互動式 writer，健康檢查看不見
+
+**證據化症狀**：`git_writer_lock.py commit` 連續失敗於 `BLOCKED: cannot snapshot current index`。
+`.git/index.lock` 為 **0 bytes、mtime 09:09**，到 09:51 已滯留 42 分鐘；`lsof` 對
+`.git/index.lock` 與 `.git/index` 皆**查無任何開啟 handle**，主 repo 上也沒有任何 git 行程
+（唯一的 `git status` 跑在 linked worktree，那是獨立 index）。
+
+**為什麼沒有被任何監控抓到（本 incident 的真正重點）**：**PHASE-Z 在同一段時間照常 commit**
+（`1d37f1234` @ 09:40:41，晚於鎖產生的 09:09）。也就是說這個鎖**只擋互動式 canonical writer，
+不擋 daemon**。於是「writer path 半殘」與「一切正常」在所有既有訊號上完全同形 —— 心跳新鮮、
+PHASE-Z 有 commit、無告警。這與 `.claude/rules/control-plane.md` 已記載的
+「靜默的守門員最危險」同一類：**fail-open 元件在乾淨路徑上無輸出，故障只在另一條路徑上顯現。**
+
+**回收機制存在但依設計拒絕**：另一 session 當日稍早落地的
+`scripts/dispatch_supervisor/phase_z.py::reclaim_leaked_index_lock`（commit `d6fedf171`）回傳
+`{"reclaimed": false, "reason": "not_ours"}`。這是**正確**行為：它只回收自己蓋過 sidecar 的鎖，
+沒有 sidecar 就不動，因為誤刪一個真正 mid-write 的鎖會毀掉 index 更新。但這也暴露缺口 ——
+**非 PHASE-Z 產生的洩漏鎖目前沒有任何回收路徑**，`not_ours` 是 provenance 判定而非 liveness 判定
+（「我無法證明持有者已死」，不是「持有者還活著」）。
+
+**處置（owner 明示授權後執行，非自主繞過）**：先做刪除前即時複驗（0 bytes、無 lsof handle、
+主 index 無 git 行程），備份該鎖到 scratchpad，記錄 `.git/index` 的 sha256 與大小
+（`c37aa982…`, 2,570,822 bytes），移除鎖後**再次比對 index sha256 完全相同** —— 證明 index 當時
+並非 mid-write，該鎖確為孤兒。隨後 `git status` 正常、`HEAD` 完好，commit `45a853173` 以
+exact-paths 落地 5 個檔案且未夾帶其他 session 的變更（同時有 4 個 session 在跑，故刻意用
+exact-paths 而非任何 `-A` 形式）。
+
+**未修的部分（明示，不宣稱已解決）**：本次是**止血**，不是根因修復。缺口仍在：
+(a) 非 PHASE-Z 洩漏鎖無回收路徑；(b) 沒有任何監控會因「互動式 writer 被擋但 daemon 正常」而告警。
+真正的修法應是替 index.lock 建立**不依賴 sidecar 的 liveness 判定**（例如以 lsof/flock 探測 +
+最小年齡雙條件），並把「canonical writer 是否可用」納入健康檢查，而不是只看 daemon 有沒有 commit。
+本段狀態為 **`contained`**。
