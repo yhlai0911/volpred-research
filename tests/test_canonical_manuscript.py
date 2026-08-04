@@ -72,6 +72,24 @@ def test_declaration_wins_over_a_newer_stale_artifact(tmp_path: Path) -> None:
     assert pdf.name == "main.pdf"
 
 
+def test_an_unbuilt_pdf_still_fails_by_default(tmp_path: Path) -> None:
+    """require_built defaults to True, and must stay that way.
+
+    The repo-wide sweep passes False because main.pdf is .gitignore'd. That
+    escape hatch is only safe while every publishing caller keeps the default:
+    the whole point of the declared resolver is that a PDF reaching a journal
+    came from the declared source, and a missing one must stop the pipeline.
+    """
+    d = _paper(tmp_path, files=("main.tex",), decl={"main_tex": "main.tex"})
+
+    with pytest.raises(CanonicalManuscriptError, match="not built"):
+        resolve_canonical_manuscript(d)
+
+    tex, pdf = resolve_canonical_manuscript(d, require_built=False)
+    assert tex.name == "main.tex"
+    assert pdf.name == "main.pdf"  # derived stem, whether or not it exists yet
+
+
 def test_pdf_is_derived_from_the_declared_tex_stem(tmp_path: Path) -> None:
     """tex and pdf can never name different versions -- that split shipped once."""
     d = _paper(
@@ -132,11 +150,21 @@ def _declared_papers() -> list[Path]:
 
 
 def test_every_declaration_in_the_repo_resolves() -> None:
-    """A declaration that names a missing or unbuilt file is worse than none."""
+    """A declaration that names a missing file is worse than none.
+
+    require_built=False on purpose. paper/*/main.pdf is .gitignore'd (line
+    175), so on a clean CI checkout NO paper has a built PDF and this sweep
+    fails for every declared paper — which is exactly what happened when the
+    declared-manuscript refactor first reached CI, green on every dev machine
+    the whole time. What this invariant can honestly assert across the repo is
+    that each declaration points at a .tex that exists. Whether the PDF is
+    built is a question for the moment one is published, and
+    resolve_canonical_manuscript still fails closed there by default.
+    """
     failures = []
     for d in _declared_papers():
         try:
-            resolve_canonical_manuscript(d)
+            resolve_canonical_manuscript(d, require_built=False)
         except CanonicalManuscriptError as exc:
             failures.append(f"{d.name}: {str(exc).splitlines()[0]}")
     assert not failures, "declared papers that do not resolve:\n" + "\n".join(failures)

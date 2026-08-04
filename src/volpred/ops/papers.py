@@ -484,7 +484,9 @@ def read_canonical_declaration(paper_dir: Path) -> dict[str, Any] | None:
     return payload
 
 
-def resolve_canonical_manuscript(paper_dir: Path) -> tuple[Path, Path]:
+def resolve_canonical_manuscript(
+    paper_dir: Path, *, require_built: bool = True
+) -> tuple[Path, Path]:
     """Return (main_tex, main_pdf) for a paper. Declared, never inferred.
 
     THREE-STRIKE REFACTOR (2026-08-04). Three times a stale `main_v*` artifact
@@ -515,6 +517,13 @@ def resolve_canonical_manuscript(paper_dir: Path) -> tuple[Path, Path]:
 
     Fails closed with the remedy printed, never falls back to a guess: a wrong
     manuscript reaching a journal or a reader is worse than a stopped pipeline.
+
+    `require_built=False` checks the declaration and its .tex but tolerates an
+    unbuilt PDF. Callers that hand a PDF to a journal or a reader must leave it
+    True. It exists for repo-wide invariant checks: `paper/*/main.pdf` is
+    .gitignore'd (line 175), so on a clean CI checkout the PDF is absent for
+    EVERY paper — a build artifact cannot be a repo invariant, and asserting it
+    is one turns CI permanently red while every local run stays green.
     """
     paper_dir = Path(paper_dir)
     decl = read_canonical_declaration(paper_dir)
@@ -533,7 +542,7 @@ def resolve_canonical_manuscript(paper_dir: Path) -> tuple[Path, Path]:
             f"does not exist. Fix the declaration or restore the file."
         )
     pdf = tex.with_suffix(".pdf")
-    if not pdf.is_file():
+    if require_built and not pdf.is_file():
         raise CanonicalManuscriptError(
             f"{paper_dir.name} declares {tex.name} but {pdf.name} is not built. "
             f"Build it so the published PDF comes from the declared source:\n"
