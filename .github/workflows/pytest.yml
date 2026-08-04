@@ -44,14 +44,29 @@ on:
   push:
     branches:
       - main
-    # Pure-documentation commits (paper .tex/.pdf/.bib, Markdown) cannot change
-    # any test outcome — the suite reads none of them. ~half of main's ~130
-    # pushes/day are exactly these (daily paper/ops refreshes). paths-ignore is
-    # fail-safe: a run is skipped ONLY when EVERY changed file matches, so any
-    # commit that also touches a .py / config / conftest still runs the full suite.
+    # Skips the daily paper/ops refreshes that make up ~38% of main's ~130
+    # pushes/day. paths-ignore is fail-safe: a run is skipped ONLY when EVERY
+    # changed file matches, so a commit that also touches a .py / config /
+    # conftest still runs the full suite.
+    #
+    # 2026-08-04: this used to be a blanket '**/*.md' on the claim that "the
+    # suite reads none of them". It reads a lot of them — 20+ test files assert
+    # on AGENTS.md, CLAUDE.md, .claude/rules/*.md, .claude/skills/**/SKILL.md,
+    # docs/**, config/governance_shared.md and several experiments/*/README.md.
+    # So a governance-only commit could break tests and CI would report nothing.
+    # It did: eecf1d67c dropped a section of AGENTS.md that
+    # test_check_matt_skills_installation.py asserts on, and the red only
+    # surfaced two commits later on an unrelated .py push. The fix for THAT was
+    # itself markdown-only, so it would have shipped unverified too.
+    #
+    # Only paper/ and storage/ markdown stay ignored — both verified to have no
+    # test reading a repo copy (matches under tests/ are tmp_path fixtures or
+    # prose in comments). Re-verify before widening:
+    #   grep -rn 'storage' tests/*.py scripts/tests/*.py | grep '\.md' \
+    #     | grep -vE 'tmp_path|tmp_dir|test_dir|\$wt|workdir|/tmp/'
     paths-ignore:
       - 'paper/**'
-      - '**/*.md'
+      - 'storage/**/*.md'
   workflow_dispatch:
 
 # Rapid successive pushes to main (many land <120s apart, well under the 9-min
