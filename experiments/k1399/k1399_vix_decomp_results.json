@@ -1,6 +1,6 @@
 {
   "experiment_id": "K1399",
-  "timestamp": "2026-05-23T08:29:19",
+  "timestamp": "2026-08-04T13:42:33",
   "data_source": "paper/leverage-direction/data/spy_vix_2004-2026.csv",
   "data_period": {
     "is_start": "2005-01-04",
@@ -10,95 +10,95 @@
   },
   "n_obs": {
     "is": 3522,
-    "oos": 1865
+    "oos": 1855
   },
   "models": {
     "HAR_ABS": {
-      "oos_qlike": -3.916261089239141,
-      "is_r2": 0.28936165453279894,
+      "oos_qlike": -3.908504728605215,
+      "is_r2": 0.28936165453279905,
       "oos_rank": 4,
       "dm_t_vs_baseline": null,
       "dm_p_vs_baseline": null,
       "harvey_pass_vs_baseline": null
     },
     "HAR_VIX_L": {
-      "oos_qlike": -3.941077824560117,
+      "oos_qlike": -3.93519870624095,
       "is_r2": 0.3443633977762649,
       "oos_rank": 2,
-      "dm_t_vs_baseline": -4.4003872477645105,
-      "dm_p_vs_baseline": 1.1416920058984375e-05,
+      "dm_t_vs_baseline": -4.895424646785067,
+      "dm_p_vs_baseline": 1.0659404485735995e-06,
       "harvey_pass_vs_baseline": true
     },
     "HAR_VIX_dV": {
-      "oos_qlike": -3.912110138830787,
-      "is_r2": 0.30444517027037177,
+      "oos_qlike": -3.9039936088810157,
+      "is_r2": 0.30444517027037166,
       "oos_rank": 6,
-      "dm_t_vs_baseline": 1.0122959107340088,
-      "dm_p_vs_baseline": 0.3115279705437897,
+      "dm_t_vs_baseline": 1.0946160440636685,
+      "dm_p_vs_baseline": 0.2738270681327417,
       "harvey_pass_vs_baseline": false
     },
     "HAR_VIX_P": {
-      "oos_qlike": -3.916122029762996,
-      "is_r2": 0.28943170737440227,
+      "oos_qlike": -3.908369468606844,
+      "is_r2": 0.28943170909171256,
       "oos_rank": 5,
-      "dm_t_vs_baseline": 0.8157033481894623,
-      "dm_p_vs_baseline": 0.4147740419381281,
+      "dm_t_vs_baseline": 0.7916539646496055,
+      "dm_p_vs_baseline": 0.4286637412546449,
       "harvey_pass_vs_baseline": false
     },
     "HAR_VIX_T": {
-      "oos_qlike": -3.931245982134267,
+      "oos_qlike": -3.9248847486857508,
       "is_r2": 0.31425371324426077,
       "oos_rank": 3,
-      "dm_t_vs_baseline": -3.5302244360665673,
-      "dm_p_vs_baseline": 0.0004252885970493696,
+      "dm_t_vs_baseline": -3.9745428171619674,
+      "dm_p_vs_baseline": 7.32173783734005e-05,
       "harvey_pass_vs_baseline": true
     },
     "HAR_VIX_All": {
-      "oos_qlike": -3.9422784656064382,
-      "is_r2": 0.3572514897911374,
+      "oos_qlike": -3.935959521592796,
+      "is_r2": 0.3572514931593308,
       "oos_rank": 1,
-      "dm_t_vs_baseline": -4.362766703129489,
-      "dm_p_vs_baseline": 1.3545164059876022e-05,
+      "dm_t_vs_baseline": -4.68487734340859,
+      "dm_p_vs_baseline": 3.005096439597065e-06,
       "harvey_pass_vs_baseline": true
     }
   },
   "pairwise_dm_vs_vix_l": {
     "HAR_VIX_dV_vs_L": {
-      "dm_t": 4.151961735185303,
-      "dm_p": 3.445084453630775e-05,
+      "dm_t": 4.583114188873591,
+      "dm_p": 4.8866416679878695e-06,
       "harvey_pass": true
     },
     "HAR_VIX_P_vs_L": {
-      "dm_t": 4.418252881133407,
-      "dm_p": 1.0521930726584317e-05,
+      "dm_t": 4.911219871751909,
+      "dm_p": 9.845647019168207e-07,
       "harvey_pass": true
     },
     "HAR_VIX_T_vs_L": {
-      "dm_t": 3.473280577406599,
-      "dm_p": 0.0005258797469751208,
+      "dm_t": 3.6707775756539673,
+      "dm_p": 0.00024865593443571617,
       "harvey_pass": true
     },
     "HAR_VIX_All_vs_L": {
-      "dm_t": -0.3993876684535078,
-      "dm_p": 0.6896533332556762,
+      "dm_t": -0.252915906690435,
+      "dm_p": 0.8003612356641797,
       "harvey_pass": false
     },
     "HAR_VIX_All_vs_best_single": {
       "best_single_model": "HAR_VIX_L",
-      "dm_t": -0.3993876684535078,
-      "dm_p": 0.6896533332556762,
+      "dm_t": -0.252915906690435,
+      "dm_p": 0.8003612356641797,
       "harvey_pass": false
     }
   },
   "vif_check": {
     "HAR_VIX_All": {
-      "rv1": 2.2453974414982447,
-      "rv5": 5.132064190402406,
-      "rv22": 8.141480848284804,
-      "vix_L": 60.261078654881,
-      "dvix": 2.0990769228613013,
-      "premium": 1.1157992406169193,
-      "ma5_vix": 68.29566118065065
+      "rv1": 2.2453968029247164,
+      "rv5": 5.132064191252869,
+      "rv22": 8.141480864824588,
+      "vix_L": 60.261078337023214,
+      "dvix": 2.0990769334848585,
+      "premium": 1.115798821724114,
+      "ma5_vix": 68.29566143058041
     }
   },
   "hypothesis_verdicts": {
@@ -112,38 +112,231 @@
   "qlike_ranking": [
     [
       "HAR_VIX_All",
-      -3.9422784656064382
+      -3.935959521592796
     ],
     [
       "HAR_VIX_L",
-      -3.941077824560117
+      -3.93519870624095
     ],
     [
       "HAR_VIX_T",
-      -3.931245982134267
+      -3.9248847486857508
     ],
     [
       "HAR_ABS",
-      -3.916261089239141
+      -3.908504728605215
     ],
     [
       "HAR_VIX_P",
-      -3.916122029762996
+      -3.908369468606844
     ],
     [
       "HAR_VIX_dV",
-      -3.912110138830787
+      -3.9039936088810157
     ]
   ],
   "k1315_replication": {
     "expected_dm_t_vix_l_vs_baseline": 4.58,
-    "actual_dm_t_vix_l_vs_baseline": 4.4003872477645105,
+    "actual_dm_t_vix_l_vs_baseline": 4.895424646785067,
     "replication_within_05": true,
     "note": "K1315 OOS 2019-2024; K1399 OOS 2019-latest. Difference expected."
   },
-  "summary": "K1399 VIX Feature Decomposition: H1=PASS (VIX level DM t=-4.40), H2=PARTIAL (DVIX vs baseline DM t=1.01), H3=PARTIAL (vol premium DM t=0.82), H4=FAIL (trend insignificant, DM t=-3.53), H5=PASS (parsimony, All vs HAR_VIX_L DM t=-0.40). Best model: HAR_VIX_All (QLIKE=-3.942278). QLIKE ranking: HAR_VIX_All=-3.942278, HAR_VIX_L=-3.941078, HAR_VIX_T=-3.931246, HAR_ABS=-3.916261, HAR_VIX_P=-3.916122, HAR_VIX_dV=-3.912110",
+  "summary": "K1399 VIX Feature Decomposition: H1=PASS (VIX level DM t=-4.90), H2=PARTIAL (DVIX vs baseline DM t=1.09), H3=PARTIAL (vol premium DM t=0.79), H4=FAIL (trend insignificant, DM t=-3.97), H5=PASS (parsimony, All vs HAR_VIX_L DM t=-0.25). Best model: HAR_VIX_All (QLIKE=-3.935960). QLIKE ranking: HAR_VIX_All=-3.935960, HAR_VIX_L=-3.935199, HAR_VIX_T=-3.924885, HAR_ABS=-3.908505, HAR_VIX_P=-3.908369, HAR_VIX_dV=-3.903994",
   "seed": 42,
   "qlike_formula": "Patton 2011 form B: mean(log(yhat) + y/yhat)",
   "dm_test": "HLN-corrected DM, NW bandwidth=T^(1/3), t(T-1) distribution",
-  "harvey_threshold": 3.0
+  "harvey_threshold": 3.0,
+  "restatement": {
+    "reason": "snapshot duplicate contamination (audit_snapshot_dup_20260721); row-level exposure measured by snapaudit_unmeasured_20260728, statistics recomputed here",
+    "task_id": "assign_ce6097bf",
+    "rerun_experiment": "snapaudit_rerun_k1308_k1399_20260804",
+    "rerun_date": "2026-08-04",
+    "rerun_commit_parent": "ffa0cd783bd61302deb632643b4e4c1bb64b4524",
+    "sample_end_pinned_to": "2026-05-19",
+    "duplicate_rows_removed_from_sample": 10,
+    "duplicate_dates": [
+      "2026-05-04",
+      "2026-05-05",
+      "2026-05-06",
+      "2026-05-07",
+      "2026-05-08",
+      "2026-05-11",
+      "2026-05-12",
+      "2026-05-13",
+      "2026-05-14",
+      "2026-05-15"
+    ],
+    "vintage_check": {
+      "csv": "paper/leverage-direction/data/spy_vix_2004-2026.csv",
+      "columns_verified": [
+        "date",
+        "spy_adj_close",
+        "vix_close"
+      ],
+      "window_end": "2026-05-19",
+      "rows_polluted_vintage": 5640,
+      "rows_clean_vintage": 5630,
+      "duplicate_rows_in_window": 10,
+      "head_equals_clean_vintage_in_window": true,
+      "duplicate_pairs_value_identical": true,
+      "dedup_keep_reproduces_clean_vintage": {
+        "first": true,
+        "last": true
+      },
+      "dedup_keep_choice_is_immaterial": true,
+      "clean_rev": "00b07f07f",
+      "polluted_rev": "d36a418cb"
+    },
+    "superseded_values": {
+      "experiment_id": "K1399",
+      "timestamp": "2026-05-23T08:29:19",
+      "data_source": "paper/leverage-direction/data/spy_vix_2004-2026.csv",
+      "data_period": {
+        "is_start": "2005-01-04",
+        "is_end": "2018-12-31",
+        "oos_start": "2019-01-02",
+        "oos_end": "2026-05-19"
+      },
+      "n_obs": {
+        "is": 3522,
+        "oos": 1865
+      },
+      "models": {
+        "HAR_ABS": {
+          "oos_qlike": -3.916261089239141,
+          "is_r2": 0.28936165453279894,
+          "oos_rank": 4,
+          "dm_t_vs_baseline": null,
+          "dm_p_vs_baseline": null,
+          "harvey_pass_vs_baseline": null
+        },
+        "HAR_VIX_L": {
+          "oos_qlike": -3.941077824560117,
+          "is_r2": 0.3443633977762649,
+          "oos_rank": 2,
+          "dm_t_vs_baseline": -4.4003872477645105,
+          "dm_p_vs_baseline": 1.1416920058984375e-05,
+          "harvey_pass_vs_baseline": true
+        },
+        "HAR_VIX_dV": {
+          "oos_qlike": -3.912110138830787,
+          "is_r2": 0.30444517027037177,
+          "oos_rank": 6,
+          "dm_t_vs_baseline": 1.0122959107340088,
+          "dm_p_vs_baseline": 0.3115279705437897,
+          "harvey_pass_vs_baseline": false
+        },
+        "HAR_VIX_P": {
+          "oos_qlike": -3.916122029762996,
+          "is_r2": 0.28943170737440227,
+          "oos_rank": 5,
+          "dm_t_vs_baseline": 0.8157033481894623,
+          "dm_p_vs_baseline": 0.4147740419381281,
+          "harvey_pass_vs_baseline": false
+        },
+        "HAR_VIX_T": {
+          "oos_qlike": -3.931245982134267,
+          "is_r2": 0.31425371324426077,
+          "oos_rank": 3,
+          "dm_t_vs_baseline": -3.5302244360665673,
+          "dm_p_vs_baseline": 0.0004252885970493696,
+          "harvey_pass_vs_baseline": true
+        },
+        "HAR_VIX_All": {
+          "oos_qlike": -3.9422784656064382,
+          "is_r2": 0.3572514897911374,
+          "oos_rank": 1,
+          "dm_t_vs_baseline": -4.362766703129489,
+          "dm_p_vs_baseline": 1.3545164059876022e-05,
+          "harvey_pass_vs_baseline": true
+        }
+      },
+      "pairwise_dm_vs_vix_l": {
+        "HAR_VIX_dV_vs_L": {
+          "dm_t": 4.151961735185303,
+          "dm_p": 3.445084453630775e-05,
+          "harvey_pass": true
+        },
+        "HAR_VIX_P_vs_L": {
+          "dm_t": 4.418252881133407,
+          "dm_p": 1.0521930726584317e-05,
+          "harvey_pass": true
+        },
+        "HAR_VIX_T_vs_L": {
+          "dm_t": 3.473280577406599,
+          "dm_p": 0.0005258797469751208,
+          "harvey_pass": true
+        },
+        "HAR_VIX_All_vs_L": {
+          "dm_t": -0.3993876684535078,
+          "dm_p": 0.6896533332556762,
+          "harvey_pass": false
+        },
+        "HAR_VIX_All_vs_best_single": {
+          "best_single_model": "HAR_VIX_L",
+          "dm_t": -0.3993876684535078,
+          "dm_p": 0.6896533332556762,
+          "harvey_pass": false
+        }
+      },
+      "vif_check": {
+        "HAR_VIX_All": {
+          "rv1": 2.2453974414982447,
+          "rv5": 5.132064190402406,
+          "rv22": 8.141480848284804,
+          "vix_L": 60.261078654881,
+          "dvix": 2.0990769228613013,
+          "premium": 1.1157992406169193,
+          "ma5_vix": 68.29566118065065
+        }
+      },
+      "hypothesis_verdicts": {
+        "H1_vix_level_significant": "PASS",
+        "H2_dvix_incremental": "PARTIAL",
+        "H3_vol_premium_regime": "PARTIAL",
+        "H4_vix_trend_no_info": "FAIL",
+        "H5_parsimony_all_vs_best": "PASS"
+      },
+      "verdict": "H1_PASS|H2_PARTIAL|H3_PARTIAL|H4_FAIL|H5_PASS",
+      "qlike_ranking": [
+        [
+          "HAR_VIX_All",
+          -3.9422784656064382
+        ],
+        [
+          "HAR_VIX_L",
+          -3.941077824560117
+        ],
+        [
+          "HAR_VIX_T",
+          -3.931245982134267
+        ],
+        [
+          "HAR_ABS",
+          -3.916261089239141
+        ],
+        [
+          "HAR_VIX_P",
+          -3.916122029762996
+        ],
+        [
+          "HAR_VIX_dV",
+          -3.912110138830787
+        ]
+      ],
+      "k1315_replication": {
+        "expected_dm_t_vix_l_vs_baseline": 4.58,
+        "actual_dm_t_vix_l_vs_baseline": 4.4003872477645105,
+        "replication_within_05": true,
+        "note": "K1315 OOS 2019-2024; K1399 OOS 2019-latest. Difference expected."
+      },
+      "summary": "K1399 VIX Feature Decomposition: H1=PASS (VIX level DM t=-4.40), H2=PARTIAL (DVIX vs baseline DM t=1.01), H3=PARTIAL (vol premium DM t=0.82), H4=FAIL (trend insignificant, DM t=-3.53), H5=PASS (parsimony, All vs HAR_VIX_L DM t=-0.40). Best model: HAR_VIX_All (QLIKE=-3.942278). QLIKE ranking: HAR_VIX_All=-3.942278, HAR_VIX_L=-3.941078, HAR_VIX_T=-3.931246, HAR_ABS=-3.916261, HAR_VIX_P=-3.916122, HAR_VIX_dV=-3.912110",
+      "seed": 42,
+      "qlike_formula": "Patton 2011 form B: mean(log(yhat) + y/yhat)",
+      "dm_test": "HLN-corrected DM, NW bandwidth=T^(1/3), t(T-1) distribution",
+      "harvey_threshold": 3.0
+    },
+    "changed_field_count": 31,
+    "note": "`superseded_values` is the contaminated record as published; the top-level fields of this file are the corrected ones."
+  }
 }

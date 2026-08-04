@@ -68,6 +68,10 @@ CHART_PATH   = os.path.join(SCRIPT_DIR, 'k1399_qlike_comparison.png')
 IS_START  = '2005-01-04'
 IS_END    = '2018-12-31'
 OOS_START = '2019-01-02'
+# Optional OOS upper bound. The OOS window is open-ended by default, so the CSV
+# growing makes any rerun non-comparable to a published vintage. Set
+# K1399_OOS_END=YYYY-MM-DD to reproduce a historical window exactly.
+OOS_END   = os.environ.get('K1399_OOS_END') or None
 EPS       = 1e-8           # min forecast floor to avoid log(0)
 HARVEY_THRESHOLD = 3.0     # Harvey et al. (2016) stringent significance level
 VIF_THRESHOLD    = 10.0    # multicollinearity warning
@@ -186,7 +190,7 @@ print(f"Date range: {data.index[0].date()} to {data.index[-1].date()}")
 
 # ─── 5. IS / OOS Split ────────────────────────────────────────────────────────
 is_data  = data.loc[IS_START:IS_END]
-oos_data = data.loc[OOS_START:]
+oos_data = data.loc[OOS_START:OOS_END] if OOS_END else data.loc[OOS_START:]
 
 print(f"\nIS:  {is_data.index[0].date()} to {is_data.index[-1].date()}, n={len(is_data)}")
 print(f"OOS: {oos_data.index[0].date()} to {oos_data.index[-1].date()}, n={len(oos_data)}")

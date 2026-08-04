@@ -1,0 +1,821 @@
+{
+  "audit_id": "snapaudit_rerun_k1308_k1399_20260804",
+  "task_id": "assign_ce6097bf",
+  "seed": 42,
+  "run_date": "2026-08-04",
+  "parent_commit": "ffa0cd783bd61302deb632643b4e4c1bb64b4524",
+  "purpose": "recompute K1308 / K1399 statistics on deduplicated input at the published vintage, so the two affected articles' errata can quote correct numbers",
+  "does_not_modify_published_articles": true,
+  "vintage_checks": {
+    "k1308": {
+      "csv": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+      "columns_verified": [
+        "date",
+        "vix_close"
+      ],
+      "window_end": "2026-05-20",
+      "rows_polluted_vintage": 4786,
+      "rows_clean_vintage": 4776,
+      "duplicate_rows_in_window": 10,
+      "head_equals_clean_vintage_in_window": true,
+      "duplicate_pairs_value_identical": true,
+      "dedup_keep_reproduces_clean_vintage": {
+        "first": true,
+        "last": true
+      },
+      "dedup_keep_choice_is_immaterial": true,
+      "clean_rev": "00b07f07f",
+      "polluted_rev": "d36a418cb"
+    },
+    "k1399": {
+      "csv": "paper/leverage-direction/data/spy_vix_2004-2026.csv",
+      "columns_verified": [
+        "date",
+        "spy_adj_close",
+        "vix_close"
+      ],
+      "window_end": "2026-05-19",
+      "rows_polluted_vintage": 5640,
+      "rows_clean_vintage": 5630,
+      "duplicate_rows_in_window": 10,
+      "head_equals_clean_vintage_in_window": true,
+      "duplicate_pairs_value_identical": true,
+      "dedup_keep_reproduces_clean_vintage": {
+        "first": true,
+        "last": true
+      },
+      "dedup_keep_choice_is_immaterial": true,
+      "clean_rev": "00b07f07f",
+      "polluted_rev": "d36a418cb"
+    }
+  },
+  "k1308": {
+    "n_before": 119,
+    "n_after": 109,
+    "changed_fields": 13,
+    "verdict_flips": [],
+    "verdict_changed": false,
+    "before_after": [
+      {
+        "field": "overall_stats.n",
+        "reader_facing_label": "正文『共 119 個交易日』",
+        "before_contaminated": 119,
+        "after_clean": 109,
+        "delta": -10.0,
+        "changed": true
+      },
+      {
+        "field": "overall_stats.mean",
+        "reader_facing_label": "平均比值 1.574",
+        "before_contaminated": 1.5737,
+        "after_clean": 1.5237,
+        "delta": -0.05,
+        "changed": true
+      },
+      {
+        "field": "overall_stats.median",
+        "reader_facing_label": "中位數",
+        "before_contaminated": 1.4639,
+        "after_clean": 1.4364,
+        "delta": -0.0275,
+        "changed": true
+      },
+      {
+        "field": "overall_stats.std",
+        "reader_facing_label": "標準差",
+        "before_contaminated": 0.3211,
+        "after_clean": 0.2855,
+        "delta": -0.0356,
+        "changed": true
+      },
+      {
+        "field": "overall_stats.cv",
+        "reader_facing_label": "CV",
+        "before_contaminated": 0.204,
+        "after_clean": 0.1874,
+        "delta": -0.0166,
+        "changed": true
+      },
+      {
+        "field": "overall_stats.min",
+        "reader_facing_label": "最小值",
+        "before_contaminated": 1.0911,
+        "after_clean": 1.0911,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "overall_stats.max",
+        "reader_facing_label": "最大值",
+        "before_contaminated": 2.2787,
+        "after_clean": 2.2787,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "overall_stats.period",
+        "reader_facing_label": "樣本期間",
+        "before_contaminated": "2025-12-01–2026-05-20",
+        "after_clean": "2025-12-01–2026-05-20",
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "rolling_summary.final_30d_mean",
+        "reader_facing_label": "最近 30 天 2.064",
+        "before_contaminated": 2.0643,
+        "after_clean": 1.8716,
+        "delta": -0.1927,
+        "changed": true
+      },
+      {
+        "field": "rolling_summary.final_30d_cv",
+        "reader_facing_label": "最近 30 天 CV",
+        "before_contaminated": 0.0824,
+        "after_clean": 0.1528,
+        "delta": 0.0704,
+        "changed": true
+      },
+      {
+        "field": "comparison_to_k1181.k1181_baseline_mean",
+        "reader_facing_label": "前一版基準 1.391",
+        "before_contaminated": 1.3906,
+        "after_clean": 1.3906,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "comparison_to_k1181.mean_diff",
+        "reader_facing_label": "與基準差距",
+        "before_contaminated": 0.1831,
+        "after_clean": 0.1331,
+        "delta": -0.05,
+        "changed": true
+      },
+      {
+        "field": "comparison_to_k1181.t_stat_vs_baseline",
+        "reader_facing_label": "vs 基準 t",
+        "before_contaminated": 6.2219,
+        "after_clean": 4.8669,
+        "delta": -1.355,
+        "changed": true
+      },
+      {
+        "field": "comparison_to_k1181.p_vs_baseline",
+        "reader_facing_label": "vs 基準 p",
+        "before_contaminated": 0.0,
+        "after_clean": 0.0,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "comparison_to_k1181.baseline_still_valid",
+        "reader_facing_label": "基準是否仍成立",
+        "before_contaminated": false,
+        "after_clean": false,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "comparison_to_k1181.additional_days",
+        "reader_facing_label": "較 K1181 增加天數",
+        "before_contaminated": 43,
+        "after_clean": 33,
+        "delta": -10.0,
+        "changed": true
+      },
+      {
+        "field": "ols_trend.beta",
+        "reader_facing_label": "OLS 趨勢 β",
+        "before_contaminated": 0.00733,
+        "after_clean": 0.006498,
+        "delta": -0.000832,
+        "changed": true
+      },
+      {
+        "field": "ols_trend.p_value",
+        "reader_facing_label": "OLS 趨勢 p",
+        "before_contaminated": 0.0,
+        "after_clean": 0.0,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "ols_trend.trend_significant",
+        "reader_facing_label": "趨勢是否顯著",
+        "before_contaminated": true,
+        "after_clean": true,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "midpoint_mean_shift_test.t_stat",
+        "reader_facing_label": "中點均值位移 t",
+        "before_contaminated": -7.9339,
+        "after_clean": -6.1435,
+        "delta": 1.7904,
+        "changed": true
+      },
+      {
+        "field": "midpoint_mean_shift_test.p_value",
+        "reader_facing_label": "中點均值位移 p",
+        "before_contaminated": 0.0,
+        "after_clean": 0.0,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "midpoint_mean_shift_test.mean_shift_detected",
+        "reader_facing_label": "是否偵測到位移",
+        "before_contaminated": true,
+        "after_clean": true,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "progress_to_252d.pct_complete",
+        "reader_facing_label": "252 日進度 %",
+        "before_contaminated": 47.2,
+        "after_clean": 43.3,
+        "delta": -3.9,
+        "changed": true
+      },
+      {
+        "field": "stability_verdict.overall_stable",
+        "reader_facing_label": "穩定性判定",
+        "before_contaminated": false,
+        "after_clean": false,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "conclusion",
+        "reader_facing_label": "結論句",
+        "before_contaminated": "UNSTABLE — ratio 顯著漂移，需進一步審查",
+        "after_clean": "UNSTABLE — ratio 顯著漂移，需進一步審查",
+        "delta": null,
+        "changed": false
+      }
+    ]
+  },
+  "k1399": {
+    "n_is_before": 3522,
+    "n_is_after": 3522,
+    "n_oos_before": 1865,
+    "n_oos_after": 1855,
+    "changed_fields": 31,
+    "verdict_flips": [],
+    "verdict_changed": false,
+    "before_after": [
+      {
+        "field": "n_obs.is",
+        "reader_facing_label": "正文 IS n=3,522",
+        "before_contaminated": 3522,
+        "after_clean": 3522,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "n_obs.oos",
+        "reader_facing_label": "正文 OOS n=1,865",
+        "before_contaminated": 1865,
+        "after_clean": 1855,
+        "delta": -10.0,
+        "changed": true
+      },
+      {
+        "field": "data_period.oos_end",
+        "reader_facing_label": "OOS 結束日",
+        "before_contaminated": "2026-05-19",
+        "after_clean": "2026-05-19",
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_ABS.oos_qlike",
+        "reader_facing_label": "HAR_ABS oos_qlike",
+        "before_contaminated": -3.916261089239141,
+        "after_clean": -3.908504728605215,
+        "delta": 0.007756,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_ABS.is_r2",
+        "reader_facing_label": "HAR_ABS is_r2",
+        "before_contaminated": 0.28936165453279894,
+        "after_clean": 0.28936165453279905,
+        "delta": 0.0,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_ABS.oos_rank",
+        "reader_facing_label": "HAR_ABS oos_rank",
+        "before_contaminated": 4,
+        "after_clean": 4,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_ABS.dm_t_vs_baseline",
+        "reader_facing_label": "HAR_ABS dm_t_vs_baseline",
+        "before_contaminated": null,
+        "after_clean": null,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_ABS.dm_p_vs_baseline",
+        "reader_facing_label": "HAR_ABS dm_p_vs_baseline",
+        "before_contaminated": null,
+        "after_clean": null,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_ABS.harvey_pass_vs_baseline",
+        "reader_facing_label": "HAR_ABS harvey_pass_vs_baseline",
+        "before_contaminated": null,
+        "after_clean": null,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_L.oos_qlike",
+        "reader_facing_label": "HAR_VIX_L oos_qlike",
+        "before_contaminated": -3.941077824560117,
+        "after_clean": -3.93519870624095,
+        "delta": 0.005879,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_L.is_r2",
+        "reader_facing_label": "HAR_VIX_L is_r2",
+        "before_contaminated": 0.3443633977762649,
+        "after_clean": 0.3443633977762649,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_L.oos_rank",
+        "reader_facing_label": "HAR_VIX_L oos_rank",
+        "before_contaminated": 2,
+        "after_clean": 2,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_L.dm_t_vs_baseline",
+        "reader_facing_label": "HAR_VIX_L dm_t_vs_baseline",
+        "before_contaminated": -4.4003872477645105,
+        "after_clean": -4.895424646785067,
+        "delta": -0.495037,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_L.dm_p_vs_baseline",
+        "reader_facing_label": "HAR_VIX_L dm_p_vs_baseline",
+        "before_contaminated": 1.1416920058984375e-05,
+        "after_clean": 1.0659404485735995e-06,
+        "delta": -1e-05,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_L.harvey_pass_vs_baseline",
+        "reader_facing_label": "HAR_VIX_L harvey_pass_vs_baseline",
+        "before_contaminated": true,
+        "after_clean": true,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_dV.oos_qlike",
+        "reader_facing_label": "HAR_VIX_dV oos_qlike",
+        "before_contaminated": -3.912110138830787,
+        "after_clean": -3.9039936088810157,
+        "delta": 0.008117,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_dV.is_r2",
+        "reader_facing_label": "HAR_VIX_dV is_r2",
+        "before_contaminated": 0.30444517027037177,
+        "after_clean": 0.30444517027037166,
+        "delta": -0.0,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_dV.oos_rank",
+        "reader_facing_label": "HAR_VIX_dV oos_rank",
+        "before_contaminated": 6,
+        "after_clean": 6,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_dV.dm_t_vs_baseline",
+        "reader_facing_label": "HAR_VIX_dV dm_t_vs_baseline",
+        "before_contaminated": 1.0122959107340088,
+        "after_clean": 1.0946160440636685,
+        "delta": 0.08232,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_dV.dm_p_vs_baseline",
+        "reader_facing_label": "HAR_VIX_dV dm_p_vs_baseline",
+        "before_contaminated": 0.3115279705437897,
+        "after_clean": 0.2738270681327417,
+        "delta": -0.037701,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_dV.harvey_pass_vs_baseline",
+        "reader_facing_label": "HAR_VIX_dV harvey_pass_vs_baseline",
+        "before_contaminated": false,
+        "after_clean": false,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_P.oos_qlike",
+        "reader_facing_label": "HAR_VIX_P oos_qlike",
+        "before_contaminated": -3.916122029762996,
+        "after_clean": -3.908369468606844,
+        "delta": 0.007753,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_P.is_r2",
+        "reader_facing_label": "HAR_VIX_P is_r2",
+        "before_contaminated": 0.28943170737440227,
+        "after_clean": 0.28943170909171256,
+        "delta": 0.0,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_P.oos_rank",
+        "reader_facing_label": "HAR_VIX_P oos_rank",
+        "before_contaminated": 5,
+        "after_clean": 5,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_P.dm_t_vs_baseline",
+        "reader_facing_label": "HAR_VIX_P dm_t_vs_baseline",
+        "before_contaminated": 0.8157033481894623,
+        "after_clean": 0.7916539646496055,
+        "delta": -0.024049,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_P.dm_p_vs_baseline",
+        "reader_facing_label": "HAR_VIX_P dm_p_vs_baseline",
+        "before_contaminated": 0.4147740419381281,
+        "after_clean": 0.4286637412546449,
+        "delta": 0.01389,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_P.harvey_pass_vs_baseline",
+        "reader_facing_label": "HAR_VIX_P harvey_pass_vs_baseline",
+        "before_contaminated": false,
+        "after_clean": false,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_T.oos_qlike",
+        "reader_facing_label": "HAR_VIX_T oos_qlike",
+        "before_contaminated": -3.931245982134267,
+        "after_clean": -3.9248847486857508,
+        "delta": 0.006361,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_T.is_r2",
+        "reader_facing_label": "HAR_VIX_T is_r2",
+        "before_contaminated": 0.31425371324426077,
+        "after_clean": 0.31425371324426077,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_T.oos_rank",
+        "reader_facing_label": "HAR_VIX_T oos_rank",
+        "before_contaminated": 3,
+        "after_clean": 3,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_T.dm_t_vs_baseline",
+        "reader_facing_label": "HAR_VIX_T dm_t_vs_baseline",
+        "before_contaminated": -3.5302244360665673,
+        "after_clean": -3.9745428171619674,
+        "delta": -0.444318,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_T.dm_p_vs_baseline",
+        "reader_facing_label": "HAR_VIX_T dm_p_vs_baseline",
+        "before_contaminated": 0.0004252885970493696,
+        "after_clean": 7.32173783734005e-05,
+        "delta": -0.000352,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_T.harvey_pass_vs_baseline",
+        "reader_facing_label": "HAR_VIX_T harvey_pass_vs_baseline",
+        "before_contaminated": true,
+        "after_clean": true,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_All.oos_qlike",
+        "reader_facing_label": "HAR_VIX_All oos_qlike",
+        "before_contaminated": -3.9422784656064382,
+        "after_clean": -3.935959521592796,
+        "delta": 0.006319,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_All.is_r2",
+        "reader_facing_label": "HAR_VIX_All is_r2",
+        "before_contaminated": 0.3572514897911374,
+        "after_clean": 0.3572514931593308,
+        "delta": 0.0,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_All.oos_rank",
+        "reader_facing_label": "HAR_VIX_All oos_rank",
+        "before_contaminated": 1,
+        "after_clean": 1,
+        "delta": 0.0,
+        "changed": false
+      },
+      {
+        "field": "models.HAR_VIX_All.dm_t_vs_baseline",
+        "reader_facing_label": "HAR_VIX_All dm_t_vs_baseline",
+        "before_contaminated": -4.362766703129489,
+        "after_clean": -4.68487734340859,
+        "delta": -0.322111,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_All.dm_p_vs_baseline",
+        "reader_facing_label": "HAR_VIX_All dm_p_vs_baseline",
+        "before_contaminated": 1.3545164059876022e-05,
+        "after_clean": 3.005096439597065e-06,
+        "delta": -1.1e-05,
+        "changed": true
+      },
+      {
+        "field": "models.HAR_VIX_All.harvey_pass_vs_baseline",
+        "reader_facing_label": "HAR_VIX_All harvey_pass_vs_baseline",
+        "before_contaminated": true,
+        "after_clean": true,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_dV_vs_L.dm_t",
+        "reader_facing_label": "HAR_VIX_dV_vs_L dm_t",
+        "before_contaminated": 4.151961735185303,
+        "after_clean": 4.583114188873591,
+        "delta": 0.431152,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_dV_vs_L.dm_p",
+        "reader_facing_label": "HAR_VIX_dV_vs_L dm_p",
+        "before_contaminated": 3.445084453630775e-05,
+        "after_clean": 4.8866416679878695e-06,
+        "delta": -3e-05,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_dV_vs_L.harvey_pass",
+        "reader_facing_label": "HAR_VIX_dV_vs_L harvey_pass",
+        "before_contaminated": true,
+        "after_clean": true,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_P_vs_L.dm_t",
+        "reader_facing_label": "HAR_VIX_P_vs_L dm_t",
+        "before_contaminated": 4.418252881133407,
+        "after_clean": 4.911219871751909,
+        "delta": 0.492967,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_P_vs_L.dm_p",
+        "reader_facing_label": "HAR_VIX_P_vs_L dm_p",
+        "before_contaminated": 1.0521930726584317e-05,
+        "after_clean": 9.845647019168207e-07,
+        "delta": -1e-05,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_P_vs_L.harvey_pass",
+        "reader_facing_label": "HAR_VIX_P_vs_L harvey_pass",
+        "before_contaminated": true,
+        "after_clean": true,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_T_vs_L.dm_t",
+        "reader_facing_label": "HAR_VIX_T_vs_L dm_t",
+        "before_contaminated": 3.473280577406599,
+        "after_clean": 3.6707775756539673,
+        "delta": 0.197497,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_T_vs_L.dm_p",
+        "reader_facing_label": "HAR_VIX_T_vs_L dm_p",
+        "before_contaminated": 0.0005258797469751208,
+        "after_clean": 0.00024865593443571617,
+        "delta": -0.000277,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_T_vs_L.harvey_pass",
+        "reader_facing_label": "HAR_VIX_T_vs_L harvey_pass",
+        "before_contaminated": true,
+        "after_clean": true,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_All_vs_L.dm_t",
+        "reader_facing_label": "HAR_VIX_All_vs_L dm_t",
+        "before_contaminated": -0.3993876684535078,
+        "after_clean": -0.252915906690435,
+        "delta": 0.146472,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_All_vs_L.dm_p",
+        "reader_facing_label": "HAR_VIX_All_vs_L dm_p",
+        "before_contaminated": 0.6896533332556762,
+        "after_clean": 0.8003612356641797,
+        "delta": 0.110708,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_All_vs_L.harvey_pass",
+        "reader_facing_label": "HAR_VIX_All_vs_L harvey_pass",
+        "before_contaminated": false,
+        "after_clean": false,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_All_vs_best_single.dm_t",
+        "reader_facing_label": "HAR_VIX_All_vs_best_single dm_t",
+        "before_contaminated": -0.3993876684535078,
+        "after_clean": -0.252915906690435,
+        "delta": 0.146472,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_All_vs_best_single.dm_p",
+        "reader_facing_label": "HAR_VIX_All_vs_best_single dm_p",
+        "before_contaminated": 0.6896533332556762,
+        "after_clean": 0.8003612356641797,
+        "delta": 0.110708,
+        "changed": true
+      },
+      {
+        "field": "pairwise_dm_vs_vix_l.HAR_VIX_All_vs_best_single.harvey_pass",
+        "reader_facing_label": "HAR_VIX_All_vs_best_single harvey_pass",
+        "before_contaminated": false,
+        "after_clean": false,
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "hypothesis_verdicts.H1_vix_level_significant",
+        "reader_facing_label": "H1_vix_level_significant 判定",
+        "before_contaminated": "PASS",
+        "after_clean": "PASS",
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "hypothesis_verdicts.H2_dvix_incremental",
+        "reader_facing_label": "H2_dvix_incremental 判定",
+        "before_contaminated": "PARTIAL",
+        "after_clean": "PARTIAL",
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "hypothesis_verdicts.H3_vol_premium_regime",
+        "reader_facing_label": "H3_vol_premium_regime 判定",
+        "before_contaminated": "PARTIAL",
+        "after_clean": "PARTIAL",
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "hypothesis_verdicts.H4_vix_trend_no_info",
+        "reader_facing_label": "H4_vix_trend_no_info 判定",
+        "before_contaminated": "FAIL",
+        "after_clean": "FAIL",
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "hypothesis_verdicts.H5_parsimony_all_vs_best",
+        "reader_facing_label": "H5_parsimony_all_vs_best 判定",
+        "before_contaminated": "PASS",
+        "after_clean": "PASS",
+        "delta": null,
+        "changed": false
+      },
+      {
+        "field": "verdict",
+        "reader_facing_label": "H1..H5 判定串",
+        "before_contaminated": "H1_PASS|H2_PARTIAL|H3_PARTIAL|H4_FAIL|H5_PASS",
+        "after_clean": "H1_PASS|H2_PARTIAL|H3_PARTIAL|H4_FAIL|H5_PASS",
+        "delta": null,
+        "changed": false
+      }
+    ]
+  },
+  "erratum_fill_ins": {
+    "mile_02c71e74": {
+      "k_id": "k1308",
+      "title": "別再把美國 VIX 直接乘 1.4 來看台股風險了",
+      "values": {
+        "n_trading_days": {
+          "published": 119,
+          "corrected": 109,
+          "field": "overall_stats.n"
+        },
+        "mean_ratio": {
+          "published": 1.5737,
+          "corrected": 1.5237,
+          "field": "overall_stats.mean"
+        },
+        "last_30d_mean": {
+          "published": 2.0643,
+          "corrected": 1.8716,
+          "field": "rolling_summary.final_30d_mean"
+        },
+        "prior_baseline": {
+          "published": 1.3906,
+          "corrected": 1.3906,
+          "field": "comparison_to_k1181.k1181_baseline_mean"
+        }
+      }
+    },
+    "mile_34157161": {
+      "k_id": "k1399",
+      "title": "VIX 四個分量裡，水準最強",
+      "values": {
+        "dm_t_level": {
+          "published": -4.4003872477645105,
+          "corrected": -4.895424646785067,
+          "field": "models.HAR_VIX_L.dm_t_vs_baseline"
+        },
+        "dm_t_ma5": {
+          "published": -3.5302244360665673,
+          "corrected": -3.9745428171619674,
+          "field": "models.HAR_VIX_T.dm_t_vs_baseline"
+        },
+        "dm_t_T_vs_L": {
+          "published": 3.473280577406599,
+          "corrected": 3.6707775756539673,
+          "field": "pairwise_dm_vs_vix_l.HAR_VIX_T_vs_L.dm_t"
+        },
+        "dm_t_All_vs_L": {
+          "published": -0.3993876684535078,
+          "corrected": -0.252915906690435,
+          "field": "pairwise_dm_vs_vix_l.HAR_VIX_All_vs_L.dm_t"
+        },
+        "dm_p_All_vs_L": {
+          "published": 0.6896533332556762,
+          "corrected": 0.8003612356641797,
+          "field": "pairwise_dm_vs_vix_l.HAR_VIX_All_vs_L.dm_p"
+        },
+        "n_is": {
+          "published": 3522,
+          "corrected": 3522,
+          "field": "n_obs.is"
+        },
+        "n_oos": {
+          "published": 1865,
+          "corrected": 1855,
+          "field": "n_obs.oos"
+        }
+      }
+    }
+  }
+}

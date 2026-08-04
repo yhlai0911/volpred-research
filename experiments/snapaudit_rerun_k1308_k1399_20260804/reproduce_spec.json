@@ -1,0 +1,57 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "rerun_dedup_corrections.py",
+    "args": []
+  },
+  "canonical_result": "snapaudit_rerun_k1308_k1399_20260804_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1308/k1308.py",
+      "sha256": "11d2eeb190996227017d80445e9a28fdd683526a150667b145c1415295836b0e"
+    },
+    {
+      "path": "experiments/k1399/k1399_vix_decomp.py",
+      "sha256": "d0b88a67830d336ac5abb8b570ecb6d66dade4c0e9cd02f094e660cef4455608"
+    },
+    {
+      "path": "data/vixtwn/vixtwn_daily.csv",
+      "sha256": "d1bfb4af97ca807ce04392d9e6158e021f2c3930e2a738c705900b5664bb8672"
+    },
+    {
+      "path": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+      "sha256": "98feeea28ce2b948f9becb64763cad70f3efeac7d3bbfaf4e58a8a537aecfbd8"
+    },
+    {
+      "path": "paper/leverage-direction/data/spy_vix_2004-2026.csv",
+      "sha256": "99a24662afc2de00cc4eb27c4281ce03135a9c6c0bf9f4a8996aaa21ed81d19d"
+    }
+  ],
+  "timeout_seconds": 900,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "environment": {
+    "RERUN_DATE": "2026-08-04"
+  },
+  "notes": "Reruns the two original experiment scripts in-place with sample-end pins (K1308_PERIOD_END=2026-05-20, K1399_OOS_END=2026-05-19). Also rewrites experiments/k1308/k1308_results.json and experiments/k1399/k1399_vix_decomp_results.json, preserving prior values under .restatement. Reads git objects 00b07f07f / d36a418cb for the vintage-equivalence check.",
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/run_date",
+      "/parent_commit"
+    ],
+    "ignore_reasons": {
+      "/run_date": "Execution date stamp; written after every scientific value is computed.",
+      "/parent_commit": "HEAD sha of the recording checkout; provenance, not an input to any estimate."
+    }
+  }
+}

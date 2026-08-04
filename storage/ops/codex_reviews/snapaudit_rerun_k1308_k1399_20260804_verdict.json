@@ -1,0 +1,14 @@
+{
+  "verdict": "CONDITIONAL_PASS",
+  "reviewer": "code-reviewer-subagent-fallback",
+  "reviewer_source_note": "Codex quota exhausted until 2026-08-08T12:01+08:00; K1259 fallback path. Re-verify on primary-path Codex when quota resets before treating closure as final.",
+  "reviewed_at": "2026-08-04T17:05:00+08:00",
+  "blocking_defects": [],
+  "non_blocking_notes": [
+    "vintage_check_missing_vixtwn_file (conf 88): verify_vintage() covers 2 of 3 consumed inputs; data/vixtwn/vixtwn_daily.csv (sample lower bound) is asserted-clean not proven-clean. Corroborating evidence supports the numbers; add verify or document out-of-scope before formal closure.",
+    "undisclosed_vixtwn_dedup_keep_change (conf 82): pre-existing VIXTWN guard keep= changed first->last beyond stated change scope; zero numerical effect this run (0 duplicate dates).",
+    "k1399_is_r2_floating_noise (conf 78): ~1e-9 is_r2 drift on premium-containing models across process invocations; benign BLAS noise, undocumented.",
+    "dm_more_significant_narrative_not_universal (conf 85): |t| increased 7/9, decreased 2/9 (no threshold crossings); README mechanism framing more deterministic than repo DM/HAC rule allows.",
+    "reviewer_tool_limitation (conf 100): no Bash/git access; git-vintage claims cross-checked by self-consistency, not re-executed."
+  ]
+}

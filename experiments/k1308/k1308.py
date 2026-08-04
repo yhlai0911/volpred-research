@@ -3,6 +3,8 @@ K1308: VIXTWN/VIX Ratio 穩定性驗證（Q6）
 追蹤 ratio 是否在累積更多天數後維持穩定（K1181 基準: 1.3906, CV=0.098, n=76）
 """
 import json
+import os
+
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -16,19 +18,37 @@ VIXTWN_PATH = ROOT / "data/vixtwn/vixtwn_daily.csv"
 VIX_PATH = ROOT / "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv"
 RESULTS_PATH = Path(__file__).parent / "k1308_results.json"
 
+# Optional period-end pin. The VIXTWN series is append-only, so an unpinned rerun
+# silently widens the sample and stops being comparable to a published vintage.
+# Set K1308_PERIOD_END=YYYY-MM-DD to reproduce a historical window exactly.
+PERIOD_END = os.environ.get("K1308_PERIOD_END") or None
+
+# Duplicate rows removed by the guards below, for provenance (see restatement block).
+DEDUP_COUNTS: dict[str, int] = {}
+
 K1181_BASELINE = {"mean": 1.3906, "cv": 0.098, "n": 76, "period": "Dec2025–Apr2026"}
 
 
 def load_vixtwn() -> pd.DataFrame:
     df = pd.read_csv(VIXTWN_PATH, parse_dates=["date"])
-    df = df.drop_duplicates(subset="date").sort_values("date").reset_index(drop=True)
+    DEDUP_COUNTS["vixtwn"] = int(df["date"].duplicated().sum())
+    df = df.drop_duplicates(subset="date", keep="last").sort_values("date").reset_index(drop=True)
     df = df[["date", "vixtwn_close"]].dropna()
+    if PERIOD_END:
+        df = df[df["date"] <= pd.Timestamp(PERIOD_END)].reset_index(drop=True)
     return df
 
 
 def load_vix(start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
     df = pd.read_csv(VIX_PATH, parse_dates=["date"], usecols=["date", "vix_close"])
     df = df[(df["date"] >= start) & (df["date"] <= end)].copy()
+    # snapshot-dup guard (audit_snapshot_dup_20260721 / snapaudit_unmeasured_20260728):
+    # this side had NO dedup, so the 10 concurrently re-appended trading days
+    # (2026-05-04..2026-05-15) replicated straight through the inner merge below —
+    # that is the whole of K1308's contamination (stored n=119 vs clean n=109, 9.17%).
+    # keep="last" matches the convention already used in k1399_vix_decomp.py.
+    DEDUP_COUNTS["vix"] = int(df["date"].duplicated().sum())
+    df = df[~df["date"].duplicated(keep="last")]
     df = df.sort_values("date").reset_index(drop=True)
     return df
 
@@ -170,17 +190,26 @@ def main():
     results = {
         "experiment_id": "K1308",
         "title": "VIXTWN/VIX Ratio 穩定性驗證（Q6）",
-        "run_date": "2026-05-22",
+        "run_date": os.environ.get("K1308_RUN_DATE", "2026-05-22"),
         "codex_review": "CONDITIONAL_PASS",
+        # Repo-relative, deliberately. Absolute paths were recorded here in the
+        # 2026-05-22 run; the repo later moved, and audit_snapshot_dup_20260721 read
+        # that stale string, found it absent, and wrongly ruled K1308
+        # UNVERIFIABLE_MISSING_INPUT (overturned by snapaudit_unmeasured_20260728).
         "data_sources": {
-            "vixtwn": str(VIXTWN_PATH),
-            "vix": str(VIX_PATH),
+            "vixtwn": str(VIXTWN_PATH.relative_to(ROOT)),
+            "vix": str(VIX_PATH.relative_to(ROOT)),
+        },
+        "input_hygiene": {
+            "duplicate_dates_dropped": dict(DEDUP_COUNTS),
+            "period_end_pin": PERIOD_END,
+            "dedup_keep": "last",
         },
         "known_limitations": [
             "baseline comparison uses K1181 fixed constant 1.3906, not a two-sample test",
             "inner merge on calendar date only; TZ/session mismatch not corrected",
             "midpoint break test is Welch t-test, not formal Chow/CUSUM",
-            "dedup keeps first row of duplicates without value validation",
+            "dedup keeps the last row of duplicates without value validation",
         ],
         "overall_stats": overall,
         "comparison_to_k1181": comparison,
