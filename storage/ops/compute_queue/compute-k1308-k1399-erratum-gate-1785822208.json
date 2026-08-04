@@ -1,0 +1,55 @@
+{
+  "id": "compute-k1308-k1399-erratum-gate-1785822208",
+  "title": "K1308/K1399 去重重跑：獨立審查（erratum 數字放行 gate）",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/snapaudit_rerun_k1308_k1399_20260804_prompt.md",
+    "storage/ops/codex_reviews/snapaudit_rerun_k1308_k1399_20260804_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "cancelled",
+  "queue_priority": 5,
+  "queued_at": "2026-08-04T05:43:28Z",
+  "started_at": null,
+  "completed_at": "2026-08-04T05:45:51Z",
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1308-k1399-erratum-gate-1785822208.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1308-k1399-erratum-gate-1785822208.stderr",
+  "result_artifact": "storage/ops/codex_reviews/snapaudit_rerun_k1308_k1399_20260804_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/snapaudit_rerun_k1308_k1399_20260804_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "routing": {
+    "lane": "compute_queue",
+    "token_cost_estimate": 0,
+    "router": "manual_enqueue"
+  },
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收 K1308/K1399 去重重跑的獨立審查裁決。程式化抽出報告末尾 JSON block（勿手改）。verdict=PASS/CONDITIONAL_PASS 且 safe_to_write_knowledge=true → 主線程寫 k1308/k1399 knowledge 條目（K1259：僅主線程可寫，數字一律程式化自 results.json 取，禁從 README 轉抄），並開 erratum 撰寫任務更正 mile_02c71e74 與 mile_34157161（填空來源＝結果檔的 erratum_fill_ins；注意 prior_baseline 1.3906 判定為不受污染、不應更動）。FAIL 或 safe_to_write_knowledge=false → 不得寫 knowledge、不得發 erratum，依 blocking_issues 開 bounded remediation。另請一併處理本班順帶發現：snapaudit_correct_k1319_k1592_original_vintage 宣稱已為 k1319 加 before/after provenance，但 experiments/k1319/k1319_results.json 在 HEAD 仍是污染值（n_total=4129、DM t -3.0226），git log 僅原始 commit 4545c887e；k1592 那半確已 committed(dd2e70b42)。k1319 是唯一判定翻轉案例（DM t 跨 Harvey |t|>3），其更正未落地應開單重做。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": "assign_ce6097bf",
+  "source_task_link": {
+    "state": "terminal",
+    "reason": "source_task_terminal",
+    "source_task_status": "succeeded"
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "cancel_reason": "source_task_terminal:succeeded",
+  "cancellation_kind": "automatic_invalid_source_binding",
+  "cancelled_at": "2026-08-04T05:45:51Z",
+  "source_task_settlement": {
+    "state": "not_required",
+    "reason": "source_task_terminal:succeeded"
+  }
+}
