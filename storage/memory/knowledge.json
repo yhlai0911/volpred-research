@@ -39223,7 +39223,10 @@
   "content": "K1325 [INCONCLUSIVE]: 0050.TW 5-min HAR-RV pipeline 續跑檢查點（K1307→K1318→K1322→K1324→K1325），資料 82天原始檔、22天warm-up後60列，train/test=42/18。HAR QLIKE=0.265 優於 RW QLIKE=0.375，方向正確但 DM-HLN t=0.88（p=0.390），遠低於 Harvey |t|>3。verdict=UNTRUSTWORTHY_SMALL_SAMPLE，revisit gate（n_total_days≥200 或 n_test≥50）未達成（現況82天/18天）。結論：pipeline 可重跑無 lookahead，但樣本太小不足以支撐正式發表級結論，僅適合作方法論 checkpoint。",
   "evidence": [
    "experiments/k1325/k1325_results.json",
-   "experiments/k1325/README.md"
+   "experiments/k1325/README.md",
+   "experiments/k1325/revisit_gate.json",
+   "config/revisit_gates.json",
+   "src/volpred/research/revisit_gate.py"
   ],
   "confidence": 0.55,
   "created_at": "2026-06-03T00:00:00",
@@ -39233,7 +39236,7 @@
   "experiment_path": "experiments/k1325/",
   "verdict": "INCONCLUSIVE",
   "needs_human": false,
-  "gap": "",
+  "gap": "revisit gate 已於 2026-08-02 重新校準（本條 content 內的『n_total_days≥200 或 n_test≥50』已作廢）。新條件由觀察到的效果量推導：|t|=0.883 @ n_test=18，t 隨 sqrt(n_test) 成長，要碰到 Harvey |t|>3 需 n_test>=208，換算原始交易日約 716（test_fraction=0.3 + 22 天 HAR 暖身）。距當時的 82 天還差 634 個交易日≈2.52 年，超過 504 天等待上限，故判決 DESIGN_CHANGE_REQUIRED：不排再跑一次的檢查點，改設計（跨資產 pooling／更長歷史／效果量更大的頻率）。舊 gate 在 n_test=50 只推到 |t|≈1.47，觸發後只會複製同一份 inconclusive 判決。誠實但難看的一點：t=0.883 本身估自 18 個測試日，t 統計量標準誤約 1，故『需要 208 天』的不確定性有一個數量級（樂觀端 21 天，悲觀端無上界）；gate 決策採點估計。Owner：config/revisit_gates.json（政策）+ src/volpred/research/revisit_gate.py（算術）+ experiments/k1325/revisit_gate.json（現行判決，由 scripts/eval_revisit_gate.py 產生）。同 pipeline 的 k1307（原寫死 POWERED_OOS_TARGET=252，同樣過鬆）/K1322/k1324/k1325 腳本已全部改為取用共用 gate。對外承諾來源：文章 mile_3445217e。",
   "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
  },
  {
@@ -42462,7 +42465,7 @@
   "item_id": "390d9784",
   "category": "methodology_lesson",
   "title": "NFP 事件日用「當月第一個週五」proxy：13 筆錯 7 筆，兩個方向性結論翻轉，且沒有任何自動檢查會抓到",
-  "content": "event_article_nfp_2026_07_03_t1 原用 first-Friday proxy 推 NFP 發布日；對照官方 BLS/ALFRED 行事曆（release id 50），13 個歷史樣本錯 7 個，其中 2025-10 是根本不存在的幻影事件（政府停擺，9 月報告延到 11-20、12 月延到 12-16）。改用 volpred.data.event_dates.nfp_release_dates（fail closed）後，8 個統計量全變、兩個方向性結論翻轉：SPY 上漲機率 53.8%→46.2%（多數上漲變多數下跌）、VIX 當日下降比例 46.2%→53.8%；SPY 當日報酬中位數 +0.098%→-0.023%、VIX 當日變化中位數 +0.02→-0.02（皆變號）；隔日 SPY 平均報酬 +0.411%→+0.032%（縮到 1/13）。\n\n最重要的方法論教訓：**平均值幾乎沒動**（SPY 當日 -0.185%→-0.183%，純屬巧合），被污染的是中位數與勝率。只看平均值會完全看不出這次污染。proxy 不噴錯、不產生 NaN、圖照樣畫得出來 —— 它安靜地產出一組方向相反但一樣可信的數字。這是『不噴錯的錯誤』，只有拿官方日曆逐筆對過才會發現。\n\n兩種失效模式（非隨機）：(a) 假日提前 —— 2025-07-04 proxy 撞到休市國慶日，官方其實 07-03 發布；(b) 停擺延後 —— 2025-10 無發布，連錯三個月。\n\n衍生的第二個教訓（Codex 4 輪審查）：為此新增的 canonical writer src/volpred/publisher/article_correction.py 自己犯了同一個 bug class —— sync_article() 失敗回傳 False 而非 raise，於是『feed.json 已改、Supabase 沒改』會被當成功；以及 next-session 缺漏時存 None 讓 pandas .mean() 靜默縮小分母，繞過自己宣稱的 fail-loud 不變式。兩者都已修並補 mutation test（還原 proxy → 5 測試轉紅；把下載窗 end 改回 2026-07-03 → lookahead 測試轉紅；新增第 4 個下載 → 3 個 lookahead 測試轉紅）。\n\n**未解決（已開獨立任務）**：k528 用同一個 proxy，254 筆中 53 筆（20.9%）是錯的、52 個真實發布日被漏掉，偏誤系統性偏早（28 筆剛好早 7 天）。線上文章 mile_35eef830 正文的核心數字（2.17 倍體制差、相關 0.45、分界 16.71、254 次樣本）全部出自 k528，尚未修正。全 repo 另有 6 支腳本用同一 proxy，其中 k904 在 paper/ 底下，可能影響論文。另 event_dates.release_dates() 用 .max() 取月份最後一筆，對 NFP 是錯的（6 個月份有雙筆，就業報告都是第一筆），但該函式與 CPI 共用，需 per-event 語意而非順手改。",
+  "content": "event_article_nfp_2026_07_03_t1 原用 first-Friday proxy 推 NFP 發布日；對照官方 BLS/ALFRED 行事曆（release id 50），13 個歷史樣本錯 7 個，其中 2025-10 是根本不存在的幻影事件（政府停擺，9 月報告延到 11-20、12 月延到 12-16）。改用 volpred.data.event_dates.nfp_release_dates（fail closed）後，8 個統計量全變、兩個方向性結論翻轉：SPY 上漲機率 53.8%→46.2%（多數上漲變多數下跌）、VIX 當日下降比例 46.2%→53.8%；SPY 當日報酬中位數 +0.098%→-0.023%、VIX 當日變化中位數 +0.02→-0.02（皆變號）；隔日 SPY 平均報酬 +0.411%→+0.032%（縮到 1/13）。\n\n最重要的方法論教訓：**平均值幾乎沒動**（SPY 當日 -0.185%→-0.183%，純屬巧合），被污染的是中位數與勝率。只看平均值會完全看不出這次污染。proxy 不噴錯、不產生 NaN、圖照樣畫得出來 —— 它安靜地產出一組方向相反但一樣可信的數字。這是『不噴錯的錯誤』，只有拿官方日曆逐筆對過才會發現。\n\n兩種失效模式（非隨機）：(a) 假日提前 —— 2025-07-04 proxy 撞到休市國慶日，官方其實 07-03 發布；(b) 停擺延後 —— 2025-10 無發布，連錯三個月。\n\n衍生的第二個教訓（Codex 4 輪審查）：為此新增的 canonical writer src/volpred/publisher/article_correction.py 自己犯了同一個 bug class —— sync_article() 失敗回傳 False 而非 raise，於是『feed.json 已改、Supabase 沒改』會被當成功；以及 next-session 缺漏時存 None 讓 pandas .mean() 靜默縮小分母，繞過自己宣稱的 fail-loud 不變式。兩者都已修並補 mutation test（還原 proxy → 5 測試轉紅；把下載窗 end 改回 2026-07-03 → lookahead 測試轉紅；新增第 4 個下載 → 3 個 lookahead 測試轉紅）。\n\n**k528 部分已於 2026-08-02 解決（見 item 63c514d3）**：k528 用同一個 proxy，254 筆中 53 筆（20.9%）是錯的、52 個真實發布日被漏掉，偏誤系統性偏早（28 筆剛好早 7 天）。改用官方日曆重跑後樣本 254→253，核心數字全部小幅位移（2.17→2.03 倍體制差、相關 0.45→0.44、分界 16.71→16.69），但**方向性結論一項都沒翻轉** —— 與本條記錄的 n=13 樣本翻轉兩個結論形成對照。線上文章 mile_35eef830 已做完 in-place 更正（19 條替換，errata action=content_correction）；殘留的圖表重製另開任務。**仍未解決**：全 repo 另有 6 支腳本用同一 proxy，其中 k904 在 paper/ 底下，可能影響論文。另 event_dates.release_dates() 用 .max() 取月份最後一筆，對 NFP 是錯的（6 個月份有雙筆，就業報告都是第一筆），但該函式與 CPI 共用，需 per-event 語意而非順手改。",
   "evidence": [
    "experiments/event_article_nfp_2026_07_03_t1/nfp_official_dates_fix_report.md",
    "experiments/event_article_nfp_2026_07_03_t1/review_verdict.json",
@@ -42479,7 +42482,20 @@
   "experiment_path": "experiments/event_article_nfp_2026_07_03_t1",
   "verdict": "PASS",
   "reviewer": "Codex CLI 0.144.1 / gpt-5.6-sol / reasoning=high (4 rounds)",
-  "provenance": "main_thread_after_worktree_merge"
+  "provenance": "main_thread_after_worktree_merge",
+  "revisions": [
+   {
+    "revised_at": "2026-08-02T16:24:41.700799+08:00",
+    "actor": "hourly-slot-1-b696a291e9dc4e6aab4816f20493ca56",
+    "reason": "k528 部分已於 2026-08-02 完成（官方日曆重跑 + mile_35eef830 in-place 更正 19 條，Codex primary-path PASS @ b2634ed41）。原文寫「尚未修正」已成事實錯誤；補上結果（方向性結論未翻轉，與本條 n=13 樣本翻轉形成對照）並保留仍未解決的 6 支腳本 / k904 / release_dates .max() 三項。詳見 item 63c514d3。",
+    "fields": [
+     "content"
+    ],
+    "before": {
+     "content": "event_article_nfp_2026_07_03_t1 原用 first-Friday proxy 推 NFP 發布日；對照官方 BLS/ALFRED 行事曆（release id 50），13 個歷史樣本錯 7 個，其中 2025-10 是根本不存在的幻影事件（政府停擺，9 月報告延到 11-20、12 月延到 12-16）。改用 volpred.data.event_dates.nfp_release_dates（fail closed）後，8 個統計量全變、兩個方向性結論翻轉：SPY 上漲機率 53.8%→46.2%（多數上漲變多數下跌）、VIX 當日下降比例 46.2%→53.8%；SPY 當日報酬中位數 +0.098%→-0.023%、VIX 當日變化中位數 +0.02→-0.02（皆變號）；隔日 SPY 平均報酬 +0.411%→+0.032%（縮到 1/13）。\n\n最重要的方法論教訓：**平均值幾乎沒動**（SPY 當日 -0.185%→-0.183%，純屬巧合），被污染的是中位數與勝率。只看平均值會完全看不出這次污染。proxy 不噴錯、不產生 NaN、圖照樣畫得出來 —— 它安靜地產出一組方向相反但一樣可信的數字。這是『不噴錯的錯誤』，只有拿官方日曆逐筆對過才會發現。\n\n兩種失效模式（非隨機）：(a) 假日提前 —— 2025-07-04 proxy 撞到休市國慶日，官方其實 07-03 發布；(b) 停擺延後 —— 2025-10 無發布，連錯三個月。\n\n衍生的第二個教訓（Codex 4 輪審查）：為此新增的 canonical writer src/volpred/publisher/article_correction.py 自己犯了同一個 bug class —— sync_article() 失敗回傳 False 而非 raise，於是『feed.json 已改、Supabase 沒改』會被當成功；以及 next-session 缺漏時存 None 讓 pandas .mean() 靜默縮小分母，繞過自己宣稱的 fail-loud 不變式。兩者都已修並補 mutation test（還原 proxy → 5 測試轉紅；把下載窗 end 改回 2026-07-03 → lookahead 測試轉紅；新增第 4 個下載 → 3 個 lookahead 測試轉紅）。\n\n**未解決（已開獨立任務）**：k528 用同一個 proxy，254 筆中 53 筆（20.9%）是錯的、52 個真實發布日被漏掉，偏誤系統性偏早（28 筆剛好早 7 天）。線上文章 mile_35eef830 正文的核心數字（2.17 倍體制差、相關 0.45、分界 16.71、254 次樣本）全部出自 k528，尚未修正。全 repo 另有 6 支腳本用同一 proxy，其中 k904 在 paper/ 底下，可能影響論文。另 event_dates.release_dates() 用 .max() 取月份最後一筆，對 NFP 是錯的（6 個月份有雙筆，就業報告都是第一筆），但該函式與 CPI 共用，需 per-event 語意而非順手改。"
+    }
+   }
+  ]
  },
  {
   "item_id": "k1732_certified_20260719",
@@ -43134,5 +43150,90 @@
   ],
   "confidence": 0.9,
   "created_at": "2026-08-02T15:27:20.027004"
+ },
+ {
+  "item_id": "ccbccb6a",
+  "category": "research_finding",
+  "content": "[K1813 收件 PASS；科學結論=NULL_NO_TRADABLE_DAY_OF_WEEK_OVERNIGHT_VRP_EFFECT] yfinance SPY/QQQ/IWM/TLT/GLD 日頻 OHLC（auto_adjust=False，Open 以 AdjClose/Close 重定標），下載起點 1990-01-01，OOS 2015-01-01 起 n=2909 天，seed=42。H1a ACCEPT：隔夜與日內兩段平方報酬 Ljung-Box Q(10) 5/5 資產 p<1e-199（最大 p=1.99e-200），兩段各自都有波動叢聚。H1b REJECT：AR(5) |r| 持續性的兩段落差經 block-bootstrap（B=2000, block=20）0/5 資產顯著；這是未能拒絕，不是證明兩段相同。H2a REJECT（H3 的關鍵前提）：可交易的那一軸——隔夜『報酬』——的星期均等性聯合 F 在 BH-FDR q=0.1 下 0/5 資產拒絕（q 值 0.738–0.836），逐格 25 檢定亦 0 拒絕。H2b ACCEPT：隔夜『變異』與 VRP proxy 的星期差異 5/5 資產拒絕（q 最大 0.0603）。H2c：加入隔夜窗跨越日曆天數的控制後只剩 QQQ/TLT/GLD 存活（SPY q=0.122、IWM q=0.176 掉出），即 SPY/IWM 的表面星期效應可由週末窗長解釋。H3 REJECT（主結論）：OOS 含成本 1 bp/side、以 net_with_cash 計分，5 資產 × 5 個日曆規則共 25 個組合中，滿足 ΔSharpe>0 且 block-bootstrap p<0.05 者為 0 個；最佳者 IWM:always_overnight ΔSharpe=+0.038（p=0.88）。反向則有 9 個組合顯著輸給 buy-and-hold，含 SPY:always_overnight -0.533(p=0.016)、SPY:dow_gated_overnight -0.533(p=0.015)、SPY:dow_walkforward_overnight -0.533(p=0.011)、SPY:dow_avoid_worst_overnight -0.227(p=0.020) 等。日曆規則只在成本拉到 5 bp 時才勝過未擇時的隔夜段（7 個組合），而在 0/1 bp 與其無法區分——這是週轉率較低的省成本假象（SPY 週轉 205 vs 504 側/年），不可當作星期效應證據。另一結果：SPY/QQQ/IWM/GLD 五個星期的 in-sample 隔夜均值全為正，sign-screen 規則因此退化成 always_overnight（ΔSharpe=0.000, p=1.000），僅 TLT 因週四 IS 均值 -2.18 bps 真的篩掉一天。Lookahead 診斷：以 N(0,0.5) 噪音覆蓋 T 之後全部報酬重建訊號，12 個探針日 0 violations，walk-forward 訊號確認為 causal。限制：成本模型為線性每側 bps，無市場衝擊／滑價狀態相依（真實開盤成本很可能更高，方向上只會加強 REJECT）；VRP 為 realized-based proxy 而非期權隱含；結論僅適用於這 5 檔 ETF 與此期間。",
+  "evidence": [
+   "experiments/k1813/K1813_results.json",
+   "experiments/k1813/README.md",
+   "code_trace sha256=a9e19bc27714c0bf... size=57747",
+   "experiments/k1813/reproduce_spec.json (generated_at_runtime=true)",
+   "compute job agent-brief_k1813-5f38bb (exit_code=1 transient provider 500; artifacts complete and independently re-verified 2026-07-29T19:53:19.932102+00:00)"
+  ],
+  "confidence": 0.75,
+  "created_at": "2026-08-02T16:09:16.675281"
+ },
+ {
+  "item_id": "63c514d3",
+  "category": "research_correction",
+  "content": "k528 NFP 事件研究改用官方 BLS 日曆（FRED release id 50, fail-closed）重跑後，線上文章 mile_35eef830 已於 2026-08-02 做完 in-place 更正（19 條替換，每條恰好命中一次，errata action=content_correction，與既有的 event_date_correction 並存於 update_history；未發第二篇更正文）。\n\n數字結果（全部取自 k528_nfp_event_study_results.json）：樣本 254→253 場；對全體交易日 1.1078 倍（Welch p=0.1121，未達顯著），對週五基準 1.1890 倍（Welch p=0.0209，達顯著）；VIX 高低體制切點 16.69、n=128/125、平均絕對報酬 1.13% vs 0.56%，比值 2.03 倍（原 2.17）；事前 VIX 相關 Pearson 0.4404 / Spearman 0.3455（原 0.45/0.38）。\n\n**方向性結論一項都沒翻轉。** 這與同源的 event_article_nfp_2026_07_03_t1（13 筆錯 7 筆、兩個方向性結論翻轉，見 item 390d9784）形成對照：同一個 first-Friday proxy bug，在 n=13 的樣本上足以翻轉結論，在 n=253 上只造成數值小幅位移。**污染率不能拿來預測結論是否翻轉** —— k528 的 proxy 錯誤率（20.9%）其實高於 event_article 的絕對筆數，但大樣本把系統性偏移平均掉了。要知道會不會翻轉，只能真的重跑。\n\n**過程中最貴的一次教訓：中途一份 18 條的更正清單被全數作廢。** 那份清單建立在一個 accessor 有 bug 的重跑上 —— ALFRED 對 6 個月份回傳兩筆，accessor 取了較晚那筆（off-cycle 的季節因子修正，不是就業報告本身）。6 筆日期錯（2006-05-08, 2012-12-12, 2013-05-06, 2020-05-11, 2024-01-10, 2024-08-21）就把 NFP-vs-週五檢定推過 5% 線，於是那份清單準備向讀者宣告「原本報告為顯著的結果其實不顯著」（1.17x p=0.0335 → 1.15x p=0.057）。**若照套，等於公開撤回一個其實正確的發現。** 正確日期下是 1.19x p=0.021，與文章初版的定性宣稱一致。教訓：更正稿本身也是研究產出，必須跟原研究一樣過審 —— 這份清單是被 Codex round-2 審查擋下的，不是被任何自動檢查擋下的。\n\n**一項 estimand 口徑修正（Codex round-5 B1）**：週五比較原本事件組是全樣本（星期別混合）、對照組卻是純週五，週五效應會滲進估計。修正後事件組限定為「消息由週五盤消化」的 237 場。關鍵區辨：243 場的**發布日**是週五，但其中 6 場是 Good Friday（BLS 照發、市場休市），行情落在下週一，那是週一報酬，不能放進對照組為純週五的比較。filter 必須用 session weekday 而非 release weekday。此限定**不是中性刪除** —— 被排掉的 16 場平靜 16.3%，所以限定會把倍數墊高（混合星期別的診斷值 1.1768 → 限定後 1.1890），兩個數字都揭露在文章更正說明裡，不只揭露好看的那個。此 bug 非日期修正引入：proxy 日曆雖然建構上全是週五，但假日順延也把 15/254 事件推到週一（94.1% 週五 session，vs 現在 93.7%），舊 spec 早就在拿混合組對純週五組，修日期只是讓它現形。\n\n**多重比較**：週五檢定 nominal p=0.0209，在宣告的 confirmatory family 下 Holm p=0.0417（過），但對全部 22 個推論輸出的 Holm p=0.375（不過）。文章據此只宣稱 nominal 顯著 + confirmatory-family Holm-robust。體制差則在任何 family 下都極顯著（Holm p=9.56e-08）。另注意 A（Welch 平均差，p=0.1121 不顯著）與 C（Wilcoxon 只看排序，p=0.0019 顯著）在同一組對照下不一致，文章明寫兩者不能合併成一句「沒有效果」。\n\n**發佈端 gate 的意外收穫**：article_correction 的 general-audience 契約擋下了第一次套用 —— 更正稿裡的 `p=0.021` 這類裸統計術語違反 general badge 的白話包裝規則（現行 body 本來一個 `p=` 都沒有，是更正稿引入的）。改寫成「顯著性 0.021」後通過。**數字更正很容易夾帶 audience regression**：作者在寫更正時腦子在統計模式，而 badge 契約是發佈時才檢查的，這個 gate 是唯一攔截點。\n\n殘留（已開後續任務）：文中兩張內嵌圖與文末懶人包圖組仍是 proxy 期數據，文章已明載「圖表仍為初版數據，正在重新產製」。",
+  "evidence": [
+   "experiments/k528/k528_nfp_event_study_results.json (official-calendar rerun)",
+   "experiments/k528/k528_nfp_official_dates_results.json (before/after claim audit + article_correction plan)",
+   "experiments/k528/build_article_correction.py (19 replacements, each matched exactly once)",
+   "experiments/k528/review_verdict.json (Codex gpt-5.6-sol/xhigh primary-path certification PASS @ b2634ed41, 0 blocking defects, 8 files SHA-pinned)",
+   "experiments/k528/errata_mile_35eef830.md",
+   "experiments/k528/test_k528_completeness_gate.py + test_k528_price_coverage_gate.py (24 tests pass)",
+   "storage/reports/feed.json :: mile_35eef830 errata.update_history[1] action=content_correction",
+   "commit 371299771 cert(k528): primary-path Codex certification PASS"
+  ],
+  "confidence": 0.9,
+  "created_at": "2026-08-02T16:24:15.210277"
+ },
+ {
+  "item_id": "eba9964a",
+  "category": "research_finding",
+  "content": "[K1814 收件 CONDITIONAL_PASS；科學結論=NULL_AND_NEGATIVE_AT_LONG_HORIZON] 「深度學習要到中長 horizon 才贏 HAR」這個假說在本設計下**被反證，不只是未獲支持**。\n\n**資料口徑先講清楚（與題目原始設定不同）**：原題寫 5-min RV，但實測 yfinance 對 ^GSPC/SPY/QQQ 的 5 分鐘 bar 只回傳 60 個交易日（4680 bars, 78/day），對 22 日 horizon 的 rolling OOS 在算術上不可能。實驗改走 Route B = B_realized_range_proxy：日頻 OHLC 的 Parkinson realized-range proxy。**本條目所有預測數字都是日頻 range proxy，不是 5 分鐘 RV，兩種口徑全程未混用。** 主 arm：^GSPC 1962-01-02–2026-07-29，16251 日 bar、16208 可用面板列（38 筆非正值以事前固定 floor RV_FLOOR=1e-7 處理，非樣本分位數）；seq_len=22、train_len=3000、refit_every=750、n_seeds=5（seed 42..46）。\n\n**主結果（BH-FDR，兩個各 6 檢定的 family，q=0.05）**：h*=None，horizons_with_dl_win=[]，H2_boundary_exists=False，三個 horizon 的 dl_beats_both_baselines 全為 false。\n- 1日：QLIKE HAR=0.3768 / HAR-L=0.3713 / ridge-lags=0.3832 / best-DL(lstm)=0.3713（5 seed sd=0.0036）；DM-HLN vs HAR=0.9804(BH-FDR q=0.3923)，vs HAR-L=-0.0106(q=0.9915)；判定 vs HAR=FAIL_TO_REJECT、vs HAR-L=FAIL_TO_REJECT；n_oos=13176、有效獨立觀測≈13176.0\n- 5日：QLIKE HAR=0.2027 / HAR-L=0.1982 / ridge-lags=0.2059 / best-DL(lstm)=0.2054（5 seed sd=0.0024）；DM-HLN vs HAR=-0.5025(BH-FDR q=0.6153)，vs HAR-L=-1.2858(q=0.2382)；判定 vs HAR=FAIL_TO_REJECT、vs HAR-L=FAIL_TO_REJECT；n_oos=13176、有效獨立觀測≈2635.2\n- 22日：QLIKE HAR=0.1931 / HAR-L=0.1914 / ridge-lags=0.2026 / best-DL(lstm)=0.2128（5 seed sd=0.0065）；DM-HLN vs HAR=-2.1125(BH-FDR q=0.0693)，vs HAR-L=-2.3133(q=0.0414)；判定 vs HAR=FAIL_TO_REJECT、vs HAR-L=HARL_BETTER；n_oos=13176、有效獨立觀測≈598.9\n\n**最強的反向證據**：兩個 family 合計 5 個 q=0.05 拒絕（dm_vs_har:h5_transformer(baseline_better, q=0.0402), dm_vs_har:h22_transformer(baseline_better, q=0.0011), dm_vs_harl:h5_transformer(baseline_better, q=0.0284), dm_vs_harl:h22_lstm(baseline_better, q=0.0414), dm_vs_harl:h22_transformer(baseline_better, q=0.0007)），**每一個的 direction 都是 baseline_better，沒有任何一個檢定往 DL 方向拒絕**。唯一 DM 為正的格子是 dm_vs_har:h1_lstm，且未達顯著。DL 的劣勢隨 horizon 擴大而非縮小，因此這不是「還沒到那個 horizon」，而是與假說方向相反。\n\n**基準公平性（獨立複核過凍結的 entrypoint bytes）**：HAR / HAR-L / AR(1) / ridge-lags 與 DL 共用同一組 origin、同一 direct-h-step embargo（訓練列須滿足 t+h<=T）、同一測試切片；目標嚴格落在 (t, t+h]，並有 runtime assertion 檢核。DL 額外被 purge h-1 列並保留 validation tail 供 early stopping，線性基準則取整個視窗——這個不對稱是**對 DL 不利**，已在 README §6 明寫，因此不能用來解釋 baseline 為何較好以外的方向。主 DL arm 只吃 log RV 單通道，與 HAR-RV 的資訊集完全相同，所以 DL 若贏也不會是資訊優勢。\n\n**唯一的正向訊號，以及為何不改寫結論**：`channels_with_returns` ablation（加入報酬通道，判給 HAR-L 比較）h=1 LSTM=0.3643 vs 自家 HAR-L=0.3804；h=5 LSTM=0.1944 vs 自家 HAR-L=0.2026；h=22 LSTM=0.2028 vs 自家 HAR-L=0.2003。h=1 與 h=5 的 LSTM QLIKE 低於自家 HAR-L（h=1 0.3643 vs 0.3804、h=5 0.1944 vs 0.2026），h=22 則否（0.2028 vs 0.2003）。這條**不改變 headline**：它在預先登記的 FDR family 之外因此 p 未校正、n_seeds=2（主 arm 為 5）、且 refit_every=3000 同時弱化了它自己的基準（自家 HAR-L 0.3804 vs 主 arm 0.3713），邊際有一部分來自較弱的比較點而非較好的模型。它的誠實讀法是「未來預先登記檢定的假說」——且它指向**短** horizon 與 leverage 通道，正好與本實驗要測的 horizon 假說方向相反。有正向就報，不藏。\n\n**限制（不可省略）**：(1) 這只界定**兩種架構、這些容量**在**日頻 range proxy** 上的表現，不等於 5 分鐘 RV 的結論；proxy 的測量噪音很可能對彈性模型的懲罰大於僵固模型，所以設計本身偏向不利 DL。(2) h=22 的有效獨立觀測僅約 598.9（原始 13176 列），且該數字是 n/h 的粗略 proxy 而非正式 ESS，只能當數量級警示；DM 已用 HAC 校正重疊，並另存 auto-lag 版本，結論不繫於 h-1 lag 選擇。(3) 數字未經重跑複現——本次驗證是「README 與 artifact 內部一致（346 個渲染數字零不符）」加上「凍結 bytes 的方法論稽核」，不是 bit-for-bit 重跑。(4) 原始 run 的 detached process 結束是推論而非 wait() receipt（父 agent 於 2026-07-29T21:30:24Z 被 timeout 殺掉），但 stages_completed 以 'complete' 收尾、8 個 arm 全數存在且無錯誤，截斷的 run 產不出終端 checkpoint。\n\n**reproduce_spec 的 entrypoint sha 刻意不等於工作區 k1814.py**：spec pin b1a67269 = 凍結副本 gate_history/b1a67269__k1814.py（已逐位元核對相符）；工作區 k1814.py 為 d5b851a9，差異經 diff 稽核僅 4 行新增的 pending_ablations 清單 + 1 行 checkpoint 改動，只影響 partial artifact 如何自述完整度，不影響任何估計、損失、檢定統計或判定。**不要 repin。**",
+  "evidence": [
+   "experiment_id: K1814（由 K1731 renumber；K1731 已被 GEVReg-MIDAS-SSVS 佔用，不可重用）",
+   "experiments/k1814/K1814_results.json (sha256=73fa1562cfdf92b514212686f434970401a14149749fc764d1a8fb2f0c4637d7)",
+   "experiments/k1814/review_verdict.json (CONDITIONAL_PASS; merge_recommendation=MERGE; sha256=32994672757bb9bd88e4597ef799b5f7467357e393c162ebba026c2108b451b4)",
+   "experiments/k1814/reproduce_spec.json (network=deny; seeds numpy/torch=42, dl_seed_grid 42..46; entrypoint pin b1a67269 = gate_history/b1a67269__k1814.py)",
+   "experiments/k1814/k1814_stage1_landing.json（stage 1/2 落地盤點；stage 2 重算 sha256 後 11 個追蹤 artifact 中 10 個逐位元相符，唯一不符者 README.md 即 stage 2 交付物）",
+   "runtime 6170.621s，stages_completed=['primary', 'robustness:SPY_parkinson', 'robustness:SPY_garman_klass', 'robustness:QQQ_parkinson', 'ablation:channels_with_returns', 'ablation:refit_250', 'ablation:window_L66', 'ablation:train_len1500', 'ablation:loss_qlike_direct', 'complete']，unresolved=[]"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-08-02T17:01:52.762865",
+  "revisions": [
+   {
+    "revised_at": "2026-08-02T17:07:01.070951+08:00",
+    "actor": "hourly-slot-1-2cb5ff31fc33495d8d263e5a0d18c5f5",
+    "reason": "conclusion_lint R1：'勝過' 這句缺數值上下文，補上 h=1/h=5/h=22 的 LSTM vs 自家 HAR-L QLIKE 對照，數字仍由 K1814_results.json 程式化取得（/tmp/k1814_regen_content.py），未更動任何結論或口徑。",
+    "fields": [
+     "content"
+    ],
+    "before": {
+     "content": "[K1814 收件 CONDITIONAL_PASS；科學結論=NULL_AND_NEGATIVE_AT_LONG_HORIZON] 「深度學習要到中長 horizon 才贏 HAR」這個假說在本設計下**被反證，不只是未獲支持**。\n\n**資料口徑先講清楚（與題目原始設定不同）**：原題寫 5-min RV，但實測 yfinance 對 ^GSPC/SPY/QQQ 的 5 分鐘 bar 只回傳 60 個交易日（4680 bars, 78/day），對 22 日 horizon 的 rolling OOS 在算術上不可能。實驗改走 Route B = B_realized_range_proxy：日頻 OHLC 的 Parkinson realized-range proxy。**本條目所有預測數字都是日頻 range proxy，不是 5 分鐘 RV，兩種口徑全程未混用。** 主 arm：^GSPC 1962-01-02–2026-07-29，16251 日 bar、16208 可用面板列（38 筆非正值以事前固定 floor RV_FLOOR=1e-7 處理，非樣本分位數）；seq_len=22、train_len=3000、refit_every=750、n_seeds=5（seed 42..46）。\n\n**主結果（BH-FDR，兩個各 6 檢定的 family，q=0.05）**：h*=None，horizons_with_dl_win=[]，H2_boundary_exists=False，三個 horizon 的 dl_beats_both_baselines 全為 false。\n- 1日：QLIKE HAR=0.3768 / HAR-L=0.3713 / ridge-lags=0.3832 / best-DL(lstm)=0.3713（5 seed sd=0.0036）；DM-HLN vs HAR=0.9804(BH-FDR q=0.3923)，vs HAR-L=-0.0106(q=0.9915)；判定 vs HAR=FAIL_TO_REJECT、vs HAR-L=FAIL_TO_REJECT；n_oos=13176、有效獨立觀測≈13176.0\n- 5日：QLIKE HAR=0.2027 / HAR-L=0.1982 / ridge-lags=0.2059 / best-DL(lstm)=0.2054（5 seed sd=0.0024）；DM-HLN vs HAR=-0.5025(BH-FDR q=0.6153)，vs HAR-L=-1.2858(q=0.2382)；判定 vs HAR=FAIL_TO_REJECT、vs HAR-L=FAIL_TO_REJECT；n_oos=13176、有效獨立觀測≈2635.2\n- 22日：QLIKE HAR=0.1931 / HAR-L=0.1914 / ridge-lags=0.2026 / best-DL(lstm)=0.2128（5 seed sd=0.0065）；DM-HLN vs HAR=-2.1125(BH-FDR q=0.0693)，vs HAR-L=-2.3133(q=0.0414)；判定 vs HAR=FAIL_TO_REJECT、vs HAR-L=HARL_BETTER；n_oos=13176、有效獨立觀測≈598.9\n\n**最強的反向證據**：兩個 family 合計 5 個 q=0.05 拒絕（dm_vs_har:h5_transformer(baseline_better, q=0.0402), dm_vs_har:h22_transformer(baseline_better, q=0.0011), dm_vs_harl:h5_transformer(baseline_better, q=0.0284), dm_vs_harl:h22_lstm(baseline_better, q=0.0414), dm_vs_harl:h22_transformer(baseline_better, q=0.0007)），**每一個的 direction 都是 baseline_better，沒有任何一個檢定往 DL 方向拒絕**。唯一 DM 為正的格子是 dm_vs_har:h1_lstm，且未達顯著。DL 的劣勢隨 horizon 擴大而非縮小，因此這不是「還沒到那個 horizon」，而是與假說方向相反。\n\n**基準公平性（獨立複核過凍結的 entrypoint bytes）**：HAR / HAR-L / AR(1) / ridge-lags 與 DL 共用同一組 origin、同一 direct-h-step embargo（訓練列須滿足 t+h<=T）、同一測試切片；目標嚴格落在 (t, t+h]，並有 runtime assertion 檢核。DL 額外被 purge h-1 列並保留 validation tail 供 early stopping，線性基準則取整個視窗——這個不對稱是**對 DL 不利**，已在 README §6 明寫，因此不能用來解釋 baseline 為何較好以外的方向。主 DL arm 只吃 log RV 單通道，與 HAR-RV 的資訊集完全相同，所以 DL 若贏也不會是資訊優勢。\n\n**唯一的正向訊號，以及為何不改寫結論**：`channels_with_returns` ablation（加入報酬通道，判給 HAR-L 比較）h=1 LSTM=0.3643 vs 自家 HAR-L=0.3804；h=5 LSTM=0.1944 vs 自家 HAR-L=0.2026；h=22 LSTM=0.2028 vs 自家 HAR-L=0.2003。h=1 與 h=5 LSTM 勝過自家 HAR-L，h=22 不勝。這條**不改變 headline**：它在預先登記的 FDR family 之外因此 p 未校正、n_seeds=2（主 arm 為 5）、且 refit_every=3000 同時弱化了它自己的基準（自家 HAR-L 0.3804 vs 主 arm 0.3713），邊際有一部分來自較弱的比較點而非較好的模型。它的誠實讀法是「未來預先登記檢定的假說」——且它指向**短** horizon 與 leverage 通道，正好與本實驗要測的 horizon 假說方向相反。有正向就報，不藏。\n\n**限制（不可省略）**：(1) 這只界定**兩種架構、這些容量**在**日頻 range proxy** 上的表現，不等於 5 分鐘 RV 的結論；proxy 的測量噪音很可能對彈性模型的懲罰大於僵固模型，所以設計本身偏向不利 DL。(2) h=22 的有效獨立觀測僅約 598.9（原始 13176 列），且該數字是 n/h 的粗略 proxy 而非正式 ESS，只能當數量級警示；DM 已用 HAC 校正重疊，並另存 auto-lag 版本，結論不繫於 h-1 lag 選擇。(3) 數字未經重跑複現——本次驗證是「README 與 artifact 內部一致（346 個渲染數字零不符）」加上「凍結 bytes 的方法論稽核」，不是 bit-for-bit 重跑。(4) 原始 run 的 detached process 結束是推論而非 wait() receipt（父 agent 於 2026-07-29T21:30:24Z 被 timeout 殺掉），但 stages_completed 以 'complete' 收尾、8 個 arm 全數存在且無錯誤，截斷的 run 產不出終端 checkpoint。\n\n**reproduce_spec 的 entrypoint sha 刻意不等於工作區 k1814.py**：spec pin b1a67269 = 凍結副本 gate_history/b1a67269__k1814.py（已逐位元核對相符）；工作區 k1814.py 為 d5b851a9，差異經 diff 稽核僅 4 行新增的 pending_ablations 清單 + 1 行 checkpoint 改動，只影響 partial artifact 如何自述完整度，不影響任何估計、損失、檢定統計或判定。**不要 repin。**"
+    }
+   }
+  ]
+ },
+ {
+  "item_id": "38405e42",
+  "category": "experiment_result",
+  "content": "[K1735 verdict=PASS reviewer=agy 1.1.9 high-effort independent read-only review (Codex primary path blocked by provider policy; K1259 fallback recorded)] Is the intraday diurnal pattern sufficient to explain RV variation? Verdict REJECT_SUFFICIENCY on primary cell tx_day/m5_5min, seed 42, date 2026-08-01. FINDING: the intraday diurnal profile is NOT sufficient to explain realized-variance variation. Pre-registered key tests T1_residual_bin_structure, T2_regime_shape, T4_residual_stochastic_vol all reject at BH-FDR q=0.1 on the primary cell and replicate across confirmatory cells tx_day, tx_night, spy. SHARES (bias-corrected): within-day diurnal share 0.5433 (95% CI 0.5326-0.5544); systematic diurnal share 0.3007; naive uncorrected share 0.2191, of which measurement noise accounts for 0.2719 of the naive denominator - so the uncorrected number materially understates the diurnal contribution. ROBUSTNESS BRACKET on the within-day share: gaussian floor 0.5433, 3-sigma jump-truncated 0.7460, conservative fat-tail floor 0.8639 - the rejection holds across the whole bracket. Criteria were written before any result was computed and not amended. LIMITS: single futures market for the primary cell, SPY cell is short (~6 months) and underpowered for T1/T2, 1-minute sub-returns carry microstructure noise.",
+  "evidence": [
+   "experiments/K1735/K1735_results.json",
+   "experiments/K1735/README.md",
+   "storage/ops/agent_briefs/K1735_review_agy_20260804.md"
+  ],
+  "confidence": 0.8,
+  "created_at": "2026-08-04T12:43:09.999879"
+ },
+ {
+  "item_id": "625d8a12",
+  "category": "research_finding",
+  "content": "[K1735 收件 PASS；科學結論=REJECT_SUFFICIENCY] 「日內 diurnal pattern 足以解釋 RV 變異」在本設計下被拒絕。Primary cell tx_day/m5_5min（TAIFEX 台指期日盤 5min，n_days=3558，20120102–20260730，seed=42），預註冊 3 個 key tests（T1_residual_bin_structure、T2_regime_shape、T4_residual_stochastic_vol）於 FDR q=0.1 後 3/3 拒絕，且分別在 confirmatory cells 重現（T1: tx_day,tx_night；T2: tx_day,tx_night；T4: spy,tx_day,tx_night），calibration gate 通過。量化分解：naive diurnal share=0.2191（CI [0.2128,0.2254]），systematic diurnal share=0.3007（CI [0.2903,0.3110]），within-day diurnal share=0.5433（CI [0.5326,0.5544]），naive 分母中 measurement noise 佔 0.2719。Within-day share 上界 bracket：Gaussian floor 0.5433 < jump-truncated 3σ 0.7460 < conservative fat-tail floor 0.8639（保守上界刻意偏高，真值落在 bracket 內）。解讀邊界：即使 within-day 過半變異可歸 diurnal，殘差仍有顯著 bin 結構、regime 形狀差與 stochastic vol —— deterministic diurnal 不是 RV 變異的充分解釋；不可反向解讀為 diurnal 不重要。",
+  "evidence": [
+   "experiment_id: K1735",
+   "experiments/k1735/K1735_results.json (sha256=a5519aefa01d20610615ea615a055e224616710e37dcd1bba784047097fd713b)",
+   "experiments/k1735/reproduce_spec.json",
+   "experiments/k1735/review_verdict.json (PASS; reviewer=agy 1.1.10 --effort high; blocking_defects=[])",
+   "merged via 65901f044 (worktree dispatch-slot-1-9783132d-k1735)"
+  ],
+  "confidence": 0.9,
+  "created_at": "2026-08-04T13:10:39.164053"
  }
 ]
