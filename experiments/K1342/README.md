@@ -123,3 +123,14 @@ This is not a test of proprietary exchange imbalance messages. It is a
 public-data proxy study for whether late-day signed-volume pressure is enough to
 recover a tradable MOC-like drift. Conclusions must be stated at that proxy
 level only.
+
+## Errata
+
+- **2026-08-01** — `K1342_results.json` 的 `data_source` 欄位字串誤寫為
+  `yfinance 1-minute OHLCV`，與**同一份檔案**的 `interval: "2m"` 及本 README「Yahoo 拒絕長區間
+  1 分鐘請求，改用 2 分鐘 K 棒」的說明矛盾。實際使用的就是 **2 分鐘** OHLCV。
+  成因是 `K1342.py` 把該字串寫死，沒有跟著 `INTERVAL` 常數走。
+  已修生成端（`K1342.py` 改為由 `INTERVAL` 內插），**未回頭手改既有 artifact**
+  （依 AGENTS.md「永遠修流程，不修資料」）；此欄位僅為 provenance 標籤，
+  不影響任何統計量。重跑本實驗即可得到正確字串。
+  對外文章（`mile_04438b53`）採用 2 分鐘口徑。

@@ -348,7 +348,10 @@ def main() -> None:
         "run_date": pd.Timestamp.now(tz="Asia/Taipei").strftime("%Y-%m-%d"),
         "seed": SEED,
         "status": "completed_proxy_study",
-        "data_source": "yfinance 1-minute OHLCV; no proprietary MOC imbalance feed",
+        # Derive from INTERVAL rather than hardcoding: the literal said "1-minute"
+        # while INTERVAL was already "2m" (Yahoo rejects long 1m requests, see README),
+        # so the artifact's own data_source contradicted its interval field.
+        "data_source": f"yfinance {INTERVAL} OHLCV; no proprietary MOC imbalance feed",
         "period": PERIOD,
         "interval": INTERVAL,
         "tickers": TICKERS,
