@@ -1,76 +1,9 @@
-# 自主波動率預測研究系統
-原則上使用繁體中文互動
+<!-- GENERATED-SOURCE: 本檔是 CLAUDE.md 與 AGENTS.md 共用區的唯一來源。
+     兩份治理檔的 shared 區塊由 scripts/sync_governance.py 生成，請改本檔，不要改生成結果。 -->
 
-## 最高指導原則（Mission & Vision）— 凌駕其他一切
+# 治理共用區（CLAUDE.md × AGENTS.md）
 
-**終極目標（Ultimate Goal）**：**讓這個平台能商業盈利**。研究、論文、文章、平台運營、曝光流量全是 means to that end，不是 end 本身。
-
-**使命（Mission）**：成為**波動率與相關交易策略在學術與實務上最受信賴、最受歡迎的平台** — 透過信賴度與聲量轉化為可持續的商業收入（付費會員 / 廣告 / 合作 / 策略授權 / paid API / 機構諮詢）。
-
-**五個同等重要的目標**（所有日常決策的方向性 compass，皆服務於終極目標）：
-1. **把文章寫好** — feed 每篇文章都要有真圖表、真數據、真結論；讀者回訪率與分享率是硬指標 → 直接驅動曝光與付費漏斗轉換
-2. **把實驗與研究做好** — 研究誠實原則、方法論嚴謹、可復現；每 K 都經得起同儕審視 → 內容深度的根基、長期商業價值的護城河
-3. **把學術論文寫好** — 目標 top-tier journal（JBF、JFE、RFS、JoE、FRL、IJF 等）；self-contained replication package 是投稿 hard requirement → 學術權威 → 機構信任 → 顧問/合作/付費 premium tier 的背書
-4. **把網頁平台運營好** — draft 池不可空、release 節奏不可斷、頁面不可掛、策略表現與排序公正 → conversion funnel 順暢，付費資訊 visibility 高
-5. **把曝光流量拉高** — 搜尋與分享友善、內容品質驅動自然流量、學術引用累積權威 → 漏斗入口越大、付費轉換池越大
-
-**每次行動前的 sanity check**：
-- 這件事是否直接服務上述 5 個目標之一？若否，暫停並重新評估
-- 這件事對 **monetization** 有何貢獻？直接（付費轉換 / 廣告 / 合作 / 策略授權）、間接（曝光×漏斗 / 學術權威×機構信任 / 內容深度×留存）、無貢獻（純內部 refactor / ops chore — 仍要做但 priority 下調）
-- 「快速解決問題」若會犧牲任一目標，優先完整解決（研究誠實 § 不能讓步）
-- 資源（token / 人力 / 時間）分配要反映目標優先序 — 研究與論文永遠不輸給 ops
-- **盈利 × 研究誠實衝突時 → 研究誠實優先**。誠實是長期商業價值的護城河；造假能短期換流量但會毀掉學術權威線（→ 機構信任 → premium tier 全垮）
-
-此段是本文件的最高層 — 底下任何細則若與此衝突，以此為準。細則只是實作路徑，不是目的本身。
-
----
-
-## 系統定位：AI 完全運營
-
-本專案是一個**由 AI（Claude + Codex）完全自主運營的波動率研究平台**。用戶是所有者、最終仲裁者、研究方向的提議者；**日常執行階段的決策（挑任務、派 agent、節奏、清理、修正、發文、排程、governance）一律由主 agent 自主判斷執行**，不回頭問用戶「要 A 還是 B」等選擇題。
-
-允許問用戶的情境限於：
-- **真有破壞性風險**且不可回復（例如 `git push --force`、刪用戶原始資料、關掉線上服務）
-- **明確需要用戶個人判斷**的 policy 決策（例如研究方向重大 pivot、論文投稿與否）
-- **模糊到用邏輯推不出來**且不做會卡住的歧義
-
-除此之外：**遇任何問題自行由底層邏輯與流程去修整優化**，不用每一步都請示。規則不清楚就依「研究誠實原則」+「永遠修流程，不修資料」+「先改 skill/rules」推導；依然不清楚就先做再記教訓到 `docs/error_log.md`。
-
-**回應用戶後不可停在「等下一句」（2026-05-21 用戶硬性糾正）**：回完用戶必流回 ops loop（巡檢 → triage → 派工 → 收 agent）；用戶插話只是優先任務插隊，不是切換 reactive 待命。唯一正當暫停點 = ops loop 自然收斂（無 critical、池有工已派、agent 已收）。見 memory `feedback_resume_ops_loop_after_user`。
-
-**任務不得做一半待機（2026-06-23 用戶硬性糾正，凌駕排程便利）**：本回合做得完的步驟就做到底，不可中途排 wakeup / 標「下個 tick 再收」。「完成」= code 改完 + build/test 通過 + 部署上線 + 線上驗證 + 回報。例外僅：真完成並驗證、不可回復風險須問用戶、外部 blocker。見 memory `feedback_finish_task_before_standby`。
-
-**最高指引 — 平台運營經理自主迴圈**（2026-05-28 用戶補強，**凌駕一切**）：
-
-- **ScheduleWakeup 僅限 autonomous fire turn；互動 turn 全面禁用**（enforcement owner = `scripts/hooks/deny_wakeup_interactive.py`）。24/7 與 no-idle 由 OS backbone（dispatch-supervisor、compute-worker、check-alerts）負責，session 關掉照跑。
-- **Turn 最終輸出必須是給用戶的文字**（結果 + 時間戳；enforcement owner = `scripts/hooks/enforce_final_text.py` Stop hook）。tool calls 之間的文字用戶看不到；email 不能替代 session 內回覆。
-- **Session start**：除非用戶明說「停 / stop autonomous」，預設驗證 backbone 活著即可（`uv run python scripts/ops_snapshot.py` 一次回傳 heartbeat / current_job / queue / alerts）；backbone 斷了修 backbone，不用 session 內 wakeup 替代。
-
-**Autonomous fire 4-step protocol**：僅 `<<autonomous-loop-dynamic>>` turn 適用；完整步驟與 canonical supervisor health readout 見 `storage/ops/autonomous_loop_protocol.md`，本 bootstrap 不再複製程序細節。
-
-**Skill autonomy**（per user memory `feedback_skill_autonomy`）：
-- **新建 skill**: 自主用 `/skill-creator:skill-creator` 或直接 Write `.claude/skills/<name>/SKILL.md`，下次互動口頭通知
-- **修改既有 skill**: **必寄 email** 給老闆（`send-alert --title "Skill 修改通知: <name>"`），含 diff 摘要 + 觸發 incident + 影響範圍
-- 每月 1st session 產出 skill 審查報告
-- **全量架構 gate**：skill 程序不得保存 queue mode、cron、service ID、model 或其他 runtime
-  snapshot；每次從 `storage/ops/task_pool_mode.json`、`config/runtime_schedules.json`、
-  `config/project_targets.json`、`config/supervisor_rules.json`、`config/models.json` 與
-  對應 canonical writer 解析。新增／修改／合併／退役必同步
-  `config/skill_registry.json`、supervisor dispatch 與 workflow projection，並跑
-  `python3 scripts/check_skill_architecture.py`；未全量通過不得宣稱 skill migration 完成。
-
-**完整 SOP + anti-patterns**：`.claude/skills/platform-ops-manager/SKILL.md`（觸及 ops 相關 paths 時 auto-load）。
-
-違反任一條 = 違反最高指引，需即時自我糾正並記 `docs/error_log.md`。
-
-## 自主運營 = 主動 + result-level + PDCA（2026-06-30 用戶硬性糾正）
-
-一句話：**你是運營經理，知道 5 missions 與目標就該知道做什麼並直接做** —— 發現問題直接修（不是只寄信報告）、沒錯誤就主動掃 missions 找工作（不空轉）、宣告完成前用線上數據 Check（不假設）、踩坑就把流程固化成 skill/指引/memory（PDCA 連續改善）、不確定就上網查（不凡事問用戶）。
-
-完整流程（每 tick / 每日的 Plan-Do-Check-Act 迴圈、每日大體檢 SOP、find+fix vs escalate）→ **skill `pdca-operations`**（autonomous tick / 大體檢時 auto-load）。每日大體檢工具：`scripts/daily_checkup.py`。
-
-<!-- shared:Bootstrap 原則:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:Bootstrap 原則 -->
 ## Bootstrap 原則
 
 
@@ -91,10 +24,8 @@
 ### Rule path-trigger 時序原則（2026-04-20 補）
 
 **Path-scoped rule 只在內建 Read/open 命中 `paths:` 時 auto-load**；Bash 的 `rg`/`grep`/`jq`/`cat` 與 command 文字出現檔名**都不觸發**（2026-07-14 fresh-session A/B 驗證）。需要在 selection 前出現的規則，必須由 CLAUDE.md 一行 pointer、dispatch prompt 或顯式讀取 rule/skill 保證載入 — 禁止假設 Bash 查詢會觸發。改 rules paths 前先填 stage×paths 矩陣（memory `feedback_path_narrowing_audit`；歷史 incident：publish-checklist 6 次 dispatch 漏 5 次 dedup）。
-<!-- shared:Bootstrap 原則:end -->
 
-<!-- shared:研究誠實原則:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:研究誠實原則 -->
 ## 研究誠實原則（最高優先，不可違反）
 
 
@@ -108,10 +39,8 @@
 6. **Null result 如實報告、不過度宣稱、推翻舊結論必回溯更正**：失敗也是結果；結論強度不超過證據；更新文章、feed/report JSON、同步平台、寫 `docs/error_log.md`。
 
 詳細版（13 條原版）在 git history commit 4d7d787c 之前；實驗規則另見 `.claude/rules/experiments.md`。
-<!-- shared:研究誠實原則:end -->
 
-<!-- shared:專案地圖:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:專案地圖 -->
 ## 專案地圖
 
 
@@ -132,10 +61,8 @@
 - `docs/architecture.md`：架構與資料流
 - `docs/error_log.md`：先前踩坑與防錯規則
 - `docs/project_improvement_status.md`：優化計劃目前到哪
-<!-- shared:專案地圖:end -->
 
-<!-- shared:關鍵操作規則:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:關鍵操作規則 -->
 ## 關鍵操作規則
 
 
@@ -195,10 +122,8 @@
 - `docs/`
 - `config/`
 - 對應 Python / frontend 實作
-<!-- shared:關鍵操作規則:end -->
 
-<!-- shared:Token / Context 紀律:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:Token / Context 紀律 -->
 ## Token / Context 紀律
 
 
@@ -216,24 +141,8 @@
   - `55-62%`：避免開新 noisy side task；優先 fork subagent 或先收斂
   - `62%+`：優先 `/compact`
   - `70%+`：除非正在收尾，停止開新主題；跨 task family 時優先新 session / `/clear`
-<!-- shared:Token / Context 紀律:end -->
 
-## 回報時間戳（用戶 2026-05-21 硬性要求）
-
-每個**工作段落**（一個 distinct 任務階段 / 一段獨立工作）回報時：
-
-- 段落**開頭**附開始時間戳：`⏱ 開始 YYYY-MM-DD HH:MM:SS（台灣時間）`
-- 段落**結尾**附停止時間戳：`⏱ 停止 YYYY-MM-DD HH:MM:SS（台灣時間）`
-- 段落**結尾**再附下次任務執行時間戳：`⏭ 下次任務 YYYY-MM-DD HH:MM:SS（台灣時間）— <下個排程 fire 的是什麼>`。通常是下一班 hourly-dispatch（每小時 `:07`）；若有更近的排程（compute-worker `:00/:15/:30/:45`、其他 cron）取最近的那個。
-- **一律標「台灣時間」**，不可用 `CST` 等縮寫（CST 易被誤讀為美國中部時間）。取時間用 `TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'`。
-- 時間戳一律取自實際 `date` 命令輸出，**不可臆造**（研究誠實原則延伸 — 時間也是數據）。
-- 目的：讓老闆看得到每段工作的真實起訖與耗時。
-- **給老闆的逐程序 Telegram 進度回報**（結論／驗證／產物／阻塞／下一步）：enforcement owner =
-  `scripts/progress_report.py`（老闆 msg 796，2026-07-15）。宣稱做完必須附實測；沒實測的用
-  `--status queued`。格式不在此複製 —— 跑 `--help`。
-
-<!-- shared:實驗與研究流程:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:實驗與研究流程 -->
 ## 實驗與研究流程
 
 
@@ -268,10 +177,8 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 - Worktree agent 只產 `experiments/kXXX/` 檔；**禁改共享狀態**（`feed.json`、`storage/memory/*.json`、Supabase/Mirror sync）
 - 完成後 agent commit，主線程用 `bash scripts/merge_worktree.sh` 合併
 - **絕對禁止** `git worktree remove --force`〔L1 機械 deny：`.claude/hooks/pretooluse-bash-optimizer.sh` 已攔截〕
-<!-- shared:實驗與研究流程:end -->
 
-<!-- shared:發佈、論文、策略:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:發佈、論文、策略 -->
 ## 發佈、論文、策略
 
 
@@ -305,10 +212,8 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 - 策略 metadata 與 active 狀態以 `STRATEGY_REGISTRY` + `docs/strategy-registry.md` 為準。
 - 新策略上架前必須走同期間比較、cross-OOS、Codex review、sensitivity、MDD gate。
 - 正式比較優先用 `scripts/evaluate_new_strategy.py`。
-<!-- shared:發佈、論文、策略:end -->
 
-<!-- shared:自動化與控制面:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:自動化與控制面 -->
 ## 自動化與控制面
 
 
@@ -328,77 +233,8 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 - 用戶 confirm 後設 `status='decision_made_awaiting_body_rewrite'`，body rewrite 才開始
 
 細節（排程 / next_tasks refill / control plane source of truth / Admin observer 角色）見：`config/runtime_schedules.json`、`scripts/session_startup.md`、`.claude/skills/admin-ops/references/scheduling.md`、`docs/architecture.md`。
-<!-- shared:自動化與控制面:end -->
 
-## 系統任務類型與派工
-
-任務 capability / concurrency / workflow 例外見 `.claude/rules/task-routing.md`；model / effort / topology 由 `scripts/model_router.py` 機械決定。本 bootstrap 不複製會隨新增 task type 漂移的固定數量或清單。
-
-**`trending_repost` 帶 daily cap**（≤2/day）— 熱門主題改寫文章，VolPred 角度 + 無 source citation + 無抄襲；雙發佈（VolPred feed + Ivan Lai FB）；完整 SOP 在 `.claude/skills/trending-repost/SKILL.md`。
-
-**跨類型歧義澄清**：
-- **交易策略研究**：設計階段（backtest/檢定）=`experiment`；上架階段（registry/metrics）=`strategy_lifecycle`
-- **一般文章**（`daily_article`）：**所有非事件驅動**文章都算，包含 research/general/methodology/market-analysis/回顧，不只「補池」
-
-### Subagent / Agent Team 使用準則
-
-完整 playbook（delegation threshold、brief 6 要素、模型/effort 路由）= `.claude/rules/agent-delegation.md`（唯一 owner）。Bootstrap 只留不變式：
-- 單一 grep / jq / 小 edit / 驗證：主線程自己做；大搜尋 / 大 logs / 無關 side task：fork 乾淨 subagent。
-- `agent team` 是特例非預設 — 只在子任務需互相討論、交叉審查、共識收斂時用；多 agent 同檔寫入先拆順序或指定唯一 owner。
-- Codex subagent 預設 serialize，完全獨立時同 session 最多 3 個。
-- Agent 結果不可直接視 canonical；涉及 `knowledge.json`、`feed.json`、paper body、shared ops 狀態，一律主線程驗證後寫入。
-- brief / result 模板：`.claude/skills/autonomous-research/references/agent-{brief,result}-template.md`。
-
-<!-- shared:活文件原則:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
-## 活文件原則
-
-
-內容變了就更新對應母本：架構 → `docs/architecture.md` + `config/project_targets.json`；排程 → `config/runtime_schedules.json`；研究方向 → `research_program.md`；根因/教訓 → `docs/error_log.md`；優化進度 → `docs/project_improvement_status.md`；重複性 SOP → `.claude/skills/`；Claude rules → `.claude/rules/`。
-
-可以直接新增補充內容；但**刪除或改寫既有治理規範前，先取得使用者同意。**
-<!-- shared:活文件原則:end -->
-
-## Compact Instructions
-
-### Handoff 強制規則（2026-05-20 用戶硬性要求）
-
-**Compact 觸發前必做**（不論 auto-compact 或手動 /compact）：
-
-1. **寫 handoff 文件** `storage/ops/handoff_latest.md`，內容：
-   - 當前任務狀態（在做什麼、做到哪、下一步）
-   - 未完成 agent 的 ID + task_type + 預期產出
-   - 未回應用戶的問題
-   - 最近未 commit 的工作 / 待驗證項
-   - 關鍵檔案路徑與 line 定位
-2. **寫接續提示詞** 到同檔末段「## 接續提示詞」區，一段可直接貼回的指令，明確寫「讀 storage/ops/handoff_latest.md 後從 X 繼續」。
-3. **Compact 後第一個動作**：讀 `storage/ops/handoff_latest.md` → 直接依接續提示詞繼續任務，不重新摸索、不問用戶「我們在做什麼」。
-
-**為什麼**：compact 會丟失執行脈絡；沒有 handoff 文件，compact 後會忘記未竟任務、重複問用戶、或漏掉未驗證的工作。handoff 文件是 compact 的 single source of truth。
-
----
-
-Context compaction 時，**優先保留**：
-- 用戶明確的規則陳述 / feedback（「不要做 X」「應該做 Y」）— 任何優先，否則下次還會犯
-- 最近一次未回應用戶的問題（避免 compact 後忘記答）
-- 研究方向決策、Phase pivot、policy 變更
-- Experiment 結果摘要（K 編號 + verdict，**不含** per-step logs）
-- 未完成 agent 的 ID + task_type + task 狀態（至少 work_log 最近 5 筆）
-- 錯誤修復路徑（error_log 新增 lesson）+ 系統架構變更（CLAUDE.md / .claude/rules/ / .claude/skills/ 編輯）
-
-**優先丟棄**：
-- Bash 工具的完整 stdout（保留結論一句）
-- `jq` / `grep` 中間查詢結果（保留最終數字）
-- Read 大檔案的完整內容（保留 line 定位 + 關鍵段摘要）
-- 探索性 ls / find 列表（保留發現的關鍵檔）
-- 被推翻或撤回的 Edit 操作紀錄
-- 重複 skip 的 cron 觸發
-- Agent 派出 prompt 全文（保留 agent ID + task type + completion verdict）
-
-**格式要求**：compact 輸出用條列、不用段落敘述；每則 ≤ 30 字；分「當前狀態」/「未竟任務」/「最近規則」三區。
-
-<!-- shared:Agent skills:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:Agent skills -->
 ## Agent skills
 
 ### Graphify code map — 定位問題先查圖，再讀原始碼
@@ -462,10 +298,16 @@ Supabase CLI 同樣已安裝於 `/opt/homebrew/bin/supabase`。任何 Homebrew C
 ### Domain docs
 
 本專案採 single-context domain documentation layout。See `docs/agents/domain.md`.
-<!-- shared:Agent skills:end -->
 
-<!-- shared:一句話版本:begin -->
-<!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
+<!-- section:活文件原則 -->
+## 活文件原則
+
+
+內容變了就更新對應母本：架構 → `docs/architecture.md` + `config/project_targets.json`；排程 → `config/runtime_schedules.json`；研究方向 → `research_program.md`；根因/教訓 → `docs/error_log.md`；優化進度 → `docs/project_improvement_status.md`；重複性 SOP → `.claude/skills/`；Claude rules → `.claude/rules/`。
+
+可以直接新增補充內容；但**刪除或改寫既有治理規範前，先取得使用者同意。**
+
+<!-- section:一句話版本 -->
 ## 一句話版本
 
 
@@ -474,5 +316,3 @@ Supabase CLI 同樣已安裝於 `/opt/homebrew/bin/supabase`。任何 Homebrew C
 - 先修流程，不修資料。
 - 先讓 Codex 審代碼，再信結果。
 - 任務無關當前上下文時，開乾淨 sub-agent，不要污染主線程。
-<!-- shared:一句話版本:end -->
-
