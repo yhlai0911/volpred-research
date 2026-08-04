@@ -1,0 +1,27 @@
+{
+  "kid": "k1730",
+  "verdict": "FAIL",
+  "reviewer": "Codex gpt-5.6-sol / high",
+  "reviewed_at": "2026-07-19T13:57:31+08:00",
+  "reviewed_commit": "9060414f9fa14c3d82285f4124631e2d07c98f6a",
+  "review_artifact": "experiments/k1730/codex_review_v1.md",
+  "blocking_defects": [
+    "whole-sample macro-tensor permutation cannot support the placebo/lookahead interpretation claimed; 'decisive' NULL framing invalid",
+    "README.md missing (three-piece hard rule); collection doc overclaims (calls invalid permutation 'decisive')",
+    "GEV 'multi-modal likelihood' verdict not established: constant 1e10 penalty for invalid params + wide random starts mechanically depress convergence rate",
+    "SSVS non-mixing (R-hat 1.61, ESS 6.25): PIP/posterior-predictive must not be presented as robust inference"
+  ],
+  "reviewed_sha256": {
+    "fig1_rolling_coverage.png": "8eeee5102b5b465a2c75e862bfb11a2f37da9320d996ff0dd5ee69f96af0bf89",
+    "fig2_ssvs_pip.png": "a202e2484baf5f26fced1357e7d8f5f30b763fc6ec19e522c232ed336e3eda61",
+    "fig3_interval_vs_realized.png": "2038384e5d73ff1b09922fe94b341283ad03740cbd53ccc20d5ccab9a4e07705",
+    "fig4_pit_calibration.png": "5c0dae3177961dd0761012f48bf9965c9b9a212375d27a13042e2700535a4dbc",
+    "k1730_data.py": "6e4c2171a48e89b01cab391cf32b93abfc5195fee5835b9a13399c2744a516f5",
+    "k1730_gevreg_midas_ssvs.py": "96b7213c9583de3d626d13f8cc2487a86620298c664d4d460d5ac76dc75e7570",
+    "k1730_gevreg_midas_ssvs_results.json": "5635d9187b626fda7fcb783876935e6c657cb99c8a63506c0da4d4d44141fb23",
+    "k1730_models.py": "a173a8c62d33c6fc2c5b0f987dcb2aee438d9336a29de9aa0e46ee5834c1406d",
+    "k1730_quickmode_results.json": "4b0a8bb07434143cb06f97448406598ac055ae988bfbc68da8902785a2977586",
+    "k1730_report_tables.py": "6e6df60f4b9d4814b42ed6cb490f16efeb8ce830c859db67800d57ede2361a5c",
+    "k1730_scoring.py": "9091c57bc02fcffc673ee36914c019f74b067903760aab60e80e9e8d22607283"
+  }
+}

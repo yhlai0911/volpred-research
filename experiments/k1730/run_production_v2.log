@@ -1,0 +1,222 @@
+warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730/.venv` and will be ignored; use `--active` to target the active environment instead
+[20:20:34] [1] Validating GEV implementation against scipy...
+[20:20:34]     max |logpdf - scipy| = 4.55e-13
+[20:20:34] [2] Building point-in-time data...
+[20:20:34]   SPY RV from cache (spy_daily_rv.csv)
+[20:20:34]   Weekly blocks: 1640 weeks, 1995-02-06 → 2026-07-16
+[20:20:34]   CPI from cache
+[20:20:34]   NFP from cache
+[20:20:34]   IP from cache
+[20:20:34]   UNRATE from cache
+[20:20:34]   VIX from cache
+[20:20:34]   DGS10 from cache
+[20:20:34]   DTB3 from cache
+[20:20:34]     CPI: 425 months, availability lag median 44d, min 37d
+[20:20:34]     NFP: 426 months, availability lag median 34d, min 31d
+[20:20:34]     IP: 426 months, availability lag median 45d, min 41d
+[20:20:34]     UNRATE: 425 months, availability lag median 34d, min 31d
+[20:20:34]     VIX: 439 months, availability lag median 31d, min 28d
+[20:20:34]     TERM: 439 months, availability lag median 31d, min 28d
+[20:20:34]   Lookahead check PASSED (118,080 macro cells, 1640 blocks)
+[20:20:34] [3] Circular-shift placebo (matched sample, leakage-free by construction)...
+[20:20:34]     matched sample: 1380/1640 blocks (first 260 dropped from every arm)
+[20:20:34]   Lookahead check PASSED (114,336 macro cells, 1640 blocks)
+[20:20:34]   Lookahead check PASSED (110,592 macro cells, 1640 blocks)
+[20:20:34]   Lookahead check PASSED (106,848 macro cells, 1640 blocks)
+[20:20:34]   Lookahead check PASSED (103,104 macro cells, 1640 blocks)
+[20:20:34]   Lookahead check PASSED (99,360 macro cells, 1640 blocks)
+[20:20:34]     lookahead re-checked on all 5 shifted macro histories: 0 violations
+[20:20:34]     6 arms dispatched to 6 workers; estimating the main arm meanwhile
+[20:20:34] [4] Rolling out-of-sample estimation...
+[20:20:34]   [main] 967 OOS blocks, 19 annual refits
+[20:20:36]   [real_matched] 967 OOS blocks, 19 annual refits
+[20:20:36]   [placebo_shift_52w] 967 OOS blocks, 19 annual refits
+[20:20:36]   [placebo_shift_104w] 967 OOS blocks, 19 annual refits
+[20:20:36]   [placebo_shift_156w] 967 OOS blocks, 19 annual refits
+[20:20:36]   [placebo_shift_208w] 967 OOS blocks, 19 annual refits
+[20:20:36]   [placebo_shift_260w] 967 OOS blocks, 19 annual refits
+[20:29:45]     2008: n_est=412 omega=1.01 xi=-0.160 | CPI=0.06, NFP=0.86, IP=0.23, UNRATE=0.11, VIX=0.07, TERM=0.13 | 549s
+[20:29:54]     2008: n_est=412 omega=2.0 xi=-0.151 | CPI=0.11, NFP=0.36, IP=0.14, UNRATE=0.23, VIX=0.50, TERM=0.39 | 558s
+[20:29:58]     2008: n_est=412 omega=8.0 xi=-0.146 | CPI=0.13, NFP=0.19, IP=0.27, UNRATE=0.58, VIX=0.46, TERM=0.40 | 562s
+[20:30:02]     2008: n_est=412 omega=3.0 xi=-0.153 | CPI=0.18, NFP=0.74, IP=0.10, UNRATE=0.31, VIX=0.17, TERM=0.41 | 566s
+[20:30:04]     2008: n_est=412 omega=1.01 xi=-0.158 | CPI=0.52, NFP=0.62, IP=0.21, UNRATE=0.70, VIX=0.67, TERM=0.23 | 569s
+[20:30:14]     2008: n_est=412 omega=5.0 xi=-0.143 | CPI=0.95, NFP=0.83, IP=0.81, UNRATE=0.29, VIX=0.96, TERM=0.31 | 578s
+[20:31:59]     2008: n_est=672 omega=1.01 xi=-0.113 | CPI=0.11, NFP=0.61, IP=0.22, UNRATE=0.58, VIX=0.89, TERM=0.13 | 685s
+[20:39:23]     2009: n_est=464 omega=1.01 xi=-0.154 | CPI=0.07, NFP=0.36, IP=0.21, UNRATE=0.11, VIX=0.09, TERM=0.49 | 578s
+[20:39:34]     2009: n_est=464 omega=1.01 xi=-0.158 | CPI=0.13, NFP=0.17, IP=0.09, UNRATE=0.42, VIX=0.17, TERM=0.08 | 572s
+[20:39:37]     2009: n_est=464 omega=1.01 xi=-0.158 | CPI=0.24, NFP=0.12, IP=0.11, UNRATE=0.09, VIX=0.15, TERM=0.73 | 584s
+[20:39:43]     2009: n_est=464 omega=1.01 xi=-0.152 | CPI=0.10, NFP=0.23, IP=0.98, UNRATE=0.28, VIX=0.96, TERM=0.12 | 584s
+[20:39:46]     2009: n_est=464 omega=5.0 xi=-0.150 | CPI=0.43, NFP=0.15, IP=0.12, UNRATE=0.22, VIX=0.82, TERM=0.09 | 572s
+[20:39:46]     2009: n_est=464 omega=1.01 xi=-0.143 | CPI=0.11, NFP=0.53, IP=0.19, UNRATE=0.72, VIX=0.31, TERM=0.13 | 582s
+[20:42:39]     2009: n_est=724 omega=1.01 xi=-0.112 | CPI=0.12, NFP=0.63, IP=0.20, UNRATE=0.65, VIX=0.69, TERM=0.11 | 640s
+[20:48:41]     2010: n_est=517 omega=12.0 xi=-0.157 | CPI=0.22, NFP=0.08, IP=0.12, UNRATE=0.08, VIX=0.09, TERM=0.88 | 558s
+[20:48:49]     2010: n_est=517 omega=1.01 xi=-0.158 | CPI=0.10, NFP=0.15, IP=0.10, UNRATE=0.28, VIX=0.12, TERM=0.09 | 555s
+[20:48:52]     2010: n_est=517 omega=1.01 xi=-0.164 | CPI=0.31, NFP=0.12, IP=0.09, UNRATE=0.08, VIX=0.09, TERM=0.80 | 555s
+[20:48:58]     2010: n_est=517 omega=5.0 xi=-0.152 | CPI=0.20, NFP=0.18, IP=0.09, UNRATE=0.15, VIX=0.36, TERM=0.21 | 552s
+[20:49:00]     2010: n_est=517 omega=1.01 xi=-0.144 | CPI=0.29, NFP=0.06, IP=0.12, UNRATE=0.06, VIX=0.33, TERM=0.07 | 553s
+[20:49:12]     2010: n_est=517 omega=1.01 xi=-0.155 | CPI=0.10, NFP=0.83, IP=0.99, UNRATE=0.12, VIX=0.90, TERM=0.15 | 570s
+[20:52:59]     2010: n_est=777 omega=1.01 xi=-0.116 | CPI=0.41, NFP=0.20, IP=0.25, UNRATE=0.09, VIX=0.64, TERM=0.10 | 621s
+[20:57:52]     2011: n_est=569 omega=12.0 xi=-0.103 | CPI=0.24, NFP=0.09, IP=0.11, UNRATE=0.10, VIX=0.09, TERM=0.92 | 551s
+[20:58:02]     2011: n_est=569 omega=5.0 xi=-0.107 | CPI=0.10, NFP=0.65, IP=0.15, UNRATE=0.44, VIX=0.27, TERM=0.23 | 549s
+[20:58:03]     2011: n_est=569 omega=1.01 xi=-0.107 | CPI=0.08, NFP=0.14, IP=0.10, UNRATE=0.21, VIX=0.07, TERM=0.12 | 554s
+[20:58:06]     2011: n_est=569 omega=2.0 xi=-0.101 | CPI=0.09, NFP=0.86, IP=0.11, UNRATE=0.23, VIX=0.12, TERM=0.91 | 548s
+[20:58:09]     2011: n_est=569 omega=2.0 xi=-0.102 | CPI=0.53, NFP=0.14, IP=0.10, UNRATE=0.35, VIX=0.37, TERM=0.08 | 550s
+[20:58:36]     2011: n_est=569 omega=1.01 xi=-0.107 | CPI=0.10, NFP=0.77, IP=0.90, UNRATE=0.15, VIX=0.13, TERM=0.55 | 564s
+[21:04:04]     2011: n_est=829 omega=2.0 xi=-0.095 | CPI=0.51, NFP=0.48, IP=0.13, UNRATE=0.41, VIX=0.67, TERM=0.11 | 664s
+[21:08:09]     2012: n_est=621 omega=12.0 xi=-0.105 | CPI=0.81, NFP=0.09, IP=0.10, UNRATE=0.06, VIX=0.10, TERM=0.96 | 617s
+[21:08:20]     2012: n_est=621 omega=2.0 xi=-0.106 | CPI=0.32, NFP=0.37, IP=0.10, UNRATE=0.26, VIX=0.37, TERM=0.50 | 613s
+[21:08:22]     2012: n_est=621 omega=1.01 xi=-0.110 | CPI=0.10, NFP=0.06, IP=0.35, UNRATE=0.04, VIX=0.08, TERM=0.44 | 620s
+[21:08:26]     2012: n_est=621 omega=1.01 xi=-0.108 | CPI=0.09, NFP=0.18, IP=0.12, UNRATE=0.18, VIX=0.07, TERM=0.11 | 623s
+[21:08:36]     2012: n_est=621 omega=12.0 xi=-0.107 | CPI=0.44, NFP=0.08, IP=0.09, UNRATE=0.23, VIX=0.56, TERM=0.08 | 627s
+[21:09:21]     2012: n_est=621 omega=1.01 xi=-0.109 | CPI=0.11, NFP=0.86, IP=0.98, UNRATE=0.15, VIX=0.12, TERM=0.66 | 645s
+[21:14:52]     2012: n_est=881 omega=12.0 xi=-0.101 | CPI=0.39, NFP=0.15, IP=0.09, UNRATE=0.14, VIX=0.76, TERM=0.09 | 649s
+[21:18:10]     2013: n_est=673 omega=12.0 xi=-0.109 | CPI=0.84, NFP=0.09, IP=0.10, UNRATE=0.06, VIX=0.12, TERM=0.98 | 601s
+[21:18:12]     2013: n_est=673 omega=5.0 xi=-0.115 | CPI=0.11, NFP=0.21, IP=0.24, UNRATE=0.08, VIX=0.37, TERM=0.42 | 590s
+[21:18:20]     2013: n_est=673 omega=3.0 xi=-0.112 | CPI=0.13, NFP=0.45, IP=0.09, UNRATE=0.18, VIX=0.31, TERM=0.54 | 601s
+[21:18:22]     2013: n_est=673 omega=1.01 xi=-0.114 | CPI=0.09, NFP=0.08, IP=0.11, UNRATE=0.07, VIX=0.08, TERM=0.07 | 596s
+[21:18:37]     2013: n_est=673 omega=12.0 xi=-0.112 | CPI=0.36, NFP=0.10, IP=0.09, UNRATE=0.30, VIX=0.40, TERM=0.08 | 601s
+[21:19:12]     2013: n_est=673 omega=1.01 xi=-0.114 | CPI=0.11, NFP=0.94, IP=0.98, UNRATE=0.09, VIX=0.10, TERM=0.90 | 591s
+[21:25:18]     2013: n_est=933 omega=12.0 xi=-0.106 | CPI=0.26, NFP=0.20, IP=0.09, UNRATE=0.23, VIX=0.59, TERM=0.09 | 626s
+[21:27:36]     2014: n_est=725 omega=5.0 xi=-0.130 | CPI=0.11, NFP=0.19, IP=0.11, UNRATE=0.18, VIX=0.18, TERM=0.28 | 565s
+[21:27:45]     2014: n_est=725 omega=12.0 xi=-0.123 | CPI=0.75, NFP=0.11, IP=0.09, UNRATE=0.14, VIX=0.15, TERM=0.97 | 575s
+[21:27:55]     2014: n_est=725 omega=1.01 xi=-0.124 | CPI=0.10, NFP=0.36, IP=0.11, UNRATE=0.15, VIX=0.09, TERM=0.11 | 573s
+[21:27:56]     2014: n_est=725 omega=2.0 xi=-0.122 | CPI=0.17, NFP=0.47, IP=0.11, UNRATE=0.55, VIX=0.29, TERM=0.77 | 576s
+[21:28:19]     2014: n_est=725 omega=5.0 xi=-0.129 | CPI=0.86, NFP=0.09, IP=0.09, UNRATE=0.74, VIX=0.31, TERM=0.07 | 582s
+[21:28:53]     2014: n_est=725 omega=1.01 xi=-0.125 | CPI=0.10, NFP=0.91, IP=0.97, UNRATE=0.18, VIX=0.13, TERM=0.90 | 581s
+[21:35:48]     2014: n_est=985 omega=2.0 xi=-0.117 | CPI=0.60, NFP=0.27, IP=0.10, UNRATE=0.31, VIX=0.66, TERM=0.11 | 630s
+[21:37:21]     2015: n_est=777 omega=5.0 xi=-0.149 | CPI=0.15, NFP=0.07, IP=0.09, UNRATE=0.11, VIX=0.85, TERM=0.91 | 585s
+[21:37:36]     2015: n_est=777 omega=1.01 xi=-0.146 | CPI=0.10, NFP=0.12, IP=0.37, UNRATE=0.19, VIX=0.09, TERM=0.80 | 591s
+[21:37:45]     2015: n_est=777 omega=3.0 xi=-0.141 | CPI=0.12, NFP=0.76, IP=0.12, UNRATE=0.25, VIX=0.55, TERM=0.62 | 589s
+[21:37:48]     2015: n_est=777 omega=8.0 xi=-0.146 | CPI=0.09, NFP=0.28, IP=0.09, UNRATE=0.22, VIX=0.50, TERM=0.25 | 593s
+[21:38:18]     2015: n_est=777 omega=5.0 xi=-0.146 | CPI=1.00, NFP=0.08, IP=0.09, UNRATE=0.98, VIX=0.43, TERM=0.08 | 599s
+[21:39:03]     2015: n_est=777 omega=1.01 xi=-0.132 | CPI=0.15, NFP=0.98, IP=1.00, UNRATE=0.39, VIX=0.13, TERM=0.99 | 610s
+[21:46:45]     2015: n_est=1037 omega=3.0 xi=-0.131 | CPI=0.99, NFP=0.77, IP=0.10, UNRATE=0.90, VIX=0.96, TERM=0.12 | 657s
+[21:47:17]     2016: n_est=830 omega=5.0 xi=-0.143 | CPI=0.15, NFP=0.07, IP=0.08, UNRATE=0.10, VIX=0.72, TERM=0.85 | 596s
+[21:47:36]     2016: n_est=830 omega=1.01 xi=-0.143 | CPI=0.10, NFP=0.21, IP=0.45, UNRATE=0.28, VIX=0.11, TERM=0.79 | 600s
+[21:47:47]     2016: n_est=830 omega=3.0 xi=-0.139 | CPI=0.11, NFP=0.73, IP=0.11, UNRATE=0.29, VIX=0.59, TERM=0.55 | 603s
+[21:47:57]     2016: n_est=830 omega=8.0 xi=-0.142 | CPI=0.09, NFP=0.25, IP=0.10, UNRATE=0.18, VIX=0.40, TERM=0.30 | 608s
+[21:48:24]     2016: n_est=830 omega=12.0 xi=-0.138 | CPI=0.96, NFP=0.13, IP=0.09, UNRATE=0.88, VIX=0.52, TERM=0.08 | 606s
+[21:49:13]     2016: n_est=830 omega=2.0 xi=-0.135 | CPI=0.10, NFP=0.51, IP=0.99, UNRATE=0.81, VIX=0.15, TERM=0.84 | 610s
+[21:57:17]     2017: n_est=882 omega=5.0 xi=-0.145 | CPI=0.31, NFP=0.07, IP=0.08, UNRATE=0.14, VIX=0.73, TERM=0.84 | 600s
+[21:57:48]     2016: n_est=1090 omega=12.0 xi=-0.129 | CPI=0.95, NFP=0.63, IP=0.11, UNRATE=0.86, VIX=0.93, TERM=0.13 | 664s
+[21:57:51]     2017: n_est=882 omega=1.01 xi=-0.145 | CPI=0.10, NFP=0.10, IP=0.60, UNRATE=0.23, VIX=0.09, TERM=0.98 | 614s
+[21:57:51]     2017: n_est=882 omega=2.0 xi=-0.142 | CPI=0.10, NFP=0.42, IP=0.11, UNRATE=0.20, VIX=0.57, TERM=0.25 | 604s
+[21:58:15]     2017: n_est=882 omega=12.0 xi=-0.147 | CPI=0.11, NFP=0.09, IP=0.10, UNRATE=0.08, VIX=0.15, TERM=0.50 | 619s
+[21:58:38]     2017: n_est=882 omega=5.0 xi=-0.142 | CPI=0.98, NFP=0.12, IP=0.09, UNRATE=0.83, VIX=0.46, TERM=0.08 | 613s
+[21:59:35]     2017: n_est=882 omega=1.01 xi=-0.141 | CPI=0.14, NFP=0.74, IP=0.80, UNRATE=0.19, VIX=0.18, TERM=0.49 | 622s
+[22:10:49]     2018: n_est=934 omega=3.0 xi=-0.142 | CPI=0.54, NFP=0.11, IP=0.09, UNRATE=0.24, VIX=0.55, TERM=0.68 | 812s
+[22:11:43]     2018: n_est=934 omega=3.0 xi=-0.139 | CPI=0.15, NFP=0.25, IP=0.10, UNRATE=0.10, VIX=0.28, TERM=0.10 | 831s
+[22:11:53]     2018: n_est=934 omega=1.01 xi=-0.142 | CPI=0.10, NFP=0.13, IP=0.64, UNRATE=0.34, VIX=0.11, TERM=0.98 | 843s
+[22:12:29]     2018: n_est=934 omega=12.0 xi=-0.144 | CPI=0.11, NFP=0.07, IP=0.11, UNRATE=0.08, VIX=0.11, TERM=0.58 | 853s
+[22:12:42]     2017: n_est=1142 omega=2.0 xi=-0.129 | CPI=0.99, NFP=0.56, IP=0.10, UNRATE=0.64, VIX=0.94, TERM=0.12 | 894s
+[22:13:03]     2018: n_est=934 omega=5.0 xi=-0.139 | CPI=0.97, NFP=0.10, IP=0.09, UNRATE=0.70, VIX=0.65, TERM=0.08 | 865s
+[22:14:20]     2018: n_est=934 omega=2.0 xi=-0.139 | CPI=0.12, NFP=0.72, IP=0.73, UNRATE=0.17, VIX=0.19, TERM=0.21 | 884s
+[22:23:01]     2019: n_est=986 omega=3.0 xi=-0.143 | CPI=0.44, NFP=0.12, IP=0.09, UNRATE=0.23, VIX=0.44, TERM=0.73 | 732s
+[22:23:53]     2019: n_est=986 omega=5.0 xi=-0.139 | CPI=0.17, NFP=0.29, IP=0.10, UNRATE=0.12, VIX=0.26, TERM=0.11 | 731s
+[22:24:12]     2019: n_est=986 omega=1.01 xi=-0.143 | CPI=0.10, NFP=0.14, IP=0.68, UNRATE=0.29, VIX=0.10, TERM=0.97 | 738s
+[22:24:41]     2019: n_est=986 omega=12.0 xi=-0.144 | CPI=0.10, NFP=0.08, IP=0.10, UNRATE=0.08, VIX=0.10, TERM=0.55 | 733s
+[22:25:16]     2019: n_est=986 omega=3.0 xi=-0.139 | CPI=0.96, NFP=0.11, IP=0.09, UNRATE=0.74, VIX=0.39, TERM=0.07 | 733s
+[22:25:40]     2018: n_est=1194 omega=2.0 xi=-0.128 | CPI=0.99, NFP=0.45, IP=0.10, UNRATE=0.51, VIX=0.98, TERM=0.12 | 777s
+[22:26:26]     2019: n_est=986 omega=1.01 xi=-0.139 | CPI=0.14, NFP=0.57, IP=0.57, UNRATE=0.17, VIX=0.23, TERM=0.24 | 726s
+[22:35:03]     2020: n_est=1038 omega=5.0 xi=-0.142 | CPI=0.51, NFP=0.07, IP=0.08, UNRATE=0.13, VIX=0.84, TERM=0.68 | 722s
+[22:36:04]     2020: n_est=1038 omega=8.0 xi=-0.139 | CPI=0.59, NFP=0.15, IP=0.09, UNRATE=0.11, VIX=0.16, TERM=0.09 | 730s
+[22:36:33]     2020: n_est=1038 omega=1.01 xi=-0.142 | CPI=0.11, NFP=0.15, IP=0.47, UNRATE=0.39, VIX=0.19, TERM=0.98 | 741s
+[22:37:02]     2020: n_est=1038 omega=1.01 xi=-0.140 | CPI=0.39, NFP=0.09, IP=0.09, UNRATE=0.08, VIX=0.08, TERM=0.36 | 741s
+[22:37:29]     2020: n_est=1038 omega=3.0 xi=-0.139 | CPI=0.98, NFP=0.10, IP=0.09, UNRATE=0.76, VIX=0.46, TERM=0.10 | 734s
+[22:38:30]     2019: n_est=1246 omega=1.01 xi=-0.128 | CPI=0.98, NFP=0.36, IP=0.11, UNRATE=0.40, VIX=0.93, TERM=0.15 | 771s
+[22:38:47]     2020: n_est=1038 omega=1.01 xi=-0.138 | CPI=0.39, NFP=0.47, IP=0.52, UNRATE=0.11, VIX=0.12, TERM=0.10 | 741s
+[22:47:17]     2021: n_est=1091 omega=5.0 xi=-0.143 | CPI=0.48, NFP=0.10, IP=0.09, UNRATE=0.15, VIX=0.90, TERM=0.83 | 734s
+[22:48:22]     2021: n_est=1091 omega=5.0 xi=-0.139 | CPI=0.39, NFP=0.22, IP=0.10, UNRATE=0.13, VIX=0.20, TERM=0.09 | 739s
+[22:49:06]     2021: n_est=1091 omega=2.0 xi=-0.142 | CPI=0.10, NFP=0.28, IP=0.20, UNRATE=0.63, VIX=0.14, TERM=1.00 | 753s
+[22:49:42]     2021: n_est=1091 omega=12.0 xi=-0.144 | CPI=0.21, NFP=0.09, IP=0.11, UNRATE=0.12, VIX=0.09, TERM=0.70 | 760s
+[22:49:51]     2021: n_est=1091 omega=2.0 xi=-0.136 | CPI=0.98, NFP=0.07, IP=0.08, UNRATE=0.24, VIX=0.88, TERM=0.09 | 741s
+[22:51:43]     2021: n_est=1091 omega=1.01 xi=-0.139 | CPI=0.19, NFP=0.77, IP=0.79, UNRATE=0.11, VIX=0.14, TERM=0.13 | 776s
+[22:51:49]     2020: n_est=1298 omega=2.0 xi=-0.129 | CPI=0.99, NFP=0.38, IP=0.10, UNRATE=0.46, VIX=0.97, TERM=0.13 | 799s
+[23:00:15]     2022: n_est=1143 omega=3.0 xi=-0.144 | CPI=0.78, NFP=0.07, IP=0.09, UNRATE=0.09, VIX=0.78, TERM=0.45 | 778s
+[23:01:11]     2022: n_est=1143 omega=5.0 xi=-0.140 | CPI=0.39, NFP=0.21, IP=0.10, UNRATE=0.11, VIX=0.13, TERM=0.10 | 769s
+[23:01:57]     2022: n_est=1143 omega=1.01 xi=-0.143 | CPI=0.12, NFP=0.14, IP=0.49, UNRATE=0.35, VIX=0.16, TERM=0.97 | 772s
+[23:02:23]     2022: n_est=1143 omega=2.0 xi=-0.135 | CPI=0.95, NFP=0.21, IP=0.09, UNRATE=0.30, VIX=0.89, TERM=0.17 | 752s
+[23:02:32]     2022: n_est=1143 omega=12.0 xi=-0.145 | CPI=0.25, NFP=0.13, IP=0.12, UNRATE=0.17, VIX=0.10, TERM=0.64 | 770s
+[23:04:13]     2022: n_est=1143 omega=1.01 xi=-0.139 | CPI=0.34, NFP=0.68, IP=0.71, UNRATE=0.11, VIX=0.14, TERM=0.12 | 750s
+[23:04:40]     2021: n_est=1351 omega=2.0 xi=-0.127 | CPI=0.99, NFP=0.18, IP=0.09, UNRATE=0.22, VIX=0.99, TERM=0.09 | 771s
+[23:12:51]     2023: n_est=1195 omega=3.0 xi=-0.146 | CPI=0.79, NFP=0.06, IP=0.09, UNRATE=0.08, VIX=0.88, TERM=0.63 | 756s
+[23:13:33]     2023: n_est=1195 omega=8.0 xi=-0.144 | CPI=0.49, NFP=0.23, IP=0.09, UNRATE=0.13, VIX=0.16, TERM=0.11 | 742s
+[23:14:30]     2023: n_est=1195 omega=1.01 xi=-0.146 | CPI=0.12, NFP=0.12, IP=0.59, UNRATE=0.23, VIX=0.19, TERM=0.98 | 753s
+[23:14:49]     2023: n_est=1195 omega=3.0 xi=-0.143 | CPI=0.88, NFP=0.23, IP=0.09, UNRATE=0.42, VIX=0.77, TERM=0.18 | 746s
+[23:15:12]     2023: n_est=1195 omega=12.0 xi=-0.148 | CPI=0.21, NFP=0.08, IP=0.13, UNRATE=0.13, VIX=0.09, TERM=0.85 | 760s
+[23:17:05]     2023: n_est=1195 omega=1.01 xi=-0.142 | CPI=0.24, NFP=0.82, IP=0.86, UNRATE=0.11, VIX=0.19, TERM=0.12 | 772s
+[23:18:07]     2022: n_est=1403 omega=2.0 xi=-0.127 | CPI=0.99, NFP=0.92, IP=0.11, UNRATE=0.92, VIX=0.99, TERM=0.30 | 806s
+[23:24:56]     2024: n_est=1247 omega=1.01 xi=-0.147 | CPI=0.12, NFP=0.07, IP=0.09, UNRATE=0.11, VIX=0.63, TERM=0.83 | 725s
+[23:25:34]     2024: n_est=1247 omega=5.0 xi=-0.144 | CPI=0.49, NFP=0.20, IP=0.09, UNRATE=0.10, VIX=0.17, TERM=0.09 | 721s
+[23:26:28]     2024: n_est=1247 omega=1.01 xi=-0.147 | CPI=0.13, NFP=0.17, IP=0.55, UNRATE=0.18, VIX=0.16, TERM=0.97 | 717s
+[23:26:46]     2024: n_est=1247 omega=5.0 xi=-0.145 | CPI=0.70, NFP=0.13, IP=0.10, UNRATE=0.30, VIX=0.71, TERM=0.28 | 717s
+[23:27:07]     2024: n_est=1247 omega=12.0 xi=-0.148 | CPI=0.29, NFP=0.15, IP=0.10, UNRATE=0.14, VIX=0.11, TERM=0.68 | 715s
+[23:29:06]     2024: n_est=1247 omega=1.01 xi=-0.142 | CPI=0.25, NFP=0.86, IP=0.88, UNRATE=0.12, VIX=0.16, TERM=0.15 | 721s
+[23:31:20]     2023: n_est=1455 omega=2.0 xi=-0.134 | CPI=0.93, NFP=0.84, IP=0.10, UNRATE=0.83, VIX=0.98, TERM=0.17 | 793s
+/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (5000) reached.
+  warnings.warn("Maximum number of iterations (" + str(max_iter) +
+[23:38:15]     2025: n_est=1299 omega=1.01 xi=-0.149 | CPI=0.10, NFP=0.08, IP=0.10, UNRATE=0.13, VIX=0.35, TERM=0.45 | 799s
+/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (5000) reached.
+  warnings.warn("Maximum number of iterations (" + str(max_iter) +
+[23:38:51]     2025: n_est=1299 omega=5.0 xi=-0.145 | CPI=0.52, NFP=0.16, IP=0.09, UNRATE=0.10, VIX=0.20, TERM=0.09 | 797s
+/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (5000) reached.
+  warnings.warn("Maximum number of iterations (" + str(max_iter) +
+[23:40:17]     2025: n_est=1299 omega=1.01 xi=-0.149 | CPI=0.09, NFP=0.29, IP=0.57, UNRATE=0.32, VIX=0.12, TERM=0.96 | 829s
+/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (5000) reached.
+  warnings.warn("Maximum number of iterations (" + str(max_iter) +
+[23:40:36]     2025: n_est=1299 omega=5.0 xi=-0.147 | CPI=0.72, NFP=0.12, IP=0.10, UNRATE=0.30, VIX=0.75, TERM=0.35 | 830s
+/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (5000) reached.
+  warnings.warn("Maximum number of iterations (" + str(max_iter) +
+[23:40:52]     2025: n_est=1299 omega=1.01 xi=-0.146 | CPI=0.43, NFP=0.37, IP=0.10, UNRATE=0.32, VIX=0.09, TERM=0.34 | 825s
+/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730/.venv/lib/python3.12/site-packages/statsmodels/regression/quantile_regression.py:191: IterationLimitWarning: Maximum number of iterations (5000) reached.
+  warnings.warn("Maximum number of iterations (" + str(max_iter) +
+[23:43:17]     2025: n_est=1299 omega=1.01 xi=-0.144 | CPI=0.27, NFP=0.90, IP=0.92, UNRATE=0.11, VIX=0.15, TERM=0.22 | 851s
+[23:45:31]     2024: n_est=1507 omega=3.0 xi=-0.137 | CPI=0.47, NFP=0.34, IP=0.09, UNRATE=0.31, VIX=0.96, TERM=0.16 | 852s
+[23:51:24]     2026: n_est=1351 omega=1.01 xi=-0.148 | CPI=0.10, NFP=0.07, IP=0.12, UNRATE=0.11, VIX=0.38, TERM=0.21 | 789s
+[23:51:24]   Common evaluation sample: 967 blocks
+[23:51:44]     2026: n_est=1351 omega=5.0 xi=-0.142 | CPI=0.22, NFP=0.29, IP=0.09, UNRATE=0.27, VIX=0.24, TERM=0.10 | 773s
+[23:51:44]   Common evaluation sample: 967 blocks
+[23:52:46]     2026: n_est=1351 omega=1.01 xi=-0.147 | CPI=0.11, NFP=0.10, IP=0.20, UNRATE=0.14, VIX=0.10, TERM=0.67 | 749s
+[23:52:46]   Common evaluation sample: 967 blocks
+[23:52:58]     2026: n_est=1351 omega=5.0 xi=-0.144 | CPI=0.77, NFP=0.15, IP=0.10, UNRATE=0.41, VIX=0.66, TERM=0.49 | 742s
+[23:52:58]   Common evaluation sample: 967 blocks
+[23:53:07]     2026: n_est=1351 omega=12.0 xi=-0.149 | CPI=0.08, NFP=0.07, IP=0.09, UNRATE=0.05, VIX=0.12, TERM=0.69 | 734s
+[23:53:07]   Common evaluation sample: 967 blocks
+[23:54:44]     2026: n_est=1351 omega=1.01 xi=-0.140 | CPI=0.23, NFP=0.95, IP=0.96, UNRATE=0.12, VIX=0.17, TERM=0.16 | 687s
+[23:54:44]   Common evaluation sample: 967 blocks
+[23:56:17]     2025: n_est=1559 omega=3.0 xi=-0.140 | CPI=0.45, NFP=0.26, IP=0.10, UNRATE=0.21, VIX=0.98, TERM=0.17 | 645s
+[00:04:41]     2026: n_est=1611 omega=3.0 xi=-0.138 | CPI=0.48, NFP=0.35, IP=0.10, UNRATE=0.30, VIX=0.98, TERM=0.26 | 504s
+[00:04:41]   Common evaluation sample: 967 blocks
+[00:04:41] [5] Collecting placebo arms...
+[00:04:41]     real=0.11415  placebo range=[0.11245, 0.11471]  p=0.833
+[00:04:41] [6] Figures...
+[00:04:42] [7] Wrote k1730_gevreg_midas_ssvs_results.json (144 KB) in 13449s
+
+==============================================================================
+K1730 SUMMARY
+==============================================================================
+OOS: 967 weekly blocks, 2008-01-07 → 2026-07-13
+
+model                      pinball   cov90  lo/hi out   VaR95   VaR99    PIT p
+------------------------------------------------------------------------------
+GEVReg-MIDAS-SSVS          0.11434   0.852   96/47      0.049   0.014 4.41e-05
+GEV-HAR                    0.11224   0.862   90/43      0.044   0.014 5.00e-02
+Gaussian-MIDAS             0.11510   0.848   66/81      0.084   0.032 4.70e-04
+HAR-QR                     0.11201   0.854   83/58      0.060   0.014 1.29e-05
+Empirical                  0.16539   0.837  114/44      0.046   0.016 0.00e+00
+  (expected: cov90=0.900, lo/hi out ~48/48, VaR95=0.050, VaR99=0.010)
+
+Diebold-Mariano (GEVReg-MIDAS-SSVS vs benchmark, pinball loss):
+  GEVReg-MIDAS-SSVS_vs_GEV-HAR                   t=+2.16  p=0.0311  favours benchmark
+  GEVReg-MIDAS-SSVS_vs_Gaussian-MIDAS            t=-0.68  p=0.4948  favours model
+  GEVReg-MIDAS-SSVS_vs_HAR-QR                    t=+1.95  p=0.0512  favours benchmark
+  GEVReg-MIDAS-SSVS_vs_Empirical                 t=-6.02  p=0.0000  favours model *Harvey-sig*
+
+Circular-shift placebo (5 shifts, 1380 matched blocks):
+  real=0.11415  placebo=[0.11245, 0.11471]  median=0.11303
+  4/5 placebo arms at least as good as real  →  one-sided p=0.833 (with 5 shifts the smallest attainable p-value is 0.167; this is a coarse placebo comparison, not a precise permutation test)
+
+SSVS sampler: worst R-hat=1.107  min ESS=42  worst |Geweke z|=28.05  →  inference tier: DIAGNOSTIC_ONLY
+GEV multistart: feasible starts 0.60, feasible optima 0.99, basin concentration 0.92 (min 0.87)
+==============================================================================
+
