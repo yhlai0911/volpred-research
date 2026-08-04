@@ -250,3 +250,9 @@ storage/work_log.json.bak_*
 # safety-net 把某次沒 commit 的衍生輸出掃了進去。它以絕對 mtime 浮點數為鍵，
 # 單次重建就產生 7,306 insertions / 1,071 deletions 的假 diff，跨機器毫無意義。
 graphify-out/
+
+# 2026-08-04 phase-z foreign incident sweep: runtime diagnostics/log streams
+# are per-host audit trails, never git assets (docs/error_log.md 2026-08-04)
+storage/logs/diagnostics/
+storage/logs/graphify/
+*.graphify-bak

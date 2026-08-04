@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：那個「新指標」，模型早就知道了",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1701/k1701_results.json",
+      "sha256": "b951f3326ccdfa923cde889a469a8faafbae1d474e2c4ef4a654700fef6b0ce7",
+      "label": "experiment K1701 results (whether realized dispersion between an index and its constituents adds incremental forecasting power for index volatility, after the algebraic identity between dispersion and average constituent volatility is accounted for)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "指數波動，和成分股各自的波動，差在哪",
+      "alt": "指數的波動不等於成分股波動的平均。如果所有股票一起漲，指數大動；一半漲一半跌互相抵消，指數幾乎不動，即使每檔個股都很激烈。中間差的那個東西叫離散度，也就是股票們有多不同步。用它來預測指數波動，聽起來很合理。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一半漲一半跌，指數就不動",
+          "body": [
+            "指數會不會大動，不只看底下的股票各自多激烈，還看它們同不同步。",
+            "全部一起漲，指數大動；一半漲一半跌互相抵消，指數幾乎不動。中間差的那個東西叫離散度。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "標普指數有離散度資料的交易日",
+          "value": {
+            "source": "results",
+            "path": "/assets/SPX/sample/n_days_with_dispersion",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "每日納入成分股檔數（中位數）",
+          "value": {
+            "source": "results",
+            "path": "/assets/SPX/sample/members_per_day/median",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_identity",
+      "info": "method",
+      "style": "professional",
+      "title": "兩個模型，同一組預測值",
+      "alt": "一致性檢查顯示，加了離散度的模型和加了成分股平均波動的模型，預測值的最大差距只有浮點數捨入誤差等級。原因是離散度的定義展開後等於成分股平均波動減去指數波動，而指數波動本來就在模型裡。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "差距只有捨入誤差等級",
+          "body": [
+            "離散度展開後 = 成分股平均波動 − 指數波動，而指數波動本來就在模型裡。",
+            "所以加離散度，等於加成分股平均波動。兩個模型張開同一個空間，預測值必然重合。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "兩個模型預測值的最大差距",
+          "value": {
+            "source": "results",
+            "path": "/assets/SPX/oos_vol/h1/ladder/identity_check_rdisp_vs_avg_vol/max_abs_forecast_diff",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "改測真的離散度，還是沒過",
+      "alt": "先讓模型吃飽波動水準，再加入平均相關係數與相對橫斷面離散度這兩個真正測不同步程度的指標。兩個市場乘三種預測期間乘兩個指標共十二格，做完多重比較校正後存活數是零。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "十二格，一格都沒存活",
+          "body": [
+            "控制掉波動水準之後，再問「在這之外，股票有多不同步」有沒有額外貢獻。",
+            "十二格裡只有兩格單獨看達到統計顯著；一次做十二個檢驗本來就會有幾格靠運氣達標，校正後一格都沒存活。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "控制波動水準後加入相關係數：預測誤差改善百分比",
+          "value": {
+            "source": "results",
+            "path": "/assets/SPX/oos_vol/h1/ladder/M_rho_vs_M1_level/qlike_improve_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "加新變數之前，先把定義展開",
+      "alt": "結論是證據不足以宣稱這個指標有穩健的增量預測力，不等於已證實完全沒用。另外在兩個穩健性子樣本裡加了這個指標反而顯著變差，成分股資料也存在已下市股票缺漏造成的存活者偏誤。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "五分鐘的代數，省掉一整輪回測",
+          "body": [
+            "要往模型加新變數，先把新變數的定義展開，看它會不會被既有變數加減湊出來。",
+            "誠實版結論：證據不足以宣稱有穩健增量，不等於已證實沒用。兩個穩健性子樣本裡它反而顯著變差，資料也有已下市股票缺漏的偏誤。"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：印度股市的波動，該看孟買的恐慌指數還是華爾街的",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1717/k1717_results.json",
+      "sha256": "99caf99d225e687b563404b5ffe951c2475b6f2900eeee26d7a9a32039a4c70b",
+      "label": "experiment K1717 results (out-of-sample horse race testing whether India VIX or US VIX carries more usable information for forecasting NIFTY daily volatility, adjudicated against a pre-registered information gate)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_result_local",
+      "info": "results",
+      "style": "professional",
+      "title": "加華爾街的恐慌指數，比什麼都不加還糟",
+      "alt": "在看報酬序列估波動的那套模型裡，加入印度自己的恐慌指數把預測誤差壓低，加入美國恐慌指數反而讓誤差高於什麼都不加的基準，代表美國指數在這裡是負貢獻而不是幫助較小。",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "誤差分數越低越準",
+          "body": [
+            "同一套模型、同一段測試期，只換「額外餵它哪一個恐慌指數」。",
+            "印度自己的指數把誤差壓下去；華爾街那個不但沒幫上忙，還讓誤差高過什麼都不加的基準。這是負貢獻，不是幫助比較小。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "只用股價自己的歷史",
+          "value": {
+            "source": "results",
+            "path": "/oos/metrics/garch_base/qlike",
+            "format": { "kind": "number", "digits": 3 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "再加上印度自己的恐慌指數",
+          "value": {
+            "source": "results",
+            "path": "/oos/metrics/garch_x_india/qlike",
+            "format": { "kind": "number", "digits": 3 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "再加上華爾街的恐慌指數",
+          "value": {
+            "source": "results",
+            "path": "/oos/metrics/garch_x_us/qlike",
+            "format": { "kind": "number", "digits": 3 }
+          },
+          "note": "比什麼都不加還高"
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "professional",
+      "title": "換一套模型再測一次，方向一樣",
+      "alt": "改用看已實現波動往後推的另一套模型重測，印度恐慌指數同樣把誤差壓低、美國恐慌指數同樣讓誤差變高，顯示結論不是單一模型設定的產物；測試期涵蓋疫情崩盤與升息空頭。",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "不是單一模型的巧合",
+          "body": [
+            "換成另一套完全不同的做法：直接看過去已經發生的波動往後推。",
+            "方向一模一樣。測試期橫跨疫情崩盤與升息空頭，不是挑一段平靜行情測出來的。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "只用波動自己的歷史",
+          "value": {
+            "source": "results",
+            "path": "/oos/metrics/har_base/qlike",
+            "format": { "kind": "number", "digits": 3 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "再加上印度自己的恐慌指數",
+          "value": {
+            "source": "results",
+            "path": "/oos/metrics/har_x_india/qlike",
+            "format": { "kind": "number", "digits": 3 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "再加上華爾街的恐慌指數",
+          "value": {
+            "source": "results",
+            "path": "/oos/metrics/har_x_us/qlike",
+            "format": { "kind": "number", "digits": 3 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本外測試的交易日",
+          "value": {
+            "source": "results",
+            "path": "/oos/n_obs",
+            "format": { "kind": "integer" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "贏了，但門檻是事前立的，所以我們說沒過",
+      "alt": "兩場對決中，看已實現波動那套的統計強度遠超門檻，看報酬序列那套卻差一點；由於事先規定兩場都要過，整體判定不通過並跳過策略。若把統計平滑參數換成不平滑那一格，同一場對決就會通過，凸顯門檻必須在開跑前定好。",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "換個旋鈕就會過，所以旋鈕要事前鎖死",
+          "body": [
+            "兩場對決印度都贏，一場遠遠超過門檻，一場差一點。事先立的規則是兩場都要過，於是整體判定不通過，策略回測直接跳過。",
+            "同一場差一點的對決，若把統計平滑參數改成不平滑那一格，強度就會越過門檻。因為參數在開跑前就跟規則一起定死，所以沒得挑。看研究時先問一句：門檻是什麼時候定的。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "看已實現波動那套：統計強度",
+          "value": {
+            "source": "results",
+            "path": "/oos/dm_comparisons/primary_local_vs_us_har/t_stat",
+            "format": { "kind": "number", "digits": 3 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "看報酬序列那套：統計強度",
+          "value": {
+            "source": "results",
+            "path": "/oos/dm_comparisons/primary_local_vs_us_garch/t_stat",
+            "format": { "kind": "number", "digits": 3 }
+          },
+          "note": "門檻是絕對值超過三"
+        },
+        {
+          "kind": "metric",
+          "label": "同一場對決，改成不平滑那一格",
+          "value": {
+            "source": "results",
+            "path": "/oos/dm_comparisons/primary_local_vs_us_garch/hac_lag_sensitivity_dm_t/lag_0/t_stat",
+            "format": { "kind": "number", "digits": 3 }
+          },
+          "note": "這一格就會過"
+        }
+      ]
+    }
+  ]
+}

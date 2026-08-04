@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：七千億 AI 資本支出的恐懼，藏在指數裡不在個股裡",
+  "evidence": {
+    "skew": {
+      "path": "storage/drafts/assets/ai_capex_skew_20260728.json",
+      "sha256": "ab96aa99f49628c1172cd0b684372e0953c1943e803de8630673a267db2ee9db",
+      "label": "AI 六巨頭 vs 標普大盤 選擇權 IV skew 橫截面 (yfinance 即時擷取 2026-07-28)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "七千億資本支出，市場在怕什麼",
+      "alt": "四大雲端業者今年資本支出合計約七千兩百五十億美元、年增七成七，熱門敘事是資本支出泡沫將導致科技股崩盤",
+      "sources": ["skew"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "熱門主張",
+          "body": [
+            "四大雲端今年資本支出合計約七千兩百五十億美元，比去年暴增七成七。",
+            "新聞版本：這是資本支出泡沫，下一步是科技股崩盤。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "AI 六巨頭平均平價隱含波動率",
+          "value": { "source": "skew", "path": "/summary/ai_mean_atm_iv", "format": { "kind": "percent", "digits": 1 } }
+        },
+        {
+          "kind": "metric",
+          "label": "標普大盤 平價隱含波動率",
+          "value": { "source": "skew", "path": "/summary/bench_atm_iv", "format": { "kind": "percent", "digits": 1 } }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "讀選擇權的帳單，不猜情緒",
+      "alt": "以即時選擇權鏈計算約三十天到期的下檔偏斜與風險逆轉，比較六檔 AI 資本支出主力與 標普大盤 指數",
+      "sources": ["skew"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "量什麼",
+          "body": [
+            "下檔偏斜＝價外賣權 IV 減平價 IV；越大代表越急著買下跌保護。",
+            "風險逆轉＝價外賣權減價外買權 IV；正值＝怕跌多過怕漲，趨近零＝兩面對稱。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "橫截面標的（AI 主力）",
+          "value": { "source": "skew", "path": "/summary/n_ai", "format": { "kind": "integer", "suffix": " 檔" } }
+        },
+        {
+          "kind": "metric",
+          "label": "選擇權到期天數",
+          "value": { "source": "skew", "path": "/summary/target_dte", "format": { "kind": "integer", "suffix": " 天" } }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "崩盤險買在指數，不在個股",
+      "alt": "六巨頭的下檔偏斜與風險逆轉幾乎為零，標普大盤 卻有陡峭的下檔偏斜與高風險逆轉，恐懼集中在指數層次",
+      "sources": ["skew"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "AI 六巨頭平均風險逆轉",
+          "value": { "source": "skew", "path": "/summary/ai_mean_rr", "format": { "kind": "number", "scale": 100, "digits": 1, "show_plus": true, "suffix": " pt" } }
+        },
+        {
+          "kind": "metric",
+          "label": "標普大盤 風險逆轉",
+          "value": { "source": "skew", "path": "/summary/bench_rr", "format": { "kind": "number", "scale": 100, "digits": 1, "show_plus": true, "suffix": " pt" } }
+        },
+        {
+          "kind": "metric",
+          "label": "AI 六巨頭平均下檔偏斜",
+          "value": { "source": "skew", "path": "/summary/ai_mean_put_skew", "format": { "kind": "number", "scale": 100, "digits": 1, "show_plus": true, "suffix": " pt" } }
+        },
+        {
+          "kind": "metric",
+          "label": "標普大盤 下檔偏斜",
+          "value": { "source": "skew", "path": "/summary/bench_put_skew", "format": { "kind": "number", "scale": 100, "digits": 1, "show_plus": true, "suffix": " pt" } }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "恐懼沒消失，它換了地址",
+      "alt": "個股被定價成兩面對稱的財報擲硬幣，真正的系統性尾部避險需求流向指數賣權，把 標普大盤 的下檔偏斜頂高",
+      "sources": ["skew"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "結論",
+          "body": [
+            "個股：被定價成兩面對稱的財報擲硬幣，貴在幅度不在方向。",
+            "指數：真正的崩盤險買在這裡，標普大盤 下檔偏斜一柱獨高。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "為什麼",
+          "body": [
+            "單一財報是特異風險，兩面都有；資本支出把六巨頭綁成共同曝險包。",
+            "對沖齊漲齊跌的系統性尾部，最有效率的工具是指數賣權，不是個股。"
+          ]
+        }
+      ]
+    }
+  ]
+}

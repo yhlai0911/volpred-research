@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：估「四檔怎麼一起動」有用，再疊一層預測就沒用了",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1714/K1714_results.json",
+      "sha256": "ffff1ea46dcc7e6c701da3370ff568ef8edfe4eaa2b39e716e6563af7a85630a",
+      "label": "experiment K1714 results (out-of-sample minimum-variance portfolio horse race on SPY/QQQ/GLD/TLT, testing whether a three-window extrapolation rule applied to the realized covariance matrix beats rolling-sample, shrinkage and exponentially-weighted covariance estimators; sample 2007-12-27 to 2026-07-15)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_numbers",
+      "info": "results",
+      "style": "professional",
+      "title": "估計把波動壓下來，多做那一步又推回去",
+      "alt": "四檔美股 ETF 組成最小波動組合。四檔等權、完全不估計時，樣本外年化波動最高；動手估四檔之間的連動關係、用最省事的指數衰減加權，波動明顯降下來；在同一張矩陣上再疊一層三段平均的外推規則，波動又回升，成為四種估法裡最高的一個。",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "同一組資產，只換算權重的輸入怎麼估",
+          "body": [
+            "SPY、QQQ、GLD、TLT 四檔，每五個交易日重配一次，權重只為了把整個組合的波動壓到最低。",
+            "先估「四檔彼此怎麼一起動」，波動明顯降下來。但在估好的矩陣上再疊一層預測規則，波動又被推了回去。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "完全不估計，四檔等權",
+          "value": {
+            "source": "results",
+            "path": "/headline/ann_vol/equal_weight",
+            "format": { "kind": "percent", "digits": 3 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "估了，用最省事的指數衰減加權",
+          "value": {
+            "source": "results",
+            "path": "/headline/ann_vol/ewma",
+            "format": { "kind": "percent", "digits": 3 }
+          },
+          "note": "四種估法裡最低"
+        },
+        {
+          "kind": "metric",
+          "label": "估了之後，再疊一層預測規則",
+          "value": {
+            "source": "results",
+            "path": "/headline/ann_vol/har_rcov_chol",
+            "format": { "kind": "percent", "digits": 3 }
+          },
+          "note": "四種估法裡最高"
+        }
+      ]
+    },
+    {
+      "name": "panel_framework",
+      "info": "method",
+      "style": "professional",
+      "title": "換最多手，買到最差的結果",
+      "alt": "受測做法與指數衰減加權的波動差距，相對於差距自身的估計誤差有多大，是判斷這個落後值不值得信的關鍵；這個專案的內規門檻是超過三倍。三個對照組一起做多重比較校正後的機率、以及另外用兩千次區塊重抽樣重算的機率，兩種互不相關的算法指向同一邊。受測做法的年換手次數是全場最高，卻拿到最高的波動。",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩種算法都指向同一邊",
+          "body": [
+            "落後這幾個百分點值不值得信，要看它相對於自身誤差有多大，這個專案的內規是要超過三倍。",
+            "換一種完全不靠假設的算法：把每日損失差切成一段一段，隨機重排出兩千個假的歷史，看反方向會出現幾次。答案指向同一邊。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "差距是自身誤差的幾倍",
+          "value": {
+            "source": "results",
+            "path": "/results_by_block_length/block_5d/inference/tests/ewma/t_stat",
+            "format": { "kind": "number", "digits": 2 }
+          },
+          "note": "門檻是超過三"
+        },
+        {
+          "kind": "metric",
+          "label": "資產排序全部換過一遍，最好的一次",
+          "value": {
+            "source": "results",
+            "path": "/results_by_block_length/block_5d/cholesky_permutation_sensitivity/ann_vol_min",
+            "format": { "kind": "percent", "digits": 3 }
+          },
+          "note": "仍高於最省事那條"
+        },
+        {
+          "kind": "metric",
+          "label": "受測做法每年換手次數",
+          "value": {
+            "source": "results",
+            "path": "/results_by_block_length/block_5d/metrics/har_rcov_chol/turnover_annualized",
+            "format": { "kind": "number", "digits": 2 }
+          },
+          "note": "全場最高，波動也最高"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "誠實的裂縫：拉長重配頻率就只是打平",
+      "alt": "把重配頻率從五個交易日拉到十個交易日，受測做法與指數衰減加權的年化波動幾乎重疊，差距相對自身誤差遠低於門檻，判定從顯著更差退成打平；兩種區塊長度的判定並不一致。但跑遍所有設定，受測做法沒有一次顯著打敗過任何一個對照組。",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "結論綁在重配頻率上，這點要講清楚",
+          "body": [
+            "同一套資料、同一批資產，只把重配頻率從五個交易日換成十個交易日，「顯著更差」就退成「打不贏」。",
+            "反過來說也成立：跑遍所有設定，受測做法沒有一次顯著打敗過任何對照組。看研究結論時值得多問一句，換個設定它還站得住嗎。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "拉長重配頻率：受測做法",
+          "value": {
+            "source": "results",
+            "path": "/results_by_block_length/block_10d/metrics/har_rcov_chol/ann_vol",
+            "format": { "kind": "percent", "digits": 3 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "拉長重配頻率：指數衰減加權",
+          "value": {
+            "source": "results",
+            "path": "/results_by_block_length/block_10d/metrics/ewma/ann_vol",
+            "format": { "kind": "percent", "digits": 3 }
+          },
+          "note": "兩者幾乎重疊"
+        },
+        {
+          "kind": "metric",
+          "label": "這時差距是自身誤差的幾倍",
+          "value": {
+            "source": "results",
+            "path": "/results_by_block_length/block_10d/inference/tests/ewma/t_stat",
+            "format": { "kind": "number", "digits": 2 }
+          },
+          "note": "遠低於門檻三"
+        }
+      ]
+    }
+  ]
+}

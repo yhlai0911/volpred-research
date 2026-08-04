@@ -1,0 +1,56 @@
+{
+  "_provenance": {
+    "as_of_market": "2026-07-30 US close",
+    "built_for": "daily_digest_20260801 summary poster",
+    "sources": {
+      "current_state": "experiments/nfp_20260807_t7/nfp_t7_results.json + mile_9d740075 daily strategy report (2026-07-31, based on 2026-07-30 close)",
+      "regime": "mile_eda69bfb (194 NFP releases, 2010-01-01..2026-03-30) and mile_35eef830 (254 NFP releases, 2005-02-04..2026-03-06)",
+      "magnifier": "mile_35eef830 (NFP ratios) and mile_b7e98682 (96 tech earnings events, 2023-07-20..2026-05-21)",
+      "premium": "mile_9560b9cc (2026-07-10 close) and mile_e4803162 (CPI 2026-07-14 timeline)",
+      "duration": "mile_b7e98682 (event-time decay) and mile_84e3be0a (release-day VIX change, n=191)",
+      "control": "mile_84e3be0a (191 NFP pre-event windows vs 1485 non-event windows, ALFRED release id 50)"
+    }
+  },
+  "current_state": {
+    "vix_close": 17.09,
+    "vix_band_label": "15-20",
+    "model_annual_vol_pct": 16.3,
+    "vix_implied_daily_pct": 1.08,
+    "next_release_date": "2026-08-07"
+  },
+  "regime": {
+    "band_nfp_abs_return_pct": 0.788,
+    "low_vix_abs_return_pct": 0.527,
+    "high_vix_abs_return_pct": 1.417,
+    "nonevent_abs_return_pct": 0.714,
+    "low_vix_n": 63,
+    "high_vix_n": 28,
+    "regime_gap_ratio": 2.17
+  },
+  "magnifier": {
+    "nfp_vs_all_days_ratio": 1.1,
+    "nfp_vs_friday_ratio": 1.17,
+    "earnings_day_ratio": 3.82,
+    "earnings_events_n": 96
+  },
+  "premium": {
+    "cpi_iv_rv_gap_points": 0.26,
+    "cpi_pre_day_vix_jump_pct": 14.17,
+    "cpi_release_day_vix_pct": -3.85,
+    "cpi_next_day_vix_pct": -5.03
+  },
+  "duration": {
+    "earnings_d1_ratio": 1.53,
+    "earnings_d2_ratio": 1.18,
+    "nfp_release_day_vix_mean_pct": -1.3,
+    "nfp_release_day_vix_median_pct": -3.0
+  },
+  "control": {
+    "nfp_pre_week_mean_pct": 1.63,
+    "normal_week_mean_pct": 0.36,
+    "welch_p": 0.342,
+    "mann_whitney_p": 0.637,
+    "events_n": 191,
+    "control_windows_n": 1485
+  }
+}

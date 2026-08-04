@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：波動率的三個時態，和你今天該不該減碼",
+  "subtitle": "依美股前一交易日收盤，配八篇已發佈研究的實測價碼",
+  "evidence": {
+    "ev": {
+      "path": "storage/drafts/assets/vol_three_tenses_20260730.json",
+      "sha256": "867ae010effc7e04943121cfa3cd6b76705b301b54351ffdd8ee8afbad51836a",
+      "label": "2026-07-30 精選導讀證據包（今日讀數取自同日每日策略建議與持倉建議；研究數字逐字取自八篇已發佈來源文章）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_three_tenses",
+      "info": "concept",
+      "style": "editorial",
+      "title": "波動率的三個時態",
+      "alt": "框架卡：把恐慌指數、模型預測、今日實際跌幅分別放進未來式、過去式、現在式三格，各自標明它注定慢多久、以及能決定什麼",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "三個數字，三個時態",
+          "body": [
+            "過去式＝用歷史報酬算出來的波動率預測。它只認得已經發生的事，所以只配決定部位大小，不決定進出時點。",
+            "現在式＝今天已經跳完的那一下。零延遲，但也不可交易；它能告訴你的是恐懼寄到哪個地址。",
+            "未來式＝恐慌指數，是保險公司報給你的價錢，不是預測。它決定避險的價碼貴不貴，不決定方向。",
+            "三個數字打架，是因為它們被當成同一個問題。落差是換算誤差，也就是保費。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "未來式：恐慌指數報價",
+          "value": { "source": "ev", "path": "/today/vix", "format": { "kind": "number", "digits": 2 } },
+          "note": "前一交易日還停在正常帶，一夜跨進偏高帶"
+        },
+        {
+          "kind": "metric",
+          "label": "過去式：模型年化波動率",
+          "value": { "source": "ev", "path": "/today/model_annualized_vol_pct", "format": { "kind": "number", "digits": 1, "suffix": "%" } },
+          "note": "前一交易日的讀數更低，模型跟得上但跟得慢"
+        },
+        {
+          "kind": "metric",
+          "label": "現在式：美股大盤單日漲跌",
+          "value": { "source": "ev", "path": "/today/spy_change_pct", "format": { "kind": "number", "digits": 2, "suffix": "%" } },
+          "note": "同一天黃金反向收漲，跌的是股票這一側"
+        },
+        {
+          "kind": "metric",
+          "label": "報價減模型＝保費（個百分點）",
+          "value": { "source": "ev", "path": "/today/premium_gap_pp", "format": { "kind": "number", "digits": 2 } },
+          "note": "不是誰比較準，是兩把尺換算的差"
+        }
+      ]
+    },
+    {
+      "name": "panel-price-tags",
+      "info": "results",
+      "style": "professional",
+      "title": "每個時態的實測價碼",
+      "alt": "結果卡：恐慌指數只在極端帶有料、中間帶接近於零；看盤節奏改成一週一次價值大增；短端跑贏長端是唯一測出隔日效力的用法；模型的機率承諾會失準",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "恐慌指數落在中間帶時的預測改善",
+          "value": { "source": "ev", "path": "/future_tense/vix_mid_band_improvement_pct", "format": { "kind": "number", "digits": 1, "suffix": "%", "show_plus": true } },
+          "note": "今天的讀數剛好落在這一格，等於幾乎沒開口"
+        },
+        {
+          "kind": "metric",
+          "label": "落在極端恐慌帶時的預測改善",
+          "value": { "source": "ev", "path": "/future_tense/vix_high_band_improvement_pct", "format": { "kind": "number", "digits": 1, "suffix": "%", "show_plus": true } },
+          "note": "十年美股大盤資料；兩端有料、中間沒有"
+        },
+        {
+          "kind": "metric",
+          "label": "看盤節奏改成一週一次的價值",
+          "value": { "source": "ev", "path": "/future_tense/window_weekly_improvement_pct", "format": { "kind": "number", "digits": 1, "suffix": "%", "show_plus": true } },
+          "note": "同一個指標，改成一個月窗口就轉為負值"
+        },
+        {
+          "kind": "metric",
+          "label": "短端跑贏長端：唯一測出隔日效力的用法（誤差改善）",
+          "value": { "source": "ev", "path": "/future_tense/term_structure_error_cut_pct", "format": { "kind": "number", "digits": 2, "suffix": "%" } },
+          "note": "看形狀不看絕對值；樣本外天數見來源文章"
+        },
+        {
+          "kind": "metric",
+          "label": "最嚴格損失警戒線的承諾破線率",
+          "value": { "source": "ev", "path": "/past_tense/promised_breach_rate_pct", "format": { "kind": "number", "digits": 1, "suffix": "%" } },
+          "note": "承諾是長期每百個交易日大約破一次"
+        },
+        {
+          "kind": "metric",
+          "label": "同一批資料裡最差版本的實際破線率",
+          "value": { "source": "ev", "path": "/past_tense/worst_actual_breach_rate_pct", "format": { "kind": "number", "digits": 2, "suffix": "%" } },
+          "note": "約每十一個交易日就響一次，四項檢查零通過"
+        }
+      ]
+    },
+    {
+      "name": "panel_cut_or_not",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "該不該減碼：先看帳單",
+      "alt": "結論卡：帳面回撤改善主要來自曝險變小，拉齊風險後優勢翻負，風險報酬比沒有一個市場變好，減碼是尺度調整不是擇時能力",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "減碼實際買到什麼",
+          "body": [
+            "回撤變淺，因為放的部位變少了。任何人等比例縮小持股都能複製同樣的改善。",
+            "把對照組也縮到同樣的實際波動再比一次，帳面優勢就翻到負的那一邊。",
+            "所以減碼是尺度調整，歸過去式管；它不是擇時能力，也不歸恐慌指數的絕對值管。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "帳面最大回撤改善（個百分點）",
+          "value": { "source": "ev", "path": "/cut_decision/headline_drawdown_gain_pp", "format": { "kind": "number", "digits": 2, "show_plus": true } },
+          "note": "受測市場全數改善，這是原本的招牌數字"
+        },
+        {
+          "kind": "metric",
+          "label": "拉齊風險後的回撤改善（個百分點）",
+          "value": { "source": "ev", "path": "/cut_decision/risk_matched_drawdown_gain_pp", "format": { "kind": "number", "digits": 2 } },
+          "note": "正負號翻面，跨市場正負個數接近擲硬幣"
+        },
+        {
+          "kind": "metric",
+          "label": "風險報酬比變好的市場個數",
+          "value": { "source": "ev", "path": "/cut_decision/markets_risk_reward_improved", "format": { "kind": "integer" } },
+          "note": "受測市場總數見來源文章；一個都沒有"
+        },
+        {
+          "kind": "metric",
+          "label": "策略平均放的股票比重",
+          "value": { "source": "ev", "path": "/cut_decision/avg_equity_weight_pct", "format": { "kind": "number", "digits": 0, "suffix": "%" } },
+          "note": "實際波動比買進持有低了三分之一上下"
+        }
+      ]
+    }
+  ]
+}

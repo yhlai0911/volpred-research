@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "title": "放大鏡不會自己發光",
+  "subtitle": "非農週買保護之前，先填完四格：光源、倍率、價錢、時效",
+  "evidence": {
+    "digest": {
+      "path": "storage/lazypack_jobs/daily_digest_20260801/evidence.json",
+      "sha256": "d5749a27c339644d2b14254589e17435f90eb7c97c07f2dba4cfb610fd5828bb",
+      "label": "非農避險四格證據快照（as-of 美股 2026-07-30 收盤）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_framework",
+      "info": "concept",
+      "style": "editorial",
+      "title": "事件是放大鏡，體制才是光源",
+      "subtitle": "房間本來多亮，決定了聚出來的亮點有多亮",
+      "alt": "框架卡：非農公佈日的波動由進場時的 VIX 體制決定，事件本身只是放大倍率",
+      "sources": ["digest"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "低 VIX 進場的非農日波動",
+          "value": {
+            "source": "digest",
+            "path": "/regime/low_vix_abs_return_pct",
+            "format": {"kind": "number", "digits": 3, "suffix": "%"}
+          },
+          "note": "比普通交易日的平均還安靜"
+        },
+        {
+          "kind": "metric",
+          "label": "高 VIX 進場的非農日波動",
+          "value": {
+            "source": "digest",
+            "path": "/regime/high_vix_abs_return_pct",
+            "format": {"kind": "number", "digits": 3, "suffix": "%"}
+          },
+          "note": "同樣是非農，房間亮度不同"
+        },
+        {
+          "kind": "metric",
+          "label": "普通交易日的平均波動",
+          "value": {
+            "source": "digest",
+            "path": "/regime/nonevent_abs_return_pct",
+            "format": {"kind": "number", "digits": 3, "suffix": "%"}
+          },
+          "note": "低體制的非農日還低於這條線"
+        },
+        {
+          "kind": "text",
+          "heading": "四格怎麼填",
+          "body": [
+            "光源：進場那天的恐慌指數站在哪一格，決定基準震幅。",
+            "倍率：這一類事件歷史上放大幾倍，非農與個股財報差一個量級。",
+            "價錢：保險報價比已知波動高出多少，才是保護的成本。",
+            "時效：放大集中在公佈日與隔天，多蓋的天數是純付出的時間價值。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_numbers",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "放大鏡不會提前發光，也不會延後發光",
+      "subtitle": "事件前一週對照組檢定，加上放大倍率與衰減速度",
+      "alt": "結果卡：非農前一週與普通區間的 VIX 變化差異未達顯著，事件放大倍率與衰減天數對照",
+      "sources": ["digest"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "非農前一週 VIX 平均變化",
+          "value": {
+            "source": "digest",
+            "path": "/control/nfp_pre_week_mean_pct",
+            "format": {"kind": "number", "digits": 2, "suffix": "%", "show_plus": true}
+          },
+          "note": {
+            "template": "樣本 {n} 次公佈日",
+            "bindings": {
+              "n": {
+                "source": "digest",
+                "path": "/control/events_n",
+                "format": {"kind": "integer"}
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "沒有非農的同長度區間",
+          "value": {
+            "source": "digest",
+            "path": "/control/normal_week_mean_pct",
+            "format": {"kind": "number", "digits": 2, "suffix": "%", "show_plus": true}
+          },
+          "note": {
+            "template": "對照組 {n} 段區間",
+            "bindings": {
+              "n": {
+                "source": "digest",
+                "path": "/control/control_windows_n",
+                "format": {"kind": "integer", "thousands": true}
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "兩者差異的顯著性",
+          "value": {
+            "source": "digest",
+            "path": "/control/welch_p",
+            "format": {"kind": "number", "digits": 3}
+          },
+          "note": "遠在門檻之外，看不出差別"
+        },
+        {
+          "kind": "metric",
+          "label": "非農日相對普通日的放大",
+          "value": {
+            "source": "digest",
+            "path": "/magnifier/nfp_vs_all_days_ratio",
+            "format": {"kind": "number", "digits": 2, "suffix": " 倍"}
+          },
+          "note": "校正多重比較後未達顯著"
+        },
+        {
+          "kind": "metric",
+          "label": "個股財報日的放大",
+          "value": {
+            "source": "digest",
+            "path": "/magnifier/earnings_day_ratio",
+            "format": {"kind": "number", "digits": 2, "suffix": " 倍"}
+          },
+          "note": "同樣叫事件，規格差一個量級"
+        },
+        {
+          "kind": "metric",
+          "label": "財報後第二天的放大",
+          "value": {
+            "source": "digest",
+            "path": "/duration/earnings_d2_ratio",
+            "format": {"kind": "number", "digits": 2, "suffix": " 倍"}
+          },
+          "note": "放大只撐一天到一天半，之後測不出來"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "八月七日這一次，四格填出來的答案",
+      "subtitle": "燈是黃色的，沒有給出提前佈局波動率的理由",
+      "alt": "結論卡：以最新美股收盤讀數填完四格，非農週不構成提前避險的依據",
+      "sources": ["digest"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "光源｜恐慌指數收盤",
+          "value": {
+            "source": "digest",
+            "path": "/current_state/vix_close",
+            "format": {"kind": "number", "digits": 2}
+          },
+          "note": "落在中間那一格，不是暗房間也不是亮房間"
+        },
+        {
+          "kind": "metric",
+          "label": "光源｜這一格的歷史非農日基準",
+          "value": {
+            "source": "digest",
+            "path": "/regime/band_nfp_abs_return_pct",
+            "format": {"kind": "number", "digits": 3, "suffix": "%"}
+          },
+          "note": "中間偏低"
+        },
+        {
+          "kind": "metric",
+          "label": "價錢｜報價換算的單日隱含波動",
+          "value": {
+            "source": "digest",
+            "path": "/current_state/vix_implied_daily_pct",
+            "format": {"kind": "number", "digits": 2, "suffix": "%"}
+          },
+          "note": "高於歷史基準，保護不算便宜"
+        },
+        {
+          "kind": "metric",
+          "label": "時效｜公佈日恐慌指數變化中位數",
+          "value": {
+            "source": "digest",
+            "path": "/duration/nfp_release_day_vix_median_pct",
+            "format": {"kind": "number", "digits": 2, "suffix": "%"}
+          },
+          "note": "不確定性解除之後，保費就退場"
+        },
+        {
+          "kind": "text",
+          "heading": "邊界",
+          "body": [
+            "四格全部回答幅度，不回答方向；跳多大有規律，往哪邊跳沒有。",
+            "分組後每格樣本有限，測不出差別不等於差別是零。",
+            "全部使用日收盤，公佈當下的日內跳動沒有進來。",
+            "這是歷史統計整理，不是測過績效的策略，也不構成投資建議。"
+          ]
+        }
+      ]
+    }
+  ]
+}

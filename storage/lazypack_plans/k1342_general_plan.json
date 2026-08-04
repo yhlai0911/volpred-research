@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：收盤前的買賣壓，用免費資料能看出方向嗎",
+  "evidence": {
+    "results": {
+      "path": "experiments/K1342/K1342_results.json",
+      "sha256": "09fadc20e10225d6d72bf3b7fe8ac23e6f432a941b67f0171ed944ae00ced678",
+      "label": "experiment K1342 results (free public-data proxy for NYSE/Nasdaq closing-auction MOC imbalance: signed-volume pressure measured 15:30-15:48 ET, tested against three holding windows on 10 US tickers after a 3.4 bps round-trip cost; overall verdict NULL)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "professional",
+      "title": "付費的資料買不起，先用免費的湊一個代理",
+      "alt": "交易所在美東時間下午三點五十公布收盤競價的委託失衡，但即時資料要付費。這份研究改用免費的兩分鐘價量，在三點三十到三點四十八分之間把每根的漲跌方向乘上成交量再加總、除以總量，得到一個帶正負號的買賣壓；視窗刻意停在失衡公布之前，樣本為十檔美股在二十九個交易日、兩百九十個標的日，交易成本以來回三點四個基點計。",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "訊號只用公布之前的資料",
+          "body": [
+            "交易所在下午三點五十公布收盤競價的買賣失衡，但即時資料要付費。",
+            "改用免費的兩分鐘價量：每一根標上漲或跌，掛上該根成交量，加總後除以總量，得到一個介於正負一之間的買賣壓。視窗停在三點四十八分，三點五十之後的資料一格都沒進來。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "訊號視窗（美東時間）",
+          "value": {
+            "source": "results",
+            "path": "/signal_definition/signal_window_et",
+            "format": { "kind": "text" }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "測到的標的日",
+          "value": {
+            "source": "results",
+            "path": "/sample/n_observations_all",
+            "format": { "kind": "integer" }
+          },
+          "note": "十檔標的、二十九個交易日"
+        },
+        {
+          "kind": "metric",
+          "label": "來回交易成本（基點）",
+          "value": {
+            "source": "results",
+            "path": "/round_trip_cost_bps",
+            "format": { "kind": "number", "digits": 1 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "professional",
+      "title": "三種抱法，扣完成本都不成立",
+      "alt": "順著買賣壓做，從十五點五十二分抱到收盤扣成本後平均每次負四點一三個基點，統計強度負三點一一；抱到隔日開盤剩正一點六一、抱到隔日收盤有正十六點五七，但這兩格的統計強度分別只有零點二一與零點八一，光靠運氣就能做到的機率分別是零點三八與零點二二，六個組合做完多重比較校正後全部等於一。",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "最好看的那一格也站不住",
+          "body": [
+            "抱到隔日收盤的正十六點五七個基點最有畫面感，但光靠運氣就能跑出這種成績的機率是零點二二，每五次就有一次。",
+            "最短的那一段方向相反，而且還沒扣成本就已經是負的。六個組合一起做多重比較校正之後，機率全部變成一。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "十五點五十二分到收盤，扣成本後（基點）",
+          "value": {
+            "source": "results",
+            "path": "/pooled_daily_equal_weight/all_days/late_close/net_mean_bps",
+            "format": { "kind": "number", "digits": 2, "show_plus": true }
+          },
+          "note": "統計強度負三點一一"
+        },
+        {
+          "kind": "metric",
+          "label": "收盤抱到隔日開盤，扣成本後（基點）",
+          "value": {
+            "source": "results",
+            "path": "/pooled_daily_equal_weight/all_days/overnight_open/net_mean_bps",
+            "format": { "kind": "number", "digits": 2, "show_plus": true }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "收盤抱到隔日收盤，扣成本後（基點）",
+          "value": {
+            "source": "results",
+            "path": "/pooled_daily_equal_weight/all_days/next_close/net_mean_bps",
+            "format": { "kind": "number", "digits": 2, "show_plus": true }
+          },
+          "note": "運氣就能做到的機率零點二二"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "訊號越強越往反方向跑，但反著做這件事我沒檢定過",
+      "alt": "只留買賣壓最明顯的日子之後，收盤前那一段從負四點一三惡化到負六點六九，未扣成本的勝率只剩三成五。看起來像是反著做會賺，但這次的檢定是單尾、方向鎖在順著做那一邊，並沒有檢定過反向；而且反向的未扣成本空間只有三點二九個基點，比三點四個基點的來回成本還小。",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "看得到，吃不到",
+          "body": [
+            "把雜訊篩掉之後，收盤前那一段虧得更多，形狀很像在說反著做會賺。",
+            "這次的檢定是單尾的，方向鎖在順著做那一邊，反向從頭到尾沒有被檢定過。何況反向的未扣成本空間只有三點二九個基點，比三點四個基點的來回成本還小。",
+            "測到的是免費價量代理，不是交易所發出來的失衡數字。這裡的沒有發現，推不到付費資料那一層。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "只留壓力最明顯的日子，扣成本後（基點）",
+          "value": {
+            "source": "results",
+            "path": "/pooled_daily_equal_weight/high_pressure_days/late_close/net_mean_bps",
+            "format": { "kind": "number", "digits": 2, "show_plus": true }
+          },
+          "note": "全部日子是負四點一三"
+        },
+        {
+          "kind": "metric",
+          "label": "同一格未扣成本（基點）",
+          "value": {
+            "source": "results",
+            "path": "/pooled_daily_equal_weight/high_pressure_days/late_close/gross_mean_bps",
+            "format": { "kind": "number", "digits": 2, "show_plus": true }
+          },
+          "note": "反過來做的空間就是這麼大，比成本小"
+        },
+        {
+          "kind": "metric",
+          "label": "整份測試涵蓋的交易日",
+          "value": {
+            "source": "results",
+            "path": "/sample/n_dates_all",
+            "format": { "kind": "integer" }
+          },
+          "note": "一個多月，樣本很短"
+        }
+      ]
+    }
+  ]
+}

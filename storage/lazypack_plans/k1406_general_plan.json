@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "title": "K1406 懶人包：一筆錢一次進場還是分批，看你用哪把尺量",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1406/k1406_results.json",
+      "sha256": "987c21750eedc8a1d94bcdc6cb5ae7f79c06b8e9ae6548b10615ebcbdf353d76",
+      "label": "experiment K1406 results (lump-sum vs staged entry and dip-buying, conditional block bootstrap on US and Taiwan broad-market ETFs)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "手上一筆錢，今天全下還是每月扔一點",
+      "alt": "年終獎金或賣房款進帳後最常見的抉擇；本研究拿美股大盤與台股大盤二十年上下的日收盤價，把日報酬切成二十天一段隨機重抽、接成一年與三年的新路徑，比較一次投入與分批投入",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "為什麼要重抽，不直接回測",
+          "body": [
+            "直接挑一段歷史回測只會得到一個答案，開始的年份不同，結論可以完全相反。",
+            "所以把日報酬切成二十天一段隨機重接。切段是為了留住壞日子會黏在一起的特性，逐日打散會把它洗掉。亂數種子固定，整份結果可重跑。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "美股樣本交易日數",
+          "value": {
+            "source": "results",
+            "path": "/data/SPY/n_days",
+            "format": {"kind": "integer"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股樣本交易日數",
+          "value": {
+            "source": "results",
+            "path": "/data/0050.TW/n_days",
+            "format": {"kind": "integer"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "分批投入拆成幾期",
+          "value": {
+            "source": "results",
+            "path": "/dca_periods",
+            "format": {"kind": "integer"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_two_yardsticks",
+      "info": "results",
+      "style": "professional",
+      "title": "同一批路徑，換把尺就換個答案",
+      "alt": "用期末金額量，一次投入四次裡贏三次；改用每一塊錢待在市場裡的年化報酬率量，勝率掉回擲硬幣水準；再把路徑按走勢拆開，上漲路徑幾乎全贏、下跌路徑幾乎全輸",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "贏的是時間，不是眼光",
+          "body": [
+            "一次投入的期末金額贏面很穩，跨美股台股、跨一年三年都差不多。原因是分批的最後幾期要等好幾個月才進場。",
+            "但按每一塊錢實際待在市場裡的時間換算年化，兩種做法基本上打平。分批沒有比較會挑時機，只是讓比較少的錢曝險比較短的時間。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "一次投入的期末金額勝率",
+          "value": {
+            "source": "results",
+            "path": "/verdicts/proposition_A/mean_lump_win_rate_fv",
+            "format": {"kind": "percent", "digits": 1}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "一次投入的資金效率勝率",
+          "value": {
+            "source": "results",
+            "path": "/verdicts/proposition_A/mean_lump_win_rate_irr",
+            "format": {"kind": "percent", "digits": 1}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美股一年期，上漲路徑裡一次投入的勝率",
+          "value": {
+            "source": "results",
+            "path": "/results/SPY_1y/group_a/bull/lump_win_rate_fv",
+            "format": {"kind": "percent", "digits": 1}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美股一年期，下跌路徑裡一次投入的勝率",
+          "value": {
+            "source": "results",
+            "path": "/results/SPY_1y/group_a/bear/lump_win_rate_fv",
+            "format": {"kind": "percent", "digits": 1}
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "把錢留著等回檔，代價在哪裡",
+      "alt": "以從近期高點回檔一成為進場門檻，四種市場與期間組合的勝率全部低於五成；等待期間資金有相當比例躺在帳戶裡沒進場，還有一部分路徑整段期間根本等不到那個回檔",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "等到的那幾次，補不回等待的成本",
+          "body": [
+            "在下跌路徑裡等回檔確實會贏，而且贏很多。問題是你事前分不出來自己站在哪一組。",
+            "平均下來，閒置的成本壓過偶爾抓到的低點。門檻拉得越高越難等到，錢空手站在場邊的時間也越長。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "等回檔贏過照表操課的比例",
+          "value": {
+            "source": "results",
+            "path": "/verdicts/proposition_B/mean_dip_win_rate_fv_at_10pct",
+            "format": {"kind": "percent", "digits": 1}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "資金平均閒置的時間比例",
+          "value": {
+            "source": "results",
+            "path": "/verdicts/proposition_B/mean_cash_drag_at_10pct",
+            "format": {"kind": "percent", "digits": 1}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "整段期間等不到回檔的比例",
+          "value": {
+            "source": "results",
+            "path": "/verdicts/proposition_B/mean_never_triggered_rate_at_10pct",
+            "format": {"kind": "percent", "digits": 1}
+          }
+        }
+      ]
+    }
+  ]
+}

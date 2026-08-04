@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "title": "三種跌法，一張理賠表",
+  "subtitle": "Fed 有人要求升息之後，四張避險保單各自賠哪一種跌",
+  "evidence": {
+    "matrix": {
+      "path": "storage/drafts/assets/hedge_claims_matrix_20260731.json",
+      "sha256": "75da60af24620213eb56065e6b5bccbc1e6db34abbd8552b0f46a583d24947a7",
+      "label": "2026-07-31 精選導讀證據包：三種跌法 × 四張避險工具的理賠對照數值，逐字取自八篇已發佈文章與當日每日策略建議"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "跌有三種成因，保單只賠其中一兩種",
+      "alt": "框架卡：把帳戶下跌拆成股票自己跌、利率往上壓、通膨吃購買力三種成因，說明多數人的避險部位是照第一種買的，而這場 FOMC 的反對票指向第二與第三種。",
+      "sources": ["matrix"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "三種跌法",
+          "body": [
+            "A 股票自己跌：獲利下修、估值太貴、風險趨避發作。",
+            "B 利率往上壓：標的沒出事，折現率變了，長債持有人先受傷。",
+            "C 通膨吃購買力：名目數字沒動，能買到的東西變少。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "四張保單",
+          "body": [
+            "長天期公債、抗通膨債、黃金、買恐慌指數或選擇權。",
+            "每一張都有理賠範圍，沒有一張是全險。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "決議日恐慌指數跳幅（點）",
+          "value": {
+            "source": "matrix",
+            "path": "/anchor/vix_jump_points",
+            "format": {"kind": "number", "digits": 2, "show_plus": true}
+          },
+          "note": "落在近七年排定決議日的高百分位"
+        },
+        {
+          "kind": "metric",
+          "label": "要求升息的反對票（張）",
+          "value": {
+            "source": "matrix",
+            "path": "/anchor/dissent_votes",
+            "format": {"kind": "integer"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "兩天後的恐慌指數讀數",
+          "value": {
+            "source": "matrix",
+            "path": "/anchor/vix_20260731",
+            "format": {"kind": "number", "digits": 2}
+          },
+          "note": "帳面回到正常帶，風險方向沒有回去"
+        },
+        {
+          "kind": "metric",
+          "label": "當天三十年期公債殖利率",
+          "value": {
+            "source": "matrix",
+            "path": "/anchor/ust30y_frac",
+            "format": {"kind": "percent", "digits": 3}
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_claims",
+      "info": "results",
+      "style": "professional",
+      "title": "實測理賠紀錄：哪些格子是空的",
+      "alt": "結果卡：股票大跌日黃金的收紅率低於丟硬幣，通膨預期升溫時股債反向強度掉近六成，抗通膨債的短天期與長天期在高通膨期走向相反，長債配置的回撤改善要用報酬去換。",
+      "sources": ["matrix"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "股市跌逾兩個百分點那天，黃金收紅率",
+          "value": {
+            "source": "matrix",
+            "path": "/drop_a_equity/gold_updays_spy_down_2pct_frac",
+            "format": {"kind": "percent", "digits": 1}
+          },
+          "note": "比丟硬幣還低"
+        },
+        {
+          "kind": "metric",
+          "label": "通膨預期降溫時的股債相關係數",
+          "value": {
+            "source": "matrix",
+            "path": "/drop_c_inflation/corr_stock_bond_falling",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "通膨預期升溫時的股債相關係數",
+          "value": {
+            "source": "matrix",
+            "path": "/drop_c_inflation/corr_stock_bond_rising",
+            "format": {"kind": "number", "digits": 3}
+          },
+          "note": "反向強度掉近六成"
+        },
+        {
+          "kind": "metric",
+          "label": "高通膨期短天期抗通膨債對一般中期美債的波動差",
+          "value": {
+            "source": "matrix",
+            "path": "/drop_b_rates/stip_vs_ief_gap_high_inflation_pp",
+            "format": {"kind": "number", "digits": 1, "suffix": " 個百分點", "show_plus": true}
+          },
+          "note": "短端是防震墊"
+        },
+        {
+          "kind": "metric",
+          "label": "高通膨期長天期抗通膨債對一般中期美債的波動差",
+          "value": {
+            "source": "matrix",
+            "path": "/drop_b_rates/ltpz_vs_ief_gap_high_inflation_pp",
+            "format": {"kind": "number", "digits": 1, "suffix": " 個百分點", "show_plus": true}
+          },
+          "note": "長端是放大器"
+        },
+        {
+          "kind": "metric",
+          "label": "股金組合加長債後的最大回撤",
+          "value": {
+            "source": "matrix",
+            "path": "/drop_a_equity/max_drawdown_with_tlt_frac",
+            "format": {"kind": "percent", "digits": 1}
+          },
+          "note": "原本更深，代價是年化報酬讓出去"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "最空的那一列，是利率往上壓",
+      "alt": "結論卡：利率上行這一列四張保單全部交白卷，長債自己是傷者、黃金在升息熊市跟著跌、恐慌指數量錯了尺，而事後把模型調得更動態也救不回方向錯誤。",
+      "sources": ["matrix"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "預測長債波動時，通過門檻的因子個數",
+          "value": {
+            "source": "matrix",
+            "path": "/drop_b_rates/factors_passing_threshold",
+            "format": {"kind": "integer"}
+          },
+          "note": "七種都試過，含殖利率水準與曲線斜率"
+        },
+        {
+          "kind": "metric",
+          "label": "其中表現最好的恐慌指數版本，比較統計量",
+          "value": {
+            "source": "matrix",
+            "path": "/drop_b_rates/best_factor_stat_vix",
+            "format": {"kind": "number", "digits": 2, "show_plus": true}
+          },
+          "note": "最高的一個，仍然不夠高"
+        },
+        {
+          "kind": "metric",
+          "label": "升息熊市那年，黃金的累積報酬",
+          "value": {
+            "source": "matrix",
+            "path": "/drop_b_rates/gold_2022_return_frac",
+            "format": {"kind": "percent", "digits": 1}
+          },
+          "note": "同期股票也在跌"
+        },
+        {
+          "kind": "metric",
+          "label": "靜態避險比率的樣本外避險效果",
+          "value": {
+            "source": "matrix",
+            "path": "/dynamic_hedge/he_static_ols",
+            "format": {"kind": "percent", "digits": 2}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最複雜的動態模型，樣本外避險效果",
+          "value": {
+            "source": "matrix",
+            "path": "/dynamic_hedge/he_dynamic_model",
+            "format": {"kind": "percent", "digits": 2}
+          },
+          "note": "排名最後，波動反而更大"
+        },
+        {
+          "kind": "text",
+          "heading": "先看範圍，再看比重",
+          "body": [
+            "理賠範圍是選單子的時候決定的，勤快調整補不回來。",
+            "要補利率這一列，工具是存續期間本身，不是波動率商品。"
+          ]
+        }
+      ]
+    }
+  ]
+}

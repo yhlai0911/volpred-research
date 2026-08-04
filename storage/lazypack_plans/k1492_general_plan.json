@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "title": "K1492 懶人包：穩定幣脫鉤預告比特幣波動，但資金撤離幾乎是空包彈",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1492/k1492_results.json",
+      "sha256": "569adbdc63df0c5be51e3cd928d38fab51f1c7fe2151db529b48c139571ab946",
+      "label": "experiment K1492 results (stablecoin peg deviation vs redemption flows → crypto/Treasury RV)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "穩定幣的動盪，真能預告比特幣波動嗎",
+      "alt": "市場常把穩定幣的贖回流出當恐慌溫度計，本研究拿五年多資料檢定它與脫鉤幅度誰才有預測力",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "熱門主張",
+          "body": [
+            "幣圈一有風聲，市場就盯著錢從 USDT、USDC 撤出的速度，把它當比特幣要變盤的訊號。",
+            "說法順口，但得拿沒看過的日子驗：真正在說話的到底是資金撤離，還是價格守不守得住一美元。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "USDT+USDC 合計供給（最新）",
+          "value": {
+            "source": "results",
+            "path": "/signal_summary/combined_supply_latest_usd",
+            "format": { "kind": "number", "scale": 1e-8, "digits": 0, "thousands": true, "suffix": " 億美元" }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "脫鉤幅度的極端日水位（距一美元）",
+          "value": {
+            "source": "results",
+            "path": "/signal_summary/peg_dev_max_p95_bps",
+            "format": { "kind": "number", "digits": 1, "suffix": " bps" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "拆開來看：脫鉤扛下全部訊號，資金撤離貼著零",
+      "alt": "把比特幣模型拆成脫鉤幅度與資金撤離兩塊，脫鉤幅度單獨就顯著，資金撤離的預測力與丟銅板無異",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "同一個比特幣，兩塊訊號分開測",
+          "body": [
+            "脫鉤幅度單獨測，比特幣未來一週波動的預測就明顯改善，出於巧合的機率約百萬分之一。",
+            "資金撤離單獨測，改善小到近乎零，出於巧合的機率高到幾乎篤定——市場愛盯的溫度計幾乎是空包彈。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "脫鉤幅度單獨：預測改善（每千分之一為單位）",
+          "value": {
+            "source": "results",
+            "path": "/btc_horse_race/peg_only/qlike_improvement_vs_baseline",
+            "format": { "kind": "number", "scale": 1000, "digits": 2, "show_plus": true }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "脫鉤幅度單獨：統計強度（越大越顯著）",
+          "value": {
+            "source": "results",
+            "path": "/btc_horse_race/peg_only/dm_hln_stat_vs_baseline",
+            "format": { "kind": "number", "digits": 2 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "資金撤離單獨：出於巧合的機率",
+          "value": {
+            "source": "results",
+            "path": "/btc_horse_race/flow_only/dm_hln_pvalue_vs_baseline",
+            "format": { "kind": "percent", "digits": 1 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "一條窄、但誠實的結論：只通到比特幣",
+      "alt": "脫鉤壓力對比特幣有增量情報，事件日波動明顯放大，但這條線路碰不到以太幣與公債",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "邊界要說清楚",
+          "body": [
+            "脫鉤壓力最兇的那些日子，比特幣接下來五天的實際波動明顯高於平常水準——訊號平時小，一旦亮燈後面不小。",
+            "但這條線路只通到比特幣：以太幣、短債 SHY、長債 TLT 全數落空。是一條專屬管線，不是整個市場的共同風險。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "比特幣完整模型：預測改善（每千分之一為單位）",
+          "value": {
+            "source": "results",
+            "path": "/asset_results/0/qlike_improvement",
+            "format": { "kind": "number", "scale": 1000, "digits": 2, "show_plus": true }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "脫鉤極端日：比特幣後續波動放大",
+          "value": {
+            "source": "results",
+            "path": "/asset_results/0/event_forward_rv5_ratio",
+            "format": { "kind": "number", "digits": 2, "suffix": " 倍" }
+          }
+        }
+      ]
+    }
+  ]
+}

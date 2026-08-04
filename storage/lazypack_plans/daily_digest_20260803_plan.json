@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "title": "波動率的兩本帳",
+  "subtitle": "恐慌指數掉回低檔的那天，指數記淨額，你的持倉領毛額",
+  "evidence": {
+    "digest": {
+      "path": "storage/drafts/assets/digest_netgross_20260803.json",
+      "sha256": "e36bd2cbb848596d38913b02671d53cc8f041c8bee87d60d62e0951792b04ab7",
+      "label": "2026-08-03 精選導讀證據包：淨額帳 vs 毛額帳的對帳數值，逐字取自八篇已發佈文章與當日每日策略建議"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_framework",
+      "info": "concept",
+      "style": "editorial",
+      "title": "指數記的是淨額，你領的是毛額",
+      "alt": "框架卡：把波動率拆成淨額帳（指數／恐慌指數，成分股彼此抵銷後的殘值）與毛額帳（每個持倉自己的波動），中間差額來自相關性這個抵銷項。",
+      "sources": [
+        "digest"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩本帳",
+          "body": [
+            "淨額帳：恐慌指數與指數波動率，是成分股彼此抵銷後剩下的殘值。",
+            "毛額帳：你手上每個部位自己的波動，抵銷之前的全額。",
+            "抵銷項：相關性。它愈大，兩本帳差愈遠，安靜就愈是借來的。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "決議日恐慌指數收盤",
+          "value": {
+            "source": "digest",
+            "path": "/anchor/vix_fomc",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "兩個交易日後就掉回低檔"
+        },
+        {
+          "kind": "metric",
+          "label": "模型算的年化波動率（%）",
+          "value": {
+            "source": "digest",
+            "path": "/anchor/garch_annual_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          },
+          "note": "這是淨額，不是你的毛額"
+        }
+      ]
+    },
+    {
+      "name": "panel_numbers",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "毛額有多大，抵銷項有多脆",
+      "alt": "數字卡：四格對照，單一大型科技股的波動相對大盤的倍數、五巨頭與大盤的二十日波動缺口、新興市場配對相關係數上限、台積電對大盤在壓力期的連動係數。",
+      "sources": [
+        "digest"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "單一大型科技股波動 ÷ 大盤（倍）",
+          "value": {
+            "source": "digest",
+            "path": "/gross/msft_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "單檔毛額遠高於指數淨額"
+        },
+        {
+          "kind": "metric",
+          "label": "五巨頭與大盤的波動缺口（百分點）",
+          "value": {
+            "source": "digest",
+            "path": "/gross/gap_pp",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          },
+          "note": "明顯高於六年平均缺口"
+        },
+        {
+          "kind": "metric",
+          "label": "新興市場配對相關係數上限",
+          "value": {
+            "source": "digest",
+            "path": "/offset/em_pair_corr_high",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "共同成分吃掉大半變動"
+        },
+        {
+          "kind": "metric",
+          "label": "台積電對大盤連動：壓力期",
+          "value": {
+            "source": "digest",
+            "path": "/offset/tsmc_beta_stress",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "平時低得多，要用時才變高"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "波動率對帳三步，今天就能跑完",
+      "alt": "帶走卡：三步驟清單，先對毛額（前三大持倉波動除以指數波動），再對抵銷項（平時與急跌時各算一次相關係數），最後把相關係數拉到接近齊漲齊跌壓力重算，判斷平靜是不是借來的。",
+      "sources": [
+        "digest"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "第一步 對毛額",
+          "body": [
+            "前三大持倉的年化波動，各除以指數的年化波動。倍數明顯大於一，兩本帳就不是同一個量級。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "第二步 對抵銷項",
+          "body": [
+            "算這三檔彼此的相關係數，平時一組、上次急跌一組。平時低、急跌高，代表分散是有條件的。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "第三步 壓力重算",
+          "body": [
+            "把相關係數統一拉到接近齊漲齊跌重算組合波動。跳得受不了，就是借來的安靜，該補的是保護不是部位。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "相關性上升：四場崩盤中檢定沒過的場次",
+          "value": {
+            "source": "digest",
+            "path": "/stress/corr_tests_failed",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          },
+          "note": "波動放大測得出來，一起垮測不出來"
+        }
+      ]
+    }
+  ]
+}

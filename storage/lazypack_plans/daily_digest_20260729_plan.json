@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：金絲雀，還是住隔壁的鄰居？幣圈訊號採購清單",
+  "evidence": {
+    "ev": {
+      "path": "storage/drafts/assets/crypto_canary_20260729.json",
+      "sha256": "01eef9951feb590d47fc922da2520fdbdaee7fbfc58b1b9c93ac8397781ece37",
+      "label": "2026-07-29 精選導讀證據包（逐字取自 8 篇已發佈來源文章）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_model",
+      "info": "concept",
+      "style": "editorial",
+      "title": "金絲雀，還是住隔壁的鄰居？",
+      "alt": "心智模型：金絲雀會提前倒下替你報時，鄰居只是跟你淋同一場雨；八年資料把幣圈歸在鄰居那一格",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩種燈，差別在「提前」",
+          "body": [
+            "金絲雀：牠先倒下，你才有時間跑。這是領先指標該有的樣子。",
+            "鄰居：同一場暴風雨一起淋濕，牠甚至淋得比你慘，但牠不會提前敲你家的門。",
+            "八年日資料把幣圈放在鄰居那一格。共動很真，提前量沒有。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "比特幣領先美股的顯著性（0.05 才及格）",
+          "value": { "source": "ev", "path": "/lead_lag/significance_btc_to_spy", "format": { "kind": "number", "digits": 3 } }
+        },
+        {
+          "kind": "metric",
+          "label": "檢定樣本（對齊美股交易日）",
+          "value": { "source": "ev", "path": "/lead_lag/trading_days", "format": { "kind": "integer", "suffix": " 天" } }
+        },
+        {
+          "kind": "metric",
+          "label": "比特幣與美股的平均相關（共動是真的）",
+          "value": { "source": "ev", "path": "/lead_lag/avg_dcc_btc_spy", "format": { "kind": "number", "digits": 3 } }
+        }
+      ]
+    },
+    {
+      "name": "panel_shopping_list",
+      "info": "results",
+      "style": "professional",
+      "title": "幣圈訊號採購清單",
+      "alt": "五個市場真的在盯的幣圈讀數，實測後只有穩定幣脫鉤幅度值得買單，其餘半價都不要或直接跳過",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "比特幣暴跌預告美股｜直接跳過（顯著性）",
+          "value": { "source": "ev", "path": "/lead_lag/significance_btc_to_spy", "format": { "kind": "number", "digits": 3 } },
+          "note": "四個傳遞方向全部沒過 0.05"
+        },
+        {
+          "kind": "metric",
+          "label": "穩定幣贖回量｜直接跳過（出於巧合的機率）",
+          "value": { "source": "ev", "path": "/stablecoin/flow_coincidence_prob_pct", "format": { "kind": "number", "digits": 1, "suffix": "%" } },
+          "note": "預測改善約 −0.0000025，準度近似丟銅板"
+        },
+        {
+          "kind": "metric",
+          "label": "穩定幣脫鉤幅度｜可以買單（預測改善）",
+          "value": { "source": "ev", "path": "/stablecoin/depeg_improvement", "format": { "kind": "number", "digits": 5 } },
+          "note": "95% 時間壓在 0.45% 內、平均 0.12%；四資產只有比特幣通過"
+        },
+        {
+          "kind": "metric",
+          "label": "永續合約資金費率｜半價都不要（方向顯著性）",
+          "value": { "source": "ev", "path": "/funding_rate/significance_direction", "format": { "kind": "number", "digits": 3 } },
+          "note": "932 天樣本外，誤差改善不到 1%"
+        },
+        {
+          "kind": "metric",
+          "label": "拿 VIX 反推比特幣｜半價都不要（最佳比較強度）",
+          "value": { "source": "ev", "path": "/reverse_direction/strength_on_when_corr_high", "format": { "kind": "number", "digits": 2, "show_plus": true } },
+          "note": "3,023 天驗收，嚴格通過線是 3，四種用法全沒碰到"
+        }
+      ]
+    },
+    {
+      "name": "panel_correction",
+      "info": "method",
+      "style": "editorial",
+      "title": "我們自己打臉自己",
+      "alt": "三月的舊文替金絲雀說法背書，七月的八年重測推翻它；新版樣本更長、對齊美股交易日、週末併入次日、加三資產聯合檢定",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "舊結論 vs 新重測",
+          "body": [
+            "2026-03-31 舊文：比特幣波動對 VIX 的顯著性 0.00025，寫成「可作為早期預警」。",
+            "2026-07-27 重測：四個方向全部不顯著，比特幣領先美股只有 0.282。",
+            "新版可信在四點：樣本拉到八年、全部對齊美股交易日、週末震盪併進下一個交易日、再加三資產聯合檢定當保險。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "舊文樣本",
+          "value": { "source": "ev", "path": "/prior_claim/trading_days", "format": { "kind": "integer", "suffix": " 天" } }
+        },
+        {
+          "kind": "metric",
+          "label": "新重測樣本",
+          "value": { "source": "ev", "path": "/lead_lag/trading_days", "format": { "kind": "integer", "suffix": " 天" } }
+        },
+        {
+          "kind": "metric",
+          "label": "三資產聯手對美股的顯著性",
+          "value": { "source": "ev", "path": "/lead_lag/joint_combined_to_spy", "format": { "kind": "number", "digits": 3 } }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "事件週怎麼用這盞燈",
+      "alt": "Fed 拍板加四大雲端財報週的用法：比特幣急殺在美股決策裡權重接近零，只留一個位置給穩定幣脫鉤幅度",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "三個動作",
+          "body": [
+            "比特幣今晚急殺？在你的美股決策裡權重接近零，它講的風險偏好你已從美股自己讀到。",
+            "比特幣安靜？也別當成背書。危機期相關跳到 0.409 到 0.47，講的是同步不是保證。",
+            "只留一個位置給穩定幣脫鉤幅度，並且清楚它只管比特幣未來一週，不管你的 SPY。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "危機期（VIX 破 35）比特幣與美股相關",
+          "value": { "source": "ev", "path": "/neighbour_evidence/corr_vix_above_35", "format": { "kind": "number", "digits": 3 } }
+        },
+        {
+          "kind": "metric",
+          "label": "平靜期（VIX 低於 15）相關",
+          "value": { "source": "ev", "path": "/neighbour_evidence/corr_vix_below_15", "format": { "kind": "number", "digits": 3 } }
+        },
+        {
+          "kind": "metric",
+          "label": "加 20% 比特幣後的組合偏態（越負尾巴越長）",
+          "value": { "source": "ev", "path": "/hedge_illusion/skew_plus_20pct_btc", "format": { "kind": "number", "digits": 2 } }
+        }
+      ]
+    }
+  ]
+}

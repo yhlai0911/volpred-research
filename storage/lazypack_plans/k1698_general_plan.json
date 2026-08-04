@@ -1,0 +1,263 @@
+{
+  "schema_version": 1,
+  "title": "K1698 懶人包：把波動率重新算對之後，那個勝負就消失了",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1698/k1698_results.json",
+      "sha256": "a13563952bdb7238e0f3059bf4a7b4f2deca18a3f34fe67da7d3e9ea6b87f54f",
+      "label": "experiment K1698 results (compliant rerun testing whether the archived HAR-beats-GJR forecast-loss win survives a gap-complete, session-aligned TAIFEX realized-volatility rebuild and an investor-relevant scoring target)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "存檔裡有一個看起來很硬的勝負",
+      "alt": "存檔宣稱以歷史波動為基礎的模型明顯勝過以報酬序列估出來的波動模型，誤差分數較低，而在更早那一版資料上檢定強度更大，差距大到沒有人回頭複查。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "差距大到沒人想再算一次",
+          "body": [
+            "兩個模型比誰更會估明天的波動：一個看過去實際發生過的波動往後推，另一個只看每天的漲跌幅反推。",
+            "誤差分數愈低愈準，前者明顯領先，而在更早那一版資料上差距更大。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "以歷史波動為基礎的模型：誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/runs/primary/qlike/rv_tx_aligned/HAR-RV/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "以報酬序列估出來的波動模型：誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/runs/primary/qlike/rv_tx_aligned/GJR/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "舊資料上同一組比較的檢定強度",
+          "value": {
+            "source": "results",
+            "path": "/runs/bridge_old_rv/qlike_dm_tests/secondary_nonnested/rv_tx_aligned/HAR-RV_vs_GJR/t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "professional",
+      "title": "先把「波動率」這串數字重新算對",
+      "alt": "重建以每日成交量最大的單一台指期合約為準，把前一天下午一點半到當天下午一點半接成一條連續的五分鐘路徑，四個接縫全部保留；換月日與窗口起點價缺漏情形逐日清點。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一條被剪成好幾段的線，接回去",
+          "body": [
+            "舊做法各時段各自加總，銜接處那幾下最劇烈的價格移動整批消失。",
+            "重建改成一整天接成一條連續的線，而且每天只用成交量最大的那一個合約，不跨合約算報酬。",
+            "夜盤日期歸屬逐檔確認，全部顯示晚上的成交被標在前一個日曆日；窗口邊界抽驗核對也全數通過。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "重建涵蓋的交易日數",
+          "value": {
+            "source": "results",
+            "path": "/rv_construction/n_days",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "其中的換月日數",
+          "value": {
+            "source": "results",
+            "path": "/rv_construction/n_roll_days",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "窗口起點價缺漏天數",
+          "value": {
+            "source": "results",
+            "path": "/rv_construction/n_anchor_missing",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "重建後數值相對舊序列的平均倍數",
+          "value": {
+            "source": "results",
+            "path": "/rv_construction/old_vs_new/mean_ratio_new_over_old",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "換成投資人真的持有的東西評分，名次對調",
+      "alt": "改用投資人實際持有的那檔台股權值型 ETF、還原除息後的當日報酬平方評分，兩個模型的名次對調，而檢定強度方向偏向另一邊且未跨過事前寫死的門檻。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "考卷換一張，優勢就沒了",
+          "body": [
+            "第一張考卷是拿預測去對模型自己算出來的波動率，那正是它的輸入來源，它當然占便宜。",
+            "第二張考卷改對投資人實際持有的那檔台股權值型 ETF 當天報酬的平方，這是很多人帳戶裡真的有的東西。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "以歷史波動為基礎的模型：投資人標的誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/runs/primary/qlike/r2_0050/HAR-RV/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "以報酬序列估出來的波動模型：投資人標的誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/runs/primary/qlike/r2_0050/GJR/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "投資人標的上的檢定強度",
+          "value": {
+            "source": "results",
+            "path": "/gate/leg1_qlike/aligned_target_r2_0050/t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "兩個模型共同可比的天數",
+          "value": {
+            "source": "results",
+            "path": "/gate/leg1_qlike/aligned_target_r2_0050/n",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "舊資料上也從來沒贏過",
+      "alt": "把同一組模型放回舊的波動率序列重跑投資人標的那張考卷，方向同樣偏向另一邊也同樣沒跨過門檻；判定為假說遭否決，沒有可操作結論。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "重建買到的是「可以做這個比較」本身",
+          "body": [
+            "在投資人真的持有的標的上，以歷史波動為基礎的模型重建前沒贏，重建後也沒贏。",
+            "這不代表另一個模型比較好，這種強度什麼都證明不了，它只是說這裡沒有你要找的東西。",
+            "序列有洞、窗口跟 ETF 交易日對不齊的時候，比出來的差距分不清是模型的差距還是對齊的差距；補完之後這個比較才乾淨，而答案是沒有人達標。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "舊序列上：以歷史波動為基礎的模型誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/runs/bridge_old_rv/qlike/r2_0050/HAR-RV/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "舊序列上：投資人標的的檢定強度",
+          "value": {
+            "source": "results",
+            "path": "/runs/bridge_old_rv/qlike_dm_tests/primary_nonnested/r2_0050/HAR-RV_vs_GJR/t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "三個修正版本中成功救回落後模型的個數",
+          "value": {
+            "source": "results",
+            "path": "/gate/leg2_tail/n_variants_rescuing_har",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：百天只該破一次的風險線，四個股市全被破了兩倍多",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1654/k1654_results.json",
+      "sha256": "abc5584cf0516ab29c1a10db7bba834c36924ecdff1606cf5906d7b719a75c00",
+      "label": "四個股票指數（標普 500 ETF、那斯達克 100 ETF、台灣加權指數、日經 225）的日報酬尾端風險實測，資料來自 yfinance，估計期自 2010-01-01、測試期 2020-01-02 至 2026-07-06，比較左右對稱常態假設與允許偏斜厚尾的假設；判定為僅尾端風險改善、震幅預測未改善"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "一條損失線，該用兩把尺量",
+      "alt": "風險線的用途是替部位標出當天最壞大概到哪裡，畫線需要兩樣東西，一個是當天震幅的估計，一個是機率分布的形狀假設。最常見的預設形狀是左右對稱的鐘形，代表漲跌機率一樣大而且極端很罕見。量一條線好不好，要分開看兩件事，一是被跌破的次數對不對，二是跌破那幾天實際虧損的規模有沒有被低估。本次比較的四個標的是標普五百指數股票型基金、那斯達克一百指數股票型基金、台灣加權指數與日經二二五。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "畫線需要兩樣東西",
+          "body": [
+            "一個是當天大概會震多大的估計，一個是機率分布的形狀假設。最常見的預設形狀是左右對稱的鐘形，代表漲三個百分點和跌三個百分點機率一樣大，而且極端值很罕見。",
+            "股市不是這樣走的。往下那條尾巴比較肥，極端日子出現的頻率也比鐘形分布給的份額高。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "量一條線要分開看兩件事",
+          "body": [
+            "第一件是被跌破的次數對不對。承諾是每一百個交易日只破一天。",
+            "第二件是跌破那幾天實際虧了多深。次數抓得剛好的線，仍然可能在破線當天嚴重低估虧損規模。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "台灣加權指數的日報酬偏態",
+          "value": {
+            "source": "results",
+            "path": "/results/^TWII/full_skew",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "負值代表往下的尾巴比往上長，四個標的中最負"
+        },
+        {
+          "kind": "metric",
+          "label": "標普五百指數基金的日報酬峰態",
+          "value": {
+            "source": "results",
+            "path": "/results/SPY/full_kurt",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          },
+          "note": "數值越高代表極端日子出現得越頻繁，遠超過鐘形分布的份額"
+        }
+      ]
+    },
+    {
+      "name": "panel_numbers",
+      "info": "results",
+      "style": "professional",
+      "title": "承諾破十六天，實際破三十四到三十八天",
+      "alt": "在測試期內，用左右對稱常態假設畫的百分之一損失線，標普五百指數股票型基金被跌破三十四天，那斯達克一百指數股票型基金三十五天，台灣加權指數三十八天，日經二二五三十五天，而各市場本來承諾的次數約在十六天上下。換成允許偏斜與厚尾的假設之後，四個市場分別降到二十二天、十八天、二十天與十四天，全部回到承諾附近。破線那幾天的虧損規模檢定，對稱模型在四個市場的數值介於二點四零到三點七二，全部落在可接受範圍外；換形狀後降到負零點四五到一點六三，全部進入範圍內。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "次數：全部超出承諾兩倍以上",
+          "body": [
+            "承諾是每一百個交易日破一天。四個市場的實際突破比率落在百分之二點零八到百分之二點四一之間。",
+            "換成允許偏斜與厚尾的形狀假設之後，四個市場全部回到承諾附近，日經甚至略低於承諾。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "台灣加權指數，對稱模型的破線天數",
+          "value": {
+            "source": "results",
+            "path": "/results/^TWII/var_backtests/alpha_0.01/M0/n_violations",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "一千五百七十八個交易日中，承諾約十五點八天"
+        },
+        {
+          "kind": "metric",
+          "label": "台灣加權指數，換形狀後的破線天數",
+          "value": {
+            "source": "results",
+            "path": "/results/^TWII/var_backtests/alpha_0.01/M2/n_violations",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "回到承諾附近"
+        },
+        {
+          "kind": "metric",
+          "label": "標普五百指數基金，對稱模型低估破線日虧損的程度",
+          "value": {
+            "source": "results",
+            "path": "/results/SPY/es_backtests/alpha_0.01/M0/Z1",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "數值越大低估越嚴重，約一點九六以內才算通過"
+        },
+        {
+          "kind": "metric",
+          "label": "標普五百指數基金，換形狀後同一項數值",
+          "value": {
+            "source": "results",
+            "path": "/results/SPY/es_backtests/alpha_0.01/M2/Z1",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "進入可接受範圍"
+        },
+        {
+          "kind": "metric",
+          "label": "虧損規模檢查，對稱模型通過組數",
+          "value": {
+            "source": "results",
+            "path": "/verdict/H3_M0_pass_count_1pct",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "四個市場全數不通過"
+        },
+        {
+          "kind": "metric",
+          "label": "虧損規模檢查，換形狀後通過組數",
+          "value": {
+            "source": "results",
+            "path": "/verdict/H3_M2_pass_count_1pct",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "四個市場全數通過"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "修好的是尾端，不是預測力",
+      "alt": "同一份實驗也比較了模型對明天震幅的預測準度，四個市場全部沒有進步，變化介於負百分之一點七六到負百分之零點五九之間，用嚴格標準檢驗沒有任何一個市場達到確實變好或確實變差的程度。破線日是否擠在一起這一項，用最嚴格的三項同時通過標準來看，四個市場只有兩個通過。可帶走的三點是，先問那條線的形狀假設，次數和深度要分開看，以及不要期待形狀修正順便改善日常預測。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "沒有變好的那一半",
+          "body": [
+            "模型對明天會震多大的預測準度，四個市場全部沒有進步，而且四個都略微退步。",
+            "用嚴格標準檢驗，沒有任何一個市場達到確實變差的程度，也沒有任何一個達到確實變好。在預測震幅這件事上，換形狀等於沒換。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "日經二二五的預測準度變化",
+          "value": {
+            "source": "results",
+            "path": "/results/^N225/dm_tests/M2_vs_M0/QLIKE_rel_improvement_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "負值代表換形狀之後比原本還差一點，四個市場皆為負"
+        },
+        {
+          "kind": "metric",
+          "label": "震幅預測確實改善的市場數",
+          "value": {
+            "source": "results",
+            "path": "/verdict/H1_pass_count",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "四個市場中沒有任何一個達標"
+        },
+        {
+          "kind": "metric",
+          "label": "破線日分布最嚴格標準的通過市場數",
+          "value": {
+            "source": "results",
+            "path": "/verdict/H2_pass_count_1pct",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "四個市場中兩個通過，那斯達克與台灣加權的破線日仍成串出現"
+        },
+        {
+          "kind": "text",
+          "heading": "可以帶走的三點",
+          "body": [
+            "先問那條線的形狀假設。如果是對稱鐘形，它在四個主要股市的實測是承諾百分之一、實際百分之二點一到百分之二點四。",
+            "次數和深度要分開看。次數抓得準的線，仍可能在破線當天嚴重低估虧損。",
+            "別期待形狀修正順便讓預測變準。想改善對明天震幅的判斷，要從別的地方下手。"
+          ]
+        }
+      ]
+    }
+  ]
+}

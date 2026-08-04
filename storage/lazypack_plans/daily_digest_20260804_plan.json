@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "title": "槓桿收據",
+  "subtitle": "恐慌指數掉到低檔的那天，正面那行利息變便宜，背面五行的價碼一格沒動",
+  "evidence": {
+    "digest": {
+      "path": "storage/drafts/assets/digest_leverage_receipt_20260804.json",
+      "sha256": "c7d2d3519c4b4a02aeabf46223c802c369ad59b50a35aa8cf6b08183e9c03558",
+      "label": "2026-08-04 精選導讀證據包：槓桿收據五行的對帳數值，逐字取自八篇已發佈文章與當日每日策略建議"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_framework",
+      "info": "concept",
+      "style": "editorial",
+      "title": "你以為槓桿的價格是利息",
+      "alt": "框架卡：把上槓桿的成本拆成收據正面（可以算出來的借款利息）與收據背面（回撤形狀、適用範圍、執行落差、被迫出場），並附上當日恐慌指數與模型年化波動率、以及當日規則給出的曝險比例。",
+      "sources": [
+        "digest"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "收據兩面",
+          "body": [
+            "正面：借款利息。印得很大、算得出來、每月結一次。",
+            "背面：回撤形狀、適用市場、你的執行落差、被迫出場的那一天。",
+            "背面沒有標價，卻是大部分人真正付掉的那一筆。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "當日恐慌指數收盤",
+          "value": {
+            "source": "digest",
+            "path": "/anchor/vix_now",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "情境判定為正常"
+        },
+        {
+          "kind": "metric",
+          "label": "當日波動率目標規則給的曝險（%）",
+          "value": {
+            "source": "digest",
+            "path": "/anchor/vix12_exposure_pct",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          },
+          "note": "最保守的那條只給五成出頭"
+        }
+      ]
+    },
+    {
+      "name": "panel_numbers",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "背面五行，各收多少",
+      "alt": "數字卡：四格對照，二十一年下來加槓桿多付的最大回撤、借款利率的損益平衡水準、同一條規則搬到台股後的最大回撤、以及借錢買槓桿過程中曾經賣掉也還不清貸款的機率。",
+      "sources": [
+        "digest"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "加槓桿版本的最大回撤（%）",
+          "value": {
+            "source": "digest",
+            "path": "/row1_leverage/mdd_levered_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "不加槓桿的基準是負九點六四"
+        },
+        {
+          "kind": "metric",
+          "label": "借款利率的損益平衡水準（%）",
+          "value": {
+            "source": "digest",
+            "path": "/row1_leverage/borrow_breakeven_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          },
+          "note": "利息這一格目前確實便宜"
+        },
+        {
+          "kind": "metric",
+          "label": "同一條規則搬到台股的最大回撤（%）",
+          "value": {
+            "source": "digest",
+            "path": "/row3_scope/taiwan_mdd_levered_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          },
+          "note": "台股基準版本是負四十八點三"
+        },
+        {
+          "kind": "metric",
+          "label": "借錢買槓桿：過程中曾經還不清的機率（%）",
+          "value": {
+            "source": "digest",
+            "path": "/row5_exit/credit_underwater_anytime_1y_pct",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          },
+          "note": "撐五年這個數字反而更高"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "翻收據五行，今天收盤前就能對完",
+      "alt": "帶走卡：五行清單，依序檢查槓桿本身值不值、規則帳、適用範圍帳、執行帳與出場帳，並附上拖延調倉在模擬中吃掉的期末財富，以及十四個工程化微調中通過統計檢定的數量。",
+      "sources": [
+        "digest"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "第一行到第三行",
+          "body": [
+            "槓桿本身：把你的融資利率除以損益平衡利率，看利息這格對你多便宜。",
+            "規則帳：找出上次調倉日期，比每月一次還密就先把頻率降下來。",
+            "適用範圍：把部位分成美股與非美股兩堆，只有第一堆能用恐慌指數決定曝險。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "第四行與第五行",
+          "body": [
+            "執行帳：上次照規則調倉超過一個月，你的實際曝險已經不是你以為的數字。",
+            "出場帳：問這筆錢未來十二個月會不會被叫走，答案不是斬釘截鐵的不會，就別借。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "拖延調倉者的期末財富（美元）",
+          "value": {
+            "source": "digest",
+            "path": "/row4_execution/wealth_lazy",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          },
+          "note": "嚴格執行者是六十萬出頭"
+        },
+        {
+          "kind": "metric",
+          "label": "十四個工程微調中通過檢定的數量",
+          "value": {
+            "source": "digest",
+            "path": "/row2_rules/variants_significant",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          },
+          "note": "點估計人人有獎，統計上一個都沒有"
+        }
+      ]
+    }
+  ]
+}

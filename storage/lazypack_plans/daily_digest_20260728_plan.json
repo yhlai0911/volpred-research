@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：風險的郵遞區號——財報季讀懂科技股恐懼的四問框架",
+  "evidence": {
+    "skew": {
+      "path": "storage/drafts/assets/ai_capex_skew_20260728.json",
+      "sha256": "ab96aa99f49628c1172cd0b684372e0953c1943e803de8630673a267db2ee9db",
+      "label": "AI 六巨頭 vs 標普大盤 選擇權 IV skew 橫截面 (yfinance 即時擷取)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_model",
+      "info": "concept",
+      "style": "editorial",
+      "title": "風險的郵遞區號",
+      "alt": "市場的恐懼不是一團模糊情緒，它會被寄到一個具體地址：個股、指數、信用市場、還是期限結構",
+      "sources": ["skew"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "心智模型",
+          "body": [
+            "一則嚇人的頭條，先別急著怕。去讀它的郵遞區號：錢實際壓在哪個地址？",
+            "個股、指數、信用、期限——恐懼寄到不同地址，該做的事完全不同。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_checklist",
+      "info": "method",
+      "style": "professional",
+      "title": "財報季風險四問",
+      "alt": "讀懂任何一則科技股要崩了頭條的四個欄位：波動多大、偏哪一邊、風險在哪一層、事件撐多久",
+      "sources": ["skew"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "四個欄位",
+          "body": [
+            "多大：個股波動 vs 大盤——吵的是個股，靜的常是大盤。",
+            "偏哪：選擇權替下跌付的錢多，還是兩邊對稱？",
+            "哪一層：單一財報的特異風險，還是六巨頭一起被重估的系統風險？",
+            "撐多久：事件波動是煙火（兩天就散），還是體制轉變？"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_today",
+      "info": "results",
+      "style": "professional",
+      "title": "今日郵遞區號讀數",
+      "alt": "個股風險逆轉貼近零、被定價成兩面對稱的財報擲硬幣；崩盤險買在指數，標普大盤風險逆轉一柱獨高",
+      "sources": ["skew"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "AI 六巨頭平均風險逆轉（偏哪邊）",
+          "value": { "source": "skew", "path": "/summary/ai_mean_rr", "format": { "kind": "number", "scale": 100, "digits": 1, "show_plus": true, "suffix": " pt" } }
+        },
+        {
+          "kind": "metric",
+          "label": "標普大盤風險逆轉（崩盤險在這）",
+          "value": { "source": "skew", "path": "/summary/bench_rr", "format": { "kind": "number", "scale": 100, "digits": 1, "show_plus": true, "suffix": " pt" } }
+        },
+        {
+          "kind": "metric",
+          "label": "AI 六巨頭平均平價波動（多大）",
+          "value": { "source": "skew", "path": "/summary/ai_mean_atm_iv", "format": { "kind": "percent", "digits": 1 } }
+        },
+        {
+          "kind": "metric",
+          "label": "標普大盤平價波動（多大）",
+          "value": { "source": "skew", "path": "/summary/bench_atm_iv", "format": { "kind": "percent", "digits": 1 } }
+        }
+      ]
+    },
+    {
+      "name": "panel_answer",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "該不該擔心",
+      "alt": "別被單一嚇人數字綁架；該擔心的不是任何一檔財報崩，而是六巨頭因共同曝險一起被重估，對沖工具在指數",
+      "sources": ["skew"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "答案",
+          "body": [
+            "別被單一嚇人數字綁架。恐懼多半寄在「大」和「系統層」，不是個股崩盤劇本。",
+            "該防的是六巨頭一起被重估——真要對沖，工具在指數、用價差、抓時機。"
+          ]
+        }
+      ]
+    }
+  ]
+}

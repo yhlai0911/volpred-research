@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "title": "K1493 懶人包：賣波動的保費沒消失，撐不住的是本金",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1493/k1493_results.json",
+      "sha256": "84c68be74e2121ecc06381e94e112aea31e5e1c526e4d12b0a1e816f31eef39a",
+      "label": "experiment K1493 results (variance risk premium proxy decline vs short-vol product economics)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "「保費變薄了，所以賣波動不好賺」這句話對嗎",
+      "alt": "市場把選擇權超額報酬下滑的研究結論，簡化成賣波動不再有利可圖；本研究把保費水準與產品績效拆成兩題分別檢驗",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "熱門主張",
+          "body": [
+            "芝加哥聯準銀行近年的工作論文指出，選擇權的超額報酬已接近於零。",
+            "傳到投資社群變成一句話：保費變薄了。但保費水準跟賣保險的人有沒有賺到，是兩件要分開量的事。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "保費水準：早年平均價差",
+          "value": {
+            "source": "results",
+            "path": "/vrp_proxy/summary/pre_2006_2017/mean",
+            "format": { "kind": "number", "digits": 3, "scale": 1000 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "保費水準：近年平均價差",
+          "value": {
+            "source": "results",
+            "path": "/vrp_proxy/summary/post_2018_2026/mean",
+            "format": { "kind": "number", "digits": 3, "scale": 1000 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "保費看不出變薄，賺錢效率卻明顯掉下來",
+      "alt": "免費日頻資料無法證明保費消失，價差為正的天數仍逾八成；但實際放空波動的指數股票型基金賺錢效率由正轉負",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩個問題，兩種答案",
+          "body": [
+            "保費那一題，前後兩段平均值的差距小到統計上分不出來，價差為正的天數也都還有八成以上。",
+            "產品那一題就清楚了：同一段時間，實際基金的賺錢效率由正轉負。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "價差為正的天數比例（近年）",
+          "value": {
+            "source": "results",
+            "path": "/vrp_proxy/summary/post_2018_2026/positive_share",
+            "format": { "kind": "percent", "digits": 1 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "賺錢效率：改制前",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/SVXY_actual/pre_2011_2017/sharpe",
+            "format": { "kind": "number", "digits": 2 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "賺錢效率：近年全段",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/SVXY_actual/post_2018_2026/sharpe",
+            "format": { "kind": "number", "digits": 2 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "決定成敗的是本金撐不撐得過那一天",
+      "alt": "把那次波動崩盤整段剔除後賺錢效率回到正值但仍低於改制前，最大回檔與單日最慘跌幅顯示本金存活才是關鍵限制",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "砍掉那一週也回不到從前",
+          "body": [
+            "把那次崩盤整段剔除重算，賺錢效率由負轉正，但與改制前仍有距離。",
+            "真正該問的是：如果同樣規模的單日崩跌再來一次，手上的部位會被清掉幾成。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "賺錢效率：剔除那次崩盤後",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/SVXY_actual/post_after_volmageddon/sharpe",
+            "format": { "kind": "number", "digits": 2 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "單日最慘跌幅（近年）",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/SVXY_actual/post_2018_2026/worst_day",
+            "format": { "kind": "percent", "digits": 1 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最大回檔（近年）",
+          "value": {
+            "source": "results",
+            "path": "/strategy_results/SVXY_actual/post_2018_2026/max_drawdown",
+            "format": { "kind": "percent", "digits": 1 }
+          }
+        }
+      ]
+    }
+  ]
+}

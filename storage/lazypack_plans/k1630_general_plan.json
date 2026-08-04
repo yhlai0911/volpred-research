@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "title": "K1630 懶人包：台股中了，美股沒中，而「它失效了」不能寫",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1630/k1630_results.json",
+      "sha256": "59d2634ea055c8bcd73845d0b2590e4c457a821d84270c486247218f69829192",
+      "label": "experiment K1630 results (Sell in May / Halloween 效應在 S&P 500 1928-2026 與台股加權指數 1997-2026 的冬夏半年月報酬差檢定)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "一句老話，兩個市場，近百年資料",
+      "alt": "把美股與台股有紀錄以來的每月報酬全部翻出來，量「十一月到隔年四月比五月到十月好」這句老話在兩個市場各自成不成立。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "要量的是什麼",
+          "body": [
+            "把一年切兩半：十一月到隔年四月算冬半年，五月到十月算夏半年。",
+            "比較兩邊的平均月報酬差多少，再問這個差距有沒有可能只是運氣。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "美股納入計算的月份數（有紀錄以來）",
+          "value": {
+            "source": "results",
+            "path": "/results/US_SP500/full/n_months_total",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股納入計算的月份數（有紀錄以來）",
+          "value": {
+            "source": "results",
+            "path": "/results/TW_TAIEX/full/n_months_total",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "台股量得到，美股量不到",
+      "alt": "台股全樣本冬半年比夏半年每月多約二點一個百分點，巧合機率不到百分之一；美股全樣本只差約零點四個百分點，巧合機率約一成四，沒有到達一般認定的顯著標準。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "同一把尺，兩種結果",
+          "body": [
+            "台股的冬夏差距大、而且很難用運氣解釋，這一格是真的。",
+            "美股就算把資料一路拉回一九二八年，差距仍然小到分不出是不是巧合。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "台股全樣本：冬半年每月多出（百分點）",
+          "value": {
+            "source": "results",
+            "path": "/verdict/TW_TAIEX/full/beta_monthly_pp",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股全樣本：這個差距純屬巧合的機率",
+          "value": {
+            "source": "results",
+            "path": "/verdict/TW_TAIEX/full/p_hac_auto",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美股全樣本：冬半年每月多出（百分點）",
+          "value": {
+            "source": "results",
+            "path": "/verdict/US_SP500/full/beta_monthly_pp",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美股全樣本：這個差距純屬巧合的機率",
+          "value": {
+            "source": "results",
+            "path": "/verdict/US_SP500/full/p_hac_auto",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "最想寫的那句，剛好是不能寫的那句",
+      "alt": "台股近十五年的差距縮小且不再顯著，但全樣本本來就包含近十五年，兩者不獨立，因此不能用一個顯著一個不顯著推論效應衰退；資料同時相容於效應減弱與樣本太小兩種解釋。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "台股近十五年：冬半年每月多出（百分點）",
+          "value": {
+            "source": "results",
+            "path": "/verdict/TW_TAIEX/last15y/beta_monthly_pp",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股近十五年：這個差距純屬巧合的機率",
+          "value": {
+            "source": "results",
+            "path": "/verdict/TW_TAIEX/last15y/p_hac_auto",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股近十五年只剩幾個月份可用",
+          "value": {
+            "source": "results",
+            "path": "/results/TW_TAIEX/last15y/n_months_total",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "為什麼不能說「它失效了」",
+          "body": [
+            "全樣本本來就把近十五年整段包在裡面，兩個數字不是各自獨立的證據。",
+            "一個顯著、一個不顯著，並不等於兩者之間有差別。",
+            "近十五年只剩不到兩百個月份，看不出差距同時相容於兩種解釋：效應真的變弱，或樣本太小根本量不出來。",
+            "這份資料分不出是哪一種，所以就不寫。"
+          ]
+        }
+      ]
+    }
+  ]
+}
