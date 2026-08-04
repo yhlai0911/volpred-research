@@ -25,8 +25,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -119,25 +117,38 @@ def test_provenance_ratchet_still_passes_on_the_real_knowledge_base() -> None:
     assert result.returncode == 0, result.stdout + result.stderr
 
 
-@pytest.mark.parametrize(
-    "argv",
-    [
-        pytest.param([], id="default-roots"),
-        pytest.param(["--roots", "src", "tests", "scripts"], id="explicit-roots"),
-    ],
-)
-def test_source_encoding_audit_still_passes_on_the_real_tree(argv: list[str]) -> None:
-    """The fail-closed guard must not turn the healthy path red.
+def test_source_encoding_audit_passes_on_a_populated_tree(tmp_path: Path) -> None:
+    """The fail-closed guard must not turn a healthy sweep red.
 
-    Paired with the blinding tests on purpose: a guard that rejects everything
-    would satisfy them alone, and would be worse than the hole it closes.
+    Paired with the blinding test on purpose: a guard that rejects everything
+    satisfies that one alone, and is worse than the hole it closes.
+
+    Deliberately a fixture tree rather than this repo. Sweeping the real tree
+    makes audit_source_encoding py_compile every file, and inside the pytest
+    job those __pycache__ directories are already root-owned from the sudo
+    system-dependency step, so the healthy path fails on PermissionError for
+    reasons that have nothing to do with encoding. The real tree is swept by
+    the Source Encoding Gate workflow in its own clean job -- that is its
+    owner, and repeating it here buys nothing.
     """
+    for name in ("src", "tests", "scripts"):
+        directory = tmp_path / name
+        directory.mkdir()
+        (directory / "clean.py").write_text(
+            "# clean UTF-8, em-dash included — should not trip the sweep\n",
+            encoding="utf-8",
+        )
+
     result = subprocess.run(
-        [sys.executable, str(ROOT / "scripts" / "audit_source_encoding.py"), *argv],
-        cwd=ROOT,
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "audit_source_encoding.py"),
+            "--root",
+            str(tmp_path),
+        ],
         capture_output=True,
         text=True,
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "files checked" in result.stdout
+    assert "3 files checked" in result.stdout
