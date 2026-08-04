@@ -126,6 +126,21 @@ def main() -> int:
         return 2
 
     files = iter_py_files(args.roots, repo_root)
+    if not files:
+        # The roots exist (checked above) but nothing was collected, so the
+        # filter is broken -- and every check below is a universal quantifier
+        # over `files`. With none, `bad` stays empty and this prints
+        # "0 files checked -> all clean -> OK": a gate that verified nothing
+        # reporting success. That is the shape this whole script exists to
+        # prevent, one level up (docs/error_log.md 2026-08-04, all([]) is True).
+        print(
+            f"[audit-encoding] FAIL: collected 0 files from {args.roots} under "
+            f"{repo_root}. The roots exist, so the collector is broken; a sweep "
+            "that sees nothing must not report clean.",
+            file=sys.stderr,
+        )
+        return 2
+
     bad: dict[Path, list[str]] = {}
     for path in files:
         problems = check_file(path)

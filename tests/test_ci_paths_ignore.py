@@ -76,3 +76,37 @@ def test_audit_cli_check_passes() -> None:
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_audit_fails_when_it_can_see_nothing(monkeypatch) -> None:
+    """An audit that inspects an empty set must fail, not pass.
+
+    Every check in cmd_check is a universal quantifier, and `all([])` is True:
+    an empty dependency recording finds no violations, an empty marker sweep
+    finds no orphans, and the audit prints OK having verified nothing. The
+    same shape shipped a real misreport on 2026-08-04 — a CI watcher filtered
+    on a field that returned zero rows, so its wait loop declared a 14-minute
+    suite complete in 25 seconds (docs/error_log.md).
+
+    Truncate config/ci_test_repo_dependencies.json, or break the marker sweep,
+    and this gate has to say so rather than wave the build through.
+    """
+    import argparse
+
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import audit_ci_paths_ignore as gate
+
+    monkeypatch.setattr(gate, "load_dependencies", lambda: [])
+    assert gate.cmd_check(argparse.Namespace()) == 1, (
+        "an empty dependency recording must fail the audit"
+    )
+
+    # Restore dependencies, blind the other sweep instead.
+    monkeypatch.undo()
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import audit_ci_paths_ignore as gate2
+
+    monkeypatch.setattr(gate2, "find_real_queue_test_files", lambda: [])
+    assert gate2.cmd_check(argparse.Namespace()) == 1, (
+        "a marker sweep that finds nothing must fail the audit"
+    )

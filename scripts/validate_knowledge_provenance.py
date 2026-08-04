@@ -69,6 +69,21 @@ def main() -> int:
         print(f"[validate-provenance] FAIL: {path} is not a list", file=sys.stderr)
         return 2
 
+    if not entries:
+        # A ratchet compares violations against a baseline, and zero entries
+        # yield zero violations -- so a truncated or wrongly-pathed
+        # knowledge.json reads as PERFECTLY CLEAN and returns 0. An empty
+        # knowledge base is a catastrophe, not a clean bill of health
+        # (docs/error_log.md 2026-08-04: a gate that inspects an empty set must
+        # fail, because every check it performs is vacuously true).
+        print(
+            f"[validate-provenance] FAIL: {path} holds no entries. An empty "
+            "knowledge base cannot be validated -- zero violations here means "
+            "the file is missing content, not that provenance is clean.",
+            file=sys.stderr,
+        )
+        return 2
+
     n = count_violations(entries)
     total = len(entries)
 

@@ -130,8 +130,35 @@ def load_dependencies() -> list[str]:
 
 def cmd_check(_args: argparse.Namespace) -> int:
     patterns = load_paths_ignore()
+    dependencies = load_dependencies()
+    real_queue_files = find_real_queue_test_files()
+
+    # Non-emptiness first, because every check below is a universal quantifier
+    # and `all([])` is True. An empty recording finds no violations; an empty
+    # marker sweep finds no orphans. Both would print OK and mean nothing --
+    # the same shape that let a CI watcher filtering on a field that returned
+    # zero rows declare a 14-minute suite complete in 25 seconds
+    # (docs/error_log.md 2026-08-04). A gate must fail when it cannot see.
+    if not dependencies:
+        print(
+            f"{DEPENDENCIES.relative_to(ROOT)} records no paths. Either the "
+            "freeze failed or the file was truncated: with an empty recording "
+            "this audit cannot detect anything and would pass unconditionally. "
+            "Re-run the probe (see this script's docstring)."
+        )
+        return 1
+    if not real_queue_files:
+        print(
+            "No test file carries @pytest.mark.real_queue, but the marker is "
+            "registered in pyproject.toml and Test Suite runs "
+            '-m "not real_queue". Either the marker was dropped from the tests '
+            "(then retire the split and queue-invariants.yml too), or the "
+            "sweep stopped seeing them -- in which case this audit is blind."
+        )
+        return 1
+
     violations = []
-    for path in load_dependencies():
+    for path in dependencies:
         pattern = covered_by(path, patterns)
         if pattern:
             violations.append((path, pattern))
@@ -152,9 +179,7 @@ def cmd_check(_args: argparse.Namespace) -> int:
     # never names would be selected by neither: deselected in one, untriggered
     # in the other. Silently unrun, which is worse than either workflow failing.
     queue_paths = load_queue_workflow_paths()
-    orphaned = [
-        f for f in find_real_queue_test_files() if not covered_by(f, queue_paths)
-    ]
+    orphaned = [f for f in real_queue_files if not covered_by(f, queue_paths)]
     if orphaned:
         print("real_queue tests that no workflow would run:")
         for path in orphaned:
@@ -167,8 +192,8 @@ def cmd_check(_args: argparse.Namespace) -> int:
 
     print(
         f"paths-ignore OK: {len(patterns)} pattern(s), "
-        f"{len(load_dependencies())} recorded dependenc(ies), no overlap; "
-        f"{len(find_real_queue_test_files())} real_queue file(s) all triggered"
+        f"{len(dependencies)} recorded dependenc(ies), no overlap; "
+        f"{len(real_queue_files)} real_queue file(s) all triggered"
     )
     return 0
 
