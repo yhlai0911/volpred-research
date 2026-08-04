@@ -538,6 +538,77 @@ def _knowledge_numeric_claim_count(k_id: str) -> int:
     )
 
 
+# 2026-08-01 K1221 incident (three regenerations: v1/v2/v3 all closed unwritable).
+# `_experiment_result_paths` only proves a `*_results.json` EXISTS, not that it holds
+# research evidence.  K1221's artifact is a pre-submission checklist audit
+# (checklist_items / blockers / warn_items / rules_observed) with zero market data and
+# zero statistical tests, so it can never satisfy publishing.md's evidence package
+# (>=3 primary-source figures + table + chart + a quantitative layer).  Refill kept
+# re-emitting it as a reader-facing task; two fires burned closing it by hand.
+#
+# Gate on artifact SHAPE, not on the knowledge `category` vocabulary: that vocabulary is
+# long-tailed and inconsistent (441 null + hundreds of one-off values), and an allowlist
+# would re-create the over-culling regression documented above at "tightening
+# systematically culled evidence-rich K's".  Only a clear positive process-audit
+# signature rejects, so evidence-rich K's are never touched by this check.
+_PROCESS_AUDIT_MARKER_KEYS = frozenset(
+    {"checklist_items", "blockers", "warn_items", "rules_observed", "sources_audited"}
+)
+# Keys that mean the artifact carries actual research output.  Presence of any of these
+# vetoes the process-audit verdict, so a hybrid artifact stays writable.
+_RESEARCH_EVIDENCE_KEYS = frozenset(
+    {
+        "results",
+        "metrics",
+        "statistics",
+        "stats",
+        "tests",
+        "sample",
+        "data_source",
+        "by_ticker",
+        "per_ticker",
+        "bootstrap",
+        "pooled_daily_equal_weight",
+        "forecasts",
+        "backtest",
+        "regression",
+        "summary_stats",
+        "descriptive_stats",
+    }
+)
+
+
+def _is_process_audit_artifact(paths: list[str]) -> bool:
+    """True when every result JSON is a process/methodology audit, not research output.
+
+    Conservative by construction: unreadable or unrecognised artifacts return False
+    (writable), and any research-evidence key vetoes the verdict.
+    """
+    if not paths:
+        return False
+    saw_audit = False
+    for rel in paths:
+        candidate = ROOT / rel
+        try:
+            payload = json.loads(candidate.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            # Staying writable is the right call — we cannot prove it is an
+            # audit — but an unreadable result artifact is itself worth
+            # knowing: it usually means a damaged or half-written experiment
+            # output, and this branch would otherwise absorb that silently.
+            _warn_refill(f"result artifact unreadable, leaving {rel} writable", exc)
+            return False
+        if not isinstance(payload, dict):
+            return False
+        keys = {str(k) for k in payload}
+        if keys & _RESEARCH_EVIDENCE_KEYS:
+            return False
+        if len(keys & _PROCESS_AUDIT_MARKER_KEYS) < 2:
+            return False
+        saw_audit = True
+    return saw_audit
+
+
 def _article_evidence_package(k_id: str) -> dict:
     """Resolve whether a K can support a verifiable article evidence package.
 
@@ -558,6 +629,16 @@ def _article_evidence_package(k_id: str) -> dict:
     result_paths = _experiment_result_paths(k_id)
     knowledge_path = ROOT / "storage" / "memory" / "knowledge.json"
     if result_paths:
+        if _is_process_audit_artifact(result_paths):
+            # Terminal, not a fall-through: the knowledge fallback below would happily
+            # count "24 items / 17 PASS / 3 blockers" as three numeric claims and let
+            # the same unwritable task back into the pool.
+            return {
+                "ready": False,
+                "source": "process_audit_artifact",
+                "paths": [],
+                "knowledge_numeric_claims": _knowledge_numeric_claim_count(k_id),
+            }
         return {
             "ready": True,
             "source": "experiment_results",

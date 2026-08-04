@@ -1408,3 +1408,80 @@ def test_evidence_thickness_bonus_thick_vs_thin(tmp_path, monkeypatch):
         assert MODULE._evidence_thickness_bonus("K_missing_dir") == 0
     finally:
         MODULE._EVIDENCE_BONUS_CACHE.clear()
+
+
+def _write_result_artifact(root: Path, k_id: str, payload: dict) -> None:
+    kdir = root / "experiments" / k_id.lower()
+    kdir.mkdir(parents=True, exist_ok=True)
+    (kdir / f"{k_id.lower()}_results.json").write_text(
+        json.dumps(payload), encoding="utf-8"
+    )
+
+
+def test_process_audit_artifact_is_not_a_writable_evidence_package(tmp_path, monkeypatch):
+    """K1221 regression (2026-08-01): v1/v2/v3 were all closed unwritable.
+
+    A pre-submission checklist audit has a `*_results.json`, so the existence-only
+    check called it writable and refill re-emitted the same reader-facing task every
+    time it was closed. It must be rejected on artifact shape.
+    """
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", tmp_path / "storage" / "next_tasks.json")
+    _write_result_artifact(
+        tmp_path,
+        "K1221",
+        {
+            "experiment_id": "K1221",
+            "task": "pre-submission checklist audit",
+            "checklist_items": [{"id": i} for i in range(24)],
+            "blockers": [1, 2, 3],
+            "warn_items": [1, 2, 3],
+            "rules_observed": {"a": 1},
+            "sources_audited": ["paper/main.tex"],
+        },
+    )
+
+    result = MODULE._article_evidence_package("K1221")
+
+    assert result["ready"] is False
+    assert result["source"] == "process_audit_artifact"
+    # Terminal: must not fall through to the knowledge numeric-claim fallback, which
+    # would count "24 items / 17 PASS / 3 blockers" as three claims and re-admit it.
+    assert result["paths"] == []
+
+
+def test_research_artifact_with_audit_like_keys_stays_writable(tmp_path, monkeypatch):
+    """The shape gate must only reject on a clear positive process-audit signature."""
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", tmp_path / "storage" / "next_tasks.json")
+    _write_result_artifact(
+        tmp_path,
+        "K9200",
+        {
+            "experiment_id": "K9200",
+            # Carries audit-ish keys but also real research output — must stay writable.
+            "blockers": [],
+            "warn_items": [],
+            "sample": {"n_observations": 290},
+            "bootstrap": {"B": 5000},
+        },
+    )
+
+    result = MODULE._article_evidence_package("K9200")
+
+    assert result["ready"] is True
+    assert result["source"] == "experiment_results"
+
+
+def test_unreadable_artifact_is_left_writable(tmp_path, monkeypatch):
+    """Conservative default: inability to prove it is an audit must not cull the K."""
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", tmp_path / "storage" / "next_tasks.json")
+    kdir = tmp_path / "experiments" / "k9201"
+    kdir.mkdir(parents=True)
+    (kdir / "k9201_results.json").write_text("{not json", encoding="utf-8")
+
+    result = MODULE._article_evidence_package("K9201")
+
+    assert result["ready"] is True
+    assert result["source"] == "experiment_results"
