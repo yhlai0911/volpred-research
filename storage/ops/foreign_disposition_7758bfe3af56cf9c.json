@@ -1,0 +1,84 @@
+{
+  "adjudicated_by": "hourly-slot-1-5374936c726946b9855986ed01c2f1f1",
+  "incident": "7758bfe3af56cf9c",
+  "_do_not_apply_before": [
+    "PRECONDITION 1 — quarantine-checkpoint src/volpred/research/revisit_gate.py, config/revisit_gates.json, tests/test_revisit_gate.py（不在 HEAD、無 quarantine 覆蓋，preflight 會 refuse；且不屬於任何 incident）",
+    "PRECONDITION 2 — 把那三條以 action=commit 加進本 disposition，否則 K1322/k1307/k1324 land 後 main 起 ImportError",
+    "POSTCONDITION — 跑 test_revisit_gate / test_refill_task_pool / test_daily_checkup_reproducibility，再 foreign_incident --reconcile"
+  ],
+  "paths": {
+    ".claude/skills/fb-publishing/SKILL.md": {
+      "action": "commit",
+      "reason": "mark_fb_post_status.py:157-158 寫的是 feed entry 頂層 fb_post_status；HEAD 的 jq 查 .details.* 永遠回 null，已誤導過一次。dirty 版正確，HEAD 錯誤。"
+    },
+    "config/experiment_artifact_exclusions.json": {
+      "action": "commit",
+      "reason": "change set A。k1325/k1324/K1322/k1307 四條 exclusion 都寫明為何無法重現（unbounded 5min glob、archived 76/80/82 天 vs 今日 123 檔、皆早於 finalize_experiment()），符合 AGENTS.md 標準。JSON 合法。"
+    },
+    "docs/handoffs/2026-08-03_volpred_optimization_continuation.md": {
+      "action": "commit",
+      "reason": "同日同類的 2026-08-03_claude_code_system_optimization_{handoff,prompt}.md 已在 HEAD；docs/handoffs/ 是 tracked 目錄。無程式風險。（仍在 24h live-authoring 寬限內，今日算 deferred，但 incident_closeable 對髒度是嚴格的，仍須 land。）"
+    },
+    "docs/handoffs/2026-08-03_volpred_optimization_prompt.md": {
+      "action": "commit",
+      "reason": "上者的配套 prompt 檔，理由與 caveat 相同。"
+    },
+    "experiments/K1322/K1322.py": {
+      "action": "commit",
+      "reason": "change set A。以 gate_for_pipeline 取代猜出來的 REVISIT_GATE_DAYS = 200，改由實測 effect size 推導。compile 通過。依賴 revisit_gate.py + revisit_gates.json。"
+    },
+    "experiments/K1342/README.md": {
+      "action": "leave",
+      "reason": "errata 聲稱『已修生成端』，但該修正不在 HEAD、不在 quarantine ref、不在 18 個 worktree 任一份 —— commit 會把假宣稱寫進 main。事實核心（interval=2m vs data_source=1-minute）為真，故不 delete。先補 K1342.py 的 INTERVAL 內插再一起 land。"
+    },
+    "experiments/k1307/k1307.py": {
+      "action": "commit",
+      "reason": "change set A。移除 POWERED_OOS_TARGET = 252（同一 pipeline 的第二份不一致門檻），改用 evaluate_registered_pipeline。compile 通過。"
+    },
+    "experiments/k1324/k1324.py": {
+      "action": "commit",
+      "reason": "change set A。移除硬寫的 200/50 門檻，改用共用 gate。compile 通過。"
+    },
+    "experiments/k1325/revisit_gate.json": {
+      "action": "commit",
+      "reason": "change set A 的生成產物，已驗內部自洽（重現 required_total_days=716 / DESIGN_CHANGE_REQUIRED）。整條 K1307→K1318→K1322→K1324→K1325 鏈現在指向它，留 untracked 等於整鏈讀一個未追蹤的決策。"
+    },
+    "experiments/k528/k528_nfp_official_dates_results.json": {
+      "action": "commit",
+      "reason": "記錄一次真的發生過的文章更正（19 處，mile_35eef830），已用 feed.json live readback 佐證而非採信 artifact 自述。同時記錄先前 18 項撤回清單為何作廢（off-cycle ALFRED accessor bug 會撤掉一個其實正確的發現）。不 land 則 main 對已出貨的更正仍寫著 status=pending。"
+    },
+    "scripts/gen_k1588_general_charts.py": {
+      "action": "commit",
+      "reason": "已發佈文章的圖表生成器，數字全從 HEAD 已有的 k1588_results.json run-time 讀取。compile 通過。留 untracked 等於 main 裡的圖不可重現。"
+    },
+    "scripts/gen_k1717_general_charts.py": {
+      "action": "commit",
+      "reason": "同上，讀 HEAD 已有的 k1717_results.json，palette 已依 dataviz skill 驗證。compile 通過。"
+    },
+    "scripts/refill_task_pool.py": {
+      "action": "commit",
+      "reason": "change set B — K1221 regression fix（v1/v2/v3 全被判不可寫，兩班 fire 手動收尾）。以 artifact SHAPE 而非長尾的 knowledge category 詞彙把關，且為 terminal 而非 fall-through。保守設計（讀不到/認不出 → 維持可寫）。※本 fire 結束前已由別的 slot land，preflight 現為 noop。"
+    },
+    "tests/test_daily_checkup_reproducibility.py": {
+      "action": "commit",
+      "reason": "三個新 assert 釘住 daily_checkup.py:976-979 的 Issue #44 措辭（已驗這些字串在 HEAD，測試對現行 main 會過），正是這個 incident class 一再踩到的邊界的 regression cover。"
+    },
+    "tests/test_refill_task_pool.py": {
+      "action": "commit",
+      "reason": "change set B 的測試覆蓋（audit artifact 被拒 / 混合型 artifact 維持可寫 / 讀不到的 artifact 維持可寫）。※同樣已於本 fire 期間 land，preflight 現為 noop。"
+    },
+    "src/volpred/research/revisit_gate.py": {
+      "action": "commit",
+      "reason": "PRECONDITION 2 of the adjudication: dependency closure for change set A — K1322/k1307/k1324 import volpred.research.revisit_gate; landing them without the module breaks main with ImportError. Chain self-consistency verified by the adjudicating fire (evaluate_registered_pipeline reproduces required_total_days=716 / DESIGN_CHANGE_REQUIRED)."
+    },
+    "config/revisit_gates.json": {
+      "action": "commit",
+      "reason": "PRECONDITION 2 of the adjudication: dependency closure for change set A — K1322/k1307/k1324 import volpred.research.revisit_gate; landing them without the module breaks main with ImportError. Chain self-consistency verified by the adjudicating fire (evaluate_registered_pipeline reproduces required_total_days=716 / DESIGN_CHANGE_REQUIRED)."
+    },
+    "tests/test_revisit_gate.py": {
+      "action": "commit",
+      "reason": "PRECONDITION 2 of the adjudication: dependency closure for change set A — K1322/k1307/k1324 import volpred.research.revisit_gate; landing them without the module breaks main with ImportError. Chain self-consistency verified by the adjudicating fire (evaluate_registered_pipeline reproduces required_total_days=716 / DESIGN_CHANGE_REQUIRED)."
+    }
+  },
+  "applied_by": "main-thread-interactive (canonical writer for the read-only adjudicating fire 5374936c)"
+}
