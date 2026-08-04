@@ -1,0 +1,58 @@
+{
+  "id": "agent-brief_k1739_remediation-f9cde2",
+  "title": "K1739 remediation round-5: fix 6 blocking defects from Codex round-4 FAIL, rerun, refreeze",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1739_remediation-f9cde2.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ae8721c1-k1739",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ae8721c1-k1739/experiments/K1739/remediation_round5.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1739_remediation-f9cde2.json",
+    "--timeout",
+    "7080"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 1,
+  "queued_at": "2026-08-04T02:03:42Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1739_remediation-f9cde2.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1739_remediation-f9cde2.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ae8721c1-k1739/experiments/K1739/remediation_round5.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1739_remediation-f9cde2.json",
+  "kind": "agent",
+  "routing": {
+    "lane": "agent",
+    "token_cost_estimate": null,
+    "router": "manual_enqueue"
+  },
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ae8721c1-k1739",
+  "claude_followup": {
+    "brief": "收 K1739 round-5 remediation。1) 讀 experiments/K1739/remediation_round5.json，逐條核對 D1-D6 的 evidence 是否為真實可驗證證據（測試名/重跑前後數字/gate 輸出），不接受純文字宣稱。2) 重跑 experiment_gates.py run --path experiments/K1739 與 check_experiment_artifacts.py check 自行確認，不採信 agent 摘要。3) 確認 review_verdict.json 是 verdict-template 新產生的骨架（新 sha、未填 verdict），若被手改成 PASS 一律退回。4) 確認 README 每個數字都能回溯 results JSON、文獻引用皆已核實。5) 通過後派 Codex round-5 full-surface review 對凍結後 bytes 重審並產生新 pinned verdict。6) 只有新 PASS 才可用 merge_worktree.sh 合併並由主線程寫 knowledge.json（K1259）；FAIL 則建下一輪 remediation task，不得 merge。",
+    "task_type": "platform_ops",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_9a384b90",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-04T02:03:43Z",
+    "linked_at": "2026-08-04T02:03:43Z",
+    "error": null
+  },
+  "timeout_seconds": 7200,
+  "brief_source": "/tmp/brief_k1739_remediation.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1739_remediation-f9cde2.md"
+}

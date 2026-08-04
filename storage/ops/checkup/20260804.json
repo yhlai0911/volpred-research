@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-08-04T10:12:56.921987",
+  "overall": "critical",
+  "critical_count": 1,
+  "warn_count": 9,
+  "findings": [
+    {
+      "dimension": "alert_conditions",
+      "severity": "warn",
+      "message": "paper_stale: M3 paper line stale > 7.45d",
+      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
+    },
+    {
+      "dimension": "alert_conditions",
+      "severity": "warn",
+      "message": "control_gate_lifecycle: 控制閘 PDCA 到期（7 個）",
+      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
+    },
+    {
+      "dimension": "alert_conditions",
+      "severity": "warn",
+      "message": "control_gate_source_health: 控制閘 evidence source 失明",
+      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
+    },
+    {
+      "dimension": "reader_metrics",
+      "severity": "info",
+      "message": "top-3 讀者互動: 買的時候時點沒那麼重要，賣的時候順序可能決定你幾(score=440); 同一個地球，兩個波動率市場：VIXTWN 近 4(score=182); K1006: 台指期隔夜跳空累計 83.6% 卻(score=170)",
+      "recovery": null
+    },
+    {
+      "dimension": "dedup_calibration",
+      "severity": "warn",
+      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=853, AI saturation=15 (threshold=5, margin=10), NFP control=3, FOMC theme=0 / hard=0",
+      "recovery": "uv run python scripts/daily_checkup.py --json  # 檢查 dedup_calibration"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "REPORT_STALE: 2 priority report(s) no longer match their audited subject hashes（例：k1699, K1710）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "PRIORITY_UNVERIFIED: 229 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1023, k1025, k1025b）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "PRIORITY_REFERENCE_UNRESOLVED: 4 paper/feed reference(s) do not resolve to an experiment directory（例：K54, K55, K71, K79）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "CODE_WITHOUT_RESULTS: 168 K-family directories have code but no archived *_results.json（例：k1212, k1267, k1380, k144, k150）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "task_pool_pressure",
+      "severity": "warn",
+      "message": "pending=89 超過 drain-first 閾值 80（{'p1': 2, 'p2': 51, 'p3': 35, 'p4': 1}）—— 自動 refill/discovery 應已停止",
+      "recovery": "清既有 pending；超齡任務走 superseded / closed_no_action 正式裁決"
+    },
+    {
+      "dimension": "task_pool_pressure",
+      "severity": "critical",
+      "message": "連續 8 個完整日 created > succeeded（08-03 +8、08-02 +16、08-01 +23、07-31 +13、07-30 +12）—— 池子單調膨脹，生成端跑贏消化端",
+      "recovery": "檢查 drain-first 閘是否生效（storage/ops/drain_first_state.json）；若 active=true 仍淨增，代表有 generator 繞過閘門（看 stderr 的 [pool_pressure] WARN 找出是誰）"
+    },
+    {
+      "dimension": "task_pool_pressure",
+      "severity": "info",
+      "message": "drain-first 生效中（entered_at=2026-07-28T00:00:31.632909+00:00）；退出條件 pending<80 且連續 3 日 succeeded>=created （目前 未滿足吞吐條件）",
+      "recovery": null
+    }
+  ]
+}
