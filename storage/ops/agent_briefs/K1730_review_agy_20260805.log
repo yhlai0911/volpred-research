@@ -1,0 +1,84 @@
+[agy_exec_bounded] stripped from child env: ANTHROPIC_BASE_URL
+VERDICT: PASS
+REVIEWER: Antigravity / Gemini 3.6 Flash (fallback path)
+BLOCKING_DEFECTS: none
+RESIDUAL_RISKS: 1. SSVS PIP 採集層因 MCMC 跨鏈與 Geweke 診斷未通過預註冊收斂門檻，依規嚴格保留為 `DIAGNOSTIC_ONLY` 階級，不可提階為推論依據；2. Non-circular lag-shift placebo 僅使用 5 個位移階數（解析度 floor 0.167），僅能作為 NULL 之粗粒度佐證；3. 本裁決作為 fallback 路徑認證，尚待 2026-08-08 Codex 額度解鎖後併入 `codex_primary_reverify_k1714_k1735_20260808` 完成主軌二次複核。
+
+---
+
+### K1730 v2 收養認證審查報告（純唯讀審查）
+
+本審查針對位於 `/Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/` 之 K1730 v2 實驗套件進行全量與抽查認證。
+
+---
+
+### 1. nested-DM 處置的一致性審查
+
+* **代碼與標記對齊**：在 [`k1730_gevreg_midas_ssvs.py`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/k1730_gevreg_midas_ssvs.py#L520) 第 520 行已顯式標註 `# nested-dm: diagnostic-only`。代碼明示 `GEV-HAR` 為 `GEVReg-MIDAS-SSVS` 將宏觀塊係數設為 0 的嵌套模型（line 141-144），在 Pinball 損失與 Expanding 視窗下無漸近常態極限理論，正式撤回其推論地位。
+* **README 敘述與表格重標**：
+  * [`README.md`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/README.md#L49-L58) §4 顯式指出 vs GEV-HAR 為 **diagnostic-only, not a test**。
+  * Table 2 與 Table 5 均已加入醒目標記與註解，註明對 GEV-HAR 之 DM 檢定已撤回推論地位。
+* **非嵌套基準（Non-nested benchmarks）定位**：
+  * **Gaussian-MIDAS**：屬於 Location-Scale 常態分佈族（隱含 Log-Likelihood 為二次損失），與 GEV極值分佈族（帶 Shape / Location / Scale 參數）屬於不同模型族，互不嵌套。
+  * **HAR-QR**：針對各分位數獨立進行 Pinball loss 最小化之分位數迴歸，無 GEV 參數分佈與 MIDAS 權重結構。
+  * **Empirical**：非參數歷史擴張視窗分位數。
+  * 結論：對 Gaussian-MIDAS / HAR-QR / Empirical 之 DM 檢定維持非嵌套模型間相對預測準確度之描述與檢定地位，與 [`K1730_NESTED_DM_ADJUDICATION.md`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/K1730_NESTED_DM_ADJUDICATION.md) 裁決完全一致。
+
+---
+
+### 2. RECONCILIATION Lineage 裁決邏輯與數值紀律
+
+* **Authoritative Baseline 選擇 (`cd931fbf`)**：
+  * [`RECONCILIATION_20260804.md`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/RECONCILIATION_20260804.md) 選擇 `cd931fbf` 作為唯一權威來源，理由充分：採用完整補救代碼（修復 v1 缺陷）、更高階 MCMC 設定 (`n_burnin=15000, n_chains=4`)、以及優異之 Multistart 診斷 (`basin concentration 0.867-0.92, feasible-optimum >= 0.967`)。
+* **`d0d25fe2` 降級為 Cross-check 收據**：
+  * `d0d25fe2` 為 2026-07-21 使用舊版代碼與較弱 MCMC 設定 (`n_burnin=10000, n_chains=2`) 的重跑結果，僅用於跨臂複核，降級為獨立 robustness 佐證。
+* **數值引用紀律**：
+  * 經比對，`README.md` 與所有報告中引用的數字完全且僅來自 `cd931fbf`（重跑驗證版），嚴格遵循「不混引兩版」的紀律。
+
+---
+
+### 3. Lookahead 資訊集邊界與 Expanding Refit 嚴格性
+
+* **MIDAS 宏觀數據 Point-in-Time 邊界**：
+  * 檢視 [`k1730_data.py`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/k1730_data.py#L203-L256)，所有月頻宏觀數據（CPI, NFP, IP, UNRATE）均調用 ALFRED `output_type=4` (initial release only)，嚴格限定 `release_date < origin`。
+  * `assert_no_lookahead` 檢定會在運行時對所有 1,380 / 967 個區塊進行三項獨立檢查（`macro_released_before_origin`, `origin_before_block_start`, `blocks_non_overlapping`），結果為 0 違規（PASS）。
+* **Refit 訓練集邊界**：
+  * 在 [`k1730_gevreg_midas_ssvs.py`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/k1730_gevreg_midas_ssvs.py#L112) 中，每年 1 月 1 日重估時，訓練集邊界嚴格定義為 `est = (block_end < refit_date).values & valid`。
+  * 確保預測目標週之結束時間必然嚴格大於 `refit_date`，不存在任何未來數據洩漏。
+
+---
+
+### 4. GEV/SSVS 實作與 MLE Multistart 診斷抽查
+
+* **MLE Multistart 診斷**：
+  * Feasible start rate 為 0.600（為隨機起步盒範圍之屬性，非似然表面缺陷）；Starts reaching feasible optimum 為 0.986；Basin concentration 達 0.867 - 0.918（最差 refit 亦有 26/30 起步點到達最佳 basin）。
+  * 所有 Hessians 均為正定 (positive definite)，最大條件數 17,853。
+* **MCMC 收斂與 SSVS 階級**：
+  * 因實測數據上最差 R-hat 達 1.107、Geweke |z| 達 28.05，未達預註冊收斂標準 (`rhat < 1.05, ESS >= 400`)，`README.md` 與 JSON 均已將 SSVS PIP 顯式降階標註為 `DIAGNOSTIC_ONLY`。
+
+---
+
+### 5. README 數字與 Results JSON 對齊驗證
+
+* 執行自動化對齊驗證腳本 [`verify_readme_alignment.py`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/verify_readme_alignment.py)：
+  * 命令行輸出：`ALIGNED — 14 numeric claims in README.md match k1730_gevreg_midas_ssvs_results.json; no banned claim vocabulary in 2 documents.`
+* **重點欄位抽查**：
+  * Headline 90% coverage：GEVReg-MIDAS-SSVS `0.8521` (824/967), GEV-HAR `0.8625`, Gaussian-MIDAS `0.8480`, HAR-QR `0.8542`, Empirical `0.8366` —— **完全全等**。
+  * Kupiec UC / CC p-values 及 Table 2 DM 數據（包含 `t=2.16, p=0.0311`）—— **完全全等**。
+
+---
+
+### 6. Placebo（非圓形 Lag-Shift）定位與 p=0.833 誠實度
+
+* **設計誠實度**：
+  * v1 的單次圓形置換（circular permutation）因會將未來發布數據洩漏至早期 origin（54,950 儲存格受影響）已在 `REMEDIATION_v2.md` 中被撤回。
+  * v2 改用非圓形 Lag-Shift Placebo（位移 [52, 104, 156, 208, 260] 週，前 260 週從所有臂中同步剔除），確保零未來資訊洩漏。
+* **p=0.833 表述誠實度**：
+  * 實測真實宏觀 Pinball loss 為 `0.11415`，Placebo 5 個臂中有 4 個臂表現優於或等於真實對齊，得出單邊 `p = 0.833`。
+  * 文檔與程式碼中均誠實聲明：「5 個位移下最小可達 p 值為 0.167，此為粗粒度對比診斷，非精確置換檢定」，僅作為 NULL 敘事之輔助佐證，無過度宣稱。
+
+---
+
+### 總結
+
+K1730 v2 實驗套件在 nested-DM 處理、歷史 Lineage 裁決、Lookahead 防範、代碼與文檔對齊度上均達到極高標準，符合認證要求。**裁決為 PASS**。

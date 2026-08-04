@@ -5,12 +5,12 @@
   "interpreter": "uv run python",
   "args": [],
   "env": {},
-  "status": "running",
+  "status": "failed",
   "queue_priority": 5,
   "queued_at": "2026-08-04T16:26:35Z",
   "started_at": "2026-08-04T18:58:33Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-08-04T20:33:15Z",
+  "exit_code": 4,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795.stderr",
   "result_artifact": "experiments/k1814/K1814_results.json",
@@ -54,5 +54,19 @@
     "fire_key": "operations-core-v1:volpred-compute-worker:9f7e7b90dd0dcaa8e1118fad",
     "scheduled_for": "2026-08-04T16:00:00Z"
   },
-  "claimed_by_pid_start_wall": "Wed Aug  5 00:00:21 2026"
+  "claimed_by_pid_start_wall": "Wed Aug  5 00:00:21 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "assign_64275152",
+    "settled_at": "2026-08-04T20:33:14Z",
+    "error": null
+  },
+  "process_exit_code": 0,
+  "failure_reason": "experiment_gate_failed",
+  "experiment_gate": {
+    "status": "failed",
+    "scope": "/Users/yhlai0911/volpred-research/experiments/k1814",
+    "exit_code": 1,
+    "report": "[gate] FAIL — 2 violation(s) under experiments/k1814:\n\n  [nested-dm-misuse]\n    - experiments/k1814/gate_history/b1a67269__k1814.py  (primary_raw_dm)\n    → Raw DM/HLN is not valid inference under a nested-model null. Use Clark-West (2007) for squared-error, or a general-loss / recursive-bootstrap design for QLIKE/pinball, and wire THAT into the verdict. If the DM is descriptive only, say so with `nested-dm: diagnostic-only` and keep it out of the claim sink. A primary unconditional GW/DM statistic under nesting is accepted only with the versioned fixed-memory cell manifest, matching runtime provenance, locally narrow claims, and a trusted external PASS receipt. Owner: scripts/tests/test_nested_dm_misuse_ratchet.py\n\n  [dm-hac-lag]\n    - experiments/k1814/gate_history/b1a67269__k1814.py::dm_hln  (degenerate_at_h1)\n    → A DM statistic without a HAC variance (or with a degenerate lag) overstates significance. Use the canonical delegate with an explicit HAC bandwidth. Owner: scripts/tests/test_dm_hac_lag_ratchet.py\n\nThis experiment is not accepted. Your own tests passing only shows it ran the way you meant it to; these gates check it does not break a rule the repo already learned the hard way."
+  }
 }
