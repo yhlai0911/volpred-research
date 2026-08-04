@@ -9,12 +9,12 @@
     "2400"
   ],
   "env": {},
-  "status": "queued",
+  "status": "failed",
   "queue_priority": 2,
   "queued_at": "2026-08-04T13:12:37Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-08-04T13:15:19Z",
+  "completed_at": "2026-08-04T13:15:26Z",
+  "exit_code": 1,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-review-k1095-v3.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-review-k1095-v3.stderr",
   "result_artifact": "storage/ops/codex_reviews/k1095_v3_verdict.md",
@@ -40,5 +40,13 @@
   "source_task_link": null,
   "timeout_seconds": 2700,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 60645,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:a2ffb41aa7b73de1f85f81c4",
+    "scheduled_for": "2026-08-04T13:15:00Z"
+  },
+  "claimed_by_pid_start_wall": "Tue Aug  4 21:15:19 2026"
 }

@@ -1,47 +1,41 @@
 {
-  "last_seen_run_id": 30905755812,
-  "last_seen_conclusion": "success",
+  "last_seen_run_id": 30911746339,
+  "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
-  "last_task_id": "ci-red-30884267057",
+  "last_task_id": "ci-red-30911746339",
   "last_push_remediation": {
-    "attempted": true,
-    "ahead": 1,
-    "head_sha": "0f1a949a121d840e4f1f539b97211d7f317f026e",
-    "pushed": true,
-    "rc": 0,
-    "outcome": "pushed",
-    "ahead_after": 0
+    "attempted": false,
+    "reason": "nothing_unpushed"
   },
   "schema_version": 3,
   "latest_observed_run": {
     "key": "30911746339:1",
     "run_id": 30911746339,
     "attempt": 1,
-    "status": "in_progress",
-    "conclusion": "",
+    "status": "completed",
+    "conclusion": "failure",
     "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30911746339",
     "head_sha": "2e744b57c1b00384964975cbbb0f7330530e5aa2",
     "created_at": "2026-08-04T13:00:58Z",
     "started_at": "2026-08-04T13:00:58Z",
-    "updated_at": "2026-08-04T13:01:02Z",
+    "updated_at": "2026-08-04T13:20:03Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "30905755812:1",
-    "run_id": 30905755812,
+    "key": "30911746339:1",
+    "run_id": 30911746339,
     "attempt": 1,
     "status": "completed",
-    "conclusion": "success",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30905755812",
-    "head_sha": "c810bed5fb3ce60fa82a70defb4176477353dc81",
-    "created_at": "2026-08-04T11:40:06Z",
-    "started_at": "2026-08-04T11:40:06Z",
-    "updated_at": "2026-08-04T11:57:20Z",
+    "conclusion": "failure",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30911746339",
+    "head_sha": "2e744b57c1b00384964975cbbb0f7330530e5aa2",
+    "created_at": "2026-08-04T13:00:58Z",
+    "started_at": "2026-08-04T13:00:58Z",
+    "updated_at": "2026-08-04T13:20:03Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-04T13:05:23.018282+00:00",
+  "updated_at": "2026-08-04T13:50:38.806091+00:00",
   "processed_run_keys": [
-    "29676881133:1",
     "29677363216:1",
     "29679059828:1",
     "29680801763:1",
@@ -540,7 +534,8 @@
     "30902205265:1",
     "30903898444:1",
     "30904451290:1",
-    "30905755812:1"
+    "30905755812:1",
+    "30911746339:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -791,5 +786,123 @@
         "attempt_history_complete": true
       }
     }
-  ]
+  ],
+  "active_incident": {
+    "incident_id": "ci-red-30911746339",
+    "phase": "verifying",
+    "opened_at": "2026-08-04T13:20:27.632257+00:00",
+    "first_failure": {
+      "key": "30911746339:1",
+      "run_id": 30911746339,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30911746339",
+      "head_sha": "2e744b57c1b00384964975cbbb0f7330530e5aa2",
+      "created_at": "2026-08-04T13:00:58Z",
+      "started_at": "2026-08-04T13:00:58Z",
+      "updated_at": "2026-08-04T13:20:03Z",
+      "attempt_history_complete": true
+    },
+    "root_cause": "2026-08-04T13:19:53.7403243Z E AssertionError: New local DM implementation(s) omit HAC or use an h=1-degenerate bandwidth:",
+    "root_cause_status": "complete",
+    "failure_run_keys": [
+      "30911746339:1"
+    ],
+    "repair_task_ids": [
+      "ci-red-30911746339"
+    ],
+    "dispatch_requested_task_ids": [
+      "ci-red-30911746339"
+    ],
+    "notifications": {
+      "detection": {
+        "attempts": 1,
+        "last_attempt_at": "2026-08-04T13:20:27.632257+00:00",
+        "last_delivery": {
+          "sent": true,
+          "skipped": false,
+          "notification_id": "effect_owned_email_3411a885b1cc1cd8153ab85b0d518645",
+          "send_error": null
+        },
+        "status": "sent",
+        "sent_at": "2026-08-04T13:20:27.632257+00:00",
+        "reported_cause": "2026-08-04T13:19:53.7403243Z E AssertionError: New local DM implementation(s) omit HAC or use an h=1-degenerate bandwidth:"
+      }
+    },
+    "root_cause_run_key": "30911746339:1",
+    "declared_output_paths": [
+      "experiments/K1038/k1038.py",
+      "experiments/K1042/k1042.py",
+      "experiments/K1043/k1043.py",
+      "experiments/K1048...K158_wavelet_garch_modwt.py",
+      "experiments/K1053/K1053.py",
+      "experiments/K1338/K1338.py",
+      "experiments/K1343_bdc_pres...experiments/K1344_private_credit_software_spillover/K1344.py",
+      "experiments/K1618/K1618.py",
+      "experiments/K1655/K1655_vix_nfci_encompassing.py",
+      "experiments/K1665/K1665.py",
+      "experiments/k1814/gate_history/b1a67269__k1814.py",
+      "experiments/k1814/k1814.py",
+      "experiments/k1814/render_readme_results.py",
+      "scripts/lazypack_layout_guard.py",
+      "scripts/tests/test_dm_hac_lag_ratchet.py",
+      "scripts/tests/test_git_writer_lock.py",
+      "scripts/tests/test_lazypack_layout_guard.py",
+      "scripts/tests/test_nested_dm_misuse_ratchet.py",
+      "src/volpred/charts/article_charts.py",
+      "src/volpred/evaluation/statistical_tests.py",
+      "src/volpred/ops/rollback.py",
+      "tests/test_append_work_log.py",
+      "tests/test_cpi_t0_official_release_dates.py",
+      "tests/test_daily_update_tw_staleness.py",
+      "tests/test_evaluation_metrics.py",
+      "tests/test_refresh_paper_snapshots_concurrent_append.py",
+      "tests/test_rollback.py",
+      "tests/test_shared_lock.py"
+    ],
+    "declared_output_paths_run_key": "30911746339:1",
+    "latest_failure": {
+      "key": "30911746339:1",
+      "run_id": 30911746339,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30911746339",
+      "head_sha": "2e744b57c1b00384964975cbbb0f7330530e5aa2",
+      "created_at": "2026-08-04T13:00:58Z",
+      "started_at": "2026-08-04T13:00:58Z",
+      "updated_at": "2026-08-04T13:20:03Z",
+      "attempt_history_complete": true
+    },
+    "failure_heads": [
+      "2e744b57c1b00384964975cbbb0f7330530e5aa2"
+    ],
+    "failure_cycles": 1,
+    "repair_admission": {
+      "status": "admitted",
+      "task_id": "ci-red-30911746339",
+      "at": "2026-08-04T13:20:27.632257+00:00"
+    },
+    "repair_task_statuses": {
+      "ci-red-30911746339": "pending"
+    },
+    "dispatch_request_count": 2,
+    "last_dispatch_request_at": "2026-08-04T13:50:38.806091+00:00",
+    "push_intent": {
+      "head_sha": "0630b7c54c55a67a0cb295c6b77c791a2070b935",
+      "run_key": "30911746339:1",
+      "recorded_at": "2026-08-04T13:20:27.632257+00:00"
+    },
+    "last_push_remediation": {
+      "attempted": false,
+      "reason": "nothing_unpushed"
+    },
+    "last_push_remediation_at": "2026-08-04T13:25:13.487158+00:00",
+    "last_verified_push_head": "0630b7c54c55a67a0cb295c6b77c791a2070b935",
+    "remediation_poll_keys": [
+      "2026-08-04T13"
+    ],
+    "remediation_checks": 1
+  }
 }
