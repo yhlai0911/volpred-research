@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：常見的成分，不代表值得單獨建模",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1584/k1584_results.json",
+      "sha256": "793e60cb718a1d8c47a8e55edc2e17857919cab0a37d1a5ccf9c2199ac0d319f",
+      "label": "台指期近月合約日盤逐筆資料整理成的日頻指標，期間二○一七年五月十六日至二○二六年六月二十九日，共兩千兩百一十九個交易日、一千六百九十七個事前預測日，最少訓練期五百天；檢驗把每天總變動拆成連續與跳動兩塊是否改善隔日預測，判定為無證據顯示拆解有用；跨市場同日跳動段落僅九十八個重疊交易日，為診斷用途，非正式結論"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "為什麼會覺得該把跳動拆出來",
+      "alt": "台指期近九年的資料裡，超過一半的交易日出現跳動，也就是價格在某個瞬間跨過一段明顯距離而不是慢慢磨過去。跳動和平常的來回震盪性質不同，平穩震盪有慣性，今天晃得大明天通常也還晃得大，跳動比較像事件，來得突然去得也快。既然兩者延續性不同，把它們混在一起當同一個東西丟進預測模型，直覺上是浪費資訊，分開處理應該會準一點。這個推論聽起來完全成立，本次就是去測它。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩種波動，性質不一樣",
+          "body": [
+            "平穩的來回震盪有慣性，今天晃得大，明天通常也還晃得大。",
+            "跳動比較像事件，來得突然、去得也快。延續性不同，直覺上就該分開處理。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "出現跳動的交易日比例",
+          "value": {
+            "source": "results",
+            "path": "/tx_harcj_test/jump_detection/jump_event_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": "超過一半，所以它不是可以忽略的雜訊"
+        },
+        {
+          "kind": "metric",
+          "label": "正式的事前預測天數",
+          "value": {
+            "source": "results",
+            "path": "/tx_harcj_test/n_oos",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "每天只用該日之前的資料重估，模型看不到要預測的那一天"
+        }
+      ]
+    },
+    {
+      "name": "panel_numbers",
+      "info": "results",
+      "style": "professional",
+      "title": "每多拆一層，隔天就差一點",
+      "alt": "從完全不拆開始，一路加細到五個等級：完全不拆、只留平穩的那一塊、拆成平穩加跳動、兩塊各自再分短中長期、再加上跳動會群聚。五個等級的隔日預測誤差一路上升，沒有一次反轉，最大與最小之間差不到百分之一。關鍵線索藏在另一組數字裡：跳動雖然常見，一半的日子只佔當天總變動的百分之三不到，平均也才百分之七。常見但每次很小，正是最容易讓人以為值得單獨處理的組合。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "只拆一層，相對完全不拆的表現變化",
+          "value": {
+            "source": "results",
+            "path": "/tx_harcj_test/pairwise_vs_har/HAR_C/qlike_improvement_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "負值代表比不拆差；才拆第一層就已經落在後面"
+        },
+        {
+          "kind": "metric",
+          "label": "拆到最細，相對完全不拆的表現變化",
+          "value": {
+            "source": "results",
+            "path": "/tx_harcj_test/pairwise_vs_har/HAR_CJ_cluster/qlike_improvement_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "五個等級一路往下，中間沒有任何一次反轉"
+        },
+        {
+          "kind": "metric",
+          "label": "跳動佔當天總變動的比例，一半的日子低於",
+          "value": {
+            "source": "results",
+            "path": "/tx_harcj_test/jump_detection/median_jump_variance_share",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "常見卻很小，這是整件事的關鍵線索"
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "沒有證據說拆有用，不是說拆有害",
+      "alt": "四個拆解版本和基準比較，統計上都沒有達到顯著，用重複抽樣重估的誤差範圍也全都涵蓋了其實沒差這個可能，因此正確結論是沒有證據顯示拆解有用，而不是拆解有害。順序上確實是越拆越差且五次沒有一次例外，但幅度不足以斷言拆解會傷害預測。可帶走的判準是，一個成分很常見不代表把它單獨拉出來建模就會划算，因為拆解本身有代價，每多一項要估的東西就多一份估計誤差，當那個成分每次只佔百分之三，帶來的新資訊很可能不夠付這筆帳。結論只涵蓋台指期日盤單一市場，拆解方法對盤中取樣頻率與報價雜訊敏感，本次未用逐筆資料做第二種方法交叉確認。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "檢驗涵蓋的交易日",
+          "value": {
+            "source": "results",
+            "path": "/tx_harcj_test/n_daily_raw",
+            "format": {
+              "kind": "integer"
+            }
+          },
+          "note": "近九年台指期日盤；結論只涵蓋這一個市場"
+        },
+        {
+          "kind": "text",
+          "heading": "為什麼要分得這麼細",
+          "body": [
+            "順序上越拆越差，五次沒有一次例外，但這個幅度還不足以斷言拆解會傷害預測。",
+            "過度解讀一個不顯著的方向，跟忽略它一樣糟。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "帶得走的判準",
+          "body": [
+            "一個成分很常見，不代表把它單獨拉出來建模就會划算。",
+            "拆解有代價：每多一項要估的東西，就多一份估計誤差。成分太小的時候，新資訊不夠付這筆帳。"
+          ]
+        }
+      ]
+    }
+  ]
+}
