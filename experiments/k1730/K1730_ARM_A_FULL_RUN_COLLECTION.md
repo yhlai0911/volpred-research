@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-08-05)** — this collection memo records an EARLIER run's numbers
+> (cov90=0.8501, DM t=1.998/p=0.046). Canonical numbers live ONLY in
+> `k1730_gevreg_midas_ssvs_results.json` (cd931fbf lineage, runtime-spec rerun);
+> see `RECONCILIATION_20260804.md`. Kept as historical record — do not cite.
+
 # K1730 arm A — 全量 production 收件驗證
 
 **收件時間**：2026-07-18 20:2x 台北
