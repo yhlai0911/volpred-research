@@ -1,0 +1,43 @@
+{
+  "id": "k1730_v2_production_rerun_runtime_spec_20260804",
+  "title": "K1730 v2 production 重跑（runtime spec 重生 + 對 cd931fbf 數值驗證）",
+  "script_path": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/k1730_gevreg_midas_ssvs.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-08-04T15:46:41Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1730_v2_production_rerun_runtime_spec_20260804.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1730_v2_production_rerun_runtime_spec_20260804.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "routing": {
+    "lane": "compute_queue",
+    "token_cost_estimate": 0,
+    "router": "manual_enqueue"
+  },
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1730 v2 重跑收件（接續 k1730_v2_adopt_reconcile_recertify_20260802，worktree k1730-adopt @ff0afa641）：(1) 驗 reproduce_spec.json 已 runtime 重生（generated_at_runtime=true、entrypoint sha 綁現行代碼）；(2) 新結果對 cd931fbf 逐欄位比對（扣 run_utc/runtime/code_trace 類 metadata；MCMC 同 seed 42 應全等，若有差逐項列出並判定）；(3) 讀 experiments/k1730/RECONCILIATION_20260804.md 依其待辦：artifact/lookahead/README-alignment gates → 雙 fallback 審查（agy + fresh-context，K1714 先例）→ verdict-template 填寫 → bash scripts/merge_worktree.sh k1730-adopt → 驗 HEAD 路徑；(4) knowledge research_correction 更正 provenance（d0d25fe2→cross-check、authoritative=cd931fbf 重跑驗證版）；(5) K1730 併入 codex_primary_reverify_k1714_k1735_20260808 的 8/8 primary 清單。",
+    "task_type": "platform_ops",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "k1730_v2_adopt_reconcile_recertify_20260802",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-04T15:46:41Z",
+    "linked_at": "2026-08-04T15:46:41Z",
+    "error": null
+  },
+  "timeout_seconds": 21600,
+  "brief_source": null,
+  "brief_snapshot": null
+}
