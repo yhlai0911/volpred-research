@@ -130,6 +130,18 @@
     "defaultMode": "dontAsk"
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/yhlai0911/.claude/hooks/main-checkout-lock.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
@@ -202,5 +214,6 @@
     "mcp__claude-in-chrome__switch_browser",
     "mcp__claude-in-chrome__tabs_context_mcp",
     "mcp__claude-in-chrome__tabs_create_mcp"
-  ]
+  ],
+  "model": "sonnet"
 }

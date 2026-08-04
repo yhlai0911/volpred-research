@@ -16,6 +16,7 @@
 - [reference_trending_blog_sources.md](reference_trending_blog_sources.md) — trending 掃描來源清單 + high-viral 類型
 - [reference_unified_memory_one_brain.md](reference_unified_memory_one_brain.md) — Telegram 與本機共用同一記憶，勿建 channel 專屬
 - [reference_work_dashboard.md](reference_work_dashboard.md) — 監控 dashboard http://127.0.0.1:8787
+- [reference_global_session_lock_hook.md](reference_global_session_lock_hook.md) — 全域主 checkout 互斥鎖已上線；volpred 在 optout，勿重建同類 gate
 - repo 操作陷阱：[frontend-v2-fix 是巢狀 repo](reference_frontend_nested_git_repo.md)｜[worktree 內用 uv run --extra dev](reference_worktree_pytest_wrong_interpreter.md)
 - Chrome/FB 環境：[發文自選 Chrome，中文用 pbcopy](reference_fb_chrome_browser_autoselect.md)｜[deviceId 身分對照，禁用裸 id 問老闆](reference_chrome_browser_identity_map.md)
 
@@ -96,6 +97,7 @@
 - [feedback_refactor_over_patch_no_legacy.md](feedback_refactor_over_patch_no_legacy.md) — 重構優先於修補，不留遺留死碼；別把補丁說成治本
 - [feedback_audit_no_passive_terminal.md](feedback_audit_no_passive_terminal.md) — audit terminal set 不可含 awaiting_*/pending_*
 - 動手前先查：[重構前通盤查證權威來源](feedback_verify_before_restructure.md)｜[建新機制前查同 concern 是否已存在](feedback_check_existing_mechanism_before_building.md)
+- [feedback_graphify_query_before_grep.md](feedback_graphify_query_before_grep.md) — 架構/caller/影響面先走 graphify query 再 grep；整合已由 Codex 建好勿重裝
 - 前端：[改動要 build + 測所有 tab](feedback_test_before_deploy.md)｜[原版=數據 v3=呈現，不能脫鉤](feedback_v3_presentation_layer_only.md)｜[讀者頁瀏覽數等展示指標只能有唯一版本](feedback_single_source_displayed_metrics.md)
 - git 紀律：[驅動 git 的測試須隔離](feedback_hermetic_git_in_tests.md)｜[git add -A 毀掉 before/after 對照](feedback_autocommit_poisons_before_after.md)
 - worktree：[無 claim 致平行實作、liveness 用 lsof](feedback_parallel_impl_and_worktree_liveness.md)｜[merge 前勿 cd 進去](feedback_no_cd_into_worktree_before_merge.md)｜[stale base 走 path-scoped 抽取](feedback_worktree_stale_base_extract_by_path.md)｜[審查產物別寫進被審的樹，會撞自己的 clean-tree gate](feedback_review_artifacts_outside_worktree.md)

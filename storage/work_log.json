@@ -34567,5 +34567,34 @@
     "failure_class": "quota",
     "primary_renderer": "scripts/gen_lazypack_codex.py",
     "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-08-05T06:28:17+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1323_article_general",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-b6a4336d02094362a9e325aedd84dd0c",
+    "owner": "hourly-slot-1-b6a4336d02094362a9e325aedd84dd0c",
+    "commit": null,
+    "summary": "K1323 general-audience 文章完稿並進草稿池 mile_679eb2a1（標題「我們還差 136 天才敢下結論，中途先抓到自己的資料過期」）。角度刻意避開既有 mile_3e11060d / mile_609d9ff3 的『點數價差』主軸，改寫 252 天門檻進度 46.0%（116/252）+ 本地 VIX 配對來源落後 7 個交易日的自查；重抓當期資料後平均由 1.5182 升至 1.5527、CV 由 0.1851 升至 0.1968，證明不穩不是資料過期造成的假象。全文數字鎖在 as-of 2026-05-28 並明示不描述當前盤面。",
+    "article_id": "mile_679eb2a1",
+    "k_id": "K1323",
+    "audience": "general",
+    "audience_inferred": "general",
+    "evidence_source_paths": [
+      "experiments/k1323/k1323_results.json"
+    ],
+    "evidence_sha256": "dd844cddffd78deceff774c16463c5c839616a10607fac2629aa4ca4002af3a0",
+    "gates": {
+      "arc_dedup": "exit0 warn_coverage_metadata_gap; 主線程另做 layer-2 feed 比對確認差異化",
+      "anti_ai_gate": "PASS exit0 (warn 1/3)",
+      "image_gate": "2 charts, both matplotlib PNG",
+      "lazypack": "plan validated, async render queued"
+    },
+    "charts": [
+      "storage/drafts/assets/twvix_ratio_gate_20260528.png",
+      "storage/drafts/assets/twvix_ratio_vs_baseline_20260528.png"
+    ],
+    "topology": "subagent (per model_router daily_article; opus/medium)"
   }
 ]
