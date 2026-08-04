@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "title": "懶人包｜線畫得最窄的那一種，一關都沒過",
+  "subtitle": "兩檔債券 ETF、十一年半的樣本外，四種畫風險線的做法誠實對比",
+  "evidence": {
+    "k1594": {
+      "path": "experiments/k1594/k1594_results.json",
+      "sha256": "986ebfb45ad009c28a0801a39fb43003351a9ff2b82e6d2ebbaac9d3bb1fab1a",
+      "label": "四種畫線方法的樣本外回測完整結果 JSON"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "每天要畫的那一條線",
+      "alt": "概念說明：風險線畫太寬會壓住資金，畫太窄會常被踩破，四種畫法在兩檔債券 ETF 上比較",
+      "sources": [
+        "k1594"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一條線，兩種代價",
+          "body": [
+            "管風險的人每天要替部位畫一條「今天最壞大概跌到這裡」的線。",
+            "畫太寬，得押一大筆錢當緩衝，那筆錢什麼都不能做。",
+            "畫太窄，被踩破的次數變多，還會在最不該賣的時候被迫減碼。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "老做法的漏洞",
+          "body": [
+            "最陽春的畫法是翻歷史，把過去每一天的漲跌一視同仁地排一排。",
+            "三年前一個平靜的星期二，份量和上週那個利率跳動的日子完全相同。",
+            "那如果讓「和今天最像」的日子講話大聲一點呢？"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "每日回看的交易日數",
+          "value": {
+            "source": "k1594",
+            "path": "/data/calibration_window_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": "四種畫法都在同一個回看窗口內比較"
+        }
+      ]
+    },
+    {
+      "name": "2_result",
+      "info": "results",
+      "style": "scientific",
+      "title": "窄是真的，合格是假的",
+      "alt": "結果說明：相似度加權在四種情境都畫出最窄的線、三格綜合成本最低，但通過三關檢查的組合數為零",
+      "sources": [
+        "k1594"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "唯一乾淨的勝利",
+          "body": [
+            "把相似的日子加重計算，四種情境全部畫出最窄的線。",
+            "高收益公司債最嚴格那一格，同一條線佔用的緩衝比其他做法少了六分之一。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "綜合成本最低的情境數（共四格）",
+          "value": {
+            "source": "k1594",
+            "path": "/conclusion/kowcpi_best_mean_pinball_cells",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          },
+          "note": "把緩衝成本和踩破代價合起來算的分數"
+        },
+        {
+          "kind": "metric",
+          "label": "三關全過的情境數",
+          "value": {
+            "source": "k1594",
+            "path": "/conclusion/kowcpi_trinity_pass_cells",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          },
+          "note": "次數要對得上、踩線不能扎堆、監管紅綠燈要在綠區"
+        },
+        {
+          "kind": "metric",
+          "label": "校正多重比較後的確定勝出次數",
+          "value": {
+            "source": "k1594",
+            "path": "/conclusion/kowcpi_strict_holm_wins_vs_vix_regime",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          },
+          "note": "四種情境各三組兩兩比較，沒有一次能斷定準確度真的有差"
+        }
+      ]
+    },
+    {
+      "name": "3_conclusion",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "贏最多的那一格，幾乎沒在加權",
+      "alt": "結論說明：表現最好的情境有效樣本接近整個回看窗口、權重幾乎沒被集中，說明證據無法區分加權有效與換一個穩定平均法",
+      "sources": [
+        "k1594"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "表現最好那格的有效樣本天數",
+          "value": {
+            "source": "k1594",
+            "path": "/cells/HYG_alpha0.01/kowcpi_mean_ess",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 天"
+            }
+          },
+          "note": "回看窗口裡真正有份量的天數，離「一視同仁」很近"
+        },
+        {
+          "kind": "metric",
+          "label": "同一格的權重拉回幅度",
+          "value": {
+            "source": "k1594",
+            "path": "/cells/HYG_alpha0.01/kowcpi_mean_shrink_to_uniform",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": "幾乎沒有被安全設計拉回，代表它本來就沒把權重集中"
+        },
+        {
+          "kind": "text",
+          "heading": "所以不能說加權贏了",
+          "body": [
+            "真的把權重集中起來的那兩格，正好是踩線次數檢定失敗的那兩格。",
+            "這次的證據沒辦法把「加權真的有效」和「只是換了一個比較穩的平均法」分開。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "帶得走的一句話",
+          "body": [
+            "一個方法在某個指標上全面領先，不代表它可以上線。",
+            "下次看到「大幅改善」的宣稱，先問改善的是哪一個指標，其他指標同時發生了什麼事。"
+          ]
+        }
+      ]
+    }
+  ]
+}

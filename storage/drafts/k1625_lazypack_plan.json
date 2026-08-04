@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "title": "懶人包｜看起來翻倍的那個落差，控制之後就沒了",
+  "subtitle": "幣安永續合約資金費率能不能預告接下來五天的高波動週，比特幣與以太幣誠實對比",
+  "evidence": {
+    "k1625": {
+      "path": "experiments/k1625/k1625_results.json",
+      "sha256": "2bbed4ae12987d6d4b578e02512fb821f0a8d801fbca6ff550c4eb45d5ce1e2f",
+      "label": "比特幣與以太幣永續合約費率對未來五日高波動週的完整檢定結果 JSON"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "誰在付錢，後面就會亂嗎",
+      "alt": "概念說明：永續合約每八小時結算一次資金費率，費率極端代表持倉擠在同一邊，本研究檢定它能否預告未來五天的高波動週",
+      "sources": [
+        "k1625"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "每八小時付一次錢",
+          "body": [
+            "永續合約每八小時結算一次資金費率，做多的人付給做空的人，或者反過來。",
+            "費率飆到平常的好幾倍，代表大家都擠在同一邊，而擠在同一邊要付租金。",
+            "交易台上的講法是這種時候要小心，因為擁擠的部位被推一下就會連環出場。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "換一個問法",
+          "body": [
+            "先前測過「隔天的波動預測得準不準」，把費率加進模型之後誤差幾乎沒動。",
+            "這次不問明天那個數字，問接下來五天會不會整個變成高波動的一週。",
+            "高波動週的定義是往後五天的平均波動，落在過去一年最高的那一段。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "比特幣可用交易日",
+          "value": {
+            "source": "k1625",
+            "path": "/per_asset/BTC/n_daily_rows_with_funding_and_rv",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": {
+            "template": "樣本自 {start} 至 {end}，同時有費率與波動的日子",
+            "bindings": {
+              "start": {
+                "source": "k1625",
+                "path": "/per_asset/BTC/sample_start",
+                "format": {
+                  "kind": "text"
+                }
+              },
+              "end": {
+                "source": "k1625",
+                "path": "/per_asset/BTC/sample_end",
+                "format": {
+                  "kind": "text"
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "以太幣可用交易日",
+          "value": {
+            "source": "k1625",
+            "path": "/per_asset/ETH/n_daily_rows_with_funding_and_rv",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": {
+            "template": "樣本自 {start} 至 {end}，同一套定義與同一個資料來源",
+            "bindings": {
+              "start": {
+                "source": "k1625",
+                "path": "/per_asset/ETH/sample_start",
+                "format": {
+                  "kind": "text"
+                }
+              },
+              "end": {
+                "source": "k1625",
+                "path": "/per_asset/ETH/sample_end",
+                "format": {
+                  "kind": "text"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_result",
+      "info": "results",
+      "style": "scientific",
+      "title": "比率很好看，控制之後不見了",
+      "alt": "結果說明：比特幣在費率極高日之後的高波動週比率遠高於平常日，但加入前一日波動與漲跌幅控制後，極端日這個開關的估計值掉到接近零",
+      "sources": [
+        "k1625"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "比特幣：多方付錢極端日之後的高波動週比率",
+          "value": {
+            "source": "k1625",
+            "path": "/per_asset/BTC/conditional_high_rv_rates/h5/positive_funding_extreme/high_rv_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": {
+            "template": "這種日子在樣本裡共 {n} 天",
+            "bindings": {
+              "n": {
+                "source": "k1625",
+                "path": "/per_asset/BTC/conditional_high_rv_rates/h5/positive_funding_extreme/n",
+                "format": {
+                  "kind": "integer",
+                  "suffix": " 天"
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "比特幣：平常日的同一個比率",
+          "value": {
+            "source": "k1625",
+            "path": "/per_asset/BTC/conditional_high_rv_rates/h5/non_extreme/high_rv_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": {
+            "template": "共 {n} 天；跟上面那格的落差接近翻倍",
+            "bindings": {
+              "n": {
+                "source": "k1625",
+                "path": "/per_asset/BTC/conditional_high_rv_rates/h5/non_extreme/n",
+                "format": {
+                  "kind": "integer",
+                  "suffix": " 天"
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "以太幣：多方付錢極端日之後的同一個比率",
+          "value": {
+            "source": "k1625",
+            "path": "/per_asset/ETH/conditional_high_rv_rates/h5/positive_funding_extreme/high_rv_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": {
+            "template": "以太幣平常日是 {base}，落差只剩比特幣的一半左右",
+            "bindings": {
+              "base": {
+                "source": "k1625",
+                "path": "/per_asset/ETH/conditional_high_rv_rates/h5/non_extreme/high_rv_rate",
+                "format": {
+                  "kind": "percent",
+                  "digits": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "控制後仍站得住的訊號：比特幣費率高低",
+          "value": {
+            "source": "k1625",
+            "path": "/primary_tstats/12/t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 倍"
+            }
+          },
+          "note": "訊號大小相對於它自身估計誤差的倍數；事先設定的過關線是三倍"
+        },
+        {
+          "kind": "text",
+          "heading": "極端日那個開關，控制之後沒了",
+          "body": [
+            {
+              "template": "扣掉前一日的波動與漲跌幅之後，「今天是不是極端日」這個開關掉到 {btc_pos}，離過關線遠得看不見。",
+              "bindings": {
+                "btc_pos": {
+                  "source": "k1625",
+                  "path": "/primary_tstats/13/t",
+                  "format": {
+                    "kind": "number",
+                    "digits": 2,
+                    "suffix": " 倍"
+                  }
+                }
+              }
+            },
+            {
+              "template": "同一個費率高低的問法搬到以太幣只有 {eth_fz}，多空之間的不對稱檢定兩個幣都沒過。",
+              "bindings": {
+                "eth_fz": {
+                  "source": "k1625",
+                  "path": "/primary_tstats/28/t",
+                  "format": {
+                    "kind": "number",
+                    "digits": 2,
+                    "suffix": " 倍"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_conclusion",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "事先講好要兩格，最後只中一格",
+      "alt": "結論說明：預先設定的判定規則要求五日高波動週檢定至少兩格站上門檻，實際只有一格，因此本研究列為待追線索而非可用訊號",
+      "sources": [
+        "k1625"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "五日高波動週檢定中站上門檻的格數",
+          "value": {
+            "source": "k1625",
+            "path": "/verdict_basis/n_h5_regime_abs_t_ge_3",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          },
+          "note": "開跑前就寫死要兩格才算找到訊號，一格只能叫單格弱結果"
+        },
+        {
+          "kind": "metric",
+          "label": "全部檢定裡最高的訊號強度",
+          "value": {
+            "source": "k1625",
+            "path": "/verdict_basis/max_abs_t_any_test",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 倍"
+            }
+          },
+          "note": "出現在比特幣的費率高低那一格，仍然是比特幣獨有"
+        },
+        {
+          "kind": "text",
+          "heading": "限制講在前面",
+          "body": [
+            "只有幣安一家的費率，跨交易所的分歧完全沒測。",
+            "費率是持倉壓力的代理，不是真正的爆倉量或帳戶槓桿。",
+            "比特幣那一格有可能只是它自己這幾年的體質，以太幣對不上就是最直接的反證。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "帶得走的一句話",
+          "body": [
+            "看起來很大的落差，跟站得住的落差，是兩回事。",
+            "把「加密貨幣」當成一個東西來談，很容易在這種地方跌倒。"
+          ]
+        }
+      ]
+    }
+  ]
+}
