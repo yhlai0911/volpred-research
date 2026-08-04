@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 import re
@@ -642,6 +643,116 @@ def _apply_codex_review_followup_fail(
     effect["v2_task"] = "created"
     effect["v2_task_id"] = v2_id
     return effect
+
+
+# A completing task that still owes work must say so in a field, not in prose.
+#
+# 2026-07-28: snapaudit_quantify_unmeasured_exposure succeeded and wrote its one
+# genuine loose end at the end of ``result`` -- "統計量變化重跑 brief 已寫好但
+# enqueue-agent 需 registered worktree 而 free_slots=0（assign_1aa8f31a 未關），
+# 未入列". Three days later ``compact_terminal_tasks`` tombstoned the row, and
+# ``_TOMBSTONE_KEEP_FIELDS`` does not carry ``result``. The sentence was deleted.
+# All three blockers cleared on their own over the following week and nothing
+# went back for it; two published articles are still missing their corrected
+# numbers. It surfaced only because someone happened to read the archive.
+#
+# The agent's actual mistake was a domain-model one worth naming, because the
+# gate below is built on its inverse: it read "no free dispatch slot" as "cannot
+# enqueue". Enqueueing a *pending* row needs no slot -- only dispatch does. A
+# declared follow-up can therefore always become a real task at completion time,
+# which is what ``--follow-up`` does. Once it is a pending row it is its own
+# evidence and needs no reader to go digging through tombstones.
+#
+# Same class as the dreaming false positive fixed 2026-08-04 (error_log class J):
+# compaction drops a field while a downstream reader still needs it. That one was
+# "cannot read the evidence, so misjudge"; this one is "cannot read the evidence,
+# so never look" -- worse, because it emits no signal at all.
+_UNDISCHARGED_MARKERS: tuple[tuple[str, str], ...] = (
+    (r"未入列|未列入|未排入|尚未入列|尚未排入|未進(?:任務)?池", "declared work was never enqueued"),
+    (r"未建(?:任務|單)|未開單|沒有開單", "declared work has no task"),
+    (r"待補|待排|之後再補|下次再|下一班再|留待", "work explicitly deferred to later"),
+    (r"仍欠|尚欠|仍待|尚待|還沒做|未完成的是", "an obligation is recorded as outstanding"),
+    (r"\bOWED\b|\bstill owed\b|\bnot enqueued\b|\bnever enqueued\b", "an obligation is recorded as outstanding"),
+    (r"\bTODO\b|\bFIXME\b|\bfollow[- ]up needed\b", "an explicit todo marker"),
+)
+
+
+def _detect_undischarged_declaration(result: str) -> dict[str, str] | None:
+    """Return the marker that says this result still owes work, or None.
+
+    High precision over high recall on purpose: a miss costs what the old
+    behaviour cost, while a false positive costs exactly one extra flag, since
+    both remedies below are single-flag. That asymmetry is why this can sit on
+    the success path at all without becoming a deadlock
+    (memory ``feedback_gates_smooth_no_deadlock``).
+    """
+    text = str(result or "")
+    if not text.strip():
+        return None
+    for pattern, why in _UNDISCHARGED_MARKERS:
+        found = re.search(pattern, text, flags=re.IGNORECASE)
+        if found:
+            return {"marker": found.group(0), "why": why}
+    return None
+
+
+def _follow_up_task_id(parent_id: str, index: int, text: str) -> str:
+    """Deterministic id so a re-run of the same completion cannot double-enqueue."""
+    digest = hashlib.sha256(f"{parent_id}|{index}|{text}".encode()).hexdigest()[:8]
+    return f"followup_{parent_id}_{digest}"
+
+
+def _materialize_follow_ups(
+    tasks: list[dict[str, Any]],
+    task: dict[str, Any],
+    follow_ups: list[str],
+) -> list[dict[str, Any]]:
+    """Turn each declared follow-up into a real pending row, in this same write.
+
+    Enqueueing is unconditional: it takes no dispatch slot, so there is no
+    capacity reason to defer it to prose. Idempotent by deterministic id.
+    """
+    parent_id = _task_key(task)
+    now = _now()
+    receipts: list[dict[str, Any]] = []
+    edges: list[dict[str, Any]] = []
+    for index, text in enumerate(follow_ups):
+        text = str(text or "").strip()
+        if not text:
+            continue
+        new_id = _follow_up_task_id(parent_id, index, text)
+        # Built here, beside the text it describes, rather than zipped against
+        # `receipts` afterwards -- a skipped blank entry would desync the two.
+        edges.append({"task_id": new_id, "text": text[:400]})
+        if any(_task_key(t) == new_id for t in tasks):
+            receipts.append({"id": new_id, "created": False, "reason": "already_exists"})
+            continue
+        new_task = {
+            "id": new_id,
+            "task_type": task.get("task_type") or "platform_ops",
+            "status": "pending",
+            "priority": normalize_priority(task.get("priority"), default=2),
+            "title": f"follow-up of {parent_id}: {text[:70]}",
+            "description": (
+                f"{text}\n\n"
+                f"— 由 {parent_id} 完成時經 `--follow-up` 宣告並自動入列。"
+                "父任務的 result 會在 3 天後被 compact_terminal_tasks 壓成 "
+                "tombstone（result 不在 _TOMBSTONE_KEEP_FIELDS 內），所以這件事"
+                "只有以這一列 pending 的形式才會留下來。"
+            ),
+            "source": task.get("source") or "followup",
+            "created_at": now,
+            "created_by": "task_pool_claim:follow_up",
+            "follows_up_on": parent_id,
+        }
+        normalize_task_priority(new_task)
+        tasks.append(new_task)
+        receipts.append({"id": new_id, "created": True})
+    if edges:
+        # Kept on the tombstone too (see _TOMBSTONE_KEEP_FIELDS), so a compacted
+        # parent still says "I spawned these" rather than saying nothing.
+        task["follow_ups"] = edges
+    return receipts
 
 
 def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
@@ -1991,8 +2102,28 @@ def _complete_locked(
             if existing_result and args.result
             else (args.result or existing_result)
         )
+        follow_ups = [t for t in (getattr(args, "follow_up", None) or []) if str(t).strip()]
+        follow_up_waived = str(getattr(args, "follow_up_waived", None) or "").strip()
         if args.status == "succeeded":
             _require_fb_drafts_for_dual_publish(task, result_text)
+            declaration = _detect_undischarged_declaration(result_text)
+            if declaration is not None and not follow_ups and not follow_up_waived:
+                return {
+                    "ok": False,
+                    "reason": "undischarged_followup_in_result",
+                    "task_id": args.id,
+                    "matched": declaration["marker"],
+                    "why": declaration["why"],
+                    "hint": (
+                        "The result says work is still owed. Prose in `result` does "
+                        "not survive compaction (3 days), so it would vanish with no "
+                        "signal. Re-run with ONE of: "
+                        "--follow-up '<what is still owed>' (enqueues it as a real "
+                        "pending task; needs no dispatch slot), or "
+                        "--follow-up-waived '<why nothing is owed>' (records the "
+                        "judgement that the phrase is not an obligation)."
+                    ),
+                }, None
         gate_receipt, gate_error = _gate_review_completion_contract(task, args)
         if gate_error is not None:
             return gate_error, None
@@ -2023,9 +2154,22 @@ def _complete_locked(
         if repair_verification is not None:
             task["repair_verification"] = repair_verification
         effect = None
+        follow_up_receipts: list[dict[str, Any]] = []
         if args.status == "succeeded":
             effect = _apply_codex_review_followup_fail(tasks, task, result_text)
+            if follow_ups:
+                follow_up_receipts = _materialize_follow_ups(tasks, task, follow_ups)
+            elif follow_up_waived:
+                task["follow_up_waived"] = {
+                    "reason": follow_up_waived,
+                    "by": completion_owner,
+                    "at": task["completed_at"],
+                }
         out = {"ok": True, "task_id": args.id, "status": args.status}
+        if follow_up_receipts:
+            out["follow_ups"] = follow_up_receipts
+        elif follow_up_waived and args.status == "succeeded":
+            out["follow_up_waived"] = follow_up_waived
         if args.status == "succeeded" and issue_ref is not None:
             number = issue_number(issue_ref)
             if number is None:
@@ -2533,7 +2677,7 @@ def main() -> int:
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
-    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.add_argument("--repair-verification-json", help="Required for self_optimization success: JSON object with method/tests/readback"); p.add_argument("--issue-disposition", choices=["contained", "close"], default="contained", help="GitHub issue lifecycle: keep open by default; close only after all issue acceptance gates pass"); p.add_argument("--gate-decision", choices=sorted(_GATE_REVIEW_ACTIONS), help="Required for succeeded control-gate reviews; must match registry lifecycle.last_action"); p.add_argument("--gate-live-readback", help="Required downstream read-back for succeeded control-gate reviews"); p.set_defaults(fn=cmd_complete)
+    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.add_argument("--repair-verification-json", help="Required for self_optimization success: JSON object with method/tests/readback"); p.add_argument("--issue-disposition", choices=["contained", "close"], default="contained", help="GitHub issue lifecycle: keep open by default; close only after all issue acceptance gates pass"); p.add_argument("--gate-decision", choices=sorted(_GATE_REVIEW_ACTIONS), help="Required for succeeded control-gate reviews; must match registry lifecycle.last_action"); p.add_argument("--gate-live-readback", help="Required downstream read-back for succeeded control-gate reviews"); p.add_argument("--follow-up", action="append", dest="follow_up", metavar="TEXT", help="Work this task declares but did not finish; becomes a real pending task in the same locked write (repeatable). Enqueueing takes no dispatch slot, so a full queue is never a reason to leave it in prose."); p.add_argument("--follow-up-waived", dest="follow_up_waived", metavar="REASON", help="Record that an unfinished-sounding phrase in --result is not actually an obligation."); p.set_defaults(fn=cmd_complete)
     p = sub.add_parser("annotate", help="set free-form metadata fields on a task (locked canonical write; replaces jq-edit)")
     p.add_argument("--id", required=True)
     p.add_argument("--set", action="append", metavar="FIELD=VALUE", help="set FIELD to a string VALUE (repeatable)")

@@ -722,6 +722,16 @@ _TOMBSTONE_KEEP_FIELDS = (
     "source",
     "created_at",
     "completed_at",
+    # Kept because it is the one field on a terminal row that can still carry
+    # *undischarged* state. ``result`` is dropped, so a follow-up written as
+    # prose there dies at compaction with no signal (2026-07-28
+    # snapaudit_quantify_unmeasured_exposure: 7 days invisible, two published
+    # articles still uncorrected). ``task_pool_claim complete --follow-up``
+    # writes this field and enqueues a real pending row for each entry, so the
+    # work survives on its own; keeping the edge here is what lets a compacted
+    # parent still answer "what did I spawn?" instead of answering nothing.
+    "follow_ups",
+    "follow_up_waived",
 )
 
 

@@ -213,7 +213,33 @@ schedule 現綁回 wrapper execution log；單一 `job_liveness` owner 同時支
 **規則（音量，2026-07-19 補）**：**通知的閘門要判「收件人有事可做嗎」，不是「系統有新資料嗎」**。偵測器的產出天然全是新資料；用新奇度當閘門，等於把機器自己 auto-remediate 的例行工作、以及已停火自清中的條件，全寄給人。已經算出來的「不需要人」判斷（如 dreaming 的 `quiescent`）必須存進 finding 活到閘門那一刻，否則會在別處被用錯的方式重算。
 **規則（自主性，2026-07-19 補）**：**已經定位到根因的洞，不得以「已知邊界」的形式寄給老闆** —— 老闆對它唯一能做的動作就是叫你去補，那封信因此仍是「收件人無事可做」的雜訊（同上條音量規則的變形）。報告邊界只在**真的需要人做取捨**時才成立（產品方向 / 治理權衡 / 資源優先序）；「補它要動到既有抽象」是工程判斷，屬機器職責。**推論**：當你寫下「不補，因為會形成雙 owner」時，先反查那個 owner 的**定義**是不是被現行實作綁架了 —— 多數「補它會變雙 owner」其實是「現行實作只覆蓋了定義的一個特例」，把定義抬高一層即可用同一個 owner 涵蓋。
 **規則（判準的輸入必須還活著，2026-08-04 補）**：**detector 若以「某欄位不存在」為判準，必須先確認那個欄位在這一列上「本來就該存在」。** 資料保留政策會刪欄位：終態 task 3 天後壓 tombstone（`unblock_expired_blocked_tasks.COMPACT_AGE_DAYS`）只留 `_TOMBSTONE_KEEP_FIELDS`，`blocked_reason` / `follows_up_on` / `k_id` / `status_history` 全被剝掉。任何 lookback 視窗**長於**保留期的 detector，都會在兩者重疊的區間把「已被壓縮」誤讀成「從未處置」，而且每晚重算、永遠得到同一個錯答案。設計時對齊三個數字：**保留期、視窗長度、判準所需欄位**。**機械 owner**：`volpred.ops.next_tasks.is_tombstoned()`（與產生 stub 的 compaction 同檔，避免各 reader 自建定義）。
+
+**規則（寫側對偶：會被刪的欄位不得承載未竟狀態，2026-08-04 補）**：上一條治的是**讀側**
+（讀不到證據就誤判）；同一個保留政策還有更危險的**寫側**面：**讀不到證據就完全看不見**，
+因為它不產生任何訊號。硬規則：**一件「還沒做完」的事只能存在於一個不會被壓縮的地方 ——
+一列 pending task。** 不可寫在 `result` 這種會被 `_TOMBSTONE_KEEP_FIELDS` 剝掉的自由文字欄位。
+配套要拆穿的錯誤 domain model：**「派工 slot 滿」不等於「不能入列」**——入列一列 pending
+不佔任何 slot，只有 dispatch 才需要 slot，所以容量從來不是把未竟事項留在散文裡的理由。
+**機械 owner**：`task_pool_claim.py complete` 的 `--follow-up`（materialize 成真 task）
+＋ `_detect_undischarged_declaration`（succeeded 路徑上的單旗標可解閘）。
+
 **代表 incident**：
+- 2026-08-04 **未竟事項寫在會被壓縮的欄位裡，沉了 7 天且零訊號**：`snapaudit_quantify_unmeasured_exposure`
+  在 07-28 完成時，把唯一真正的未竟項寫在 `result` 末尾（「重跑 brief 已寫好但 free_slots=0…**未入列**」）。
+  3 天後 `compact_terminal_tasks` 把該列壓成 tombstone，`_TOMBSTONE_KEEP_FIELDS` 不含 `result`，
+  那句話**被刪除**。期間三個阻塞條件全部自行解除，卻沒有任何機制回頭把它排進去；兩篇已發佈
+  文章的更正數字因此空著，最後是有人為別的任務去翻 `storage/next_tasks_archive/2026-07.jsonl`
+  才偶然發現。**與同日 dreaming 假陽性同根（保留政策刪欄位）但更危險**：前者誤判仍會叫，
+  後者連叫都不會叫。當時 agent 的判斷錯誤值得單獨記下，因為修法正是建立在它的反面 ——
+  它把「free_slots=0」讀成「不能入列」，但入列 pending 從不需要 slot。修法：`complete --follow-up`
+  在**同一把鎖**內把宣告 materialize 成真 pending task（deterministic id 冪等），
+  `follow_ups` 邊進 `_TOMBSTONE_KEEP_FIELDS` 讓壓縮後的父列仍答得出「我生了什麼」；
+  succeeded 路徑加高精度散文偵測，命中時以 `--follow-up` 或 `--follow-up-waived` **單旗標**
+  兩個出口解閘（退出碼 1，`&&` 鏈會斷），刻意不做成死局。偵測器上線後第一個命中的是**它作者
+  自己 25 分鐘前的 K1733 完成語**（`OWED: Codex primary-path re-verification`）。真實損害
+  另由 `assign_ce6097bf` 於同日 05:36 以根因修法補完（`load_vix()` 補 dedup guard + 期間 pin，
+  非只重跑；結論全不翻）。8 個新回歸測試，兩半各自 break-then-verify（拿掉 gate → 1 failed；
+  拿掉 keep field → 2 failed）— Q3
 - 2026-08-04 **detector 對「被政策刪掉的欄位」下判斷，每晚重算同一個錯答案**：dreaming `detect_missing_retry_strategy` 以「failed 且無 `blocked_reason`、無 `follows_up_on`、無 k_id sibling、無 id lineage 後繼」判定 orphaned failure，但終態列 3 天就被壓成 tombstone stub、上述欄位結構性消失，而該 detector 的 lookback 是 14 天（`LOOP_HEALTH_WINDOW_DAYS`）。day 3 → day 14 這 11 天內，**一個已正確重試的失敗與一個被丟掉的失敗在位元上完全相同**。live 回讀：當下 10 個 finding 有 6 個是 archived receipt；池中 51 張 dreaming pending 有 31 張是同一 artifact 的累積，且因 subject 已歸檔而永遠不可能自行解除。修法在產生端：`is_tombstoned()` 立為 canonical predicate 並置於 compaction 同檔，detector 判斷前先問。**不註冊進 `dreaming_revalidate`** —— 該模組刻意把此 pattern 列為 historical 不重驗，而這是「finding 從來就不成立」而非「snapshot 過期」，屬不同缺陷，故修在生成而非重驗。31 張走 canonical `mark_task_blocked --reason deprecated` 收為 `closed_no_action`（pending 131→100、dreaming 51→20），detector live findings 10→4。RED→GREEN 對真實 queue 驗證；168 tests passed（新增 2）— Q3
 - 2026-08-03 **STRIKE 2（可終止性 class，換一個 surface 原樣復發）**：`compute_queue` 的 `cancelled source task settlement did not match` 從 7/21 起每個 compute-worker tick 發兩次、13 天約 2,500 次，無人察覺。根因是 reconciler 的「已無事可做」缺終止邊界 —— 它只認得「source task 仍 pending 且未綁 job」一種無害狀態，source task 已 `succeeded`（或已被歸檔出池）時就判定為 binding mismatch，warn 完 return、不寫 settlement，下一輪原樣重來。同一函式另有更嚴重的潛在面：task 被歸檔後 `tpc._find` 會 `SystemExit`，那是在 worker readiness scan 裡，等於一張陳舊 receipt 可以拖垮整個 drain loop。修法是把終止語意補完整（不綁此 job → `not_required` 並記 reason；仍綁但無法 unwind 才 warn），`SystemExit` 收斂成 not_required。**但真正讓它活 13 天的不是這個 reconciler，而是 `warn()` 只寫 stderr** → 排程程序改開 bounded JSONL 持久化，新增 `recurring_diagnostic_warning` detector 把「重複且仍在燒」變成 task。canonical drain loop live 回讀 settlement=`not_required`、警告停止；cron-env 回讀 persist=1 且 JSONL 實際落地；279 tests passed（新增 14）— Q3
 - 2026-07-19 **同日 strike 2（自主性面）**：上一則修好音量閘門後，把 `quiescent` 剩下的洞（首見即已停火的 alert 仍吵一次）寫成「刻意不補的已知邊界」寄給老闆，理由是「補它要另立判定 → 雙 owner（anti-stacking）」。老闆回：「不是叫我做，你判定後就去優化執行啊，立刻重構底層」。**那個理由是錯的** —— 它把「跟上一輪 marker 比」誤當成 quiescence 的**定義**，其實定義是「訊號在一個 run interval 內沒推進」，相對式只是有前值時的特例。把定義抬高一層後，首見改問同一判準的**絕對**形式（marker 距今 ≥ `DREAMING_RUN_INTERVAL_HOURS`=24h），仍是同一個 owner `_is_quiescent()`，不是第二套判定。改：`reconcile()` 兩條分支全委派給 `_is_quiescent()`，並加 test 鎖住判定不得散回 `reconcile`。真實 alert 資料首見重放：7 個 finding 中 2 個（停火 25.3h / 31.2h）靜音、5 個 24h 內仍在燒的照樣送達；今日實跑 3 個首見 finding marker 皆 <10h → 全判活躍（反向鎖成立）。178 tests passed（新增 6）— Q3
@@ -320,6 +346,21 @@ schedule 現綁回 wrapper execution log；單一 `job_liveness` owner 同時支
 **規則**：測試與原始碼要一起上（測試先上、code 沒跟 → main 紅）。pytest guard 要覆蓋 worktree（不能只在被忽略的 root conftest）；collection 不可讀 production `.env.local`。驅動 git 的測試須隔離（臨時 repo，不碰真庫）。「測試寫 canonical state」整個 class 由 CI tree-clean owner 擋。機器要訂閱自己的 CI 狀態（別紅 12 小時沒人看見）。
 **機械 owner**：CI pytest（零憑證必全綠）+ pytest.yml tree-clean step（唯一 owner）+ hermetic-git 測試規則 + cron wrapper manifest。
 **代表 incident**：
+- 2026-08-04 **測試自建 `env={...}` 把 canonical-write guard 的旗標剝掉，寫進正式任務池**：
+  為 follow-up 機制寫的新測試用 `subprocess.run(..., env={"PATH":..., "HOME":..., "PYTHONPATH":...})`
+  驅動 `task_pool_claim.py`，並自創一個**根本不存在**的 `VOLPRED_NEXT_TASKS` 以為能改路徑。
+  兩個錯誤疊起來的後果：路徑仍是硬編的 `storage/next_tasks.json`，而全套件在 `conftest.py:26`
+  設的 `VOLPRED_NO_CANONICAL_WRITE=1` 被那個 dict **整個換掉**，於是 `_locked_load` 的
+  `guard_canonical_write` 看到一個未武裝的 process → 測試直接改動線上任務池裡的真實 row
+  （`snapaudit_quantify_unmeasured_exposure`，恰好就是這輪要修的那一列的 tombstone）。
+  **guard 本身沒壞、位置也對** —— 它擋不住的是「把環境整個重建」這個動作。
+  處置：以 git HEAD 的該列做 surgical 還原（bit-identical 驗證、無多餘 row、池筆數不變），
+  測試改為 in-process + `monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", tmp)`，
+  完全不動環境，guard 全程武裝。**class sweep**：AST 掃全部 `tests/` 與 `scripts/tests/`
+  的 subprocess `env={...}` 全替換呼叫，只有 1 處未帶旗標，且它是打進 throwaway repo 的
+  hermetic `git`、不跑任何 volpred writer —— **population of one，不立新 gate**（既有 writer
+  guard 已是 owner，anti-stacking）。**教訓：測試要換的是「寫哪裡」，不是「環境長什麼樣」；
+  一旦你重建 env，你就默默地把整套 conftest 的防護一起丟了。** — Q3
 - 2026-07-27 **root_cause_fixed_and_verified** CI watcher建立的`ci-root`雖為
   `platform_ops`，卻沒有producer-isolation execution contract；supervisor能fire但
   不能preassign，worker只能重複診斷。Watcher現從完整failed log只抽known-root literal
