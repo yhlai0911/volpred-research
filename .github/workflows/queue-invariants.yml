@@ -1,0 +1,79 @@
+name: Queue Invariants
+
+# Eight ratchets read the LIVE storage/next_tasks.json on purpose: they exist to
+# catch the supervisor writing a queue with out-of-vocabulary statuses, blocked
+# rows with no until_at, or a roadmap P1 with no backing task. They belong on
+# every queue change.
+#
+# They used to ride inside the 15-minute Test Suite, which meant every
+# supervisor state commit started a full run — and those land every few minutes,
+# so the next commit cancelled it. Over one recent stretch only 8 of 60 runs on
+# main reached a conclusion at all: main's CI was mostly not red, it was absent.
+#
+# Splitting them out fixes both ends. The queue gets a verdict in about a minute
+# instead of fifteen, and Test Suite can put storage/next_tasks.json in its
+# paths-ignore and stop being cancelled by commits it did not need to run for.
+#
+# Scope note, stated rather than hidden: `paths` lists the queue plus the files
+# these tests load directly. An indirect break — something under src/volpred
+# that changes how the validators behave — would run Test Suite (which now
+# deselects these eight) without running this workflow. A bare local `pytest`
+# still runs them, so the pre-merge check keeps that hole covered.
+# scripts/audit_ci_paths_ignore.py check fails the build if a real_queue test
+# lives in a file this list does not name.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths:
+      - 'storage/next_tasks.json'
+      - 'tests/test_task_status_vocab.py'
+      - 'tests/test_migrate_status_vocab.py'
+      - 'tests/test_roadmap_coverage.py'
+      - 'tests/test_dreaming_review.py'
+      - 'scripts/audit_roadmap_coverage.py'
+      - 'scripts/migrate_status_vocab.py'
+      - 'scripts/dreaming_review.py'
+      - '.github/workflows/queue-invariants.yml'
+  workflow_dispatch:
+
+# Queue commits arrive in bursts. The newest queue state is the one worth a
+# verdict, and a superseded run tells nobody anything.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # The same fail-closed belt Test Suite runs behind: a ratchet that reads
+      # the queue must never reach production state to do it.
+      VOLPRED_NO_REMOTE_WRITE: "1"
+      VOLPRED_NO_EMAIL: "1"
+      VOLPRED_NO_CANONICAL_WRITE: "1"
+      VOLPRED_NO_REMOTE_READ: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Run the live-queue ratchets
+        run: uv run --extra dev python -m pytest -q -p no:cacheprovider -m real_queue
+      - name: Assert the ratchets mutated no repo state
+        # Same rule as Test Suite: reading the live queue is the point, writing
+        # to it is the bug. Tracked files only — this job touches no ignored
+        # runtime paths, so porcelain is sufficient here.
+        run: |
+          dirty="$(git status --porcelain)"
+          if [ -n "$dirty" ]; then
+            echo "::error::a real_queue test modified tracked repo state:"
+            echo "$dirty"
+            exit 1
+          fi

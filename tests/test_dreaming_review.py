@@ -12,6 +12,8 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import dreaming_review as dr  # noqa: E402
 
@@ -836,6 +838,7 @@ def test_queueing_the_same_signature_every_night_does_not_pile_up(tmp_path):
     assert len(_queued_ids(storage)) == 1
 
 
+@pytest.mark.real_queue
 def test_queueing_never_touches_the_real_repo_queue(tmp_path):
     """apply_auto_dispatch is now on by default, so every test that drives main()
     reaches it. The obvious reuse, task_pool_claim._locked_load(), hardcodes the

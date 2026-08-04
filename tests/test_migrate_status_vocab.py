@@ -164,6 +164,7 @@ def test_migration_is_idempotent():
 
 # --------------------------------------------------- real-queue convergence --
 
+@pytest.mark.real_queue
 def test_dry_run_on_real_queue_copy_converges_to_zero_residue(tmp_path):
     """The mapping tables must cover the ENTIRE frozen population: running the
     migration on a copy of the canonical queue leaves zero out-of-vocab

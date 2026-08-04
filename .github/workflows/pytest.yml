@@ -215,7 +215,14 @@ jobs:
         # testpaths = ["tests", "scripts/tests"] (pyproject.toml). No credentials
         # are provided on purpose: a reintroduced import-time raise must fail here,
         # not silently pass because a secret papered over it.
-        run: uv run --extra dev python -m pytest -q -p no:cacheprovider
+        #
+        # -m "not real_queue": the eight ratchets that read the LIVE
+        # storage/next_tasks.json run in queue-invariants.yml instead, which is
+        # what lets this workflow ignore the queue file. Without the split, a
+        # supervisor state commit — landing every few minutes — starts a
+        # 15-minute run that the next one cancels; over one recent stretch only
+        # 8 of 60 runs on main reached a conclusion at all.
+        run: uv run --extra dev python -m pytest -q -p no:cacheprovider -m "not real_queue"
       - name: Assert the suite mutated no repo state
         # One gate for a whole bug class: "a test wrote live repo state". Four
         # instances surfaced on 2026-07-10 alone — the pregate decision log, the

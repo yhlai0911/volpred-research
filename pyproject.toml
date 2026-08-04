@@ -64,6 +64,18 @@ packages = ["src/volpred"]
 # merge_worktree dedup）從未被裸跑 `pytest` 收集 —— gate 存在但零執行，正是
 # 「機制存在、沒人在問」那一類缺陷。全數 69 passed / 0.73s，納入成本可忽略。
 testpaths = ["tests", "scripts/tests"]
+# `real_queue` marks the tests that deliberately read the LIVE
+# storage/next_tasks.json — ratchets that exist to catch the supervisor writing
+# a bad queue. A bare `pytest` still runs them, so local runs lose no coverage.
+# CI splits them out: the 15-minute suite runs `-m "not real_queue"` and skips
+# supervisor commits entirely, while .github/workflows/queue-invariants.yml
+# runs `-m real_queue` on every queue change and answers in about a minute.
+# Faster feedback on the queue, and the suite stops being cancelled by a commit
+# it did not need to run for. scripts/audit_ci_paths_ignore.py check keeps the
+# two halves consistent.
+markers = [
+    "real_queue: reads the live storage/next_tasks.json on purpose",
+]
 
 [dependency-groups]
 dev = [

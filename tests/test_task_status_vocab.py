@@ -402,6 +402,7 @@ def test_validator_routes_through_canonical_locked_reader(tmp_path, monkeypatch)
     assert observed == [queue]
 
 
+@pytest.mark.real_queue
 def test_current_out_of_vocab_count_matches_frozen_baseline():
     from scripts import validate_next_tasks_status as vns
 
@@ -409,6 +410,7 @@ def test_current_out_of_vocab_count_matches_frozen_baseline():
     assert vns.count_out_of_vocab(tasks) == BASELINE
 
 
+@pytest.mark.real_queue
 def test_validator_flags_one_injected_out_of_vocab_row(tmp_path):
     from scripts import validate_next_tasks_status as vns
 
@@ -515,6 +517,7 @@ def test_blocked_without_until_baseline_constant_mirrors_module():
     assert nt.LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE == BLOCKED_NO_UNTIL_BASELINE
 
 
+@pytest.mark.real_queue
 def test_real_queue_blocked_without_until_at_or_below_baseline():
     """THE gate: any NEW blocked row lacking an exit fails CI."""
     tasks = json.loads(REAL_NEXT_TASKS.read_text(encoding="utf-8"))
@@ -722,6 +725,7 @@ def test_blocked_reason_baseline_constant_mirrors_validator_default():
     )
 
 
+@pytest.mark.real_queue
 def test_real_queue_blocked_reason_out_of_vocab_matches_frozen_baseline():
     from scripts import validate_next_tasks_status as vns
 
@@ -729,6 +733,7 @@ def test_real_queue_blocked_reason_out_of_vocab_matches_frozen_baseline():
     assert vns.count_out_of_vocab_blocked_reasons(tasks) == BLOCKED_REASON_BASELINE
 
 
+@pytest.mark.real_queue
 def test_validator_flags_injected_out_of_vocab_blocked_reason(tmp_path):
     from scripts import validate_next_tasks_status as vns
 

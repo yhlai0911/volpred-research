@@ -39,7 +39,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "pytest.yml"
+QUEUE_WORKFLOW = ROOT / ".github" / "workflows" / "queue-invariants.yml"
 DEPENDENCIES = ROOT / "config" / "ci_test_repo_dependencies.json"
+TEST_DIRS = ("tests", "scripts/tests")
 
 
 def load_paths_ignore() -> list[str]:
@@ -86,6 +88,36 @@ def covered_by(path: str, patterns: list[str]) -> str | None:
     return None
 
 
+def load_queue_workflow_paths() -> list[str]:
+    spec = yaml.safe_load(QUEUE_WORKFLOW.read_text(encoding="utf-8"))
+    triggers = spec.get(True) or spec.get("on") or {}
+    push = triggers.get("push") or {}
+    return list(push.get("paths") or [])
+
+
+def find_real_queue_test_files() -> list[str]:
+    """Test files carrying @pytest.mark.real_queue.
+
+    Textual, deliberately: importing the suite to ask pytest would run
+    collection-time side effects, and this has to stay cheap enough to sit in
+    the audit. A marker applied dynamically (parametrize, a fixture) would be
+    missed — none exist today, and the pytest.ini marker docs say to apply it
+    directly.
+    """
+    found = []
+    for rel_dir in TEST_DIRS:
+        for path in sorted((ROOT / rel_dir).glob("test_*.py")):
+            # errors="replace": a byte-corrupted source file is real, and it
+            # already has an owner (scripts/audit_source_encoding.py + the
+            # Source Encoding Gate workflow). Raising here would make this
+            # audit a second, worse reporter of someone else's failure and
+            # would take the marker check offline while that one is red.
+            text = path.read_text(encoding="utf-8", errors="replace")
+            if "@pytest.mark.real_queue" in text:
+                found.append(path.relative_to(ROOT).as_posix())
+    return found
+
+
 def load_dependencies() -> list[str]:
     if not DEPENDENCIES.exists():
         raise SystemExit(
@@ -115,9 +147,28 @@ def cmd_check(_args: argparse.Namespace) -> int:
         )
         return 1
 
+    # Test Suite deselects real_queue, so those tests run ONLY in
+    # queue-invariants.yml. A marked test in a file that workflow's `paths`
+    # never names would be selected by neither: deselected in one, untriggered
+    # in the other. Silently unrun, which is worse than either workflow failing.
+    queue_paths = load_queue_workflow_paths()
+    orphaned = [
+        f for f in find_real_queue_test_files() if not covered_by(f, queue_paths)
+    ]
+    if orphaned:
+        print("real_queue tests that no workflow would run:")
+        for path in orphaned:
+            print(f"  {path}")
+        print(
+            "\nTest Suite deselects them and queue-invariants.yml does not "
+            "trigger on this file. Add it to that workflow's `paths`."
+        )
+        return 1
+
     print(
         f"paths-ignore OK: {len(patterns)} pattern(s), "
-        f"{len(load_dependencies())} recorded dependenc(ies), no overlap"
+        f"{len(load_dependencies())} recorded dependenc(ies), no overlap; "
+        f"{len(find_real_queue_test_files())} real_queue file(s) all triggered"
     )
     return 0
 

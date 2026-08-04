@@ -30,6 +30,7 @@ def test_direction_doc_items_are_all_marker_bound():
     assert len({i["rid"] for i in items}) == len(items), "duplicate rid in doc"
 
 
+@pytest.mark.real_queue
 def test_p1_items_have_live_backing_tasks():
     """A P1 the boss reads as active must exist in the pool. This is the actual gate."""
     report = audit()
