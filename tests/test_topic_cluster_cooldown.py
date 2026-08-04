@@ -157,6 +157,12 @@ def test_cluster_cooldown_type_exempt_covers_trending_repost_content_type():
     assert cluster_cooldown_type_exempt("general", None, None, [], "trending_2026") is True
 
 
+def _empty_queue(tmp_path: Path) -> Path:
+    path = tmp_path / "next_tasks.json"
+    path.write_text("[]", encoding="utf-8")
+    return path
+
+
 def test_build_publication_candidates_applies_cluster_penalty(tmp_path: Path, monkeypatch):
     script_path = Path(__file__).resolve().parents[1] / "scripts" / "build_publication_candidates.py"
     spec = importlib.util.spec_from_file_location("build_publication_candidates", script_path)
@@ -192,6 +198,11 @@ def test_build_publication_candidates_applies_cluster_penalty(tmp_path: Path, mo
     monkeypatch.setattr(mod, "KNOWLEDGE_PATH", knowledge_path)
     monkeypatch.setattr(mod, "FEED_PATH", feed_path)
     monkeypatch.setattr(mod, "OUTPUT_PATH", output_path)
+    # ROOT is patched above, but NEXT_TASKS_PATH was resolved from the real
+    # ROOT at import time, so without this the builder still reads the live
+    # queue — a file the supervisor rewrites every few minutes, and nothing
+    # in these two tests asserts on its contents.
+    monkeypatch.setattr(mod, "NEXT_TASKS_PATH", _empty_queue(tmp_path))
     monkeypatch.setattr(
         mod,
         "cluster_gate_status",
@@ -283,6 +294,11 @@ def test_build_publication_candidates_attaches_reader_signal_without_rescoring(
     monkeypatch.setattr(mod, "KNOWLEDGE_PATH", knowledge_path)
     monkeypatch.setattr(mod, "FEED_PATH", feed_path)
     monkeypatch.setattr(mod, "OUTPUT_PATH", output_path)
+    # ROOT is patched above, but NEXT_TASKS_PATH was resolved from the real
+    # ROOT at import time, so without this the builder still reads the live
+    # queue — a file the supervisor rewrites every few minutes, and nothing
+    # in these two tests asserts on its contents.
+    monkeypatch.setattr(mod, "NEXT_TASKS_PATH", _empty_queue(tmp_path))
     monkeypatch.setattr(mod, "READER_METRICS_LATEST_PATH", reader_metrics_path)
     monkeypatch.setattr(
         mod,

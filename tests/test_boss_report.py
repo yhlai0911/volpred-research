@@ -29,6 +29,25 @@ def _load_module(name: str, rel_path: str):
 boss_report = _load_module("boss_report", "scripts/boss_report.py")
 
 
+@pytest.fixture
+def off_the_live_queue(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stub the two paths that reach storage/next_tasks.json.
+
+    The render tests below assert on report STRUCTURE, never on queue
+    contents, so reading the live file buys them nothing — and it costs the
+    repo a full CI run for every supervisor commit, which lands every few
+    minutes. _render_roadmap_coverage is the non-obvious one: it reaches the
+    queue indirectly through audit_roadmap_coverage.audit(), which is why
+    stubbing _pending_tasks alone left the read in place.
+    """
+    monkeypatch.setattr(
+        boss_report,
+        "_pending_tasks",
+        lambda: {"total": 0, "by_type": {}, "by_priority": {}},
+    )
+    monkeypatch.setattr(boss_report, "_render_roadmap_coverage", lambda: "")
+
+
 def _canonical_boss_fire(
     scheduled_for: str = "2026-07-26T12:10:00Z",
 ) -> str:
@@ -416,7 +435,7 @@ def test_articles_in_window_warns_on_bad_feed_schema(tmp_path, monkeypatch) -> N
     assert any("dict" in w for w in boss_report._REPORT_WARNINGS)
 
 
-def test_daily_close_renders_day_close_sections(monkeypatch) -> None:
+def test_daily_close_renders_day_close_sections(monkeypatch, off_the_live_queue) -> None:
     monkeypatch.setattr(boss_report, "_dashboard", lambda: {"overall_status": "ok", "sections": []})
     monkeypatch.setattr(boss_report, "_commits_in_window", lambda: [])
     monkeypatch.setattr(boss_report, "_paper_portfolio", lambda: [])
@@ -445,7 +464,7 @@ def test_daily_close_renders_day_close_sections(monkeypatch) -> None:
 
 
 def test_plain_edition_batches_articles_but_skips_other_day_close_sections(
-    monkeypatch,
+    monkeypatch, off_the_live_queue
 ) -> None:
     monkeypatch.setattr(boss_report, "_dashboard", lambda: {"overall_status": "ok", "sections": []})
     monkeypatch.setattr(boss_report, "_commits_in_window", lambda: [])
@@ -501,7 +520,7 @@ def test_boss_report_is_the_only_scheduled_article_email_batch() -> None:
     assert "20:10 僅納入 14:10 後新增文章" in job["description"]
 
 
-def test_build_html_uses_one_program_snapshot(monkeypatch) -> None:
+def test_build_html_uses_one_program_snapshot(monkeypatch, off_the_live_queue) -> None:
     reads = 0
     program = SimpleNamespace(
         next_actions=lambda *, limit: ["same-snapshot action"],

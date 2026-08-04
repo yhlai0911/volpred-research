@@ -81,17 +81,37 @@ def test_pending_ignores_p3_and_lower():
     assert shown == [] and overflow == 0
 
 
-def test_render_sections_never_raises(monkeypatch):
+def _empty_queue(tmp_path, monkeypatch):
+    """Point the module at an empty queue file.
+
+    render_sections() takes no tasks argument, so without this it reads the
+    live storage/next_tasks.json — the file the supervisor rewrites every few
+    minutes. These two tests assert on STRUCTURE (headers present, every line a
+    str), which the live queue's contents cannot affect, so the dependency was
+    never intentional; it just made the suite read a moving target and forced
+    CI to run for every supervisor commit.
+    """
+    path = tmp_path / "next_tasks.json"
+    path.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(rs, "NEXT_TASKS_PATH", path)
+    return path
+
+
+def test_render_sections_never_raises(monkeypatch, tmp_path):
+    _empty_queue(tmp_path, monkeypatch)
     monkeypatch.setattr(rs, "scheduled_next_24h", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
     out = rs.render_sections(OWNER, now=NOW)
     assert "📗 已完成（本班）" in out and "🗓 已排程" in out
     assert any("讀取失敗" in ln for ln in out)
 
 
-def test_render_sections_empty_shows_placeholder():
+def test_render_sections_empty_shows_placeholder(monkeypatch, tmp_path):
+    _empty_queue(tmp_path, monkeypatch)
     out = rs.render_sections(OWNER, now=NOW)
     assert out[0] == "" and out[1] == "📗 已完成（本班）"
     assert all(isinstance(ln, str) for ln in out)
+    # An empty queue must reach the reader as 「無」, not as a blank section.
+    assert "　無" in out
 
 
 @pytest.mark.parametrize("field", ["已完成", "已排程"])

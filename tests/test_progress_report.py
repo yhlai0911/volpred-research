@@ -27,6 +27,23 @@ sys.modules["progress_report"] = progress_report
 _spec.loader.exec_module(progress_report)
 
 
+@pytest.fixture(autouse=True)
+def _isolated_queue(tmp_path, monkeypatch):
+    """Keep the report's 「已完成／已排程」 columns off the live queue.
+
+    build() renders those two columns through report_sections, which reads
+    storage/next_tasks.json when given no tasks. Nothing here asserts on their
+    contents — these tests pin the done/queued refusals — so reading the file
+    the supervisor rewrites every few minutes buys nothing and makes every
+    supervisor commit a reason to run the suite.
+    """
+    from volpred.ops import report_sections
+
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(report_sections, "NEXT_TASKS_PATH", queue)
+
+
 def _args(**overrides):
     """A valid `done` report; override single fields to build each violation."""
     base = dict(
