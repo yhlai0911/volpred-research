@@ -1539,7 +1539,7 @@
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-08-04T10:25:46.825011+00:00",
      "detail": {
       "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
       "dirty": true,
@@ -1551,7 +1551,7 @@
      "last_seen_at": "2026-08-01T04:26:40.812897+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-08-04T10:25:46.825011+00:00",
      "detail": {
       "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
       "dirty": true,
@@ -1575,7 +1575,7 @@
      "last_seen_at": "2026-08-01T04:26:40.812897+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-08-04T10:25:46.825011+00:00",
      "detail": {
       "branch": "wt/dispatch-slot-1-f5a22a5f-k1095v2",
       "dirty": false,
@@ -1587,7 +1587,7 @@
      "last_seen_at": "2026-08-01T04:26:40.812897+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-08-04T10:25:46.825011+00:00",
      "detail": {
       "branch": "worktree-agent-a148e8a94105f7935",
       "dirty": true,
@@ -1599,7 +1599,7 @@
      "last_seen_at": "2026-08-01T04:26:40.812897+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-08-04T10:25:46.825011+00:00",
      "detail": {
       "branch": "wt/dispatch-slot-2-8dda242d-k1708",
       "dirty": false,
@@ -1779,7 +1779,7 @@
      "last_seen_at": "2026-08-01T04:26:40.812897+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-08-04T10:25:46.825011+00:00",
      "detail": {
       "branch": "k1733-slot1-9189c746",
       "dirty": true,
@@ -1983,7 +1983,7 @@
    "clean_streak_started_at": null,
    "control_gate_id": "dispatch_worker_ownership",
    "current_task_id": null,
-   "episode_count": 56,
+   "episode_count": 59,
    "episode_failures": [
     {
      "at": "2026-08-04T04:16:20.228925+00:00",
@@ -1993,7 +1993,7 @@
      "task_id": "inc_792a94b0ecf4_e1"
     }
    ],
-   "episode_opened_at": "2026-08-04T10:21:10.464718+00:00",
+   "episode_opened_at": "2026-08-04T10:27:18.462703+00:00",
    "escalation": {
     "at": "2026-08-04T04:16:20.270924+00:00",
     "notification_id": "effect_owned_email_5b3a5d4b722faea245a48bbb9ca01d93",
@@ -2921,7 +2921,7 @@
      },
      "first_seen_at": "2026-08-04T06:55:40.479741+00:00",
      "key": "dispatch-slot-1-3175c52f",
-     "last_seen_at": "2026-08-04T10:20:55.010771+00:00"
+     "last_seen_at": "2026-08-04T10:26:54.288399+00:00"
     },
     {
      "cleared_at": null,
@@ -2935,7 +2935,7 @@
      },
      "first_seen_at": "2026-08-04T07:21:54.991363+00:00",
      "key": "dispatch-slot-1-1675be8d",
-     "last_seen_at": "2026-08-04T09:53:23.366823+00:00"
+     "last_seen_at": "2026-08-04T10:27:06.169543+00:00"
     },
     {
      "cleared_at": null,
@@ -2949,36 +2949,21 @@
      },
      "first_seen_at": "2026-08-04T07:46:21.551654+00:00",
      "key": "dispatch-slot-1-592ef34e",
-     "last_seen_at": "2026-08-04T10:21:10.464718+00:00"
+     "last_seen_at": "2026-08-04T10:27:18.462703+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-592ef34e unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-04T10:21:10.464718+00:00",
+   "last_seen_at": "2026-08-04T10:27:18.462703+00:00",
    "notified_at": null,
-   "occurrence_count": 10360,
+   "occurrence_count": 10363,
    "resolution": {
-    "at": "2026-08-04T10:21:10.464718+00:00",
+    "at": "2026-08-04T10:27:18.462703+00:00",
     "by": "inc_792a94b0ecf4_rootcause_e2",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
-    {
-     "at": "2026-08-04T09:07:04.671951+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T09:07:16.529452+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T09:21:55.843773+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
     {
      "at": "2026-08-04T09:29:03.133129+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
@@ -3021,6 +3006,21 @@
     },
     {
      "at": "2026-08-04T10:21:10.464718+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T10:26:54.288399+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T10:27:06.169543+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T10:27:18.462703+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     }
@@ -5053,6 +5053,6 @@
    }
   }
  },
- "updated_at": "2026-08-04T10:21:10.532231+00:00",
+ "updated_at": "2026-08-04T10:37:55.374740+00:00",
  "version": 1
 }
