@@ -48,22 +48,39 @@ def test_wrapper_exists_and_is_the_sanctioned_entry(provider_id: str) -> None:
 @pytest.mark.parametrize("provider_id", sorted(WRAPPERS))
 def test_wrapper_strips_forbidden_env_before_authorising(provider_id: str) -> None:
     text = WRAPPERS[provider_id].read_text(encoding="utf-8")
-    # Reads the forbidden set from the registry rather than hardcoding it.
-    assert 'provider["auth"]["forbidden_env"]' in text, (
-        f"{provider_id} wrapper does not read forbidden_env from the registry, "
-        "so its notion of policy can drift from the registry's"
+    # Delegates to the canonical sanitizer instead of reimplementing stripping.
+    # One owner per concern: registry.sanitize_provider_spawn_environment landed
+    # 2026-08-04 for the daemon spawn path, and these wrappers briefly carried a
+    # parallel copy. A second implementation is how the two drift apart.
+    # Must actually CALL it, not merely import it. An earlier version of this
+    # test matched the bare name and so stayed green when the call was replaced
+    # with a hand-rolled dict while the import lingered.
+    assert re.search(
+        r"clean_env,\s*stripped\s*=\s*sanitize_provider_spawn_environment\s*\(",
+        text,
+    ), (
+        f"{provider_id} wrapper does not call the canonical sanitizer "
+        "(importing it is not using it)"
     )
-    # Builds a stripped environment.
-    assert re.search(r"clean_env\s*=\s*\{[^}]*not in forbidden", text), (
-        f"{provider_id} wrapper does not build a stripped environment"
+    assert 'provider["auth"]["forbidden_env"]' not in text, (
+        f"{provider_id} wrapper reimplements the forbidden-set lookup instead of "
+        "delegating to registry.sanitize_provider_spawn_environment"
     )
-    # Attests the stripped environment, not os.environ.
-    assert "environment=clean_env" in text, (
-        f"{provider_id} wrapper attests something other than the stripped "
-        "environment"
+    # Passing os.environ INTO the sanitizer is correct; what must never happen is
+    # handing the raw environment to authorize_provider_spawn. Scope the check to
+    # the authorize call rather than substring-matching the whole file, which is
+    # what an earlier version of this test got wrong.
+    authorize_call = re.search(
+        r"authorize_provider_spawn\((.*?)\)", text, re.S
     )
-    assert "environment=os.environ" not in text, (
-        f"{provider_id} wrapper still attests the raw parent environment"
+    assert authorize_call, f"{provider_id} wrapper never calls authorize_provider_spawn"
+    args = authorize_call.group(1)
+    assert "environment=clean_env" in args, (
+        f"{provider_id} wrapper attests something other than the sanitized "
+        f"environment: {args.strip()[:120]}"
+    )
+    assert "environment=os.environ" not in args, (
+        f"{provider_id} wrapper hands the raw parent environment to authorize"
     )
 
 

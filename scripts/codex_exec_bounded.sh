@@ -54,6 +54,7 @@ from volpred.ops import termination
 from volpred.ops.execution.registry import (
     ProviderRegistryError,
     authorize_provider_spawn,
+    sanitize_provider_spawn_environment,
     verify_spawn_receipt,
 )
 
@@ -89,28 +90,16 @@ contract_id = os.environ.get(
     "VOLPRED_CODEX_EXEC_CONTRACT",
     "bounded-codex.agentic",
 )
-def forbidden_env_for(provider_id):
-    """Read the forbidden set from the registry so this cannot drift from policy."""
-    import json
-    from volpred.ops.execution.registry import DEFAULT_REGISTRY_PATH
-    payload = json.loads(DEFAULT_REGISTRY_PATH.read_text(encoding="utf-8"))
-    for provider in payload["providers"]:
-        if provider.get("provider_id") == provider_id:
-            return frozenset(provider["auth"]["forbidden_env"])
-    raise ProviderRegistryError(f"provider {provider_id!r} absent from registry")
-
-# Strip the forbidden API-key / alternate-endpoint variables BEFORE authorising,
-# and spawn with that same stripped environment, so the attested environment and
-# the real child environment are identical. Inside a Claude Code session
-# ANTHROPIC_BASE_URL is always present (harness-injected, pointing at the official
-# default endpoint), which denied every sanctioned codex spawn while granting the
-# child nothing. Denying was also weaker than it looked: it blocked the wrapper
-# while a raw `codex exec` inherited the whole environment. Owner principle
-# (2026-08-04): claude, codex and agy all run on subscription OAuth quota.
+# Canonical owner: registry.sanitize_provider_spawn_environment (2026-08-04).
+# It strips the contract's forbidden auth variables before authorization and
+# returns the stripped NAMES ONLY, so a daemon that absorbed a key at runtime
+# cannot leak it into a provider child. The authorize check below stays
+# authoritative for anything that still reaches it. Do not reimplement the
+# stripping here -- one owner per concern.
 try:
-    forbidden = forbidden_env_for("codex-cli")
-    clean_env = {k: v for k, v in os.environ.items() if k not in forbidden}
-    stripped = sorted(set(os.environ) & forbidden)
+    clean_env, stripped = sanitize_provider_spawn_environment(
+        contract_id=contract_id, environment=os.environ,
+    )
     receipt = authorize_provider_spawn(
         contract_id=contract_id,
         model_id=model,

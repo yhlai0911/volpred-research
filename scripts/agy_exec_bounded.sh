@@ -71,6 +71,7 @@ from volpred.ops.execution.registry import (
     DEFAULT_REGISTRY_PATH,
     ProviderRegistryError,
     authorize_provider_spawn,
+    sanitize_provider_spawn_environment,
     verify_spawn_receipt,
 )
 
@@ -88,8 +89,8 @@ def resolve_agy():
     found = shutil.which("agy")
     return found or "agy"
 
-def registered(provider_id):
-    """Read policy straight from the registry, so this never drifts from it."""
+def registered_model(provider_id):
+    """Only the model id; env stripping belongs to the canonical sanitizer."""
     payload = json.loads(DEFAULT_REGISTRY_PATH.read_text(encoding="utf-8"))
     for provider in payload["providers"]:
         if provider.get("provider_id") == provider_id:
@@ -98,7 +99,7 @@ def registered(provider_id):
                 raise ProviderRegistryError(
                     f"provider {provider_id!r} registers no model_ids"
                 )
-            return frozenset(provider["auth"]["forbidden_env"]), models[0]
+            return models[0]
     raise ProviderRegistryError(f"provider {provider_id!r} absent from registry")
 
 timeout = float(sys.argv[1])
@@ -106,10 +107,12 @@ contract_id = os.environ["VOLPRED_AGY_CONTRACT"]
 agy_bin = resolve_agy()
 
 try:
-    forbidden, model_id = registered("agy-cli")
-    # Strip first, then attest the stripped environment, then spawn with it.
-    clean_env = {k: v for k, v in os.environ.items() if k not in forbidden}
-    stripped = sorted(set(os.environ) & forbidden)
+    model_id = registered_model("agy-cli")
+    # Canonical owner: registry.sanitize_provider_spawn_environment. Do not
+    # reimplement the stripping here -- one owner per concern.
+    clean_env, stripped = sanitize_provider_spawn_environment(
+        contract_id=contract_id, environment=os.environ,
+    )
     receipt = authorize_provider_spawn(
         contract_id=contract_id,
         model_id=model_id,
