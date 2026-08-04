@@ -39,7 +39,7 @@
     "task_type": "platform_ops",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1814",
   "source_task_link": {
     "state": "linked",
@@ -59,10 +59,10 @@
   },
   "claimed_by_pid_start_wall": "Sun Aug  2 15:45:47 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "K1814",
-    "settled_at": "2026-08-02T09:42:06Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-08-04T12:32:08Z"
   },
   "experiment_gate": {
     "status": "failed",
@@ -70,5 +70,7 @@
     "exit_code": 1,
     "report": "[gate] FAIL — 5 violation(s) under experiments/k1814:\n\n  [nested-dm-misuse]\n    - experiments/k1814/gate_history/b1a67269__k1814.py  (primary_raw_dm)\n    - experiments/k1814/k1814.py  (primary_raw_dm)\n    - experiments/k1814/render_readme_results.py  (primary_raw_dm)\n    → Raw DM/HLN is not valid inference under a nested-model null. Use Clark-West (2007) for squared-error, or a general-loss / recursive-bootstrap design for QLIKE/pinball, and wire THAT into the verdict. If the DM is descriptive only, say so with `nested-dm: diagnostic-only` and keep it out of the claim sink. A primary unconditional GW/DM statistic under nesting is accepted only with the versioned fixed-memory cell manifest, matching runtime provenance, locally narrow claims, and a trusted external PASS receipt. Owner: scripts/tests/test_nested_dm_misuse_ratchet.py\n\n  [dm-hac-lag]\n    - experiments/k1814/gate_history/b1a67269__k1814.py::dm_hln  (degenerate_at_h1)\n    - experiments/k1814/k1814.py::dm_hln  (degenerate_at_h1)\n    → A DM statistic without a HAC variance (or with a degenerate lag) overstates significance. Use the canonical delegate with an explicit HAC bandwidth. Owner: scripts/tests/test_dm_hac_lag_ratchet.py\n\nThis experiment is not accepted. Your own tests passing only shows it ran the way you meant it to; these gates check it does not break a rule the repo already learned the hard way.",
     "charged_to": "experiment"
-  }
+  },
+  "followup_dispatched_at": "2026-08-04T12:32:08Z",
+  "followup_next_task_id": "K1814"
 }

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-04T11:00:20.206471+00:00",
+  "generated_at": "2026-08-04T12:00:41.198950+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 174.4
+      "age_hours": 175.5
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 174.3
+      "age_hours": 175.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 169.6
+      "age_hours": 170.6
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 168.7
+      "age_hours": 169.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 333.6
+      "age_hours": 334.6
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 137.8
+      "age_hours": 138.8
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 168.6
+      "age_hours": 169.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 185.6
+      "age_hours": 186.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 193.7
+      "age_hours": 194.7
     },
     {
       "path": "storage/drafts/k1706_general_draft.md",
@@ -79,7 +79,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 4605,
-      "age_hours": 18.8
+      "age_hours": 19.8
     }
   ],
   "held": [],
@@ -104,26 +104,7 @@
   ],
   "applied": true,
   "job_deliverable_candidates": [],
-  "job_deliverable_held": [
-    {
-      "job_id": "compute-k1708-full-sample-rerun-a-own-restriction-1784685543",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_results.json",
-          "reason": "missing_or_not_regular_file"
-        },
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_forecast_ledger.csv",
-          "reason": "missing_or_not_regular_file"
-        },
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_cumulative_loss.png",
-          "reason": "missing_or_not_regular_file"
-        }
-      ]
-    }
-  ],
+  "job_deliverable_held": [],
   "job_deliveries": [],
   "namespaces": {
     "drafts": {
@@ -157,6 +138,15 @@
       "collections": []
     }
   },
-  "held_escalations": [],
-  "held_escalated_paths": []
+  "held_escalations": [
+    {
+      "task_id": "assign_f7534bd4",
+      "paths": [
+        "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543"
+      ]
+    }
+  ],
+  "held_escalated_paths": [
+    "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543"
+  ]
 }

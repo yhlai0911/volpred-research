@@ -30,7 +30,7 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1813",
   "source_task_link": {
     "state": "linked",
@@ -50,10 +50,10 @@
   },
   "claimed_by_pid_start_wall": "Sun Aug  2 15:45:47 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "K1813",
-    "settled_at": "2026-08-02T08:46:06Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-08-04T12:29:15Z"
   },
   "experiment_gate": {
     "status": "out_of_scope"
@@ -65,5 +65,7 @@
     "storage/ops/codex_reviews/k1813_verdict.md"
   ],
   "delivered_at": "2026-08-02T09:02:12.081363+00:00",
-  "delivery_source": "reap_orphan_deliverables"
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-08-04T12:29:15Z",
+  "followup_next_task_id": "assign_bfd8dbf8"
 }
