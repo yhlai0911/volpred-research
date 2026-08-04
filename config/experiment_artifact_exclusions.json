@@ -50,6 +50,10 @@
     {
       "experiment": "k994",
       "reason": "k994.py (lines 368-392) downloads ^VIX and every asset live via yf.download over DATA_START 2005-01-01 to DATA_END 2026-04-08 with no committed price snapshot, so archived k994_results.json cannot be byte-reproduced offline -- same unfrozen-live-source class as k528 and k1623. This is a KNOWN OPEN GAP, not a settled exemption: task k892_k994_pinned_snapshot_repoint_20260721 exists to repoint this loader at a pinned snapshot, and is blocked because the available 0050.TW snapshot (paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv) ends in 2022 while the paper-cited DM t=1.44 (paper/garch-x-vix/main.tex:531) is an OOS statistic over 2019-01-01..2026-04-08. Repointing at that CSV would truncate the OOS window and silently change a published number. The gap and the decision it needs are written up in experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md -- the only 2026-07-27 change to this directory. Remove this exclusion once a snapshot covers the cited window; the k892 half of the same task is already done and verified."
+    },
+    {
+      "experiment": "K1342",
+      "reason": "K1342.py:72 pulls its only input with yf.download(period=\"60d\", interval=\"2m\") -- a ROLLING window, not a pinned date range, against a feed Yahoo only retains for the last 60 days. The window that produced the archived K1342_results.json has therefore expired at the source: it is not merely revised (the k1623 case), it is unobtainable. K1342_daily_signals.csv cannot stand in as a snapshot -- K1342.py:398 WRITES it, so it is output, not input. A reproduce_spec authored now would hash today's 60 days and claim they generated a result they did not, which is the exact K1708 divergence class volpred.research.reproduce_spec exists to make unrepresentable. Remove this exclusion when the next checkpoint in this line commits a frozen snapshot of its 2m bars, or moves to a source that accepts an explicit start/end date."
     }
   ]
 }
