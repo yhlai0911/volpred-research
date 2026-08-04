@@ -6080,3 +6080,21 @@ settlement 層缺「workspace 永久消失」終態出口，另案處理。
 
 本段狀態為 **`root_cause_fixed_and_verified`**（root cause 修復 + live 成功 fire 回讀 + 全實例裁決 +
 regression gates 在位）。
+
+## 2026-08-04 — 手動 workspace 裁決漏了 gate3 等價檢查：釋放了 pending 任務依賴的 worktree
+
+**症狀**：worker_orphaned aggregate 裁決 phase 2 釋放 `dispatch-slot-1-bd00f90a-k1731` worktree
+後，發現 pending 任務 `k1730_k1731_review_certification_codex_20260729`（K1731 critical path）
+的 BLOCKER CHAIN 明確以該 worktree 為 merge 輸入。
+
+**根因**：手動裁決腳本只做了 branch/內容層檢查（archive ref + branch 保留），**沒有做
+`worktree_gc.py` gate3（無未結收件單提及此 worktree）的等價檢查** —— 機械 GC 有這道閘，
+手動路徑繞過了它。
+
+**修復**：依 aggregate 任務 playbook 從保留 branch 重建 worktree（tip 803dcc837，整合狀態
+byte-identical），pending 任務輸入完整恢復。零資料損失（branch 從未刪除）。
+
+**制度化**：手動 workspace 裁決（main thread aggregate adjudication）在釋放任何 worktree 前，
+必須先跑 `python3 scripts/worktree_gc.py --json` 並確認該 worktree 的 gate3 PASS，或等價地
+grep `storage/next_tasks.json` 內 pending/claimed/blocked 任務對 workspace 名稱的引用。
+本段狀態 **`root_cause_fixed_and_verified`**（worktree 重建回讀驗證 + 規則寫入本條 + playbook 補充）。

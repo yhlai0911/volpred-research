@@ -1666,3 +1666,11 @@ Each cat needs dedicated session work; not iterative one-cycle fixes.
 - k1714：完整實驗（README/code/results/圖/data）從未 commit，已封存 `refs/orphan-archive/agent-a148e8a-k1714`（ff65394ea）；knowledge 已引用 ×10 但無 reproduce_spec、無 review verdict
 
 **待辦決策（研究方向層）**：逐 K 決定 re-run（修 blocking defects 後重跑認證）或正式 retire（並審 knowledge 中既有引用是否構成幽靈引用需更正）。defects 明細見各 branch 的 `review_verdict.json`；處置報告 `storage/ops/orphan_adjudication_20260804.md`。
+
+### 五 K 裁決結果 2026-08-04（承上節「Orphan 實驗最終裁決」，逐 K re-run/retire 定案）
+
+- **k1380 → branch 線 RETIRE、科學問題 RE-RUN 已在軌**：封存 branch 是歷史失敗紀錄（FAIL×2 + INVALID 結果檔）。修正線在 main 的 `experiments/K1380_v4`：`k1380_v4_white_rc_snooping_correction_20260729` 與 `assign_b8abe71a`（含 Codex 二審）均 succeeded；重跑走既有 pending `k1583_corrected_k1380_matrix_rerun_20260802`（K1583 撤回的解鎖條件），**不另開單**。
+- **k1708 → RETIRE 本實作 lineage**：rev2 / round-3 / round-4 / gatecert-s14 四度未過認證，3-strike 已於 2026-07-22 觸發，最後任務 `K1708_gatecert_s14_rerun` failed 且無後繼。科學問題（時變狀態空間 HAR vs 固定/滾動 HAR）回 backlog 為開放題；重啟必須全新設計 + 新 K-id，吸收已入庫 lessons（schema-migration 靜默失鑑別、verdict gate 保守性、provenance 測試強度）。依 3-strike 規則禁止在本 lineage 再 patch-rerun。
+- **k1095_v2 → RETIRE**：`k1095_v3_remediation`（awaiting_agent_job）明確以修 v2 的 4 個 blocking defects 為目標；v2 branch 作為缺陷對照組保留。
+- **k1730/k1731 → 結論保留、落地走既有認證鏈**：K1730 arm A NULL 與 K1731 arm B 結論已 md5 定案入庫；復現包落地走 pending `k1730_k1731_review_certification_codex_20260729`（critical path）。其輸入 worktree `dispatch-slot-1-bd00f90a-k1731` 已於本日從保留 branch 重建（tip 803dcc837，1233-commit 整合狀態完整）。
+- **snapdup（audit_snapshot_dup_20260721）→ RETIRE**：9 張 `snapdupfix_*` consumer 修正全數 succeeded、actionable 產出消化完畢；兩個 flip 數字出自 lag-0 手寫 DM，已由 knowledge `research_correction` 條目 04aa8dd4 回溯更正（以 snapdupfix corrected artifacts 為準）；consumer 集合裁決與 count-only 稽核教訓不受影響、繼續有效。

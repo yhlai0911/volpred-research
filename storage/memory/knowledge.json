@@ -43247,5 +43247,17 @@
   ],
   "confidence": 0.8,
   "created_at": "2026-08-04T14:52:50.185565"
+ },
+ {
+  "item_id": "04aa8dd4",
+  "category": "research_correction",
+  "content": "[snapshot-dup 裁決更正 2026-08-04] 2026-05-18 裁決定案條目中的兩個顯著性翻轉數字（k1319 DM t -2.9319→-3.1085 跨 Harvey |t|>3.0；k1592 p 0.038→0.137 跨 5%）出自 audit_snapshot_dup_20260721 實驗內手寫 dm_test，其 long-run variance 僅用 gamma0（HAC lag=0，實驗規則明文禁止；2026-08-04 對凍結 branch 的 review FAIL D1），且兩案判定門檻不一致（D2：k1319 用 |t|>3.0、k1592 用 p<5%）。這兩個 flip 的權威事後數字以 snapdupfix_k1319 與 snapdupfix_k1592（均 succeeded）在去重資料上重跑的 corrected artifacts 為準，不引用 audit 內的 flip 估計。不受影響而繼續有效的部分：consumer 集合裁決（audit C 為權威、audit A 分母偽陰性作廢）、9 個受污染 consumer 名單、count-only 稽核看不見值污染的方法學教訓。audit_snapshot_dup_20260721 實驗線 RETIRE：9 張 snapdupfix_* 修正單全數 succeeded、actionable 產出已消化完畢；branch wt/dispatch-slot-1-20b291d5-snapdup + refs/orphan-archive/dispatch-slot-1-20b291d5-snapdup 保留完整軌跡。",
+  "evidence": [
+   "experiments/audit_snapshot_dup_20260721/review_verdict.json @ wt/dispatch-slot-1-20b291d5-snapdup (FAIL; 3 blocking defects)",
+   "snapdupfix_k1319, snapdupfix_k1592 tasks: succeeded (storage/next_tasks.json)",
+   "storage/ops/orphan_adjudication_20260804.md"
+  ],
+  "confidence": 0.9,
+  "created_at": "2026-08-04T15:06:57.127196"
  }
 ]
