@@ -89,18 +89,44 @@ contract_id = os.environ.get(
     "VOLPRED_CODEX_EXEC_CONTRACT",
     "bounded-codex.agentic",
 )
+def forbidden_env_for(provider_id):
+    """Read the forbidden set from the registry so this cannot drift from policy."""
+    import json
+    from volpred.ops.execution.registry import DEFAULT_REGISTRY_PATH
+    payload = json.loads(DEFAULT_REGISTRY_PATH.read_text(encoding="utf-8"))
+    for provider in payload["providers"]:
+        if provider.get("provider_id") == provider_id:
+            return frozenset(provider["auth"]["forbidden_env"])
+    raise ProviderRegistryError(f"provider {provider_id!r} absent from registry")
+
+# Strip the forbidden API-key / alternate-endpoint variables BEFORE authorising,
+# and spawn with that same stripped environment, so the attested environment and
+# the real child environment are identical. Inside a Claude Code session
+# ANTHROPIC_BASE_URL is always present (harness-injected, pointing at the official
+# default endpoint), which denied every sanctioned codex spawn while granting the
+# child nothing. Denying was also weaker than it looked: it blocked the wrapper
+# while a raw `codex exec` inherited the whole environment. Owner principle
+# (2026-08-04): claude, codex and agy all run on subscription OAuth quota.
 try:
+    forbidden = forbidden_env_for("codex-cli")
+    clean_env = {k: v for k, v in os.environ.items() if k not in forbidden}
+    stripped = sorted(set(os.environ) & forbidden)
     receipt = authorize_provider_spawn(
         contract_id=contract_id,
         model_id=model,
         executable_path=codex_bin,
-        environment=os.environ,
+        environment=clean_env,
     )
     verify_spawn_receipt(receipt)
 except ProviderRegistryError as exc:
     print(f"ERROR: provider policy denied codex: {exc}", file=sys.stderr)
     sys.exit(126)
-child_env = {**os.environ, **receipt.environment()}
+if stripped:
+    print(
+        "[codex_exec_bounded] stripped from child env: " + ", ".join(stripped),
+        file=sys.stderr,
+    )
+child_env = {**clean_env, **receipt.environment()}
 proc = subprocess.Popen(
     [receipt.resolved_executable, "exec", "-m", model, *sys.argv[2:]],
     start_new_session=True,
