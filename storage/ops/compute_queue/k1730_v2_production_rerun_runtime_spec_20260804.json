@@ -5,12 +5,12 @@
   "interpreter": "uv run python",
   "args": [],
   "env": {},
-  "status": "running",
+  "status": "failed",
   "queue_priority": 5,
   "queued_at": "2026-08-04T15:46:41Z",
   "started_at": "2026-08-04T16:00:22Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-08-04T18:58:32Z",
+  "exit_code": 4,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1730_v2_production_rerun_runtime_spec_20260804.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1730_v2_production_rerun_runtime_spec_20260804.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
@@ -47,5 +47,19 @@
     "fire_key": "operations-core-v1:volpred-compute-worker:9f7e7b90dd0dcaa8e1118fad",
     "scheduled_for": "2026-08-04T16:00:00Z"
   },
-  "claimed_by_pid_start_wall": "Wed Aug  5 00:00:21 2026"
+  "claimed_by_pid_start_wall": "Wed Aug  5 00:00:21 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "k1730_v2_adopt_reconcile_recertify_20260802",
+    "settled_at": "2026-08-04T18:58:31Z",
+    "error": null
+  },
+  "process_exit_code": 0,
+  "failure_reason": "experiment_gate_failed",
+  "experiment_gate": {
+    "status": "failed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1730-adopt/experiments/k1730",
+    "exit_code": 1,
+    "report": "[gate] FAIL — 1 violation(s) under .claude/worktrees/k1730-adopt/experiments/k1730:\n\n  [nested-dm-misuse]\n    - experiments/k1730/k1730_gevreg_midas_ssvs.py  (review_required)\n    → Raw DM/HLN is not valid inference under a nested-model null. Use Clark-West (2007) for squared-error, or a general-loss / recursive-bootstrap design for QLIKE/pinball, and wire THAT into the verdict. If the DM is descriptive only, say so with `nested-dm: diagnostic-only` and keep it out of the claim sink. A primary unconditional GW/DM statistic under nesting is accepted only with the versioned fixed-memory cell manifest, matching runtime provenance, locally narrow claims, and a trusted external PASS receipt. Owner: scripts/tests/test_nested_dm_misuse_ratchet.py\n\nThis experiment is not accepted. Your own tests passing only shows it ran the way you meant it to; these gates check it does not break a rule the repo already learned the hard way."
+  }
 }
