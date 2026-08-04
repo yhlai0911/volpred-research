@@ -239,8 +239,17 @@ schedule 現綁回 wrapper execution log；單一 `job_liveness` owner 同時支
   兩個出口解閘（退出碼 1，`&&` 鏈會斷），刻意不做成死局。偵測器上線後第一個命中的是**它作者
   自己 25 分鐘前的 K1733 完成語**（`OWED: Codex primary-path re-verification`）。真實損害
   另由 `assign_ce6097bf` 於同日 05:36 以根因修法補完（`load_vix()` 補 dedup guard + 期間 pin，
-  非只重跑；結論全不翻）。8 個新回歸測試，兩半各自 break-then-verify（拿掉 gate → 1 failed；
-  拿掉 keep field → 2 failed）— Q3
+  非只重跑；結論全不翻）。**上線後 live 回讀當場抓到自己的第三個缺陷**：materialize 出來的
+  子列同時繼承了父列的 `priority` **與 `source`**，於是完成一張 boss P1 會鑄出一張
+  source=`user` 的 P1 —— `is_urgent_source` 會把它直接放過 R2 admission clamp。這一列在
+  8/8 前根本做不了，卻會坐在 P1 FIFO 頭，正是該 clamp 存在要防的 starvation 形狀。修法：
+  子列一律 `source="followup"`（血緣由 `follows_up_on` 承載，那才是表達血緣的欄位）
+  ＋ 在鎖內直接呼叫同一個 owner `clamp_machine_priority_inflation`（gateway 自己開檔，
+  持鎖中無法再進入）；既有前例 `_apply_codex_review_followup_fail` 有**完全相同**的漏呼叫，
+  同 commit 一併補。已建立的那一列走 unblock → `migrate_p1_inflation.py` → re-block
+  三個 canonical 操作修正，未手改欄位（`annotate` 正確拒絕 lifecycle 欄位）。
+  9 個新回歸測試，三處各自 break-then-verify（拿掉 gate → 1 failed；拿掉 keep field →
+  2 failed；拿掉 clamp/source → 1 failed）— Q3
 - 2026-08-04 **detector 對「被政策刪掉的欄位」下判斷，每晚重算同一個錯答案**：dreaming `detect_missing_retry_strategy` 以「failed 且無 `blocked_reason`、無 `follows_up_on`、無 k_id sibling、無 id lineage 後繼」判定 orphaned failure，但終態列 3 天就被壓成 tombstone stub、上述欄位結構性消失，而該 detector 的 lookback 是 14 天（`LOOP_HEALTH_WINDOW_DAYS`）。day 3 → day 14 這 11 天內，**一個已正確重試的失敗與一個被丟掉的失敗在位元上完全相同**。live 回讀：當下 10 個 finding 有 6 個是 archived receipt；池中 51 張 dreaming pending 有 31 張是同一 artifact 的累積，且因 subject 已歸檔而永遠不可能自行解除。修法在產生端：`is_tombstoned()` 立為 canonical predicate 並置於 compaction 同檔，detector 判斷前先問。**不註冊進 `dreaming_revalidate`** —— 該模組刻意把此 pattern 列為 historical 不重驗，而這是「finding 從來就不成立」而非「snapshot 過期」，屬不同缺陷，故修在生成而非重驗。31 張走 canonical `mark_task_blocked --reason deprecated` 收為 `closed_no_action`（pending 131→100、dreaming 51→20），detector live findings 10→4。RED→GREEN 對真實 queue 驗證；168 tests passed（新增 2）— Q3
 - 2026-08-03 **STRIKE 2（可終止性 class，換一個 surface 原樣復發）**：`compute_queue` 的 `cancelled source task settlement did not match` 從 7/21 起每個 compute-worker tick 發兩次、13 天約 2,500 次，無人察覺。根因是 reconciler 的「已無事可做」缺終止邊界 —— 它只認得「source task 仍 pending 且未綁 job」一種無害狀態，source task 已 `succeeded`（或已被歸檔出池）時就判定為 binding mismatch，warn 完 return、不寫 settlement，下一輪原樣重來。同一函式另有更嚴重的潛在面：task 被歸檔後 `tpc._find` 會 `SystemExit`，那是在 worker readiness scan 裡，等於一張陳舊 receipt 可以拖垮整個 drain loop。修法是把終止語意補完整（不綁此 job → `not_required` 並記 reason；仍綁但無法 unwind 才 warn），`SystemExit` 收斂成 not_required。**但真正讓它活 13 天的不是這個 reconciler，而是 `warn()` 只寫 stderr** → 排程程序改開 bounded JSONL 持久化，新增 `recurring_diagnostic_warning` detector 把「重複且仍在燒」變成 task。canonical drain loop live 回讀 settlement=`not_required`、警告停止；cron-env 回讀 persist=1 且 JSONL 實際落地；279 tests passed（新增 14）— Q3
 - 2026-07-19 **同日 strike 2（自主性面）**：上一則修好音量閘門後，把 `quiescent` 剩下的洞（首見即已停火的 alert 仍吵一次）寫成「刻意不補的已知邊界」寄給老闆，理由是「補它要另立判定 → 雙 owner（anti-stacking）」。老闆回：「不是叫我做，你判定後就去優化執行啊，立刻重構底層」。**那個理由是錯的** —— 它把「跟上一輪 marker 比」誤當成 quiescence 的**定義**，其實定義是「訊號在一個 run interval 內沒推進」，相對式只是有前值時的特例。把定義抬高一層後，首見改問同一判準的**絕對**形式（marker 距今 ≥ `DREAMING_RUN_INTERVAL_HOURS`=24h），仍是同一個 owner `_is_quiescent()`，不是第二套判定。改：`reconcile()` 兩條分支全委派給 `_is_quiescent()`，並加 test 鎖住判定不得散回 `reconcile`。真實 alert 資料首見重放：7 個 finding 中 2 個（停火 25.3h / 31.2h）靜音、5 個 24h 內仍在燒的照樣送達；今日實跑 3 個首見 finding marker 皆 <10h → 全判活躍（反向鎖成立）。178 tests passed（新增 6）— Q3

@@ -247,6 +247,37 @@ def test_blank_entries_do_not_misalign_the_tombstone_edges(pool: Path) -> None:
         assert text in child["description"], f"edge {child_id} names the wrong text"
 
 
+def test_followup_of_a_boss_p1_does_not_inherit_p1(pool: Path) -> None:
+    """A follow-up is machine-created, whatever the parent was.
+
+    Caught live: the first version inherited both `priority` and `source` from the
+    parent, so completing a boss P1 minted a P1 successor from a "user" source --
+    which `is_urgent_source` waves straight past the admission clamp. The follow-up
+    here could not even be started for four days, and it would have sat at the head
+    of the P1 FIFO lane the whole time. P1 means "what the boss wants right now";
+    a follow-up is by definition not that.
+    """
+    tasks = _tasks(pool)
+    tasks[0].update(priority=1, source="user", status="in_progress")
+    pool.write_text(json.dumps(tasks), encoding="utf-8")
+
+    out = _run(
+        pool,
+        id="snapaudit_quantify_unmeasured_exposure",
+        status="succeeded",
+        result=f"完成。{LOST_DECLARATION}",
+        follow_up=["something owed but not urgent"],
+    )
+    child = _find(pool, out["follow_ups"][0]["id"])
+    assert child["priority"] == 2, "machine-created follow-up must be clamped off P1"
+    assert child["priority_capped_from"] == 1
+    assert child["source"] == "followup", (
+        "inheriting the parent's boss source would launder a machine row past the clamp"
+    )
+    # Lineage still readable -- it moved to the field that means lineage.
+    assert child["follows_up_on"] == "snapaudit_quantify_unmeasured_exposure"
+
+
 def test_failed_completions_are_not_gated(pool: Path) -> None:
     """A failure report is *expected* to describe unfinished work."""
     out = _run(

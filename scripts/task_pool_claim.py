@@ -64,6 +64,7 @@ if str(_REPO_ROOT / "scripts") not in sys.path:
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import (  # noqa: E402
     TERMINAL_COMPACTABLE_STATUSES,
+    clamp_machine_priority_inflation,
     clear_claim_ownership,
     enforce_blocked_until,
     normalize_priority,
@@ -639,6 +640,10 @@ def _apply_codex_review_followup_fail(
         "dispatch_lane": "agent",
     }
     normalize_task_priority(new_task)
+    # Same admission clamp the gateway applies; called directly because this runs
+    # inside the lock. Without it a P1 review task mints a P1 successor from a
+    # machine source, which is the inflation the clamp exists to stop.
+    clamp_machine_priority_inflation(new_task)
     tasks.append(new_task)
     effect["v2_task"] = "created"
     effect["v2_task_id"] = v2_id
@@ -740,12 +745,22 @@ def _materialize_follow_ups(
                 "tombstone（result 不在 _TOMBSTONE_KEEP_FIELDS 內），所以這件事"
                 "只有以這一列 pending 的形式才會留下來。"
             ),
-            "source": task.get("source") or "followup",
+            # Machine source, NOT the parent's. Inheriting it would launder a
+            # row the completion machinery created into a boss ingress, and
+            # `is_urgent_source` would then wave it past the P1 clamp. Lineage is
+            # carried by `follows_up_on`, which is the field that means it.
+            "source": "followup",
             "created_at": now,
             "created_by": "task_pool_claim:follow_up",
             "follows_up_on": parent_id,
         }
         normalize_task_priority(new_task)
+        # Same owner the admission gateway uses. Called directly because we are
+        # already inside the lock on this file and cannot re-enter the gateway.
+        # A follow-up of a boss P1 is not itself "what the boss wants right now",
+        # which is what the P1 lane means -- and an undoable P1 at the head of a
+        # FIFO lane is exactly the starvation shape this clamp exists to prevent.
+        clamp_machine_priority_inflation(new_task)
         tasks.append(new_task)
         receipts.append({"id": new_id, "created": True})
     if edges:
