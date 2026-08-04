@@ -6043,3 +6043,40 @@ merge gate）、壞 ref fail-closed；另鎖 `merge_worktree.sh` call site 必�
 
 本段狀態為 **`root_cause_fixed_and_verified`**（k1735 當事紅燈亦已由 `227025e49` 補條目
 轉綠：Experiment Artifacts Gate @227025e success）。
+
+## 2026-08-04 — worker_orphaned（inc_792a94b0ecf4，occurrence 10k+）三層收斂：env 污染斷根 + 48 實例全數裁決
+
+**證據化症狀**：incident 自 2026-07-21 起累積 52 instances（48 未清）、occurrence_count 10312；
+e1 修復單 succeeded 但 breach 持續 → episode 2 升級唯一根因任務。`dispatch_workspace_receipts.jsonl`
+1.8 萬筆顯示每次 fire 都在重複裁決同一批 workspace。
+
+**因果鏈（三層）**：
+1. 邏輯層根因：phase_z in-process alert → `EmailNotifier.__init__._prime_project_env()` 把 `.env`
+   整包（含 `OPENAI_API_KEY`）灌進 daemon `os.environ` → provider registry fail-closed 拒絕每個
+   claude spawn（`3da9b93f4` 修復 + fail-safe strip；`c224b0b43` 教訓）。
+2. 流程層：被拒的 fire 空轉 churn generation → 前代 workspace 被 `worker_superseded_generation`
+   打成孤兒 → WS-B 裁決成 `remediation_opened` 後 sweep 依 `remediation_bound` 跳過 → 堆積等
+   main thread aggregate 裁決（該任務一直沒人執行 = 堆到 48）。
+3. 架構層：wrapper 層 strip-before-attest（codex/agy/claude 三 CLI 統一）取代 presence-based deny，
+   attested env == spawned env（`ca712fc64` + `tests/test_provider_spawn_sanitised.py` 10 tests）。
+
+**收斂執行（2026-08-04 main thread）**：
+- 根因修復 live 驗證：13:25 off-cadence fire `2607def6` **outcome=success（1208.8s）**，停擺後首個成功 worker。
+- 43 churn 實例：archive ref（`refs/orphan-archive/*`）→ 還原 phantom deletes → worktree remove
+  （不 --force）→ branch -D → clear_instance。5 個 19,974-file phantom-D 空殼一併清除。
+- 5 研究軌跡實例：FAIL/未認證實驗（k1380/k1708/k1095_v2/k1731/snapdup），branch 保留 + archive ref、
+  worktree 釋放、clear_instance；re-run/retire 決策記入 research_program.md。
+- k1714 未 commit 完整實驗封存 `refs/orphan-archive/agent-a148e8a-k1714`（9 檔驗證齊）。
+- Worktree 總數 45 → 30；uncleared instances 48 → 0。
+- 處置報告：`storage/ops/orphan_adjudication_20260804.md`（逐實例理由 + tip sha）。
+
+**Regression 防線**：provider spawn sanitise suite（10 tests，break-then-verify 驗證過）+ 既有
+`_PRODUCER_NEVER_SPAWNED_OUTCOMES` empty→remove 路徑（12:10/12:18 denied fires 實證 `empty_removed`）
++ worktree_gc 三 gate + sweep 的 remediation_bound 防重複開單。
+
+**殘留已知問題（不阻本案）**：task settlement reconciliation 對 `ci-red-30507270318` /
+`ci-red-30736983439` 每分鐘重試 `workspace_not_terminal`（workspace 已 missing/superseded）——
+settlement 層缺「workspace 永久消失」終態出口，另案處理。
+
+本段狀態為 **`root_cause_fixed_and_verified`**（root cause 修復 + live 成功 fire 回讀 + 全實例裁決 +
+regression gates 在位）。

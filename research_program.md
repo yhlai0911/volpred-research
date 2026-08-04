@@ -1658,3 +1658,11 @@ Each cat needs dedicated session work; not iterative one-cycle fixes.
   - 差異／來源：不是 option overlay／return factor，而是交易機制 robustness（[RFS 2026](https://academic.oup.com/rfs/article/39/3/783/8193725)；[公開資料與程式](https://doi.org/10.7910/DVN/LMB13N)；[Cboe AIM](https://www.cboe.com/us/options/trading/crossing_orders/)）。
 - [ ] **時變狀態空間 HAR 是否勝過固定／滾動 HAR** — 在 SPY/QQQ 與本機台指期相同 target、window、ledger 下比較 HAR、rolling HAR、SHARP/SHARP-SV；每個 origin 的 filtering 只看窗內資料，超參數由內層滾動驗證決定，再用 QLIKE/MSE、DM-HLN、GW、MCS 與 regime breakdown 檢定。
   - 差異／來源：不是再加 predictor，而是檢驗 HAR coefficient drift（[Journal of Econometrics 2025](https://www.sciencedirect.com/science/article/abs/pii/S030440762500199X)，DOI 10.1016/j.jeconom.2025.106146）。
+
+### Orphan 實驗最終裁決 2026-08-04（worker_orphaned incident inc_792a94b0ecf4 aggregate adjudication）
+
+5 個 FAIL/未認證實驗 worktree 已釋放；branch + `refs/orphan-archive/` 完整保留失敗軌跡（認證 gate 依設計禁止它們入 main）：
+- k1380（review FAIL×2 defects、結果檔已 INVALID 標記）、k1708（三輪 review FAIL、3-strike 在案）、k1095_v2（FAIL×4）、k1731+k1730（無 verdict；其 nested-DM ops 工具已獨立落地 main）、audit_snapshot_dup_20260721（FAIL×3）
+- k1714：完整實驗（README/code/results/圖/data）從未 commit，已封存 `refs/orphan-archive/agent-a148e8a-k1714`（ff65394ea）；knowledge 已引用 ×10 但無 reproduce_spec、無 review verdict
+
+**待辦決策（研究方向層）**：逐 K 決定 re-run（修 blocking defects 後重跑認證）或正式 retire（並審 knowledge 中既有引用是否構成幽靈引用需更正）。defects 明細見各 branch 的 `review_verdict.json`；處置報告 `storage/ops/orphan_adjudication_20260804.md`。
