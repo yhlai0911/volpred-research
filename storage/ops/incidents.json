@@ -1983,7 +1983,7 @@
    "clean_streak_started_at": null,
    "control_gate_id": "dispatch_worker_ownership",
    "current_task_id": null,
-   "episode_count": 300,
+   "episode_count": 310,
    "episode_failures": [
     {
      "at": "2026-08-04T04:16:20.228925+00:00",
@@ -1993,7 +1993,7 @@
      "task_id": "inc_792a94b0ecf4_e1"
     }
    ],
-   "episode_opened_at": "2026-08-04T14:40:11.087598+00:00",
+   "episode_opened_at": "2026-08-04T15:29:17.497143+00:00",
    "escalation": {
     "at": "2026-08-04T04:16:20.270924+00:00",
     "notification_id": "effect_owned_email_5b3a5d4b722faea245a48bbb9ca01d93",
@@ -2196,6 +2196,12 @@
     {
      "at": "2026-08-04T14:21:14.354774+00:00",
      "instance_key": "dispatch-slot-1-e5184e6f",
+     "reason": "worker_superseded_generation",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-04T15:29:17.497143+00:00",
+     "instance_key": "dispatch-slot-1-c49f8267",
      "reason": "worker_superseded_generation",
      "transition": "opened"
     }
@@ -2933,7 +2939,7 @@
      },
      "first_seen_at": "2026-08-04T06:55:40.479741+00:00",
      "key": "dispatch-slot-1-3175c52f",
-     "last_seen_at": "2026-08-04T14:39:58.105730+00:00"
+     "last_seen_at": "2026-08-04T15:28:46.324354+00:00"
     },
     {
      "cleared_at": null,
@@ -2947,7 +2953,7 @@
      },
      "first_seen_at": "2026-08-04T07:21:54.991363+00:00",
      "key": "dispatch-slot-1-1675be8d",
-     "last_seen_at": "2026-08-04T14:40:04.566640+00:00"
+     "last_seen_at": "2026-08-04T15:28:56.999765+00:00"
     },
     {
      "cleared_at": null,
@@ -2961,7 +2967,7 @@
      },
      "first_seen_at": "2026-08-04T07:46:21.551654+00:00",
      "key": "dispatch-slot-1-592ef34e",
-     "last_seen_at": "2026-08-04T14:40:11.087598+00:00"
+     "last_seen_at": "2026-08-04T15:29:05.437279+00:00"
     },
     {
      "cleared_at": null,
@@ -2990,70 +2996,34 @@
      "first_seen_at": "2026-08-04T14:21:14.354774+00:00",
      "key": "dispatch-slot-1-e5184e6f",
      "last_seen_at": "2026-08-04T14:21:14.354774+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "c347ea3820433b3a311c5d736582f3ca37f1baaa",
+      "branch": "worktree-dispatch-slot-1-c49f8267",
+      "checkpoint_commit": "614c0d779e05ed69129e034a1243b52a242be502",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-c49f8267"
+     },
+     "first_seen_at": "2026-08-04T15:29:17.497143+00:00",
+     "key": "dispatch-slot-1-c49f8267",
+     "last_seen_at": "2026-08-04T15:29:17.497143+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-592ef34e unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-04T14:40:11.087598+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-c49f8267 unmergeable (worker_superseded_generation)",
+   "last_seen_at": "2026-08-04T15:29:17.497143+00:00",
    "notified_at": null,
-   "occurrence_count": 10604,
+   "occurrence_count": 10614,
    "resolution": {
-    "at": "2026-08-04T14:40:11.087598+00:00",
+    "at": "2026-08-04T15:29:17.497143+00:00",
     "by": "inc_792a94b0ecf4_rootcause_e2",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
-    {
-     "at": "2026-08-04T13:54:38.936607+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T13:54:50.746320+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T14:20:49.977135+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T14:20:56.424302+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T14:21:03.015931+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T14:21:14.354774+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T14:23:49.334963+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T14:23:55.775379+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T14:24:02.242135+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-04T14:39:58.105730+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
     {
      "at": "2026-08-04T14:40:04.566640+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
@@ -3061,6 +3031,56 @@
     },
     {
      "at": "2026-08-04T14:40:11.087598+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T14:57:58.241230+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T14:58:13.380663+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T14:58:28.634734+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T14:59:08.559237+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T14:59:14.980046+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T14:59:21.352542+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T15:28:46.324354+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T15:28:56.999765+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T15:29:05.437279+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-04T15:29:17.497143+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     }
@@ -4689,6 +4709,11 @@
      "at": "2026-08-04T13:20:30.740704+00:00",
      "instance_key": "30911746339:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-04T15:00:40.478961+00:00",
+     "instance_key": "30920174382:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -4697,14 +4722,20 @@
      "first_seen_at": "2026-08-04T13:20:30.740704+00:00",
      "key": "30911746339:1",
      "last_seen_at": "2026-08-04T13:20:30.740704+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-04T15:00:40.478961+00:00",
+     "key": "30920174382:1",
+     "last_seen_at": "2026-08-04T15:00:40.478961+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-04T13:19:53.7403243Z E AssertionError: New local DM implementation(s) omit HAC or use an h=1-degenerate bandwidth:",
-   "last_seen_at": "2026-08-04T13:20:30.740704+00:00",
+   "last_breach_detail": "2026-08-04T14:59:44.5988730Z E AssertionError: New local DM implementation(s) omit HAC or use an h=1-degenerate bandwidth:",
+   "last_seen_at": "2026-08-04T15:00:40.478961+00:00",
    "notified_at": null,
-   "occurrence_count": 1,
+   "occurrence_count": 2,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -5149,6 +5180,6 @@
    }
   }
  },
- "updated_at": "2026-08-04T14:55:55.618677+00:00",
+ "updated_at": "2026-08-04T15:29:26.358106+00:00",
  "version": 1
 }
