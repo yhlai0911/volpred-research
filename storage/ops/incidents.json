@@ -4673,7 +4673,7 @@
    "clean_observations": [],
    "clean_streak_started_at": null,
    "control_gate_id": null,
-   "current_task_id": "ci-root-30875762101",
+   "current_task_id": "ci-red-30884267057",
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-08-04T04:10:23.124893+00:00",
@@ -4701,6 +4701,16 @@
      "at": "2026-08-04T05:55:46.904694+00:00",
      "instance_key": "30881214658:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-04T06:30:45.379859+00:00",
+     "instance_key": "30882954731:1",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-04T06:50:38.498550+00:00",
+     "instance_key": "30884267057:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -4721,14 +4731,26 @@
      "first_seen_at": "2026-08-04T05:55:46.904694+00:00",
      "key": "30881214658:1",
      "last_seen_at": "2026-08-04T05:55:46.904694+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-04T06:30:45.379859+00:00",
+     "key": "30882954731:1",
+     "last_seen_at": "2026-08-04T06:30:45.379859+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-04T06:50:38.498550+00:00",
+     "key": "30884267057:1",
+     "last_seen_at": "2026-08-04T06:50:38.498550+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-04T05:55:28.2621231Z E AttributeError: 'Namespace' object has no attribute 'knowledge_ref'",
-   "last_seen_at": "2026-08-04T05:55:46.904694+00:00",
+   "last_breach_detail": "2026-08-04T06:49:23.3019078Z E AttributeError: 'Namespace' object has no attribute 'knowledge_ref'",
+   "last_seen_at": "2026-08-04T06:50:38.498550+00:00",
    "notified_at": null,
-   "occurrence_count": 3,
+   "occurrence_count": 5,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -4738,6 +4760,11 @@
      "episode": 1,
      "opened_at": "2026-08-04T04:10:23.603633+00:00",
      "task_id": "ci-root-30875762101"
+    },
+    {
+     "episode": 1,
+     "opened_at": "2026-08-04T06:50:38.770741+00:00",
+     "task_id": "ci-red-30884267057"
     }
    ],
    "task_mode": "external",
@@ -4920,6 +4947,6 @@
    }
   }
  },
- "updated_at": "2026-08-04T06:23:06.451950+00:00",
+ "updated_at": "2026-08-04T06:50:38.771960+00:00",
  "version": 1
 }
