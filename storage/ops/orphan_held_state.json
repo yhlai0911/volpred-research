@@ -1,68 +1,14 @@
 {
   "note": "held 的時間軸。超過 held_escalation_shifts 班仍無主 → 指名任務。一筆記錄消失 = 那個路徑已經有出口了。",
-  "updated_at": "2026-08-04T10:01:26.153092+00:00",
+  "updated_at": "2026-08-04T11:00:41.412518+00:00",
   "shifts_to_escalate": 6,
   "entries": {
     "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543": {
       "first_seen": "2026-08-04T07:00:59.351071+00:00",
-      "shifts": 4,
-      "last_seen": "2026-08-04T10:01:26.153092+00:00",
+      "shifts": 5,
+      "last_seen": "2026-08-04T11:00:41.412518+00:00",
       "reason": "no_existing_declared_files",
       "namespace": "compute_queue"
-    },
-    "experiments/K1322": {
-      "first_seen": "2026-08-02T10:02:50.842467+00:00",
-      "shifts": 48,
-      "last_seen": "2026-08-04T10:01:26.153092+00:00",
-      "reason": "atomic_unit_incomplete",
-      "namespace": "experiments",
-      "task_id": "assign_88020d6b",
-      "escalated_at": "2026-08-02T15:02:01.095541+00:00"
-    },
-    "experiments/K1342": {
-      "first_seen": "2026-08-01T11:03:29.499192+00:00",
-      "shifts": 72,
-      "last_seen": "2026-08-04T10:01:26.153092+00:00",
-      "reason": "atomic_unit_incomplete",
-      "namespace": "experiments",
-      "task_id": "assign_98e0980a",
-      "escalated_at": "2026-08-01T16:01:47.323566+00:00"
-    },
-    "experiments/k1307": {
-      "first_seen": "2026-08-02T10:02:50.842467+00:00",
-      "shifts": 48,
-      "last_seen": "2026-08-04T10:01:26.153092+00:00",
-      "reason": "atomic_unit_incomplete",
-      "namespace": "experiments",
-      "task_id": "assign_88020d6b",
-      "escalated_at": "2026-08-02T15:02:01.095541+00:00"
-    },
-    "experiments/k1324": {
-      "first_seen": "2026-08-02T10:02:50.842467+00:00",
-      "shifts": 48,
-      "last_seen": "2026-08-04T10:01:26.153092+00:00",
-      "reason": "atomic_unit_incomplete",
-      "namespace": "experiments",
-      "task_id": "assign_88020d6b",
-      "escalated_at": "2026-08-02T15:02:01.095541+00:00"
-    },
-    "experiments/k1325": {
-      "first_seen": "2026-08-02T10:02:50.842467+00:00",
-      "shifts": 48,
-      "last_seen": "2026-08-04T10:01:26.153092+00:00",
-      "reason": "atomic_unit_incomplete",
-      "namespace": "experiments",
-      "task_id": "assign_88020d6b",
-      "escalated_at": "2026-08-02T15:02:01.095541+00:00"
-    },
-    "experiments/k528": {
-      "first_seen": "2026-08-02T09:02:14.545550+00:00",
-      "shifts": 49,
-      "last_seen": "2026-08-04T10:01:26.153092+00:00",
-      "reason": "atomic_unit_incomplete",
-      "namespace": "experiments",
-      "task_id": "assign_ade5b83a",
-      "escalated_at": "2026-08-02T14:01:44.068956+00:00"
     }
   }
 }
