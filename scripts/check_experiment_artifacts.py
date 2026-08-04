@@ -148,6 +148,34 @@ def load_knowledge_ids(root: Path | None = None) -> set[str] | None:
     return recorded
 
 
+def load_knowledge_ids_at_ref(ref: str, root: Path | None = None) -> set[str] | None:
+    """K-ids in the knowledge base as COMMITTED at ``ref``. ``None`` = unreadable.
+
+    The merge-side gate and the CI gate are the same script, but until 2026-08-04
+    they evaluated different states: merge read the working tree, CI read the
+    pushed commit. The k1735 merge passed against an uncommitted working-tree
+    entry, then CI went red on the push that carried no entry (run 30879353621).
+    Reading the committed blob closes that split-brain — dirty working-tree
+    state can no longer satisfy the merge gate.
+    """
+    base = root or _canonical_root()
+    try:
+        proc = subprocess.run(
+            ["git", "show", f"{ref}:{KNOWLEDGE_REL.as_posix()}"],
+            cwd=str(base), capture_output=True, text=True, timeout=30, check=True,
+        )
+        entries = json.loads(proc.stdout)
+    except (OSError, ValueError, subprocess.SubprocessError) as exc:
+        print(f"[artifacts] WARN — knowledge base unreadable at {ref}:{KNOWLEDGE_REL} "
+              f"(root {base}): {type(exc).__name__}: {exc}", file=sys.stderr)
+        return None
+    recorded = knowledge_ids_from_entries(entries)
+    if recorded is None:
+        print(f"[artifacts] WARN — knowledge base at {ref}:{KNOWLEDGE_REL} is "
+              f"{type(entries).__name__}, expected a list.", file=sys.stderr)
+    return recorded
+
+
 def load_exclusions(root: Path | None = None) -> dict[str, str]:
     """``{k_id: reason}`` for experiments legitimately exempt from this gate."""
     path = (root or REPO_ROOT) / EXCLUSIONS_REL
@@ -698,10 +726,27 @@ def cmd_check(args: argparse.Namespace) -> int:
         print("[artifacts] PASS — no experiment directory added or modified.")
         return 0
 
-    knowledge_ids = load_knowledge_ids()
+    if args.knowledge_ref:
+        knowledge_ids = load_knowledge_ids_at_ref(args.knowledge_ref)
+    else:
+        knowledge_ids = load_knowledge_ids()
     exclusions = load_exclusions()
     records = [audit_experiment(t, knowledge_ids, exclusions) for t in targets]
     failed = [r for r in records if r["violations"]]
+
+    if args.knowledge_ref and failed:
+        # The most common way to fail ref-mode is an entry that exists but was
+        # never committed — say so explicitly instead of sending the author off
+        # to write a second entry.
+        worktree_ids = load_knowledge_ids()
+        for r in failed:
+            kid = k_id(Path(r["path"]).name)
+            if (kid and worktree_ids and kid in worktree_ids
+                    and any("no entry in" in v for v in r["violations"])):
+                print(f"[artifacts] NOTE — {kid}: a knowledge entry EXISTS in the working "
+                      f"tree but not at {args.knowledge_ref}. Commit "
+                      f"{KNOWLEDGE_REL} (via scripts/git_writer_lock.py) and rerun — "
+                      "CI validates committed state, so an uncommitted entry goes red on push.")
 
     for r in records:
         if r["excluded"]:
@@ -843,6 +888,12 @@ def main() -> int:
     chk = sub.add_parser("check", help="Gate one or more experiment directories.")
     chk.add_argument("--path", action="append", help="experiments/<kid> (repeatable)")
     chk.add_argument("--changed-since", help="gate every experiment touched since this ref")
+    chk.add_argument(
+        "--knowledge-ref",
+        help="verify the knowledge entry against this git ref's committed "
+             "storage/memory/knowledge.json instead of the working tree (the "
+             "merge gate passes HEAD so it evaluates the same state CI will see)",
+    )
     chk.set_defaults(func=cmd_check)
 
     swp = sub.add_parser("sweep", help="Repo-wide artifact-completeness report.")

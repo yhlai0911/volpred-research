@@ -5915,3 +5915,105 @@ exact-paths 而非任何 `-A` 形式）。
 真正的修法應是替 index.lock 建立**不依賴 sidecar 的 liveness 判定**（例如以 lsof/flock 探測 +
 最小年齡雙條件），並把「canonical writer 是否可用」納入健康檢查，而不是只看 daemon 有沒有 commit。
 本段狀態為 **`contained`**。
+
+## 2026-08-04 — Contract test 釘住的是文案不是不變式，於是正確的修正把 main 弄紅
+
+**證據化症狀**：Test Suite run `30875762101`（`a1ca746`）`1 failed, 7214 passed`。唯一失敗是
+`tests/test_cron_git_push_backup.py::test_silent_fallback_hold_routes_to_stable_p1_before_any_notification`
+的 `assert 'title "git-push-backup: push 失敗"' in script`。
+
+**根因**：`87f35d687`（fix(push-alert)）把 push 失敗告警的標題從寫死字串改成 classifier 產出的
+`--title "$PUSH_CLASS_TITLE"` —— 這正是那個 commit 要修的東西（前一版 body 一律歸咎認證/網路，
+而 2026-08-04 的真因是 129 MiB 檔案撞 GitHub 100 MiB 上限，三條線索全錯）。程式改對了，
+測試卻在 grep 舊的字面標題，於是**一個正確的修正被自己的契約測試判紅**。
+
+**這條測試原本要保護的不變式**（看它自己的註解就寫著）：divergence 與真實 transport failure 仍是
+**owner-facing** 告警，只有 guard-held、可機械修復的分支才被靜音。標題文字從來不是重點，
+**路由**才是。字面 assert 對這個不變式**既不必要也不充分** —— 改個措辭就假紅，而真正的迴歸
+（把 push 失敗改走 `--suppress-owner-transport` 內部路由）反而照樣綠燈。
+
+**修正**（`93452ab0c`）：切出 `# 3) fast-forward push` 之後的區塊，改釘路由本身 ——
+`send-alert --level warn` 在、`--title "$PUSH_CLASS_TITLE"` 在、owner-facing 預設標題仍是
+classifier 的 fallback 起點，且該區塊內**不得**出現 `--suppress-owner-transport` 或
+`INTERNAL_ROUTE_ARGS`。措辭再改不會紅，路由被改走內部路徑會紅。
+
+**Class sweep**：`grep -rln 'title "' tests/ scripts/tests/` 全 repo 只有這一個檔案在字面 assert
+告警標題，已修畢；不另加 gate（anti-stacking —— 這類問題的 owner 就是測試本身怎麼寫）。
+
+**教訓**：contract test 斷言 shell script 內容時，釘**行為契約**（哪條路由、哪個 flag、哪個
+exit code），不要釘**使用者可見文案**。文案本來就會因為「講得更準確」而改，而那正是我們希望
+發生的改動。
+
+### 第二層：治理檔合流時，被整段取代的區塊裡有 unique 內容，靜默消失
+
+修好上面那條後，同一輪 CI（run `30877298384`）換另一個測試紅：
+`tests/test_check_matt_skills_installation.py::test_agents_living_doc_records_current_matt_flow`
+的 `assert "GitHub Issue #3" in agents` 失敗。
+
+根因是 `eecf1d67c`（governance: make CLAUDE.md and AGENTS.md share one source）。它把 AGENTS.md
+的「Agent skills」**整段**換成共享區塊，而那一段裡還住著一個 AGENTS.md 專屬子節 —— Matt Pocock
+flow。整段替換於是把它一起吃掉了，**違反該 commit 自己寫下的規則**（各檔保留自己的 unique
+sections）。
+
+**遺失的不是裝飾**：plan（Issue #3）、spec（`docs/refactor_plan_ops_master_2026_07.md`）、
+tickets（Issues #5~#36）三份都已存在，而那條規則說的是「使用者要求依先前規劃繼續時，從第一張
+未阻塞 ticket 走 `implement` → `tdd` → `code-review`，**不要**重跑 grill／to-spec／to-tickets」。
+少了它，只讀 AGENTS.md 的 agent 會把已經做完的規劃再做一次。
+
+修法（`3377c4750`）：恢復到 shared marker **之外**的 AGENTS.md 專屬區；`sync_governance --check`
+11 個共享區塊仍全綠。安裝驗證那一行不重複寫 —— 共享的「全域 skill surface」已經有了。
+
+**教訓**：把兩份文件的共通段落抽成 single source 時，**逐段替換的粒度必須小於等於 unique 內容的
+粒度**。drift gate 只驗 marker 之間是否一致，驗不到「marker 外有沒有東西被整段吃掉」—— 那正是
+這次的失效面。
+
+### 第三層：`paths-ignore: '**/*.md'` 讓治理檔改動完全不經 CI
+
+第二層的修復是**純 markdown commit**，push 後 CI **根本沒跑**。`.github/workflows/pytest.yml`
+的 `paths-ignore` 有一條 `'**/*.md'`，理由寫著 "Pure-documentation commits ... cannot change any
+test outcome — the suite reads none of them"。
+
+**這個假設是錯的，而且錯得很廣**：20+ 個測試檔斷言 `AGENTS.md`、`CLAUDE.md`、
+`.claude/rules/*.md`、`.claude/skills/**/SKILL.md`、`docs/**`、`config/governance_shared.md`
+與數個 `experiments/*/README.md` 的內容。也就是說 **governance-only commit 可以弄壞測試而 CI
+一聲不吭** —— `eecf1d67c` 正是如此，紅燈拖到兩個 commit 後一次無關的 `.py` push 才浮出來。
+
+修法（`54f91cfc5`）：只留 `paper/**` 與 `storage/**/*.md`，兩者都實際查證過沒有測試讀 repo 內
+的副本（tests 底下的命中全是 `tmp_path` fixture 或註解散文），**並把重新查證的指令寫進註解**，
+讓這個宣稱可以被重跑驗證，而不是再一次被信任。代價約每天多 24 次 run（~130 pushes），換掉一個
+一直在靜默放行治理變更的 gate。
+
+**教訓**：`paths-ignore` 的每一條都是一個「這些檔改了不影響測試」的**斷言**，而斷言要能被驗證。
+寫下它的當下可能是對的，測試長出新依賴時它會**靜默轉為錯的** —— 而失效方式是「CI 變綠」，
+沒有任何人會注意到。這與 `.claude/rules/control-plane.md` 的「靜默的守門員最危險」同一類。
+
+三層狀態皆為 **`root_cause_fixed_and_verified`**（CI run `PLACEHOLDER_RUN` 全綠）。
+
+## 2026-08-04 — merge gate 與 CI gate 同一支腳本、看兩份狀態：未 commit 的 knowledge 條目讓 merge 過、push 紅
+
+**證據化症狀**：Experiment Artifacts Gate 於 `65901f0`（12:48 email）與 `ca712fc`
+（run `30879353621`）連兩紅：`experiments/k1735` 缺 knowledge 條目。但 12:43 的
+`merge_worktree.sh` 合併當下 gate 是綠的。
+
+**根因（邏輯層）**：`check_experiment_artifacts.py` 的 knowledge 檢查讀 working tree 的
+`storage/memory/knowledge.json`。merge 當下樹裡有一條**未 commit** 的 K1735 review 條目
+→ merge gate 放行；push 出去的 commit 沒帶它 → CI（讀 committed 狀態）紅。同一支腳本、
+兩個 gate、兩種有效輸入 —— 「規則只有一份」的假設在輸入層破功。
+
+**根因（流程層）**：knowledge 條目（主線程專屬寫入）與 merge commit 天然分離，沒有機制
+強制兩者同 push 落地；條目留在 dirty tree 是常態而非異常。
+
+**修正**：`check_experiment_artifacts.py` 新增 `--knowledge-ref <ref>`（以
+`git show ref:storage/memory/knowledge.json` 讀 committed 快照）；`merge_worktree.sh`
+的 artifacts gate 改傳 `--knowledge-ref HEAD`，merge gate 從此與 CI 看同一份狀態。
+ref 模式失敗時若 working tree 其實有條目，印明確補救：「條目存在但未 commit —— 先 commit
+再 merge」。CI 路徑語意不變（checkout 上 committed == working tree）。
+
+**回歸驗證**：`tests/test_artifacts_gate_committed_knowledge.py`（hermetic git）鎖三性質：
+working-tree loader 看得到 dirty 條目、ref loader 只看 committed（dirty 條目不可再滿足
+merge gate）、壞 ref fail-closed；另鎖 `merge_worktree.sh` call site 必含
+`check --knowledge-ref HEAD`。8 passed（含既有 relpath regression）；live:
+`check --knowledge-ref HEAD --path experiments/k1735` PASS（條目已隨 `227025e49` commit）。
+
+本段狀態為 **`root_cause_fixed_and_verified`**（k1735 當事紅燈亦已由 `227025e49` 補條目
+轉綠：Experiment Artifacts Gate @227025e success）。

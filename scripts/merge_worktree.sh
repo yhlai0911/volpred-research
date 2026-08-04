@@ -639,7 +639,10 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         if [[ ${#artifact_args[@]} -gt 0 ]]; then
             echo "  [ARTIFACT] 檢查實驗 artifact 完整性..."
             # 同 certify gate：stdlib-only 的 python3，不用 uv —— 起不來的 gate 等於棄權。
-            if ! python3 "$artifacts_gate" check "${artifact_args[@]}"; then
+            # --knowledge-ref HEAD（2026-08-04 k1735 教訓）：CI 驗的是 committed 狀態，
+            # merge gate 若讀 working tree，未 commit 的 knowledge 條目會讓 merge 過、push 紅。
+            # 兩個 gate 必須看同一份狀態。
+            if ! python3 "$artifacts_gate" check --knowledge-ref HEAD "${artifact_args[@]}"; then
                 echo "  [🛑 ABORT] 實驗缺 artifact，拒絕合併（上方已列出可直接執行的補救指令）"
                 echo "  [WHY] 實驗進 main、knowledge/reproduce_spec 沒進 → 下一班 CI 紅，"
                 echo "        而且要靠考古才知道當初跑了什麼。趁作者還在現場補最便宜。"
