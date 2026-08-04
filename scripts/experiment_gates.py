@@ -248,10 +248,17 @@ CERTIFY_GATES: tuple[Gate, ...] = tuple(gate for gate in GATES if gate.certify)
 def python_files(target: Path) -> list[Path]:
     if target.is_file():
         return [target] if target.suffix == ".py" else []
+    # gate_history/ holds pre-change bytes preserved as EVIDENCE (see
+    # audit_nested_dm_misuse.scan_population, which already skips them): a
+    # preserved blob is by contract never edited, so flagging one demands a
+    # repair that is forbidden to make. 2026-08-05 K1730: the drift gate
+    # required preserving the as-run entrypoint under gate_history/ while this
+    # iterator fed the same blob to the nested-dm scan as a live violation —
+    # the two gates deadlocked on exactly the file the rules forced to exist.
     return [
         p
         for p in sorted(target.rglob("*.py"))
-        if "__pycache__" not in p.parts
+        if "__pycache__" not in p.parts and "gate_history" not in p.parts
     ]
 
 
