@@ -517,14 +517,6 @@ def score_all(weeks: pd.DataFrame, run: dict) -> dict:
         results["by_model"][m] = entry
 
     # --- Diebold-Mariano: the GEV model against every benchmark -------------
-    # nested-dm: diagnostic-only.  GEV-HAR nests inside GEVReg-MIDAS-SSVS
-    # (zero the macro block), the loss is pinball (general, non-differentiable)
-    # and the scheme is recursive/expanding — K1731 F1 established this triple
-    # has NO published inference method (CW/GW/McCracken all inapplicable).
-    # Per K1730_NESTED_DM_ADJUDICATION.md (2026-07-21) the vs-GEV-HAR DM was
-    # RETRACTED as inference and re-labelled diagnostic-only; the NULL claim
-    # rests on descriptive loss ordering + the lag-shift placebo, and the only
-    # valid repair is the randomization test specified in that document §4.
     focal = "GEVReg-MIDAS-SSVS"
     for bench in MODELS:
         if bench == focal:

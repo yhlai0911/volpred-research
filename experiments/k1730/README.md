@@ -49,9 +49,13 @@ bandwidth under the Harvey (2016) |t| > 3 threshold.
 ## 4. Result — the macro block adds nothing
 
 `GEV-HAR` (no macro at all) scores a *lower* pinball loss than the full
-GEVReg-MIDAS-SSVS. The DM comparison against GEV-HAR favours the benchmark and
-does not clear the Harvey threshold, so the honest reading is "no detectable
-difference", not "macro hurts".
+GEVReg-MIDAS-SSVS. The DM comparison against GEV-HAR is **diagnostic-only,
+not a test**: GEV-HAR nests inside the full model, the loss is pinball and the
+scheme is recursive — a triple with no published inference method
+(`K1730_NESTED_DM_ADJUDICATION.md`, 2026-07-21; the raw DM was retracted as
+inference). The honest reading — "no detectable difference", not "macro
+hurts" — rests on the descriptive loss ordering and the lag-shift placebo
+below, not on any DM p-value.
 
 **Placebo.** The macro history is re-attached to the target at lags
 [52, 104, 156, 208, 260] weeks (non-circular: the head is left undefined and dropped
@@ -137,6 +141,12 @@ OOS sample: 967 weekly blocks, 2008-01-07 → 2026-07-13
 
 *Pinball loss averaged over the τ grid; repo-canonical HAC bandwidth; Harvey (2016) threshold |t| > 3.*
 
+*The **vs GEV-HAR** row is a NESTED comparison (diagnostic-only — its t/p have
+no asymptotic-normal limit under nesting with pinball + recursive estimation;
+retracted as inference per `K1730_NESTED_DM_ADJUDICATION.md`). Non-nested rows
+(Gaussian-MIDAS / HAR-QR / Empirical are separate model families) remain valid
+DM comparisons.*
+
 | Comparison | t | p | HAC lag | acf(1) | Favours | Harvey-sig |
 |---|---:|---:|---:|---:|---|---|
 | vs GEV-HAR | 2.16 | 0.0311 | 10 | 0.168 | benchmark | no |
@@ -169,7 +179,7 @@ OOS sample: 967 weekly blocks, 2008-01-07 → 2026-07-13
 | HAR-QR | 0.0922 / 0.865 | 0.1144 / 0.851 | 0.1321 / 0.798 | 0.1066 / 0.882 |
 | Empirical | 0.2226 / 0.760 | 0.1697 / 0.797 | 0.1637 / 0.875 | 0.1314 / 0.941 |
 
-### Table 5 — Subperiod DM vs GEV-HAR (no macro)
+### Table 5 — Subperiod DM vs GEV-HAR (no macro; diagnostic-only, same nested-inference retraction as Table 2)
 
 | Subperiod | t | p | Favours |
 |---|---:|---:|---|

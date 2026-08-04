@@ -1,63 +1,82 @@
 {
   "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
   "entrypoint": {
     "path": "k1730_gevreg_midas_ssvs.py",
-    "args": [
-      "--workers",
-      "6"
-    ]
+    "args": [],
+    "sha256": "e751a203aaab9477806f59fab5d7b60aa1086fbc2144e85436026109b7c9f972",
+    "size_bytes": 46163
   },
   "canonical_result": "k1730_gevreg_midas_ssvs_results.json",
   "inputs": [
     {
       "path": "experiments/k1730/data/CPI_first_release.csv",
-      "sha256": "920b316a5e4052ef966109157a0b572ba62d4080e0f58561d721ce584e407686"
+      "sha256": "920b316a5e4052ef966109157a0b572ba62d4080e0f58561d721ce584e407686",
+      "size_bytes": 12698
     },
     {
       "path": "experiments/k1730/data/DGS10_daily.csv",
-      "sha256": "f999b1806b97c487a798d23585accc921e208316c2d76cbdff28362728059170"
+      "sha256": "f999b1806b97c487a798d23585accc921e208316c2d76cbdff28362728059170",
+      "size_bytes": 145334
     },
     {
       "path": "experiments/k1730/data/DTB3_daily.csv",
-      "sha256": "1087bf21332727a227a6165c80e23fbfff33b43e76a22968be01e3d874d0936e"
+      "sha256": "1087bf21332727a227a6165c80e23fbfff33b43e76a22968be01e3d874d0936e",
+      "size_bytes": 145378
     },
     {
       "path": "experiments/k1730/data/IP_first_release.csv",
-      "sha256": "c4fc8696a370648f5b68e62eb9d1d7929f428423abf29e39661bad63c2f0851b"
+      "sha256": "c4fc8696a370648f5b68e62eb9d1d7929f428423abf29e39661bad63c2f0851b",
+      "size_bytes": 13146
     },
     {
       "path": "experiments/k1730/data/NFP_first_release.csv",
-      "sha256": "644e7303f22a653921c024fc67698603e81a0b826118ed23dc1e2c37914fd1e6"
+      "sha256": "644e7303f22a653921c024fc67698603e81a0b826118ed23dc1e2c37914fd1e6",
+      "size_bytes": 13606
     },
     {
       "path": "experiments/k1730/data/UNRATE_first_release.csv",
-      "sha256": "afe5a1c4d2afe6f7631eee40b95e2658462cf9f53195d12a8906cd1b32b7d3c1"
+      "sha256": "afe5a1c4d2afe6f7631eee40b95e2658462cf9f53195d12a8906cd1b32b7d3c1",
+      "size_bytes": 11397
     },
     {
       "path": "experiments/k1730/data/VIX_daily.csv",
-      "sha256": "ce980fec2fb68097bd01668ff4d094d1e415c943de4a8d3921ef7c84522c46ea"
+      "sha256": "ce980fec2fb68097bd01668ff4d094d1e415c943de4a8d3921ef7c84522c46ea",
+      "size_bytes": 155965
     },
     {
       "path": "experiments/k1730/data/spy_daily_rv.csv",
-      "sha256": "f46ae392ba916ef26460c4119ebfca4fc7a5936d1956583d9294edf0ab52eaa3"
-    },
-    {
-      "path": "experiments/k1730/k1730_data.py",
-      "sha256": "6e4c2171a48e89b01cab391cf32b93abfc5195fee5835b9a13399c2744a516f5"
-    },
-    {
-      "path": "experiments/k1730/k1730_models.py",
-      "sha256": "ce1fc8c2e38d698ce2730ed414c747d0f5c72eed762a3cbb77eba79269b4f51c"
-    },
-    {
-      "path": "experiments/k1730/k1730_scoring.py",
-      "sha256": "9091c57bc02fcffc673ee36914c019f74b067903760aab60e80e9e8d22607283"
+      "sha256": "f46ae392ba916ef26460c4119ebfca4fc7a5936d1956583d9294edf0ab52eaa3",
+      "size_bytes": 264740
     }
   ],
-  "timeout_seconds": 18000,
+  "outputs": [
+    "k1730_gevreg_midas_ssvs_results.json",
+    "reproduce_commit.json"
+  ],
+  "timeout_seconds": 32101,
   "network": "deny",
   "randomness": {
     "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 10680.5,
+    "recorded_at": "2026-08-04T18:58:31Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
     "seeds": [
       {
         "library": "numpy",
@@ -69,16 +88,27 @@
     "rtol": 1e-09,
     "atol": 1e-12,
     "ignore_pointers": [
-      "/started_utc",
-      "/finished_utc",
+      "/created_at",
       "/runtime_seconds",
-      "/placebo_test/runtime_seconds"
+      "/run_utc",
+      "/runtime_env"
     ],
     "ignore_reasons": {
-      "/started_utc": "wall-clock stamp",
-      "/finished_utc": "wall-clock stamp",
-      "/runtime_seconds": "wall-clock duration; depends on --workers and host load",
-      "/placebo_test/runtime_seconds": "wall-clock duration of the parallel placebo arms"
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
     }
+  },
+  "canonical_result_identity": {
+    "path": "k1730_gevreg_midas_ssvs_results.json",
+    "sha256": "cf7298c8eeb0fedf7a7dcf020d7740098658aceaf48925c80506118397baab0c",
+    "size_bytes": 147911
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "801d980e3494753f2253591aef9a7a964b9af178c658eaf47764dfc2454658ea",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": []
   }
 }
