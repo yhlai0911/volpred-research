@@ -972,7 +972,12 @@ def _supersede_subsumed(path: Path, *, keep_id: str, paths: set[str],
 
 # ── mechanical close condition ───────────────────────────────────────────────
 
-def _git_lines(repo_root: Path, *args: str, runner=subprocess.run) -> list[str]:
+def _git_lines(
+    repo_root: Path,
+    *args: str,
+    runner=subprocess.run,
+    ok_returncodes: tuple[int, ...] = (0,),
+) -> list[str]:
     try:
         proc = runner(
             ["git", "-C", str(repo_root), *args],
@@ -981,7 +986,7 @@ def _git_lines(repo_root: Path, *args: str, runner=subprocess.run) -> list[str]:
     except (subprocess.SubprocessError, OSError) as exc:
         warn("foreign_incident", f"git {args[0]} 失敗 ({exc}) — 視為無覆蓋證據")
         return []
-    if proc.returncode != 0:
+    if proc.returncode not in ok_returncodes:
         warn("foreign_incident",
              f"git {args[0]} rc={proc.returncode} — 視為無覆蓋證據",
              err=(proc.stderr or "")[-200:])
@@ -1085,10 +1090,12 @@ def referenced_by_tracked(repo_root: Path, paths: Iterable[str], *,
             # pathspec 限定在碼與設定：doc 或 next_tasks.json 提到一個檔名，只代表有人
             # 寫過它，不代表有人在跑它。把那種提及當活性證據，等於讓任何被寫進舊任務
             # 描述的殘留檔永久免疫於清除 —— 分類器會很少說 dead，也就等於沒有分類。
+            # git grep exits 1 on "no match" — a normal negative result, not a
+            # probe failure; only rc>=2 means the evidence is actually missing.
             hits = _git_lines(repo_root, "grep", "-l", "-F", needle, "--",
                               "*.py", "*.sh", "*.js", "*.ts", "*.toml", "*.cfg",
                               "*.json", ":(exclude)storage/**", ":(exclude)docs/**",
-                              runner=runner)
+                              runner=runner, ok_returncodes=(0, 1))
             # 自己引用自己不算；一個 tracked 檔提到自己只表示它被提交了。
             other = [h for h in hits if h != rel]
             if other:
