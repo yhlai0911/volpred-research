@@ -228,6 +228,16 @@ storage/ops/termination_intents.jsonl.lock
 storage/ops/producer_custody_receipts.jsonl
 storage/ops/producer_custody_receipts.jsonl.lock
 
+# Workspace execution receipts. PHASE-Z re-committed this ledger on every fire
+# and it grew without bound: on 2026-08-04 it reached 129 MiB and GitHub's
+# 100 MiB hard limit rejected every push, stranding six commits with an alert
+# that blamed auth and network. 93.8% of the bytes were one inline `checkpoint`
+# field, now capped at the single writer (workspace.py::_append_receipt).
+# It is host-local runtime audit state, like the custody receipts above: kept on
+# disk, read by the supervisor, and not something a fresh clone needs.
+storage/ops/dispatch_workspace_receipts.jsonl
+storage/ops/dispatch_workspace_receipts.jsonl.lock
+
 # Editor swap/temp droppings（2026-07-20：JetBrains/AFP 型 `.!<pid>!<name>` 曾在工作區卡 13 班，
 # 每班都被 PHASE-Z 重數一次成「無主檔案」）
 .!*!*

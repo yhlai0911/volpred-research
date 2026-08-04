@@ -45,6 +45,7 @@ from __future__ import annotations
 
 import errno
 import fcntl
+import hashlib
 import json
 import logging
 import os
@@ -1311,15 +1312,63 @@ def _task_binding_missing(workspace: dict[str, Any]) -> bool:
     )
 
 
+#: Per-receipt ceiling. The ledger's own numbers set it: median record is 645 B
+#: and p90 is 807 B, so 8 KiB leaves an order of magnitude of headroom for
+#: ordinary events while refusing the outliers that actually caused harm.
+_MAX_RECEIPT_BYTES = 8 * 1024
+
+#: Fields below this size are never worth eliding; keeps the walk cheap.
+_ELIDE_MIN_FIELD_BYTES = 512
+
+
+def _elide_oversized_fields(record: dict[str, Any]) -> dict[str, Any]:
+    """Shrink a receipt to the ceiling by replacing its fattest values.
+
+    This ledger is tracked in Git and committed by PHASE-Z on every fire, so an
+    unbounded record is not a local disk problem — it is a repository problem.
+    On 2026-08-04 it reached 129 MiB and GitHub's 100 MiB hard limit rejected
+    every push, stranding six commits. 93.8% of those bytes were one field:
+    `checkpoint`, where 397 records out of 17,897 carried 125 MB between them.
+
+    An audit trail must not silently shed evidence, so an elided value is
+    replaced by a stub that records what was dropped, how big it was, and its
+    sha256 — the receipt still proves the event happened and stays detectably
+    incomplete, rather than quietly becoming a lie by omission.
+    """
+    trimmed = dict(record)
+    elided: list[dict[str, Any]] = []
+    while len(json.dumps(trimmed, ensure_ascii=False).encode("utf-8")) > _MAX_RECEIPT_BYTES:
+        candidates = [
+            (len(json.dumps(v, ensure_ascii=False, default=str).encode("utf-8")), k)
+            for k, v in trimmed.items()
+            if k not in {"receipt_id", "at", "event", "kind", "job_id", "task_id"}
+        ]
+        candidates = [c for c in candidates if c[0] >= _ELIDE_MIN_FIELD_BYTES]
+        if not candidates:
+            break  # nothing left worth dropping; write it slightly over rather than lose the event
+        size, key = max(candidates)
+        raw = json.dumps(trimmed[key], ensure_ascii=False, default=str).encode("utf-8")
+        trimmed[key] = {
+            "_elided": True,
+            "reason": "receipt_size_ceiling",
+            "original_bytes": size,
+            "sha256": hashlib.sha256(raw).hexdigest(),
+        }
+        elided.append({"field": key, "bytes": size})
+    if elided:
+        trimmed["_elided_fields"] = elided
+    return trimmed
+
+
 def _append_receipt(repo_root: Path, payload: dict[str, Any]) -> bool:
     """Durably append one workspace event; return whether fsync succeeded."""
     dest = Path(repo_root) / RECEIPTS_RELPATH
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
-        line = json.dumps(
-            {"receipt_id": uuid.uuid4().hex, "at": _now_iso(), **payload},
-            ensure_ascii=False,
-        )
+        record = {"receipt_id": uuid.uuid4().hex, "at": _now_iso(), **payload}
+        if len(json.dumps(record, ensure_ascii=False).encode("utf-8")) > _MAX_RECEIPT_BYTES:
+            record = _elide_oversized_fields(record)
+        line = json.dumps(record, ensure_ascii=False)
         with dest.open("a", encoding="utf-8") as fh:
             fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
             try:
