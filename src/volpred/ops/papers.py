@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import sys
 from datetime import datetime, timezone
@@ -23,6 +24,7 @@ from ..config.runtime import (
     iter_frontend_paper_public_dirs,
 )
 from .common import project_path
+from .diagnostics import warn
 from .scheduled_writer_commit import (
     commit_owned_outputs,
     dirty_paths_before_write,
@@ -256,27 +258,16 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
 
     metrics: dict[str, int | None] = {}
 
-    # Find the current main tex file. 2026-06-11 fix (leverage-direction
-    # incident): a fixed version-priority list picked the STALE main_v3.tex
-    # over the actively-edited main.tex, pushing an outdated abstract (with
-    # superseded claims) to the live site. Among existing candidates, prefer
-    # the most recently modified one — the file the main thread actually
-    # edits and compiles is the current version, regardless of its suffix.
-    main_candidates = [paper_dir / n for n in
-                       ["main_v4.tex", "main_v3.tex", "main_v2.tex", "main.tex"]]
-    body_candidates = [paper_dir / n for n in
-                       ["body.tex", "body_v5.tex", "body_v4.tex", "body_v3.tex"]]
-    mains = [c for c in main_candidates if c.exists()]
-    bodies = [c for c in body_candidates if c.exists()]
-    if mains:
-        # main* wrappers carry \title/\begin{abstract}; pick the most recently
-        # edited one (NOT the body file, whose mtime is usually newer but which
-        # lacks the abstract environment — picking it left the stale Supabase
-        # abstract untouched).
-        tex = max(mains, key=lambda c: c.stat().st_mtime)
-    elif bodies:
-        tex = max(bodies, key=lambda c: c.stat().st_mtime)
-    else:
+    # The manuscript is whatever the paper declares. Metrics and the uploaded
+    # PDF must come from the same file, or Supabase shows one version's abstract
+    # beside another version's PDF -- which is how the 2026-06-11 and 2026-08-04
+    # leverage-direction incidents reached readers. See
+    # resolve_canonical_manuscript for why identity stopped being inferred.
+    try:
+        tex, _pdf = resolve_canonical_manuscript(paper_dir)
+    except CanonicalManuscriptError as exc:
+        # Fail closed: no metrics beats metrics attributed to the wrong version.
+        warn("paper_metrics", str(exc), paper=paper_dir.name)
         return metrics
 
     content = tex.read_text(errors="ignore")
@@ -463,21 +454,108 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
     return metrics
 
 
-def _select_current_main_artifact(paper_dir: Path, suffix: str) -> Path | None:
-    """Pick the current main artifact by mtime, not version suffix.
+CANONICAL_DECL_NAME = "canonical.json"
 
-    Some paper folders keep stale `main_v3.*` files beside actively edited
-    `main.*` files. Suffix priority can therefore upload an old PDF while
-    metrics come from the current TeX source.
-    """
-    # Version-agnostic: a hardcoded main_v4/v3/v2 list silently uploaded stale
-    # PDFs the day main_v5 appeared (2026-07-19 vt-trend-following incident).
-    # Match main{suffix} and main_v<N>{suffix} for ANY N, then pick by mtime.
-    pattern = re.compile(rf"main(_v\d+)?{re.escape(suffix)}$")
-    existing = [p for p in paper_dir.glob(f"main*{suffix}") if pattern.fullmatch(p.name)]
-    if not existing:
+
+class CanonicalManuscriptError(RuntimeError):
+    """A paper folder does not say which file is the manuscript."""
+
+
+def _decl_path(paper_dir: Path) -> Path:
+    return Path(paper_dir) / CANONICAL_DECL_NAME
+
+
+def read_canonical_declaration(paper_dir: Path) -> dict[str, Any] | None:
+    """Return the paper's canonical declaration, or None when undeclared."""
+    path = _decl_path(paper_dir)
+    if not path.is_file():
         return None
-    return max(existing, key=lambda candidate: candidate.stat().st_mtime)
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise CanonicalManuscriptError(
+            f"{path} is unreadable: {type(exc).__name__}: {exc}. A corrupt "
+            "declaration must be repaired, never silently guessed around."
+        ) from exc
+    if not isinstance(payload, dict) or not str(payload.get("main_tex") or "").strip():
+        raise CanonicalManuscriptError(
+            f"{path} carries no 'main_tex'. Declare the manuscript entry point."
+        )
+    return payload
+
+
+def resolve_canonical_manuscript(paper_dir: Path) -> tuple[Path, Path]:
+    """Return (main_tex, main_pdf) for a paper. Declared, never inferred.
+
+    THREE-STRIKE REFACTOR (2026-08-04). Three times a stale `main_v*` artifact
+    won the selection and reached readers:
+
+    * 2026-06-11 leverage-direction -- a fixed suffix-priority list preferred
+      main_v3.tex over the actively edited main.tex, publishing a superseded
+      abstract.
+    * 2026-07-19 vt-trend-following -- the hardcoded v4/v3/v2 list uploaded a
+      stale PDF the day main_v5 appeared.
+    * 2026-08-04 leverage-direction again -- on 2026-07-01 an owner-authorised
+      adjudication ruled main.tex+body.tex canonical and `git mv`-ed the v3/v2
+      lines into `_archived/`. It moved only the **.tex** files. `main_v3.pdf`
+      stayed behind, so mtime selection kept choosing it, and the PDF readers
+      downloaded stayed byte-identical to the version the repo had explicitly
+      declared obsolete -- for 34 days, across a scheduled refresh on 07-20.
+
+    Each previous fix replaced one guess with a better guess. The structural
+    fault is guessing at all: an explicit adjudication existed in
+    `_archived/README.md` and no resolver could see it. So identity is now
+    **declared** in `paper/<id>/canonical.json`, and this is the only function
+    allowed to answer "which file is this paper".
+
+    Only `main_tex` is declared. The PDF is derived from the same stem, which
+    makes the tex/pdf disagreement structurally impossible -- vt-insurance-cost
+    was selecting `main_v1.tex` for metrics while uploading `main.pdf`, built
+    from a different source.
+
+    Fails closed with the remedy printed, never falls back to a guess: a wrong
+    manuscript reaching a journal or a reader is worse than a stopped pipeline.
+    """
+    paper_dir = Path(paper_dir)
+    decl = read_canonical_declaration(paper_dir)
+    if decl is None:
+        raise CanonicalManuscriptError(
+            f"{paper_dir.name} has no {CANONICAL_DECL_NAME}. Declare the "
+            f"manuscript entry point:\n"
+            f'  {{"main_tex": "main.tex", "reason": "<who ruled, and when>"}}\n'
+            f"Write it to {_decl_path(paper_dir)}. Identity is declared, not "
+            "inferred -- see resolve_canonical_manuscript."
+        )
+    tex = paper_dir / str(decl["main_tex"]).strip()
+    if not tex.is_file():
+        raise CanonicalManuscriptError(
+            f"{paper_dir.name}/{CANONICAL_DECL_NAME} declares {tex.name}, which "
+            f"does not exist. Fix the declaration or restore the file."
+        )
+    pdf = tex.with_suffix(".pdf")
+    if not pdf.is_file():
+        raise CanonicalManuscriptError(
+            f"{paper_dir.name} declares {tex.name} but {pdf.name} is not built. "
+            f"Build it so the published PDF comes from the declared source:\n"
+            f"  cd {paper_dir} && /Library/TeX/texbin/xelatex "
+            f"-interaction=nonstopmode {tex.name}   # twice, to resolve refs"
+        )
+    return tex, pdf
+
+
+def _select_current_main_artifact(paper_dir: Path, suffix: str) -> Path | None:
+    """Deprecated shim over the declared resolver. Do not add callers.
+
+    Kept only so existing call sites keep their `Path | None` contract while
+    they migrate. New code calls `resolve_canonical_manuscript`, which raises
+    with a remedy instead of returning None.
+    """
+    try:
+        tex, pdf = resolve_canonical_manuscript(paper_dir)
+    except CanonicalManuscriptError as exc:
+        warn("paper_canonical", str(exc), paper=Path(paper_dir).name)
+        return None
+    return tex if suffix == ".tex" else pdf if suffix == ".pdf" else None
 
 
 def sync_all_papers(
@@ -646,12 +724,13 @@ def update_paper_full(
     # 1. Auto-detect metrics
     metrics = _count_tex_metrics(paper_dir)
 
-    # 2. Find current PDF by mtime, matching _count_tex_metrics' current-TeX
-    # semantics. Do not prefer stale versioned PDFs over fresh main.pdf.
-    pdf_path = _select_current_main_artifact(paper_dir, ".pdf")
-
-    if not pdf_path:
-        raise RuntimeError(f"No PDF found in {paper_dir}")
+    # 2. The PDF is the one derived from the declared manuscript, so it is
+    # necessarily the same version _count_tex_metrics just read. Let the
+    # resolver's own error through: "No PDF found" told an operator nothing,
+    # while the resolver names the missing declaration or prints the build
+    # command. sync_all_papers records this per paper and moves on, so a paper
+    # awaiting adjudication never blocks the others.
+    _tex, pdf_path = resolve_canonical_manuscript(paper_dir)
 
     # 3. Upload PDF
     paper = upload_paper_pdf(paper_id=paper_id, file_path=str(pdf_path))

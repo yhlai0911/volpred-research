@@ -51,3 +51,20 @@ git mv _archived/*.tex .
 - Line 508 `paper_dir.glob("*.tex")` non-recursive：`_archived/*.tex` 不會被 mtime pick 抓到。
 
 **結論**：封存 v3/v2 到 `_archived/` 子目錄後，code 完全不需要改；mtime-based canonical pick 也不會誤選。
+
+## 2026-08-04 補齊：PDF 也搬進來了
+
+2026-07-01 的裁定只 `git mv` 了 `.tex`，`main_v2.pdf` / `main_v3.pdf` 留在論文資料夾。
+`volpred.ops.papers._select_current_main_artifact` 當時用 mtime 在 `main*.pdf` 裡挑，
+於是它一直挑中 `main_v3.pdf` —— **讀者從 2026-07-01 到 2026-08-04 下載到的
+`leverage-direction-matters.pdf`，逐位元等於這份已被裁定作廢的 v3**（70 頁，
+sha256 前綴 `95996710c8365594`），期間 2026-07-20 的排程 refresh 也照樣挑中它。
+
+v3 是 Stage 1.2 之前的 two-contribution 舊主文，含已被 Stage 1.3 刻意 offload 到
+supplementary 的旁支（VaR compliance、market timing、HAR paradox、time-zone、
+commodity extension）。也就是說讀者讀到的是研究線刻意收斂掉的內容。
+
+根因不是「漏搬一個檔」，是 **canonical 身分靠推論而非宣告** —— 這份裁定就寫在本檔裡，
+而當時沒有任何 resolver 看得到它。已改為宣告式：`paper/<id>/canonical.json` 宣告
+`main_tex`，PDF 由同 stem 推導（tex 與 pdf 不可能各指一版），唯一 owner =
+`volpred.ops.papers.resolve_canonical_manuscript`，未宣告即 fail closed 並印出補救指令。

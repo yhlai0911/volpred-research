@@ -1,8 +1,8 @@
 # Paper 1: Leverage Direction Matters — Asymmetric Volatility and the Cross-Section of VT Alpha
 
 **Target Journal**: Journal of Banking and Finance (JBF)
-**Status**: 🟢 **REVISION COMPLETE — v12 確認輪通過（2026-06-11 12:00）**：v11 5 HIGH 全修 + 確認輪殘留（L187/L513/Table 3 11-row）全修；reproduce gate GREEN（171 MATCH / 0 MISMATCH / 23 NOTE, 100%）；63 頁新版已上線。下一步 = 投稿準備 spot-check（v13 輕量）+ R1-track MEDIUM（multiple-testing 段/BH 溯源/tab:vt 統一窗）。v11 round（latex-academic-reviewer + citation-verifier 正式雙 skill）找到的 5 HIGH **已全部處置**：V11-1 L184 GLD 散文 ✅（v12 sweep 對齊 K903）；V11-2 Table 2 混血 vintage ✅（全 7 列換 K903 canonical + caption 全表揭露 + BTC 敘事重寫 t=+2.88）；V11-3 SPY 2025 散文 ✅；V11-4 GLD γ 三版 ✅（L405 標 2010-2017 in-sample window 揭露）；V11-5 reproduce gate ✅（reproduce.py 重寫對齊 v12 7-table K903 → **green 100.0%**，161 MATCH / 0 MISMATCH / 23 NOTE；tab:var_ortho GARCH+Normal Kupiec p 0.64→0.40 修正）。citation：57 條全驗證，hood2025/nelson2025/xu2024 確認真實存在（v11 citation_check_v1.md）；bali2016 捏造 DOI 已刪。band 重推 (0.009,0.072)、`\label{sec:model_selection}` 已補。**下一步**：v12 review round（雙 skill 複審確認 0 HIGH）通過後始可考慮投稿；殘 MEDIUM（multiple-testing 段、BH 溯源、tab:vt 統一窗重算）走 R1-track。完整軌跡：`review_history/v11/` + `review_history/audit_2026-06-10/fix_log.md`。｜Reproduce (2026-06-11 current): 161 MATCH / 0 MISMATCH / 23 NOTE，100.0%，green。
-**Pages**: 48 | **Citations**: 54
+**Status**: 🟢 **REVISION COMPLETE — v12 確認輪通過（2026-06-11 12:00）**：v11 5 HIGH 全修 + 確認輪殘留（L187/L513/Table 3 11-row）全修；reproduce gate GREEN（171 MATCH / 0 MISMATCH / 23 NOTE, 100%）；新版已上線（2026-08-04 從 canonical main.tex 重建後為 44 頁；先前記載的 63/48/43 皆為舊值或錯值）。下一步 = 投稿準備 spot-check（v13 輕量）+ R1-track MEDIUM（multiple-testing 段/BH 溯源/tab:vt 統一窗）。v11 round（latex-academic-reviewer + citation-verifier 正式雙 skill）找到的 5 HIGH **已全部處置**：V11-1 L184 GLD 散文 ✅（v12 sweep 對齊 K903）；V11-2 Table 2 混血 vintage ✅（全 7 列換 K903 canonical + caption 全表揭露 + BTC 敘事重寫 t=+2.88）；V11-3 SPY 2025 散文 ✅；V11-4 GLD γ 三版 ✅（L405 標 2010-2017 in-sample window 揭露）；V11-5 reproduce gate ✅（reproduce.py 重寫對齊 v12 7-table K903 → **green 100.0%**，171 MATCH / 0 MISMATCH / 23 NOTE；tab:var_ortho GARCH+Normal Kupiec p 0.64→0.40 修正）。citation：57 條全驗證，hood2025/nelson2025/xu2024 確認真實存在（v11 citation_check_v1.md）；bali2016 捏造 DOI 已刪。band 重推 (0.009,0.072)、`\label{sec:model_selection}` 已補。**下一步**：v12 review round（雙 skill 複審確認 0 HIGH）通過後始可考慮投稿；殘 MEDIUM（multiple-testing 段、BH 溯源、tab:vt 統一窗重算）走 R1-track。完整軌跡：`review_history/v11/` + `review_history/audit_2026-06-10/fix_log.md`。｜Reproduce (2026-06-11 current): 171 MATCH / 0 MISMATCH / 23 NOTE，100.0%，green。
+**Pages**: 44 | **Citations**: 57
 
 ## Data Sources
 - SPY, QQQ, GLD, TLT, EEM, BTC-USD, IWM, SLV: yfinance
@@ -41,7 +41,7 @@ paper folder (JBF submission hard requirement). Entry points:
 - `results/README.md` — canonical result-JSON index (where each table number sources from)
 - `experiments.md` — table/figure → K-experiment K-id mapping (canonical)
 - `experiments/` — paper-folder shim copies of K799/K802/K824v2/K902 + HM stub
-- `reproduce.py` / `reproduce_report.json` — paper-wide claim verifier (current gate: 161 MATCH / 0 MISMATCH / 23 NOTE, green)
+- `reproduce.py` / `reproduce_report.json` — paper-wide claim verifier (current gate: 171 MATCH / 0 MISMATCH / 23 NOTE, green)
 
 ## Known Issues (from R1)
 - ~~C1: HM gamma internal contradiction (Sec 4.7 vs Sec 5.4)~~ **RESOLVED 2026-04-19** via K1256 3-spec disambiguation (`pure_vt_full` §4.7, `pure_vt_high_vix` §4.7 VIX>25 conditional, `hybrid_vt_full` §5.4); body_v3.tex L433 footnote documents the three distinct regressions; `reproduce.py` now scores each spec as DIVERGENT_SAME_SIGN (NOTE tier) pending L11 errata path (c) for the 17-55% magnitude divergence vs paper.

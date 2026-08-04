@@ -294,6 +294,44 @@ schedule 現綁回 wrapper execution log；單一 `job_liveness` owner 同時支
 
 ## M. Source-of-truth drift / registry / supabase / 系列身分
 
+**規則（reusable entity 的身分只能宣告，不能推論，2026-08-04 3-STRIKE 後補）**：
+一個跨 session 重複使用的實體（哪個 `main*.tex` 是這篇論文、哪個 series、哪個 registry
+條目），**它的身分必須有一個機械可讀的宣告**；任何「由檔名版本序、mtime、glob 順序、
+標題文字推出來」的答案都是猜測，而猜測會在**產物集合被部分變更時**默默指向舊版。
+**推論器看不見人做的裁定**：2026-07-01 的 canonical 裁定白紙黑字寫在
+`_archived/README.md`，而沒有任何 resolver 讀得到它。未宣告一律 **fail closed 並印出
+補救指令**，不得退回猜測 —— 錯的手稿送到讀者或期刊，比停下來嚴重得多。
+**機械 owner**：`volpred.ops.papers.resolve_canonical_manuscript`
+＋ 每篇 `paper/<id>/canonical.json`；gate `tests/test_canonical_manuscript.py`。
+
+**代表 incident**：
+- 2026-08-04 **3-STRIKE：讀者下載到 repo 已明確裁定作廢的論文版本，34 天**。
+  2026-07-01 老闆 email 授權下做過正式裁定（Codex read-only，170K tokens）：
+  leverage-direction 的 canonical = `main.tex + body.tex`，v3/v2 兩條 revision line
+  `git mv` 進 `_archived/`。裁定同步了 `experiments.md`、`submission_package.md` 與
+  `papers.py` 的 .tex 選擇 —— **但 `git mv` 只搬了 `.tex`，`main_v3.pdf` 留在原資料夾**。
+  `_select_current_main_artifact` 用 mtime 在 `main*.pdf` 裡挑，於是持續挑中它；線上
+  `leverage-direction-matters.pdf` 與被封存的 `main_v3.pdf` **逐位元相同**
+  （sha256 前綴 `95996710c8365594`，70 頁），2026-07-20 的排程 refresh 跑過也照樣挑中。
+  v3 是 Stage 1.2 之前的 two-contribution 舊主文，含 Stage 1.3 已刻意 offload 到
+  supplementary 的旁支（VaR compliance、market timing、HAR paradox、time-zone、
+  commodity extension）—— 讀者讀到的是研究線刻意收斂掉的內容。
+  **前兩擊都是「換一種猜法」**：2026-06-11 leverage-direction（固定 suffix 優先序挑中
+  舊 main_v3.tex，把過期 abstract 推上線）→ 2026-07-19 vt-trend-following（硬編
+  v4/v3/v2 清單，在 main_v5 出現當天上傳舊 PDF）。三層重構：**身分改宣告**
+  （`canonical.json`）、**PDF 由宣告的 tex 同 stem 推導**（tex 與 pdf 不可能各指一版 ——
+  vt-insurance-cost 當時正拿 `main_v1.tex` 算 metrics 卻上傳 `main.pdf`）、**未宣告即
+  fail closed**。全量盤點 13 篇：4 篇有身分缺陷（leverage-direction 發布已封存版、
+  taiwan-vt 與 volatility-absorption 線上檔與選中檔皆不符、vt-insurance-cost tex/pdf 分裂）。
+  8 篇證據一致者立即宣告；**5 篇證據互相矛盾者刻意留白**（`vix-sufficiency` 的
+  paper-guide 指向一個不存在的檔、`volatility-absorption` guide 與 reproduce 打架、
+  `vt-trend-following` 三來源三答案、另兩篇無 `main*.tex`）—— 留白 = 響亮 fail closed，
+  優於靜默猜測，且 `sync_all_papers` 逐篇 try/except 使單篇未裁定不阻塞其他篇（無死局）。
+  順帶修正：leverage-direction 從 canonical 源重建為 **44 頁**（先前記載的 60/48/63/43
+  全錯），`btc-gas-negative` 補建缺失的 PDF，taiwan-vt 的殘留 `main_v2.pdf` 一併退役。
+  9 個新 gate + 5 個釘住舊 mtime 契約的測試改寫成新契約（不留兩套選擇規則）；
+  break-then-verify：把 resolver 改回猜測 → 1 failed — Q3
+
 **（2026-07-16 追加，歸本 class：dual task queue + 雙回覆）**
 - 2026-07-16 **3-STRIKE 級結構修復（老闆直接下令「該單一關口的就單一關口」）**：`volpred ops assign` 寫入的 `storage/ops/tasks/` queue **無任何 dispatcher 消費**（唯一 reader=手動 claim-next，無人跑）→ 16 任務黑洞 5 天，含結論已推翻仍在排隊的 K1695 舊敘事文章（執行=發錯誤內容）；同晚兩個並行互動 session 對老闆同一則 Telegram（msg877）**矛盾雙回覆**（msg879 排 credit→vol 研究 vs msg880 判 aggregate 版全 NULL），本 session 亦違反 claim-first（先做事先回覆最後才 claim）。**修**：(a) assign 重定向為 next_tasks.json thin wrapper（`append_next_task`，flock）；(b) 存量 17 個非終態 triage（4 終態含 1 deprecated 有害任務 + 13 遷入 canonical queue，credit 題合併雙方判斷成單一 brief）；(c) reply-right guard：`telegram-send --reply-to-task` 對已完成/他人持有任務拒發（break-then-verify 過）；(d) 機械 gate `scripts/tests/test_ops_tasks_receipts_only.py`（先 FAIL 於存量、遷移後轉綠，證明會咬）。設計：`docs/refactor_plan_single_gateway_task_system.md` — Q3
 
