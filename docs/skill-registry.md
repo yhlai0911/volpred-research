@@ -29,6 +29,7 @@ supervisor dispatch expectation 與 architecture contract 的機械唯一來源�
 | `lazypack-infographic` | cross-cutting | publishing | support |
 | `member-questions` | leaf | member | `member-qa` |
 | `memory-health` | leaf | memory | `memory-health` |
+| `owner-first` | cross-cutting | ops | support |
 | `paper-review-cycle` | leaf | paper | `paper-review-round` |
 | `paper-stage-classifier` | compatibility | paper | support |
 | `paper-submission-pipeline` | orchestrator | paper | `paper-submission` |
