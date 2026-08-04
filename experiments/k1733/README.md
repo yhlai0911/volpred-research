@@ -240,16 +240,32 @@ Companions: OOS R² increment on the log scale, and a stationary-bootstrap 90% i
 
 ### Future-noise causal probe
 
-Every OHLC bar strictly after **2020-06-30** is replaced by an N(0, 0.005²) random walk (0.5%
+Every OHLC bar **on or after 2020-06-30** is replaced by an N(0, 0.005²) random walk (0.5%
 daily), and the whole pipeline is rebuilt. Anything stamped on or before the cut must be
 **bit-identical**.
 
-| Stage | Max absolute deviation pre-cut |
+**The boundary is inclusive (`>= cut`), and that is the point.** A forecast at origin
+`i ≤ cut` may legally touch dates up to `i − 1`, so corrupting from the cut inclusive leaves
+every legal input untouched while poisoning the first illegal one. The first version of this
+probe corrupted only `> cut`, which **cannot** catch a predictor that reads its own same-day
+bar or an embargo that is off by one day: at `i = cut` both read bar `cut`, which that version
+left clean. Codex review caught this and it was fixed before the final run.
+
+Second hardening from the same review: an unmeasurable comparison is now a **violation**, not
+a silent zero. `_probe_deviation` fails on an index mismatch, a changed missingness pattern, too
+few finite cells to constitute a test, or a shape mismatch — a probe that reports 0.0 because it
+compared nothing certifies only its own blindness. Structurally missing history (PAVE before
+2017) is legal and present in both panels, so masks are compared and only finite cells are
+differenced.
+
+| Stage | Max absolute deviation |
 |---|---|
-| log-volatility panel | **0.0** |
-| M2 / M3 forecasts, log scale, 6 cells × 1383 origins | **0.0** |
-| M2 / M3 forecasts, variance level (incl. the σ² conversion) | **0.0** |
-| strategy weights (own / market / cross-basket gates) | **0.0** |
+| the corruption itself, **post**-cut (sanity: the noise must bite) | **5.262** |
+| log-volatility panel, pre-cut | **0.0** |
+| all 5 ladder design matrices, 6 cells × 3325 pre-cut rows | **0.0** |
+| all 5 rungs' forecasts, log scale, 6 cells × 1383 origins | **0.0** |
+| all 5 rungs' forecasts, variance level (incl. the σ² conversion) | **0.0** |
+| every strategy weight **and** z-score (`w_bh w_own w_mkt w_cross z_own z_mkt z_cross`) | **0.0** |
 
 `violations = []`, `n_violations = 0`, verdict `CLEAN`.
 

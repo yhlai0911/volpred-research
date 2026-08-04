@@ -509,9 +509,19 @@ def circular_block_indices(n: int, block: int, rng: np.random.Generator) -> np.n
 def stationary_bootstrap_mean_ci(
     x: np.ndarray, block: int, n_boot: int, rng: np.random.Generator, alpha: float = 0.10
 ) -> dict:
-    """Percentile CI for the mean of a serially dependent series."""
+    """Percentile CI for the mean of a serially dependent series.
+
+    Non-finite entries are ASSERTED away rather than filtered: dropping them
+    would splice together observations that are not adjacent in time and quietly
+    misstate the dependence the block length is there to preserve. Every caller
+    here passes an already-masked, contiguous evaluation vector, so the assertion
+    is the honest form of the same guard. Codex review, 2026-07-30.
+    """
     x = np.asarray(x, dtype=float)
-    x = x[np.isfinite(x)]
+    assert np.isfinite(x).all(), (
+        "stationary bootstrap received non-finite input; filtering it here would "
+        "collapse time gaps — mask upstream instead"
+    )
     n = len(x)
     if n < 20:
         return {"mean": float(np.mean(x)) if n else None, "ci_low": None, "ci_high": None,
@@ -744,8 +754,11 @@ def run_network(name: str, log_vol: pd.DataFrame, cfg: dict, n_boot: int,
                 "boot_mean": float(d.mean()),
                 "ci_low_90": float(np.quantile(d, 0.05)),
                 "ci_high_90": float(np.quantile(d, 0.95)),
-                "p_one_sided_gt0": float(np.mean(d <= 0.0)),
-                "p_one_sided_lt0": float(np.mean(d >= 0.0)),
+                # (1 + count) / (B + 1): a percentile-bootstrap tail probability
+                # should never be reported as exactly zero — B replicates cannot
+                # evidence a p below 1/(B+1). Codex review, 2026-07-30.
+                "p_one_sided_gt0": float((1 + int(np.sum(d <= 0.0))) / (n_boot + 1)),
+                "p_one_sided_lt0": float((1 + int(np.sum(d >= 0.0))) / (n_boot + 1)),
                 "boot_sign_stability": float(np.mean(np.sign(d) == np.sign(point))),
             }
         )
@@ -757,13 +770,30 @@ def run_network(name: str, log_vol: pd.DataFrame, cfg: dict, n_boot: int,
     # The complementary one-sided test. H2 asks whether the physical/credit leg
     # transmits INTO the AI leg; if the estimates come out negative, the mirror
     # question ("does the AI leg transmit into the physical/credit leg?") is a
-    # real, testable finding — but it was NOT pre-specified, so it is FDR'd in
-    # its own family and reported as post-hoc throughout.
-    rej_r, p_adj_r, _, _ = multipletests([r["p_one_sided_lt0"] for r in pair_rows],
-                                         alpha=FDR_Q, method="fdr_bh")
-    for r, rj, pa in zip(pair_rows, rej_r, p_adj_r):
-        r["p_fdr_bh_reverse"] = float(pa)
-        r["fdr_significant_reverse"] = bool(rj)
+    # real, testable finding — but it was NOT pre-specified.
+    #
+    # It is therefore corrected over the POOLED directional search: all 2 x n_pairs
+    # one-sided tests in one Benjamini-Hochberg family. Giving the reverse direction
+    # its own family after inspecting the sign would not control the search that
+    # actually happened — the direction was chosen by looking. The pre-specified H2
+    # family stays separate precisely because its direction was fixed in advance.
+    # Codex review, 2026-07-30.
+    pooled_p = ([r["p_one_sided_gt0"] for r in pair_rows]
+                + [r["p_one_sided_lt0"] for r in pair_rows])
+    rej_pool, p_adj_pool, _, _ = multipletests(pooled_p, alpha=FDR_Q, method="fdr_bh")
+    n_p = len(pair_rows)
+    for k2, r in enumerate(pair_rows):
+        r["p_fdr_bh_forward_pooled"] = float(p_adj_pool[k2])
+        r["fdr_significant_forward_pooled"] = bool(rej_pool[k2])
+        r["p_fdr_bh_reverse"] = float(p_adj_pool[n_p + k2])
+        r["fdr_significant_reverse"] = bool(rej_pool[n_p + k2])
+    pooled_family = {
+        "n_tests": len(pooled_p),
+        "composition": "both one-sided directions for every pair, in ONE BH family",
+        "why": ("H2R's direction was chosen after seeing the sign; correcting it in "
+                "its own family would not control the directional search"),
+        "n_rejected": int(sum(rej_pool)),
+    }
 
     net_rows = {
         a: {
@@ -902,8 +932,17 @@ def run_network(name: str, log_vol: pd.DataFrame, cfg: dict, n_boot: int,
             "p_value_vs_independent_ar_null": p_h1,
             "n_null": int(n_null),
             "criterion": "block-bootstrap / surrogate p < 0.05",
+            "null_scope_caveat": (
+                "The surrogate removes cross-series LINEAR dynamics, contemporaneous "
+                "correlation and any cross-sectional conditional heteroskedasticity "
+                "together. So the floor bounds 'no cross-asset dependence of any of "
+                "those kinds', which is what a Diebold-Yilmaz TCI aggregates — but it "
+                "cannot attribute the excess to lagged transmission specifically. "
+                "Codex review, 2026-07-30."
+            ),
         },
         "h2_pairwise": pair_rows,
+        "pooled_directional_fdr_family": pooled_family,
         "net_directional": net_rows,
         "ordering_robustness": ordering,
         "subperiods": subperiods,
@@ -1311,17 +1350,24 @@ def run_h4(log_vol, returns, spec_name: str, spec: dict, target: str) -> dict:
 # Lookahead causal probe
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def corrupt_after(panel: dict[str, pd.DataFrame], cut: pd.Timestamp,
-                  rng: np.random.Generator, sigma: float = 0.005) -> dict[str, pd.DataFrame]:
-    """Replace every bar strictly after ``cut`` with an N(0, sigma^2) random walk.
+def corrupt_from(panel: dict[str, pd.DataFrame], cut: pd.Timestamp,
+                 rng: np.random.Generator, sigma: float = 0.005) -> dict[str, pd.DataFrame]:
+    """Replace every bar on or after ``cut`` with an N(0, sigma^2) random walk.
 
-    If any feature, forecast, or position stamped on or before ``cut`` moves, the
-    pipeline was reading the future. sigma = 0.5% per day.
+    The boundary is ``>= cut``, not ``> cut``, and that is the whole point. A
+    forecast at origin ``i <= cut`` may legally touch dates up to ``i - 1``, so
+    corrupting from ``cut`` inclusive leaves every legal input untouched while
+    poisoning the FIRST illegal one. Corrupting only ``> cut`` (the first version
+    of this probe) cannot see a predictor that reads its own same-day bar or an
+    embargo that is off by one day, because at ``i = cut`` those read bar ``cut``,
+    which that version left clean. Codex review, 2026-07-30.
+
+    sigma = 0.5% per day.
     """
     out = {}
     for tk, df in panel.items():
         d = df.copy()
-        post = d.index > cut
+        post = d.index >= cut
         m = int(post.sum())
         if m == 0:
             out[tk] = d
@@ -1338,9 +1384,53 @@ def corrupt_after(panel: dict[str, pd.DataFrame], cut: pd.Timestamp,
     return out
 
 
+def _probe_deviation(clean: pd.DataFrame | pd.Series, dirty: pd.DataFrame | pd.Series,
+                     stage: str, min_rows: int, violations: list[dict]) -> float:
+    """Compare two aligned pre-cut objects, treating "cannot compare" as a failure.
+
+    A probe that reports 0.0 when it compared nothing, or when the deviation is
+    NaN, certifies its own blindness. So an index mismatch, an empty overlap, a
+    too-short overlap and a non-finite deviation are all violations in their own
+    right, not silent zeros. Codex review, 2026-07-30.
+    """
+    if not clean.index.equals(dirty.index):
+        violations.append({"stage": stage, "issue": "index_mismatch",
+                           "n_clean": int(len(clean.index)), "n_dirty": int(len(dirty.index))})
+        return float("nan")
+    if len(clean.index) < min_rows:
+        violations.append({"stage": stage, "issue": "too_few_rows_to_be_a_test",
+                           "n_rows": int(len(clean.index)), "min_rows": int(min_rows)})
+        return float("nan")
+    a = np.asarray(clean, dtype=float)
+    b = np.asarray(dirty, dtype=float)
+    if a.shape != b.shape:
+        violations.append({"stage": stage, "issue": "shape_mismatch",
+                           "clean": list(a.shape), "dirty": list(b.shape)})
+        return float("nan")
+    # Structurally missing history (PAVE before 2017, HYG before 2007) is legal and
+    # appears in BOTH panels. What is NOT legal is the corruption changing WHERE the
+    # missingness sits, so the masks are compared and only the finite cells are
+    # differenced. Demanding every cell be finite would flag the union index itself.
+    ok_a, ok_b = np.isfinite(a), np.isfinite(b)
+    if not np.array_equal(ok_a, ok_b):
+        violations.append({"stage": stage, "issue": "missingness_pattern_changed",
+                           "n_finite_clean": int(ok_a.sum()),
+                           "n_finite_dirty": int(ok_b.sum())})
+        return float("nan")
+    if int(ok_a.sum()) < min_rows:
+        violations.append({"stage": stage, "issue": "too_few_finite_comparisons",
+                           "n_finite": int(ok_a.sum()), "min_rows": int(min_rows)})
+        return float("nan")
+    dev = float(np.abs(a[ok_a] - b[ok_a]).max())
+    if dev > 0.0:
+        violations.append({"stage": stage, "issue": "pre_cut_output_moved",
+                           "max_abs_deviation": dev})
+    return dev
+
+
 def lookahead_probe(panel: dict[str, pd.DataFrame], cut: pd.Timestamp) -> dict:
     rng = np.random.default_rng(SEED + 5)
-    dirty = corrupt_after(panel, cut, rng)
+    dirty = corrupt_from(panel, cut, rng)
 
     clean_lv, _ = build_log_vol(panel, "parkinson")
     dirty_lv, _ = build_log_vol(dirty, "parkinson")
@@ -1350,58 +1440,81 @@ def lookahead_probe(panel: dict[str, pd.DataFrame], cut: pd.Timestamp) -> dict:
     dirty_rv = dirty_r ** 2
 
     violations: list[dict] = []
-
-    # 1. features / vol proxies on or before the cut must be untouched
-    pre = clean_lv.index <= cut
-    dev = float(np.nanmax(np.abs(clean_lv[pre].to_numpy() - dirty_lv.loc[clean_lv.index[pre]].to_numpy())))
-    if dev > 0.0:
-        violations.append({"stage": "log_vol_panel", "max_abs_deviation": dev})
-
-    # 2. OOS forecasts at origins <= cut must be identical
     spec_name = "long7"
     spec = FORECAST_SPECS[spec_name]
+
+    # 0. the corruption must actually have changed something after the cut,
+    #    otherwise every "identical" below is identical for the wrong reason.
+    post = clean_lv.index >= cut
+    post_shift = float(np.abs(
+        clean_lv.loc[post].to_numpy() - dirty_lv.loc[post].to_numpy()
+    ).max())
+    if not post_shift > 0.0:
+        violations.append({"stage": "corruption_itself", "issue": "noise_changed_nothing",
+                           "max_abs_deviation_post_cut": post_shift})
+
+    # 1. raw volatility proxies stamped strictly before the cut
+    pre = clean_lv.index < cut
+    lv_dev = _probe_deviation(clean_lv.loc[pre], dirty_lv.loc[pre],
+                             "log_vol_panel", 500, violations)
+
+    # 2. the shifted DESIGN MATRICES of all five ladder rungs, not just the raw
+    #    proxy: the HAR / rolling / shift layer is where an off-by-one would live.
+    design_checks = []
+    for target in FORECAST_TARGETS:
+        for h in HORIZONS:
+            d1, y1, i1 = ladder_designs(target, h, clean_rv, clean_lv, clean_r, spec["exog"])
+            d2, y2, i2 = ladder_designs(target, h, dirty_rv, dirty_lv, dirty_r, spec["exog"])
+            row = {"target": target, "horizon": h, "deviations": {}}
+            for name in sorted(d1):
+                m1 = d1[name].loc[d1[name].index <= cut]
+                m2 = d2[name].loc[d2[name].index <= cut]
+                row["deviations"][name] = _probe_deviation(
+                    m1, m2, f"design/{target}/h{h}/{name}", 500, violations)
+            row["n_pre_cut_rows"] = int((np.asarray(i1) <= cut).sum())
+            design_checks.append(row)
+
+    # 3. OOS forecasts and level conversions at origins <= cut, ALL five rungs
     cell_checks = []
     for target in FORECAST_TARGETS:
         for h in HORIZONS:
             p1 = _preds_for_probe(spec_name, target, h, clean_rv, clean_lv, clean_r, spec, cut)
             p2 = _preds_for_probe(spec_name, target, h, dirty_rv, dirty_lv, dirty_r, spec, cut)
-            common = p1.index.intersection(p2.index)
             devs = {
-                col: float(np.nanmax(np.abs(p1.loc[common, col] - p2.loc[common, col])))
-                if len(common) else 0.0
-                for col in ("M2", "M3", "M2_level", "M3_level")
+                col: _probe_deviation(p1[[col]], p2[[col]],
+                                      f"forecast/{target}/h{h}/{col}", 100, violations)
+                for col in p1.columns
             }
             cell_checks.append({
-                "target": target, "horizon": h, "n_pre_cut_origins": int(len(common)),
+                "target": target, "horizon": h, "n_pre_cut_origins": int(len(p1.index)),
                 "max_abs_deviation": devs,
             })
-            worst = max(devs.values())
-            if worst > 0.0:
-                violations.append({
-                    "stage": f"forecast/{target}/h{h}", "max_abs_deviation": worst,
-                })
 
-    # 3. strategy positions on or before the cut must be identical
+    # 4. every strategy weight column, including the two baselines
     df1 = strategy_arms(clean_lv, clean_r, spec["exog"], "QQQ", spec["oos_start"])
     df2 = strategy_arms(dirty_lv, dirty_r, spec["exog"], "QQQ", spec["oos_start"])
-    pre_idx = df1.index[df1.index <= cut].intersection(df2.index)
-    w_dev = float(np.nanmax(np.abs(
-        df1.loc[pre_idx, ["w_own", "w_cross"]].to_numpy()
-        - df2.loc[pre_idx, ["w_own", "w_cross"]].to_numpy()
-    ))) if len(pre_idx) else 0.0
-    if w_dev > 0.0:
-        violations.append({"stage": "strategy_weights", "max_abs_deviation": w_dev})
+    w_cols = ["w_bh", "w_own", "w_mkt", "w_cross", "z_own", "z_mkt", "z_cross"]
+    w_dev = _probe_deviation(df1.loc[df1.index <= cut, w_cols],
+                             df2.loc[df2.index <= cut, w_cols],
+                             "strategy_weights", 500, violations)
 
     return {
         "method": (
-            "every OHLC bar strictly after the cut is replaced by an "
-            "N(0, 0.005^2) random walk; features, forecasts and positions "
-            "stamped on or before the cut must be bit-identical"
+            "every OHLC bar ON OR AFTER the cut is replaced by an N(0, 0.005^2) "
+            "random walk; the raw volatility proxies, all five ladder design "
+            "matrices, all five rungs' forecasts and level conversions, and every "
+            "strategy weight and z-score stamped on or before the cut must be "
+            "bit-identical. The boundary is inclusive so that a same-day predictor "
+            "or an off-by-one embargo is caught at origin = cut; an empty, "
+            "misaligned or non-finite comparison is itself a violation."
         ),
         "cut_date": str(cut.date()),
+        "boundary": "corruption starts AT the cut (>= cut), comparisons end at the cut",
         "noise_sd_daily": 0.005,
         "seed": SEED + 5,
-        "log_vol_max_abs_deviation_pre_cut": dev,
+        "corruption_max_abs_deviation_post_cut": post_shift,
+        "log_vol_max_abs_deviation_pre_cut": lv_dev,
+        "design_matrix_checks": design_checks,
         "forecast_checks": cell_checks,
         "strategy_weight_max_abs_deviation_pre_cut": w_dev,
         "violations": violations,
@@ -1412,11 +1525,11 @@ def lookahead_probe(panel: dict[str, pd.DataFrame], cut: pd.Timestamp) -> dict:
 
 def _preds_for_probe(spec_name, target, h, rv_panel, log_vol, returns, spec,
                      cut: pd.Timestamp) -> pd.DataFrame:
-    """Origin-level M2 / M3 predictions and level conversions, for origins <= cut."""
+    """Origin-level predictions and level conversions for EVERY rung, origins <= cut."""
     designs, y, idx = ladder_designs(target, h, rv_panel, log_vol, returns, spec["exog"])
     oos = np.asarray(idx >= pd.Timestamp(spec["oos_start"])) & np.asarray(idx <= cut)
     cols = {}
-    for name in ("M2", "M3"):
+    for name in sorted(designs):
         p, s2, _ = expanding_oos(designs[name], y, oos, h, MIN_TRAIN)
         cols[name] = p
         cols[f"{name}_level"] = np.exp(p + 0.5 * s2)
@@ -1756,10 +1869,13 @@ def verdict_h2_reverse(nets: dict, granger: dict) -> dict:
         "status": "post_hoc_not_pre_specified",
         "criterion": (
             "complement of the pre-specified one-sided test: KPPS pairwise NPDC < 0, "
-            "Benjamini-Hochberg significant at q=0.10 in its own family, bootstrap "
-            "sign stability >= 90%, and the SPY-controlled Granger evidence at least "
-            "as strong in the reverse direction as in the hypothesised one"
+            "Benjamini-Hochberg significant at q=0.10 in the POOLED directional "
+            "family (both one-sided directions for every pair in one family, because "
+            "this direction was chosen after seeing the sign), bootstrap sign "
+            "stability >= 90%, and the SPY-controlled Granger evidence at least as "
+            "strong in the reverse direction as in the hypothesised one"
         ),
+        "fdr_family": nets["full8"]["pooled_directional_fdr_family"],
         "verdict": "SUPPORTED_POST_HOC" if both else (
             "PARTIAL_POST_HOC" if sig_neg else "NOT_SUPPORTED"),
         "n_pairs_negative_and_fdr_significant": len(sig_neg),
@@ -1835,7 +1951,13 @@ def verdict_h3(h3: dict) -> dict:
     sig = [c for c, r in zip(cells, prim) if r["fdr_significant"] and r["oos_r2_increment"] > 0]
     pos_ci = [c for c, r in zip(cells, prim)
               if (r["mspe_gap_log_bootstrap"]["ci_low"] or 0) > 0]
-    if len(sig) >= 2 and pos_ci:
+    # The bootstrap-interval corroboration has to land ON a cell that also cleared
+    # FDR. Allowing an unrelated cell to supply it would let two different cells
+    # jointly "pass" a criterion neither meets. Tightened per Codex review
+    # 2026-07-30; it can only ever make ACCEPT harder, and the verdict here is
+    # REJECT either way, so it cannot flatter this experiment.
+    corroborated = [c for c in sig if c in pos_ci]
+    if len(sig) >= 2 and corroborated:
         v = "ACCEPT"
     elif sig:
         v = "PARTIAL"
@@ -1847,14 +1969,23 @@ def verdict_h3(h3: dict) -> dict:
                       "beyond own volatility AND the broad-market volatility factor",
         "criterion": (
             "PRIMARY rung M3 vs M2: Clark-West one-sided p, Benjamini-Hochberg q=0.10 over "
-            "the 12-cell family, with a positive OOS R² increment; and a bootstrap interval "
-            "on the squared-error gap excluding zero for at least one cell"
+            "the 12-cell family, with a positive OOS R² increment; AND at least one of "
+            "those same FDR-significant cells must also have a bootstrap interval on the "
+            "squared-error gap excluding zero"
         ),
         "verdict": v,
         "n_cells": len(cells),
         "n_fdr_significant_positive": len(sig),
         "cells_fdr_significant": [cid(c) for c in sig],
         "cells_with_positive_bootstrap_interval": [cid(c) for c in pos_ci],
+        "cells_fdr_significant_and_corroborated": [cid(c) for c in corroborated],
+        "estimand": (
+            "the INCREMENTAL content of the physical/credit block beyond own range "
+            "volatility and the broad-market volatility factor. A REJECT here rejects "
+            "that incremental estimand only; it is NOT evidence that the total "
+            "cross-asset volatility channel is absent — rung M0plusExog_vs_M0 shows the "
+            "total association is large. Do not narrate one as the other."
+        ),
         "best_cell": cid(best[0]),
         "max_cw_t": best[1]["clark_west"]["t_stat"],
         "rung_summary": h3["fdr_by_rung"],
@@ -2043,12 +2174,20 @@ def main() -> None:
         "cholesky_worst_pair_sign_stability": nets["full8"]["ordering_robustness"][
             "cholesky_worst_pair_sign_stability"],
         "what_this_rules_out": (
-            "The tradable version of the J.P. Morgan AI-data-centre-financing thesis: "
-            "that power/grid/credit volatility is an early-warning gauge you can put in "
-            "front of a Nasdaq volatility forecast. In-sample lead information exists, "
-            "but after own-volatility and broad-market-volatility controls it adds "
-            "nothing out of sample, so the funding chain is not a usable volatility "
-            "lead indicator at daily frequency with free data."
+            "The INCREMENTAL, tradable version of the J.P. Morgan "
+            "AI-data-centre-financing thesis: that power/grid/credit volatility earns "
+            "its place in a Nasdaq volatility forecast that already knows the target's "
+            "own range volatility and the broad-market volatility factor. It does not. "
+            "What is NOT ruled out is the total association, which is large: the "
+            "exogenous block beats a bare squared-return HAR-RV in 12/12 cells. The "
+            "block is real information; it is redundant information."
+        ),
+        "what_this_does_not_rule_out": (
+            "That the underlying economic channel exists. H1 shows the three baskets "
+            "are one volatility system, and the SPY-controlled Granger arm rejects "
+            "no-lead in most forward pairs. The negative result is specifically about "
+            "INCREMENTAL out-of-sample forecast value at daily frequency through free "
+            "equity proxies, and about the net variance-share direction."
         ),
         "what_would_change_it": (
             "Instrument the physical leg directly rather than through equity proxies: "

@@ -225,11 +225,95 @@ def test_lookahead_probe_is_clean(res):
     assert p["n_violations"] == 0 and p["violations"] == []
     assert p["log_vol_max_abs_deviation_pre_cut"] == 0.0
     assert p["strategy_weight_max_abs_deviation_pre_cut"] == 0.0
-    assert p["forecast_checks"], "the probe must actually have compared some origins"
+    # The noise must actually bite after the cut, else every "identical" below is
+    # identical for the wrong reason.
+    assert p["corruption_max_abs_deviation_post_cut"] > 0.0
+    assert p["boundary"].startswith("corruption starts AT the cut")
+    assert p["design_matrix_checks"] and p["forecast_checks"]
+    for c in p["design_matrix_checks"]:
+        assert c["n_pre_cut_rows"] > 500
+        assert set(c["deviations"]) == {"M0", "M1", "M2", "M3", "M0plusExog"}
+        for name, dev in c["deviations"].items():
+            assert dev == 0.0, f"design/{c['target']}/h{c['horizon']}/{name}"
     for c in p["forecast_checks"]:
         assert c["n_pre_cut_origins"] > 100
+        # every rung, log scale AND variance level
+        assert len(c["max_abs_deviation"]) == 10
         for col, dev in c["max_abs_deviation"].items():
             assert dev == 0.0, f"{c['target']}/h{c['horizon']}/{col}"
+
+
+def test_probe_boundary_is_inclusive_and_would_catch_a_same_day_leak(panel):
+    """The corruption must start AT the cut, or the probe is blind by one day.
+
+    Corrupting only ``> cut`` leaves bar ``cut`` clean, so a predictor reading its
+    own same-day bar survives the probe. This asserts the boundary directly on the
+    corrupted panel, which is the property the README claims.
+    """
+    cut = pd.Timestamp("2020-06-30")
+    rng = np.random.default_rng(K.SEED + 5)
+    dirty = K.corrupt_from(panel, cut, rng)
+    for tk in ("QQQ", "XLU"):
+        clean_df, dirty_df = panel[tk], dirty[tk]
+        assert clean_df.index.equals(dirty_df.index)
+        at_cut = clean_df.index == cut
+        assert at_cut.sum() == 1, "the cut must be a trading day for this test to bite"
+        # bar AT the cut is corrupted ...
+        assert float(np.abs(clean_df.loc[at_cut, "Close"].to_numpy()
+                            - dirty_df.loc[at_cut, "Close"].to_numpy()).max()) > 0.0, tk
+        # ... and every bar strictly before it is untouched.
+        before = clean_df.index < cut
+        assert np.array_equal(clean_df.loc[before].to_numpy(),
+                              dirty_df.loc[before].to_numpy()), tk
+
+
+def test_probe_deviation_refuses_to_certify_a_non_comparison():
+    """An unmeasurable comparison must be a violation, not a silent 0.0."""
+    idx = pd.date_range("2020-01-01", periods=600, freq="D")
+    a = pd.DataFrame({"x": np.arange(600, dtype=float)}, index=idx)
+
+    # identical -> 0.0, no violation
+    v: list[dict] = []
+    assert K._probe_deviation(a, a.copy(), "same", 500, v) == 0.0 and v == []
+
+    # index mismatch -> violation
+    v = []
+    assert np.isnan(K._probe_deviation(a, a.iloc[:-1], "idx", 500, v))
+    assert v and v[0]["issue"] == "index_mismatch"
+
+    # empty / too short -> violation, NOT a clean zero
+    v = []
+    assert np.isnan(K._probe_deviation(a.iloc[:0], a.iloc[:0], "empty", 500, v))
+    assert v and v[0]["issue"] in {"too_few_rows_to_be_a_test", "index_mismatch"}
+
+    # missingness pattern changed -> violation
+    b = a.copy()
+    b.iloc[3, 0] = np.nan
+    v = []
+    assert np.isnan(K._probe_deviation(a, b, "nanmask", 500, v))
+    assert v and v[0]["issue"] == "missingness_pattern_changed"
+
+    # matching NaN in both (structurally missing history) is legal
+    a2, b2 = a.copy(), a.copy()
+    a2.iloc[0, 0] = np.nan
+    b2.iloc[0, 0] = np.nan
+    v = []
+    assert K._probe_deviation(a2, b2, "shared_nan", 500, v) == 0.0 and v == []
+
+    # a real move -> violation carrying the deviation
+    c = a.copy()
+    c.iloc[10, 0] += 1e-9
+    v = []
+    assert K._probe_deviation(a, c, "moved", 500, v) == pytest.approx(1e-9)
+    assert v and v[0]["issue"] == "pre_cut_output_moved"
+
+
+def test_stationary_bootstrap_rejects_non_finite_input():
+    rng = np.random.default_rng(0)
+    x = np.arange(100, dtype=float)
+    x[5] = np.nan
+    with pytest.raises(AssertionError):
+        K.stationary_bootstrap_mean_ci(x, 22, 10, rng)
 
 
 def test_label_embargo_arithmetic():

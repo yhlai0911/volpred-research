@@ -1,7 +1,7 @@
 {
   "k_id": "K1733",
   "title": "AI-infrastructure funding-chain volatility transmission: hyperscaler/semis x power-grid/utility x credit",
-  "generated_at": "2026-07-29T22:15:35.207893+00:00",
+  "generated_at": "2026-07-30T00:33:51.265688+00:00",
   "data_source": {
     "provider": "yfinance",
     "auto_adjust": false,
@@ -648,7 +648,8 @@
         "null_floor_q95": 2.0331838476774307,
         "p_value_vs_independent_ar_null": 0.001996007984031936,
         "n_null": 500,
-        "criterion": "block-bootstrap / surrogate p < 0.05"
+        "criterion": "block-bootstrap / surrogate p < 0.05",
+        "null_scope_caveat": "The surrogate removes cross-series LINEAR dynamics, contemporaneous correlation and any cross-sectional conditional heteroskedasticity together. So the floor bounds 'no cross-asset dependence of any of those kinds', which is what a Diebold-Yilmaz TCI aggregates — but it cannot attribute the excess to lagged transmission specifically. Codex review, 2026-07-30."
       },
       "h2_pairwise": [
         {
@@ -658,11 +659,13 @@
           "ci_low_90": -5.711110277694741,
           "ci_high_90": -2.822382295640364,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.003196803196803197,
           "fdr_significant_reverse": true
         },
         {
@@ -672,11 +675,13 @@
           "ci_low_90": -7.164088454932279,
           "ci_high_90": -4.177974744037359,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.003196803196803197,
           "fdr_significant_reverse": true
         },
         {
@@ -686,11 +691,13 @@
           "ci_low_90": -4.6406891251215,
           "ci_high_90": -1.6033301219212954,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.003196803196803197,
           "fdr_significant_reverse": true
         },
         {
@@ -700,11 +707,13 @@
           "ci_low_90": -6.850488735397652,
           "ci_high_90": -3.932534072564032,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.003196803196803197,
           "fdr_significant_reverse": true
         },
         {
@@ -713,12 +722,14 @@
           "boot_mean": -1.974176828964587,
           "ci_low_90": -3.5064495836675276,
           "ci_high_90": -0.5414291544805432,
-          "p_one_sided_gt0": 0.984,
-          "p_one_sided_lt0": 0.016,
+          "p_one_sided_gt0": 0.984015984015984,
+          "p_one_sided_lt0": 0.016983016983016984,
           "boot_sign_stability": 0.984,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.016,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.03396603396603397,
           "fdr_significant_reverse": true
         },
         {
@@ -728,11 +739,13 @@
           "ci_low_90": -5.54876209398241,
           "ci_high_90": -2.0456233995759514,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.003196803196803197,
           "fdr_significant_reverse": true
         },
         {
@@ -741,12 +754,14 @@
           "boot_mean": -3.038349327285735,
           "ci_low_90": -4.664901905625967,
           "ci_high_90": -1.4982748115829623,
-          "p_one_sided_gt0": 0.999,
-          "p_one_sided_lt0": 0.001,
+          "p_one_sided_gt0": 0.999000999000999,
+          "p_one_sided_lt0": 0.001998001998001998,
           "boot_sign_stability": 0.999,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.001142857142857143,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.0045668617097188524,
           "fdr_significant_reverse": true
         },
         {
@@ -755,15 +770,23 @@
           "boot_mean": -2.8668517601220675,
           "ci_low_90": -4.523715785587739,
           "ci_high_90": -1.207514934881829,
-          "p_one_sided_gt0": 0.999,
-          "p_one_sided_lt0": 0.001,
+          "p_one_sided_gt0": 0.999000999000999,
+          "p_one_sided_lt0": 0.001998001998001998,
           "boot_sign_stability": 0.999,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.001142857142857143,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.0045668617097188524,
           "fdr_significant_reverse": true
         }
       ],
+      "pooled_directional_fdr_family": {
+        "n_tests": 16,
+        "composition": "both one-sided directions for every pair, in ONE BH family",
+        "why": "H2R's direction was chosen after seeing the sign; correcting it in its own family would not control the directional search",
+        "n_rejected": 8
+      },
       "net_directional": {
         "MSFT": {
           "net_pp": 6.485265248975644,
@@ -1791,7 +1814,8 @@
         "null_floor_q95": 0.826789757443671,
         "p_value_vs_independent_ar_null": 0.001996007984031936,
         "n_null": 500,
-        "criterion": "block-bootstrap / surrogate p < 0.05"
+        "criterion": "block-bootstrap / surrogate p < 0.05",
+        "null_scope_caveat": "The surrogate removes cross-series LINEAR dynamics, contemporaneous correlation and any cross-sectional conditional heteroskedasticity together. So the floor bounds 'no cross-asset dependence of any of those kinds', which is what a Diebold-Yilmaz TCI aggregates — but it cannot attribute the excess to lagged transmission specifically. Codex review, 2026-07-30."
       },
       "h2_pairwise": [
         {
@@ -1801,11 +1825,13 @@
           "ci_low_90": -5.87800697294865,
           "ci_high_90": -3.331415286312737,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.0023976023976023976,
           "fdr_significant_reverse": true
         },
         {
@@ -1815,11 +1841,13 @@
           "ci_low_90": -7.471777368081876,
           "ci_high_90": -4.9382189203517655,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.0023976023976023976,
           "fdr_significant_reverse": true
         },
         {
@@ -1828,12 +1856,14 @@
           "boot_mean": -1.4806562233090406,
           "ci_low_90": -2.5608528925603857,
           "ci_high_90": -0.36012888947170507,
-          "p_one_sided_gt0": 0.987,
-          "p_one_sided_lt0": 0.013,
+          "p_one_sided_gt0": 0.987012987012987,
+          "p_one_sided_lt0": 0.013986013986013986,
           "boot_sign_stability": 0.987,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.013,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.027972027972027972,
           "fdr_significant_reverse": true
         },
         {
@@ -1843,11 +1873,13 @@
           "ci_low_90": -5.2203429694994385,
           "ci_high_90": -2.4698259419960378,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.0023976023976023976,
           "fdr_significant_reverse": true
         },
         {
@@ -1857,11 +1889,13 @@
           "ci_low_90": -4.322509326744446,
           "ci_high_90": -1.6378566346305823,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.0023976023976023976,
           "fdr_significant_reverse": true
         },
         {
@@ -1871,14 +1905,22 @@
           "ci_low_90": -4.925790207856226,
           "ci_high_90": -2.258833156899013,
           "p_one_sided_gt0": 1.0,
-          "p_one_sided_lt0": 0.0,
+          "p_one_sided_lt0": 0.000999000999000999,
           "boot_sign_stability": 1.0,
           "p_fdr_bh": 1.0,
           "fdr_significant": false,
-          "p_fdr_bh_reverse": 0.0,
+          "p_fdr_bh_forward_pooled": 1.0,
+          "fdr_significant_forward_pooled": false,
+          "p_fdr_bh_reverse": 0.0023976023976023976,
           "fdr_significant_reverse": true
         }
       ],
+      "pooled_directional_fdr_family": {
+        "n_tests": 12,
+        "composition": "both one-sided directions for every pair, in ONE BH family",
+        "why": "H2R's direction was chosen after seeing the sign; correcting it in its own family would not control the directional search",
+        "n_rejected": 6
+      },
       "net_directional": {
         "MSFT": {
           "net_pp": -5.214510286087759,
@@ -9127,20 +9169,102 @@
     }
   },
   "lookahead_diagnostics": {
-    "method": "every OHLC bar strictly after the cut is replaced by an N(0, 0.005^2) random walk; features, forecasts and positions stamped on or before the cut must be bit-identical",
+    "method": "every OHLC bar ON OR AFTER the cut is replaced by an N(0, 0.005^2) random walk; the raw volatility proxies, all five ladder design matrices, all five rungs' forecasts and level conversions, and every strategy weight and z-score stamped on or before the cut must be bit-identical. The boundary is inclusive so that a same-day predictor or an off-by-one embargo is caught at origin = cut; an empty, misaligned or non-finite comparison is itself a violation.",
     "cut_date": "2020-06-30",
+    "boundary": "corruption starts AT the cut (>= cut), comparisons end at the cut",
     "noise_sd_daily": 0.005,
     "seed": 47,
+    "corruption_max_abs_deviation_post_cut": 5.261958047261414,
     "log_vol_max_abs_deviation_pre_cut": 0.0,
+    "design_matrix_checks": [
+      {
+        "target": "QQQ",
+        "horizon": 1,
+        "deviations": {
+          "M0": 0.0,
+          "M0plusExog": 0.0,
+          "M1": 0.0,
+          "M2": 0.0,
+          "M3": 0.0
+        },
+        "n_pre_cut_rows": 3325
+      },
+      {
+        "target": "QQQ",
+        "horizon": 5,
+        "deviations": {
+          "M0": 0.0,
+          "M0plusExog": 0.0,
+          "M1": 0.0,
+          "M2": 0.0,
+          "M3": 0.0
+        },
+        "n_pre_cut_rows": 3325
+      },
+      {
+        "target": "QQQ",
+        "horizon": 22,
+        "deviations": {
+          "M0": 0.0,
+          "M0plusExog": 0.0,
+          "M1": 0.0,
+          "M2": 0.0,
+          "M3": 0.0
+        },
+        "n_pre_cut_rows": 3325
+      },
+      {
+        "target": "SMH",
+        "horizon": 1,
+        "deviations": {
+          "M0": 0.0,
+          "M0plusExog": 0.0,
+          "M1": 0.0,
+          "M2": 0.0,
+          "M3": 0.0
+        },
+        "n_pre_cut_rows": 3325
+      },
+      {
+        "target": "SMH",
+        "horizon": 5,
+        "deviations": {
+          "M0": 0.0,
+          "M0plusExog": 0.0,
+          "M1": 0.0,
+          "M2": 0.0,
+          "M3": 0.0
+        },
+        "n_pre_cut_rows": 3325
+      },
+      {
+        "target": "SMH",
+        "horizon": 22,
+        "deviations": {
+          "M0": 0.0,
+          "M0plusExog": 0.0,
+          "M1": 0.0,
+          "M2": 0.0,
+          "M3": 0.0
+        },
+        "n_pre_cut_rows": 3325
+      }
+    ],
     "forecast_checks": [
       {
         "target": "QQQ",
         "horizon": 1,
         "n_pre_cut_origins": 1383,
         "max_abs_deviation": {
+          "M0": 0.0,
+          "M0_level": 0.0,
+          "M0plusExog": 0.0,
+          "M0plusExog_level": 0.0,
+          "M1": 0.0,
+          "M1_level": 0.0,
           "M2": 0.0,
-          "M3": 0.0,
           "M2_level": 0.0,
+          "M3": 0.0,
           "M3_level": 0.0
         }
       },
@@ -9149,9 +9273,15 @@
         "horizon": 5,
         "n_pre_cut_origins": 1383,
         "max_abs_deviation": {
+          "M0": 0.0,
+          "M0_level": 0.0,
+          "M0plusExog": 0.0,
+          "M0plusExog_level": 0.0,
+          "M1": 0.0,
+          "M1_level": 0.0,
           "M2": 0.0,
-          "M3": 0.0,
           "M2_level": 0.0,
+          "M3": 0.0,
           "M3_level": 0.0
         }
       },
@@ -9160,9 +9290,15 @@
         "horizon": 22,
         "n_pre_cut_origins": 1383,
         "max_abs_deviation": {
+          "M0": 0.0,
+          "M0_level": 0.0,
+          "M0plusExog": 0.0,
+          "M0plusExog_level": 0.0,
+          "M1": 0.0,
+          "M1_level": 0.0,
           "M2": 0.0,
-          "M3": 0.0,
           "M2_level": 0.0,
+          "M3": 0.0,
           "M3_level": 0.0
         }
       },
@@ -9171,9 +9307,15 @@
         "horizon": 1,
         "n_pre_cut_origins": 1383,
         "max_abs_deviation": {
+          "M0": 0.0,
+          "M0_level": 0.0,
+          "M0plusExog": 0.0,
+          "M0plusExog_level": 0.0,
+          "M1": 0.0,
+          "M1_level": 0.0,
           "M2": 0.0,
-          "M3": 0.0,
           "M2_level": 0.0,
+          "M3": 0.0,
           "M3_level": 0.0
         }
       },
@@ -9182,9 +9324,15 @@
         "horizon": 5,
         "n_pre_cut_origins": 1383,
         "max_abs_deviation": {
+          "M0": 0.0,
+          "M0_level": 0.0,
+          "M0plusExog": 0.0,
+          "M0plusExog_level": 0.0,
+          "M1": 0.0,
+          "M1_level": 0.0,
           "M2": 0.0,
-          "M3": 0.0,
           "M2_level": 0.0,
+          "M3": 0.0,
           "M3_level": 0.0
         }
       },
@@ -9193,9 +9341,15 @@
         "horizon": 22,
         "n_pre_cut_origins": 1383,
         "max_abs_deviation": {
+          "M0": 0.0,
+          "M0_level": 0.0,
+          "M0plusExog": 0.0,
+          "M0plusExog_level": 0.0,
+          "M1": 0.0,
+          "M1_level": 0.0,
           "M2": 0.0,
-          "M3": 0.0,
           "M2_level": 0.0,
+          "M3": 0.0,
           "M3_level": 0.0
         }
       }
@@ -9238,7 +9392,13 @@
     "H2R_post_hoc": {
       "hypothesis": "H2R (POST-HOC) — the AI leg is the net transmitter INTO the physical / credit leg, i.e. the funding-chain story runs backwards",
       "status": "post_hoc_not_pre_specified",
-      "criterion": "complement of the pre-specified one-sided test: KPPS pairwise NPDC < 0, Benjamini-Hochberg significant at q=0.10 in its own family, bootstrap sign stability >= 90%, and the SPY-controlled Granger evidence at least as strong in the reverse direction as in the hypothesised one",
+      "criterion": "complement of the pre-specified one-sided test: KPPS pairwise NPDC < 0, Benjamini-Hochberg significant at q=0.10 in the POOLED directional family (both one-sided directions for every pair in one family, because this direction was chosen after seeing the sign), bootstrap sign stability >= 90%, and the SPY-controlled Granger evidence at least as strong in the reverse direction as in the hypothesised one",
+      "fdr_family": {
+        "n_tests": 16,
+        "composition": "both one-sided directions for every pair, in ONE BH family",
+        "why": "H2R's direction was chosen after seeing the sign; correcting it in its own family would not control the directional search",
+        "n_rejected": 8
+      },
       "verdict": "PARTIAL_POST_HOC",
       "n_pairs_negative_and_fdr_significant": 8,
       "n_pairs_tested": 8,
@@ -9258,12 +9418,14 @@
     },
     "H3": {
       "hypothesis": "H3 — physical / credit volatility adds OOS predictive content beyond own volatility AND the broad-market volatility factor",
-      "criterion": "PRIMARY rung M3 vs M2: Clark-West one-sided p, Benjamini-Hochberg q=0.10 over the 12-cell family, with a positive OOS R² increment; and a bootstrap interval on the squared-error gap excluding zero for at least one cell",
+      "criterion": "PRIMARY rung M3 vs M2: Clark-West one-sided p, Benjamini-Hochberg q=0.10 over the 12-cell family, with a positive OOS R² increment; AND at least one of those same FDR-significant cells must also have a bootstrap interval on the squared-error gap excluding zero",
       "verdict": "REJECT",
       "n_cells": 12,
       "n_fdr_significant_positive": 0,
       "cells_fdr_significant": [],
       "cells_with_positive_bootstrap_interval": [],
+      "cells_fdr_significant_and_corroborated": [],
+      "estimand": "the INCREMENTAL content of the physical/credit block beyond own range volatility and the broad-market volatility factor. A REJECT here rejects that incremental estimand only; it is NOT evidence that the total cross-asset volatility channel is absent — rung M0plusExog_vs_M0 shows the total association is large. Do not narrate one as the other.",
       "best_cell": "full8/SMH/h1",
       "max_cw_t": 0.9843083513225924,
       "rung_summary": {
@@ -9315,7 +9477,8 @@
     "h3_primary_cells": 12,
     "h3_loose_reading_max_cw_t": 7.254456269312317,
     "cholesky_worst_pair_sign_stability": 0.315,
-    "what_this_rules_out": "The tradable version of the J.P. Morgan AI-data-centre-financing thesis: that power/grid/credit volatility is an early-warning gauge you can put in front of a Nasdaq volatility forecast. In-sample lead information exists, but after own-volatility and broad-market-volatility controls it adds nothing out of sample, so the funding chain is not a usable volatility lead indicator at daily frequency with free data.",
+    "what_this_rules_out": "The INCREMENTAL, tradable version of the J.P. Morgan AI-data-centre-financing thesis: that power/grid/credit volatility earns its place in a Nasdaq volatility forecast that already knows the target's own range volatility and the broad-market volatility factor. It does not. What is NOT ruled out is the total association, which is large: the exogenous block beats a bare squared-return HAR-RV in 12/12 cells. The block is real information; it is redundant information.",
+    "what_this_does_not_rule_out": "That the underlying economic channel exists. H1 shows the three baskets are one volatility system, and the SPY-controlled Granger arm rejects no-lead in most forward pairs. The negative result is specifically about INCREMENTAL out-of-sample forecast value at daily frequency through free equity proxies, and about the net variance-share direction.",
     "what_would_change_it": "Instrument the physical leg directly rather than through equity proxies: PJM/ERCOT interconnection-queue or capacity-auction prices, data-centre power-purchase-agreement spreads, and private-credit fund marks. Those are the variables the thesis is actually about; XLU/PAVE/HYG/LQD are the free shadows of them and the shadows carry the market factor along."
   },
   "figures": [
@@ -9339,10 +9502,10 @@
   "unresolved": [],
   "code_trace": {
     "path": "experiments/k1733/K1733.py",
-    "sha256": "e29c99197be716a91a5b1d1887601f6c090c5d3d86b913c0afe0c58120726b14",
-    "size_bytes": 101233
+    "sha256": "6b3d0ac5d2cf0c405372f76b8226e3991ce73677b3fc242a69c9d822848083b6",
+    "size_bytes": 109777
   },
-  "runtime_seconds": 193.031,
+  "runtime_seconds": 196.817,
   "runtime_env": {
     "python": "3.12.10",
     "implementation": "CPython",
