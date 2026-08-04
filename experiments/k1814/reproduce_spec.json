@@ -1,0 +1,113 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "k1814.py",
+    "args": [],
+    "sha256": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
+    "size_bytes": 66724
+  },
+  "canonical_result": "K1814_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1814/data/GSPC_daily.csv",
+      "sha256": "921235759096695f3063a6cc4df38660867af297cd864bcedc25e3d003e81034",
+      "size_bytes": 1315480
+    },
+    {
+      "path": "experiments/k1814/data/QQQ_daily.csv",
+      "sha256": "b1a6a4df4aea1965e63ac07c2edbcec236a958f082a54bb023fb677bc8f1ee53",
+      "size_bytes": 545281
+    },
+    {
+      "path": "experiments/k1814/data/SPY_daily.csv",
+      "sha256": "ccac2c8635320df75cb97be836fffa162582616f2dd6bcfc37096f4ec1984498",
+      "size_bytes": 619159
+    },
+    {
+      "path": "experiments/k1814/data/intraday_probe.json",
+      "sha256": "efe6bf436c2c60c9e963ab811a34c5c08e8fba1ce76a1844d4c25a9ca293b993",
+      "size_bytes": 1068
+    },
+    {
+      "path": "experiments/k1814/data/proxy_validation_SPY.json",
+      "sha256": "feaed7a03e743c0360494397a3fb8f677923173264720f1fcb0a121b1b781091",
+      "size_bytes": 2070
+    }
+  ],
+  "outputs": [
+    "K1814_results.json",
+    "fig1_longmemory_regimes.png",
+    "fig2_qlike_by_horizon.png",
+    "fig3_dm_statistics.png",
+    "fig4_forecast_vs_actual.png",
+    "fig5_proxy_validation.png"
+  ],
+  "timeout_seconds": 18571,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "torch",
+        "value": 42
+      },
+      {
+        "library": "dl_seed_grid",
+        "value": "42..46"
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 6170.621,
+    "recorded_at": "2026-07-29T22:40:30Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      },
+      {
+        "library": "torch",
+        "value": 42
+      },
+      {
+        "library": "dl_seed_grid",
+        "value": "42..46"
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1814_results.json",
+    "sha256": "73fa1562cfdf92b514212686f434970401a14149749fc764d1a8fb2f0c4637d7",
+    "size_bytes": 265512
+  }
+}

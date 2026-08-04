@@ -1,0 +1,312 @@
+{
+  "schema": "volpred.k1814.stage1_landing.v1",
+  "split_stage": "landing_inventory",
+  "split_index": "1/2",
+  "parent_job_id": "agent-brief_k1814-a3ea90",
+  "parent_task_id": "K1814",
+  "produced_by": "hourly-slot-1-5dda30a3e2344a2892606deb86b81248",
+  "produced_at": "2026-08-02T16:52:00+08:00",
+  "worktree": ".claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+  "run_landed": true,
+  "landing_evidence": {
+    "stages_completed": [
+      "primary",
+      "robustness:SPY_parkinson",
+      "robustness:SPY_garman_klass",
+      "robustness:QQQ_parkinson",
+      "ablation:channels_with_returns",
+      "ablation:refit_250",
+      "ablation:window_L66",
+      "ablation:train_len1500",
+      "ablation:loss_qlike_direct",
+      "complete"
+    ],
+    "terminal_stage_present": true,
+    "runtime_seconds": 6170.621,
+    "results_json_mtime": "2026-07-30T06:40:30",
+    "run_full_log_tail_marker": "done in 6170.6s  h*=None",
+    "note": "Run reached its own terminal 'complete' checkpoint. This is a self-declared terminal marker written by checkpoint(), corroborated by the run_full.log tail line and by all 8 declared arms being present and error-free."
+  },
+  "detached_pid_52501": {
+    "final_state": "gone",
+    "how_determined": "ps -p 52501 returned no row and pgrep -fl k1814 returned nothing at 2026-08-02T16:37 CST, three days after the artifacts stopped changing.",
+    "ended_naturally": true,
+    "evidence_for_natural_end": [
+      "K1814_results.json/reproduce_spec.json/run_full.log all share mtime 2026-07-30T06:40:30, i.e. the final 'complete' checkpoint wrote them and nothing touched them after.",
+      "run_full.log ends with the script's own normal-exit line 'done in 6170.6s' followed by the per-horizon verdict summary, not a truncation or traceback.",
+      "runtime_seconds=6170.6 matches the last checkpoint's elapsed stamp (6171s)."
+    ],
+    "killed_by_us": false,
+    "caveat": "No direct process-exit receipt exists (the parent agent that would have reaped it was itself killed at 2026-07-29T21:30:24Z by the 5279s timeout). Natural completion is inferred from the artifact/log evidence above, which is consistent and leaves no gap, but is inference rather than a wait() status."
+  },
+  "arm_inventory": {
+    "declared_robustness": [
+      "SPY_parkinson",
+      "SPY_garman_klass",
+      "QQQ_parkinson"
+    ],
+    "declared_ablations": [
+      "channels_with_returns",
+      "refit_250",
+      "window_L66",
+      "train_len1500",
+      "loss_qlike_direct"
+    ],
+    "arms": [
+      {
+        "arm": "robustness:SPY_parkinson",
+        "declared": true,
+        "present": true,
+        "error": null,
+        "horizons_present": [
+          "1",
+          "22",
+          "5"
+        ],
+        "usable": true
+      },
+      {
+        "arm": "robustness:SPY_garman_klass",
+        "declared": true,
+        "present": true,
+        "error": null,
+        "horizons_present": [
+          "1",
+          "22",
+          "5"
+        ],
+        "usable": true
+      },
+      {
+        "arm": "robustness:QQQ_parkinson",
+        "declared": true,
+        "present": true,
+        "error": null,
+        "horizons_present": [
+          "1",
+          "22",
+          "5"
+        ],
+        "usable": true
+      },
+      {
+        "arm": "ablations:channels_with_returns",
+        "declared": true,
+        "present": true,
+        "error": null,
+        "horizons_present": [
+          "1",
+          "22",
+          "5"
+        ],
+        "usable": true
+      },
+      {
+        "arm": "ablations:refit_250",
+        "declared": true,
+        "present": true,
+        "error": null,
+        "horizons_present": [
+          "1",
+          "22",
+          "5"
+        ],
+        "usable": true
+      },
+      {
+        "arm": "ablations:window_L66",
+        "declared": true,
+        "present": true,
+        "error": null,
+        "horizons_present": [
+          "1",
+          "22",
+          "5"
+        ],
+        "usable": true
+      },
+      {
+        "arm": "ablations:train_len1500",
+        "declared": true,
+        "present": true,
+        "error": null,
+        "horizons_present": [
+          "1",
+          "22",
+          "5"
+        ],
+        "usable": true
+      },
+      {
+        "arm": "ablations:loss_qlike_direct",
+        "declared": true,
+        "present": true,
+        "error": null,
+        "horizons_present": [
+          "1",
+          "22",
+          "5"
+        ],
+        "usable": true
+      }
+    ],
+    "n_declared": 8,
+    "n_present": 8,
+    "missing": []
+  },
+  "artifact_hashes": [
+    {
+      "path": "K1814_results.json",
+      "sha256": "73fa1562cfdf92b514212686f434970401a14149749fc764d1a8fb2f0c4637d7",
+      "size_bytes": 265512,
+      "mtime": "2026-07-30T06:40:30"
+    },
+    {
+      "path": "reproduce_spec.json",
+      "sha256": "74c68fc83d26c9151a880d9a45429e17aacae745edd37193974ff176eac94477",
+      "size_bytes": 3116,
+      "mtime": "2026-07-30T06:40:30"
+    },
+    {
+      "path": "run_full.log",
+      "sha256": "c83e54f5266f4799a2f37ae07903599bb05378dbfe37a5388f0c4f82f027162d",
+      "size_bytes": 7520,
+      "mtime": "2026-07-30T06:40:30"
+    },
+    {
+      "path": "README.md",
+      "sha256": "8cf0b74f6be85d913213cb6c4c4c15b91b83bb01b85d80cf4c99929a26876d22",
+      "size_bytes": 15594,
+      "mtime": "2026-07-30T05:00:49"
+    },
+    {
+      "path": "k1814.py",
+      "sha256": "d5b851a99cfcfda07962bc05f74a7268f38c233bdd7aaf475352ca1b91f0f212",
+      "size_bytes": 67086,
+      "mtime": "2026-08-02T16:38:12"
+    },
+    {
+      "path": "fig1_longmemory_regimes.png",
+      "sha256": "643bb9efe1d36122922c16a25a85d0dc461c06f77c5c3cc8e27053f1ebaccc57",
+      "size_bytes": 120875,
+      "mtime": "2026-07-30T05:38:41"
+    },
+    {
+      "path": "fig2_qlike_by_horizon.png",
+      "sha256": "06ab80d31b044016ef9c4d9a0e888f4385ce17146c8b8d7e645c710f7763346d",
+      "size_bytes": 46732,
+      "mtime": "2026-07-30T05:38:41"
+    },
+    {
+      "path": "fig3_dm_statistics.png",
+      "sha256": "37ede784b5c127f98b32ab7089a61bb6cec82341bd048fb3b57882e091b9c849",
+      "size_bytes": 32590,
+      "mtime": "2026-07-30T05:38:41"
+    },
+    {
+      "path": "fig4_forecast_vs_actual.png",
+      "sha256": "ee8c631fa0283578cff2780302da7f63e649198c55b5a7445f7fbeaac07b02e0",
+      "size_bytes": 230612,
+      "mtime": "2026-07-30T05:38:41"
+    },
+    {
+      "path": "fig5_proxy_validation.png",
+      "sha256": "50698259bd7c7e494064396c12efeacc4aee9f7cfb3bfff8cc12f4ff861a99fa",
+      "size_bytes": 35601,
+      "mtime": "2026-07-30T05:38:41"
+    },
+    {
+      "path": "gate_history/b1a67269__k1814.py",
+      "sha256": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
+      "size_bytes": 66724,
+      "mtime": "2026-08-02T16:38:01"
+    }
+  ],
+  "usable_numbers": {
+    "verdict": "ALL declared arms usable. The primary arm, all 3 robustness arms and all 5 ablations completed without error and carry all 3 horizons.",
+    "retain": [
+      "robustness:SPY_parkinson",
+      "robustness:SPY_garman_klass",
+      "robustness:QQQ_parkinson",
+      "ablations:channels_with_returns",
+      "ablations:refit_250",
+      "ablations:window_L66",
+      "ablations:train_len1500",
+      "ablations:loss_qlike_direct",
+      "primary"
+    ],
+    "must_mark_missing": []
+  },
+  "unresolved_field_audit": {
+    "artifact_value": [],
+    "artifact_value_is_correct_here": true,
+    "why": "The run reached 'complete', so an empty unresolved list is truthful for THIS artifact. The defect was latent, not realised.",
+    "latent_defect_confirmed": true,
+    "defect": "k1814.py ablation loop called checkpoint(f'ablation:{name}', []) on every iteration, so any artifact cut mid-ablation-loop would have declared zero unresolved items while holding only 1-4 of 5 ablations. The robustness loop did this correctly. This is exactly the failure mode the 2026-07-30 06:08 inventory observed live (1/5 ablations done, unresolved=[]).",
+    "fix_applied": true,
+    "fix": "ablation loop now tracks pending_ablations and reports ['ablation not yet run: <spec>', ...] for every spec not yet completed.",
+    "rerun_required": false,
+    "rerun_rationale": "Fix changes only what a FUTURE partial artifact reports. It touches no estimation, no data, no verdict logic. The archived numbers are unaffected."
+  },
+  "entrypoint_sha_divergence": {
+    "IMPORTANT": true,
+    "reproduce_spec_pins": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
+    "reproduce_spec_pins_size": 66724,
+    "current_k1814_py_sha": "d5b851a99cfcfda07962bc05f74a7268f38c233bdd7aaf475352ca1b91f0f212",
+    "current_k1814_py_size": 67086,
+    "diverged": true,
+    "reason": "The honesty fix above edited k1814.py after the run, so it no longer hashes to the pin in reproduce_spec.json.",
+    "original_bytes_preserved_at": "gate_history/b1a67269__k1814.py",
+    "original_bytes_sha": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
+    "reviewer_instruction": "To reproduce or audit the archived numbers, diff against gate_history/b1a67269__k1814.py, NOT the working k1814.py. The preserved blob hashes exactly to the reproduce_spec pin.",
+    "do_not": "Do NOT 'repair' reproduce_spec.json by re-pointing it at the new sha. The spec correctly describes the code that produced the results."
+  },
+  "findings_for_stage2": [
+    {
+      "id": "F1",
+      "severity": "must_fix",
+      "finding": "README sections 7 and 8 are UNRENDERED PLACEHOLDERS: literal '<!-- RESULTS:DESCRIPTIVE -->' and '<!-- RESULTS:MAIN -->' with no content, while README line 10 asserts 'Status: results section filled from K1814_results.json at run completion.' That status line is currently false.",
+      "evidence": "README.md mtime 2026-07-30T05:00:49 predates K1814_results.json mtime 2026-07-30T06:40:30 by 100 minutes; the fill step belonged to the parent agent that was killed at 21:30:24Z.",
+      "implication": "The experiment currently has NO human-readable results section. This is the single biggest gap and must be closed before any merge or knowledge write."
+    },
+    {
+      "id": "F2",
+      "severity": "resolved_no_action",
+      "finding": "Stage-2 checklist item 1 anticipated the README might claim 5-min RV as primary data. It does not. The README title, the top-of-file calibre warning, and §2's rejection of Route A all state the daily Parkinson range proxy.",
+      "evidence": "README.md lines 1-8, 43-61; results.data_calibre_gate.route_taken='B_realized_range_proxy' with an explicit headline_caveat.",
+      "implication": "No must-fix here. Verify the numbers in the rendered §8 keep the same calibre discipline once F1 is closed."
+    },
+    {
+      "id": "F3",
+      "severity": "confirms_prior",
+      "finding": "HAR/HAR-L is NOT beaten at any horizon. Every horizon is FAIL_TO_REJECT against both baselines, and dl_beats_both_baselines is false throughout.",
+      "evidence": "h1 HAR=0.3768 HARL=0.3713 DL=0.3713 (DM/HARL -0.01, q=0.9915); h5 HAR=0.2027 HARL=0.1982 DL=0.2054 (DM/HARL -1.29, q=0.2382); h22 HAR=0.1931 HARL=0.1914 DL=0.2128 (DM/HARL -2.31, q=0.0414).",
+      "implication": "This is a NULL result, and at h=22 the DL model is significantly WORSE than HAR-L after BH-FDR. The 'DL wins at longer horizons' hypothesis is contradicted, not merely unsupported. Whatever §8 renders must say so."
+    },
+    {
+      "id": "F4",
+      "severity": "check_in_stage2",
+      "finding": "Ablation arms report AR1=nan and RIDGE=nan, and refit_250 additionally reports TRF=nan by design (Transformer dropped, n_seeds=1).",
+      "evidence": "run_full.log ablation lines; ablations._settings_note documents the reduced settings.",
+      "implication": "The nans appear intentional (ablations run only the models they need), but stage 2 should confirm no ablation conclusion is drawn from a nan column."
+    },
+    {
+      "id": "F5",
+      "severity": "verified_ok",
+      "finding": "README's 'sd across seeds 42-46' claim matches the artifact: primary config.n_seeds=5 and dl_qlike_per_seed carries exactly 5 entries.",
+      "evidence": "primary.config.n_seeds=5; verdict.per_horizon.h1.dl_qlike_per_seed has 5 values.",
+      "implication": "No action."
+    }
+  ],
+  "stage2_gate": {
+    "may_stage2_start": true,
+    "why": "Run has landed, all declared arms are present and error-free, and the artifact hashes above pin exactly what stage 2 must verify against.",
+    "blocking_item_handed_to_stage2": "F1 (unrendered README results sections)."
+  },
+  "success_criteria_self_check": {
+    "landing_json_exists": true,
+    "answers_which_numbers_usable": true,
+    "unresolved_misreport_fixed_or_annotated": "fixed in code + annotated here",
+    "process_end_accounted_for": true
+  }
+}

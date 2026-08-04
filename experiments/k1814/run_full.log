@@ -1,0 +1,76 @@
+[1/6] data-calibre gate: probing yfinance intraday limits
+    ^GSPC|5m|60d {'n_bars': 4680, 'start': '2026-05-04 13:30:00+00:00', 'end': '2026-07-29 19:55:00+00:00', 'n_trading_days': 60, 'bars_per_day': 78.0}
+    ^GSPC|1h|730d {'n_bars': 5073, 'start': '2023-08-30 13:30:00+00:00', 'end': '2026-07-29 19:30:00+00:00', 'n_trading_days': 730, 'bars_per_day': 6.95}
+    SPY|5m|60d {'n_bars': 4680, 'start': '2026-05-04 13:30:00+00:00', 'end': '2026-07-29 19:55:00+00:00', 'n_trading_days': 60, 'bars_per_day': 78.0}
+    SPY|1h|730d {'n_bars': 5072, 'start': '2023-08-30 13:30:00+00:00', 'end': '2026-07-29 19:30:00+00:00', 'n_trading_days': 730, 'bars_per_day': 6.95}
+    QQQ|5m|60d {'n_bars': 4680, 'start': '2026-05-04 13:30:00+00:00', 'end': '2026-07-29 19:55:00+00:00', 'n_trading_days': 60, 'bars_per_day': 78.0}
+    QQQ|1h|730d {'n_bars': 5073, 'start': '2023-08-30 13:30:00+00:00', 'end': '2026-07-29 19:30:00+00:00', 'n_trading_days': 730, 'bars_per_day': 6.95}
+[2/6] proxy validation vs genuine intraday RV
+[3/6] primary arm: ^GSPC Parkinson (this is the long stage)
+    [GSPC_parkinson_primary] h=1 HP chosen: lstm=hidden16/lr0.003, transformer=hidden16/lr0.003
+    [GSPC_parkinson_primary] h= 1 n_oos=13176 HAR=0.3768 HARL=0.3713 AR1=0.5152 RIDGE=0.3832 LSTM=0.3713 TRF=0.3886
+    [GSPC_parkinson_primary] h=5 HP chosen: lstm=hidden16/lr0.003, transformer=hidden16/lr0.003
+    [GSPC_parkinson_primary] h= 5 n_oos=13176 HAR=0.2027 HARL=0.1982 AR1=0.2934 RIDGE=0.2059 LSTM=0.2054 TRF=0.2659
+    [GSPC_parkinson_primary] h=22 HP chosen: lstm=hidden64/lr0.003, transformer=hidden64/lr0.003
+    [GSPC_parkinson_primary] h=22 n_oos=13176 HAR=0.1931 HARL=0.1914 AR1=0.2836 RIDGE=0.2026 LSTM=0.2128 TRF=0.2242
+[4/6] figures
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'primary' (2462s elapsed)
+[5/6] robustness: cross-asset and cross-estimator
+    [SPY_parkinson] h=1 HP chosen: lstm=hidden32/lr0.001, transformer=hidden32/lr0.001
+    [SPY_parkinson] h= 1 n_oos= 5356 HAR=0.4041 HARL=0.3952 AR1=0.4704 RIDGE=0.4013 LSTM=0.4310 TRF=0.4358
+    [SPY_parkinson] h=5 HP chosen: lstm=hidden32/lr0.001, transformer=hidden64/lr0.001
+    [SPY_parkinson] h= 5 n_oos= 5356 HAR=0.2525 HARL=0.2429 AR1=0.3196 RIDGE=0.2530 LSTM=0.2836 TRF=0.2795
+    [SPY_parkinson] h=22 HP chosen: lstm=hidden64/lr0.001, transformer=hidden64/lr0.001
+    [SPY_parkinson] h=22 n_oos= 5356 HAR=0.2776 HARL=0.2735 AR1=0.3331 RIDGE=0.2826 LSTM=0.3225 TRF=0.3296
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'robustness:SPY_parkinson' (2857s elapsed)
+    [SPY_garman_klass] h=1 HP chosen: lstm=hidden64/lr0.001, transformer=hidden64/lr0.001
+    [SPY_garman_klass] h= 1 n_oos= 5356 HAR=0.3750 HARL=0.3621 AR1=0.4288 RIDGE=0.3702 LSTM=0.3839 TRF=0.3948
+    [SPY_garman_klass] h=5 HP chosen: lstm=hidden32/lr0.001, transformer=hidden64/lr0.001
+    [SPY_garman_klass] h= 5 n_oos= 5356 HAR=0.2424 HARL=0.2304 AR1=0.3042 RIDGE=0.2432 LSTM=0.2805 TRF=0.2682
+    [SPY_garman_klass] h=22 HP chosen: lstm=hidden64/lr0.001, transformer=hidden64/lr0.001
+    [SPY_garman_klass] h=22 n_oos= 5356 HAR=0.2804 HARL=0.2749 AR1=0.3291 RIDGE=0.2859 LSTM=0.3330 TRF=0.3195
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'robustness:SPY_garman_klass' (3360s elapsed)
+    [QQQ_parkinson] h=1 HP chosen: lstm=hidden64/lr0.001, transformer=hidden32/lr0.001
+    [QQQ_parkinson] h= 1 n_oos= 3814 HAR=0.3849 HARL=0.3735 AR1=0.4447 RIDGE=0.3924 LSTM=0.4009 TRF=0.4144
+    [QQQ_parkinson] h=5 HP chosen: lstm=hidden32/lr0.001, transformer=hidden32/lr0.001
+    [QQQ_parkinson] h= 5 n_oos= 3814 HAR=0.2536 HARL=0.2458 AR1=0.3105 RIDGE=0.2553 LSTM=0.2640 TRF=0.2649
+    [QQQ_parkinson] h=22 HP chosen: lstm=hidden32/lr0.001, transformer=hidden64/lr0.001
+    [QQQ_parkinson] h=22 n_oos= 3814 HAR=0.2510 HARL=0.2488 AR1=0.3010 RIDGE=0.2499 LSTM=0.2611 TRF=0.2593
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'robustness:QQQ_parkinson' (3769s elapsed)
+[6/6] ablations
+    [ablation_channels_with_returns] h= 1 n_oos=13176 HAR=0.3867 HARL=0.3804 AR1=nan RIDGE=nan LSTM=0.3643 TRF=0.5497
+    [ablation_channels_with_returns] h= 5 n_oos=13176 HAR=0.2077 HARL=0.2026 AR1=nan RIDGE=nan LSTM=0.1944 TRF=0.3469
+    [ablation_channels_with_returns] h=22 n_oos=13176 HAR=0.2016 HARL=0.2003 AR1=nan RIDGE=nan LSTM=0.2028 TRF=0.2187
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'ablation:channels_with_returns' (4084s elapsed)
+    [ablation_refit_250] h= 1 n_oos=13176 HAR=0.3755 HARL=0.3693 AR1=nan RIDGE=nan LSTM=0.3701 TRF=nan
+    [ablation_refit_250] h= 5 n_oos=13176 HAR=0.2036 HARL=0.2001 AR1=nan RIDGE=nan LSTM=0.2010 TRF=nan
+    [ablation_refit_250] h=22 n_oos=13176 HAR=0.1933 HARL=0.1920 AR1=nan RIDGE=nan LSTM=0.2109 TRF=nan
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'ablation:refit_250' (4587s elapsed)
+    [ablation_window_L66] h= 1 n_oos=13132 HAR=0.3876 HARL=0.3817 AR1=nan RIDGE=nan LSTM=0.3770 TRF=0.4366
+    [ablation_window_L66] h= 5 n_oos=13132 HAR=0.2085 HARL=0.2035 AR1=nan RIDGE=nan LSTM=0.2054 TRF=0.2655
+    [ablation_window_L66] h=22 n_oos=13132 HAR=0.2027 HARL=0.2013 AR1=nan RIDGE=nan LSTM=0.2325 TRF=0.2694
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'ablation:window_L66' (5650s elapsed)
+    [ablation_train_len1500] h= 1 n_oos=14676 HAR=0.3519 HARL=0.3666 AR1=nan RIDGE=nan LSTM=0.4061 TRF=0.4651
+    [ablation_train_len1500] h= 5 n_oos=14676 HAR=0.1873 HARL=0.1839 AR1=nan RIDGE=nan LSTM=0.2340 TRF=0.2603
+    [ablation_train_len1500] h=22 n_oos=14676 HAR=0.1863 HARL=0.1847 AR1=nan RIDGE=nan LSTM=0.2411 TRF=0.2648
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'ablation:train_len1500' (5813s elapsed)
+    [ablation_loss_qlike_direct] h= 1 n_oos=13176 HAR=0.3867 HARL=0.3804 AR1=nan RIDGE=nan LSTM=0.4180 TRF=0.4299
+    [ablation_loss_qlike_direct] h= 5 n_oos=13176 HAR=0.2077 HARL=0.2026 AR1=nan RIDGE=nan LSTM=0.2194 TRF=0.2376
+    [ablation_loss_qlike_direct] h=22 n_oos=13176 HAR=0.2016 HARL=0.2003 AR1=nan RIDGE=nan LSTM=0.2325 TRF=0.2228
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'ablation:loss_qlike_direct' (6171s elapsed)
+[reproduce_spec] wrote K1814_results.json + reproduce_spec.json (entrypoint b1a67269d6f6, 66724 bytes)
+    [checkpoint] wrote K1814_results.json after 'complete' (6171s elapsed)
+
+done in 6170.6s  h*=None
+  h= 1: HAR=0.3768 HARL=0.3713 DL(lstm)=0.3713+-0.0036  DM/HAR=+0.98 (q=0.3923)  DM/HARL=-0.01 (q=0.9915)  -> FAIL_TO_REJECT
+  h= 5: HAR=0.2027 HARL=0.1982 DL(lstm)=0.2054+-0.0024  DM/HAR=-0.50 (q=0.6153)  DM/HARL=-1.29 (q=0.2382)  -> FAIL_TO_REJECT
+  h=22: HAR=0.1931 HARL=0.1914 DL(lstm)=0.2128+-0.0065  DM/HAR=-2.11 (q=0.0693)  DM/HARL=-2.31 (q=0.0414)  -> FAIL_TO_REJECT

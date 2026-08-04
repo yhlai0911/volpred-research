@@ -1,0 +1,18 @@
+{
+  "schema_version": "volpred.gate_history.v1",
+  "entries": [
+    {
+      "sha256": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
+      "size_bytes": 66724,
+      "source": "k1814.py",
+      "blob": "b1a67269__k1814.py",
+      "reason": "K1814 split 1/2 artifact-honesty fix: ablation loop checkpoint(f'ablation:{name}', []) at line 1329 declared zero unresolved items on every iteration, so a mid-loop partial artifact claimed completeness. Preserving the exact bytes that produced the archived K1814_results.json (entrypoint sha b1a67269d6f6) before changing the unresolved list to name the not-yet-run ablation specs. Results are NOT re-run; fix affects future executions only.",
+      "preserved_at": "2026-08-02T08:38:01Z"
+    }
+  ],
+  "_readme": [
+    "Pre-change bytes of gate-bearing experiment scripts, preserved BEFORE the edit.",
+    "Written by scripts/preserve_gate_blob.py. Never edit a blob: it is evidence,",
+    "and an edited original is a reconstruction, which is what K1708 was rejected for."
+  ]
+}
