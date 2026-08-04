@@ -3,11 +3,11 @@
 ## 論文列表
 - **第一篇**：`paper/leverage-direction/main.tex`（44 頁，Leverage Direction Matters，目標 JBF）
 - **第二篇**：`paper/taiwan-vt/main_v3.tex`（50 頁，`\input{body_v3}`；Taiwan VT + TZ Information Transmission，目標 PBFJ）— 舊 `main.tex`/`body.tex` 單體版已封存 `paper/taiwan-vt/_superseded/`（2026-07-05 版本分岔 reconcile；canonical TSMC γ=0.052/t=3.98 常數均值 K892，非舊 body 的零均值 0.039/0.87）
-- **第三篇**：`paper/vt-trend-following/main.tex`（24 頁，Is VT Just Trend Following?，目標待定）
-- **第四篇**：`paper/vix-sufficiency/main_v2.tex`（39 頁，Can Anything Beat VIX?，目標 J. Forecasting）
-- **第五篇**：`paper/volatility-absorption/main_v2.tex`（Volatility Absorption）
-- **第六篇**：`paper/vt-crowding-abm/main.tex`（VT Crowding ABM）
-- **第七篇**：`paper/vt-insurance-cost/main.tex`（VT Insurance Cost）
+- **第三篇**：`paper/vt-trend-following/main_v5.tex`（36 頁，`\input{body_v5}`，Is VT Just Trend Following?，目標待定）
+- **第四篇**：`paper/vix-sufficiency/main_v5.tex`（64 頁，Can Anything Beat VIX?，目標 J. Forecasting）
+- **第五篇**：`paper/volatility-absorption/main_v3.tex`（44 頁，Volatility Absorption）
+- **第六篇**：`paper/vt-crowding-abm/main.tex`（34 頁，VT Crowding ABM）
+- **第七篇**：`paper/vt-insurance-cost/main.tex`（17 頁，VT Insurance Cost）
 - **第八篇**：`paper/prg-periodic-garch/main.tex`（PRG Periodic GARCH）
 - **第九篇**：`paper/garch-x-vix/main.tex`（45 頁，Multiplicative GARCH-X with VIX，目標 J. Empirical Finance 或 J. Forecasting）
 - 編譯：`cd paper/<name> && /Library/TeX/texbin/xelatex -interaction=nonstopmode main.tex`（跑兩次解引用）
@@ -28,9 +28,15 @@
 leverage-direction 再犯）。前兩次都只是把「怎麼猜」換一種猜法。細節見
 `docs/error_log.md` class M 與 `paper/leverage-direction/_archived/README.md`。
 
-尚未宣告（證據矛盾，需裁定；在裁定前它們會 fail closed 而非被猜）：
-`vix-sufficiency`、`volatility-absorption`、`vt-trend-following`、
-`eav-universal-magnitude`、`forecast-tail-divergence`。
+2026-08-04 稍晚已補裁定四篇（依逐檔 git 歷史 + `reproduce.py`，非依檔名序）：
+`vt-trend-following` → `main_v5.tex`、`volatility-absorption` → `main_v3.tex`、
+`vix-sufficiency` → `main_v5.tex`、`eav-universal-magnitude` → `body.tex`
+（該篇沒有任何 `main*.tex`，`body.tex` 本身就是 `\documentclass` root）。
+上面第三/四/五篇的檔名與頁數同步更正 —— 舊值指向的不是現行手稿，其中
+`vix-sufficiency` 原本指的 `main_v2.tex` 根本不存在。
+
+**未宣告只剩 `forecast-tail-divergence`，而那是正確狀態**：它是 outline-only draft
+（`EXECUTION.md` 標 `stage: draft`），從未有過 `.tex`，沒有手稿可宣告。
 
 ## 版本命名規則
 - `main.tex` / `body.tex` = 原版（不動）

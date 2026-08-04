@@ -1,0 +1,6 @@
+{
+  "main_tex": "body.tex",
+  "declared_at": "2026-08-04",
+  "declared_by": "adjudicated from per-file git history + reproduce.py, after the three-strike refactor",
+  "reason": "This paper has no main*.tex at all: body.tex is itself the \\documentclass root (check_paper_compliance.py already treats a bare body.tex as an entry point for exactly this case). The stray main.pdf has no main.tex source and is retired to _archived/."
+}
