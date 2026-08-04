@@ -1,0 +1,44 @@
+{
+  "id": "codex-review-k1095-v3",
+  "title": "K1095-v3 adversarial re-review on frozen bytes (HEAD 2519fd345) — PASS gates the merge",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1095_v3_prompt.md",
+    "storage/ops/codex_reviews/k1095_v3_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 2,
+  "queued_at": "2026-08-04T13:12:37Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-review-k1095-v3.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-review-k1095-v3.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1095_v3_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1095_v3_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "routing": {
+    "lane": "compute_queue",
+    "token_cost_estimate": 0,
+    "router": "manual_enqueue"
+  },
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收 K1095-v3 Codex 對抗式重審結果。(1) 讀 storage/ops/codex_reviews/k1095_v3_verdict.md 首行 VERDICT。(2) 先核對 verdict 內的 byte-freeze 表：八個 sha256 必須逐一等於 prompt 裡的 pin（worktree .claude/worktrees/dispatch-slot-1-6ec34837-k1095v3, HEAD 2519fd345），不符即視為未審凍結 bytes，重新 freeze 再送審。(3) PASS → 主線程把 verdict 寫成 experiments/k1095_v3/review_verdict.json（含八檔 sha256 pin、reviewer、HEAD、per-defect 判定），再跑 bash scripts/merge_worktree.sh 合併，合併後由主線程寫 knowledge.json 的 K1095-v3 條目（數字一律從 k1095_v3_results.json 程式化取得，禁抄 README；agent 不得寫 knowledge）。(4) FAIL → 依 verdict 的 Required remediation 建 K1095-v4 remediation task，不得合併、不得把 FAIL 當 PASS。(5) 空檔或 QUOTA_EXHAUSTED = 審查失敗不是通過，requeue 本 job，禁止在無 verdict 下合併。",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "source_task_link": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null
+}
