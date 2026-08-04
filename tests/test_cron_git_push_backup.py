@@ -51,7 +51,17 @@ def test_silent_fallback_hold_routes_to_stable_p1_before_any_notification() -> N
     # Divergence and a real transport failure remain owner-facing alerts; only
     # the guard-held, mechanically repairable branch is suppressed.
     assert 'title "git-push-backup: 偵測到 origin 分岔"' in script
-    assert 'title "git-push-backup: push 失敗"' in script
+    # The push-failure title became classifier-derived on 2026-08-04 (a fixed
+    # body blamed auth for what was a file-size rejection), so pin the routing
+    # invariant instead of the literal title: still a warn-level owner alert,
+    # never the internal remediable route, and the owner-facing string remains
+    # the default the classifier overrides.
+    push_block = script[script.index("# 3) fast-forward push"):]
+    assert 'PUSH_CLASS_TITLE="git-push-backup: push 失敗"' in push_block
+    assert "send-alert --level warn" in push_block
+    assert '--title "$PUSH_CLASS_TITLE"' in push_block
+    assert "--suppress-owner-transport" not in push_block
+    assert "INTERNAL_ROUTE_ARGS" not in push_block
 
 
 def test_audit_and_push_are_bound_to_one_immutable_sha() -> None:
