@@ -1,0 +1,329 @@
+{
+  "schema_version": 1,
+  "title": "懶人包｜門檻沒到，所以我們不下結論",
+  "subtitle": "台灣恐慌指數除以美國恐慌指數的倍數，驗證進度到哪裡，以及中途查到自家資料過期這件事",
+  "evidence": {
+    "k1323": {
+      "path": "experiments/k1323/k1323_results.json",
+      "sha256": "dd844cddffd78deceff774c16463c5c839616a10607fac2629aa4ca4002af3a0",
+      "label": "台灣與美國恐慌指數比值的門檻進度、兩種配對口徑統計量與資料新鮮度自查結果 JSON"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "一個事先訂好的規矩",
+      "alt": "概念說明：台灣恐慌指數除以美國恐慌指數得到一個倍數，事先講好要累積滿一年的交易日才認定穩不穩，目前只走到不到一半",
+      "sources": [
+        "k1323"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "在看什麼數字",
+          "body": [
+            "台灣的恐慌指數除以美國的恐慌指數，得到一個倍數。",
+            "這個倍數大，代表台股的隱含波動相對美股被墊得比較高。",
+            "問題不是它今天多少，而是它到底穩不穩定。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "規矩事先訂好",
+          "body": [
+            "要認定穩或不穩，事先講好要累積滿一整年的交易日才拿出來說。",
+            "門檻是事先訂的，不是事後挑的。",
+            "事先講好的門檻，只有在對自己不利的時候才有價值。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "事先訂的門檻",
+          "value": {
+            "source": "k1323",
+            "path": "/progress_to_252/target_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個交易日"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "目前累積",
+          "value": {
+            "source": "k1323",
+            "path": "/progress_to_252/unique_vixtwn_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個交易日"
+            }
+          },
+          "note": {
+            "template": "台灣端樣本自 {start} 至 {end}",
+            "bindings": {
+              "start": {
+                "source": "k1323",
+                "path": "/data_sources/vixtwn/start",
+                "format": {
+                  "kind": "date"
+                }
+              },
+              "end": {
+                "source": "k1323",
+                "path": "/data_sources/vixtwn/end",
+                "format": {
+                  "kind": "date"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "professional",
+      "title": "跑到一半，出事的是自己",
+      "alt": "方法說明：本地那份配對用的美股資料末端落後台灣端數個交易日，使可用的配對天數變少，於是另外重抓一份當期資料再算一次",
+      "sources": [
+        "k1323"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩邊日期對不上",
+          "body": [
+            "配對那一步，兩份資料的最後日期對不上。",
+            "台灣那份已經更新到最新，本地那份美股資料的末端停在更早以前。",
+            "這個缺口不會報錯、不會少一欄，也不會出現任何異常值。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "本地美股檔末端",
+          "value": {
+            "source": "k1323",
+            "path": "/data_sources/local_vix_primary/end",
+            "format": {
+              "kind": "date"
+            }
+          },
+          "note": {
+            "template": "台灣端已到 {vixtwn_end}",
+            "bindings": {
+              "vixtwn_end": {
+                "source": "k1323",
+                "path": "/source_freshness_gap/vixtwn_last_date",
+                "format": {
+                  "kind": "date"
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "落後幅度",
+          "value": {
+            "source": "k1323",
+            "path": "/source_freshness_gap/local_source_stale_vs_vixtwn_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個交易日"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "舊檔配得出的天數",
+          "value": {
+            "source": "k1323",
+            "path": "/source_freshness_gap/local_pairing_overlap_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "重抓後配得出的天數",
+          "value": {
+            "source": "k1323",
+            "path": "/source_freshness_gap/fresh_pairing_overlap_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": "少掉的那幾天，全部是最新的那幾天"
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "professional",
+      "title": "重抓一份，結論沒有被救回來",
+      "alt": "結果對照：換上當期重抓的美股資料之後，倍數的平均更高、跳動幅度更大，兩種口徑的平均都高於先前研究定的參考水位",
+      "sources": [
+        "k1323"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "參考水位（先前研究）",
+          "value": {
+            "source": "k1323",
+            "path": "/baseline_comparison/k1181_mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "舊檔口徑平均",
+          "value": {
+            "source": "k1323",
+            "path": "/primary_local_gate/ratio_stats/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "重抓口徑平均",
+          "value": {
+            "source": "k1323",
+            "path": "/fresh_vix_audit/ratio_stats/mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "參考的跳動幅度",
+          "value": {
+            "source": "k1323",
+            "path": "/baseline_comparison/k1181_cv",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "重抓口徑跳動幅度",
+          "value": {
+            "source": "k1323",
+            "path": "/fresh_vix_audit/ratio_stats/cv",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "約為參考值的兩倍"
+        },
+        {
+          "kind": "metric",
+          "label": "二十天平均的終點",
+          "value": {
+            "source": "k1323",
+            "path": "/fresh_vix_audit/ratio_stats/rolling20_mean_end",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": {
+            "template": "起點是 {start}，整段路上沒有像樣的回頭",
+            "bindings": {
+              "start": {
+                "source": "k1323",
+                "path": "/fresh_vix_audit/ratio_stats/rolling20_mean_start",
+                "format": {
+                  "kind": "number",
+                  "digits": 3
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "把樣本切一半",
+          "body": [
+            "前半段的平均貼著參考水位，後半段拉開一大截。",
+            "換成新鮮資料，這條上升的斜線只有更陡，沒有變平。",
+            "原本猜資料過期製造了假象，這個猜測不成立。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "門檻沒到，所以不下結論",
+      "alt": "結論：進度尚未達到事先訂好的門檻，倍數的跳動幅度仍偏大且單向爬升，因此本輪不宣布任何結果，數字全部停在樣本截止日",
+      "sources": [
+        "k1323"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "門檻進度",
+          "value": {
+            "source": "k1323",
+            "path": "/progress_to_252/completion_ratio",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "還差",
+          "value": {
+            "source": "k1323",
+            "path": "/progress_to_252/days_remaining",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個交易日"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "這輪的結論只有一句",
+          "body": [
+            "門檻沒到，而且以目前的散開程度和趨勢，還不到能講穩定的狀態。",
+            "材料其實夠寫一篇讀起來很順的結論文章，但門檻是事先講好的。",
+            "現在就宣布，等於承認那條線可以移動。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "真正的收穫",
+          "body": [
+            "比較有用的，是那幾天的資料落差。",
+            "它只會安靜地讓樣本變少，然後把最新的一段資訊從結論裡拿掉。",
+            "所有數字停在樣本截止日，不描述當前市場。"
+          ]
+        }
+      ]
+    }
+  ]
+}
