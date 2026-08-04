@@ -109,11 +109,18 @@ uv run python scripts/audit_fb_pipeline.py
 jq --arg id "<mile_id>" \
   '.[] | select(.id == $id) | {
     id,
-    fb_post_status: .details.fb_post_status,
-    fb_post_url: .details.fb_post_url,
-    fb_posted_at: .details.fb_posted_at
+    fb_post_status,
+    fb_post_url,
+    fb_post_status_updated_at
   }' storage/reports/feed.json
 ```
+
+**欄位在頂層，不在 `.details`。** 2026-06-01 的 `migrate_fb_post_status_single_source.py` 已把
+`fb_post_status` 收斂成單一來源：canonical writer（`mark_fb_post_status.py`）與 worker 的
+idempotency guard（`fb_realchrome_post.py:_fb_post_status`）讀寫的都是 feed entry 的**頂層**欄位。
+查 `.details.fb_post_status` 一定回 null，而那個 null 讀起來像「根本沒發出去」——已經誤導過一次
+（`docs/error_log_archive/2026-Q3.md` 差點把成功的貼文判成假宣告），2026-08-01 再犯一次。驗證對外
+狀態一律查「guard 實際讀的那個欄位」。
 
 完成條件：
 

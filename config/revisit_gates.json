@@ -1,0 +1,40 @@
+{
+  "_doc": "Canonical revisit-gate policy. Owner: src/volpred/research/revisit_gate.py. Experiment scripts MUST import gate_for_pipeline() instead of hardcoding thresholds. Replaces the copy-pasted REVISIT_GATE_TOTAL_DAYS=200 / REVISIT_GATE_TEST_DAYS=50 pair that K1325's public article (mile_3445217e) admitted was too loose to ever decide anything.",
+  "version": 1,
+  "updated_at": "2026-08-02",
+  "policy": {
+    "target_abs_t": 3.0,
+    "_target_abs_t_why": "research_program.md Harvey bar: |t| > 3 before a forecasting verdict is publishable.",
+    "min_test_days_floor": 60,
+    "_min_test_days_floor_why": "Below ~60 test days the HAC/Harvey small-sample corrections in dm_hln are themselves unreliable, so a large |t| there is a reason to distrust the statistic rather than to act on it.",
+    "max_wait_trading_days": 504,
+    "_max_wait_trading_days_why": "~2 years. Past that, the stationary-effect assumption behind the sqrt(n) extrapolation is not credible (index composition, microstructure, regime drift), so 'revisit later' stops being a plan and the design has to change instead.",
+    "trading_days_per_year": 252
+  },
+  "pipelines": {
+    "tw50_5min_har_rv": {
+      "description": "0050.TW 5-min realized-variance HAR-RV vs Random Walk checkpoint chain: K1307 -> K1318 -> K1322 -> K1324 -> K1325.",
+      "experiments": ["k1307", "k1318", "K1322", "k1324", "k1325"],
+      "supersedes": {
+        "k1322": "REVISIT_GATE_DAYS = 200 (raw days)",
+        "k1324": "REVISIT_GATE_TOTAL_DAYS = 200 / REVISIT_GATE_TEST_DAYS = 50",
+        "k1325": "REVISIT_GATE_TOTAL_DAYS = 200 / REVISIT_GATE_TEST_DAYS = 50",
+        "k1307": "POWERED_OOS_TARGET = 252 (raw days)",
+        "_why": "Four scripts in one chain carried three different hardcoded thresholds, none derived. At n_test = 50 the implied DM-HLN |t| is ~1.47 against a |t| > 3 bar, so the old gate could only ever reproduce the same inconclusive verdict. Public commitment: article mile_3445217e (K1325 general)."
+      },
+      "split": {
+        "test_fraction": 0.3,
+        "_test_fraction_why": "The chain holds out the last 30% of post-warm-up rows (K1325: 60 HAR rows -> 42 train / 18 test).",
+        "warmup_days": 22,
+        "_warmup_days_why": "HAR's 22-day monthly lag consumes the first 22 raw days before the first usable feature row."
+      },
+      "latest_checkpoint": {
+        "experiment_id": "k1325",
+        "results_path": "experiments/k1325/k1325_results.json",
+        "observed_abs_t_field": "results.DM_HLN_t",
+        "observed_test_days_field": "sample.n_test",
+        "current_total_days_field": "sample.n_total_days"
+      }
+    }
+  }
+}

@@ -108,3 +108,6 @@ def test_fire_manifest_hook_check_warns_when_registration_is_missing(
     assert len(findings) == 1
     assert findings[0]["dimension"] == "fire_manifest_hook"
     assert findings[0]["severity"] == "warn"
+    assert "舊 shadow 診斷" in findings[0]["message"]
+    assert "不能授權 commit ownership 切換" in findings[0]["message"]
+    assert "Issue #44" in findings[0]["recovery"]

@@ -61,7 +61,19 @@ if str(_SRC_DIR) not in sys.path:
 # K1322 only consumes daily 5-min CSVs; we do not mutate them.
 DATA_GLOB_DIR = Path("/Users/yhlai0911/volpred-research/data/intraday")
 SYMBOL = "0050_TW_5min"
-REVISIT_GATE_DAYS = 200  # require n_total >= 200 before a verdict is trusted
+
+# Revisit gate (2026-08-02): the old `REVISIT_GATE_DAYS = 200` constant was a
+# guess, and K1325 showed it could never separate the hypotheses (n_test = 50
+# implies |t| ~ 1.47 against a |t| > 3 bar). The condition is now derived from
+# the observed effect size by volpred.research.revisit_gate, with policy in
+# config/revisit_gates.json, shared across the whole
+# K1307 -> K1318 -> K1322 -> K1324 -> K1325 chain. K1322_results.json still
+# carries the superseded 200-day block: it is the artifact of the run that
+# produced it and is not rewritten after the fact. Live decision lives in
+# experiments/k1325/revisit_gate.json.
+from volpred.research.revisit_gate import gate_for_pipeline  # noqa: E402
+
+REVISIT_PIPELINE = "tw50_5min_har_rv"
 
 # ======================================================================
 # 0) Import HAC dm_test from volpred (same as K1301/K1303 — consistency)
@@ -305,13 +317,9 @@ def main():
             "k1322_question": ("Does HAR-RV's predictive power over RW also hold on the 0050.TW spot ETF "
                               "(different microstructure: lower liquidity, call-auction open, no after-hours)?"),
         },
-        "revisit_gate": {
-            "n_total_days_required": REVISIT_GATE_DAYS,
-            "current_n_total_days": None,
-            "untrustworthy_small_sample": None,
-            "rationale": ("76-day intraday window after warm-up leaves n_test ~ 16. "
-                         "Re-run when n_total >= 200 (~ Aug 2026 if data collection continues)."),
-        },
+        # Filled in after the DM statistic exists — the requirement is derived
+        # from the observed effect size, so it cannot be stated up front.
+        "revisit_gate": None,
     }
 
     # --- 1) Load daily RV ---
@@ -365,10 +373,7 @@ def main():
     n_test = T - n_train
     out["n_train"] = int(n_train)
     out["n_test"] = int(n_test)
-    untrustworthy = bool(n_test < 50)
-    out["revisit_gate"]["untrustworthy_small_sample"] = untrustworthy
-    print(f"[split] T={T}, n_train={n_train}, n_test={n_test}, "
-          f"untrustworthy_small_sample={untrustworthy}")
+    print(f"[split] T={T}, n_train={n_train}, n_test={n_test}")
 
     idx_train = np.arange(n_train)
     idx_test = np.arange(n_train, T)
@@ -433,6 +438,18 @@ def main():
     out["DM_HLN_p"] = float(dm_p) if not np.isnan(dm_p) else None
     out["DM_interpretation"] = "positive t => HAR-RV lower QLIKE => HAR preferred; negative => RW preferred"
 
+    # --- Revisit gate: derived from the effect size just measured ---
+    gate = gate_for_pipeline(
+        REVISIT_PIPELINE,
+        observed_abs_t=0.0 if np.isnan(dm_t) else float(dm_t),
+        observed_test_days=int(n_test),
+        current_total_days=int(out["n_total_days"]),
+        effect_favours_challenger=(not np.isnan(dm_t)) and dm_t > 0,
+    )
+    out["revisit_gate"] = gate.to_dict()
+    untrustworthy = not gate.gate_passed
+    out["revisit_gate"]["untrustworthy_small_sample"] = untrustworthy
+
     # --- 8) Verdict ---
     pass_dm = (not np.isnan(dm_t)) and abs(dm_t) > 3.0
     har_lower_qlike = mean_qlike_har < mean_qlike_rw
@@ -448,14 +465,14 @@ def main():
 
     out["untrustworthy_small_sample"] = untrustworthy
     out["verdict"] = verdict
-    out["revisit_gate_threshold"] = REVISIT_GATE_DAYS
+    out["revisit_gate_threshold"] = gate.required_test_days
 
     # Caveat string surfaced for downstream readers
     out["caveats"] = []
     if untrustworthy:
         out["caveats"].append(
-            f"n_test={n_test} < 50 → DM-HLN test under-powered; verdict is exploratory only. "
-            f"Revisit when n_total >= {REVISIT_GATE_DAYS}."
+            f"n_test={n_test} < {gate.required_test_days} → DM-HLN test under-powered; "
+            f"verdict is exploratory only. {gate.rationale}"
         )
     if r2_har_oos < 0 or r2_rw_oos < 0:
         out["caveats"].append(

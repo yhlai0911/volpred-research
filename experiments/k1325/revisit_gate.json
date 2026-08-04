@@ -1,0 +1,49 @@
+{
+  "pipeline": "tw50_5min_har_rv",
+  "verdict": "DESIGN_CHANGE_REQUIRED",
+  "gate_passed": false,
+  "observed_abs_t": 0.882689,
+  "observed_test_days": 18,
+  "current_total_days": 82,
+  "target_abs_t": 3.0,
+  "required_test_days": 208,
+  "required_total_days": 716,
+  "required_test_days_ci": {
+    "optimistic_test_days": 21,
+    "pessimistic_test_days": null
+  },
+  "additional_trading_days_needed": 634,
+  "eta_years": 2.52,
+  "policy": {
+    "target_abs_t": 3.0,
+    "min_test_days_floor": 60,
+    "max_wait_trading_days": 504,
+    "trading_days_per_year": 252
+  },
+  "split": {
+    "test_fraction": 0.3,
+    "warmup_days": 22
+  },
+  "rationale": "Reaching |t|=3 needs 208 test days (~716 raw trading days). That is 634 more trading days ≈ 2.52 years beyond the current 82, past the 504-day wait horizon. Do not schedule a re-run; change the design (pool across assets, deeper history, or a frequency where the effect is larger).",
+  "assumptions": [
+    "t grows as sqrt(n_test): mean loss differential and its long-run variance are assumed to stay at their currently observed values.",
+    "This is an extrapolation from a small sample, not a formal power calculation; required_test_days_ci shows how wide the band is.",
+    "Target bar is the project's Harvey |t| > 3.",
+    "Floor of 60 test days applies regardless of the extrapolation, because DM-HLN small-sample corrections are not trustworthy below it."
+  ],
+  "generated_by": "scripts/eval_revisit_gate.py",
+  "policy_source": "config/revisit_gates.json",
+  "evidence": {
+    "experiment_id": "k1325",
+    "results_path": "experiments/k1325/k1325_results.json",
+    "observed_dm_hln_t": 0.882689,
+    "current_total_days_source": "experiments/k1325/k1325_results.json at time of that run"
+  },
+  "supersedes": {
+    "k1322": "REVISIT_GATE_DAYS = 200 (raw days)",
+    "k1324": "REVISIT_GATE_TOTAL_DAYS = 200 / REVISIT_GATE_TEST_DAYS = 50",
+    "k1325": "REVISIT_GATE_TOTAL_DAYS = 200 / REVISIT_GATE_TEST_DAYS = 50",
+    "k1307": "POWERED_OOS_TARGET = 252 (raw days)",
+    "_why": "Four scripts in one chain carried three different hardcoded thresholds, none derived. At n_test = 50 the implied DM-HLN |t| is ~1.47 against a |t| > 3 bar, so the old gate could only ever reproduce the same inconclusive verdict. Public commitment: article mile_3445217e (K1325 general)."
+  }
+}

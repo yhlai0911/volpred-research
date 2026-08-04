@@ -5,11 +5,22 @@ K1307 scaffold and readiness diagnostic for Taiwan 5-minute HAR-RV on 0050.TW.
 This script does not claim a new forecasting result. It audits local sample
 coverage and verifies whether the current 0050.TW 5-minute RV history is long
 enough for a powered HAR-RV experiment.
+
+Readiness threshold (2026-08-02): this file used to answer "is the sample long
+enough?" with its own hardcoded `POWERED_OOS_TARGET = 252` raw days, while
+K1322/K1324/K1325 downstream answered the same question with a different
+hardcoded pair (200 total / 50 test days). Two numbers, one pipeline, neither
+derived from anything -- and K1325 showed both were far too loose to separate
+the hypotheses. The requirement now comes from
+`volpred.research.revisit_gate.evaluate_registered_pipeline`, which derives it
+from the effect size measured at the chain's latest checkpoint. Policy lives in
+`config/revisit_gates.json`.
 """
 
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -27,7 +38,11 @@ TW_RV_PATH = PROJECT_ROOT / "data" / "intraday" / "0050_TW_daily_rv.csv"
 SPY_RV_PATH = PROJECT_ROOT / "data" / "intraday" / "SPY_daily_rv.csv"
 MIN_HAR_LAG_DAYS = 22
 MIN_TRAIN_DAYS = 30
-POWERED_OOS_TARGET = 252
+
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
+from volpred.research.revisit_gate import evaluate_registered_pipeline  # noqa: E402
+
+REVISIT_PIPELINE = "tw50_5min_har_rv"
 
 
 @dataclass(frozen=True)
@@ -77,7 +92,14 @@ def readiness_diagnostic(rv: pd.Series) -> dict:
     max_oos_after_min_train = max(usable_obs - MIN_TRAIN_DAYS, 0)
     non_null_obs = int(rv.dropna().shape[0])
 
-    if non_null_obs >= POWERED_OOS_TARGET:
+    # Derived, not guessed: how many raw days this pipeline needs before its
+    # OOS comparison can reach the project's |t| > 3 bar.
+    gate = evaluate_registered_pipeline(
+        REVISIT_PIPELINE, current_total_days=non_null_obs
+    )
+    powered_target = gate.required_total_days
+
+    if powered_target is not None and non_null_obs >= powered_target:
         verdict = "READY_FOR_FULL_OOS"
     elif usable_obs >= MIN_TRAIN_DAYS and max_oos_after_min_train > 0:
         verdict = "NOT_READY_SAMPLE_TOO_SHORT"
@@ -91,11 +113,16 @@ def readiness_diagnostic(rv: pd.Series) -> dict:
         "min_har_lag_days": MIN_HAR_LAG_DAYS,
         "min_train_days": MIN_TRAIN_DAYS,
         "max_oos_obs_after_min_train": max_oos_after_min_train,
-        "powered_oos_target_days": POWERED_OOS_TARGET,
-        "meets_powered_threshold": non_null_obs >= POWERED_OOS_TARGET,
+        "powered_oos_target_days": powered_target,
+        "meets_powered_threshold": bool(
+            powered_target is not None and non_null_obs >= powered_target
+        ),
+        "revisit_gate": gate.to_dict(),
         "notes": [
             "This file is a sample-readiness diagnostic, not a full forecasting run.",
             "K1318 already showed methodology is viable but 0050.TW OOS power is too low in short samples.",
+            "powered_oos_target_days is derived from the latest checkpoint's observed "
+            "effect size via config/revisit_gates.json, not hardcoded.",
             "Use signal from t-1 to predict RV at t; explicit rv.shift(1) enforced in feature construction.",
         ],
     }
