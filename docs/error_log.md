@@ -6309,3 +6309,26 @@ ast-parse，兩個 wrapper 都鎖）已隨 `0f1a949a1` 落地。agy wrapper 用�
 **制度化**：reap 自動收實驗不補件的流程洞已開 chip（reap 收 experiments/<kid> 時自動開
 補件任務）。本段狀態 **`root_cause_fixed_and_verified`**（spec runtime 生成 + 雙審 PASS +
 兩道 gate 綁 bytes 驗證 + 復現全等證據）。
+
+## 2026-08-05 — K1730 v2 收養落地：lineage 裁決、runtime spec 重生、gate 互咬死結、雙 fallback 認證
+
+**任務鏈**：`k1730_v2_adopt_reconcile_recertify_20260802`（main_thread lane）→ compute 重跑 → 收件 merge。
+
+1. **Lineage 裁決**：knowledge 原引用的 d0d25fe2 其實是 v1 舊代碼+較弱 MCMC 設定的復核產物；
+   authoritative 改為 v2/cd931fbf（補救版、15000/4 chains、完整 multistart 診斷）。決定性證據＝
+   邊界 DM cell 跨 0.05 漂移 → 必須釘死唯一 lineage。knowledge 更正條目 55de8943。
+2. **Spec 重生**：v2 suite 原 spec 為手寫 drift（entrypoint sha 不符，K1708 類）→ finalize 佈線 +
+   compute queue 重跑 2.97h（seed 42），扣牆鐘欄位後與 cd931fbf **全量逐欄位全等**，spec runtime-born。
+3. **Gate 互咬死結（已根治，commit ddba23a34）**：drift gate 強制封存 as-run bytes 到 gate_history/，
+   而 `experiment_gates.python_files` 把封存 blob 餵給 nested-dm 掃描判活違規 —— audit 母體掃描早已
+   排除 gate_history（註解自己寫「其他 iterator 沒被告知」）。修 iterator + regression test 鎖死。
+   附帶：compute job 因此 bug 被判 `experiment_gate_failed`（script 本體 exit 0、產物有效），
+   followup 未觸發，收件由主線程手動完成。
+4. **佇列 4.5h 不撿件（contained，另查）**：job enqueue 後 19:15–23:45 tick 全 jobs_run=0，
+   跑過 `reconcile-bindings` 後 00:00 tick 即撿起 —— 疑 source_task_link 在 dispatch-settle 前
+   短暫 invalid；未複製出根因，同類再發升級處理。
+5. **認證**：雙 fallback PASS（agy Gemini 3.6 Flash + claude fresh-context 207k-token 位元級核對，
+   均 none blocking）；nested-DM 撤回裁決完整帶進 suite（marker+README 重標+裁決文件+as-run 封存）；
+   merge 5066c02f4 落地、HEAD 驗證、artifacts gate PASS。Codex primary 補驗併入 8/8 任務（含 K1714/K1735）。
+
+本段主體狀態 **`root_cause_fixed_and_verified`**（第 4 點單獨 `contained`）。

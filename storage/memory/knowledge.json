@@ -43154,7 +43154,7 @@
  {
   "item_id": "ccbccb6a",
   "category": "research_finding",
-  "content": "[K1813 收件 PASS；科學結論=NULL_NO_TRADABLE_DAY_OF_WEEK_OVERNIGHT_VRP_EFFECT] yfinance SPY/QQQ/IWM/TLT/GLD 日頻 OHLC（auto_adjust=False，Open 以 AdjClose/Close 重定標），下載起點 1990-01-01，OOS 2015-01-01 起 n=2909 天，seed=42。H1a ACCEPT：隔夜與日內兩段平方報酬 Ljung-Box Q(10) 5/5 資產 p<1e-199（最大 p=1.99e-200），兩段各自都有波動叢聚。H1b REJECT：AR(5) |r| 持續性的兩段落差經 block-bootstrap（B=2000, block=20）0/5 資產顯著；這是未能拒絕，不是證明兩段相同。H2a REJECT（H3 的關鍵前提）：可交易的那一軸——隔夜『報酬』——的星期均等性聯合 F 在 BH-FDR q=0.1 下 0/5 資產拒絕（q 值 0.738–0.836），逐格 25 檢定亦 0 拒絕。H2b ACCEPT：隔夜『變異』與 VRP proxy 的星期差異 5/5 資產拒絕（q 最大 0.0603）。H2c：加入隔夜窗跨越日曆天數的控制後只剩 QQQ/TLT/GLD 存活（SPY q=0.122、IWM q=0.176 掉出），即 SPY/IWM 的表面星期效應可由週末窗長解釋。H3 REJECT（主結論）：OOS 含成本 1 bp/side、以 net_with_cash 計分，5 資產 × 5 個日曆規則共 25 個組合中，滿足 ΔSharpe>0 且 block-bootstrap p<0.05 者為 0 個；最佳者 IWM:always_overnight ΔSharpe=+0.038（p=0.88）。反向則有 9 個組合顯著輸給 buy-and-hold，含 SPY:always_overnight -0.533(p=0.016)、SPY:dow_gated_overnight -0.533(p=0.015)、SPY:dow_walkforward_overnight -0.533(p=0.011)、SPY:dow_avoid_worst_overnight -0.227(p=0.020) 等。日曆規則只在成本拉到 5 bp 時才勝過未擇時的隔夜段（7 個組合），而在 0/1 bp 與其無法區分——這是週轉率較低的省成本假象（SPY 週轉 205 vs 504 側/年），不可當作星期效應證據。另一結果：SPY/QQQ/IWM/GLD 五個星期的 in-sample 隔夜均值全為正，sign-screen 規則因此退化成 always_overnight（ΔSharpe=0.000, p=1.000），僅 TLT 因週四 IS 均值 -2.18 bps 真的篩掉一天。Lookahead 診斷：以 N(0,0.5) 噪音覆蓋 T 之後全部報酬重建訊號，12 個探針日 0 violations，walk-forward 訊號確認為 causal。限制：成本模型為線性每側 bps，無市場衝擊／滑價狀態相依（真實開盤成本很可能更高，方向上只會加強 REJECT）；VRP 為 realized-based proxy 而非期權隱含；結論僅適用於這 5 檔 ETF 與此期間。",
+  "content": "[K1813 review=FAIL（Codex primary-path，2026-08-02，2 項 blocking defect，remediation round 2 = assign_bfd8dbf8，未 merge）；暫定科學結論=NULL_NO_TRADABLE_DAY_OF_WEEK_OVERNIGHT_VRP_EFFECT，但下列 H3 數字待 B1 修正後重算] yfinance SPY/QQQ/IWM/TLT/GLD 日頻 OHLC（auto_adjust=False，Open 以 AdjClose/Close 重定標），下載起點 1990-01-01，OOS 2015-01-01 起 n=2909 天，seed=42。H1a ACCEPT：隔夜與日內兩段平方報酬 Ljung-Box Q(10) 5/5 資產 p<1e-199（最大 p=1.99e-200），兩段各自都有波動叢聚。H1b REJECT：AR(5) |r| 持續性的兩段落差經 block-bootstrap（B=2000, block=20）0/5 資產顯著；這是未能拒絕，不是證明兩段相同。H2a REJECT（H3 的關鍵前提）：可交易的那一軸——隔夜『報酬』——的星期均等性聯合 F 在 BH-FDR q=0.1 下 0/5 資產拒絕（q 值 0.738–0.836），逐格 25 檢定亦 0 拒絕。H2b ACCEPT：隔夜『變異』與 VRP proxy 的星期差異 5/5 資產拒絕（q 最大 0.0603）。H2c：加入隔夜窗跨越日曆天數的控制後只剩 QQQ/TLT/GLD 存活（SPY q=0.122、IWM q=0.176 掉出），即 SPY/IWM 的表面星期效應可由週末窗長解釋。H3 REJECT（主結論）：OOS 含成本 1 bp/side、以 net_with_cash 計分，5 資產 × 5 個日曆規則共 25 個組合中，滿足 ΔSharpe>0 且 block-bootstrap p<0.05 者為 0 個；最佳者 IWM:always_overnight ΔSharpe=+0.038（p=0.88）。反向則有 9 個組合顯著輸給 buy-and-hold，含 SPY:always_overnight -0.533(p=0.016)、SPY:dow_gated_overnight -0.533(p=0.015)、SPY:dow_walkforward_overnight -0.533(p=0.011)、SPY:dow_avoid_worst_overnight -0.227(p=0.020) 等。日曆規則只在成本拉到 5 bp 時才勝過未擇時的隔夜段（7 個組合），而在 0/1 bp 與其無法區分——這是週轉率較低的省成本假象（SPY 週轉 205 vs 504 側/年），不可當作星期效應證據。另一結果：SPY/QQQ/IWM/GLD 五個星期的 in-sample 隔夜均值全為正，sign-screen 規則因此退化成 always_overnight（ΔSharpe=0.000, p=1.000），僅 TLT 因週四 IS 均值 -2.18 bps 真的篩掉一天。Lookahead 診斷：以 N(0,0.5) 噪音覆蓋 T 之後全部報酬重建訊號，12 個探針日 0 violations，walk-forward 訊號確認為 causal。限制：成本模型為線性每側 bps，無市場衝擊／滑價狀態相依（真實開盤成本很可能更高，方向上只會加強 REJECT）；VRP 為 realized-based proxy 而非期權隱含；結論僅適用於這 5 檔 ETF 與此期間。 【2026-08-04 更正】原條目標頭寫「收件 PASS」與事實不符：Codex primary-path review 實際回 FAIL，證據 storage/ops/codex_reviews/k1813_verdict.md。兩項 blocking defect：B1 — buy_and_hold 基準把兩段 simple return 相加（k1813.py:522 與 966）而非複利，真值應為 (1+s_on)(1+s_id)-1，故本條目所有 H3 ΔSharpe 比較（含 IWM:always_overnight +0.038、SPY 系列 -0.533/-0.227 等）都是對錯誤基準序列算出來的，須待重算。審查者以凍結 CSV 唯讀重算，OOS Sharpe 誤差約 +0.0009 SPY / -0.0006 QQQ / +0.0007 IWM / -0.0008 TLT / +0.0047 GLD，方向上 null 很可能維持，但數字未經正式重算前不得引用為定論。B2 — power 不足以支撐「不存在」等級的宣稱：H3 bootstrap SE 約 0.08–0.37 ΔSharpe，SE 0.23–0.29 時雙尾 5% 需觀測到約 0.45–0.57 才越過門檻、約 80% power 需 0.64–0.81，故本設計無法排除數個規則存在中等正效應。可支持的敘述只到「本設計下沒有任何日曆規則產生統計顯著的正 ΔSharpe」，不可讀成「效應不存在」。已通過項目保留：lookahead PASS（12 探針 0 violations）、in-sample/OOS 分離 PASS、成本與利息會計 PASS。frozen bytes 經審查者驗證與送審完全一致，故此為方法論 FAIL 而非產物問題。",
   "evidence": [
    "experiments/k1813/K1813_results.json",
    "experiments/k1813/README.md",
@@ -43163,7 +43163,20 @@
    "compute job agent-brief_k1813-5f38bb (exit_code=1 transient provider 500; artifacts complete and independently re-verified 2026-07-29T19:53:19.932102+00:00)"
   ],
   "confidence": 0.75,
-  "created_at": "2026-08-02T16:09:16.675281"
+  "created_at": "2026-08-02T16:09:16.675281",
+  "revisions": [
+   {
+    "revised_at": "2026-08-04T20:29:42.325499+08:00",
+    "actor": "hourly-slot-1-24fc44982b774737b4318b8d9bdf830e",
+    "reason": "K1813 collection: the entry header claimed '收件 PASS' but the Codex primary-path review returned FAIL with two blocking defects (storage/ops/codex_reviews/k1813_verdict.md, 2026-08-02). B1: the buy_and_hold benchmark adds simple segment returns instead of compounding them (k1813.py:522/966), so every H3 delta-Sharpe in this entry was computed against the wrong benchmark series and must be recomputed. B2: bootstrap SEs of 0.08-0.37 delta-Sharpe cannot support absence-of-effect claims. Header corrected to review=FAIL with the remediation task id, and the two defects appended as an explicit 2026-08-04 correction so the numbers are not cited as settled. Findings that passed review (lookahead, IS/OOS separation, cost accounting) are preserved unchanged.",
+    "fields": [
+     "content"
+    ],
+    "before": {
+     "content": "[K1813 收件 PASS；科學結論=NULL_NO_TRADABLE_DAY_OF_WEEK_OVERNIGHT_VRP_EFFECT] yfinance SPY/QQQ/IWM/TLT/GLD 日頻 OHLC（auto_adjust=False，Open 以 AdjClose/Close 重定標），下載起點 1990-01-01，OOS 2015-01-01 起 n=2909 天，seed=42。H1a ACCEPT：隔夜與日內兩段平方報酬 Ljung-Box Q(10) 5/5 資產 p<1e-199（最大 p=1.99e-200），兩段各自都有波動叢聚。H1b REJECT：AR(5) |r| 持續性的兩段落差經 block-bootstrap（B=2000, block=20）0/5 資產顯著；這是未能拒絕，不是證明兩段相同。H2a REJECT（H3 的關鍵前提）：可交易的那一軸——隔夜『報酬』——的星期均等性聯合 F 在 BH-FDR q=0.1 下 0/5 資產拒絕（q 值 0.738–0.836），逐格 25 檢定亦 0 拒絕。H2b ACCEPT：隔夜『變異』與 VRP proxy 的星期差異 5/5 資產拒絕（q 最大 0.0603）。H2c：加入隔夜窗跨越日曆天數的控制後只剩 QQQ/TLT/GLD 存活（SPY q=0.122、IWM q=0.176 掉出），即 SPY/IWM 的表面星期效應可由週末窗長解釋。H3 REJECT（主結論）：OOS 含成本 1 bp/side、以 net_with_cash 計分，5 資產 × 5 個日曆規則共 25 個組合中，滿足 ΔSharpe>0 且 block-bootstrap p<0.05 者為 0 個；最佳者 IWM:always_overnight ΔSharpe=+0.038（p=0.88）。反向則有 9 個組合顯著輸給 buy-and-hold，含 SPY:always_overnight -0.533(p=0.016)、SPY:dow_gated_overnight -0.533(p=0.015)、SPY:dow_walkforward_overnight -0.533(p=0.011)、SPY:dow_avoid_worst_overnight -0.227(p=0.020) 等。日曆規則只在成本拉到 5 bp 時才勝過未擇時的隔夜段（7 個組合），而在 0/1 bp 與其無法區分——這是週轉率較低的省成本假象（SPY 週轉 205 vs 504 側/年），不可當作星期效應證據。另一結果：SPY/QQQ/IWM/GLD 五個星期的 in-sample 隔夜均值全為正，sign-screen 規則因此退化成 always_overnight（ΔSharpe=0.000, p=1.000），僅 TLT 因週四 IS 均值 -2.18 bps 真的篩掉一天。Lookahead 診斷：以 N(0,0.5) 噪音覆蓋 T 之後全部報酬重建訊號，12 個探針日 0 violations，walk-forward 訊號確認為 causal。限制：成本模型為線性每側 bps，無市場衝擊／滑價狀態相依（真實開盤成本很可能更高，方向上只會加強 REJECT）；VRP 為 realized-based proxy 而非期權隱含；結論僅適用於這 5 檔 ETF 與此期間。"
+    }
+   }
+  ]
  },
  {
   "item_id": "63c514d3",
@@ -43213,14 +43226,33 @@
  {
   "item_id": "38405e42",
   "category": "experiment_result",
-  "content": "[K1735 verdict=PASS reviewer=agy 1.1.9 high-effort independent read-only review (Codex primary path blocked by provider policy; K1259 fallback recorded)] Is the intraday diurnal pattern sufficient to explain RV variation? Verdict REJECT_SUFFICIENCY on primary cell tx_day/m5_5min, seed 42, date 2026-08-01. FINDING: the intraday diurnal profile is NOT sufficient to explain realized-variance variation. Pre-registered key tests T1_residual_bin_structure, T2_regime_shape, T4_residual_stochastic_vol all reject at BH-FDR q=0.1 on the primary cell and replicate across confirmatory cells tx_day, tx_night, spy. SHARES (bias-corrected): within-day diurnal share 0.5433 (95% CI 0.5326-0.5544); systematic diurnal share 0.3007; naive uncorrected share 0.2191, of which measurement noise accounts for 0.2719 of the naive denominator - so the uncorrected number materially understates the diurnal contribution. ROBUSTNESS BRACKET on the within-day share: gaussian floor 0.5433, 3-sigma jump-truncated 0.7460, conservative fat-tail floor 0.8639 - the rejection holds across the whole bracket. Criteria were written before any result was computed and not amended. LIMITS: single futures market for the primary cell, SPY cell is short (~6 months) and underpowered for T1/T2, 1-minute sub-returns carry microstructure noise.",
+  "content": "[K1735 verdict=PASS reviewer=agy 1.1.10 high-effort independent read-only review (Codex primary path blocked by provider policy; K1259 fallback recorded)] Is the intraday diurnal pattern sufficient to explain RV variation? Verdict REJECT_SUFFICIENCY on primary cell tx_day/m5_5min, seed 42, date 2026-08-01. FINDING: the intraday diurnal profile is NOT sufficient to explain realized-variance variation. Pre-registered key tests T1_residual_bin_structure, T2_regime_shape, T4_residual_stochastic_vol all reject at BH-FDR q=0.1 on the primary cell and replicate across confirmatory cells tx_day, tx_night, spy. SHARES (bias-corrected): within-day diurnal share 0.5433 (95% CI 0.5326-0.5544); systematic diurnal share 0.3007; naive uncorrected share 0.2191, of which measurement noise accounts for 0.2719 of the naive denominator - so the uncorrected number materially understates the diurnal contribution. ROBUSTNESS BRACKET on the within-day share: gaussian floor 0.5433, 3-sigma jump-truncated 0.7460, conservative fat-tail floor 0.8639 - the rejection holds across the whole bracket. Criteria were written before any result was computed and not amended. LIMITS: single futures market for the primary cell, SPY cell is short (~6 months) and underpowered for T1/T2, 1-minute sub-returns carry microstructure noise.",
   "evidence": [
-   "experiments/K1735/K1735_results.json",
-   "experiments/K1735/README.md",
+   "experiments/k1735/K1735_results.json",
+   "experiments/k1735/README.md",
    "storage/ops/agent_briefs/K1735_review_agy_20260804.md"
   ],
   "confidence": 0.8,
-  "created_at": "2026-08-04T12:43:09.999879"
+  "created_at": "2026-08-04T12:43:09.999879",
+  "revisions": [
+   {
+    "revised_at": "2026-08-04T20:11:29.931609+08:00",
+    "actor": "hourly-slot-1-24fc44982b774737b4318b8d9bdf830e",
+    "reason": "K1735 close-out verification: (1) reviewer version corrected 1.1.9 -> 1.1.10 to match the pinned review_verdict.json, whose own provenance note records that 1.1.9 was read once early in the session and never verified at review time; (2) evidence paths recased experiments/K1735/ -> experiments/k1735/, the canonical on-disk directory, so the pointers resolve on a case-sensitive checkout instead of only on the macOS case-insensitive FS. Review content and findings unchanged.",
+    "fields": [
+     "content",
+     "evidence"
+    ],
+    "before": {
+     "evidence": [
+      "experiments/K1735/K1735_results.json",
+      "experiments/K1735/README.md",
+      "storage/ops/agent_briefs/K1735_review_agy_20260804.md"
+     ],
+     "content": "[K1735 verdict=PASS reviewer=agy 1.1.9 high-effort independent read-only review (Codex primary path blocked by provider policy; K1259 fallback recorded)] Is the intraday diurnal pattern sufficient to explain RV variation? Verdict REJECT_SUFFICIENCY on primary cell tx_day/m5_5min, seed 42, date 2026-08-01. FINDING: the intraday diurnal profile is NOT sufficient to explain realized-variance variation. Pre-registered key tests T1_residual_bin_structure, T2_regime_shape, T4_residual_stochastic_vol all reject at BH-FDR q=0.1 on the primary cell and replicate across confirmatory cells tx_day, tx_night, spy. SHARES (bias-corrected): within-day diurnal share 0.5433 (95% CI 0.5326-0.5544); systematic diurnal share 0.3007; naive uncorrected share 0.2191, of which measurement noise accounts for 0.2719 of the naive denominator - so the uncorrected number materially understates the diurnal contribution. ROBUSTNESS BRACKET on the within-day share: gaussian floor 0.5433, 3-sigma jump-truncated 0.7460, conservative fat-tail floor 0.8639 - the rejection holds across the whole bracket. Criteria were written before any result was computed and not amended. LIMITS: single futures market for the primary cell, SPY cell is short (~6 months) and underpowered for T1/T2, 1-minute sub-returns carry microstructure noise."
+    }
+   }
+  ]
  },
  {
   "item_id": "625d8a12",
@@ -43259,5 +43291,18 @@
   ],
   "confidence": 0.9,
   "created_at": "2026-08-04T15:06:57.127196"
+ },
+ {
+  "item_id": "55de8943",
+  "category": "research_correction",
+  "content": "[K1730 provenance 更正 2026-08-05] K1730 arm A 的 authoritative production artifact 自本日起為 **cd931fbf lineage 的 runtime-spec 重跑驗證版**（experiments/k1730/k1730_gevreg_midas_ssvs_results.json @ main，merge 5066c02f4；重跑 seed 42、扣牆鐘欄位後與 cd931fbf 全量逐欄位全等；reproduce_spec generated_at_runtime=true）。先前條目引用的 md5 d0d25fe2b49eeca9ac7d8ab5dc7d0419 係 K1731-F3 以 v1 舊代碼與較弱 MCMC 設定（burnin 10000/2 chains vs v2 的 15000/4）重跑的復核產物，自本日起**降級為 cross-check 收據**：其同向結論是 robustness 佐證，但邊界 DM cell 會跨 0.05 漂移（vs GEV-HAR p 0.0311↔0.0460、vs HAR-QR 0.0512↔0.0757），任何被引用的數字一律只出自 authoritative 版。科學結論不變：NULL（macro 增量價值偵測不到）、vs GEV-HAR 的 DM 維持 2026-07-21 裁決的 diagnostic-only 地位。認證：雙 fallback PASS（agy + claude fresh-context，none blocking；Codex primary 補驗併入 8/8 任務）。完整裁決：experiments/k1730/RECONCILIATION_20260804.md。",
+  "evidence": [
+   "experiments/k1730/k1730_gevreg_midas_ssvs_results.json @ main (merge 5066c02f4)",
+   "experiments/k1730/RECONCILIATION_20260804.md",
+   "experiments/k1730/review_verdict.json (PASS; dual fallback; 15 files pinned)",
+   "compute job k1730_v2_production_rerun_runtime_spec_20260804 (2.97h, seed 42)"
+  ],
+  "confidence": 0.92,
+  "created_at": "2026-08-05T05:07:33.879015"
  }
 ]
