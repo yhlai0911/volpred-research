@@ -1,8 +1,25 @@
 # 接手：backbone 封鎖（worker spawn 被 forbidden env 擋死）
 
 建立：2026-08-04 12:48（台灣時間）
-狀態：**進行中 — 全部派工停擺**
+狀態：**已解決（root_cause_fixed_and_verified）— 2026-08-04 13:25，commit `3da9b93f4`**
 Task：`assign_ec2a9ee7`（P1）
+
+## 解決摘要（2026-08-04 13:25 補記）
+
+矛盾解開：`ps eww` 只顯示 **boot-time** env；被驗證的 `child_env` base 是 **runtime
+`os.environ`**。注入者 = `EmailNotifier.__init__` → `_prime_project_env()` 把整份
+`.env`（含 OPENAI_API_KEY）灌進 process-global env；daemon 內 in-process alert 鏈
+（phase_z → `volpred.ops.alerts` → `owned_email` → `EmailNotifier()`）觸發。
+乾淨 env 下一行 `EmailNotifier(storage_dir=tmp)` 即可復現（23 個 key 注入）。
+
+修法（依本檔「設計判斷」段執行，forbidden 清單未放寬）：
+1. `email_notifier._DELIVERY_ENV_ALLOWLIST` — 只 prime 投遞域 key，秘密永不進 process env
+2. `registry.sanitize_provider_spawn_environment()` — worker + codex_failover 在
+   authorize 前 strip forbidden 變數（只 log key 名）；gate 本體照樣 fail-closed
+
+驗證：reload（release 80db06a7）→ `request_fire` → 13:24:57 fire request consumed、
+worker 真 spawn、`provider_policy_denied` 停止。詳見 `docs/error_log.md` §A 2026-08-04
+entry + archive Q3 全文。
 
 ## 一句話
 
