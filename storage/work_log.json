@@ -34523,5 +34523,32 @@
     "owner": "hourly-slot-1-9fc58645dec24c69b5b61a8891a3e2f0",
     "commit": null,
     "summary": "K1594 general-audience 文章完稿並進草稿池（mile_4c4773d8, audience=general, status=draft）。\n\n主題：kernel-weighted conformal 下尾分位數 vs HS250 / HS1000 / VIXRegime1000，TLT+HYG 日頻，OOS 2015-01-01 至 2026-06-30（2887 天），trailing 1000 日 calibration，bandwidth 於 2013-2014（235 日）選定。誠實呈現 MIXED_WEAK：加權法 4 格全部畫出最窄緩衝（-1.53% / -5.66% / -5.24% / -16.07%）、3 格 mean pinball 最低，但 trinity_pass=0、Holm 校正後 strict wins=0，16 組合中唯一三關全過是 TLT α=5% 的 VIXRegime1000。另點出贏最多那格 mean ESS=781.0 / shrink=0.013，等於幾乎沒加權，證據無法區分「加權有效」與「換一個較穩的平均法」。\n\n流程：check_arc_dedup（--k-id k1594 --audience general）verdict=clean + feed grep k1594 = 0 命中；圖表 storage/drafts/assets/k1594_general_figs.py 產 2 張 data-bound PNG（踩線次數 vs 期望、緩衝寬度相對基準）；anti_ai_gate --no-fb-mode exit 0（warn 0/3）；_infer_audience 回讀 academic keyword hits=0 → general；prepublish provenance gate 首輪擋下 6 個 derived index 數字（圖說），改為質性描述後 rc=0。lazypack strict plan（3 panels，全部 RFC-6901 binding 到 k1594_results.json，sha256 986ebfb4…）validate-only 通過並已 enqueue lazypack-mile_4c4773d8。\n\ntopology_override: subagent→inline — 本 session 限制不派 Agent tool，主線程已載入全部 evidence，inline 完稿並過齊 4 道 gate。"
+  },
+  {
+    "timestamp": "2026-08-04T22:47:55+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_4c4773d8",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_4c4773d8:codex->agy",
+    "article_id": "mile_4c4773d8",
+    "job_id": "lazypack-mile_4c4773d8",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-08-04T22:54:04+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1625_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-cee78409fa64447cae4eec163a533931",
+    "owner": "hourly-slot-1-cee78409fa64447cae4eec163a533931",
+    "commit": null,
+    "summary": "K1625 一般讀者向文章完稿並進草稿池：`mile_7d19ad76`「多方搶著付錢之後，比特幣高波動週的機率從 17% 升到 30%——同一招搬到以太幣就對不上了」（audience 回讀=general，status=draft，body 3,046 字元，2 張 data-bound 圖表 + 1 張描述統計表）。\n\n**主題差異化**：feed 既有 `mile_3c83e665`（general）/ `mile_5193647b`（research）皆為 K1436，問的是「加進費率能否改善隔日波動點預測」（答案≈否）。本篇改問五日 high-RV regime 機率、加 ETH 複製檢定與多空不對稱檢定，敘事軸為前作的下游延伸而非重述。arc-dedup gate（--k-id k1625 --audience general）exit 0、k_coverage=[]、arc_duplicates=[]；layer-2 feed grep 命中 3 篇皆非 K1625。\n\n**數字驗證**：29/29 個文中數字字串由 `experiments/k1625/k1625_results.json` 程式化比對逐字吻合（含 per_asset 樣本數／年化波動、h5 conditional rates 全格、8 個 h=5 regime-model 統計強度、兩檔 gap 與比值）。統計術語一律白話包裝（統計強度以「相對自身估計誤差的倍數」表述、顯著性以「萬分之 1.5 / 十萬分之 4.7」表述），未刪弱任何統計資訊。\n\n**gate 結果**：`anti_ai_gate.py --no-fb-mode` PASS exit 0（warn 0/3）；publish content-vs-source audit PASS（2 claims vs 329 source values，首輪擋下「10/90 百分位」unbound literal 已改寫）；`_infer_audience` 回讀=general（academic keyword hits 僅 1 筆，且來源是圖檔 URL 檔名 k1625_*.png，非 reader-visible prose）；lazypack plan 驗證通過（首輪擋下 prose 未綁定數字，已全部改為 template+binding），async render 已 queue。\n\n**誠實度**：verdict 為 MIXED_WEAK_SINGLE_CELL，文章明寫「事先講好要兩格、最後只中一格 → 未結案」、BTC pos-extreme dummy 控制後掉到 -0.05、ETH 全格未過、Codex review 的三條 caveat（Binance-only、不得宣稱多空不對稱、不得宣稱 funding predicts crypto volatility）全部保留。\n\ntopology_override: subagent→inline（router 預設 daily_article=subagent）。原因：evidence package 已由主線程在選題／查重階段完整讀出（results JSON 決策欄位、README、codex_review），本班為 supervisor 綁定的單張 task、無 draft-pool deficit 並行需求，再派 writer 只會重讀同一批 artifact 而不產生平行度。"
   }
 ]
