@@ -1,23 +1,31 @@
 # Feed Index
 
-_Last built: 2026-08-03 06:05 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-08-04 00:08 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1932**  (with thumbnail: 92)
-- Last 30 days: **205**
-- Total chars (content): 6,052,004
+- Total articles: **1940**  (with thumbnail: 93)
+- Last 30 days: **208**
+- Total chars (content): 6,083,914
 
-**Status**: published=1728, archived=124, unpublished=66, retracted=13, wont_fix=1
+**Status**: published=1733, archived=124, unpublished=66, retracted=13, draft=3, wont_fix=1
 
-**Audience**: research=1144, general=515, daily=171, unknown=77, member_qa=15, event=10
+**Audience**: research=1144, general=521, daily=173, unknown=77, member_qa=15, event=10
 
-**Category**: milestone=922, general=888, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
+**Category**: milestone=923, general=895, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
 
-## 最近 30 天 (205)
+## 最近 30 天 (208)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-08-04 | `mile_3c950dcc` | 每日策略建議：VIX 15.86（正常）— 2026-08-04 | daily | general | published | 1519 | Y | 每日建議, VIX, 策略配置 |
+| 2026-08-04 | `mile_cddd4316` | 2026-08-04 本日持倉比率建議（依據 2026-08-03 收盤數據） | daily | milestone | published | 941 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
+| 2026-08-03 | `mile_3ff8b57a` | 特斯拉本來就比福特會動：三檔單股槓桿基金掛牌，九次對照比不出新的差距 | general | general | draft | 5577 |  | 一般讀者, 槓桿ETF, 特斯拉, 輝達, 事件研究 |
+| 2026-08-03 | `mile_8782c7e2` | 查了九個來源，這題連第一格數字都填不進去 | general | general | draft | 5037 |  | 一般讀者, 拉丁美洲, 私募信貸, 資料品質, 研究方法 |
+| 2026-08-03 | `mile_d3d4aebd` | 不估計 11.4%、估了 8.7%、再疊一層預測 9.3%：多做的那一步把波動推了回去 | general | general | published | 5302 |  | 一般讀者, 資產配置, 風險管理, ETF, 模型驗證 |
+| 2026-08-03 | `mile_bbacfbd8` | 🧪 迷思實驗室｜槓桿 ETF 收盤前那一筆，真的把尾盤波動推大了嗎？719 個交易日的答案 | general | general | draft | 3739 |  | 一般讀者, 迷思實驗室, 槓桿ETF, 尾盤, 納斯達克, 再平衡 |
+| 2026-08-03 | `mile_b4223d34` | 同一個結算日傳說再測一次：399 個到期日，當天振幅窄了 0.14 個百分點，仍然沒過事前訂死的門檻 | general | general | published | 5529 |  | 一般讀者, 選擇權, 結算日, 美股, 事件研究 |
+| 2026-08-03 | `mile_dc8c018c` | 百天只該破一次的風險線，四個股市全被破了兩倍多 | general | general | published | 4266 |  | 一般讀者, 風險管理, 尾端風險, 台股, 美股 |
 | 2026-08-03 | `mile_8a39f5a0` | VIX 掉回 15.99，市場說沒事了：指數的平靜是淨額，你的持倉付的是毛額 | general | general | published | 13462 |  | 一般讀者, 精選導讀, VIX, 集中度, 相關性, 風險管理 |
 | 2026-08-03 | `mile_aca7eb30` | 每日策略建議：VIX 15.99（正常）— 2026-08-03 | daily | general | published | 1519 | Y | 每日建議, VIX, 策略配置 |
 | 2026-08-03 | `mile_5139a796` | 2026-08-03 本日持倉比率建議（依據 2026-07-31 收盤數據） | daily | milestone | published | 942 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
@@ -218,16 +226,16 @@ _Last built: 2026-08-03 06:05 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-07-05 | `mile_467226e7` | 🧪 迷思實驗室｜開盤第一小時真的最危險嗎？這次答案接近「對」，但不是你想的那種對 | general | general | published | 2970 |  | 一般讀者, SPY, 日內波動, 開盤, 5分鐘資料, 風險管理 |
 | 2026-07-05 | `mile_c5bc3eb1` | 股災保險不要只買一個商品：黃金、VIX 與尾部煞車的三道安檢 | general | general | published | 5434 |  | 一般讀者, 精選導讀, 黃金, VIX, 資產配置, 風險管理 |
 | 2026-07-05 | `mile_0fa841ed` | 燒最多錢的科技巨頭，選擇權市場現在沒有多收「下跌保費」 | general | general | published | 3506 |  | 一般讀者, trending, AI, capex, skew, Mag7 |
+
+<details><summary>## 2026-Q3 (28)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-07-05 | `mile_08820c3d` | 🧪 迷思實驗室｜黃金不是股災保險箱：它有時救你，有時跟著一起跌 | general | general | published | 2944 |  | 一般讀者, 黃金, GLD, SPY, 避險, safe-haven |
 | 2026-07-04 | `mile_d1a83b4f` | 🧪 迷思實驗室｜美股大跌，台股隔天真的會補跌嗎？我查了兩千六百多天的數據 | general | general | published | 2331 |  | 一般讀者, 台股, 美股, 跨市場, 投資迷思, 隔夜行情 |
 | 2026-07-04 | `mile_d30a3ede` | 台股波動率是美股的 2.3 倍：這個差距，大半不是恐慌 | general | general | published | 2291 |  | 一般讀者, 波動率, 台指VIX, VIX, 美台市場, 已實現波動率 |
 | 2026-07-04 | `mile_463f37f7` | 盯著最慘的那 1% 交易日調倉位，實測沒有比看普通波動率更安全 | general | general | published | 3194 |  | 一般讀者, 風險管理, 尾部風險, 波動率目標, 資產配置, ETF |
 | 2026-07-04 | `mile_4fe0a026` | 🧪 迷思實驗室｜股票快貼近漲跌停,隔天真的比較震盪?61萬筆台股資料的檢驗結果 | general | general | published | 2949 |  | 一般讀者, 台股, 漲跌停, 自然實驗, 波動率, TWSE |
-
-<details><summary>## 2026-Q3 (23)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-07-04 | `mile_a656a042` | 新興市場主權債的波動率,能提前預告 EM 股市風暴嗎?一次誠實的否定(K1621) | research | experiment | published | 6430 |  | 研究, EMB, 新興市場, 跨資產, HAR-RV, DM-test |
 | 2026-07-04 | `mile_167ed77b` | 現在進場太晚了嗎？上車前先問四件事，唯獨別問「今天算不算高點」 | general | general | published | 6898 |  | 一般讀者, 精選導讀, 進場時機, 資產配置, 定期定額, VIX |
 | 2026-07-03 | `mile_64c33170` | 夏天太平靜，是暴風雨前的寧靜嗎？我用 21 年 VIX 數據查了這個直覺 | general | general | published | 3096 |  | 一般讀者, VIX, 波動率季節性, 夏季波動, 波動率持續性, 尾部風險 |
