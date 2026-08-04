@@ -2433,16 +2433,16 @@
     {
      "cleared_at": null,
      "detail": {
-      "base_sha": "1296ffcd71bc9ee4a29f42b63087791171dcb131",
+      "base_sha": "",
       "branch": "worktree-dispatch-slot-1-810125e6",
       "checkpoint_commit": "",
-      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
-      "reason": "worker_superseded_generation",
+      "detail_tail": "fire ended with outcome=orphaned; dirty=True unique_commits=0",
+      "reason": "worker_orphaned",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-810125e6"
      },
      "first_seen_at": "2026-07-30T04:45:24.217009+00:00",
      "key": "dispatch-slot-1-810125e6",
-     "last_seen_at": "2026-08-04T04:00:06.327040+00:00"
+     "last_seen_at": "2026-08-04T04:08:39.886026+00:00"
     },
     {
      "cleared_at": null,
@@ -2792,7 +2792,7 @@
      },
      "first_seen_at": "2026-08-02T21:26:00.232871+00:00",
      "key": "dispatch-slot-1-95470ef5",
-     "last_seen_at": "2026-08-04T04:00:16.718836+00:00"
+     "last_seen_at": "2026-08-04T04:10:54.457809+00:00"
     },
     {
      "cleared_at": null,
@@ -2806,7 +2806,7 @@
      },
      "first_seen_at": "2026-08-03T06:31:26.826223+00:00",
      "key": "dispatch-slot-1-3381ab14",
-     "last_seen_at": "2026-08-04T04:00:25.577912+00:00"
+     "last_seen_at": "2026-08-04T04:11:04.005082+00:00"
     },
     {
      "cleared_at": null,
@@ -2820,7 +2820,7 @@
      },
      "first_seen_at": "2026-08-03T07:20:23.020263+00:00",
      "key": "dispatch-slot-1-963e82b6",
-     "last_seen_at": "2026-08-04T04:00:34.942015+00:00"
+     "last_seen_at": "2026-08-04T04:11:15.128756+00:00"
     },
     {
      "cleared_at": null,
@@ -2834,7 +2834,7 @@
      },
      "first_seen_at": "2026-08-03T08:28:35.957693+00:00",
      "key": "dispatch-slot-1-a82478f1",
-     "last_seen_at": "2026-08-04T04:00:48.912579+00:00"
+     "last_seen_at": "2026-08-04T04:11:29.142697+00:00"
     },
     {
      "cleared_at": null,
@@ -2848,7 +2848,7 @@
      },
      "first_seen_at": "2026-08-03T09:27:28.118145+00:00",
      "key": "dispatch-slot-1-795237a6",
-     "last_seen_at": "2026-08-04T04:00:56.827549+00:00"
+     "last_seen_at": "2026-08-04T04:11:36.957725+00:00"
     },
     {
      "cleared_at": null,
@@ -2862,7 +2862,7 @@
      },
      "first_seen_at": "2026-08-03T11:25:05.244107+00:00",
      "key": "dispatch-slot-1-d5ed8442",
-     "last_seen_at": "2026-08-04T04:01:11.593578+00:00"
+     "last_seen_at": "2026-08-04T04:11:47.314716+00:00"
     },
     {
      "cleared_at": null,
@@ -2882,9 +2882,9 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-d5ed8442 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-04T04:01:11.593578+00:00",
+   "last_seen_at": "2026-08-04T04:11:47.314716+00:00",
    "notified_at": null,
-   "occurrence_count": 10162,
+   "occurrence_count": 10177,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -4615,6 +4615,62 @@
     "last_at": null
    }
   },
+  "inc_ee27ad60abae": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
+   "control_gate_id": null,
+   "current_task_id": "ci-root-30875762101",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-08-04T04:10:23.124893+00:00",
+   "escalation": null,
+   "fingerprint": "ee27ad60abae874263ab5735f5c625a8e25485a92c6af46d0c180afd0a23dab0",
+   "fingerprint_parts": [
+    "ci-red-30875762101"
+   ],
+   "first_seen_at": "2026-08-04T04:10:23.124893+00:00",
+   "incident_id": "inc_ee27ad60abae",
+   "instance_transition_baselined_at": "2026-08-04T04:10:23.124893+00:00",
+   "instance_transition_tracking": true,
+   "instance_transitions": [
+    {
+     "at": "2026-08-04T04:10:23.124893+00:00",
+     "instance_key": "30875762101:1",
+     "transition": "opened"
+    }
+   ],
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-04T04:10:23.124893+00:00",
+     "key": "30875762101:1",
+     "last_seen_at": "2026-08-04T04:10:23.124893+00:00"
+    }
+   ],
+   "is_control_intervention": false,
+   "kind": "ci_red",
+   "last_breach_detail": "2026-08-04T04:06:00.5846422Z tests/test_cron_git_push_backup.py:54: AssertionError",
+   "last_seen_at": "2026-08-04T04:10:23.124893+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-08-04T04:10:23.603633+00:00",
+     "task_id": "ci-root-30875762101"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_f0e082378018": {
    "class": "ordinary",
    "clean_observations": [],
@@ -4789,6 +4845,6 @@
    }
   }
  },
- "updated_at": "2026-08-04T04:02:17.174215+00:00",
+ "updated_at": "2026-08-04T04:11:47.346242+00:00",
  "version": 1
 }
