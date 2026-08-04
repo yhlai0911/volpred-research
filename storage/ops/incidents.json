@@ -1983,7 +1983,7 @@
    "clean_streak_started_at": null,
    "control_gate_id": "dispatch_worker_ownership",
    "current_task_id": null,
-   "episode_count": 8,
+   "episode_count": 9,
    "episode_failures": [
     {
      "at": "2026-08-04T04:16:20.228925+00:00",
@@ -1993,7 +1993,7 @@
      "task_id": "inc_792a94b0ecf4_e1"
     }
    ],
-   "episode_opened_at": "2026-08-04T05:48:36.112120+00:00",
+   "episode_opened_at": "2026-08-04T06:55:40.479741+00:00",
    "escalation": {
     "at": "2026-08-04T04:16:20.270924+00:00",
     "notification_id": "effect_owned_email_5b3a5d4b722faea245a48bbb9ca01d93",
@@ -2167,6 +2167,12 @@
      "at": "2026-08-03T12:17:25.956907+00:00",
      "instance_key": "dispatch-slot-1-db30a837",
      "reason": "worker_killed_timeout",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-04T06:55:40.479741+00:00",
+     "instance_key": "dispatch-slot-1-3175c52f",
+     "reason": "worker_superseded_generation",
      "transition": "opened"
     }
    ],
@@ -2890,14 +2896,28 @@
      "first_seen_at": "2026-08-03T12:17:25.956907+00:00",
      "key": "dispatch-slot-1-db30a837",
      "last_seen_at": "2026-08-03T12:17:25.956907+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "a122751813acd82cb5e7da4d54de9a5af237bb3b",
+      "branch": "worktree-dispatch-slot-1-3175c52f",
+      "checkpoint_commit": "",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-3175c52f"
+     },
+     "first_seen_at": "2026-08-04T06:55:40.479741+00:00",
+     "key": "dispatch-slot-1-3175c52f",
+     "last_seen_at": "2026-08-04T06:55:40.479741+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-d5ed8442 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-04T05:48:36.112120+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-3175c52f unmergeable (worker_superseded_generation)",
+   "last_seen_at": "2026-08-04T06:55:40.479741+00:00",
    "notified_at": null,
-   "occurrence_count": 10312,
+   "occurrence_count": 10313,
    "resolution": {
     "at": "2026-08-04T06:07:09.086952+00:00",
     "by": "inc_792a94b0ecf4_rootcause_e2",
@@ -2940,7 +2960,7 @@
      "criterion": "root_cause_task_succeeded"
     }
    ],
-   "state": "resolved",
+   "state": "escalated",
    "suppressed_until": null,
    "task_history": [
     {
@@ -4947,6 +4967,6 @@
    }
   }
  },
- "updated_at": "2026-08-04T06:50:38.771960+00:00",
+ "updated_at": "2026-08-04T07:13:57.144137+00:00",
  "version": 1
 }
