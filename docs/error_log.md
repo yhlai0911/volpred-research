@@ -6101,10 +6101,97 @@ daemon push 碰不到它，於是跑完了。驗證後刪除該 branch。
 `.env.local`。兩邊環境不可比 —— 這正是 workflow 開頭那段註解記載的、只有 credential-less
 checkout 才暴露得出來的那類耦合。
 
-**未修的部分（明示）**：`storage/**` 不能整包排除觸發 —— `test_publication_gate.py` 讀
+**當時未修的部分**：`storage/**` 不能整包排除觸發 —— `test_publication_gate.py` 讀
 `storage/memory/knowledge.json`、`test_k189_k1544_governance.py` 讀
 `storage/paper_pipeline_status.json`，另有數個 ratchet baseline 也住在 `storage/ops/`。要讓 main
-的 CI 真的能收斂，得逐子目錄查證哪些 daemon 產物確定無測試依賴，這是獨立一件事，本段不宣稱已解決。
+的 CI 真的能收斂，得逐子目錄查證哪些 daemon 產物確定無測試依賴。**已於當日稍後完成 —— 見下一條
+「main 的 CI 從『大部分沒有結論』變成自己收斂得了」。**
+
+## 2026-08-04 — main 的 CI 從「大部分沒有結論」變成自己收斂得了
+
+**證據化症狀**：近 60 輪 Test Suite 只有 8 次 `success`、15 次 `cancelled`、其餘 failure。
+`cancelled` 才是重點 —— dispatch-supervisor 每 3–5 分鐘 push 一次，suite 要 15 分鐘，
+`concurrency` 又是 `cancel-in-progress: true`，所以**後一個 commit 永遠先到**。當天要驗證修正
+時連續四輪被掐掉，只能開隔離 branch 用 `workflow_dispatch --ref` 才拿得到結論。
+
+**根因不是 daemon push 太快，是 suite 為了它不需要跑的東西而跑**。近 200 個 commit 裡 90 個碰
+`storage/next_tasks.json`，每一個都啟動整套 15 分鐘測試。
+
+### 依賴集必須用 audit hook 錄下來，不能用 grep 推
+
+`paths-ignore` 的每一條都是「改這些檔不影響測試」的斷言，而**斷言要能被機械複驗**。當天早上
+那條 `storage/**/*.md` 就是靠 grep 驗證後加的，幾小時後被動態 probe 抓到它蓋住了測試實際會讀的
+`storage/event_articles/*/fb_draft.md`。
+
+於是改成用 `sys.addaudithook` 跑全套、錄下每一個被開啟的 repo 路徑與開啟它的 nodeid
+（`scripts/ci_storage_read_probe.py`）。**三個關鍵發現 grep 全都看不到**：
+
+- `boss_report` 經 `_render_roadmap_coverage` → `audit_roadmap_coverage.audit()` 繞到 queue，
+  只 stub `_pending_tasks` 沒用
+- `build_publication_candidates` 在 **import 時**就解析了 `NEXT_TASKS_PATH`，事後 patch `ROOT`
+  移不動它
+- `storage/ops/*_state.json` 蓋到 `pregate_state.json`
+
+**教訓**：測試觸達一個檔的方式包含 module-level 常數、config 指標、沒拼出來的 glob。
+凡是「哪些檔會影響測試」這種問題，**靜態搜尋的答案沒有資格當 gate 的依據**。
+
+### 刻意讀 live 資料的 ratchet 要拆出去，而拆分本身會製造新的無聲失敗
+
+八個 ratchet 是**故意**讀 live `storage/next_tasks.json` 的 —— 它們就是要抓 supervisor 寫出
+壞 queue（status vocabulary、blocked 無 until_at、roadmap P1 無對應任務）。它們不該被改掉，
+但也不該讓整套 suite 陪跑。
+
+作法：標 `real_queue` marker，主 suite 跑 `-m "not real_queue"`，另建
+`.github/workflows/queue-invariants.yml` 在 queue 變更時專跑 —— **queue 的驗證從 15 分鐘變成
+2 分 22 秒，是變快不是變少**。裸跑 `pytest` 仍然全跑，本機 pre-merge 覆蓋不變。
+
+**但拆分自己開了一個洞**：標了 marker 卻住在 `queue-invariants` 的 `paths` 沒列的檔案裡，會被
+一邊 deselect、另一邊不觸發 —— **兩個 build 都綠，測試根本沒跑**。這個洞由
+`scripts/audit_ci_paths_ignore.py check` 機械擋住（同時擋 paths-ignore 蓋到依賴、與 marker 孤兒
+兩件事，單一 owner，不另疊層）。
+
+### 量測工具自己也會騙人
+
+`simulate` 一度回報 skip 率只有 15%，實際是 37%。差別在它把歷史 commit 裡**已經 untracked** 的
+路徑也算成阻擋 —— `3fb25fabc` 退役的 workspace receipt ledger 一個檔就吃掉 66/200 個 commit。
+那些檔不可能出現在未來 commit，計入它們等於回答了一個沒人問的問題。已改成只算仍被追蹤的路徑，
+並把排除數量印出來。
+
+同一天還踩了第二次：用來等 CI 的 `gh run list --commit <sha>` 回 0 筆，`until` 迴圈立刻通過，
+**25 秒就宣稱「全部完成」**（Test Suite 要 14 分鐘），我因此對老闆誤報了一次「沒有紅的」，而當時
+Experiment Artifacts Gate 正要轉紅。改用 `headSha` 前綴過濾。
+
+**教訓**：驗證工具回報「沒問題」時，要先確認它**真的看到了東西**。空集合通過所有全稱檢查 ——
+`all([])` 是 `True`，`length == 0` 也是「沒有未完成的」。這類 gate 一律要同時斷言「非空」。
+
+**結果**：skip 率 3% → 36%，`d3351b695` 五個 workflow 全綠、Test Suite **7287 passed / 0 failed
+在 main 上跑完**（不是隔離 branch）。狀態 **`root_cause_fixed_and_verified`**。
+
+**明說沒解決的**：`storage/reports/feed.json`（值 7 個百分點）走不通 —— **54 個測試**讀它，
+publisher 的 dedup / audience audit / provenance gate 全靠真實 ledger 做重複檢查，那是真依賴，
+不是意外。
+
+### 同日三個同類 bug：測試釘住的是實作的複製品，不是它的契約
+
+當天 CI 紅了三次，根因是同一個形狀：
+
+1. **push-alert**：contract test grep 寫死的 `--title "git-push-backup: push 失敗"`，於是
+   classifier 化標題這個**正確的修正**被判成迴歸
+2. **artifacts gate**：測試手寫 `argparse.Namespace(path=..., changed_since=None)` 複製 CLI 介面，
+   `--knowledge-ref` 一加就 `AttributeError` —— 它斷言的是一個**沒有任何呼叫者會產生**的 args 物件
+3. **declared manuscript**（`dc507a96d`）：全 repo 不變式測試要求 `main.pdf` 存在，而
+   `paper/*/main.pdf` 在 `.gitignore:175` —— **CI 必紅、本機必綠**，所以它在每台開發機上都看起來沒事
+
+修法都不是把複製品補齊，而是讓測試指向唯一定義：釘路由而非文案、`build_parser()` 而非手寫
+Namespace、`require_built=False` 讓不變式只斷言它有資格斷言的東西（並加測試釘住預設值，
+免得那個參數變成發佈路徑的後門）。
+
+**這已經是同類第二次以「測試複製介面」的形式出現（1 與 2）**。第三次就該按 Three-Strike 整體
+重構，而不是再修一個測試 —— 屆時要處理的是「測試如何取得被測物的表面形狀」這個共通問題，
+例如禁止手寫 Namespace、契約測試一律經 public factory。
+
+**gitignored 產物不能當 repo 不變式**（第 3 條）值得單獨記住：一個在 CI 上必然缺席的東西，
+斷言它存在等於斷言「CI 永遠紅」，而本機的綠燈會讓這件事看起來完全正常。
 
 ## 2026-08-04 — merge gate 與 CI gate 同一支腳本、看兩份狀態：未 commit 的 knowledge 條目讓 merge 過、push 紅
 
