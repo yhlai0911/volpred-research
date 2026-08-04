@@ -1,0 +1,74 @@
+{
+  "id": "compute-k1745-round-1-independent-certification-review-frozen-bytes-1785810119",
+  "title": "K1745 round-1 independent certification review (frozen bytes)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1745_round1_prompt.md",
+    "storage/ops/codex_reviews/k1745_round1_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-08-04T02:21:59Z",
+  "started_at": "2026-08-04T02:55:48Z",
+  "completed_at": "2026-08-04T03:08:43Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1745-round-1-independent-certification-review-frozen-bytes-1785810119.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1745-round-1-independent-certification-review-frozen-bytes-1785810119.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1745_round1_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1745_round1_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "routing": {
+    "lane": "compute_queue",
+    "token_cost_estimate": 0,
+    "router": "manual_enqueue"
+  },
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1745 收件 stage 2（PASS-gated merge）。Round-1 Codex review 已落地於 storage/ops/codex_reviews/k1745_round1_verdict.md。做法：(1) 讀 verdict 報告末尾唯一的 fenced JSON block，程式化抽出後原樣寫入 .claude/worktrees/dispatch-slot-1-c6dd8dc8-k1745/experiments/K1745/review_verdict.json —— 禁止手改任何欄位、禁止自行判定 PASS。(2) 重新 shasum claim surface，確認與 reviewed_sha256 逐一相符（不符=bytes 已漂移，停止並開 incident）。(3) 跑 uv run python scripts/experiment_gates.py certify --path <worktree>/experiments/K1745。(4) verdict=PASS 才跑 bash scripts/merge_worktree.sh，合併後由主線程從 K1745_results.json 程式化取數寫 knowledge.json（K1259：agent 不得寫 knowledge.json），再跑 check_experiment_artifacts.py 確認 artifact gate 綠。(5) verdict=FAIL 則保留 worktree、不 merge、不寫 knowledge，依 blocking_defects 開 bounded remediation task（比照 K1739 的 assign_9a384b90）。前置核數已完成：byte pin 精確、README↔results 全對、由 K1745_forecasts.csv 獨立重算 QLIKE/NW-HAC t/HLN/Holm 全部相符，故 stage 2 不需重算數字，只需依 verdict 走 gate。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_6e80726f",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-08-04T02:22:06Z",
+    "linked_at": "2026-08-04T02:22:06Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 97378,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:80c1df13ba5afb56467f7e41",
+    "scheduled_for": "2026-08-04T02:15:00Z"
+  },
+  "claimed_by_pid_start_wall": "Tue Aug  4 10:15:33 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "assign_6e80726f",
+    "settled_at": "2026-08-04T03:08:43Z",
+    "error": null
+  },
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "f9b27e9a1f2f0ec4d0d014265ff9bc82ce87ef5d",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k1745_round1_verdict.md"
+  ],
+  "delivered_at": "2026-08-04T04:01:39.257515+00:00",
+  "delivery_source": "reap_orphan_deliverables"
+}
