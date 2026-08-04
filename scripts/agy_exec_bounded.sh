@@ -26,7 +26,9 @@
 #
 # Usage:
 #   bash scripts/agy_exec_bounded.sh [--timeout N] [--contract ID] <agy args...>
-#   printf '%s' "$PROMPT" | bash scripts/agy_exec_bounded.sh --timeout 600 --print -
+#   bash scripts/agy_exec_bounded.sh --timeout 600 --dangerously-skip-permissions --print "$PROMPT"
+#   (agy has no stdin `-` prompt syntax — pass the prompt as an argument; headless
+#    agentic tool use needs --dangerously-skip-permissions or it auto-denies.)
 #
 # Default timeout 600s, default contract prepublish-audit.agy (research-review).
 # Exit 124 = timed out. Exit 126 = provider policy denied. Exit 127 = agy missing.

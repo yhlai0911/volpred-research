@@ -91,7 +91,7 @@ contract_id = os.environ.get(
     "bounded-codex.agentic",
 )
 # Canonical owner: registry.sanitize_provider_spawn_environment (2026-08-04).
-# It strips the contract's forbidden auth variables before authorization and
+# It strips the contract forbidden auth variables before authorization and
 # returns the stripped NAMES ONLY, so a daemon that absorbed a key at runtime
 # cannot leak it into a provider child. The authorize check below stays
 # authoritative for anything that still reaches it. Do not reimplement the
