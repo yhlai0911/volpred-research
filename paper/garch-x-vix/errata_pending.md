@@ -77,6 +77,14 @@ Key results:
 
 **Paper 9 implication**: K1391 does NOT directly address C1 for the paper's stated OOS. Need **K1392** with OOS truncated to 2026-04-07. K1391 results are a monitoring finding (A4f advantage not robust to most recent data) but not immediately relevant to the paper's C1 fix.
 
+> **Snapshot-dedup update (2026-07-27)**: the 2026-05-22 numbers above (n=1866) ran on a
+> canonical snapshot with duplicate trading days that leaked into the DM test. Loader
+> deduped (`~index.duplicated(keep="last")`) and rerun on the clean+extended snapshot:
+> **n_full_oos=1900, Full-OOS DM t=−2.054 (p=0.040), Non-COVID t=−2.924 (p=0.0035),
+> COVID +1.465, Post-COVID t=−3.208 (p=0.0014, Harvey-sig)**. Verdict unchanged (GJR
+> wins full/non-COVID/post-COVID); post-COVID now crosses Harvey. Canonical numbers:
+> `experiments/k1391/k1391_results.json` (run_at 2026-07-27T15:06 UTC).
+
 **Action**: ~~K1392 enqueued~~ → K1392 completed (with bugs) → **K1393 completed 2026-05-22: C1 PASS**.
 
 ## SF1 RESOLUTION — K1393 (2026-05-22)
