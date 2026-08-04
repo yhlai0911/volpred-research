@@ -5989,7 +5989,30 @@ test outcome — the suite reads none of them"。
 寫下它的當下可能是對的，測試長出新依賴時它會**靜默轉為錯的** —— 而失效方式是「CI 變綠」，
 沒有任何人會注意到。這與 `.claude/rules/control-plane.md` 的「靜默的守門員最危險」同一類。
 
-三層狀態皆為 **`root_cause_fixed_and_verified`**（CI run `PLACEHOLDER_RUN` 全綠）。
+三層狀態皆為 **`root_cause_fixed_and_verified`**：CI run `30880142299` @ `227025e49`
+**7237 passed, 12 skipped, 0 failed**。
+
+### 附記：這個綠燈為什麼不是在 main 上拿到的
+
+main 上連續四輪 run（`30878381783` / `30878620509` / `30878782539` / `30879353636`）全部
+`cancelled`。workflow 的 `concurrency` 以 `github.ref` 分組並 `cancel-in-progress: true`，而
+dispatch-supervisor 每 3–5 分鐘就 push 一次（近 40 個 commit 中 23 個是純 `storage/` 的 state
+churn），suite 要 15 分鐘 —— **後一個 commit 永遠先到，前一輪永遠跑不完**。近 60 輪只有 8 次
+success，也就是說 main 的 CI 大部分時間**不是紅，是根本沒有結論**。
+
+本輪的驗證改在隔離 ref 上取得：從 main tip 開 `ci-verify-error-log` branch（線性 main，內容
+涵蓋三個修正），用 `workflow_dispatch --ref` 觸發 —— concurrency group 換成那個 branch，main 的
+daemon push 碰不到它，於是跑完了。驗證後刪除該 branch。
+
+本機全套**不能**當對照：同一份 code 在本機是 27 failed / 179 errors，幾乎全是
+`test_supabase_*_postgres.py`（需要本機沒起的 Postgres），CI 是 Ubuntu 乾淨 checkout 且無
+`.env.local`。兩邊環境不可比 —— 這正是 workflow 開頭那段註解記載的、只有 credential-less
+checkout 才暴露得出來的那類耦合。
+
+**未修的部分（明示）**：`storage/**` 不能整包排除觸發 —— `test_publication_gate.py` 讀
+`storage/memory/knowledge.json`、`test_k189_k1544_governance.py` 讀
+`storage/paper_pipeline_status.json`，另有數個 ratchet baseline 也住在 `storage/ops/`。要讓 main
+的 CI 真的能收斂，得逐子目錄查證哪些 daemon 產物確定無測試依賴，這是獨立一件事，本段不宣稱已解決。
 
 ## 2026-08-04 — merge gate 與 CI gate 同一支腳本、看兩份狀態：未 commit 的 knowledge 條目讓 merge 過、push 紅
 
