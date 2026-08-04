@@ -1,0 +1,82 @@
+[agy_exec_bounded] stripped from child env: ANTHROPIC_BASE_URL
+# K1714 認證審查報告（Primary Path Certification Audit）
+
+---
+
+## 審查摘要 (Executive Summary)
+
+本審查對 `experiments/K1714/` 凍結快照進行端到端方法論、程式碼、數據對齊與單元測試稽核。
+
+- **數據與科學結果重現性**：`K1714_results.json` 中的數據與 `README.md` 逐欄位對齊，Lookahead 邊界控制嚴格（`apply_start > info_end` 100% 通過），HAC lag sensitivity、Bootstrap (studentized CBB 2000 reps)、Holm 族群校正均符合規範。
+- **認證結果**：**`FAIL`**。
+- **核心拒絕原因**：Claim surface 中的測試檔案 `experiments/K1714/test_K1714.py` 在執行 `uv run pytest experiments/K1714/test_K1714.py` 時發生 **1 個測試失敗** (`test_logm_unvec_is_pd_for_any_real_vector`)，無法通過自動化單元測試綠燈要求。
+
+---
+
+## 七大審查重點稽核結果
+
+### 1. Lookahead 資訊集邊界 (Lookahead & Information Set Boundary)
+- **稽核結果**：**CLEAN**
+- **證據**：
+  - `build_block_rcov` 建立非重疊 $k$ 日區塊。
+  - `har_forecast_path` 在預測區塊 $t$ 時，資訊原點鎖定在 $o = t-1$（資訊截止於區塊 $t-1$ 的最後一個交易日），訓練集的目標視窗最晚僅至區塊 $t-1$（$o' \le t-2$）。
+  - `run_backtest` 於區塊 $t$ 套用由區塊 $t-1$ 資訊算出的權重，`apply_start` 與 `info_end` 之時間差恆為 1 個交易日（`min_gap_days = max_gap_days = 1`）。
+  - 單元測試 `test_har_forecast_is_invariant_to_the_future` 驗證擾動預測日之後的報酬完全不影響預測值。
+
+### 2. DM / HAC 檢定規範 (DM / HAC Specification & Sensitivity)
+- **稽核結果**：**CLEAN**
+- **證據**：
+  - 採用 Repo 規範之 canonical bandwidth `newey_west_lag(4665)` $= \lceil 4665^{1/3} \rceil = 17$，無使用退化之 $h-1=0$。
+  - 於 `K1714_results.json` 完整報告 `HAC_LAG_GRID = (0, 5, 10, 20, 40, 63)` 的敏感度測試（$t$ 值平滑落於 $+4.45 \sim +4.81$ 之間）。
+  - 檢定對象為非嵌套模型（HAR-RCov vs rolling sample / Ledoit-Wolf / EWMA）之 GMV 組合實現變異數差異（Ledoit & Wolf 2011 delta-method HAC 檢定），不屬於 nested predictive regression，故無須使用 Clark-West (CW) 修正，邏輯正確。
+
+### 3. Bootstrap 實作 (Studentized Circular Block Bootstrap)
+- **稽核結果**：**CLEAN**
+- **證據**：
+  - 實作於 `studentized_cbb_pvalue`，抽樣 2000 次，固定 `seed = 42`，block size = 17。
+  - 對每次 bootstrap 重抽樣本正確計算 studentized 統計量 $t^* = (\Delta^* - \Delta_{\text{obs}}) / \text{SE}^*$，並以 $(count + 1) / (valid + 1)$ 計算 $p$ 值。
+  - 結果：HAR vs EWMA 之 bootstrap $p$-value $= 0.0005$（Headline 5-day block），與漸進 $p$-value ($1.51 \times 10^{-5}$) 同向顯著。
+
+### 4. Multiple-Testing Correction (Holm-Bonferroni Family)
+- **稽核結果**：**CLEAN**
+- **證據**：
+  - `PRIMARY_FAMILY = ("sample", "ledoit_wolf", "ewma")` 在 `CONFIG` 中預先登記（3 個比較）。
+  - `holm_bonferroni()` 實作標準 step-down FWER 調整，且保持單調性。
+  - 對於 post-hoc 加入的 Matrix-log spec，另行計算並報告了涵蓋 6 個比較的 `widened_correction_over_both_specs` ($p_{\text{holm}} = 0.0573$)。
+
+### 5. README 主張 vs Results JSON 逐數字對齊 (README vs Results Alignment)
+- **稽核結果**：**CLEAN**
+- **數據比對**：
+  - Headline 5d HAR 年化波動：`9.256%`（JSON: `0.092562867...`）
+  - sample 年化波動：`8.933%`（JSON: `0.089330578...`）
+  - Ledoit-Wolf 年化波動：`9.029%`（JSON: `0.090291244...`）
+  - EWMA 年化波動：`8.724%`（JSON: `0.087243896...`）
+  - Equal-Weight 年化波動：`11.433%`（JSON: `0.114327433...`）
+  - HAR vs EWMA $t$ 值：`+4.564`（JSON: `+4.5636`），Holm $p = 1.51\times 10^{-5}$，Bootstrap $p = 0.0005$。
+  - 10d block Robustness 報告 `TIE_NULL`（HAR 8.811% vs EWMA 8.807%），誠實揭露 5d 與 10d 的不一致並提供條件數（Condition Number）機制診斷。
+
+### 6. PSD 投影與 Cholesky 排序依賴 (PSD & Ordering Sensitivity)
+- **稽核結果**：**DEFECT FOUND IN TEST SUITE**
+- **分析**：
+  - Cholesky 24 種資產排列敏感度測試顯示全距達 0.767pp (9.056% - 9.823%)，證實在 Cholesky 下效應量級受排序影響。
+  - 作者引入排列等變（permutation-equivariant）之 Matrix-log (`logm`) 作為次要 spec。
+  - **缺陷細節**：`K1714.py:208` 之 `logm_unvec` 直接計算 `(Q * np.exp(w)) @ Q.T`，未加入對稱化或特徵值下限數值修補。在 `test_K1714.py:47-56` 的 `test_logm_unvec_is_pd_for_any_real_vector` 測試中，使用 `scale=5.0` 產生的隨機向量會使矩陣特徵值動態範圍跨越 $[-20, +20]$，導致 float64 矩陣乘法精度受限（$\sim 10^{-7}$），計算出的 `s` 出現負特徵值 ($-1.18 \times 10^{-8}$)，引發 `numpy.linalg.LinAlgError: Matrix is not positive definite` 導致 `pytest` 失敗。
+
+### 7. Equal-Weight 基準處理 (Reference Strategy Handling)
+- **稽核結果**：**CLEAN**
+- **證據**：`equal_weight` 放在 `REFERENCE_STRATEGIES` 中，未混入 `PRIMARY_FAMILY` 參與多重比較校正，僅作為展現共變異數估計整體價值的對照基準（年化波動由 11.433% 降至 8.7~9.3%）。
+
+---
+
+## 裁決宣告 (Final Verdict)
+
+VERDICT: FAIL
+REVIEWER: codex/gemini-3.6-flash (primary path)
+BLOCKING_DEFECTS:
+- experiments/K1714/test_K1714.py:55: 執行 `uv run pytest experiments/K1714/test_K1714.py` 時測試 `test_logm_unvec_is_pd_for_any_real_vector` 失敗並丟出 `numpy.linalg.LinAlgError: Matrix is not positive definite`。主因為 `v = rng.normal(scale=5.0, size=10)` 生成大數值向量時，矩陣 $A$ 之特徵值跨度過大（例如 $[-20, +20]$），在 float64 矩陣乘法 `(Q * np.exp(w)) @ Q.T` 的數值浮點捨入下，微小正特徵值（如 $e^{-20} \approx 2 \times 10^{-9}$）被 $\approx 10^{-7}$ 的捨入雜訊覆蓋為負值（$-1.18 \times 10^{-8}$），致使 `np.linalg.cholesky(s)` 檢定失敗。此測試屬於聲明面（claim surface）8 個釘定檔案之一，單元測試無法全數綠燈通過屬於 Blocking Defect。
+
+RESIDUAL_RISKS:
+- Cholesky 排序依賴全距達 0.767pp，大於待測模型與 benchmark 之間的差距（0.2-0.5pp），雖然「HAR 未能勝出」的方向性在 24 種排序下皆成立，但 Cholesky 下的精確效應量級無法單獨被識別。
+- Matrix-log 屬於看到 headline 結果後 added 的 post-hoc 次要 spec；儘管 README 與 Results 已提供 6-comparison 擴大校正（$p_{\text{holm}} = 0.0573$），但仍應視為診斷性穩健測試而非主要事前登記證據。
+- 10-day 區塊 spec 初始訓練列僅 66 列（`BURNIN_DAYS // 10 = 78`），初期 OOS 估計可能存在較高樣本變異。
+- 5-day 區塊 RCov proxy 之條件數最大達 463,462，使得「HAR 結構失敗」與「Proxy 估計雜訊主導」兩者之間的識別存在限制（如 README §8.1 所誠實揭露）。

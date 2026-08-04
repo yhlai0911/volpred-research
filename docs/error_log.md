@@ -6140,3 +6140,36 @@ byte-identical），pending 任務輸入完整恢復。零資料損失（branch 
 必須先跑 `python3 scripts/worktree_gc.py --json` 並確認該 worktree 的 gate3 PASS，或等價地
 grep `storage/next_tasks.json` 內 pending/claimed/blocked 任務對 workspace 名稱的引用。
 本段狀態 **`root_cause_fixed_and_verified`**（worktree 重建回讀驗證 + 規則寫入本條 + playbook 補充）。
+
+## 2026-08-04 — K1714 補件落地：reap 免審入庫的債、K-id 大小寫雙版本、與一輪真 FAIL 的修復循環
+
+**背景債**：`experiments/K1714`（大寫，canonical，knowledge 條目數字與其完全吻合）於
+2026-07-27 被 `reap_orphan_deliverables` 以 chore commit `671c59249` 自動收進 main —— 無
+reproduce_spec、無 review_verdict，債沉默 8 天。同 K-id 另有一份 7/22 早間的小寫草稿
+`k1714`（較粗設計）從未 commit，已封存 `refs/orphan-archive/agent-a148e8a-k1714`、不落地
+（macOS 大小寫不敏感 FS 下兩目錄會相撞 —— 在 landing worktree 實際發生過 index/磁碟震盪，
+處理紀錄見本日 session）。
+
+**補件（老闆指令）**：
+1. spec 以 K1708 規則正規補齊：`finalize_experiment` 接進 `K1714.py`，凍結資料
+   （`prices_raw.csv` sha256 相符）+ seed 42 全實驗重跑，科學 payload 與 7/22 版逐欄位全等
+   → spec 於 run-time 誕生，非事後補。
+2. 認證審查（Codex 額度鎖到 8/8 → fallback ×2 獨立）：agy round-1 全面審 **FAIL**
+   （blocking：`test_K1714.py` 的 `logm_unvec` PD 測試實跑炸 —— float64 在特徵值動態範圍
+   ±20 時捨入讓 ~2e-9 特徵值翻負）。本地復現屬實（1 failed, 32 passed）。修復 =
+   精確對稱化 + 特徵值 clip 於捨入 floor（`eps·max(exp(w))`；真實 pipeline 遠高於 floor，
+   clip 為 no-op）。重跑後 33 tests 全綠；headline/primary 逐位元不變，唯 matrix-log
+   次要 spec 有 1e-13 級浮點尾數 drift（對稱化改變加法順序的預期現象）。
+3. 重釘 verdict template（8 檔）→ agy round-2 delta **PASS** + fresh-context
+   `feature-dev:code-reviewer` 全面審 **PASS**（雙獨立 fallback；欠 Codex primary 補驗，
+   K1259 規則）。certify gate PASS（裁決綁現行 bytes）、artifacts gate PASS。
+
+**過程中另修一個平台級 gate 缺陷**：`codex_exec_bounded.sh` 內嵌 python 註解的撇號
+（`contract's`）截斷 bash 單引號 `-c` 區塊，所有 codex 呼叫炸
+`float('forbidden')` —— 修復 + `tests/test_bounded_wrapper_python_block.py`（抽塊
+ast-parse，兩個 wrapper 都鎖）已隨 `0f1a949a1` 落地。agy wrapper 用法註解同步修正
+（無 stdin `-` 語法；headless 需 `--dangerously-skip-permissions`，皆實測）。
+
+**制度化**：reap 自動收實驗不補件的流程洞已開 chip（reap 收 experiments/<kid> 時自動開
+補件任務）。本段狀態 **`root_cause_fixed_and_verified`**（spec runtime 生成 + 雙審 PASS +
+兩道 gate 綁 bytes 驗證 + 復現全等證據）。

@@ -1,0 +1,53 @@
+[agy_exec_bounded] stripped from child env: ANTHROPIC_BASE_URL
+以下為對 **K1714 認證審查 Round 2（Delta 覆核）** 的完整審查分析與評估結論：
+
+---
+
+### A. Blocking Defect 關閉評估
+
+**原問題與修復機制**：
+- **Round 1 失敗原因**：`logm_unvec` 在特徵值動態範圍達到 $\pm 20$ 時（如 `test_logm_unvec_is_pd_for_any_real_vector` 生成的隨機向量），float64 矩陣乘法運算的捨入噪聲（約 $\approx \epsilon_{\text{mach}} \cdot \max(e^w)$）掩蓋了真小特徵值（$\approx 2 \times 10^{-9}$），致使數值特徵值翻負（$\approx -1.18 \times 10^{-8}$），觸發 `np.linalg.cholesky` 的 `LinAlgError`。
+- **修復手法評估**：
+  1. 增加了精確對稱化 `(s + s.T) / 2.0`，消除矩陣乘法產生的非對稱數值偏置。
+  2. 設定動態 floor：`floor = np.finfo(float).eps * w_exp.max()`，並對特徵值進行重構 clip。
+  3. docstring 誠實修正，明確說明了精確算術與 float64 算術在契約保證上的邊界差異。
+- **驗證結果**：實測 `uv run python -m pytest experiments/K1714/test_K1714.py` 通過全數 33 項測試（包含 Round 1 失敗的 `test_logm_unvec_is_pd_for_any_real_vector`）。
+- **結論**：Blocking defect 已**誠實且正確地關閉**，程式碼乾淨且未引入任何副作用或新問題。
+
+---
+
+### B. `logm_unvec` 新實作數學與數值分析
+
+1. **Clip 的數學正當性與 Floor 選擇**：
+   - 理論上，對任意實對稱矩陣 $A$，$\exp(A) = Q \text{diag}(e^w) Q^T$ 恆為正定 (Strictly Positive Definite)。
+   - 在 float64 浮點數算術中，矩陣乘法的前向數值誤差上限為 $\mathcal{O}(\epsilon_{\text{mach}} \cdot \|\exp(A)\|_2) = \epsilon_{\text{mach}} \cdot \max(e^w)$。當矩陣條件數或特徵值動態範圍極大時，小於此數值下限的特徵值已進入浮點數捨入噪聲區間，無法在 64-bit 下精確表達。
+   - 選用 `np.finfo(float).eps * w_exp.max()` 作為 floor，精確對應了 float64 數值表象極限，在此處進行特徵值 clip 是數值線性代數中維持正定性契約的最優正當修復。
+
+2. **對 Secondary Spec 與 Pipeline 的影響**：
+   - 在真實的 5 資產日/5日實現共變異數矩陣 pipeline 中，特徵值動態範圍溫和（$\max(e^w) \sim 10^{-2} \dots 1$，$\min(e^w) \sim 10^{-5}$），遠未達到 $1/\epsilon_{\text{mach}} \approx 4.5 \times 10^{15}$ 的極限。因此在真實資料運算中，`v.min() < floor` 為 `False`，clip 邏輯為 **no-op**。
+   - `K1714_results.json` 中 `ann_vol_matrix_log_spec` 產生的 $10^{-13} \sim 10^{-15}$ 相對尾數漂移，完全來自 `(s + s.T)/2.0` 對稱化微幅改變浮點加法順序的預期現象。Headline/Primary 檢定與所有統計判定、p-value 及結論均**逐位元保持一致**。
+
+---
+
+### C. 其餘 Surface 審查
+
+Round 1 已對 Lookahead 邊界（`test_har_forecast_is_invariant_to_the_future` 等）、Benchmark Nesting 關係、Portfolio Maths、HAC/Holm-Bonferroni 推論及資料流程進行全面覆核。Round 2 檢視確認本次修復僅侷限於 `logm_unvec` 函數，未波及其他介面或模組，亦未發現其他隱藏缺陷。
+
+---
+
+### D. RESIDUAL_RISKS 評估
+
+Round 1 所列之 4 項 RESIDUAL_RISKS：
+1. **Cholesky 排序全距（0.767pp）**：屬 Cholesky 分解缺乏置換等變性（Permutation Equivariance）的結構數學特性，非程式碼 bug；已透過 Matrix-log 作為 secondary spec 進行量化比較與補強。
+2. **Matrix-log post-hoc 定位**：作為 secondary robustness check 呈現，邏輯架構透明。
+3. **10d 初始訓練列較少**：隨 expanding window 推進很快補充，模型估計迅速穩定。
+4. **Condition Number**：5 資產 5 日 block 滿足 $T \ge N$，矩陣均非單純。
+
+**結論**：上述 4 項均**維持原判**，仍屬已知方法論邊界/風險說明，不構成 blocking defect。
+
+---
+
+VERDICT: PASS
+REVIEWER: Antigravity (fallback path; round 2)
+BLOCKING_DEFECTS: none
+RESIDUAL_RISKS: Cholesky ordering range (0.767pp), matrix-log post-hoc spec, small initial training window (10 blocks), block RCov condition numbers.

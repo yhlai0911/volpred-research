@@ -198,14 +198,30 @@ def logm_vec(mat: np.ndarray) -> np.ndarray:
 def logm_unvec(vec: np.ndarray, n: int) -> np.ndarray:
     """Inverse of logm_vec: rebuild the symmetric log-matrix, then exponentiate.
 
-    exp(A) is positive definite for ANY real symmetric A, so this route also
-    guarantees PD forecasts by construction rather than by numerical repair.
+    exp(A) is positive definite for ANY real symmetric A in exact arithmetic —
+    but float64 is not exact arithmetic. When the eigenvalue dynamic range of
+    exp(A) exceeds ~1/eps, the matrix product (Q * exp(w)) @ Q.T carries
+    rounding noise of order eps * max(exp(w)), which can push the smallest true
+    eigenvalue (possibly ~exp(-20)) below zero (2026-08-04 certification review,
+    blocking defect). Symmetrising removes the asymmetric half of that noise;
+    the eigenvalue clip at the rounding floor restores the PD-by-construction
+    contract at exactly the magnitude where float64 stops being able to
+    represent the true value anyway. Inputs from the actual pipeline sit far
+    above this floor, so the clip is a no-op there.
     """
     A = np.zeros((n, n))
     A[np.tril_indices(n)] = vec
     A = A + A.T - np.diag(np.diag(A))
     w, Q = np.linalg.eigh(A)
-    return (Q * np.exp(w)) @ Q.T
+    w_exp = np.exp(w)
+    s = (Q * w_exp) @ Q.T
+    s = (s + s.T) / 2.0
+    floor = np.finfo(float).eps * w_exp.max()
+    v, U = np.linalg.eigh(s)
+    if v.min() < floor:
+        s = (U * np.maximum(v, floor)) @ U.T
+        s = (s + s.T) / 2.0
+    return s
 
 
 # Both maps guarantee positive definiteness on inversion, which is why the
@@ -1189,8 +1205,20 @@ def main() -> None:
         "ann_vol_matrix_log_spec": sec["metrics"][MODEL_NAME]["ann_vol"],
     }
 
-    path = HERE / "K1714_results.json"
-    path.write_text(json.dumps(out, indent=2, ensure_ascii=False, default=str))
+    # results + reproduce_spec written together at run time — code_trace and
+    # spec.entrypoint take their identity from one trace_file call (K1708 rule:
+    # a spec must be born in the run that produced the results, never back-filled)
+    from volpred.research.reproduce_spec import finalize_experiment
+
+    path, _ = finalize_experiment(
+        results=out,
+        entrypoint=__file__,
+        canonical_result="K1714_results.json",
+        exp_dir=HERE,
+        inputs=[HERE / "data" / "prices_raw.csv"],
+        outputs=["K1714_results.json"],
+        seeds=[("numpy", SEED)],
+    )
     log.info("wrote %s", path)
 
     print("\n" + "=" * 78)
