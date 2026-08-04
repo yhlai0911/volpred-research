@@ -979,8 +979,12 @@ def _git_lines(
     ok_returncodes: tuple[int, ...] = (0,),
 ) -> list[str]:
     try:
+        # core.quotePath=false: git C-quotes non-ASCII pathnames by default
+        # ("\346\226\207..."), so CJK paths from status/ls-tree never matched
+        # the raw UTF-8 dirty-path set — two incidents were mathematically
+        # uncloseable and pinned the dispatch derate forever (2026-08-04).
         proc = runner(
-            ["git", "-C", str(repo_root), *args],
+            ["git", "-C", str(repo_root), "-c", "core.quotePath=false", *args],
             capture_output=True, text=True, timeout=_GIT_TIMEOUT_S, check=False,
         )
     except (subprocess.SubprocessError, OSError) as exc:

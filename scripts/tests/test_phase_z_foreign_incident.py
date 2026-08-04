@@ -1319,9 +1319,11 @@ def test_live_code_changes_the_instruction_but_not_the_verdict(repo: Path):
     def _runner(cmd, **kw):
         # Pretend the path is quarantine-covered so `covered` is True and the only
         # remaining question is what to tell the operator about the dirty path.
-        if cmd[3:5] == ["for-each-ref", "--format=%(refname)"]:
+        # Match by content, not index — _git_lines injects `-c core.quotePath=false`
+        # ahead of the subcommand (CJK-path fix, 2026-08-04).
+        if "for-each-ref" in cmd and "--format=%(refname)" in cmd:
             return subprocess.CompletedProcess(cmd, 0, "refs/quarantine/x\n", "")
-        if cmd[3] == "ls-tree":
+        if "ls-tree" in cmd:
             return subprocess.CompletedProcess(cmd, 0, f"{rel}\n", "")
         kw.pop("capture_output", None)
         kw.pop("text", None)
@@ -1336,3 +1338,33 @@ def test_live_code_changes_the_instruction_but_not_the_verdict(repo: Path):
     assert "不要清除" in blocker and "收養" in blocker, (
         "a live path must not be handed the preserve-then-delete instruction"
     )
+
+
+# ── CJK paths must survive git's C-quoting (2026-08-04 undead-incident fix) ──
+
+
+def test_cjk_paths_are_covered_and_dirty_with_their_real_names(repo: Path):
+    """git C-quotes non-ASCII pathnames by default, so a CJK path read from
+    status/ls-tree never matched the incident's raw UTF-8 path set: the file
+    was quarantined AND dirty, yet reported as neither — two incidents became
+    mathematically uncloseable and pinned the dispatch derate forever."""
+    rel = "storage/ops/graphify/query_中文檔名_20260801.jsonl"
+    _write(repo, rel, "line-1\n")
+    # Put the CJK file into an immutable quarantine ref the way phase_z does:
+    # a commit object reachable from refs/volpred/quarantine/*.
+    _git(repo, "add", rel)
+    _git(repo, "commit", "-qm", "quarantine checkpoint")
+    sha = _git(repo, "rev-parse", "HEAD").stdout.strip()
+    _git(repo, "update-ref", "refs/volpred/quarantine/20260804TESTZ", sha)
+    # Make the same path dirty in the working tree again.
+    _write(repo, rel, "line-1\nline-2-dirty\n")
+
+    covered = fi.quarantine_covered_paths(repo)
+    dirty = fi.dirty_paths(repo)
+
+    assert rel in covered, f"C-quoted ls-tree output lost the CJK path: {sorted(covered)}"
+    assert rel in dirty, f"C-quoted status output lost the CJK path: {sorted(dirty)}"
+    for got in (covered, dirty):
+        assert not any(p.startswith('"') for p in got), (
+            "raw C-quoted names leaked through instead of UTF-8"
+        )
