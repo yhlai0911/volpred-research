@@ -258,6 +258,23 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
   - brief：`.claude/skills/autonomous-research/references/agent-brief-template.md`
   - result：`.claude/skills/autonomous-research/references/agent-result-template.md`
 
+### Matt Pocock flow — 規劃已經做完了，不要重跑
+
+使用者明確要求依 Matt skills 選流程時，先讀 `ask-matt` router，依其 main flow／on-ramp
+選擇 user-invoked skill，不可自行拼湊替代順序。安裝狀態一律以
+`scripts/check_matt_skills_installation.py --json` 的實際 manifest 回讀為準（surface 說明見下方
+「全域 skill surface」）。
+
+**現有全域優化的 plan／spec／ticket 三份都已存在**：GitHub Issue #3（plan）→
+`docs/refactor_plan_ops_master_2026_07.md`（spec）→ GitHub Issues #5~#36 `[Plan T*]`（tickets）。
+使用者說「依先前規劃繼續」時，**不要**重跑 grill／to-spec／to-tickets —— 先讀 spec §7 與 ticket
+blocking edge，從第一張未阻塞的 ticket 走 `implement` → `tdd` → `code-review`。只有 scope 確實
+改變、且 owner 明確要求重新規劃時才回頭做規劃階段。
+
+標示 `disable-model-invocation: true` 的 skill 只在使用者明確呼叫時啟動；其餘 model-invoked
+skills 可按任務描述自動採用。建立或修改 skill 時以 `writing-great-skills` 的 predictability、
+information hierarchy、completion criterion 與 single source of truth 為準。
+
 <!-- shared:Agent skills:begin -->
 <!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
 ## Agent skills
