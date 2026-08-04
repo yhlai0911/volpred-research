@@ -764,6 +764,16 @@ def scan_population(root: Path = REPO_ROOT) -> list[Finding]:
     for pattern in SCAN_PATTERNS:
         paths.update(root.glob(pattern))
     for path in sorted(paths):
+        # gate_history/ holds the pre-change bytes of gate-bearing scripts,
+        # preserved as EVIDENCE by scripts/preserve_gate_blob.py. Its manifest
+        # says never to edit a blob -- an edited original is a reconstruction,
+        # which is what K1708 was rejected for. Scanning them asks for a fix
+        # that is forbidden to apply: the live script can be repaired, a frozen
+        # snapshot of what it used to be cannot. audit_canonical_stat_helpers.py
+        # already skips them for the same reason; this audit and the nested-DM
+        # one had simply not been told.
+        if "gate_history" in path.parts or "__pycache__" in path.parts:
+            continue
         findings.extend(scan_file(path, root))
     findings.sort(key=lambda f: (SEVERITY[f.verdict], not f.exercises_h1, f.file))
     return findings

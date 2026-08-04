@@ -2689,6 +2689,14 @@ def scan_population(root: Path = REPO_ROOT) -> AuditResult:
     errors: list[str] = []
     paths = sorted(root.glob(SCAN_GLOB))
     for path in paths:
+        # gate_history/ holds pre-change bytes preserved as EVIDENCE by
+        # scripts/preserve_gate_blob.py, whose manifest says never to edit a
+        # blob: an edited original is a reconstruction, the exact failure K1708
+        # was rejected for. Flagging one demands a repair that is forbidden to
+        # make. audit_canonical_stat_helpers.py already skips them; this audit
+        # and the DM-HAC one had simply not been told.
+        if "gate_history" in path.parts or "__pycache__" in path.parts:
+            continue
         try:
             finding = scan_file(path, root)
         except (OSError, UnicodeError, SyntaxError, RecursionError) as exc:

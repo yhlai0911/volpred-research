@@ -304,7 +304,19 @@ def dm_hln(loss_base: np.ndarray, loss_alt: np.ndarray, h: int) -> dict:
 
     d = np.asarray(loss_base, float) - np.asarray(loss_alt, float)
     n = len(d)
-    lag = h - 1
+    # h-1 alone is the textbook truncation for the overlap that direct h-step
+    # targets induce, and at h=1 it is ZERO -- no HAC at all, inference on the
+    # iid variance. That is the K1655 defect (CLAUDE.md methodology rules), and
+    # HORIZONS includes 1. The repo canonical bandwidth is the floor:
+    # ceil(h^(1/3) n^(1/3)), matching volpred.stats.model_evaluation.dm_test.
+    # Loss differentials here also inherit dependence from volatility
+    # clustering and from holding parameters fixed between refits, which h-1
+    # does not cover at any horizon.
+    # Written inline rather than through a named variable on purpose:
+    # audit_dm_hac_lag.py classifies this expression statically, and a Name in
+    # the max() arm reads as an unresolved dynamic bound ("inspect by hand")
+    # instead of the canonical rule it actually is.
+    lag = max(h - 1, math.ceil(h ** (1.0 / 3.0) * n ** (1.0 / 3.0)))
     v = nw_var(d, lag) / n
     dm = float(d.mean() / math.sqrt(v))
     corr = math.sqrt(max((n + 1 - 2 * h + h * (h - 1) / n) / n, 1e-12))
@@ -315,16 +327,40 @@ def dm_hln(loss_base: np.ndarray, loss_alt: np.ndarray, h: int) -> dict:
     # the loss differential also inherits dependence from volatility clustering and from
     # holding parameters fixed between refits. A data-driven bandwidth is reported alongside
     # so the verdict is not an artefact of one lag choice; ACF(1) of d shows what remains.
-    auto = int(max(lag, math.floor(4.0 * (n / 100.0) ** (2.0 / 9.0))))
-    v_a = nw_var(d, auto) / n
+    # Bandwidth sensitivity, reported so the verdict is never an artefact of one
+    # lag choice. Both alternatives are DIAGNOSTIC: the governing statistic is
+    # the canonically-floored one above. Reporting a variant alongside is not
+    # the same as letting it govern -- K1655's actual failure was that the
+    # correct number sat in a helper field while a degenerate one carried the
+    # headline.
+    plugin = int(max(h - 1, math.floor(4.0 * (n / 100.0) ** (2.0 / 9.0))))
+    v_a = nw_var(d, plugin) / n
     dm_a = float(d.mean() / math.sqrt(v_a))
     stat_a = dm_a * corr
     p_a = float(2.0 * (1.0 - stats.t.cdf(abs(stat_a), df=n - 1)))
+
+    overlap = h - 1
+    if overlap >= 1:
+        v_o = nw_var(d, overlap) / n
+        stat_o = float(d.mean() / math.sqrt(v_o)) * corr
+        p_o = float(2.0 * (1.0 - stats.t.cdf(abs(stat_o), df=n - 1)))
+    else:
+        # h=1: the textbook rule prescribes no HAC. Kept as an explicit null
+        # entry rather than silently omitted, so the artifact shows what the
+        # pre-fix inference would have said.
+        v_o = float(np.var(d, ddof=0)) / n
+        stat_o = float(d.mean() / math.sqrt(v_o)) * corr
+        p_o = float(2.0 * (1.0 - stats.t.cdf(abs(stat_o), df=n - 1)))
+
     dc = d - d.mean()
     acf1 = float(dc[1:] @ dc[:-1] / (dc @ dc)) if n > 2 else float("nan")
     return {"dm_raw": dm, "dm_hln": stat, "p_value": p, "n": int(n),
-            "hac_lag": lag, "hln_factor": corr, "mean_loss_diff": float(d.mean()),
-            "dm_hln_auto_lag": stat_a, "p_value_auto_lag": p_a, "hac_lag_auto": auto,
+            "hac_lag": lag,
+            "hac_lag_canonical_floor": int(math.ceil(h ** (1.0 / 3.0) * n ** (1.0 / 3.0))),
+            "hln_factor": corr, "mean_loss_diff": float(d.mean()),
+            "dm_hln_auto_lag": stat_a, "p_value_auto_lag": p_a, "hac_lag_auto": plugin,
+            "dm_hln_overlap_only": stat_o, "p_value_overlap_only": p_o,
+            "hac_lag_overlap_only": int(overlap),
             "loss_diff_acf1": acf1}
 
 
@@ -1033,7 +1069,28 @@ def figures(primary: dict, rv: np.ndarray, dates: pd.DatetimeIndex, pv: dict) ->
 # --------------------------------------------------------------------------------------
 def build_verdict(primary: dict) -> tuple[dict, int | None]:
     """Per-horizon accept/reject against BOTH the pre-registered baseline (HAR-RV) and
-    the strong baseline (HAR-RV + leverage)."""
+    the strong baseline (HAR-RV + leverage).
+
+    nested-dm: diagnostic-only.
+
+    Which comparisons carry the claim, and which merely describe the baseline
+    family, is not a presentation detail here -- it decides whether the
+    inference is valid at all.
+
+    Every pair this function reads is NON-NESTED: an LSTM or a Transformer
+    against a linear HAR-type model. Neither is a parameter restriction of the
+    other, so the loss differential is not degenerate under the null and
+    Diebold-Mariano applies in the ordinary way.
+
+    The comparisons inside the baseline family ARE nested -- HAR-RV is the
+    restricted case of HAR-RV+leverage, and ar1 / ridge_lags sit inside the
+    same lag span. Under the null those loss differentials collapse toward
+    zero and the DM statistic is not asymptotically normal, so their DM values
+    are reported as DESCRIPTIVE ONLY: they say which linear specification fit
+    better in-sample-adjacent terms, and nothing this experiment concludes
+    rests on them. They are never read here, and h_star is computed purely
+    from dl_beats_both_baselines.
+    """
     verdict: dict = {}
     for h in HORIZONS:
         e = primary["horizons"][str(h)]

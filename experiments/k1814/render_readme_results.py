@@ -352,6 +352,20 @@ def render_main(d: dict) -> str:
         + ", ".join(f"`{k}`" for k in fam["dm_vs_har"]["results"]) + "."
     )
     L.append("")
+    # nested-dm: diagnostic-only.
+    #
+    # Every DM statistic this renderer prints comes from a NON-NESTED pair: an
+    # LSTM or a Transformer against a linear baseline. Neither is a parameter
+    # restriction of the other, so the loss differential is not degenerate
+    # under the null and DM applies in the ordinary way. Both FDR families are
+    # exactly {h1,h5,h22} x {lstm,transformer} -- six DL-vs-baseline tests.
+    #
+    # The NESTED comparisons (harl, ar1 and ridge_lags against the HAR-RV they
+    # contain) reach the reader only as QLIKE levels, never as a DM statistic
+    # or a p-value. That is deliberate: under the null those forecasts
+    # coincide, the statistic is not asymptotically normal, and a p-value
+    # would not be a valid test size. Their DM values stay in the results
+    # artifact as description and are not rendered here.
     for key in ("dm_vs_har", "dm_vs_harl"):
         f = fam[key]
         L.append(f"**Family `{key}` — baseline {f['baseline']}**")
