@@ -1,0 +1,128 @@
+{
+  "schema_version": "volpred.reproduce_report.v1",
+  "generated_at": "2026-08-05T09:56:14.560062+00:00",
+  "experiment_id": "k1583",
+  "engine": {
+    "name": "scripts/reproduce_check.py",
+    "schema": "volpred.reproduce_report.v1",
+    "path": "scripts/reproduce_check.py",
+    "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+    "committed_at_repo_head": true
+  },
+  "repo_head": "232283ff5b75861640cfaef3a35c298f8cff8856",
+  "methodology_references": [
+    {
+      "citation": "Peng (2011), Reproducible Research in Computational Science",
+      "doi": "10.1126/science.1213847",
+      "principle": "computational reproducibility is a minimum standard, not a validity verdict"
+    },
+    {
+      "citation": "Sandve et al. (2013), Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "principle": "record provenance and preserve the exact workflow behind every result"
+    },
+    {
+      "citation": "Stodden et al. (2016), Enhancing Reproducibility for Computational Methods",
+      "doi": "10.1126/science.aah6168",
+      "principle": "disclose code, data, workflow, and computational environment"
+    }
+  ],
+  "discovery": {
+    "inventory_record": {
+      "experiment": "k1583",
+      "path": "experiments/k1583",
+      "priority_sources": [],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": true,
+      "report_status": "unverified",
+      "report_stale": true,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "k1583.py",
+      "result_file": "k1583_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    "subject_files": [
+      {
+        "path": "experiments/K1380_v4/k1380_v4_losses_all.npy",
+        "sha256": "2b7232b99a7cb9521adfce843f399cf51099581ef9ac6a9d2e2e4f74e35551f4",
+        "size": 258528
+      },
+      {
+        "path": "experiments/k1583/k1583.py",
+        "sha256": "73505b0de124b78e73f11ec4a5fa321239d4bb7b920e1156b7b7a1fe021f9b7b",
+        "size": 28602
+      },
+      {
+        "path": "experiments/k1583/k1583_results.json",
+        "sha256": "1c88ee72f29b2c409b9527942672f98abc8cb5fb6242adcfbead58b7f9df8f9e",
+        "size": 35086
+      },
+      {
+        "path": "experiments/k1583/reproduce_spec.json",
+        "sha256": "d4ad16e2c83ab02bfe61f565ecb508d9acf710e73fc12e0bab0e856edab473d3",
+        "size": 3043
+      },
+      {
+        "path": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+        "sha256": "43870c199d00c922ca607c674254edd66c5acca00209eb501a94c5c339449830",
+        "size": 3179160
+      },
+      {
+        "path": "scripts/reproduce_check.py",
+        "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+        "size": 65995
+      }
+    ],
+    "entrypoint": "experiments/k1583/k1583.py",
+    "canonical_result": "experiments/k1583/k1583_results.json",
+    "spec_sha256": "d4ad16e2c83ab02bfe61f565ecb508d9acf710e73fc12e0bab0e856edab473d3",
+    "subject_sha256": "6db70c0c781fa495fce4fae133422e4fa11660f2a8281433564580b55e49ef47"
+  },
+  "environment": {
+    "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "uv_lock_sha256": "340b8dc87c7b1e0f1fc852bab3f62e2d084582c77831cee59a3729064706edf0",
+    "pythonhashseed": "0",
+    "package_versions": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "arch": "8.0.0",
+      "yfinance": "1.2.0",
+      "scikit-learn": "1.8.0"
+    }
+  },
+  "execution": {
+    "command": [
+      "/Users/yhlai0911/volpred-research/.venv/bin/python3",
+      "experiments/k1583/k1583.py"
+    ],
+    "backend": "macos_sandbox_exec",
+    "network": "deny",
+    "exit_code": 1,
+    "timeout_seconds": 103,
+    "duration_seconds": 7.289,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e2aad314db454e196679ba2e12749b31cdfb40d5a1a518f4a3d6e279269ac6aa",
+    "stdout_tail": "",
+    "stderr_tail": "2026-08-05 17:56:21,782 [INFO] ======================================================================\n2026-08-05 17:56:21,782 [INFO] K1583 Conditional / Sequential MCS\n2026-08-05 17:56:21,782 [INFO] ======================================================================\n2026-08-05 17:56:21,782 [INFO] Loading K1380_v4 loss matrix from /private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-hnlh6vwk/repo/experiments/K1380_v4/k1380_v4_losses_all.npy\n2026-08-05 17:56:21,782 [INFO]   loss matrix shape: (17, 1900) (specs × days)\n2026-08-05 17:56:21,804 [INFO]   OOS dates aligned (raw positional): 2019-01-02 → 2026-07-21 (1900 rows)\n2026-08-05 17:56:21,804 [INFO] Dropping ineligible specs (per K1380_v4 metadata): ['C1']\n2026-08-05 17:56:21,846 [INFO] Loading VIX from SPY data CSV\n2026-08-05 17:56:21,865 [INFO]   VIX regime counts: {'mid': 763, 'high': 720, 'low': 417}\nTraceback (most recent call last):\n  File \"/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-hnlh6vwk/repo/experiments/k1583/k1583.py\", line 710, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-hnlh6vwk/repo/experiments/k1583/k1583.py\", line 540, in main\n    recession = load_recession_indicator(losses_df.index, fred_api_key())\n                                                          ^^^^^^^^^^^^^^\n  File \"/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-hnlh6vwk/repo/experiments/k1583/k1583.py\", line 285, in fred_api_key\n    raise RuntimeError(\"FRED_API_KEY missing — cannot fetch USRECD\")\nRuntimeError: FRED_API_KEY missing — cannot fetch USRECD\n",
+    "clean_snapshot": true,
+    "sandbox_removed_after_run": true
+  },
+  "comparison": null,
+  "integrity": {
+    "canonical_unchanged": true,
+    "changed_paths": []
+  },
+  "outcome": {
+    "status": "error",
+    "reason_code": "NONZERO_EXIT",
+    "severity": "warn",
+    "reproducible": null,
+    "summary": "experiment exited 1"
+  }
+}

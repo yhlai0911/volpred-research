@@ -1,7 +1,7 @@
 {
   "schema_version": "volpred.reproduce_inventory.v1",
-  "generated_at": "2026-08-05T08:57:14.779439+00:00",
-  "repo_head": "b7d9753515a8f3a056ebad7a08cd3c4ae8a483df",
+  "generated_at": "2026-08-05T10:00:38.547674+00:00",
+  "repo_head": "1cb90631a6b645c9c4920600dc6dc9bacdeb82d8",
   "scope": {
     "paper_sources": "paper/*/experiments.md plus canonical submission compile closures; README fallback only when both are absent",
     "recent_feed_articles": "latest 60 records with status=published",
@@ -239,7 +239,6 @@
       "K1354",
       "K1366",
       "K1406",
-      "K1420",
       "K1436",
       "K1448",
       "K1450",
@@ -250,6 +249,7 @@
       "K1584",
       "K1585",
       "K1588",
+      "K1589",
       "K1594",
       "K1623",
       "K1625",
@@ -362,7 +362,6 @@
       "K1406",
       "K1417",
       "K1418",
-      "K1420",
       "K1436",
       "K1448",
       "K1450",
@@ -377,6 +376,7 @@
       "K1584",
       "K1585",
       "K1588",
+      "K1589",
       "K1591",
       "K1592",
       "K1594",
@@ -603,7 +603,6 @@
     "K1406": "k1406",
     "K1417": "k1417",
     "K1418": "k1418",
-    "K1420": "k1420",
     "K1436": "k1436",
     "K1448": "k1448",
     "K1450": "k1450",
@@ -618,6 +617,7 @@
     "K1584": "k1584",
     "K1585": "k1585",
     "K1588": "k1588",
+    "K1589": "k1589",
     "K1591": "k1591",
     "K1592": "k1592",
     "K1594": "k1594",
@@ -748,9 +748,9 @@
     "experiment_dirs": 1516,
     "with_code": 1441,
     "with_results": 1286,
-    "with_reproduce_report": 6,
-    "runnable": 39,
-    "unverified_missing_spec": 1168,
+    "with_reproduce_report": 7,
+    "runnable": 40,
+    "unverified_missing_spec": 1167,
     "code_without_results": 168,
     "results_without_code": 13,
     "priority_refs": 238,
@@ -762,12 +762,13 @@
     "priority_stale_reports": 2,
     "priority_unverified": 233,
     "priority_code_without_results": 2,
-    "broken_reports": 2,
+    "broken_reports": 3,
     "stale_reports": 4,
     "knowledge_base_readable": true,
     "results_without_knowledge": 0
   },
   "report_status_counts": {
+    "fail_mismatch": 1,
     "pass_tolerated": 4,
     "unverified": 2
   },
@@ -2377,23 +2378,6 @@
       "blocker": "missing reproduce_spec.json"
     },
     {
-      "experiment": "k1420",
-      "path": "experiments/k1420",
-      "priority_sources": [
-        "recent_feed"
-      ],
-      "code_count": 1,
-      "results_count": 1,
-      "reproduce_report": false,
-      "report_status": null,
-      "report_stale": null,
-      "spec_file": null,
-      "entrypoint": "k1420.py",
-      "result_file": "k1420_results.json",
-      "classification": "unverified_missing_spec",
-      "blocker": "missing reproduce_spec.json"
-    },
-    {
       "experiment": "k1436",
       "path": "experiments/k1436",
       "priority_sources": [
@@ -2628,6 +2612,23 @@
       "spec_file": null,
       "entrypoint": "k1588.py",
       "result_file": "k1588_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
+      "experiment": "k1589",
+      "path": "experiments/k1589",
+      "priority_sources": [
+        "recent_feed"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1589.py",
+      "result_file": "k1589_results.json",
       "classification": "unverified_missing_spec",
       "blocker": "missing reproduce_spec.json"
     },
@@ -7299,6 +7300,21 @@
       "spec_file": "reproduce_spec.json",
       "entrypoint": "K1710.py",
       "result_file": "K1710_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    {
+      "experiment": "k1583",
+      "path": "experiments/k1583",
+      "priority_sources": [],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": true,
+      "report_status": "fail_mismatch",
+      "report_stale": false,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "k1583.py",
+      "result_file": "k1583_results.json",
       "classification": "runnable",
       "blocker": null
     },

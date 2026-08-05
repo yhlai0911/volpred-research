@@ -241,6 +241,11 @@
      "at": "2026-08-05T09:25:18.312336+00:00",
      "instance_key": "30991427787:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-05T09:55:33.921764+00:00",
+     "instance_key": "30993567586:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -273,14 +278,20 @@
      "first_seen_at": "2026-08-05T09:25:18.312336+00:00",
      "key": "30991427787:1",
      "last_seen_at": "2026-08-05T09:25:18.312336+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-05T09:55:33.921764+00:00",
+     "key": "30993567586:1",
+     "last_seen_at": "2026-08-05T09:55:33.921764+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-05T09:20:34.4755041Z E AssertionError: Enforcement Layer Map is out of sync with disk — update docs/governance/enforcement_layer_map.md in the same commit as the hook/CI change.",
-   "last_seen_at": "2026-08-05T09:25:18.312336+00:00",
+   "last_breach_detail": "2026-08-05T09:50:20.2582548Z E AssertionError: Enforcement Layer Map is out of sync with disk — update docs/governance/enforcement_layer_map.md in the same commit as the hook/CI change.",
+   "last_seen_at": "2026-08-05T09:55:33.921764+00:00",
    "notified_at": null,
-   "occurrence_count": 5,
+   "occurrence_count": 6,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2083,7 +2094,7 @@
    "clean_streak_started_at": null,
    "control_gate_id": "dispatch_worker_ownership",
    "current_task_id": null,
-   "episode_count": 1267,
+   "episode_count": 1300,
    "episode_failures": [
     {
      "at": "2026-08-04T04:16:20.228925+00:00",
@@ -2093,7 +2104,7 @@
      "task_id": "inc_792a94b0ecf4_e1"
     }
    ],
-   "episode_opened_at": "2026-08-05T09:30:29.329617+00:00",
+   "episode_opened_at": "2026-08-05T09:59:33.973493+00:00",
    "escalation": {
     "at": "2026-08-04T04:16:20.270924+00:00",
     "notification_id": "effect_owned_email_5b3a5d4b722faea245a48bbb9ca01d93",
@@ -3057,7 +3068,7 @@
      },
      "first_seen_at": "2026-08-04T06:55:40.479741+00:00",
      "key": "dispatch-slot-1-3175c52f",
-     "last_seen_at": "2026-08-05T09:29:55.868382+00:00"
+     "last_seen_at": "2026-08-05T09:56:28.421791+00:00"
     },
     {
      "cleared_at": null,
@@ -3071,7 +3082,7 @@
      },
      "first_seen_at": "2026-08-04T07:21:54.991363+00:00",
      "key": "dispatch-slot-1-1675be8d",
-     "last_seen_at": "2026-08-05T09:30:07.101693+00:00"
+     "last_seen_at": "2026-08-05T09:56:35.084414+00:00"
     },
     {
      "cleared_at": null,
@@ -3085,7 +3096,7 @@
      },
      "first_seen_at": "2026-08-04T07:46:21.551654+00:00",
      "key": "dispatch-slot-1-592ef34e",
-     "last_seen_at": "2026-08-05T09:30:18.566641+00:00"
+     "last_seen_at": "2026-08-05T09:56:41.701158+00:00"
     },
     {
      "cleared_at": null,
@@ -3155,7 +3166,7 @@
      },
      "first_seen_at": "2026-08-05T05:28:01.199569+00:00",
      "key": "dispatch-slot-1-12eda1cf",
-     "last_seen_at": "2026-08-05T09:30:29.329617+00:00"
+     "last_seen_at": "2026-08-05T09:59:33.973493+00:00"
     },
     {
      "cleared_at": null,
@@ -3175,72 +3186,72 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-12eda1cf unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-05T09:30:29.329617+00:00",
+   "last_seen_at": "2026-08-05T09:59:33.973493+00:00",
    "notified_at": null,
-   "occurrence_count": 11571,
+   "occurrence_count": 11604,
    "resolution": {
-    "at": "2026-08-05T09:30:29.329617+00:00",
+    "at": "2026-08-05T09:59:33.973493+00:00",
     "by": "inc_792a94b0ecf4_rootcause_e2",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
     {
-     "at": "2026-08-05T09:20:20.470122+00:00",
+     "at": "2026-08-05T09:52:31.170197+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:20:30.781011+00:00",
+     "at": "2026-08-05T09:52:42.434150+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:20:42.472507+00:00",
+     "at": "2026-08-05T09:52:53.118522+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:20:52.465225+00:00",
+     "at": "2026-08-05T09:54:29.597934+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:26:12.575525+00:00",
+     "at": "2026-08-05T09:54:36.157331+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:26:23.240449+00:00",
+     "at": "2026-08-05T09:54:42.647760+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:26:34.568123+00:00",
+     "at": "2026-08-05T09:54:52.451210+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:26:44.795418+00:00",
+     "at": "2026-08-05T09:56:28.421791+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:29:55.868382+00:00",
+     "at": "2026-08-05T09:56:35.084414+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:30:07.101693+00:00",
+     "at": "2026-08-05T09:56:41.701158+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:30:18.566641+00:00",
+     "at": "2026-08-05T09:56:51.461801+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T09:30:29.329617+00:00",
+     "at": "2026-08-05T09:59:33.973493+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     }
@@ -5481,6 +5492,6 @@
    }
   }
  },
- "updated_at": "2026-08-05T09:38:15.898570+00:00",
+ "updated_at": "2026-08-05T10:01:40.981356+00:00",
  "version": 1
 }
