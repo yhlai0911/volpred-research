@@ -27,6 +27,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from dept_routing import resolve_dept_routing  # noqa: E402
 from _core import (  # noqa: E402
     DEFAULT_ORG_ROOT,
     REPO_ROOT,
@@ -139,7 +140,17 @@ def cmd_attach(args: argparse.Namespace) -> int:
         print("沒有需要新開的部門 pane。")
         return 0
 
-    print(f"將開 {len(plan)} 個 pane：{', '.join(n for n, _ in plan)}（kind={args.kind}）")
+    # The pane must actually RUN at the department's routing, not merely display
+    # it: a cockpit that shows opus/xhigh while the session runs on CLI defaults
+    # is a dashboard lying about its own subject.
+    routing = resolve_dept_routing(load_registry(root))["departments"]
+    print(f"將開 {len(plan)} 個 pane（kind={args.kind}）：")
+    for name, _ in plan:
+        s = (routing.get(name) or {}).get("session") or {}
+        eff = args.effort or s.get("effort", "?")
+        print(f"  {name:<18} {s.get('model', '?')}/{eff}"
+              + (f"  [--effort 覆寫，路由建議 {s.get('effort')}]" if args.effort else "")
+              + (f"  ⚠️ {s['conflict']}" if s.get("conflict") else ""))
     if args.dry_run:
         print("--dry-run：僅顯示計畫，未動 Herdr。")
         return 0
@@ -157,7 +168,11 @@ def cmd_attach(args: argparse.Namespace) -> int:
     for idx, (name, meta) in enumerate(plan):
         try:
             pane_id = seed_pane if idx == 0 else _split_largest(seed_pane, cwd)
-            herdr("agent", "start", name, "--kind", args.kind, "--pane", pane_id, timeout=120)
+            session = (routing.get(name) or {}).get("session") or {}
+            model = session.get("model") or "opus"
+            effort = args.effort or session.get("effort") or "medium"
+            herdr("agent", "start", name, "--kind", args.kind, "--pane", pane_id,
+                  "--", "--model", model, "--effort", effort, timeout=120)
             title = meta.get("title") or name
             herdr("pane", "rename", pane_id, f"{title} · {name}")
 
@@ -166,6 +181,8 @@ def cmd_attach(args: argparse.Namespace) -> int:
             write_lease(root, name, {
                 "runner": "herdr", "pane_id": pane_id, "tab_id": tab_id,
                 "agent": name, "kind": args.kind, "since": now_iso(),
+                "model": model, "effort": effort,
+                "effort_basis": "cli override" if args.effort else session.get("basis"),
             })
 
             pending = len(inbox_items(root, name))
@@ -176,7 +193,7 @@ def cmd_attach(args: argparse.Namespace) -> int:
                       f"結束前務必執行章程裡的 Session 收尾契約。",
                       timeout=90)
             attached.append((name, pane_id, pending))
-            print(f"  ✓ {title} → pane {pane_id}（待辦 {pending}）")
+            print(f"  ✓ {title} → pane {pane_id}  {model}/{effort}（待辦 {pending}）")
         except (HerdrError, subprocess.TimeoutExpired) as exc:
             failed.append((name, str(exc)))
             print(f"  ✗ {name}: {exc}", file=sys.stderr)
@@ -191,24 +208,31 @@ def cmd_status(args: argparse.Namespace) -> int:
     require_herdr()
     root: Path = args.root
     alive = live_agents()
+    routing = resolve_dept_routing(load_registry(root))["departments"]
     rows = []
     for name, meta in active_departments(root, None):
+        session = (routing.get(name) or {}).get("session") or {}
+        want = f"{session.get('model', '?')}/{session.get('effort', '?')}"
         lease = read_lease(root, name)
         if not lease:
-            rows.append((name, meta.get("title") or name, "—", "未附掛", len(inbox_items(root, name))))
+            rows.append((name, meta.get("title") or name, "—", "未附掛", want, "—",
+                         len(inbox_items(root, name))))
             continue
         pane = lease.get("pane_id", "?")
         state = alive.get(pane, {}).get("agent_status")
         status = f"live · {state}" if state else "租約過期（pane 已消失）"
-        rows.append((name, meta.get("title") or name, pane, status, len(inbox_items(root, name))))
+        running = f"{lease.get('model', '?')}/{lease.get('effort', '?')}"
+        rows.append((name, meta.get("title") or name, pane, status, want, running,
+                     len(inbox_items(root, name))))
 
     if args.as_json:
-        print(json.dumps([dict(zip(("dept", "title", "pane", "status", "inbox"), r)) for r in rows],
-                         ensure_ascii=False, indent=2))
+        keys = ("dept", "title", "pane", "status", "routed", "running", "inbox")
+        print(json.dumps([dict(zip(keys, r)) for r in rows], ensure_ascii=False, indent=2))
         return 0
-    print(f"{'部門':<18}{'pane':<10}{'狀態':<24}待辦")
-    for _, title, pane, status, inbox in rows:
-        print(f"{title:<16}{pane:<10}{status:<24}{inbox}")
+    print(f"{'部門':<16}{'pane':<8}{'狀態':<20}{'路由':<14}{'實際':<14}待辦")
+    for _, title, pane, status, want, running, inbox in rows:
+        drift = "" if running in ("—", want) else "  ⚠️ 與路由不符"
+        print(f"{title:<14}{pane:<8}{status:<20}{want:<14}{running:<14}{inbox}{drift}")
     return 0
 
 
@@ -243,6 +267,8 @@ def build_parser() -> argparse.ArgumentParser:
     a = sub.add_parser("attach", help="one pane + named agent per active department")
     a.add_argument("--depts", default=None, help="comma-separated subset (default: all active)")
     a.add_argument("--kind", default=DEFAULT_KIND, help=f"agent kind (default {DEFAULT_KIND})")
+    a.add_argument("--effort", choices=("low", "medium", "high", "xhigh", "max"), default=None,
+                   help="override the routed effort for every pane in this attach")
     a.add_argument("--label", default="VolPred 組織", help="tab label")
     a.add_argument("--dry-run", action="store_true")
     a.add_argument("--no-prompt", action="store_true", help="start agents but send no work prompt")

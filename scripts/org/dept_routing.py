@@ -57,6 +57,7 @@ def resolve_dept_routing(registry: dict) -> dict:
                 "mapped": bool(normalized and normalized in TASK_TYPE_TO_MODEL),
             }
         entry: dict = {"title": meta.get("title"), "task_routing": rows}
+        entry["session"] = session_routing(rows)
         if not rows:
             entry["note"] = (
                 "no owned task_types — dept work runs via scripts/cron, "
@@ -66,10 +67,49 @@ def resolve_dept_routing(registry: dict) -> dict:
     return {"sources": ROUTING_SOURCES, "departments": departments}
 
 
+# Ordered weakest → strongest so a session can be staffed for its hardest work.
+EFFORT_LADDER = ("low", "medium", "high", "xhigh", "max")
+
+
+def session_routing(rows: dict) -> dict:
+    """(model, effort) for a whole long-lived department session.
+
+    A task_type maps to one effort, but a cockpit pane is a single session that
+    outlives any one work item and cannot downshift mid-flight. It is therefore
+    staffed at the CEILING of the work it owns: running an xhigh experiment at
+    low effort produces bad research (mission 2), while running a lookup at
+    xhigh only costs tokens. Cost stays visible — resource_monitor audits it.
+    """
+    if not rows:
+        model, effort = pick_model(None)
+        return {"model": model, "effort": effort, "basis": "router default (no owned task_types)"}
+
+    models = sorted({r["model"] for r in rows.values()})
+    ceiling = max(
+        rows.values(),
+        key=lambda r: EFFORT_LADDER.index(r["effort"]) if r["effort"] in EFFORT_LADDER else -1,
+    )
+    driver = next(tt for tt, r in rows.items() if r["effort"] == ceiling["effort"])
+    routing = {
+        "model": models[0],
+        "effort": ceiling["effort"],
+        "basis": f"ceiling of owned task_types (driven by {driver})",
+    }
+    if len(models) > 1:
+        # Surfacing beats silently picking one: a department spanning two models
+        # cannot be one session, and that is a registry problem to fix.
+        routing["conflict"] = f"owned task_types span multiple models: {', '.join(models)}"
+    return routing
+
+
 def format_text(projection: dict) -> str:
     lines = ["dept routing (live projection — canonical map: scripts/model_router.py)"]
     for name, entry in projection["departments"].items():
-        lines.append(f"  {name:<18} {entry.get('title') or ''}")
+        s = entry.get("session") or {}
+        session_note = f"  → session {s.get('model')}/{s.get('effort')}" if s else ""
+        lines.append(f"  {name:<18} {entry.get('title') or ''}{session_note}")
+        if s.get("conflict"):
+            lines.append(f"    ⚠️ {s['conflict']}")
         rows = entry["task_routing"]
         if not rows:
             lines.append(f"    (no owned task_types) {entry.get('note', '')}".rstrip())

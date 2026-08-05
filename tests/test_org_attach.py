@@ -153,3 +153,47 @@ def test_attach_rejects_unknown_department(org_root: Path, monkeypatch) -> None:
 
     with pytest.raises(SystemExit):
         attach.active_departments(org_root, ["nosuchdept"])
+
+
+def _routing():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("dept_routing_module", ORG_SCRIPTS / "dept_routing.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_session_effort_is_the_ceiling_of_owned_work():
+    """A long-lived pane cannot downshift, so it is staffed for its hardest task."""
+    routing = _routing()
+
+    session = routing.session_routing({
+        "lookup": {"model": "opus", "effort": "low", "mapped": True},
+        "experiment": {"model": "opus", "effort": "xhigh", "mapped": True},
+        "strategy_lifecycle": {"model": "opus", "effort": "xhigh", "mapped": True},
+    })
+
+    assert session["effort"] == "xhigh", "under-powering the hardest owned task is the worse failure"
+    assert session["model"] == "opus"
+    assert "experiment" in session["basis"] or "strategy_lifecycle" in session["basis"]
+
+
+def test_session_routing_surfaces_a_multi_model_department():
+    routing = _routing()
+
+    session = routing.session_routing({
+        "a": {"model": "opus", "effort": "low", "mapped": True},
+        "b": {"model": "sonnet", "effort": "low", "mapped": True},
+    })
+
+    assert "conflict" in session, "a department spanning two models cannot be one session"
+    assert "opus" in session["conflict"] and "sonnet" in session["conflict"]
+
+
+def test_department_without_task_types_falls_back_to_router_default():
+    routing = _routing()
+
+    session = routing.session_routing({})
+
+    assert session["model"] and session["effort"]
+    assert "default" in session["basis"]
