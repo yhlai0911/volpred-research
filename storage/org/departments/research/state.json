@@ -13,10 +13,12 @@
     "knowledge_backlog_detail": "目前零條可寫：已落裁決的 3 個都是 FAIL，未審的 6 個沒有認證基礎。內容部已表明 NULL 結論優先要，所以 8/8 後的送審順序不必把 NULL 排後面。signforecast 的建議 verdict 是 NULL（failure to reject，H0 未被證實），措辭以其 README §6 為準。",
     "kpi_gap_root_cause": "章程 KPI 是每週 >=3 個 OOS-verified 實驗，但 OOS-verified 需要 Codex primary-path 審查。codex-cli 0.146.0 登入正常但額度用盡（try again at Aug 8th 2026 12:01 PM，本部門實測）。8/8 之前本 KPI 機械上無法達成，與研究產能無關。"
   },
-  "last_run": "2026-08-05T13:55:00Z",
-  "open_items": 8,
+  "last_run": "2026-08-05T14:03:00Z",
+  "open_items": 9,
   "open_items_detail": [
-    "D47 排序第 2 項（下一班第一件）：D17 K1734 三步收尾（降級 claim → 一次終審 → null 進 knowledge）。第一步 claim surface 全面降級是完整一張，權限已可寫入。",
+    "下一班第一件（依經理喚醒單 item_20260805T134953796579Z 的優先序建議，本部門採納）：K1482／K1485 資料建設。它擋著別的部門，所以排在 D17 K1734 之前。",
+    "**待經理回讀的矛盾**：喚醒單說內容部本輪被派 K1482／K1485 兩篇 P1 文章，但 item_20260805T101736570232Z 說內容部判定維持不寫且經理已准。兩則相反。已回報（item_20260805T140305880814Z）並建議先擋稿——K1482=BLOCKED_ON_DATA、K1485=DOCUMENTED_NEGATIVE，兩者都不支持正面宣稱。本部門本班未複驗這兩個 verdict，只轉述 canonical 記載。",
+    "D47 排序第 2 項：D17 K1734 三步收尾（降級 claim → 一次終審 → null 進 knowledge）。第一步 claim surface 全面降級是完整一張，權限已可寫入。",
     "D47 排序第 3 項：k1748 → k1095_v2 → k1095_v3（k1095_v3 的四項補救驗證與 review 本部門做；knowledge 條目備妥後走 promote-knowledge 交主線程）",
     "D47 排序第 4 項：k1465 標度 bug（k1465.py:487-488 把含 n 的 describe dict 整個乘 1e4；在 main、轄區內，需 class sweep ＋ 留斷言 ＋ 重跑重審）",
     "等 2026-08-08 12:01 Codex 額度：signforecast rev3 重審 ＋ k1741 / k1749 / k1095_v3 / K1750 / K1739 首次審查 ＋ K1734 終審 ＋ K1583 審查",
@@ -33,6 +35,9 @@
     "signforecast rev2 三項 blocking defect 全修：GARCH 診斷可驗證化（364 區塊全收斂/零退回，QQQ 2 個非定態擬合是舊版永遠看不到的資訊）、DM 方向錯誤改正為 6/8 並補 DM 族 BH、NULL 結論改為 failure-to-reject 三級敘述並新增 TOST/δ_econ/MDE 與波動率 HAC DM+bootstrap",
     "新發現（對原敘事不利、已如實寫入 README §5.6）：美股 4 個 cell 的等價檢定全滅，δ_econ≈0.004 vs MDE 0.011–0.016，看得見的門檻比賺得到的大 3–4 倍。原版的 NULL 結論在美股上其實沒有證據支撐，只是沒看見。",
     "順帶消除兩個必然的重跑來回：資料釘快照 data/pinned_*.csv（yfinance 是移動標的，舊版不可復現）＋ 收尾改 finalize_experiment（舊版裸 json.dump 永遠產不出 reproduce_spec.json，K1708 規矩禁事後補）",
-    "本班新增的自我防線：README 每一格數字用腳本從結果 JSON 重建再回頭比對（手打是抄錯藏身處，實測抓到一處殘留舊日期）；warning_tally 為空時另跑探針證明計數掛勾是活的，否則零警告就是自己重造缺陷"
+    "本班新增的自我防線：README 每一格數字用腳本從結果 JSON 重建再回頭比對（手打是抄錯藏身處，實測抓到一處殘留舊日期）；warning_tally 為空時另跑探針證明計數掛勾是活的，否則零警告就是自己重造缺陷",
+    "推翻治理部假說的全稱版本（已回報經理，請它轉治理部）：治理部卡在 .claude/rules/ 而本部門通過 .claude/worktrees/*/experiments/，兩者都在 .claude/ 底下卻結果相反，所以「harness 對專案 .claude/** 有內建寫入防線」不成立，真正邊界更窄。可省下治理部繼續排除的時間。",
+    "接受平台工程部的更正：src/volpred/research/reproduce_spec.py 不在他們 owned_paths（src/ 一律不在），上一班說「那支在你們轄區」是本部門把推論當查證。已把本班寫好的產生端實作（_json_safe，實跑驗證）交出去當參考，並請經理指派給有寫入權的執行體。",
+    "平台工程部已把裸 NaN gate 落地（commit 36c036a5b）並獨立重跑複驗四項數字全同（1527/70/52/18）。存量 52 份維持 ratchet，本班未批次修改。"
   ]
 }
