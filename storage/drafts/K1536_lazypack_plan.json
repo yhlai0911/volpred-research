@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "title": "高生態足跡商品的波動率假說被資料擋下（K1536）",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1536/k1536_results.json",
+      "sha256": "9b2bff96418c65c89081c24f4defc110e713d6c47dc7b9a387f6986637a769cf",
+      "label": "K1536 生態足跡商品波動率事件研究結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "要檢驗的說法：踩生態的商品比較晃？",
+      "alt": "概念框架：把七檔農林商品 ETF 當成高生態足跡籃子，六檔金屬與能源 ETF 當控制組，每天比較兩籃的已實現波動率與下行風險",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "常見說法是：森林砍掉、土地耗掉、水抽乾的產業，遲早被法規追上，價格應該更不安分。",
+            "高足跡籃子取 CORN、SOYB、WEAT、CANE、JO、WOOD、DBA 七檔；控制組取 GLD、SLV、CPER、USO、UNG、PDBC 六檔。",
+            "每天算兩個口徑：整體晃動的已實現波動率，以及只算下跌那一半的下行半變異數，再把農林組減掉控制組。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本涵蓋",
+          "value": {
+            "source": "results",
+            "path": "data.n_union_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個交易日"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本起點",
+          "value": {
+            "source": "results",
+            "path": "data.effective_start",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本終點",
+          "value": {
+            "source": "results",
+            "path": "data.effective_end",
+            "format": {
+              "kind": "date"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "方向是反的：農林籃子明顯比較不晃",
+      "alt": "主要結果：全樣本每日平均差在兩個風險口徑都顯著為負，HAC 調整後 t 值仍分別為負七點五與負六點三",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "已實現波動率：每日平均差",
+          "value": {
+            "source": "results",
+            "path": "unconditional_tests.0.mean",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "已實現波動率：HAC t 值",
+          "value": {
+            "source": "results",
+            "path": "unconditional_tests.0.hac_t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "下行半變異數：每日平均差",
+          "value": {
+            "source": "results",
+            "path": "unconditional_tests.1.mean",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "下行半變異數：HAC t 值",
+          "value": {
+            "source": "results",
+            "path": "unconditional_tests.1.hac_t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這兩欄",
+          "body": [
+            "假說預測差要是正的，實際兩個口徑都落在零的左邊，信賴區間連零都沒碰到。",
+            "t 值已用 HAC 異質自相關穩健標準誤調整，因為大波動的日子會連著出現，不調整會把顯著性灌水。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "政策事件那一段：六次事件撐不起結論",
+      "alt": "事件研究與研究邊界：三個事件研究估計值方向為正但信賴區間全部涵蓋零，最小 p 值仍高於零點一七",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "波動率對數比 p 值",
+          "value": {
+            "source": "results",
+            "path": "event_bootstrap_tests.0.p_two_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "下行風險對數比 p 值",
+          "value": {
+            "source": "results",
+            "path": "event_bootstrap_tests.1.p_two_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "累積異常報酬 p 值",
+          "value": {
+            "source": "results",
+            "path": "event_bootstrap_tests.2.p_two_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "拔靴法重抽次數",
+          "value": {
+            "source": "results",
+            "path": "event_bootstrap_tests.0.reps",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "這份結果不能拿去做什麼",
+          "body": [
+            "ETF 有轉倉成本與追蹤誤差，不等於商品期貨本身；WOOD 裝的是林業公司股票，不是木材。",
+            "籃子是經濟意義上的代理，沒有按 JNCC 或 SEI 的生物多樣性足跡分數排序。",
+            "正確說法是「用公開 ETF 代理測不到高足跡商品波動較高」，不是「生態風險不存在」。"
+          ]
+        }
+      ]
+    }
+  ]
+}

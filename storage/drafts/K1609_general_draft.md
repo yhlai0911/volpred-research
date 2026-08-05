@@ -52,13 +52,13 @@ details: {experiment_refs: ["K1609"], evidence_source_paths: ["experiments/K1609
 
 ![六格全部落在門檻內側，最近的一格只走到 2.05](storage/assets/k1609_general_gate_forest.png)
 
-最大的一格走到 2.05，門檻是 3。
+表裡最強的一格是黃金的實質利率那格，估計值÷誤差連兩倍出頭都不到，門檻要的是三倍。
 
 換成係數看更具體：黃金那格的估計值是 −0.0157，要碰到門檻得做到 −0.0229，還差 1.46 倍。最弱的一格是黃金的下跌波動，只有門檻要求的 12%。
 
 ## 那格 0.040 撐不住
 
-單獨看一格的話，黃金的實質利率那格確實像有東西：機率值 0.040，95% 區間落在 −0.0307 到 −0.0007 之間。
+單獨看一格的話，黃金的實質利率那格確實像有東西：機率值 0.040，區間落在 −0.0307 到 −0.0007 之間。
 
 看右邊那一端。−0.0007，離 0 只剩下 0.0007。
 
@@ -106,4 +106,4 @@ details: {experiment_refs: ["K1609"], evidence_source_paths: ["experiments/K1609
 
 ---
 
-*倉儲報表端點：`Gold_Stocks.xls` 與 `Silver_stocks.xls`，2026-07-03 執行，兩次皆 ReadTimeout、0 位元組。替代面板取自 yfinance（GLD、SLV、GC=F、SI=F、^VIX）與 FRED DFII10，2,061 個週五起點，2006-01-06 至 2026-05-29；迴歸為 OLS 搭配 Newey-West 落後 4 期，重抽為年份分群 5,000 次、隨機種子 42。全文數字逐一對應實驗結果檔。*
+*倉儲報表端點：`Gold_Stocks.xls` 與 `Silver_stocks.xls`，2026-07-03 執行，兩次皆 ReadTimeout、0 位元組。替代面板取自 yfinance（GLD、SLV、GC=F、SI=F、^VIX）與 FRED DFII10，2,061 個週五起點，2006-01-06 至 2026-05-29；迴歸為 OLS 搭配 Newey-West 落後四期，重抽為年份分群 5,000 次、隨機種子 42。全文數字逐一對應實驗結果檔。*

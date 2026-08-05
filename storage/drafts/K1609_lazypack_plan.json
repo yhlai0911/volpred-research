@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "title": "金銀庫存緊俏度：六格沒有一格過關（K1609）",
+  "evidence": {
+    "results": {
+      "path": "experiments/K1609/K1609_results.json",
+      "sha256": "66b10902b56dc07bbfa4f2ad52b3f08f5f30fe910b423e9922449a77a6d2e77c",
+      "label": "K1609 金銀倉儲緊俏度代理實驗結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "本來要測庫存，最後只拿到代理指標",
+      "alt": "概念框架：原設計要用交易所倉儲庫存測金銀波動，抓檔逾時後改用期現價差與成交金額湊出的緊俏度代理分數",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "原本要問的事",
+          "body": [
+            "交易所每天公布黃金與白銀的倉庫庫存，分成隨時可交割的註冊與暫時不能交割的合格。",
+            "庫存被搬空的時候，金銀價格會不會變得更會跳？這是有文獻根據的老問題。",
+            "抓庫存檔案的兩次連線都逾時、回傳零位元組，所以這份研究對真實庫存的證據量是零。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "換上來的東西照實貼標籤",
+          "body": [
+            "改用期貨與對應 ETF 的價差、加上成交金額，各自跟自己過去一年比一次，加總成一個緊俏度分數，再往後推一天才使用。",
+            "這個分數跟庫房裡有幾噸金磚沒有關係，既不是庫存也不是租賃利率——它是代理，不是原本要測的東西。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "週五起算點",
+          "value": {
+            "source": "results",
+            "path": "sample.weekly_origin_rows",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本起點",
+          "value": {
+            "source": "results",
+            "path": "sample.start",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本終點",
+          "value": {
+            "source": "results",
+            "path": "sample.end",
+            "format": {
+              "kind": "date"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "門檻事先訂死，最近的一格只走到一半",
+      "alt": "主要結果：六格檢定中訊號最強的黃金實質利率格 t 值僅約負二點零五，遠低於事先訂下的三倍門檻",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "門檻怎麼訂的",
+          "body": [
+            "估計值要大到自己誤差的三倍以上才算數。這比常見標準嚴得多。",
+            "理由是一次要看六格，放寬等於允許自己在六次裡挑一次漂亮的。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "最強一格：黃金實質利率連動 t 值",
+          "value": {
+            "source": "results",
+            "path": "results.gold.fwd21_return_real_yield_corr.ols_hac.t_hac_lag4",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "黃金下週波動 t 值",
+          "value": {
+            "source": "results",
+            "path": "results.gold.log_fwd5_rv_ratio.ols_hac.t_hac_lag4",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "白銀下跌波動 t 值",
+          "value": {
+            "source": "results",
+            "path": "results.silver.downside_semivar_5d_ann.ols_hac.t_hac_lag4",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "黃金格觀測數",
+          "value": {
+            "source": "results",
+            "path": "results.gold.log_fwd5_rv_ratio.ols_hac.n",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "換把尺再量一次，那格也撐不住",
+      "alt": "穩健性與研究邊界：唯一看似顯著的黃金格改用年份分群重抽後區間跨過零，實驗自陳五項缺陷全部朝同一方向",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "黃金實質利率格：迴歸機率值",
+          "value": {
+            "source": "results",
+            "path": "results.gold.fwd21_return_real_yield_corr.ols_hac.p_hac_lag4",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同一格：重抽機率值",
+          "value": {
+            "source": "results",
+            "path": "results.gold.fwd21_return_real_yield_corr.year_bootstrap_high_proxy_diff.p_sign_two_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "重抽次數",
+          "value": {
+            "source": "results",
+            "path": "results.gold.fwd21_return_real_yield_corr.year_bootstrap_high_proxy_diff.n_boot",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "兩把尺量的不是同一件事",
+          "body": [
+            "迴歸算的是控制前期報酬、前期波動、恐慌指數與實質利率之後的斜率。",
+            "重抽比的是分數最高那批週跟其他週的平均差，什麼都沒控制。",
+            "所以重抽不能當迴歸的穩健性檢查——這句話是研究自己寫進缺陷清單裡的。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "五個自陳缺陷，全部往同一邊倒",
+          "body": [
+            "假交易日往資料裡加雜訊，修乾淨後估計值只會更靠近零。",
+            "實質利率那格的時間配對錯位，修正後唯一那格會更站不住。",
+            "重抽切高低的門檻用了全樣本分位數，即時使用時看不到後面的分布。"
+          ]
+        }
+      ]
+    }
+  ]
+}

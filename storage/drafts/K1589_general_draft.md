@@ -59,7 +59,7 @@ ACGL 那一列是真的：0.0023 就算扣過多重比較也站得住。
 
 問題在最後一列。KIE 的斜率 +0.0197，訊號強度 2.31，單看也過門檻——而且它夾在四檔再保險股中間，比 RNR 還高。
 
-![四檔再保險股與保險業 ETF 的斜率比較](assets/k1589_general_dose_response.png)
+![四檔再保險股與保險業 ETF 的斜率比較](storage/drafts/assets/k1589_general_dose_response.png)
 
 ## 對照組把結論翻掉
 
@@ -77,7 +77,7 @@ ACGL 那一列是真的：0.0023 就算扣過多重比較也站得住。
 
 還有一件事值得看：這些斜率再怎麼顯著，實際的波動變化有多大？
 
-![登陸前後平均波動率](assets/k1589_general_before_after.png)
+![登陸前後平均波動率](storage/drafts/assets/k1589_general_before_after.png)
 
 42 次登陸平均下來，RNR 的年化波動從 0.2119 變成 0.2150，多了 0.0031。ACGL 從 0.2005 到 0.2054。AXS 甚至是往下的，從 0.2188 掉到 0.2086。KIE 從 0.1658 到 0.1641，也是往下。同期 SPY 從 0.1332 掉到 0.1272。
 
