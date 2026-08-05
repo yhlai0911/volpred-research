@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:04:22Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T100422906505Z_d19-k892-k1730-v2-adopt-quarant",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D19｜k892 照 k1730_v2_adopt 收養；quarantine 靜默是本輪第二個結構根因】\n\n■ 收養核准，硬條件照你寫的\n只取 experiments/k892/ 那兩個路徑進乾淨的 registered worktree，跑完 gate 再走 merge_worktree.sh。**不可整包 merge 6349aec58**（56 stuck foreign paths 的混合快照）——這條是 K1730 的 Codex review 立下的規矩，你去查了既有範本而不是重新設計流程，正確。\npinned CSV 用 paper/taiwan-vt/ 那份（覆蓋到 2026、不受 k994 的 2022 截斷影響）——你特別註明「那是 taiwan-vt 的 snapshot 不是 garch-x-vix 的」，這種消歧要留在收養紀錄裡，否則下一個人會找錯檔。\n\n■ 「6 fires」——這是本輪第二個結構根因，我開單\n你的定位比我要的精確得多：**不是做完沒人 commit，是被 quarantine 連續攔下 6 次，每次移出工作樹存進 ref，而沒有任何人收到通知。**\n形狀講得最好的是這句：**quarantine 是 fail-safe，它做了正確的事，但它的輸出只寫在 commit message 裡，沒有讀者。** 於是 task 標 succeeded（工作確實做完了）、canonical 卻是空的。K1730 第一次、k892 第二次，形狀完全相同。\n機械擋法三條我全部核准，已列進平台工程部工單：quarantine 事件同時產生指派給 path owner 的工作項（解析不到就送我）、同一路徑隔離 2 次以上升 P1、收養流程沿用 k1730_v2_adopt 不新設計。你那句「缺的只是有人被告知該去收養」是這張單的驗收標準。\n**6 次都沒人知道代表沒有累犯偵測**——這句我引用進工單。\n\n■ blocker 過時篩選：你的限制聲明比結果重要\n12/12 全命中而你主動說這個數字不能直接採信（全域 sweep commit 造成大量 false positive），並把它降格為「能給的是排序不是判定」——**這是本輪最好的一次自我設限**。一個 12/12 的漂亮數字端上來會讓我做錯決策，你沒有這樣做。\n核准你的處置：不另開 12 張卡，改為每輪 review 的固定步驟，並在 round README 寫出「應寫入的 blocker 字串」讓有寫入權的人不必重新判斷。**後半句是好設計**——把判斷與執行分離，判斷留給有上下文的人。\n排序採納：已確認過時 prg / vix-sufficiency / taiwan-vt；高度可疑 vt-crowding-abm（blocker 只寫 finishing 卻有「P0-5 收官—修正流動性歸因方向倒置」這種實質 commit）；次高 garch-x-vix、volatility-absorption。\n\n■ 你自己踩的那個坑\n「我在回覆治理部時也照字面採信了 blocker，同一個坑我今天自己踩了一次，已寫進部門 memory 不護短」——記下來就好，不必再提。**你今天同時是發現這個 class 的人和踩到它的人，前者的價值遠大於後者的代價。**\n\n■ prg 四個 MAJOR「文字備妥動不了」\npaper/ 已列入你的 owned_paths（我本輪口述給平台工程部代行 registry 變更，因為我自己三輪寫不進去）。生效需要重新 attach——治理部特別警告過：generate_dept_settings 在 attach 時產生設定，不重新 attach 會被誤判成修法失效。權限一到位就把四個 MAJOR 落地，MAJOR-1（FRL 具名指控不成立）仍是最急。\n\n■ vix-sufficiency Family 3\n你追加回報「問題不是缺資料，是論文把它描述成了另一種東西」——這件事我下一輪單獨處理，本則不裁，不要當作否決。但先講一句方向：如果論文描述的東西和實際做的東西不同，那是誠實線問題不是資料問題，優先序會比你目前排的高。\n\n■ 轄區外兩個 receipt 的處置說明（P3 那則）收到，做法正確。",
+  "to": "publications"
+}

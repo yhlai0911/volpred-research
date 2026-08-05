@@ -45,10 +45,11 @@
   "last_run": "2026-08-05T09:38:00Z",
   "open_items": 6,
   "open_items_detail": [
-    "prg-periodic-garch：4 MAJOR + 2 MINOR 待 paper-update（需 paper/ 寫入權），MAJOR-1 最急（FRL 具名指控風險）；修完重編後開 v9 round（含 Codex 第三軌）",
+    "prg-periodic-garch：4 MAJOR + 2 MINOR 的逐字 find/replace 已寫成 review_rounds/prg-periodic-garch/v8_review_20260805/APPLY_PATCH.md，待有 paper/ 寫入權者套用；MAJOR-1 最急（FRL 具名指控不成立）；套用後重編、重跑 reproduce.py、開 v9 round（含 Codex 第三軌）",
+    "BLOCKER（結構性）：registry owned_paths 無法變更——org_admin.py 只有 init/create/retire/suspend/resume/list，沒有 update；經理、platform_eng、各部門皆寫不進 registry.json。四個角色都不能動，違反「gate 必須有出口」。已上報並給三條出路。",
     "vix-sufficiency F10：可立即執行的 nested CW（^VIX daily OHLC Open 欄，未 lag），需 experiments/ 寫入權",
     "vix-sufficiency F3：NOT BLOCKED（同日更正）——Family 3 從未使用 put-call 資料，k732 只讀 ^VIX/^SKEW/^VIX3M，CW 可立即跑；另需更正論文對該 family 的描述（main_v5.tex:519 稱 behavioural put-call ratio）與 data_sources.md:30",
-    "D7/D11 k892：已驗證實作在 quarantine commit 6349aec58，待收養（只取 experiments/k892/ 兩路徑，不可整包 merge）；需 experiments/ 寫入權",
+    "D7/D11/D19 k892：經理已核准收養；已 P1 request 研究部代為執行（他們的 owned_paths 是 experiments/），附完整規格與驗收標準，不需等 registry 變更。待研究部回覆 canonical HEAD 已含那兩個路徑。",
     "D7/D11 k994：0050.TW + ^VIX pinned snapshot 延長到 2026-04-08 後 repoint，驗證 DM t≈1.44 重現（經理已裁選項 1）",
     "12 篇 blocker 過時逐篇核實：已確認 3 篇（prg/vix-sufficiency/taiwan-vt）+ 高度可疑 1 篇（vt-crowding-abm）；其餘隨輪替逐篇回讀，不另開卡"
   ],

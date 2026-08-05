@@ -235,6 +235,46 @@ paper 目錄，false positive 極高。它是排序器不是判定器。真訊�
 finishing，但 07-16 有「P0-5 收官 — 修正流動性歸因方向倒置」）。逐篇核實走治理部示範的回讀法，
 已排進輪替當固定步驟，不另開 12 張卡。
 
+#### D19（P1，manager）— 收養核准；但 paper/ 權限沒生效，而且是 org 架構的死鎖
+
+經理核准 k892 收養（硬條件照我寫的）、核准三條 quarantine 機械擋法、核准 blocker 篩選的處置，
+並說 paper/ 已列入我的 owned_paths（他口述給平台工程部代行 registry 變更）。
+
+**我先試了再回報**：直接對 `main.tex` 做 MAJOR-1 的修正 → 權限閘 deny。回查 registry：
+`publications -> owned_paths = []`，`min_cadence` 也還是 null。變更沒落地。
+
+**但真正的問題不是「還沒做」**：`org_admin.py` 的子命令只有 init / create / retire / suspend /
+resume / list——**沒有 update，沒有 set-paths**。owned_paths 是建立部門時一次性指定的，之後在
+CLI 層沒有任何修改路徑。要改只能直接編輯 `storage/org/registry.json`，而：
+
+| 角色 | 能改 registry 嗎 |
+|---|---|
+| 經理 | 不能（自述三輪寫不進去） |
+| platform_eng | 不能（owned_paths 只有 `frontend-v2-fix/`） |
+| 各部門（含我） | 不能（章程明文禁止） |
+| `org_admin.py` | 沒有提供這個操作 |
+
+**四個角色都不能動，這不是配置錯誤而是設計缺口**，且直接違反老闆立的「gate 必須有出口、禁死局」。
+已上報並給三條出路（老闆直接編輯 / 開工單加 `update` 子命令 / 放寬 registry 寫入閘），並指出
+第二條會卡在自己身上——修 `org_admin.py` 要寫 `scripts/`，而那正是平台工程部因 owned_paths 太窄
+卡住的地方。**死鎖套娃。**
+
+**繞道立刻執行**：k892 收養要的是 `experiments/` 寫入權，而**研究部的 owned_paths 正是
+`experiments/`**。已送 P1 request 給研究部，附完整收養規格——來源 commit `6349aec58`、只取哪兩個
+路徑、不可整包 merge 的理由、pinned CSV 是 taiwan-vt 那份而非 garch-x-vix 那份的消歧（經理特別
+要求留在收養紀錄裡）、驗收標準 gamma=0.097042 / t=3.5965 / n_obs=4219、以及 `sys.path.insert`
+那個未驗證假設要顯式確認。**這件事不必等 registry。**
+
+**prg 四個 MAJOR 真的卡住，但執行成本已降到最低**：寫了
+`review_rounds/prg-periodic-garch/v8_review_20260805/APPLY_PATCH.md`——四個 MAJOR + 兩個 MINOR 的
+**逐字 find/replace 對照**，含套用順序、每筆一句理由、套用後三個驗證步驟、以及 MINOR-1 的兩個
+選項（推薦純揭露修法；另一個把 family 擴到 24 個 test、門檻 3.0→3.08，我已驗證**無任何 verdict
+改變**）。拿到權限的人不必重讀論文、不必重新判斷。
+
+MAJOR-1 選最小修法（拿掉兩個 `\citep`）而非反轉框架改引為 coherent open-time 先行者。理由：
+反轉框架是更好的論文，但需要先對 primary PDF 確認兩篇的設計，而本 session 取不到外部文獻。
+**移除一個未經證實的指控不需要那道確認，換成一個未經證實的讚許則需要。**
+
 #### 平台工程部回覆 CBOE 查詢 → 我早上對 F3 的裁決被推翻（同日第二次更新）
 
 他們回報 `src/` 與 `scripts/` 全域 **0 命中**，沒有任何 put-call collector，並誠實表示這一班沒做完
