@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -675,8 +676,8 @@ def captured_wake(monkeypatch):
 
     calls: list[tuple] = []
 
-    def _fake(root, reasons):
-        calls.append((root, reasons))
+    def _fake(root, reasons, **kwargs):
+        calls.append((root, reasons, kwargs))
         return {"woken": True, "via": "test"}
 
     monkeypatch.setattr(manager_tick, "wake_manager", _fake)
@@ -1129,3 +1130,80 @@ def test_every_role_is_told_how_to_grow_its_own_skills(org_root: Path) -> None:
     assert "skills/" in brief and "SKILL.md" in brief
     assert "第二次" in brief, "the promotion threshold has to be stated, or nobody promotes anything"
     assert "writing-great-skills" in brief
+
+
+# --- delivery and coordination run on different clocks ---------------------
+
+def test_delivery_is_not_throttled_by_the_coordinators_floor(org_root: Path, monkeypatch) -> None:
+    """publications sat 93 minutes on two items because one clock served both.
+
+    Waking an idle department that already holds due work costs one prompt;
+    waking the coordinator starts an opus/high round. Tying them together priced
+    delivery at the coordinator's rate.
+    """
+    import subprocess as sp
+    import manager_tick
+
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "alpha", "--from", "manager", "--task", "做事",
+                    "--no-wake", root=org_root).returncode == 0
+    _core.write_lease(org_root, "alpha", {"runner": "herdr", "pane_id": "w1:p1"})
+    manager_tick._stamp_manager_wake(org_root, datetime.now(timezone.utc))
+
+    class _R:
+        returncode = 0
+        stdout = json.dumps({"result": {"agent": {"agent_status": "idle"}}})
+        stderr = ""
+
+    sent: list[list[str]] = []
+    monkeypatch.setattr(sp, "run", lambda cmd, **kw: (sent.append(cmd), _R())[1])
+
+    assert manager_tick.wake_manager(org_root, ["x"])["woken"] is False, "coordinator is throttled"
+    woken = manager_tick.wake_departments(org_root)
+
+    assert [d["dept"] for d in woken if d["woken"]] == ["alpha"], (
+        "a department holding due work must be delivered to regardless of the coordinator's floor"
+    )
+
+
+def test_the_coordinator_keeps_a_floor_when_the_tick_speeds_up(org_root: Path) -> None:
+    import manager_tick
+
+    manager_tick._stamp_manager_wake(org_root, datetime.now(timezone.utc))
+
+    result = manager_tick.wake_manager(org_root, ["收件匣有東西"])
+
+    assert result["woken"] is False and "下限" in result["reason"]
+
+
+def test_a_boss_message_never_waits_for_that_floor(org_root: Path, monkeypatch) -> None:
+    """急件直達 outranks the throttle — that is the whole point of the floor
+    being on the tick's path and not on the message's."""
+    import manager_tick
+    import org_intake
+
+    manager_tick._stamp_manager_wake(org_root, datetime.now(timezone.utc))
+    seen: list[bool] = []
+
+    def _fake(root, reasons, *, respect_min_interval=True):
+        seen.append(respect_min_interval)
+        return {"woken": True, "via": "test"}
+
+    monkeypatch.setattr(manager_tick, "wake_manager", _fake)
+
+    result = org_intake.record_boss_message(org_root, "急件", msg_id="2001")
+
+    assert result["wake"]["woken"] is True
+    assert seen == [False], "the boss's message must bypass the coordinator's floor"
+
+
+def test_an_unreadable_stamp_fails_open(org_root: Path) -> None:
+    """A throttle that silences the coordinator on its own bookkeeping failure
+    looks exactly like a quiet platform."""
+    import manager_tick
+
+    stamp = manager_tick._manager_wake_stamp(org_root)
+    stamp.parent.mkdir(parents=True, exist_ok=True)
+    stamp.write_text("{ not json", encoding="utf-8")
+
+    assert manager_tick._too_soon_for_manager(org_root, datetime.now(timezone.utc)) is None

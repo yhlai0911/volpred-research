@@ -107,7 +107,7 @@ def _wake(root: Path, reasons: list[str]) -> dict:
     try:
         from manager_tick import wake_manager  # noqa: PLC0415 — avoids an import cycle
 
-        return wake_manager(root, reasons)
+        return wake_manager(root, reasons, respect_min_interval=False)
     except Exception as exc:  # noqa: BLE001 — see docstring; recorded in the receipt
         return {
             "woken": False,

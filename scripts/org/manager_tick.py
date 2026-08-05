@@ -25,6 +25,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _core import (  # noqa: E402
     DEFAULT_ORG_ROOT,
+    runtime_dir,
     REPO_ROOT,
     dept_dir,
     load_registry,
@@ -40,6 +41,20 @@ BUSY_STATES = {"working", "blocked"}
 CADENCE_SECONDS = {"hourly": 3600, "daily": 86400, "weekly": 604800}
 # The coordinator patrols on its own clock even with an empty inbox.
 PATROL_SECONDS = 4 * 3600
+
+# Delivery and coordination want different clocks, and they used to share one.
+#
+# Waking an idle department that is already holding due work costs one herdr
+# prompt; waking the coordinator starts an opus/high round. Running both at 30
+# minutes meant publications sat 93 minutes on two items so the coordinator
+# would not over-fire. The tick now runs every 10 minutes for delivery -- a
+# department with an empty inbox is skipped, so the cadence is proportional to
+# backlog by construction -- while the coordinator keeps its own floor here.
+#
+# The floor is deliberately not applied to an out-of-band wake: a boss message
+# goes straight to `wake_manager` and must never be told to wait 30 minutes
+# (feedback_urgent_bypasses_scheduler_by_design).
+MANAGER_MIN_WAKE_INTERVAL_S = 30 * 60
 
 
 def _inbox_items(inbox: Path) -> list[dict]:
@@ -299,13 +314,54 @@ def wake_departments(root: Path) -> list[dict]:
     return out
 
 
-def wake_manager(root: Path, reasons: list[str]) -> dict:
+def _manager_wake_stamp(root: Path) -> Path:
+    return runtime_dir(root) / "manager.last_wake.json"
+
+
+def _too_soon_for_manager(root: Path, now: datetime) -> str | None:
+    """Keep the coordinator on a 30-minute floor while delivery ticks faster."""
+    path = _manager_wake_stamp(root)
+    if not path.exists():
+        return None
+    try:
+        last = json.loads(path.read_text(encoding="utf-8"))["at"]
+        elapsed = (now - datetime.fromisoformat(last.replace("Z", "+00:00"))).total_seconds()
+    except (json.JSONDecodeError, OSError, KeyError, ValueError) as exc:
+        # Fail open, loudly. A throttle that silences the coordinator when its
+        # own bookkeeping breaks is indistinguishable from a quiet platform,
+        # and the whole org stops while every dashboard reads normal.
+        print(f"[manager_tick] wake stamp unreadable ({type(exc).__name__}) — 不節流",
+              file=sys.stderr)
+        return None
+    if elapsed < MANAGER_MIN_WAKE_INTERVAL_S:
+        return (f"上次協調 {int(elapsed // 60)} 分鐘前，未達 "
+                f"{MANAGER_MIN_WAKE_INTERVAL_S // 60} 分鐘下限（部門投遞不受此限）")
+    return None
+
+
+def _stamp_manager_wake(root: Path, now: datetime) -> None:
+    """Record only a wake that actually landed — a refused one is not a round."""
+    path = _manager_wake_stamp(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"at": now.strftime("%Y-%m-%dT%H:%M:%SZ")}), encoding="utf-8")
+
+
+def wake_manager(root: Path, reasons: list[str], *, respect_min_interval: bool = True) -> dict:
     """Wake the coordinator: prefer its live cockpit pane, else run headless.
 
     Never stacks: a busy pane is left alone (the boss may be talking to it) and
     an existing lease means a round is already in flight.
+
+    `respect_min_interval=False` is for out-of-band wakes (a boss message).
+    Those are the one thing that must never queue behind a clock.
     """
     import subprocess
+
+    now = datetime.now(timezone.utc)
+    if respect_min_interval:
+        too_soon = _too_soon_for_manager(root, now)
+        if too_soon:
+            return {"woken": False, "reason": too_soon}
 
     lease = read_lease(root, MANAGER)
     if lease and lease.get("runner") == "headless":
@@ -330,6 +386,7 @@ def wake_manager(root: Path, reasons: list[str]) -> dict:
             sent = subprocess.run([HERDR, "agent", "prompt", MANAGER, text],
                                   capture_output=True, text=True, timeout=60)
             if sent.returncode == 0:
+                _stamp_manager_wake(root, now)
                 return {"woken": True, "via": "cockpit", "pane": lease.get("pane_id")}
             return {"woken": False, "reason": f"cockpit prompt rejected: {sent.stderr.strip()[:80]}"}
         if note:
@@ -345,6 +402,7 @@ def wake_manager(root: Path, reasons: list[str]) -> dict:
         )
     except (OSError, subprocess.SubprocessError) as exc:
         return {"woken": False, "reason": f"headless spawn failed ({type(exc).__name__}: {exc})"}
+    _stamp_manager_wake(root, now)
     return {"woken": True, "via": "headless"}
 
 
