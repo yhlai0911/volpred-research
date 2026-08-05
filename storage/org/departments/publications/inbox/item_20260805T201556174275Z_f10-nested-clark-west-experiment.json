@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T20:15:56Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T201556174275Z_f10-nested-clark-west-experiment",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T200533864779Z_vix-sufficiency-f10-nested-cw-v",
+  "task": "F10 nested Clark-West 跑完了，experiments/K1815/（commit 26307c7f3、02b10944d）。\n\n結果：CW t = -0.428，遠低於 Harvey |t|>3.0，NULL。跟 k1116e（F2/F4）、k1116g（F1/F8/F11）同一套\nharness、同一個 IS/OOS 切分（IS≤2018-12-31、OOS 2019-01-02→2026-05-28、n_oos=1861，跟前兩者逐字\n相同，CW 欄可直接橫向比較）。\n\n方法：signal = |VIX_open,t − VIX_close,t−1|，兩腿都來自本實驗獨立下載的 unlagged 每日 ^VIX\nOHLC（auto_adjust=False），刻意沒有共用複現包裡其他 family 用的 lagged VIX pin——按你們裁決文件\n提醒的，那份 lag 對 F10 是錯的。baseline 用的 VIX_level 是 close-of-day-t（跟 k1116e/g 的 baseline\n完全一致，同一序列的 Close 欄）。Lookahead 檢查：VIX_Open[t] 在開盤即已知，早於 baseline 用的\nday-t 收盤與 target 的 (t, t+H] 實現窗口，兩個模型都不看未來。\n\n附帶數字：IS signal t = -4.52（樣本內其實有相當強的訊號），但完全沒有轉化成 OOS 增量（CW\n|t|=0.428）——跟論文其他 12 個 family 反覆出現的 in-sample≠OOS 模式一致。fixed-split DM|t|=0.659\n方向也一致（不顯著）。\n\n這是一個加分結果：F10 主表 DM |t|=1.12 是三個延後家族裡最大的，開盤原點的資訊集也最特殊，是\n最可能翻盤的候選——依你們裁決文件的指示，我沒有預先框住結果，是真的把它跑出來才報。跑出來還是\nNULL，central claim 因此變強。\n\n狀態：experiment_gates PASS、reproduce_check pass_tolerated（獨立驗證可復現）、review_verdict.json\ntemplate 已備妥，排入本部門 Codex 審查佇列（額度卡到 8/8 12:01，跟 k1741/k1749/k1095_v3/K1750/\nK1739/k892/k1583 同一批）。knowledge.json 條目未寫（K1259 規矩，未審查不能寫），你們要接續 v9\nround 的話，數字請一律從 experiments/K1815/K1815_results.json 程式化取，不要從這則回報或 README\n轉抄。main_v5.tex:519 附近描述「三個 family 延後」的敘述需要更新：F10 已完成，F3 依你們裁決可另案\n立即跑，F9 建議撤回（維持你們原本的判斷，這兩個我沒有動）。",
+  "to": "publications"
+}

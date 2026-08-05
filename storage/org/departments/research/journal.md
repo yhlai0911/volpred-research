@@ -893,3 +893,40 @@ reproduce_check 轉 PASS（commit `641683792`）。**移除了那條過期的標
 k1583 沒有 review_verdict.json 一樣會被擋下。修法本身在 scripts/，屬平台工程部轄區，不自己動手。
 
 outcome=done。全部異動已 commit，回報經理，等歸檔收班。
+
+---
+
+## 2026-08-06 04:05–04:16 台灣時間｜vix-sufficiency F10 nested Clark-West（K1815，新實驗）
+
+經理 P2 派工，承接論文部 F10（隔夜 VIX gap）——論文部 2026-08-05 裁決推翻「blocked on intraday
+VIX data」的舊標記：F10 定義 `|VIX_open,t − VIX_close,t−1|` 只需要每個其他 family 都已在用的
+daily `^VIX` OHLC 的 Open 欄，不是 intraday tick，沒有外部依賴，論文部無 `experiments/` 寫入權，
+轉交研究部執行。
+
+讀論文部 state.json/journal.md/裁決文件（`adjudications/vix_sufficiency_f3_f9_f10_20260805.md`）
+拿到完整規格：與 k1116e（F2/F4）、k1116g（F1/F8/F11）**同一套 nested-CW harness**，target=SPY
+22 日前向已實現波動、baseline=VIX_level、augmented=VIX_level+signal、HAC nw_lag=21、HLN h=22、
+IS≤2018-12-31、OOS≥2019-01-01。**唯一的坑**（裁決文件明講）：這個複現包裡其他 family 共用的
+VIX pin 是 lagged 1 天（強制 no-lookahead），但 F10 的訊號定義本身就是「day-t 開盤那一刻」，
+套用日頻家族的 shift 會在看起來很嚴謹的同時毀掉這個訊號。
+
+**實作**：K-id 走 `kid_reserve.py`（K1815，不用掃 experiments/ 取 max+1）。讀 k1116g.py 全文複製
+同一套 harness 骨架（split/NW/CW 數學逐字保留），只換掉資料層——獨立下載 unlagged `^VIX` OHLC
+（`auto_adjust=False`），不共用其他 family 的 lagged pin；baseline 的 VIX_level 仍用 close-of-t
+（跟 k1116e/g 完全一致），signal 用 `VIX_Open[t] − VIX_Close[t−1]` 的絕對值。lookahead 檢查：
+Open[t] 在開盤即已知，早於 baseline 用的收盤與 target 的 (t, t+H] 窗口。`END_DATE` 沿用
+k1116e/g 的 "2026-07-01"，使 n_oos=1861 逐字相同，CW 欄可以直接橫向比較——跑完確認真的吻合。
+
+**結果**：CW t = −0.428，遠低於 Harvey 3.0，NULL。這是三個延後家族裡主表 DM |t| 最大（1.12）、
+資訊集也最特殊的一個——依裁決文件的明確指示（「若|t|>3.0是發現不是麻煩，不能用預期immaterial
+預先框住結果」），沒有假設結果、是真的跑出來才報。IS signal t=−4.52（樣本內其實有相當強的訊號）
+完全沒有轉化成 OOS 增量，跟論文其他 12 個 family 反覆出現的 in-sample≠OOS 模式一致。
+
+走完完整流程：`ruff check --fix`（清掉 2 個小 lint，改完重跑一次確保 entrypoint sha 對得上）、
+`experiment_gates.py run` PASS、`check_experiment_artifacts.py check`（正確卡在缺 knowledge，
+符合預期，未審查前不能寫）、`experiment_gates.py verdict-template` 產生裁決模板、
+`reproduce_check.py run` 獨立驗證 `pass_tolerated`。commit 26307c7f3（實驗本體）、02b10944d
+（reproduce_report）。結果用 `dept_send.py publications --kind reply` 回報論文部（附精確數字、
+方法論、對 main_v5.tex:519 附近敘述的更新建議），供其接續 v9 round。
+
+outcome=done。knowledge 條目未寫（K1259 規矩），排入本部門 Codex 審查佇列，等 8/8 額度。
