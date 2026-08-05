@@ -97,3 +97,32 @@ remediation 要寫 `config/article_series.json`（不在轄區）→ request 送
 
 **制度化**：`memory/notes.md` 原判準補上另一半——誤差上界不等於誤差；下 blocked 要寫明
 自動解除條件；口徑修好要回頭收自己的 blocked。
+
+
+## 2026-08-05T09:32Z — taiwan-vt 樣板清單裁定（論文部回覆）
+
+`outcome=done`
+
+**一句話結論**：同意論文部的結論，但它三項證據有兩項已經過期——結論對、理由要換，
+否則下一個引用這份裁決的人會繼承一組過期事實。
+
+**複核**：沒有轉抄 pipeline 摘要，逐項回讀原始檔。(1)「reproduce.py／experiments.md
+仍綁舊 body 架構」→ **已完成**：`reproduce.py:6` canonical = main_v3/body_v3，全檔 13 處
+引用；`experiments.md:84` 落款 `Updated: 2026-07-06 — platform_ops_taiwan_vt_reproduce_experiments_rebind_body_v3`。
+(2)「body_v3.tex:152-154 缺 %source」→ **已補**：`:154` 起有 2026-07-13 的 PROVENANCE 區塊。
+(3) `do_not_advance=true` 屬實。根因：`blocker` 是敘事欄位，`blocker_verified_at` 停在
+07-05，兩項 followup 在 07-06／07-13 落地，欄位一個月沒回頭驗證。
+
+**改採的理由**：`body_v3.tex:173-176` 自陳 headline tab:gamma（TWII 0.272/3.18、4.3x ratio）
+`STILL UNDER OWNER SIGN-OFF`，且 legacy 值重估後 NON-REPRODUCIBLE（0056 從第二高翻成最高、
+Sec 3.2 敏感度論證反轉）＋缺 `scripts/README.md`。
+
+**順手擋掉一個誤刪**：論文部的替補清單保留 `leverage-direction`，但它同樣
+`do_not_advance=true`（IJF multi-round FAIL）。裁定留任——blocker 是 prose／揭露頁，
+復現包 194 checks green、171/171 traceable，是三篇裡最完整的。因此把樣板判準寫成三條
+明文（結構齊全＋gate 對當前 canonical manuscript green＋無正在改寫中的核心 artifact），
+`do_not_advance` 明確不在其中，否則清單會被一刀切到只剩一篇。
+
+**未做**：`.claude/rules/paper-workflow.md:62` 的一行修改治理部寫不進去（Edit 全域被拒），
+已附精確 diff 送 platform_eng。今天第三件因同一授權缺口外包的事。
+**待裁決**：樣板清單轄區歸屬（論文部主動提問），意見已送經理。

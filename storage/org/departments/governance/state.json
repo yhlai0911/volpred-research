@@ -1,6 +1,6 @@
 {
   "health": "degraded",
-  "health_reason": "治理部 owned_paths=[] 但職責涵蓋 docs/governance/**；本班兩項修法皆因此被擋（enforcement map 一行、週次報告落點）。等經理裁決。",
+  "health_reason": "治理部 owned_paths=[] 但職責涵蓋 docs/governance/** 與 .claude/rules/**；今天三件裁定的執行面都必須外包（enforcement map 一行、週次 audit 報告落點、paper-workflow.md:62 一行）。等經理裁決。",
   "kpi": {
     "skill_architecture_check": "not_run_this_session",
     "skills_reference_integrity": {
@@ -12,6 +12,15 @@
     },
     "enforcement_map_green": false,
     "enforcement_map_missing": ["scripts/hooks/write_claim_guard.py"],
+    "rulings_issued_today": 4,
+    "cross_dept_evidence_recheck": {
+      "as_of": "2026-08-05",
+      "claims_rechecked": 3,
+      "claims_stale": 2,
+      "case": "taiwan-vt 樣板案：論文部引用的 pipeline blocker 欄位 blocker_verified_at 停在 07-05，followup 已於 07-06/07-13 落地",
+      "conclusion_changed": false,
+      "grounds_changed": true
+    },
     "r4_desktop_session_concentration": {
       "as_of": "2026-08-05",
       "metric": "單一 Codex 桌面對話佔平台 7 日去重後 billable",
@@ -42,7 +51,7 @@
       "enforcement_layer_map_stale": true
     }
   },
-  "last_run": "2026-08-05T09:15:00Z",
-  "open_items": 2,
-  "notes": "open_items = (1) 經理裁決治理部 owned_paths（P1，卡住 enforcement map 修復與本週報告落點）；(2) 前一班 gate 盤點 7 項提案仍待裁決，其中提案 #7 arc dedup/digest/silent-fallback 三組疑似疊層待複核。R4 案已結：數字更正為 59.0%（fork root 口徑），自訂的 blocked-on-R2 已解除，C3 是否上呈老闆改由經理裁決。已送出 request：內容部（series members 補登）、平台工程部（members 推導根因、claim-on-deny 缺陷、.git/index.lock P1）、論文部（taiwan-vt 缺 scripts/README.md）。commit 仍受 .git/index.lock 阻塞。"
+  "last_run": "2026-08-05T09:32:00Z",
+  "open_items": 3,
+  "notes": "open_items = (1) 經理裁決治理部 owned_paths（P1，今天三件裁定的執行面都因此外包）；(2) 經理裁決樣板清單轄區歸屬（治理部意見：留在 rules，治理部定判準、論文部供證據）；(3) 前一班 gate 盤點 7 項提案待裁決，含提案 #7 三組疑似疊層待複核。R4 案已結（59.0%、blocked 解除）。taiwan-vt 樣板案已結（同意移出但換理由）。已送 request：內容部、平台工程部（series 根因／claim-on-deny 缺陷／git index.lock／paper-workflow.md:62 一行）、論文部、資源監控部。inbox 尚有 8 張前幾班未歸檔的項目，非本輪指派，下一班處理。"
 }

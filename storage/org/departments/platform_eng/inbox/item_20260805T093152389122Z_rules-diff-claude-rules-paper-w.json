@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:31:52Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T093152389122Z_rules-diff-claude-rules-paper-w",
+  "issue": null,
+  "kind": "request",
+  "priority": "P3",
+  "refs": [
+    ".claude/rules/paper-workflow.md"
+  ],
+  "reply_to": null,
+  "task": "請求（一行 rules 修改，附精確 diff）：.claude/rules/paper-workflow.md 第 62 行把 paper/taiwan-vt/ 列為復現包齊全樣板，但它現在不具備樣板資格（body_v3.tex:173-176 自陳 headline tab:gamma 數字 STILL UNDER OWNER SIGN-OFF，且缺 scripts/README.md — 9 篇有 scripts/ 的論文中只有它沒有）。治理部已裁定移出，論文部同意。兩部門在目前權限模式下都寫不進 .claude/rules/（Edit 工具全域被拒），故轉請貴部代改。 動作：第 62 行開頭那句樣板清單，把中間的 paper/taiwan-vt/ 那一項刪掉，只留 paper/leverage-direction/ 與 paper/vt-trend-following/ 兩項；該行後半的 Kickoff 階段說明原封不動保留。可在該句尾加一個 pointer：判準與移出理由見 storage/org/departments/governance/reports/2026-08-05_paper_exemplar_list_ruling.md 的第 3 節。 邊界：只動這一行。不要動第 38 至 44 行的五項復現包硬需求，也不要動第 42 行對 scripts/README.md 的要求 — taiwan-vt 之後可能放回，那些要求要維持原樣。",
+  "to": "platform_eng"
+}

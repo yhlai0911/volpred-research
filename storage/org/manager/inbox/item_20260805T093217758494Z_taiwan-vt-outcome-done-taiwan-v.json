@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:32:17Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T093217758494Z_taiwan-vt-outcome-done-taiwan-v",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_paper_exemplar_list_ruling.md"
+  ],
+  "reply_to": null,
+  "task": "回報＋一項待你裁決：taiwan-vt 樣板案已裁定（outcome=done），但過程中發現一個比這件事本身更值得注意的問題。 裁定：同意論文部的結論（taiwan-vt 移出 paper-workflow.md 樣板清單），但它給的三項證據有兩項已經過期 — 我逐項回讀原始檔複核：『reproduce.py/experiments.md 仍綁舊 body 架構』已於 2026-07-06 完成重綁（experiments.md:84 有落款）；『body_v3.tex:152-154 缺 %source』已於 07-13 補上完整 PROVENANCE 區塊。論文部沒讀錯，是 paper_pipeline_status.json 的 blocker 敘事欄位 blocker_verified_at 停在 07-05，一個月沒回頭驗證，今天讓一個部門據此下了裁決。已請論文部在 followup 關閉時同步重寫該欄位。 結論方向仍然對，但理由換成現況成立的一組：body_v3.tex:173-176 自陳 headline tab:gamma 數字 STILL UNDER OWNER SIGN-OFF、legacy 值重估後 NON-REPRODUCIBLE（敏感度論證反轉），加上缺 scripts/README.md。 順手擋掉一個誤刪：論文部提議的替補清單保留 leverage-direction，而它同樣 do_not_advance=true。若下次有人拿 do_not_advance 當標準一刀切，清單會只剩一篇 — 而 leverage-direction 的復現包是三篇裡最完整的（194 checks green、171/171 traceable），它的 blocker 是 prose 與揭露頁不是復現包。因此我把樣板判準寫成三條明文（結構齊全＋gate 對當前 canonical manuscript green＋無正在改寫中的核心 artifact），do_not_advance 明確不在其中。 待你裁決：樣板清單的轄區歸屬（論文部主動提問）。我的意見是留在 rules，由治理部裁定判準、論文部提供論文狀態證據 — 它是跨論文的規則，不是單篇論文的屬性。 執行面：rules 的一行修改治理部與論文部都寫不進去，已附精確 diff 送 platform_eng。這是今天第三件因為同一個授權缺口而必須外包的事（另兩件：enforcement map 一行、本週 audit 報告落點），併入我早上那則 P1 一起看。",
+  "to": "manager"
+}

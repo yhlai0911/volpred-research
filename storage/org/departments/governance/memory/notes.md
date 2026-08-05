@@ -87,3 +87,25 @@ registry 強制每道 gate 帶 `incident_refs`，是全平台立項紀律最好�
 `.claude/rules/paper-workflow.md:42` 的 `scripts/README.md` 指的是 `paper/<name>/scripts/README.md`。
 上週 audit 按 repo root 去 stat，判成「檔案不存在」的 finding，是偽陽性。
 **規則裡的相對路徑，先找它的「此處」是哪裡。**
+
+
+## 判準：引用敘事欄位前，先看它的 `*_verified_at`
+
+（2026-08-05，taiwan-vt 樣板清單案）
+
+論文部拿 `paper_pipeline_status.json` 的 `taiwan-vt.blocker` 當現況證據下裁決，
+三項理由有兩項在一個月前就已經被做完了——欄位的 `blocker_verified_at` 停在 07-05，
+followup 在 07-06 與 07-13 落地，沒人回頭改欄位。
+
+**帶時間戳的欄位，時間戳就是它的有效期聲明；沒回頭驗證的敘事欄位不是證據，是留言。**
+本部門複核他部門結論時的標準動作：把敘事欄位講的每一件事回讀到原始檔（tex / py / md
+的實際行），對得上才採用。這次三項有兩項對不上，而結論方向仍然正確——**理由錯了但
+結論對，仍然要換理由**，否則下一個引用這份裁決的人會繼承一組過期事實。
+
+## 判準：樣板／範例清單不能用 pipeline 狀態欄位一刀切
+
+同案。`do_not_advance=true` 對 `taiwan-vt` 與 `leverage-direction` 同時成立，但前者是
+headline 數字未簽核（該移出），後者是 prose 與揭露頁草稿、復現包本身 171/171 traceable
+（該留任）。**樣板示範的是結構與 provenance 慣例，不是結論已定案。**
+判準寫成明文放在 `reports/2026-08-05_paper_exemplar_list_ruling.md` §3，
+下次有人要動清單時引用它，不要重新發明標準。
