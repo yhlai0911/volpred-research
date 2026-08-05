@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "title": "隔夜與盤中各自挑星期，恐慌溢酬不挑（K1465）",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1465/k1465_results.json",
+      "sha256": "3e566d73a2a3b9ac057d6669b385331538c6de7c7782fa78ae966e371753a9bd",
+      "label": "K1465 恐慌溢酬星期效應與可交易性檢定結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "把一天拆成兩截，再問它們挑不挑星期",
+      "alt": "說明恐慌溢酬定義、樣本期間與樣本內外切分",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "選擇權市場對未來一個月的波動先報一個價，實際走完之後再看真正跳了多少，兩者相減就是恐慌溢酬。",
+            "一個交易日可以拆成兩截：昨天收盤到今天開盤的隔夜，和今天開盤到收盤的盤中。",
+            "問題是：這個溢酬會不會挑星期？如果會，就有一個不必預測行情、照日曆做的方法。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "全期樣本",
+          "value": {"source": "results", "path": "sample.full.n", "format": {"kind": "integer", "suffix": " 個交易日"}}
+        },
+        {
+          "kind": "metric",
+          "label": "用來挑星期的樣本內",
+          "value": {"source": "results", "path": "sample.is.n", "format": {"kind": "integer", "suffix": " 天"}}
+        },
+        {
+          "kind": "metric",
+          "label": "只用來驗收的樣本外",
+          "value": {"source": "results", "path": "sample.oos.n", "format": {"kind": "integer", "suffix": " 天"}}
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "原料有星期結構，成品沒有",
+      "alt": "對照隔夜、盤中與恐慌溢酬三者的分布一致性檢定機率值",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "隔夜：機率值",
+          "value": {"source": "results", "path": "kruskal_wallis.r_on_sq_full.p", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "盤中：機率值",
+          "value": {"source": "results", "path": "kruskal_wallis.r_id_sq_full.p", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "恐慌溢酬（全期）：機率值",
+          "value": {"source": "results", "path": "kruskal_wallis.vrp_full.p", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "恐慌溢酬（樣本外）：機率值",
+          "value": {"source": "results", "path": "kruskal_wallis.vrp_oos.p", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這四個數字",
+          "body": [
+            "前兩格夠小，代表隔夜與盤中的跳動確實會挑星期。",
+            "後兩格很大，代表兩者算出來的溢酬不挑。合理的解釋是選擇權報價已經同步反映了同一套日曆，相減之後抵銷掉。",
+            "另外要提醒：隔夜週一的平均值最高是被少數幾個極端的週一撐起來的，中位數其實不高。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "還是照做了一次，四項全輸",
+      "alt": "呈現樣本外只做週一與一直持有的績效對照",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "只做週一：夏普值",
+          "value": {"source": "results", "path": "backtest_oos.strat_ret.sharpe", "format": {"kind": "number", "digits": 2, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "一直持有：夏普值",
+          "value": {"source": "results", "path": "backtest_oos.bh_ret.sharpe", "format": {"kind": "number", "digits": 2, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "只做週一：期末淨值",
+          "value": {"source": "results", "path": "backtest_oos.strat_ret.final_equity", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "一直持有：期末淨值",
+          "value": {"source": "results", "path": "backtest_oos.bh_ret.final_equity", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "text",
+          "heading": "能帶走的一句話",
+          "body": [
+            "統計上不顯著不等於不能賺，所以還是照著做了一次驗收。結果是顯著地賠。",
+            "星期結構停在原料端，沒有傳到成品端。想按日曆收保費的做法，在這個標的上沒有立足點。"
+          ]
+        }
+      ]
+    }
+  ]
+}

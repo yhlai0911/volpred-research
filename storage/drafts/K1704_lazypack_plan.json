@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "title": "換六把尺量同一件事，冠軍六次都一樣（K1704）",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1704/K1704_results.json",
+      "sha256": "a412e7969f76879a4565a01b4713f2d270f3406505d38a7fd98c2921da5bbb06",
+      "label": "K1704 台指期波動代理穩健性與模型排名結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "先問一個沒人問的問題：你拿什麼當標準答案",
+      "alt": "說明波動代理的選擇問題、樣本期間與驗收期",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "比較兩個波動預測模型時，「市場昨天實際抖了多少」不是客觀事實，是算出來的，而且怎麼算有很多選擇。",
+            "用分鐘級價格算、用當天最高最低價算、用當天漲跌幅平方算，會得到不一樣的數字。",
+            "如果排名會因為換一把尺就翻盤，那所有「甲模型比乙模型好」的結論都只是量法的副產品。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "來源檔案逐檔複驗",
+          "value": {"source": "results", "path": "data.diagnostics.n_days", "format": {"kind": "integer", "suffix": " 個交易日"}}
+        },
+        {
+          "kind": "metric",
+          "label": "驗收期起點",
+          "value": {"source": "results", "path": "design.oos_start_date", "format": {"kind": "date"}}
+        },
+        {
+          "kind": "metric",
+          "label": "六把尺共用的驗收樣本",
+          "value": {"source": "results", "path": "design.common_evaluation_n", "format": {"kind": "integer", "suffix": " 天"}}
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "六把尺，同一個第一名",
+      "alt": "對照加權共識這把尺下三個模型的損失分數",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "多尺度模型",
+          "value": {"source": "results", "path": "targets.consensus_weighted.metrics.HAR_RV5.qlike", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "指數加權",
+          "value": {"source": "results", "path": "targets.consensus_weighted.metrics.EWMA_R2.qlike", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "不對稱模型",
+          "value": {"source": "results", "path": "targets.consensus_weighted.metrics.GJR_GARCH.qlike", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "最細那把尺下的第一名分數",
+          "value": {"source": "results", "path": "targets.rv_1min.metrics.HAR_RV5.qlike", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這幾個數字",
+          "body": [
+            "分數越小越好。六把尺量下來，順序一次都沒翻。",
+            "整列的數字會隨著尺變粗而變大，那不是模型變差，是尺本身變吵。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "冠軍固定，但二三名分不出來",
+      "alt": "呈現淘汰賽結果與兩兩比較的統計量",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "第一名對不對稱模型",
+          "value": {"source": "results", "path": "targets.consensus_weighted.dm_newey_west_hac.HAR_RV5_vs_GJR_GARCH.t_stat", "format": {"kind": "number", "digits": 2, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "第一名對指數加權",
+          "value": {"source": "results", "path": "targets.consensus_weighted.dm_newey_west_hac.HAR_RV5_vs_EWMA_R2.t_stat", "format": {"kind": "number", "digits": 2, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "第二名對第三名",
+          "value": {"source": "results", "path": "targets.consensus_weighted.dm_newey_west_hac.GJR_GARCH_vs_EWMA_R2.t_stat", "format": {"kind": "number", "digits": 2, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "第二名對第三名：機率值",
+          "value": {"source": "results", "path": "targets.consensus_weighted.dm_newey_west_hac.GJR_GARCH_vs_EWMA_R2.p_value", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "text",
+          "heading": "能帶走的一句話",
+          "body": [
+            "精確的說法是「冠軍六次都一樣」，不是「整張排名六次都一樣」。後兩名之間統計上沒有分辨力。",
+            "看到模型比較的結論，先問對方拿什麼當標準答案，以及換一把尺結論還在不在。"
+          ]
+        }
+      ]
+    }
+  ]
+}

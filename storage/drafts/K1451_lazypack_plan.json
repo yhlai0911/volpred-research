@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "title": "信用價差的波動預告力，被恐慌指數吃掉了（K1451）",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1451/k1451_results.json",
+      "sha256": "e90d8ac5fe6bfbd324ee702a15ae4778bcdede893fb0bc3b85c9f8bbd5bce039",
+      "label": "K1451 信用價差對標普 500 未來波動的預測力檢定結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "要檢驗的說法：信用市場會先知道",
+      "alt": "說明信用價差訊號的定義、樣本期間與觀測數",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "市場開始擔心企業還不出錢時，垃圾債會比投資級債先被賣掉，兩者的價格比值會往下走。",
+            "訊號取高收益債基金除以投資級債基金的近一個月變化，往後推一天才使用，避免用到當天才知道的資訊。",
+            "要預測的是美股大盤指數接下來一個月實際跳動的幅度。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本起點",
+          "value": {"source": "results", "path": "sample.start", "format": {"kind": "date"}}
+        },
+        {
+          "kind": "metric",
+          "label": "樣本終點",
+          "value": {"source": "results", "path": "sample.end", "format": {"kind": "date"}}
+        },
+        {
+          "kind": "metric",
+          "label": "觀測數",
+          "value": {"source": "results", "path": "sample.n_obs", "format": {"kind": "integer", "suffix": " 個交易日"}}
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "單獨看成立，加入恐慌指數後塌掉",
+      "alt": "對照單變量與控制恐慌指數兩種設定下的斜率與機率值",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "單獨看：斜率",
+          "value": {"source": "results", "path": "models.univariate.hyg_lqd_chg22_lag1.coef", "format": {"kind": "number", "digits": 3, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "單獨看：機率值",
+          "value": {"source": "results", "path": "models.univariate.hyg_lqd_chg22_lag1.p_hac", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "加恐慌指數後：斜率",
+          "value": {"source": "results", "path": "models.vix_control_level.hyg_lqd_chg22_lag1.coef", "format": {"kind": "number", "digits": 3, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "加恐慌指數後：機率值",
+          "value": {"source": "results", "path": "models.vix_control_level.hyg_lqd_chg22_lag1.p_hac", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這四個數字",
+          "body": [
+            "斜率從左上那格掉到左下那格，剩下不到原本的二十五分之一。",
+            "同一條式子裡恐慌指數自己的解釋力很強，等於它把信用價差想講的話先講完了。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "四次檢定，校正後零次存活",
+      "alt": "呈現多重比較校正後最小機率值與判定結果",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "校正後最小機率值",
+          "value": {"source": "results", "path": "multiple_test_correction.uni_hyg_lqd_chg22_lag1.bonferroni_p", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "解釋力（只有信用價差）",
+          "value": {"source": "results", "path": "models.univariate.meta.r2", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "解釋力（加恐慌指數）",
+          "value": {"source": "results", "path": "models.vix_control_level.meta.r2", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "判定",
+          "value": {"source": "results", "path": "verdict", "format": {"kind": "text"}}
+        },
+        {
+          "kind": "text",
+          "heading": "能帶走的一句話",
+          "body": [
+            "想知道接下來一個月市場會不會震，多看一個信用價差指標，得到的資訊和你已經從恐慌指數看到的高度重疊。",
+            "這不代表信用市場沒有資訊，只代表它在這一題上不是獨立的領先訊號。"
+          ]
+        }
+      ]
+    }
+  ]
+}

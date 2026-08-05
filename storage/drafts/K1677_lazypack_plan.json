@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "title": "一個通過全部檢定的結果，因為倖存者偏誤而不採用（K1677-rev）",
+  "evidence": {
+    "results": {
+      "path": "experiments/K1677-rev/K1677-rev_results.json",
+      "sha256": "068e69949f64bc38209c99ab25805051112555a1944ae93e16bc3229707d28b5",
+      "label": "K1677-rev 詐欺與裁罰揭露事件的同業傳染檢定結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "一家出事，隔壁那幾家會跟著抖嗎",
+      "alt": "說明事件來源、同業名單政策與嚴格版樣本數",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "一家公司被抓到做假帳或被主管機關開罰，它自己會怎麼樣大家都知道。問題是同一個產業的其他公司。",
+            "每個事件事先凍結一份同業名單，出事的那家自己排除，只看隔壁。八個指標事先宣告、方向事先定死。",
+            "主要分析用了一條很貴的規矩：名單裡任何一家資料不完整，整個事件剔除。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "手工整理的事件數",
+          "value": {"source": "results", "path": "data_and_methodology.input_events", "format": {"kind": "integer", "suffix": " 件"}}
+        },
+        {
+          "kind": "metric",
+          "label": "嚴格版可用事件",
+          "value": {"source": "results", "path": "data_and_methodology.primary_usable_events", "format": {"kind": "integer", "suffix": " 件"}}
+        },
+        {
+          "kind": "metric",
+          "label": "因名單不完整被剔除的同業出現次數",
+          "value": {"source": "results", "path": "peer_universe_audit.n_missing_occurrences", "format": {"kind": "integer", "suffix": " 次"}}
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "波動沒有傳染，價差走到門口",
+      "alt": "對照波動與買賣價差兩個指標的統計量與校正後機率值",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "波動：統計量",
+          "value": {"source": "results", "path": "aggregates_primary_complete_case.rv_mktadj.t_cluster_directional", "format": {"kind": "number", "digits": 2, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "波動：校正後機率值",
+          "value": {"source": "results", "path": "aggregates_primary_complete_case.rv_mktadj.p_bh_cluster_signflip_directional", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "買賣價差：統計量",
+          "value": {"source": "results", "path": "aggregates_primary_complete_case.spread_cs_mktadj.t_cluster_directional", "format": {"kind": "number", "digits": 2, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "買賣價差：最嚴格校正後機率值",
+          "value": {"source": "results", "path": "aggregates_primary_complete_case.spread_cs_mktadj.p_bh_cluster_signflip_directional", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這四個數字",
+          "body": [
+            "波動那兩格連方向都不對，判定沒有偵測到傳染。",
+            "買賣價差的統計量夠強，但最嚴格的那道校正沒過。事前訂死的門檻要求這一關也要過，所以不升格。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "放寬之後全部通過，我們還是不用它",
+      "alt": "對照放寬版的統計量與機率值，並說明倖存者偏誤",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "放寬版：可用事件",
+          "value": {"source": "results", "path": "data_and_methodology.sensitivity_usable_events", "format": {"kind": "integer", "suffix": " 件"}}
+        },
+        {
+          "kind": "metric",
+          "label": "放寬版：統計量",
+          "value": {"source": "results", "path": "aggregates_available_peer_sensitivity.spread_cs_mktadj.t_cluster_directional", "format": {"kind": "number", "digits": 2, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "放寬版：最嚴格校正後機率值",
+          "value": {"source": "results", "path": "aggregates_available_peer_sensitivity.spread_cs_mktadj.p_bh_cluster_signflip_directional", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "嚴格版判定",
+          "value": {"source": "results", "path": "verdict.label", "format": {"kind": "text"}}
+        },
+        {
+          "kind": "text",
+          "heading": "能帶走的一句話",
+          "body": [
+            "放寬版納入的是今天還活著、資料還抓得到的同業。被排除的，正好是事件之後真的倒掉、下市、被併購的那幾家。",
+            "用倖存者組成對照組去測傳染，等於先拿掉最嚴重的案例再宣稱剩下的顯著。所以這個漂亮結果只留在附註裡。",
+            "研究裡最貴的不是跑出顯著結果，是知道哪一個顯著結果不能用。"
+          ]
+        }
+      ]
+    }
+  ]
+}
