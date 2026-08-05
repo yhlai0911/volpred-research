@@ -30,7 +30,30 @@
 
 state.json open_items[2]（原「已送經理裁決」項）更新為「裁決已下，指令已備妥，等 paper/
 鎖釋放後由主線程套用」。與 prg v8 六筆修改指令同批交接、同一收斂驗證流程（獨立複驗 sha256 +
-逐條核對，套用者不自行宣告收斂）。outcome=done（裁決記錄 + 編輯指令產出，套用本身在轄區外）。（台灣）— 經理派工 item_20260805T161413971824Z：平台工程部回覆，已歸檔
+逐條核對，套用者不自行宣告收斂）。outcome=done（裁決記錄 + 編輯指令產出，套用本身在轄區外）。
+
+## 2026-08-06T04:17:05（台灣）— F10 nested Clark-West 跑完：NULL，已併入 v9 指令
+
+研究部完成 F10（`experiments/K1815/`，commit `26307c7f3`/`02b10944d`）。**獨立自
+`K1815_results.json` 核對，不採信回報文字**：`clark_west.t = -0.42823...`、
+`dm_mspe.t = -0.65897...`、`is_signal_tstat = -4.5232`、`n_oos=1861`，數字與研究部回報完全一致，
+IS/OOS 切分（IS≤2018-12-31、OOS 2019-01-02→2026-05-28）與 k1116e/g 逐字相同，可橫向並列。
+
+**驗證通過，加分結果如實記錄**：F10 主表 DM |t|=1.12 是三個延後家族裡最大、開盤原點資訊集最
+特殊，是三者中最可能翻盤的候選；研究部依裁決文件指示未預先框住結果，真的跑出來仍是 NULL——
+central claim 因此變強而非減弱。
+
+**已更新 v9 edit instructions**（`work/vix_sufficiency_v9_edit_instructions_20260805.md` §5）：
+把 L519 段落中 F10 從「pending robustness computation」改寫為「done, NULL, CW t=-0.43」，
+並標註前一句「five daily families」需同步改「six」、F10 需插入 Family~1/2/4/8/11 的列舉與
+排序（含排序慣例待主線程核對：依正負號還是絕對值排列）。
+
+**knowledge.json 未寫**：Codex 審查佇列中（額度卡到當日 08:00 這批），依 K1259 規矩未審查
+不能寫，v9 套用時數字一律從 `K1815_results.json` 程式化取，不從本回報或 README 轉抄——這點
+研究部回報時已主動提醒，本部門獨立驗證後確認提醒正確。
+
+outcome=done（驗證 + 併入 v9 指令；knowledge.json 寫入與 F3/F9/F10 三件 .tex 套用皆待 paper/
+鎖釋放後由主線程一次處理）。（台灣）— 經理派工 item_20260805T161413971824Z：平台工程部回覆，已歸檔
 
 平台工程部對稍早 request（`item_20260805T111714799957Z` mv allow-list 缺口）回覆：缺口1
 （歸檔）已有解＝`scripts/org/inbox_archive.py`，本部門已在使用；缺口2（前一班 session 層

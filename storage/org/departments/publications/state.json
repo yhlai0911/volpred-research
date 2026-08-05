@@ -43,14 +43,14 @@
     "decided_at": "2026-08-05",
     "rationale": "journal.md 2026-08-05 §裁決三。vt-crowding-abm 未選定期刊前不佔名次。"
   },
-  "last_run": "2026-08-06T04:09:18+08:00",
+  "last_run": "2026-08-06T04:17:05+08:00",
   "open_items": 9,
   "open_items_detail": [
     "prg-periodic-garch（老闆點名最急，對外風險）：六筆逐字 find/replace 已備妥交接。2026-08-05T13:1xZ 獨立複驗 gate（sha256 8852326a…c86ed / 30408 bytes 皆相符）並補驗六個 FIND 的全檔唯一性（全部 count=1、命中原行號 207/198/39/118/111/195）→ ROUND VALID，可直接套用不需重出。Edit 1 處置確認為最小修法（移除兩個 citep），理由與投稿策略無關：無證據的具名方法論指控本身就不能留。**唯一缺口是「誰套用」——本部門仍無 paper/**/*.tex 寫入權，本輪重測仍 deny，未繞過。** 已送經理裁決（A 主線程套用，時間成本零；B 解鎖後由本部門套用，需改 settings ＋ re-attach 兩個非同步步驟）。套用後三步驗證結果回本部門判定收斂，不由套用者宣告。收斂後：重編、重跑 reproduce.py、寫回 blocker + verified_at、開 v9 round（含 Codex 第三軌）。",
     "vix-sufficiency main_v5.tex:519：把 F3 稱作 behavioral put-call ratio，並宣稱其 CW 因 CBOE put-call 未 pin 而 deferred——兩者皆不成立（本輪查證）。§3.2.3 正確，不要動。需主線程，與 prg 同批走 .tex 路線。",
     "vix-sufficiency F3 家族地位：經理裁決 (b) 降級為 robustness 診斷、家族數 thirteen→twelve（item_20260805T200528019400Z，2026-08-05）。逐行 .tex 編輯指令已備妥於 work/vix_sufficiency_v9_edit_instructions_20260805.md（19 處計數改動 + Table footnote + §2.3 新段 + L519 段落改寫，含 F9/F10 併同一段一次處理）。待 paper/ 寫鎖釋放後由主線程 套用，與 prg v8 六筆修改同批交接、同一獨立複驗流程。",
     "下一輪 review round：依 charter 輪替表為 W2 vt-insurance-cost（FRL format/word-limit gate）。crypto-fear-channel 的狀態盤點仍在輪替表 W5。",
-    "vix-sufficiency F10：可立即執行的 nested CW（^VIX daily OHLC Open 欄，未 lag），需 experiments/ 寫入權——非本部門轄區，需經理指派研究部或平台工程部。",
+    "vix-sufficiency F10：DONE（研究部 experiments/K1815/，commit 26307c7f3/02b10944d，2026-08-05）。獨立自 K1815_results.json 核對：CW t=-0.428、fixed-split DM t=-0.659、is_signal_t=-4.52、n_oos=1861，IS/OOS 切分與 k1116e/g 逐字相同。NULL——F10 主表 DM |t|=1.12 最大且開盤資訊集最特殊，是最可能翻盤的候選，結果仍是 NULL，central claim 因此變強。Codex 審查佇列中，knowledge.json 未寫（K1259，審查前不可寫）。已併入 v9 edit instructions（L519 段落 + 前一句 five→six family 列舉）。",
     "D7/D11/D19 k892 收養：DONE（研究部 77b1884fc，我從 canonical HEAD 獨立驗過三個值）。腳本仍跑不完——cross-check 的 ^TWII 走 live yfinance 回 None，在寫出 results.json 前 raise；taiwan-vt body_v3.tex:53 的『no live yfinance dependency』需限定到 0050.TW 那一腿，修正措辭在 work/taiwan_vt_repoint_wording.md。experiments/k892 仍缺 reproduce_spec.json，卡在同一個 ^TWII。",
     "W4 taiwan-vt 待核實：body_v3.tex:33 寫樣本『4,217 trading days、到 March 2026』，而 n_obs=4219、期間到 2026-04-02。差 2 天、期末差一個月，未裁定，需讀腳本載入邏輯。",
     "12 篇 blocker 過時逐篇核實：已確認 3 篇（prg/vix-sufficiency/taiwan-vt）+ 高度可疑 1 篇（vt-crowding-abm）；其餘隨輪替逐篇回讀，不另開卡。",

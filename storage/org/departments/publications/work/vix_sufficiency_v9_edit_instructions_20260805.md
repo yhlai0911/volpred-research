@@ -102,25 +102,44 @@ robustness 診斷，家族數由 thirteen 改 twelve；`main_v5.tex:519` 誠實�
 > data-provisioning follow-up and are expected... to be equally immaterial.
 
 **問題**：(a) Family 3 從未使用 put-call 資料（見 adjudication §「F3 — SUPERSEDED」）；
-(b) F9 應排除（方法論理由，非資料問題）；(c) F10 根本沒 blocked（`^VIX` daily OHLC Open 欄
-已存在於 pin，只是需要跑 nested CW，非本部門轄區，已請研究部評估承接，**本輪不動 F10 的執行
-狀態，只修文字**）。
+(b) F9 應排除（方法論理由，非資料問題）；(c) F10 **已於 2026-08-05 由研究部跑完**
+（`experiments/K1815/`，commit `26307c7f3` / `02b10944d`，Codex 審查佇列中，knowledge.json
+未寫入前不得引用 K 編號結論——但 `.tex` 措辭可引用已通過 `experiment_gates` 的
+`K1815_results.json` 程式化數字，因為那是產出腳本的直接輸出，不是待審的敘述性結論）。
 
-**替換為**（整合 adjudication 建議句 + 本裁決的降級框架，這版取代 adjudication 原建議，因為
-原建議仍把 F3 當「thirteen 之一」處理，現在要反映 twelve + 診斷的新框架）：
+**F10 結果（獨立自 `experiments/K1815/K1815_results.json` 核對，非轉抄回報文字）**：
+`clark_west.t = -0.42823...`（四捨五入 $|t|=0.43$）、`dm_mspe.t = -0.65897...`
+（fixed-split DM 方向性交叉檢查 $|t|=0.66$）、`is_signal_tstat = -4.5232`（樣本內有訊號，
+OOS 未轉化）、`n_oos=1861`，IS/OOS 切分（IS≤2018-12-31、OOS 2019-01-02→2026-05-28）與
+k1116e/g 逐字相同，NW lag 21，故可與 Family~1/2/4/8/11 的 CW 結果橫向並列。
+
+**替換為**（整合 adjudication 建議句 + 本裁決的降級框架 + F10 實測結果，這版同時取代
+adjudication 原建議與本檔先前草稿——F10 從「pending」改為「done, NULL」）：
 
 > The remaining daily families are treated differently. Family 3 (behavioral sentiment index) is,
 > as noted above, a robustness diagnostic rather than a headline family, and its DM statistic
 > ($|t| = 0.52$) is reported for completeness rather than as an independent test; a nested
 > Clark-West increment adds no information beyond what \S\ref{sec:family3} already establishes and
-> is therefore not computed. Family 10 (overnight VIX change) depends on the unlagged Open column
-> of the daily VIX series, already present in the replication snapshot; its nested Clark-West
-> increment is a pending robustness computation, not a data limitation. Family 9 (Google Trends
-> fear) is excluded from the nested Clark-West exercise on methodological rather than logistical
-> grounds: Google Trends returns values rescaled to the queried window with no vintage archive, so
-> no series available at each forecast origin can be reconstructed. Its main-table Diebold-Mariano
-> statistic ($|t| = 0.67$) is reported as a final-vintage figure and is not upgraded to a real-time
-> predictive claim.
+> is therefore not computed. Family 10 (overnight VIX change) is evaluated with the same nested
+> Clark-West procedure as Families 1, 2, 4, 8, and 11, using an unlagged daily VIX Open/Close series
+> pinned independently of the lagged VIX snapshot used elsewhere (the lag being inapplicable to an
+> opening-auction signal): the increment is far from significant (Clark-West $t = -0.43$; fixed-split
+> DM $t = -0.66$), confirming VIX sufficiency for the family with the largest main-table statistic
+> ($|t| = 1.12$) and the most distinctive information set among the daily families. Family 9 (Google
+> Trends fear) is excluded from the nested Clark-West exercise on methodological rather than
+> logistical grounds: Google Trends returns values rescaled to the queried window with no vintage
+> archive, so no series available at each forecast origin can be reconstructed. Its main-table
+> Diebold-Mariano statistic ($|t| = 0.67$) is reported as a final-vintage figure and is not upgraded
+> to a real-time predictive claim.
+
+**連動修改**：本段前一句（現況約 L517）「For the five daily families whose signal admits a
+well-defined pinned-data nested specification (Family~1 ..., Family~2 ..., Family~4 ...,
+Family~8 ..., and Family~11 ...)」與「The verdict is unanimous: every daily increment remains
+far short of significance---Family~2 is the largest at Clark-West $t = +1.69$ ..., followed by
+Family~1 ($t=+0.69$), Family~8 ($t=+0.11$), Family~4 ($t=-0.22$), and Family~11 ($t=-1.50$)」
+兩處都要把 **five → six**、**Family~10** 加入列舉，並在排序中插入 F10 的 $t=-0.43$
+（依現有列舉是由大到小排列，F10 排在 Family~1 之後、Family~8 之前——$|-0.43|$ 介於
+$|+0.69|$ 與 $|+0.11|$ 之間，需確認排序慣例是依正負號還是絕對值，核對後再插入正確位置）。
 
 ## 6. 收斂後動作（五步 Gate 4-5）
 
