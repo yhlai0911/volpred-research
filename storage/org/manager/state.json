@@ -1,10 +1,8 @@
 {
-  "last_patrol": "2026-08-05T14:50:00Z",
-  "last_tick": "2026-08-05T14:50:00Z",
+  "last_patrol": "2026-08-06T22:03:00+08:00",
+  "last_tick": "2026-08-06T22:03:00+08:00",
   "next_review_due": "2026-08-12T13:30:00Z",
-  "pending_proposals": [
-    "2026-08-05_split_platform_eng"
-  ],
+  "pending_proposals": [],
   "open_items": [
     {
       "id": "research-reattach-pending",
@@ -16,9 +14,10 @@
     {
       "id": "platform-eng-split-proposal",
       "what": "拆部門提案已寫入 storage/org/manager/outbox/proposals/2026-08-05_split_platform_eng.md 並 email 老闆(needs-reply)",
-      "state": "awaiting_boss_approval",
+      "state": "resolved",
       "owner": "manager",
-      "next": "等老闆 telegram 回 approve/reject 2026-08-05_split_platform_eng"
+      "next": "等老闆 telegram 回 approve/reject 2026-08-05_split_platform_eng",
+      "note": "2026-08-06 覆核：registry.json 已存在 platform_ops（created_at 2026-08-05T17:09:10Z）且 platform_eng owned_paths 已縮編為 frontend-v2-fix/,tests/，與提案分工一致；判定已核准並落地，state 改 resolved"
     },
     {
       "id": "zone-a-three-items",
