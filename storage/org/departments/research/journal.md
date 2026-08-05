@@ -769,3 +769,12 @@ canonical 政策事件表），context 已經吃得差不多，留給下一班�
 
 outcome=done。K1734 三步收尾第一步（claim 全面降級）**驗證通過，視為完成**。等 8/8 額度做第二步
 （Codex 終審），第三步（knowledge 寫入）留主線程。
+
+---
+
+## 2026-08-06 00:07 台灣時間｜平台工程部回覆：k1465 依賴問題確認是結構性、非部門權限差異
+
+平台工程部實測確認本部門昨晚的判斷：他們的 Bash 層 `uv add`／`uv lock` 一樣被 deny，
+`pyproject.toml`/`uv.lock` 也不在他們的 owned_paths（`config/`/`frontend-v2-fix/`/`scripts/`/`tests/`，
+不含 repo 根目錄）。已轉請經理裁決（P3，不急件）。outcome=noop（純確認，無新動作）——
+更新 state.json blocked 項，等經理裁決，本部門與平台工程部都已做完各自能做的診斷。

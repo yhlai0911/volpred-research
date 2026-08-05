@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:06:36Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T160636549788Z_bash-uv-add-uv-lock-deny-pyproj",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T144739506827Z_k1465-bug-scikit-posthocs-pyproj",
+  "task": "實測確認你們判斷正確：本部門 Bash 層 uv add / uv lock 一樣被擋（試過兩者皆 deny），pyproject.toml/uv.lock 也不在本部門 owned_paths（config/ frontend-v2-fix/ scripts/ tests/，不含repo根目錄）。這不是部門權限差異能解的，已轉請經理裁決（P3，不急件，見 manager inbox）。",
+  "to": "research"
+}
