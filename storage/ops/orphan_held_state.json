@@ -1,41 +1,100 @@
 {
   "note": "held 的時間軸。超過 held_escalation_shifts 班仍無主 → 指名任務。一筆記錄消失 = 那個路徑已經有出口了。",
-  "updated_at": "2026-08-05T03:27:03.627956+00:00",
+  "updated_at": "2026-08-05T03:33:37.821623+00:00",
   "shifts_to_escalate": 6,
   "entries": {
     "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543": {
       "first_seen": "2026-08-04T07:00:59.351071+00:00",
-      "shifts": 26,
-      "last_seen": "2026-08-05T03:27:03.627956+00:00",
+      "shifts": 27,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
       "reason": "no_existing_declared_files",
       "namespace": "compute_queue",
       "task_id": "assign_f7534bd4",
       "escalated_at": "2026-08-04T12:01:02.182967+00:00"
     },
-    "job:compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795": {
-      "first_seen": "2026-08-04T21:00:54.412334+00:00",
-      "shifts": 12,
-      "last_seen": "2026-08-05T03:27:03.627956+00:00",
-      "reason": "experiment_admission_blocked",
-      "namespace": "compute_queue",
-      "task_id": "assign_b7ff833d",
-      "escalated_at": "2026-08-05T02:00:32.276521+00:00"
-    },
-    "experiments/k1814": {
-      "first_seen": "2026-08-05T03:27:03.627956+00:00",
+    "experiments/nfp_20260807_t2/README.md": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
       "shifts": 1,
-      "last_seen": "2026-08-05T03:27:03.627956+00:00",
-      "reason": "atomic_unit_incomplete",
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
       "namespace": "experiments"
     },
-    "experiments/nfp_20260807_t2": {
-      "first_seen": "2026-08-05T01:00:39.824746+00:00",
-      "shifts": 8,
-      "last_seen": "2026-08-05T03:27:03.627956+00:00",
-      "reason": "atomic_unit_incomplete",
-      "namespace": "experiments",
-      "task_id": "assign_8d016302",
-      "escalated_at": "2026-08-05T03:24:40.458980+00:00"
+    "experiments/nfp_20260807_t2/data/nfp_release_dates_2010-01-01_2026-08-05.json": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/data/vix_close_2010-01-01_2026-08-04.csv": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/nfp_20260807_t2.py": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/nfp_20260807_t2_controls.csv": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/nfp_20260807_t2_events.csv": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/nfp_20260807_t2_results.json": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/nfp_20260807_t2_window.png": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/render_readme.py": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/reproduce_commit.json": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/reproduce_spec.json": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
+    },
+    "experiments/nfp_20260807_t2/review_verdict.json": {
+      "first_seen": "2026-08-05T03:33:37.821623+00:00",
+      "shifts": 1,
+      "last_seen": "2026-08-05T03:33:37.821623+00:00",
+      "reason": "head_changed_during_scan",
+      "namespace": "experiments"
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-05T03:26:23.402454+00:00",
+  "generated_at": "2026-08-05T03:33:15.271541+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 190.9
+      "age_hours": 191.0
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 190.7
+      "age_hours": 190.8
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 186.1
+      "age_hours": 186.2
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 185.1
+      "age_hours": 185.2
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 350.1
+      "age_hours": 350.2
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 154.3
+      "age_hours": 154.4
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 185.0
+      "age_hours": 185.1
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 202.0
+      "age_hours": 202.1
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 210.1
+      "age_hours": 210.2
     },
     {
       "path": "storage/drafts/k1706_general_draft.md",
@@ -79,7 +79,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 4605,
-      "age_hours": 35.2
+      "age_hours": 35.3
     }
   ],
   "held": [],
@@ -103,39 +103,59 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795.json",
+      "execution_status": "failed",
+      "paths": [
+        "experiments/k1814/K1814_results.json",
+        "experiments/k1814/fig1_longmemory_regimes.png",
+        "experiments/k1814/fig2_qlike_by_horizon.png",
+        "experiments/k1814/fig3_dm_statistics.png",
+        "experiments/k1814/fig4_forecast_vs_actual.png",
+        "experiments/k1814/fig5_proxy_validation.png"
+      ],
+      "existing_paths": [
+        "experiments/k1814/K1814_results.json",
+        "experiments/k1814/fig1_longmemory_regimes.png",
+        "experiments/k1814/fig2_qlike_by_horizon.png",
+        "experiments/k1814/fig3_dm_statistics.png",
+        "experiments/k1814/fig4_forecast_vs_actual.png",
+        "experiments/k1814/fig5_proxy_validation.png"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795",
+      "paths": [
+        "experiments/k1814/K1814_results.json",
+        "experiments/k1814/fig1_longmemory_regimes.png",
+        "experiments/k1814/fig2_qlike_by_horizon.png",
+        "experiments/k1814/fig3_dm_statistics.png",
+        "experiments/k1814/fig4_forecast_vs_actual.png",
+        "experiments/k1814/fig5_proxy_validation.png"
+      ],
+      "delivered": true,
+      "delivery_status": "partial_delivered",
+      "delivery_commit": "5656069517e9be7e55e5652ffcf3716ef8b121d4",
+      "reason": "already_committed"
+    }
+  ],
   "namespaces": {
     "drafts": {
-      "collectable": [
-        {
-          "path": "storage/drafts/daily_digest_20260805_general_draft.md",
-          "kind": "md",
-          "reason": "untracked",
-          "admission_snapshot": {
-            "head": "36fb25712635c092153e6e57eb490ab8df90f40c",
-            "sha256": "215705f4dde3518fe56edde7f99925e339a0b483dbf146946440e994dcf3a7fd",
-            "git_blob": "2c534e8c874e50668261f4ad5c77201a05d21467"
-          }
-        }
-      ],
+      "collectable": [],
       "held": [],
       "skipped": {
         "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": [
-        {
-          "namespace": "drafts",
-          "paths": [
-            "storage/drafts/daily_digest_20260805_general_draft.md"
-          ],
-          "committed": true,
-          "detail": "[bdc84611264980429c493165694476093fff7814] chore(draft-reap): collect orphaned draft artifacts (1 files)\n"
-        }
-      ]
+      "collections": []
     },
     "paper": {
       "collectable": [],
@@ -151,18 +171,68 @@
       "collectable": [],
       "held": [
         {
-          "path": "experiments/k1814",
-          "kind": "atomic_unit_incomplete",
-          "reason": "atomic_unit_incomplete",
-          "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
-          "members": [
-            "experiments/k1814/review_verdict.json",
-            "experiments/k1814/reviews/agy_recert_2026_08_05.md"
-          ]
+          "path": "experiments/nfp_20260807_t2/README.md",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/data/nfp_release_dates_2010-01-01_2026-08-05.json",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/data/vix_close_2010-01-01_2026-08-04.csv",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/nfp_20260807_t2.py",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/nfp_20260807_t2_controls.csv",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/nfp_20260807_t2_events.csv",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/nfp_20260807_t2_results.json",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/nfp_20260807_t2_window.png",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/render_readme.py",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/reproduce_commit.json",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/reproduce_spec.json",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
+        },
+        {
+          "path": "experiments/nfp_20260807_t2/review_verdict.json",
+          "kind": "namespace_configuration",
+          "reason": "head_changed_during_scan"
         }
       ],
       "skipped": {
-        "grace": 5,
+        "grace": 3,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -171,8 +241,6 @@
   },
   "held_escalations": [],
   "held_escalated_paths": [
-    "experiments/nfp_20260807_t2",
-    "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543",
-    "job:compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795"
+    "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543"
   ]
 }
