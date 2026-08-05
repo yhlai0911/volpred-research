@@ -1,44 +1,46 @@
 {
-  "last_seen_run_id": 30979923917,
-  "last_seen_conclusion": "success",
+  "last_seen_run_id": 30985301561,
+  "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
-  "last_task_id": "ci-red-30973884810",
+  "last_task_id": "ci-red-30983363179",
   "last_push_remediation": {
-    "attempted": false,
-    "reason": "nothing_unpushed"
+    "attempted": true,
+    "ahead": 2,
+    "head_sha": "474f1b70f7f6fa3b5d3c731fd66a7df9f40c7540",
+    "pushed": true,
+    "rc": 0,
+    "outcome": "pushed",
+    "ahead_after": 0
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "30979923917:1",
-    "run_id": 30979923917,
+    "key": "30985301561:1",
+    "run_id": 30985301561,
     "attempt": 1,
     "status": "completed",
-    "conclusion": "success",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30979923917",
-    "head_sha": "4f18e1cd5351ef526508d5ebf4ae191c0c3688c1",
-    "created_at": "2026-08-05T06:00:55Z",
-    "started_at": "2026-08-05T06:00:55Z",
-    "updated_at": "2026-08-05T06:19:53Z",
+    "conclusion": "failure",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30985301561",
+    "head_sha": "e69a0c55c043387264435559502c1ef45aa49ce1",
+    "created_at": "2026-08-05T07:30:38Z",
+    "started_at": "2026-08-05T07:30:38Z",
+    "updated_at": "2026-08-05T07:49:45Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "30979923917:1",
-    "run_id": 30979923917,
+    "key": "30985301561:1",
+    "run_id": 30985301561,
     "attempt": 1,
     "status": "completed",
-    "conclusion": "success",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30979923917",
-    "head_sha": "4f18e1cd5351ef526508d5ebf4ae191c0c3688c1",
-    "created_at": "2026-08-05T06:00:55Z",
-    "started_at": "2026-08-05T06:00:55Z",
-    "updated_at": "2026-08-05T06:19:53Z",
+    "conclusion": "failure",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30985301561",
+    "head_sha": "e69a0c55c043387264435559502c1ef45aa49ce1",
+    "created_at": "2026-08-05T07:30:38Z",
+    "started_at": "2026-08-05T07:30:38Z",
+    "updated_at": "2026-08-05T07:49:45Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-05T06:20:14.026210+00:00",
+  "updated_at": "2026-08-05T07:50:23.137831+00:00",
   "processed_run_keys": [
-    "29726390561:1",
-    "29729805920:1",
-    "29744414167:1",
     "29744499806:1",
     "29748716048:1",
     "29753197925:1",
@@ -535,7 +537,10 @@
     "30974864467:1",
     "30975322874:1",
     "30976577989:1",
-    "30979923917:1"
+    "30979923917:1",
+    "30983363179:1",
+    "30984643520:1",
+    "30985301561:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -736,5 +741,124 @@
         "attempt_history_complete": true
       }
     }
-  ]
+  ],
+  "active_incident": {
+    "incident_id": "ci-red-30983363179",
+    "phase": "verifying",
+    "opened_at": "2026-08-05T07:20:20.217453+00:00",
+    "first_failure": {
+      "key": "30983363179:1",
+      "run_id": 30983363179,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30983363179",
+      "head_sha": "dbd2402c06b39e0771932ee0aff84090cfe85526",
+      "created_at": "2026-08-05T07:00:36Z",
+      "started_at": "2026-08-05T07:00:36Z",
+      "updated_at": "2026-08-05T07:19:19Z",
+      "attempt_history_complete": true
+    },
+    "root_cause": "2026-08-05T07:49:36.9147106Z E AssertionError: Enforcement Layer Map is out of sync with disk — update docs/governance/enforcement_layer_map.md in the same commit as the hook/CI change.",
+    "root_cause_status": "complete",
+    "failure_run_keys": [
+      "30983363179:1",
+      "30985301561:1"
+    ],
+    "repair_task_ids": [
+      "ci-red-30983363179"
+    ],
+    "dispatch_requested_task_ids": [
+      "ci-red-30983363179"
+    ],
+    "notifications": {
+      "detection": {
+        "attempts": 1,
+        "last_attempt_at": "2026-08-05T07:20:20.217453+00:00",
+        "last_delivery": {
+          "sent": true,
+          "skipped": false,
+          "notification_id": "effect_owned_email_217e1b3c23b36bfef3ca5b51a7b795ac",
+          "send_error": null
+        },
+        "status": "sent",
+        "sent_at": "2026-08-05T07:20:20.217453+00:00",
+        "reported_cause": "2026-08-05T07:19:10.8725351Z E AssertionError: cron wrapper manifest is out of date — the copy launchd execs in ~/.volpred/bin will NOT have your edit."
+      }
+    },
+    "root_cause_run_key": "30985301561:1",
+    "declared_output_paths": [
+      "docs/governance/enforcement_layer_map.md",
+      "scripts/hooks/write_claim_guard.py",
+      "scripts/lazypack_layout_guard.py",
+      "scripts/sync_cron_wrappers.py",
+      "scripts/tests/test_cron_wrapper_manifest.py",
+      "scripts/tests/test_git_writer_lock.py",
+      "scripts/tests/test_lazypack_layout_guard.py",
+      "scripts/tests/test_scheduled_writer_commit_policy.py",
+      "src/volpred/charts/article_charts.py",
+      "src/volpred/evaluation/statistical_tests.py",
+      "src/volpred/ops/execution/registry.py",
+      "src/volpred/ops/rollback.py",
+      "tests/test_append_work_log.py",
+      "tests/test_cpi_t0_official_release_dates.py",
+      "tests/test_daily_update_tw_staleness.py",
+      "tests/test_enforcement_map_audit.py",
+      "tests/test_evaluation_metrics.py",
+      "tests/test_provider_registry.py",
+      "tests/test_provider_spawn_contracts.py",
+      "tests/test_refresh_paper_snapshots_concurrent_append.py",
+      "tests/test_rollback.py",
+      "tests/test_shared_lock.py"
+    ],
+    "declared_output_paths_run_key": "30985301561:1",
+    "latest_failure": {
+      "key": "30985301561:1",
+      "run_id": 30985301561,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30985301561",
+      "head_sha": "e69a0c55c043387264435559502c1ef45aa49ce1",
+      "created_at": "2026-08-05T07:30:38Z",
+      "started_at": "2026-08-05T07:30:38Z",
+      "updated_at": "2026-08-05T07:49:45Z",
+      "attempt_history_complete": true
+    },
+    "failure_heads": [
+      "dbd2402c06b39e0771932ee0aff84090cfe85526",
+      "e69a0c55c043387264435559502c1ef45aa49ce1"
+    ],
+    "failure_cycles": 2,
+    "repair_admission": {
+      "status": "admitted",
+      "task_id": "ci-red-30983363179",
+      "at": "2026-08-05T07:20:20.217453+00:00"
+    },
+    "repair_task_statuses": {
+      "ci-red-30983363179": "pending"
+    },
+    "dispatch_request_count": 4,
+    "last_dispatch_request_at": "2026-08-05T07:50:23.137831+00:00",
+    "push_intent": {
+      "head_sha": "474f1b70f7f6fa3b5d3c731fd66a7df9f40c7540",
+      "run_key": "30985301561:1",
+      "recorded_at": "2026-08-05T07:50:23.137831+00:00"
+    },
+    "last_push_remediation": {
+      "attempted": true,
+      "ahead": 2,
+      "head_sha": "474f1b70f7f6fa3b5d3c731fd66a7df9f40c7540",
+      "pushed": true,
+      "rc": 0,
+      "outcome": "pushed",
+      "ahead_after": 0
+    },
+    "last_push_remediation_at": "2026-08-05T07:50:23.137831+00:00",
+    "last_verified_push_head": "474f1b70f7f6fa3b5d3c731fd66a7df9f40c7540",
+    "remediation_poll_keys": [
+      "2026-08-05T07"
+    ],
+    "remediation_checks": 1
+  }
 }
