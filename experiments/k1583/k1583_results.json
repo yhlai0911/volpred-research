@@ -24,8 +24,7 @@
       "Rolling-window MCS top-1 is a proxy for full sequential SPA (Hansen 2005) — change-point = winner switch.",
       "B=1000 for static MCS (task budget); B=500 for inner rolling loops to keep runtime bounded.",
       "MCS implementation reused from src/volpred/stats/mcs.py (HLN 2011 T_R variant, stationary bootstrap, HAC SE)."
-    ],
-    "timestamp": "2026-08-05T09:58:33.210115+00:00"
+    ]
   },
   "loss_inventory": [
     {
@@ -1514,12 +1513,12 @@
   ],
   "code_trace": {
     "path": "experiments/k1583/k1583.py",
-    "sha256": "23f5bce0c3a50d165fee19de8a752805844d7fcc174765280f459d750f3d0cab",
-    "size_bytes": 31242
+    "sha256": "5dd1ed6b63bb8873a7cb8bd87c1946b100a4a1ae278545636e78a195f8559602",
+    "size_bytes": 31657
   },
   "artifact_generation": {
     "schema_version": "volpred.reproduce_commit.v1",
-    "generation_id": "d28ccb62f899e97de65c751e5d431455add28525e929ea181baef99642b0e2e3",
+    "generation_id": "a149d4fb1beb6b66368e7d68ecf92517c3448217a1eec7d2073496bc2145bdf4",
     "output_identities": [
       {
         "path": "k1583_conditional_mcs_heatmap.png",
@@ -1533,7 +1532,7 @@
       }
     ]
   },
-  "runtime_seconds": 13.282,
+  "runtime_seconds": 13.401,
   "runtime_env": {
     "python": "3.12.10",
     "implementation": "CPython",

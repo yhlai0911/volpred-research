@@ -674,7 +674,12 @@ def main() -> int:
                 "B=1000 for static MCS (task budget); B=500 for inner rolling loops to keep runtime bounded.",
                 "MCS implementation reused from src/volpred/stats/mcs.py (HLN 2011 T_R variant, stationary bootstrap, HAC SE).",
             ],
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            # No execution timestamp here on purpose. finalize_experiment already
+            # records created_at, and reproduce_check ignores that pointer by name.
+            # A second timestamp under /metadata was compared as a scientific value
+            # and, worse, fed artifact_generation.generation_id — so two identical
+            # runs produced two different content hashes and the reproduction was
+            # reported as a mismatch on nothing but the clock.
         },
         "loss_inventory": inventory,
         "mcs_unconditional": _strip(uncond_res),
