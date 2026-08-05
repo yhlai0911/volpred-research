@@ -3,45 +3,97 @@
     "what": "額度緊縮時的常設分層政策。老闆 2026-08-05：『以後只要 token 不夠時，都是優先支援每日必做工作』——所以這不是一次性處置，是每次緊縮都照這張表走，不必重想。",
     "owner": "scripts/model_router.py::pick_model 是唯一套用點。不要在別處複製這張表。",
     "signal": "額度訊號是 Claude Code 的 /usage（All models 週用量 %）。storage/reports/token_usage/daily_*.json 的 billable 計數是**使用報告與成本歸屬**用的，單位不同，不能拿來回答『還剩多少』。兩個儀表兩個工作。",
-    "auto_expiry": "expires_at 一到自動失效。手動降檔最大的風險是沒人記得復原——四天的省錢會變成永久降級。"
+    "auto_expiry": "expires_at 一到自動失效。手動降檔最大的風險是沒人記得復原——四天的省錢會變成永久降級。",
+    "revision": "老闆 22:28 指令：日常運作要維持，部門一律 sonnet/high（不是 low——省錢不該省到判斷力），經理派工降頻。"
   },
-
   "_tiers": {
-    "tier0_never_cut": "每日必做：文章撰寫、資料蒐集、發文、boss 回覆。降這些等於用內容品質與營運連續性換 token，而那是 mission 1 與 4。",
+    "tier0_never_cut": "每日必做（文章/資料/發文）在 92% 這一級改走 sonnet/high 而非停工——維持運作優先於維持模型等級。只有 boss 回覆通道維持 opus。",
     "tier1_downgrade": "ops／治理／審查／查詢：checklist 型工作，sonnet 足夠。",
     "tier2_defer": "論文寫作與修改：沒有時效性，緩幾天不損失任何東西。用降檔模型改論文比晚幾天改更糟，所以是**暫緩不是降檔**。",
     "exempt_not_llm": "**不耗 token 的程式運算不受任何限制**（compute queue、回測、模擬、資料抓取）。那是 CPU 不是 token，暫停它只損失研究進度、省不到額度。緊縮時它照跑；只有『需要 LLM 判讀結果』那一段才受 tier 規則管。"
   },
-
   "active": true,
   "expires_at": "2026-08-09T08:00:00Z",
   "reason": "weekly allowance 89% at 2026-08-05T13:50Z; resets Sun 16:00 台北",
-
   "exempt": [
-    "daily_article",
-    "daily_digest",
-    "event_article",
-    "trending_repost",
-    "member_qa",
     "email_reply",
     "telegram_reply"
   ],
-
   "overrides": {
-    "platform_ops": ["sonnet", "low"],
-    "governance": ["sonnet", "low"],
-    "code_review": ["sonnet", "medium"],
-    "resource_audit": ["sonnet", "medium"],
-    "lookup": ["sonnet", "low"],
-    "verify": ["sonnet", "low"],
-    "classification": ["sonnet", "low"],
-    "org_manager": ["sonnet", "medium"],
-    "experiment": ["opus", "high"],
-    "strategy_lifecycle": ["opus", "high"],
-    "paper_body": ["sonnet", "low"],
-    "paper_review": ["sonnet", "low"],
-    "paper_decision": ["sonnet", "low"]
+    "platform_ops": [
+      "sonnet",
+      "high"
+    ],
+    "governance": [
+      "sonnet",
+      "high"
+    ],
+    "code_review": [
+      "sonnet",
+      "high"
+    ],
+    "resource_audit": [
+      "sonnet",
+      "high"
+    ],
+    "lookup": [
+      "sonnet",
+      "high"
+    ],
+    "verify": [
+      "sonnet",
+      "high"
+    ],
+    "classification": [
+      "sonnet",
+      "high"
+    ],
+    "org_manager": [
+      "sonnet",
+      "medium"
+    ],
+    "experiment": [
+      "sonnet",
+      "high"
+    ],
+    "strategy_lifecycle": [
+      "sonnet",
+      "high"
+    ],
+    "paper_body": [
+      "sonnet",
+      "low"
+    ],
+    "paper_review": [
+      "sonnet",
+      "low"
+    ],
+    "paper_decision": [
+      "sonnet",
+      "low"
+    ],
+    "daily_article": [
+      "sonnet",
+      "high"
+    ],
+    "daily_digest": [
+      "sonnet",
+      "high"
+    ],
+    "event_article": [
+      "sonnet",
+      "high"
+    ],
+    "trending_repost": [
+      "sonnet",
+      "high"
+    ],
+    "member_qa": [
+      "sonnet",
+      "high"
+    ]
   },
-
-  "deferred_departments": ["publications"]
+  "deferred_departments": [
+    "publications"
+  ]
 }

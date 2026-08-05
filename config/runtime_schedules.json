@@ -56,6 +56,9 @@
       },
       "org_boss_digest": {
         "activated_at": "2026-08-05T09:25:00Z"
+      },
+      "org_manager_tick": {
+        "activated_at": "2026-08-05T06:10:00Z"
       }
     },
     "job_defaults": {
@@ -164,9 +167,6 @@
         "previous": {
           "activated_at": "2026-07-26T11:42:00Z"
         }
-      },
-      "org_manager_tick": {
-        "activated_at": "2026-08-05T06:10:00Z"
       }
     }
   },
@@ -533,10 +533,10 @@
       {
         "id": "org_manager_tick",
         "label": "Org manager tick — wakes the coordinator when work exists",
-        "cron": "*/30 * * * *",
+        "cron": "0 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_org_manager_tick.sh",
         "log_path": "storage/logs/cron/org_manager_tick.log",
-        "description": "運營經理喚醒閘門，每 30 分鐘。先跑零成本純 Python 硬事實 gate（manager/部門 inbox 有到期件、部門 min_cadence 逾期、org review 到期）；全否則寫 skip receipt 直接結束，不喚醒任何 LLM。有事才喚醒經理：優先用它的 Herdr cockpit pane（idle 才推，忙碌不打斷——老闆可能正在協作），沒有 cockpit 就用 manager_run.py 起一輪 headless，全程持租約防止 tick 疊床。2026-08-05 由 shadow 轉為實際運作；回滾方式 = wrapper 命令加回 --shadow。",
+        "description": "運營經理喚醒閘門，每小時（額度節流，週日恢復）。先跑零成本純 Python 硬事實 gate（manager/部門 inbox 有到期件、部門 min_cadence 逾期、org review 到期）；全否則寫 skip receipt 直接結束，不喚醒任何 LLM。有事才喚醒經理：優先用它的 Herdr cockpit pane（idle 才推，忙碌不打斷——老闆可能正在協作），沒有 cockpit 就用 manager_run.py 起一輪 headless，全程持租約防止 tick 疊床。2026-08-05 由 shadow 轉為實際運作；回滾方式 = wrapper 命令加回 --shadow。",
         "host_crontab_managed": false,
         "piggy_back_enabled": false,
         "matchers": [
