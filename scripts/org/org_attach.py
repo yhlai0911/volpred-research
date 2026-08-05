@@ -153,6 +153,40 @@ def find_org_tab(label: str) -> str | None:
     return None
 
 
+def generate_dept_settings(root: Path, dept: str) -> Path | None:
+    """Grant a department write access to exactly the turf its charter declares.
+
+    Departments reported every write denied: the project allow-list has 111
+    Bash rules and zero Edit/Write rules, so a pane could only write when a
+    human sat there approving. Ownership is already declared in the registry —
+    this turns that declaration into the permission that makes it real, and no
+    wider: a department still cannot write another's turf.
+
+    Written to runtime/ (regenerated per attach) so a hand-authored
+    departments/<dept>/settings.json always wins.
+    """
+    registry = load_registry(root)
+    meta = registry.get("departments", {}).get(dept)
+    if meta is None:
+        return None
+
+    turf = [f"storage/org/departments/{dept}/**"]
+    turf += [p.rstrip("/") + "/**" for p in (meta.get("owned_paths") or [])]
+    allow = [f"{tool}({t})" for t in turf for tool in ("Edit", "Write")]
+    allow += [
+        "Bash(uv run python scripts/org/dept_send.py:*)",
+        "Bash(uv run python scripts/org/org_status.py:*)",
+        "Bash(uv run python scripts/org/dept_routing.py:*)",
+        "Bash(uv run python scripts/git_writer_lock.py:*)",
+        "Bash(uv run pytest:*)",
+    ]
+    path = runtime_dir(root) / f"{dept}.settings.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"permissions": {"allow": allow}}, ensure_ascii=False, indent=2),
+                    encoding="utf-8")
+    return path
+
+
 def dept_session_args(root: Path, dept: str) -> list[str]:
     """Per-department CLI config, opt-in by what exists on disk.
 
@@ -170,6 +204,10 @@ def dept_session_args(root: Path, dept: str) -> list[str]:
     ddir = dept_dir(root, dept) if dept != MANAGER else root / MANAGER
     extra: list[str] = []
     settings = ddir / "settings.json"
+    if not settings.is_file() and dept != MANAGER:
+        generated = generate_dept_settings(root, dept)
+        if generated:
+            settings = generated
     if settings.is_file():
         extra += ["--settings", str(settings)]
     skills = ddir / "skills"

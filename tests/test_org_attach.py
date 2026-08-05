@@ -385,7 +385,9 @@ def test_identity_and_work_compose_without_drift(org_root: Path) -> None:
 def test_per_department_config_is_opt_in_by_file(org_root: Path) -> None:
     attach = _load_attach()
 
-    assert attach.dept_session_args(org_root, "research") == [], "no files → no flags"
+    base = attach.dept_session_args(org_root, "research")
+    assert base[0] == "--settings", "turf permissions are always granted, never opt-in"
+    assert "--plugin-dir" not in base and "--disallowed-tools" not in base, "the rest is opt-in"
 
     ddir = _core.dept_dir(org_root, "research")
     (ddir / "settings.json").write_text("{}", encoding="utf-8")
@@ -398,3 +400,28 @@ def test_per_department_config_is_opt_in_by_file(org_root: Path) -> None:
     assert "--disallowed-tools" in args
     assert "Bash(git push *)" in args[args.index("--disallowed-tools") + 1]
     assert "# comment" not in " ".join(args)
+
+
+def test_generated_permissions_match_the_declared_turf(org_root: Path) -> None:
+    """Departments could not write at all: 111 Bash allow rules, zero Edit/Write."""
+    attach = _load_attach()
+    assert run_tool("org_admin.py", "create", "content", "--paths", "storage/drafts/",
+                    root=org_root).returncode == 0
+
+    path = attach.generate_dept_settings(org_root, "content")
+    allow = json.loads(path.read_text())["permissions"]["allow"]
+
+    assert "Write(storage/drafts/**)" in allow
+    assert "Write(storage/org/departments/content/**)" in allow
+    assert not any("research" in rule for rule in allow), "turf must not widen past the charter"
+
+
+def test_hand_written_settings_beat_the_generated_one(org_root: Path) -> None:
+    attach = _load_attach()
+    assert run_tool("org_admin.py", "create", "content", root=org_root).returncode == 0
+    own = _core.dept_dir(org_root, "content") / "settings.json"
+    own.write_text('{"permissions": {"allow": []}}', encoding="utf-8")
+
+    args = attach.dept_session_args(org_root, "content")
+
+    assert str(own) in args, "a department's own settings must win over the generated default"

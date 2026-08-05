@@ -1,21 +1,28 @@
 #!/usr/bin/env python3
 """Boss digest: fold manager/outbox + department reports into ONE message.
 
-P0/P1: --dry-run renders the digest to stdout. Live delivery (P2) will route
-through the existing durable email owner (`email.ops_alert`) / telegram
-transport — this script never grows its own send path.
+This is the single boss-facing channel for the org: departments never mail the
+boss, they report to the manager, and the manager sends one digest. Delivery
+goes through the canonical durable owner (`volpred ops send-alert`) — this
+script never grows its own send path, so dedup, retry and Sent read-back stay
+where they already work.
+
+  uv run python scripts/org/boss_digest.py --dry-run   # render only
+  uv run python scripts/org/boss_digest.py --send      # deliver one digest
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _core import DEFAULT_ORG_ROOT, load_registry  # noqa: E402
+from _core import DEFAULT_ORG_ROOT, REPO_ROOT, load_registry  # noqa: E402
 
 
 def render(root: Path) -> str:
@@ -63,18 +70,83 @@ def render(root: Path) -> str:
     return "\n".join(lines)
 
 
+def has_content(root: Path) -> bool:
+    """True when there is something worth a boss-facing message.
+
+    An empty digest on a quiet morning is exactly the noise this channel was
+    built to end, so a quiet org sends nothing at all.
+    """
+    pending = root / "manager" / "outbox" / "digest_pending.md"
+    if pending.exists() and pending.read_text(encoding="utf-8").strip():
+        return True
+    if any((root / "manager" / "outbox" / "proposals").glob("*.md")):
+        return True
+    for path in (root / "manager" / "inbox").glob("*.json"):
+        try:
+            if json.loads(path.read_text(encoding="utf-8")).get("from") != "boss":
+                return True
+        except (json.JSONDecodeError, OSError):  # silent-ok: unreadable items are rendered as ⚠️ in the digest
+            return True
+    return False
+
+
+def send(root: Path, text: str, *, force: bool = False) -> int:
+    """Deliver through the canonical durable email owner, never a private path."""
+    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as fh:
+        fh.write(text)
+        body = fh.name
+    cmd = ["uv", "run", "volpred", "ops", "send-alert", "--level", "info",
+           "--title", "VolPred 運營日報（經理彙整）", "--body-md", body]
+    if force:
+        cmd.append("--force")
+    try:
+        proc = subprocess.run(cmd, cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=180)
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f"digest 寄送失敗（{type(exc).__name__}: {exc}）", file=sys.stderr)
+        return 1
+    finally:
+        Path(body).unlink(missing_ok=True)
+    if proc.returncode != 0:
+        print(f"digest 寄送失敗：{(proc.stderr or proc.stdout).strip()[:300]}", file=sys.stderr)
+        return 1
+
+    # Consume what was reported so the next digest is not a repeat.
+    archive = root / "manager" / "inbox" / "_archive"
+    archive.mkdir(parents=True, exist_ok=True)
+    for path in (root / "manager" / "inbox").glob("*.json"):
+        try:
+            if json.loads(path.read_text(encoding="utf-8")).get("from") == "boss":
+                continue  # boss instructions are the manager's to close, not the digest's
+        except (json.JSONDecodeError, OSError):  # silent-ok: unreadable items were rendered; archiving them stops a loop
+            pass
+        path.replace(archive / path.name)
+    pending = root / "manager" / "outbox" / "digest_pending.md"
+    if pending.exists():
+        pending.write_text("", encoding="utf-8")
+    print("digest 已寄出")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=DEFAULT_ORG_ROOT)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--send", action="store_true")
+    parser.add_argument("--force", action="store_true", help="bypass the 24h dedup once")
     args = parser.parse_args()
+
+    if not args.dry_run and not args.send:
+        parser.error("需要 --dry-run 或 --send")
+
+    if args.send and not has_content(args.root):
+        print("組織這段時間沒有需要回報的事——不寄空信。")
+        return 0
 
     text = render(args.root)
     if args.dry_run:
         print(text)
         return 0
-    print("live delivery not wired yet (P2) — use --dry-run; digest NOT sent", file=sys.stderr)
-    return 1
+    return send(args.root, text, force=args.force)
 
 
 if __name__ == "__main__":
