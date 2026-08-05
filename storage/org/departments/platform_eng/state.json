@@ -8,89 +8,49 @@
     "diagnoses_complete_awaiting_write_access": 0,
     "last_fresh_detector_run": "2026-08-05T11:07:40Z"
   },
-  "last_run": "2026-08-06T00:16:00Z",
-  "open_items": 49,
+  "last_run": "2026-08-06T01:46:00Z",
+  "open_items": 0,
   "owned_paths_now_effective": {
-    "paths": ["config/", "frontend-v2-fix/", "scripts/", "tests/"],
-    "note": "D57 型別修法（commit 1a0d4b274 + d3212484d）已落地並經回歸；registry/generate_dept_settings 的整條 owned_paths 阻塞鏈（D5-D57）已由上一班收斂完，本班未再撞到。src/volpred/ops/ 與 supabase/migrations/ 維持 Codex Zone A（經理 D22/D37），本部門不寫。"
+    "paths": ["frontend-v2-fix/", "tests/"],
+    "note": "msg1629（老闆核准部門拆分，2026-08-05 17:09 執行）：本部門縮編為 owned_task_types=[code_review]，config/ 與 scripts/（含 scripts/org/）連同 platform_ops task_type 全部移交新設『platform_ops』部門。本班在拆分生效前完成的 4 項 scripts/config 修改（見下方 pre_split_work_committed）已測完並 commit，不需回滾；此後同類維護一律轉交 platform_ops，本部門不再直接動手。session 內快取權限可能仍放行舊範圍，但邏輯上以此為準。"
   },
+  "pre_split_work_committed_this_session": [
+    "assign_4e4e8030 provider registry pin 修復工具（scripts/repin_provider_identity.py + 5 tests），commit 38b17f9b7",
+    "assign_10d0c985 compute_queue --survives-source-success 旗標，commit 88c04a339",
+    "orphan_namespace_reports_assets_20260805 config/orphan_namespaces.json 新 namespace，commit 1912bece0",
+    "msg1629 附帶指示的 gh 唯讀 allowlist（scripts/org/org_attach.py），commit 6ec020458"
+  ],
   "this_session": {
     "done": [
-      "D39 P0（老闆層，凌駕一切）：AuthButton + /questions 兩版 + S1-S6 全量 24 站 auth-bootstrap 收編進 radar-session，commit 785ca70，build 通過、deploy 通過、瀏覽器線上實測通過、member_success 正式驗收通過、經理裁決結案（見 journal 2026-08-05 22:34 條目）",
-      "ops_snapshot.alerts_state 讀了 writer 從沒寫過的鍵（sent_at/ts vs 實際的 last_sent_at）修好並驗證，sent_last_24h 0→37，加回歸測試",
-      "歸檔第一輪 D5→D57 saga + 第二輪雜項共 ~70 件 inbox 訊息；收件匣 95 → 49（剩下幾乎全是 canonical 任務池項目，見下方 canonical_backlog_35_pending）"
+      "D39 P0（老闆層）：AuthButton + /questions 兩版 + S1-S6 全量 24 站 auth-bootstrap 收編進 radar-session，commit 785ca70，build/deploy/瀏覽器實測/member_success 驗收全過（見 journal 2026-08-05 22:34 條目）",
+      "ops_snapshot.alerts_state 讀鍵不符修好，sent_last_24h 0→37，加回歸測試",
+      "assign_c7c2b761／assign_e6cdb287：experiments/k1583、K1710 reaper-held 判定完成（非 reaper bug，需研究部審查），送 research request item_20260805T173612147257Z，副作用發現 check_experiment_artifacts.py 的知識條目檢查會被單純提及滿足（一併記錄轉交）",
+      "orphan_namespace_reports_assets_20260805：config/orphan_namespaces.json 補第 4 個管理 namespace，commit 1912bece0",
+      "msg1629 gh 唯讀 allowlist 落地，commit 6ec020458，9 條唯讀規則 + 邊界回歸測試",
+      "msg1629 部門拆分執行：52→0 件收件匣，35 張 canonical 任務 + 8 則直接通訊全數轉交 platform_ops（4 則先回覆等待中的請求者再歸檔），4 則已被後續事實取代/已完成直接歸檔記理由，回報 manager item_20260805T174610931654Z"
     ],
     "declined_or_deferred": [
-      "F1/F2/F3 token 會計修復（資源監控部指派，P1 owner=本部門）——規模判斷過大且對方規格仍在持續修訂中（同日又追加 period_semantics 新缺陷 A/B/C），本班優先做完 P0 站點故障，F1/F2/F3 排下一輪整段做，不倉促收一半。F1 回歸基準（07-21~07-28 八天真值）已到位；F2 正確修法（forked_from_id/parent_thread_id 鏈追 root）已有 resource_monitor 的參考實作可抄，見 journal。",
-      "canonical 任務池 35 件（platform_ops pending 74 筆的其中一大塊）——逐筆核對 storage/next_tasks.json 全部仍是 pending（非已自癒雜訊），但內容多數是需要真的讀懂再動手的研究驗證/工程除錯，見 canonical_backlog_35_pending，判斷不宜在本班尾端倉促速刷"
-    ]
-  },
-  "canonical_backlog_35_pending": {
-    "verified_all_still_pending_in_next_tasks_json": "2026-08-06T00:16Z",
-    "research_verification_k_collection_merge": [
-      "assign_1fe316ba K1750 IPO heat（BOUNDED_NULL，11 步科學驗證清單，含 preregistration 凍結順序核對）",
-      "assign_5b63c16f K1741 short-credit tail-hedge",
-      "assign_628bc810 K1749 low-vol consolidation duration",
-      "assign_71636a7a K1813 transient-500 但 artifact 完整",
-      "assign_bfd8dbf8 K1813 remediation round 2",
-      "k1730_k1731_review_certification_codex_20260729 K1731 critical path"
-    ],
-    "note_research_items": "task_type 標 platform_ops（因為是 collect_completed 派工步驟），但實質是 worktree-merge-verification skill 治理的研究誠實紅線工作（knowledge.json 只能主線程寫、merge 前要獨立 Codex 覆核）。不建議在非研究情境下速刷。",
-    "governance_lifecycle_review": [
-      "control_gate_review_candidate_silent_fallback_audit...",
-      "control_gate_review_dispatch_collision...",
-      "control_gate_review_publisher_provenance_contract...",
-      "control_gate_review_task_generation...",
-      "dreaming_missing_retry_strategy_k1221/k1730/k1739/k1742（4 件）",
-      "dreaming_observation_ledger_breach_single_gateway_claim_next_removal",
-      "dreaming_repeated_tool_failure_dispatch_supervisor_kill_failed_orphan",
-      "dreaming_unfiled_incident_class（3 件，不同 hash）"
-    ],
-    "engineering_fix": [
-      "ci-red-30983363179 CI 紅燈修復",
-      "assign_71c8e587 3-STRIKE×91 selfreload 被 fail-closed 永久封鎖",
-      "assign_9166bcb6 phase-z-foreign 派發組合無解（空 declared_output_paths + 唯讀 sandbox）",
-      "assign_4e4e8030 CLI 自動升級打斷 backbone",
-      "assign_10d0c985 compute queue terminal 矛盾",
-      "gh-54 Graphify integration 完成",
-      "inc_5fa16e7d8d78_rootcause_e1 publishing_freshness 根因重構",
-      "inc_c67bec28dd29_rootcause_e2 silent_fallback_new 根因重構"
-    ],
-    "content_pipeline_blocked": [
-      "lazypack_render_repair_mile_a1d9c5e0（根因已是 upload_chart 無重試，同一件事，已轉 Codex Zone A）",
-      "k528_regenerate_mile_35eef830_charts",
-      "assign_c7c2b761 experiments/k1583 reaper held",
-      "assign_e6cdb287 experiments/K1710 等 2 份 reaper held"
-    ],
-    "org_meta": [
-      "assign_2fdba4c4 platform_ops pending 池 74 筆逐筆 triage 本身",
-      "assign_a33907f7 老闆 approve 部門拆分未落地 + 經理 inbox 積壓 9 則老闆訊息"
+      "ci-red-30983363179：已有 dispatch-supervisor 背景 worker 正在處理（pid 42868，fire_reason 明確指向同一 incident），本班判斷雙寫風險高於價值，主動不搶，且已隨拆分轉交 platform_ops",
+      "F1/F2/F3 token 會計修復、其餘 34 張 canonical 任務、D43 skill 載入黑洞——全數隨 msg1629 轉交 platform_ops，不在本部門新轄區（owned_task_types=[code_review]）內"
     ]
   },
   "d39_completed": {
     "commit": "frontend-v2-fix 785ca70",
     "scope": "S1(radar-session 擴充 user 欄位) -> S2(六個 me/* console) -> S3(AuthButton) -> S4(questions 兩版) -> S5(五個 admin 資料區 console) -> S6(七個 C 類 rejection path) 全量 24 站",
-    "verified": "tsc/build/check:member-continuity(22)/check:growth-experiments(36)/check:frontend-core(10) 全過；deploy-zeabur-safe.sh 部署成功；verify:vnext-live pass（首次 timeout 是部署後傳播延遲）；瀏覽器實測全新分頁登入鈕正確 render、/questions 未卡 skeleton",
+    "verified": "tsc/build/check:member-continuity(22)/check:growth-experiments(36)/check:frontend-core(10) 全過；deploy-zeabur-safe.sh 部署成功；verify:vnext-live pass；瀏覽器實測全新分頁登入鈕正確 render、/questions 未卡 skeleton",
     "gap": "S0 的壞 localStorage context 沒有瀏覽器層實測（javascript_tool 被本 session 權限層擋下），改以既有單元測試覆蓋，已請 member_success 補驗"
   },
   "handed_to_codex_zone_a": [
-    "src/volpred/research/reproduce_spec.py::finalize_experiment — 輸出前把非有限值轉 null，這是裸 NaN 的產生端修法；研究部誤以為在本部門轄區，實際 src/ 一律不在 owned_paths",
-    "control_gate_lifecycle._review_watermark 未問 is_tombstoned — 退役 gate 每輪重開複審單（work/hourly_pregate_ghost_20260805/root_cause.md）",
-    "src/volpred/charts/article_charts.py::upload_chart 無退避重試 — Supabase 圖片逾時擋住內容部兩篇進池",
-    "src/volpred/ops/questions.py:1640 rerank 不清 archived 列的 current_rank（會員部已定位）"
+    "src/volpred/research/reproduce_spec.py::finalize_experiment — 輸出前把非有限值轉 null",
+    "control_gate_lifecycle._review_watermark 未問 is_tombstoned",
+    "src/volpred/charts/article_charts.py::upload_chart 無退避重試 — Supabase 圖片逾時（已隨拆分一併轉交 platform_ops 追蹤，因為呼叫端 publish_draft.py 現屬 platform_ops）",
+    "src/volpred/ops/questions.py:1640 rerank 不清 archived 列的 current_rank"
   ],
   "next_card_commitments": [
-    "C8：components/OpsConsole.tsx:363-380 inline getSession().then() 無 catch（member_success 驗收時發現，不在原 24 站裁定表，責任在規格方非漏做）——低嚴重度（不 gate render，靜默無資料），比照 C7 修法，排下一輪跟 F1/F2/F3 一起做",
-    "F1/F2/F3 token 會計修復 — 下一輪整段做，讀 resource_monitor 最新版規格（規格持續在動，開工前先重新對帳）",
-    "series_registry 結構修法：把『成員由哪個 details 欄位推導』變成 registry 宣告欄位，收編 audit() 的 by_ct hack，六系列回歸 + 機械測試",
-    "platform_ops canonical pending 池逐筆 triage（74 筆，33 筆 >7 天）",
-    "worktree-venv-vs-main-src reproduce_check 假 mismatch（P3，manager item 2026-08-05T152044232935Z）— 已 ack，排入計畫評估"
+    "C8：components/OpsConsole.tsx:363-380 inline getSession().then() 無 catch（code_review 範圍內，仍是本部門的活項）",
+    "series_registry 結構修法（跨 code_review／platform_ops，若牽涉 src/volpred 需先確認邊界）"
   ],
   "active_incident": {
-    "what": "provider 拒絕 worker spawn — 執行層全停（上一班留下的狀態，本班未驗證是否已解除）",
-    "root_cause": "config/provider_registry.json 的 settings_surface pin 與 .claude/settings.json 曾一度不同步",
-    "level": "A/B 已由他人落地（commit 1b513bd79，含 tests/test_provider_pin_drift.py）。C（mark_alert_sent 只在 _send 回 0 才蓋章）與 D（持續性條件接進 incident 生命週期）落在 src/volpred/ops/，屬 Codex Zone A，需經理安排",
-    "report": "work/provider_denial_20260805/incident.md",
-    "note_for_next_shift": "本班開工時 dispatch worker/queue 運作正常（ops_snapshot 顯示有 in_flight 與近期 success completion），這條 incident 狀態可能已經自然改善，下一班開工先用 ops_snapshot 對帳再決定要不要繼續追"
+    "what": "無（provider pin drift 已由 D57 收斂並隨拆分移交 platform_ops 後續監管）"
   }
 }

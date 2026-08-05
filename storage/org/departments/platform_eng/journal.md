@@ -1,5 +1,55 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-06 01:22–01:46（台灣時間）｜收件匣清空 + msg1629 部門拆分執行｜outcome=done
+
+**ci-red-30983363179**：查到 `storage/ops/ci_watch_state.json.active_incident` 顯示這個
+incident 已滾動 18 個 failure cycle、`dispatch_request_count=54`，且**此刻**
+（`current_job.fire_reason="cron+requested:ci_red:ci-red-30983363179"`，started_at 僅 8
+分鐘前，pid 42868 running）已有 dispatch-supervisor 的背景 worker 正在處理同一張單。
+next_tasks.json 上該任務仍 status=pending（未 claim），為避免雙寫同一批 scripts/ 檔（
+sync_cron_wrappers.py 等），本班主動不搶——判斷屬於「已有人在做」而非「我漏做」，跳過。
+
+**orphan_namespace_reports_assets_20260805**（succeeded，commit `1912bece0`）：
+`config/orphan_namespaces.json` 補第 4 個 namespace `reports_assets`（前 3 次是
+paper/drafts/experiments，坑點固定是漏一筆 config）。驗證：reap 掃描輸出出現
+`namespace reports_assets`；`foreign_incident --check` 對該路徑無 blocker；
+`pytest -k "orphan or reap"` 100 passed。
+
+**assign_c7c2b761（k1583）與 assign_e6cdb287（K1710）**（均 succeeded，判定型任務）：
+兩者都是 reaper 正確 held，不是 reaper bug——k1583（08-05 18:03 新產出）沒有專屬知識條目，
+但另一條目 `2e9fbbd9`「K1583 SUPERSEDED」明文要求它重跑重審；K1710 的
+reproduce_report.json 現況 `INPUT_HASH_MISMATCH` 於 `src/volpred/stats/model_evaluation.py`。
+**副作用發現**：`scripts/check_experiment_artifacts.py` 的 `knowledge_ids_from_entries()`
+只做全庫文字掃描比對 K-id「有沒有被提及」，把「被別條目點名為 SUPERSEDED」也算成「有知識條目
+覆蓋」，對 k1583 誤報 PASS——未動這支腳本（研究知識庫審查架構決定），已連同兩案證據一起送
+research dept request（`item_20260805T173612147257Z`）。本班不寫 knowledge.json（K1259）。
+
+**msg1629 gh 唯讀 allowlist**（commit `6ec020458`）：`scripts/org/generate_dept_settings`
+新增 9 條唯讀 `gh` 規則（pr/issue/run view、pr checks、issue/pr/run list、search、
+auth status），merge/close/edit/comment/create/delete 一律不進白名單。新測試
+`test_gh_allowlist_is_read_only` 鎖住邊界；`tests/test_org_attach.py` 30 passed（1 個既有
+無關失敗 `test_manager_is_attached_by_default`，manager routing literal vs model_router，
+未動它）。誠實揭露：本 session 自己的權限是 attach 當下載入的，改動不會即時生效，`gh pr list`
+本 session 內仍被擋（預期行為，非改壞）；真正端到端驗證需下一次任何部門 reattach。
+
+**msg1629 部門拆分執行**（老闆 msg1629 核准）：平台工程部縮編為
+`owned_task_types=[code_review]`、`owned_paths=[frontend-v2-fix/, tests/]`，
+`scripts/`、`config/`、`platform_ops` task_type 移交新設『platform_ops』部門。
+收件匣 52 件清點：35 張 canonical 任務（task_type 全為 platform_ops，核對 next_tasks.json
+全數仍 pending/未 claim）用 `--canonical-task-id` 原樣轉交 platform_ops；8 則直接通訊
+（token 會計 F1/F2/F3 系列 7 則 + drafts-charts／Supabase 上傳急件 1 則，修復點都在
+scripts/）同樣轉交，其中 4 則是 resource_monitor/content 還在等回覆的 request，
+先各自回覆說明轉交去向再歸檔；D43 skill 載入黑洞（`scripts/org/_core.py:identity_prompt()`
+不讀 `skills/`）轉交並附建議修法；4 則已被後續事實取代或已完成的直接歸檔記理由（D39 授權判斷
+被 msg1629 本身取代、D30 是 manager 自己的 outbox CLI 缺口純 FYI、D40 與收尾契約單訴求的
+`scripts/org/inbox_archive.py` 本班全程都在用已存在、harness token 與 18-pending-phase-z
+都是既有結案通知）。收件匣清空後回報 manager（`item_20260805T174610931654Z`）。
+
+**刻意不做**：manager 訊息說「新收件匣權限需要 re-attach 才生效：
+`org_attach.py restore`」——沒有自己跑這個指令，因為它會動到全組織 pane 的
+restore/reconcile，單一部門 pane 內觸發對其他部門即時 pane 有沒有副作用不確定，
+已回報 manager 裁決要不要由他/下次自然重啟套用。
+
 ## 2026-08-05 18:48–18:53（台灣時間）｜D36 預備（2/3 完成）｜outcome=done
 
 **A 已被別人做掉**：commit `1b513bd79`（18:46:42）已重新 pin。我獨立重算 registry 裡
