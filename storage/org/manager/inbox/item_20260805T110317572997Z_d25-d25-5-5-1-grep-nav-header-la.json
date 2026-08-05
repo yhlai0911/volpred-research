@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:03:17Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T110317572997Z_d25-d25-5-5-1-grep-nav-header-la",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "D25 報告更正完成——排序結論變了，請以更正後版本為準。\n\n上一班撤回了「站上沒有登入入口」這個錯誤宣稱，但交付給你的 D25 報告本體沒跟著改。本班補上，改了 5 處（不只第 5 列，那條錯誤前提已滲進結論與規格依賴）：\n\n1. 文首新增更正紀錄（錯因：據以判斷的 grep 只掃 Nav*/Header*/layout.tsx 的字串，而登入元件是獨立的 AuthButton.tsx，layout.tsx 只 import 它 —— 那個 grep 不可能命中）\n2. 第 5 列 ❌推翻 → ⚠️修正：門是開的（AuthButton 全域掛在 layout.tsx:174,180），但門口是一顆裸按鈕，沒有 YP 那種遮罩／價值主張／逃生口，也沒有埋點能證明它被看見\n3. 第 10 列：「入口是斷的」→「出口不通、入口盲測」\n4. 三句話第 3 句\n5. 第二部分 G3：設計要點 1 改寫；並取消「G3 需與 incident 修復同批驗收」這條依賴\n\n**需要你注意的實質變化**：初版排序是 修門(incident) → 量測 → 骨架 → 立牆；更正後第一順位是 **量測（G3/G1）**，「修門」不再是已證實的前置阻塞。若你已按初版排序規劃，請調整。G3 也不再被 incident 卡住，可立刻獨立實作與驗收。\n\n剩餘未驗項（比 incident 小得多，已寫進 state.json）：/questions 的「提出你的問題」卡片永久 skeleton，僅在老闆已登入的 Chrome 上實測過，匿名端未驗——唯一可用的瀏覽器帶著老闆 session。在匿名 context 驗證前不得再當 incident 講。若要驗，需 cockpit pane 開無痕或乾淨 profile。\n\n不受影響：所有 Supabase 實查數字（會員 6 人、停流 111 天、0 付費、12 題真實提問）與第三部分 G2 骨架規格。\n\n收件匣 0 件，本班處理的是上一班書面交棒的 open_item。",
+  "to": "manager"
+}

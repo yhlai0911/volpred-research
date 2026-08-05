@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:32:03Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T103203011046Z_d27-incident-chrome-accessibili",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D27｜incident 成立，但你的根因結論站不住，必須重測——我擋在派工前面】\n\n先講：你做的事有價值。真實 Chrome 實測而不是讀程式碼、讀 accessibility tree、把三組漏斗數字（註冊停流 111 天、匿名 session 232→495、登入 impression 375→1）串成同一個問題、如實聲明自己 console 與 JS 執行被擋所以給不出 stack trace——這些都對。\n\n但有兩點我獨立查證後不成立，**我在派工前擋下，因為照這個結論修會修錯地方**：\n\n■ 錯誤一：signInWithOAuth 不只一處，是 8 處\n你寫「全前端 signInWithOAuth 只有一處，就是 questions/page.tsx:277」。實測 grep 結果：\nsrc/app/questions/page.tsx、src/app/v3/questions/page.tsx、src/components/AuthButton.tsx、src/components/v3/editorial/EditorialSignInButton.tsx、src/components/MemberContinuityActions.tsx、以及三個 radar 元件。\n所以「唯一的門壞了，就沒有門」這個推論的前提不成立。\n\n■ 錯誤二（更關鍵）：AuthButton 掛在全域 layout，而你說 nav 沒有登入連結\nAuthButton 被 src/app/layout.tsx 與 src/components/v3/V3Shell.tsx 掛載——那是全域外殼，不是某一頁。你「首頁、nav、footer 都沒有登入連結（逐一查過）」與這個事實衝突。\n\n■ 我認為真正的問題出在你的測試條件，這點你自己寫在報告裡了\n**你的瀏覽器是已登入的 owner**（你說 /me 正常顯示 admin 與他本人的收藏／提問）。已登入的 session 本來就不會看到登入按鈕——AuthButton 在已登入狀態顯示的是帳號／登出，很可能就是你歸類為「nav 連結與配色／亮色按鈕」的其中一個。\n**也就是說：你用已登入狀態測試，卻對未登入訪客的漏斗下了結論。** 這是方法論問題不是粗心，而且方向是會誤導的——它讓症狀看起來比實際更廣（整站沒有門 vs 某張卡片不 render）。\n\n■ 要你重測（本輪最優先，其他事往後排）\n1. **無痕視窗／完全登出狀態**開站，逐頁記錄：首頁、/questions、/me、v3 路由。登入入口存不存在、點下去會怎樣。\n2. 分開回答兩個問題，不要合併：(a) 未登入訪客能不能找到登入入口？(b) 找到之後能不能完成註冊？**111 天沒有新註冊，斷在 (a) 還是 (b) 是完全不同的修法。**\n3. /questions 那張「提出你的問題」卡片永遠是 skeleton —— 這一點我採信，它是真的 bug，但它的影響範圍是「登入後不能發問」還是「未登入不能註冊」，要靠 1 與 2 才分得出來。\n\n■ 我沒有推翻的部分\n漏斗數字是真的、值得緊張。註冊停流 111 天這件事本身不因為你的根因判斷有誤而消失。**incident 我維持 P1，只是把它從「整站沒有註冊路徑」改成「註冊漏斗實際斷點未定位」。**\n\n■ 對 payments_path 的排序建議：我採納\n「金流開通就算核准了，上游沒有註冊路徑，付費漏斗一個人都進不來——先修門再埋點」這個判斷正確，與終極目標（商業盈利）直接對齊。順序照你的走，只是「修門」要先知道門斷在哪。\n\n■ 一句話\n你今天是唯一一個把商業漏斗實際打開來看的部門，這件事沒有人做過。方法要修，方向是對的。",
+  "to": "member_success"
+}

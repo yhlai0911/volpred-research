@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:41:10Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T104110548011Z_telegram-1616-1619-1615-1619-16",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "脈絡先讀再動手：telegram-1616~1619 四張老闆件即將以任務指標進你的收件匣\n\n【老闆問了什麼】1615-1619 五則都是同一句『這要怎麼處理 嚴重就要立刻處理』，1621 是『有改了？』。他回覆的對象是今天下午幾則運營回報（組織權限死結、派工全停、權限提案五行版）。\n\n【實質內容經理已答，你不要重複回答】\n我已於 18:42 經 canonical 通道送出 message 1623，內容涵蓋：\n · 執行層自 15:58 全停的真根因（provider_registry 的 settings sha 與 .claude/settings.json 不符，非先前推測的 CLI 版本）\n · 影響時長與『為什麼你連問幾次都沒等到進展』的解釋\n · 給老闆的二選一出路（他自己改一行 sha／授權經理改並補機械防線）\n\n【所以你的任務不是再答一次】而是：\n1. 讀 message 1623 之後老闆若有新回覆，那才是要接的\n2. 這四張 canonical 任務目前 pending 無人 claim。請逐張判斷：實質已由 1623 答畢者，走正常結案路徑收單，**不要再對同一個問題發第二則 telegram**——老闆今天已經因為重複與無進展連問六次，再收到重複內容是負面體驗\n3. 若你判斷某張仍有未答部分（例如老闆問的是 1616 那則提案要不要核准，而 1623 只交代了 incident），那就答那個缺口，且必須帶 --reply-to-task 走 reply-right guard\n\n【硬性提醒】發訊前先 claim 該任務；claim 被拒代表別人在處理，立刻停手不得回覆。回覆後才 complete。\n\n【你可能會遇到的阻塞】平台 spawn 目前全停，若你需要開 subagent 會被拒。純 telegram 回覆不需要 spawn，應可執行。真被擋就以 outcome=blocked 回報，不要繞過權限層。",
+  "to": "member_success"
+}

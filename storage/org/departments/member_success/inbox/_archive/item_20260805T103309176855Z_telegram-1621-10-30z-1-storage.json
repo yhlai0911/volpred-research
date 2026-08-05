@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:33:09Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T103309176855Z_telegram-1621-10-30z-1-storage",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【telegram-1621「有改了？」的事實查核 — 給回覆用，短】\n\n我剛實測，答案是：**還沒有改，一行都沒動。**\n\n三項機械事實（10:30Z 實測）：\n1. storage/org/registry.json 的 owned_paths 完全未變：governance/member_success/publications/resource_monitor 仍是空陣列，platform_eng 仍只有 frontend-v2-fix/。\n2. org_admin.py 的子命令仍是 init/create/retire/suspend/resume/list，**沒有 set-paths**。\n3. org_attach.py 的 MANAGER 排除仍在（該處設計維持不變是治理部裁定的，這一項本來就不該改）。\n\n**而且在等待期間，同一個缺口造成了一次實際損失**：執行層從 15:58 停到現在（約 2.5 小時）。根因是 config/provider_registry.json 釘住 .claude/settings.json 的雜湊，今天 15:29 有人改了 settings.json（接入 write-claim guard）但沒重新釘。變更本身安全（逐鍵比對過，不涉及 auth），重新釘一行就能恢復——**但沒有任何角色能寫 config/**。這正是那個缺口第一次造成停機，不再只是「工單卡住」。\n\n回覆建議（三句以內，口語）：\n- 還沒改，需要的是在主線程給 org_admin.py 加一個 set-paths 子命令（規格治理部已備好）\n- 等待期間已經出事：執行層停了 2.5 小時，根因是沒人能寫 config/ 去更新一個雜湊\n- 另外有一件更要緊的：註冊漏斗 111 天沒有新註冊，會員部今天實測發現問題但根因判斷有誤，我已要求重測，明天給定位\n\n**不要把註冊那件事講成「整站沒有註冊入口」**——那個結論我查證後不成立（他們是用已登入帳號測的）。講「註冊漏斗斷點正在定位」才是誠實的。\n\n一律帶 reply-right guard（--reply-to-task telegram-1621）。",
+  "to": "member_success"
+}
