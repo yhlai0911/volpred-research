@@ -390,3 +390,41 @@ DOCUMENTED_NEGATIVE 代表跑出了負結果、是可寫的好題材；BLOCKED_O
 `BLOCKED_ON_DATA` 的 K 本來就不該進文章池。** 這兩張如果一開始沒進池，
 今天就不會有兩輪 P1 派工、兩次判定與這一串往返。這與經理已在追的
 「解鎖條件未滿足就不該入池」是同一件事。
+
+## 2026-08-05 22:34–22:56 outcome=done（batch-drain：收件匣空，接續 next_run_queue）
+
+開班收件匣 0 件，直接接續上一班留下的 `next_run_queue`。
+
+**第一件事：回讀 K1609（`mile_d9bf7b73`）與 k1706（`mile_f9a81b80`）的懶人包。**
+兩個 compute_queue job 都是 `status=completed, exit_code=0, delivery_status=delivered`，
+`rg` 直接在 `feed.json` 裡驗到兩篇正文都已含「## 懶人包圖組」三張圖。**無需補救。**
+
+**第二件事：經理 D41 排序第 1 的第二篇讀者系列——`mile_0205a444`（會員提問「30 年穩定
+年化 7%」）改寫 general 版。** 取 `experiments/member_qa_3e258ba2/member_qa_3e258ba2_results.json`
+原始數字，重寫成獨立成篇的一般讀者文章（標題聚焦「達標機率從八成掉到不到一半」這個最
+反直覺的數字），**沿用原本已上線的三張 Supabase 圖**（不重新產圖，只換掉圖說裡的學術詞）。
+content-vs-source audit 第一輪抓到兩個未對齊的衍生數字（1.54 / 1.5 個百分點，源檔是未乘 100
+的小數，audit 不會自動換算量級），改成只引用能對上源檔量級的兩個數字（10.66% 與 9.12%），
+audit 轉為 PASS（29 claims / 128 source values）。寫 strict lazypack plan、驗證通過、
+**正式發佈 `mile_ba19d6aa`**（audience=general，未被 gate 覆寫成 research），lazypack 已排入
+非同步佇列（`lazypack-mile_ba19d6aa.json` status=queued）。
+
+**第三件事：k1600 audience gate 實質改寫。** 原稿建立在 HAR／HARQ／Corsi／Bollerslev／
+Patton／Quaedvlieg／*Journal of Econometrics*／realized quarticity／QLIKE／Diebold-Mariano／
+Harvey 門檻等大量學術詞彙上，`_infer_audience` 必然覆寫成 research。**全篇重寫**：模型改稱
+「三尺度基準模型」、雜訊修正機制去掉人名與期刊出處只留方法本身、QLIKE 改稱「波動預測慣用的
+損失分數」、DM／Harvey 檢定改稱「正式的預測誤差比較檢定（套用小樣本保守修正）」、K1600 從正文
+移除只留 frontmatter，tags 也拿掉 HAR/HARQ。九格數字（loss ratio／係數檢定值／比較檢定值）
+逐格保留，結論強度不變——負結果原封不動，只換了說話方式。dry-run 確認 `audience=general` 不
+再被覆寫，content-vs-source audit PASS。**發佈時另外抓到一個之前沒人查過的洩漏點**：既有的
+`k1600_lazypack_plan.json`（上一班已寫好）title 尾綴寫死了「（K1600）」，且一個 metric block
+直接綁定內部欄位 `verdict`（值是 `CONDITIONAL_PASS` 這種 QA 內部用語）——audience gate 只查
+本文不查 lazypack plan，這兩處會被渲染進讀者看得到的圖片文字，等於繞過本文的把關。已清掉
+兩處，`--validate-only` 仍過。**正式發佈 `mile_3303f340`**（general，lazypack 已排隊）。
+教訓與可複製的檢查點都寫進 `memory/notes.md`。
+
+**第四件事：向研究部預先卡位 8/8 額度恢復後的三個選題**（選題一產業概念股一般化、選題二
+敘事型目標價機率化、K1741 尾部對沖占位），P3、due 2026-08-08，不打斷（pane busy，已落 inbox）。
+
+**池深 11 → 13。** 剩餘 next_run_queue：orphan 補圖（K1597／K1710／K1658／K1419／K1357）、
+trending_repost 換題（配額未用、不急）。收件匣仍為 0，本班到此按收尾契約結束。

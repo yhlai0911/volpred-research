@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "title": "係數對了，預測卻沒進步：一個測量誤差修正的誠實踩空（K1600）",
+  "title": "係數對了，預測卻沒進步：一個測量誤差修正的誠實踩空",
   "evidence": {
     "results": {
       "path": "experiments/k1600/k1600_results.json",
       "sha256": "b0d3570f5a9be440da0ffe016bb7cc6d471985bc1dc733bdd301befae2d67024",
-      "label": "K1600 測量誤差修正模型的低頻代理版檢定結果"
+      "label": "測量誤差修正模型的低頻代理版檢定結果"
     }
   },
   "panels": [
@@ -68,11 +68,6 @@
           "kind": "metric",
           "label": "兩者同時成立的格數",
           "value": {"source": "results", "path": "verdict_detail.n_joint_support", "format": {"kind": "integer", "suffix": " 格"}}
-        },
-        {
-          "kind": "metric",
-          "label": "研究判定",
-          "value": {"source": "results", "path": "verdict", "format": {"kind": "text"}}
         }
       ]
     },
