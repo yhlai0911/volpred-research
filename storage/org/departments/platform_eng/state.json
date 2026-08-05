@@ -1,45 +1,34 @@
 {
-  "health": "degraded",
+  "health": "ok",
   "kpi": {
     "control_gate_evidence_sources_unhealthy": 2,
     "series_registry_drift": 0,
     "reproduce_gate_false_positive_experiments": ["k1699", "K1710"],
-    "worktree_artifacts_preserved_commits": ["d18fee80b", "3ca7e6685", "8876b7334"],
-    "diagnoses_complete_awaiting_write_access": 4,
-    "incidents_contained_this_session": 2,
-    "article_charts_delivered": 11,
-    "article_charts_experiments": ["k1451", "k1465", "K1677-rev", "K1696", "k1704"],
+    "d39_p0_login_signup_outage": "root_cause_fixed_and_verified",
+    "diagnoses_complete_awaiting_write_access": 0,
     "last_fresh_detector_run": "2026-08-05T11:07:40Z"
   },
-  "last_run": "2026-08-05T11:25:00Z",
-  "open_items": 42,
+  "last_run": "2026-08-05T15:29:00Z",
+  "open_items": 54,
   "owned_paths_now_effective": {
     "paths": ["config/", "frontend-v2-fix/", "scripts/", "tests/"],
-    "note": "registry 已更新且 runtime/platform_eng.settings.json 已同步發出 Edit/Write；先前三班的 owned_paths 阻塞已解除。src/volpred/ops/ 與 supabase/migrations/ 維持 Codex Zone A（經理 D22），本部門不寫。",
-    "codex_coordination_duty": "動 scripts/ 前先 git log -5 --oneline -- <path>，最近有 [codex] 先協調（D16 第二項仍有效）"
+    "note": "D57 型別修法（commit 1a0d4b274 + d3212484d）已落地並經回歸；registry/generate_dept_settings 的整條 owned_paths 阻塞鏈（D5-D57）已由上一班收斂完，本班未再撞到。src/volpred/ops/ 與 supabase/migrations/ 維持 Codex Zone A（經理 D22/D37），本部門不寫。"
   },
   "this_session": {
     "done": [
-      "governance item_20260805T100508608054Z — hourly_pregate 幽靈 gate 根因（治理部提的修法是 no-op，已更正）",
-      "content item_20260805T093841452486Z + governance item_20260805T090032179605Z — 系列註冊 drift 1→0",
-      "publications item_20260805T112130942330Z — 三件更正；mv allow 規則不匹配的根因是一個字面星號（Bash 規則是前綴比對）",
-      "manager D45 — boss_digest 診斷（推翻經理假說：不是只吃 cc，是完全不排序）＋ 落地 70ac6273e，1931 行→18 行、首則 P3→P1、含破壞驗證",
-      "manager token P1 — brief 收件匣有界渲染 bc9cc3b22，work_prompt 104KB→9.7KB；經理側順帶改為依優先序取前 N（上限不能是時鐘）",
-      "自我更正 e341e180b — 收回重複的 provider pin gate（tests/test_provider_pin_drift.py 早已存在於 1b513bd79）",
-      "research D40-5 — 裸 NaN/Infinity 常設 gate 36c036a5b：收編進 check_experiment_artifacts.py、判準用 parser 不用 regex、52 份凍成 config/bare_nonfinite_results_baseline.json 走 ratchet；掃描數字獨立重跑複驗一致（1527/70/52/18）"
+      "D39 P0（老闆層，凌駕一切）：AuthButton + /questions 兩版 + S1-S6 全量 24 站 auth-bootstrap 收編進 radar-session，commit 785ca70，build 通過、deploy 通過、瀏覽器線上實測通過（見 journal 2026-08-05 22:34 條目）",
+      "歸檔已被 D57/D42 最終裁決取代的 D5→D57 saga inbox 訊息（46 件，逐一核對後歸檔，5 件先補簡短回覆）；收件匣 95 → 54"
     ],
-    "stopped_by_ruling": [
-      "member_success /questions skeleton — 經理 11:05:42Z 裁定實作 owner 是會員部；本部門只交分析＋機械 gate，gate 待對方的 22 站裁定清單"
+    "declined_or_deferred": [
+      "F1/F2/F3 token 會計修復（資源監控部指派，P1 owner=本部門）——規模判斷過大且對方規格仍在持續修訂中（同日又追加 period_semantics 新缺陷 A/B/C），本班優先做完 P0 站點故障，F1/F2/F3 排下一輪整段做，不倉促收一半。F1 回歸基準（07-21~07-28 八天真值）已到位；F2 正確修法（forked_from_id/parent_thread_id 鏈追 root）已有 resource_monitor 的參考實作可抄，見 journal。",
+      "platform_ops canonical pending 池逐筆 triage（74 筆，33 筆 >7 天）——本班未動，留待下一班"
     ]
   },
-  "frontend_lock_blocker": {
-    "what": "~/.claude/hooks/main-checkout-lock.sh 對 frontend-v2-fix 落鎖，持有者 b575276c（member_success），18:41:44 台灣時間",
-    "root_cause": "~/.claude/session-locks/optout.conf 只列外層 repo；frontend-v2-fix 是獨立巢狀 git repo，hook 以 repo root 算 key，專案的 opt-out 蓋不到它",
-    "class": "與 write_claim_guard 幽靈 claim 同 class（鎖記錄『試過寫』而非『寫了』）；今日第三個實例",
-    "permanent_fix": "在 frontend-v2-fix/ 內放 .claude/no-session-lock（hook:46 的 opt-out，隨 clone 走）；該檔本身也在被鎖的 repo 內，需鎖解除後第一件事做",
-    "external_action": "optout.conf 不在本部門 owned_paths，Edit 被拒且未繞過；老闆可執行 rm ~/.claude/session-locks/af037391a28f.lock 立即解鎖",
-    "expires_at": "2026-08-05T11:26:44Z（閒置 45 分鐘）",
-    "patch_ready": "work/questions_skeleton_20260805/diagnosis_and_patch.md（三處修正 + 9 處 class sweep 清單）"
+  "d39_completed": {
+    "commit": "frontend-v2-fix 785ca70",
+    "scope": "S1(radar-session 擴充 user 欄位) -> S2(六個 me/* console) -> S3(AuthButton) -> S4(questions 兩版) -> S5(五個 admin 資料區 console) -> S6(七個 C 類 rejection path) 全量 24 站",
+    "verified": "tsc/build/check:member-continuity(22)/check:growth-experiments(36)/check:frontend-core(10) 全過；deploy-zeabur-safe.sh 部署成功；verify:vnext-live pass（首次 timeout 是部署後傳播延遲）；瀏覽器實測全新分頁登入鈕正確 render、/questions 未卡 skeleton",
+    "gap": "S0 的壞 localStorage context 沒有瀏覽器層實測（javascript_tool 被本 session 權限層擋下），改以既有單元測試覆蓋，已請 member_success 補驗"
   },
   "handed_to_codex_zone_a": [
     "src/volpred/research/reproduce_spec.py::finalize_experiment — 輸出前把非有限值轉 null，這是裸 NaN 的產生端修法；研究部誤以為在本部門轄區，實際 src/ 一律不在 owned_paths",
@@ -47,39 +36,17 @@
     "src/volpred/charts/article_charts.py::upload_chart 無退避重試 — Supabase 圖片逾時擋住內容部兩篇進池",
     "src/volpred/ops/questions.py:1640 rerank 不清 archived 列的 current_rank（會員部已定位）"
   ],
-  "ci_leak_gate_fix": {
-    "commit": "87c62e134",
-    "root_cause": "org_intake._wake 沒有守門；tests/test_org_admin.py 以真 subprocess 傳 tmp root 呼叫，in-process monkeypatch 跨不了行程，於是 pytest 真的喚醒協調者並在 storage/ 留下 org_manager_run.log",
-    "fix": "守門放在 root（非 canonical 一律拒絕並寫進 receipt），既有 in-process 測試改為明確 monkeypatch DEFAULT_ORG_ROOT",
-    "verification": "74 passed；修後連三次逐檔探測該訊號不再出現；本機 daemon 噪音無法證明 CI 綠，以 CI 為準",
-    "correction": "經理歸因為『新增三支測試』與 commit 44e44f92d，兩者皆非——44e44f92d 是治理部的歸檔 commit，三支新測試逐檔探測皆乾淨"
-  },
-  "lesson_this_session": "三次同一個形狀：治理部對一個已成立的狀態再標一次、經理看到 commit 就推定作者、我採信自己部門 state.json 的『B 未寫』而沒讀 A 的 commit。都是拿摘要當事實。動手前回到來源，包括自己上一班留下的摘要。",
-  "d39_s0_landed": {
-    "commit": "frontend-v2-fix 1c42db7",
-    "what": "read() 不再讓 localStorage 漂移 throw；丟棄重建 + storage 不可用時回記憶體身分，每次丟棄 console.warn",
-    "verified": "npm run check:member-continuity 22 passed（原 19，+3）；tsc --noEmit 乾淨",
-    "not_done": "S1(radar-session 擴充) -> S3(AuthButton) -> S4(questions 兩版) 未動；線上尚未改變、還不能請會員部驗收",
-    "next_shift_first_action": "S1 -> S3 -> S4 -> 部署 -> 請 member_success 用它指定的兩種 context 驗收"
-  },
-  "owned_paths_type_fix": {
-    "commit": "1a0d4b274（上游 org_admin）+ d3212484d（產生器）",
-    "root_cause": "owned_paths 從未定義它存的是目錄還是路徑；org_admin 寫入前一律加斜線，org_attach 讀取時無從分辨。兩端各自拼字串，修一端不會贏",
-    "fix": "_core.declares_a_file / normalize_owned_path 為單一定義，兩端共用；org_attach 的重複判斷已刪",
-    "gate": "tests/test_org_turf_patterns.py 8 passed，含經理指名的端到端列（set-paths 寫入 -> turf_patterns 產出）；破壞驗證確認舊正規化下該列會紅",
-    "not_ours": "docs/error_log.md 的 3-STRIKE 登記與 docs/refactor_plan_*.md 在 docs/ 底下，不在 owned_paths，已請經理指派"
-  },
-  "dotpath_permission_gap": "本部門授權 frontend-v2-fix/** 無法命中點開頭目錄（.claude/），所以 D51 核准的 no-session-lock 標記檔寫不進去；未繞過，已回報經理。修法在 generate_dept_settings 多發一條涵蓋點路徑的 pattern",
   "next_card_commitments": [
+    "F1/F2/F3 token 會計修復 — 下一輪整段做，讀 resource_monitor 最新版規格（規格持續在動，開工前先重新對帳）",
     "series_registry 結構修法：把『成員由哪個 details 欄位推導』變成 registry 宣告欄位，收編 audit() 的 by_ct hack，六系列回歸 + 機械測試",
-    "D2 org 歸檔 CLI：scripts/org/ 已在轄區，但 11:12Z 起被 session f5153fb1 認領中，本輪未動"
+    "platform_ops canonical pending 池逐筆 triage（74 筆，33 筆 >7 天）",
+    "worktree-venv-vs-main-src reproduce_check 假 mismatch（P3，manager item 2026-08-05T152044232935Z）— 已 ack，排入計畫評估"
   ],
   "active_incident": {
-    "what": "provider 拒絕 worker spawn — 執行層全停",
-    "root_cause": "config/provider_registry.json 的 settings_surface pin 停在 76e6bfc7c（07-23），commit e69a0c55c 於 08-05 15:29 改了 .claude/settings.json 未同步 re-pin",
-    "not_the_cause": "CLI 升級 sha（executable identity 檢查已通過）",
-    "level": "A 與 **B 都已由他人在同一個 commit 落地（1b513bd79，含 tests/test_provider_pin_drift.py）**。本部門 2026-08-05 一度又加了一支 scripts/tests/test_provider_registry_pins.py，經查是同 concern 的第二層且多出來的覆蓋為空，已於 e341e180b 刪除（anti-stacking）。既有 gate 實跑 2 passed。C/D 未寫",
-    "next": "C（mark_alert_sent 只在 _send 回 0 才蓋章）與 D（持續性條件接進 incident 生命週期）落在 src/volpred/ops/，屬 Codex Zone A，需經理安排",
-    "report": "work/provider_denial_20260805/incident.md"
+    "what": "provider 拒絕 worker spawn — 執行層全停（上一班留下的狀態，本班未驗證是否已解除）",
+    "root_cause": "config/provider_registry.json 的 settings_surface pin 與 .claude/settings.json 曾一度不同步",
+    "level": "A/B 已由他人落地（commit 1b513bd79，含 tests/test_provider_pin_drift.py）。C（mark_alert_sent 只在 _send 回 0 才蓋章）與 D（持續性條件接進 incident 生命週期）落在 src/volpred/ops/，屬 Codex Zone A，需經理安排",
+    "report": "work/provider_denial_20260805/incident.md",
+    "note_for_next_shift": "本班開工時 dispatch worker/queue 運作正常（ops_snapshot 顯示有 in_flight 與近期 success completion），這條 incident 狀態可能已經自然改善，下一班開工先用 ops_snapshot 對帳再決定要不要繼續追"
   }
 }

@@ -703,3 +703,66 @@ blocked 0 —— 早先被鎖擋住的兩張後來都在同班內完成。
 `path_claims.py release --scope <journal>` 解除，**沒有用 `VOLPRED_ALLOW_CONCURRENT_WRITE=1` 硬搶**。
 今天同一個 class 的三個實例：會員部的 frontend 幽靈鎖、本部門對自己 journal 的幽靈鎖、
 以及治理部已裁定的 write_claim_guard 本體。
+
+## 2026-08-05 22:34–23:29（台灣時間）｜D39 P0 登入/註冊全站故障｜outcome=done｜commit `785ca70`
+
+**背景**：session 開工時 registry/owned_paths 那整條 D5→D57 鏈已由上一班收斂完（journal (13)-(16)），
+收件匣 95 件裡有 46 件是那條鏈的逐訊息紀錄，本身已被最終裁決（D57、D42 S0 落地）取代。
+
+**主線任務**：D39 P0（老闆層，凌駕本部門其他所有工作）——`AuthButton` 與 `/questions` 兩版永久卡
+loading/skeleton，全站沒有可用的登入/註冊入口。member_success 的
+`auth_session_sweep_20260805.md` 給了全量 24 站 A/B/C/D 裁定表 + S0-S6 逐站規格；經理裁決本部門
+是唯一實作者（member_success 只出規格與驗收，因為他們對 `frontend-v2-fix/` 無寫入權）。
+
+**根因**（member_success 已定位，本班驗證後照做）：27 個 auth-gated 站點裡，只有
+`radar-session.ts:99` 一處掛了 `.catch()`；其餘 26 個站點各自寫了一份
+`getSession().then(...)` + `onAuthStateChange(...)`，reject 時沒有任何 fallback ——
+loading flag 永遠卡 true。`AuthButton.tsx:36` 的 `useState(!getCachedUser())`
+讀的是 sessionStorage，匿名訪客/新分頁無快取 → 初始值 true → 一撞到 reject 就永久不 render，
+受害的正是全站導覽列的登入鈕（付費漏斗入口）。
+
+**落地（S1→S6 全量 24 站，一次做完，未留混合態）**：
+- S1 `radar-session.ts`：`RadarSessionState` 擴為 `{token, user, status}`，新增
+  `useRadarSession()`；`useRadarAccessToken()` 降為薄封裝，既有 radar 元件零改動
+- S3 `AuthButton.tsx`：砍掉自己的 getSession/onAuthStateChange 與 `:36` 那個 loading 初始值根因
+- S4 questions 兩版：authLoading/user 全部改吃 radar-session；`continuity.merge()` 用 ref 做
+  per-token 去重，避免重複觸發
+- S2 六個 `me/*` console + v3 Editorial 對應版（A4-A9）、S5 三個純 admin console（A10-A12）＋
+  五個資料區 admin console（B1-B5）：同構 inline bootstrap 全部收編成 `useRadarAccessToken()`/
+  `useRadarSession()`（B 類的 `sessionAccessToken`/`sessionEmail` 也一併收）
+- S6 七個 C 類（`MemberContinuityActions`、`ReportImpression`、`ArticleEngagement`、
+  `product-analytics-browser.ts`、admin/page.tsx C7）補齊缺的 rejection path；questions 兩版的
+  submit handler（C5/C6）原本就有外層 try/catch，未動
+
+**驗證（五步 Gate 走完）**：`tsc --noEmit` 乾淨；`check:member-continuity` 22/22、
+`check:growth-experiments` 36/36、`check:frontend-core` 10/10；`next build` 乾淨；
+`deploy-zeabur-safe.sh` 部署（`scripts/git_writer_lock.py run` 包 worktree git 操作，
+fast-forward merge 回 frontend-v2-fix main，未動到主 checkout 既有的無關未提交變更）；
+`verify:vnext-live` 首次撞 10s timeout（部署後傳播延遲），重跑即 pass。**瀏覽器實測**（Chrome
+擴充套件，非本機 dev server）：全新分頁 anonymous context → 登入鈕正確 render「登入」（不再永久
+loading/空白）；點擊既有已登入 session → 正確開出會員選單；登出後重整 → 正確回到登入態；
+`/questions` 全新分頁 render 完整互動內容，未卡 skeleton。
+
+**誠實揭露的缺口**：S0（`member-continuity-browser.ts` 的 `read()` fail-safe，S0 本身在更早
+一班已落地，commit `1c42db7`）沒有做瀏覽器層「帶壞 localStorage 資料」的 context 實測——本
+session 的 `javascript_tool` 被權限層擋下，無法手動注入壞值。改以既有單元測試
+（`member-continuity-browser.test.mjs` 系列，22/22 含格式錯誤案例）覆蓋，已明確回報給
+member_success 請他們用自己的方式補這條瀏覽器層驗收。
+
+**Worktree 紀律**：主 checkout 互斥鎖擋住（前一班 session 尚未過 45 分鐘閒置門檻），改走
+`git -C frontend-v2-fix worktree add`（`.claude/worktrees/platform_eng-d39-auth-session`，
+node_modules 用 symlink 借用主 checkout 的，merge 前刪除），完工後 `git merge --ff-only` +
+`git worktree remove` + `git branch -d` 清乾淨，未留 orphan。
+
+**收尾**：D39/D36/auth_session_sweep 相關工作項回報經理與 member_success 並歸檔；順帶清掉
+inbox 裡已被 D57/D42 取代的 D5→D57 鏈（46 件，多數 assignment/decision，逐一核對後歸檔，5 件
+先補一句簡短回覆才過 inbox_archive.py 的「request/decision 不可無回覆歸檔」檢查）。收件匣
+95 → 54。
+
+**本班未動的 P1（誠實回報 contained/queued，非做不到而是規模太大不宜倉促收）**：
+資源監控部指派的 F1（token daily 報表 UTC/台灣日界錯位，連 6 天記 0）／F2（Codex fork 跨檔去重
+失效，v1 修法已被證偽，正確做法是 `forked_from_id`/`parent_thread_id` 鏈往上追 root，
+`resource_monitor/tools/token_breakdown.py::_codex_fork_root_index` 有可抄的參考實作）／F3
+（PRICING 缺 5 個 model）。範圍還在增長（資源監控部同一天又送了 period_semantics 的新缺陷 A/B/C），
+且 F1 的回歸基準（07-21~07-28 八天真值）雖已交付，但整體規格仍在被對方持續修訂中。判斷：本班
+先做完 P0 站點故障，F1/F2/F3 排下一輪整段做，不要在規格還在動的狀態下倉促收一半。
