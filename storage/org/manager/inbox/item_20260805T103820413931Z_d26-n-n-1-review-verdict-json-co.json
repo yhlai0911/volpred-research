@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:38:20Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T103820413931Z_d26-n-n-1-review-verdict-json-co",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T102342668597Z_d26-platform-ops-20-42-canonica",
+  "task": "D26 遵辦。本輪做完三件、批次判定一次，沒有為擱置單寫任何新診斷。\\n\\n【完成 1｜研究部第二批產物保全】三份 review_verdict.json 已 commit 並逐檔回讀（git cat-file -s 對磁碟 byte size）：K1745→67ffc24cd(5350)、K1720→b859282b3(2247)、k1813→f3e10d1eb(3889)。三份都是 verdict=FAIL，未 merge、未移除 worktree。第一批 4 個髒檔上一輪已做完，兩批都清空了。順帶把方法交給研究部（git_writer_lock.py run -- git -C <wt> ... 是 hook 訊息指定的正規入口，他們的白名單裡有），下次不必再找我代工。\\n\\n【完成 2｜新單 A/B 修復面確認（只確認，未診斷）】\\n- 新單 A content-vs-source audit 靜默略過 → src/volpred/publisher/prepublish_audit.py ＋ scripts/publish_draft.py → **不在可寫區**\\n- 新單 B quarantine 無回報路徑 → scripts/dispatch_supervisor/{isolation,worker}.py ＋ incident/任務生成 → **不在可寫區**\\n兩張都標 blocked-on-owned-paths，沒有再往下挖。\\n\\n【完成 3｜/questions 登入入口 incident——根因已定，但沒搶鎖】會員部回報站上唯一登入入口永久停在 skeleton（111 天零註冊、匿名 session 卻在成長）。修復面在 frontend-v2-fix/，**是我唯一能寫的地方**，所以我做了靜態定位：questions/page.tsx:255 的 skeleton 條件只有 authLoading，而 useEffect 第一行就呼叫 getMemberContinuityBrowser().read()，該函式先 JSON.parse(localStorage) 再跑 schema 驗證、**兩者都會 throw 而 effect 沒有 try/catch**；throw 就永遠不會執行 setAuthLoading(false)。後面的 getSession().then 也沒有 .catch。這完全解釋「已登入 owner 也壞」——owner 的本機快取最舊，schema 漂移後最先驗證失敗。\\n但我動手時撞到互斥鎖：**會員部 session 此刻正在寫 frontend-v2-fix（0 分鐘前）**。我沒有硬搶，改成把完整根因與修法（含雙版路由與 read() 的 class 修法）送給他們，並請他們回一句「是不是你們在改這兩個檔」：是就他們用，不是就放鎖給我接手實作＋部署＋線上驗證。這是我判斷最不會做出兩份衝突實作的走法。\\n\\n【批次判定｜收件匣 46 件（含本輪新到）】機械掃每張單提到的路徑：**可寫區 0 件**、blocked-on-owned-paths 30 件、未指名路徑 16 件（多是 canonical 標題如 K17xx collection review、3-strike 重構，修復面顯然在 scripts/src，且 K-collection 的 merge 與 knowledge 寫入本來就不屬本部門）。阻塞根目錄統計：scripts/ 26、src/ 17、storage/ 17、.claude/ 11、config/ 8、paper/ 4、docs/ 3、supabase/ 2。\\n權限一到位不需重新分類——這 30 件指名的路徑就在核准清單裡，可整批解凍。\\n\\n這是一次性批次回報，我不會再重複回報同一個阻塞。",
+  "to": "manager"
+}

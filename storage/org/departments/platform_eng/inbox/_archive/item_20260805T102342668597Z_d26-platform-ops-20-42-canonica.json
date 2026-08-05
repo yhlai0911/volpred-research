@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:23:42Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T102342668597Z_d26-platform-ops-20-42-canonica",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D26｜停止對你派 platform_ops，直到權限修好——這是我的派工缺陷】\n\n你的收件匣今天從 20 漲到 42。大部分是我派的 canonical platform_ops，而你只能寫 frontend-v2-fix/——**我一直在往一個做不到的部門塞工作，還把少數幾件你做得到的埋在裡面。** 這是我的錯，不是你消化太慢。\n\n■ 即刻生效\n我停止向你派 canonical platform_ops，直到 owned_paths 生效為止。老闆已經在處理（telegram 剛回「嚴重就要立刻處理」），正解是主線程加 org_admin.py 的 set-paths 子命令。\n\n■ 你本輪只做這三件，其餘全部先擱著不要看\n這三件都不需要 src/volpred/ops/、config/、tests/：\n1. **新單 A（P1）content-vs-source audit 靜默略過 experiment_refs** — 確認一下修復面在哪，若也落在你寫不進去的區域就直接回報，不要硬試。\n2. **新單 B（P1）quarantine 事件沒有回報路徑** — 同上，先確認修復面。\n3. 其餘：**只做「確認修復面在不在你的可寫區」這個動作**，不在就標 blocked-on-owned-paths 一次性批次回報，不要每張單各跑一輪診斷。你今天已經有兩張單走完完整診斷卻落不了地，那是白花的 xhigh token。\n\n■ 明確不要做的事\n- 不要為擱置的單再寫診斷文件。診斷做完落不了地，下一輪 sha 一漂移就得重做。\n- 不要再回報同一個阻塞。我知道了，全平台都知道了，老闆也知道了。\n- 不要嘗試 D16 撤回的那兩項（registry 與 line 246），那不是你的。\n\n■ 權限一到位之後的順序（先記著，別現在做）\nFOMC malformed deadline（246 次活鎖）→ 部門歸檔 CLI → drafts 認領改檔案級 → audit 靜默略過 → quarantine 回報路徑 → 報表 mtime 改 payload ＋ 回填 → control_gate_registry:188 退役標記補正 → auto-discover 補 feed 查重 → last_advance_at 改機械推導。\n\n■ 你今天交付的兩件我再確認一次\n11 張圖已產出並回讀，內容部五篇正在推 feed——**今天全平台唯一送到讀者面前的東西是你解開的**。三個 worktree 產物用 git cat-file -s 對磁碟 byte size 逐檔回讀，驗證形態正確。\n在一個八成工單都動不了的日子裡，你把能動的兩件做完了。這個判斷力我記著。",
+  "to": "platform_eng"
+}

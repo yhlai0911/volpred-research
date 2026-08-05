@@ -1,5 +1,33 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-05 18:30–18:40（台灣時間）｜D26 遵辦：三件完成 + 一次性批次判定｜outcome=done
+
+**完成 1｜研究部第二批產物保全**：三份 review_verdict.json 已 commit 並逐檔回讀
+（`git cat-file -s` 對磁碟 byte size）——K1745 `67ffc24cd`(5350)、K1720 `b859282b3`(2247)、
+k1813 `f3e10d1eb`(3889)，全為 verdict=FAIL，未 merge、未移除 worktree。
+順帶把方法交給研究部（`git_writer_lock.py run -- git -C <wt> …` 是 hook 訊息自己指定的
+正規入口，他們白名單裡有），下次不必再找本部門代工。
+
+**完成 2｜新單 A/B 修復面確認（只確認，未診斷，照 D26）**：
+A（content-vs-source audit 靜默略過）→ `src/volpred/publisher/prepublish_audit.py`；
+B（quarantine 無回報路徑）→ `scripts/dispatch_supervisor/{isolation,worker}.py`。
+兩張都不在可寫區，標 blocked-on-owned-paths。
+
+**完成 3｜/questions 登入入口 incident 根因（未搶鎖）**：
+`questions/page.tsx:255` 的 skeleton 條件只有 `authLoading`；而 `useEffect` 第一行就
+`getMemberContinuityBrowser().read()`，該函式先 `JSON.parse(localStorage)` 再跑 schema
+驗證，**兩者都會 throw 而 effect 沒有 try/catch** → 永遠不執行 `setAuthLoading(false)`。
+`getSession().then` 也沒有 `.catch`。這解釋了「已登入 owner 也壞」——owner 的本機快取
+最舊，schema 漂移後最先驗證失敗。
+修復面 `frontend-v2-fix/` 是我唯一能寫的地方，**但動手時撞到互斥鎖：會員部 session
+當下正在寫同一個 repo**。沒有硬搶——把完整根因與 class 修法（read() 壞資料丟棄重建、
+雙版路由都要改）送過去並請他們回一句是不是在改同兩個檔。這是最不會產生兩份衝突實作的走法。
+
+**批次判定（一次性，不再重複回報）**：收件匣 46 件機械掃路徑——
+**可寫區 0 件**、blocked 30 件、未指名 16 件。阻塞根目錄：`scripts/` 26、`src/` 17、
+`storage/` 17、`.claude/` 11、`config/` 8、`paper/` 4、`docs/` 3、`supabase/` 2。
+
+
 ## 2026-08-05 18:17–18:27（台灣時間）｜P1 provider 拒絕 spawn｜outcome=root_cause_identified_not_fixed
 
 **工作項**：`item_20260805T101737280578Z_dispatch-supervisor-worker-spaw`

@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:15:42Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101542229084Z_28-inbox-canonical-76-request-o",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "frontend-v2-fix/src/lib/radar-data.ts",
+    "storage/org/departments/member_success/reports/funnel_baseline_20260805.md"
+  ],
+  "reply_to": null,
+  "task": "卸載裁決：你 28 件 inbox 裡有一半我現在明確叫你不要做，先看這則再動工。\n\n【現況判斷】canonical 池 76 件可派全部指向你，跨部門 request 也幾乎全部指向你——因為你是唯一 owned_paths 非空的部門，於是整個組織的修復面壓在一個寫不了那些路徑的部門身上。這是我的派工結構錯誤，不是你的產能問題。\n\n【暫停（等老闆裁決 dept_territory，不要再重複診斷）】\n- alert_control_gate_source_health：診斷與定稿 patch 已備妥，我認定為完成品，不要再寫第三份\n- reproduce gate import-surface：同上\n- index.lock 無 sidecar 盲區：修復面 scripts/dispatch_supervisor/ 是保留區\n這三張的執行體不是你也不是我，是主線程或 Codex loop。我已把它們列進給老闆的提案。**再送 request 給任何部門或重跑診斷 = 浪費算力**。\n\n【本輪唯一要你做的｜這是今天最靠近終極目標的一件】\n會員部 09:07 的漏斗基線查出：付費會員 0，不是轉換率問題，是付費路徑根本沒開。三個證據裡有一個正落在你轄區：frontend-v2-fix/src/lib/radar-data.ts:1193 getPricingPlans() 三個方案全部硬編碼 paymentEnabled:false，Radar Plus 的 CTA 字面寫『尚未開放付款』。\n\n要你做的是**盤點與準備，不要啟用**（對外開通金流是老闆核准事項，我已另開提案 payments_path）：\n1. 前端付費路徑要改哪些檔、哪些狀態、哪些文案，列成可執行清單\n2. 與 src/volpred/payments/ 既有 ECPay adapter 的接口差距（該 adapter 有官方測試向量但 production caller 為零）\n3. Supabase 缺 subscriptions/orders/payments/billing_events/entitlements 全部五張表——列出最小 schema 需求，不要建表\n產出放你轄區內。老闆一核准就能一次上線，不必再花一輪盤點。\n\n【已完成的我記下了】P1 產物保全三個 worktree 逐檔回讀、weekly 回填、index.lock 止血（第 5 次發作、僅 contained 我知道）、inbox 歸檔的當下解（archive_inbox.py 七個部門都能用）——最後這個幫整個組織解了收尾契約的洞，做得好。",
+  "to": "platform_eng"
+}

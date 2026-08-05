@@ -10,8 +10,19 @@
     "article_charts_experiments": ["k1451", "k1465", "K1677-rev", "K1696", "k1704"],
     "last_fresh_detector_run": "2026-08-05T09:00:00Z"
   },
-  "last_run": "2026-08-05T10:27:00Z",
-  "open_items": 43,
+  "last_run": "2026-08-05T10:40:00Z",
+  "open_items": 42,
+  "inbox_surface_audit": {
+    "items": 46,
+    "writable_today": 0,
+    "blocked_on_owned_paths": 30,
+    "no_path_named": 16,
+    "blocked_roots": "scripts/26 src/17 storage/17 .claude/11 config/8 paper/4 docs/3 supabase/2",
+    "note": "D26 一次性批次判定，不再重複回報同一阻塞"
+  },
+  "handed_off": {
+    "questions_login_incident": "根因已交會員部（他們正握 frontend-v2-fix 寫入鎖）；未搶鎖，等他們回覆是否由本部門接手實作"
+  },
   "active_incident": {
     "what": "provider 拒絕 worker spawn — 執行層全停",
     "root_cause": "config/provider_registry.json 的 settings_surface pin 停在 76e6bfc7c（07-23），commit e69a0c55c 於 08-05 15:29 改了 .claude/settings.json 未同步 re-pin",
