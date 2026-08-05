@@ -1,5 +1,15 @@
 # content 部門私有記憶
 
+## 部門拆分：scripts/ 相關求助改找 platform_ops，不再找 platform_eng（2026-08-05 msg1629）
+
+`platform_eng`（平台工程部）已拆出新部門 `platform_ops`（維運部），`scripts/`（含
+`publish_draft.py`、圖表腳本、`lazypack_render.py` 等）的轄區與求助對象轉移到 platform_ops。
+組織通則裡的「求助路由」表（`storage/org/policy.md`，非本部門轄區）目前還沒更新這條，
+下次遇到 scripts/ 相關 bug（發佈流程、圖表產生、Supabase 上傳等）**先送 platform_ops**，
+不要照舊送 platform_eng——會被原樣轉交，多一趟。org_status 可用
+`uv run python scripts/org/org_status.py --json` 確認兩個部門都是 `active`。
+既有的 Supabase upload_chart 無重試缺陷單，就是這次拆分當下被原樣轉交過去的案例。
+
 ## 沿用既有已上線圖片可略過重新上傳（2026-08-05）
 
 member_qa 改寫 general 版時，原始圖表已經上線在 Supabase（例如

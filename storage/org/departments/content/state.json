@@ -9,14 +9,14 @@
     "correctness_readbacks_done": 3,
     "correctness_corrections_needed": 0,
     "structural_defects_found_and_escalated": 1,
-    "replies_sent": 0,
+    "replies_sent": 1,
     "inbox_items_archived": 1,
     "inbox_remaining": 0,
     "canonical_tasks_settled": 0,
     "department_skills_written": 0,
     "self_inflicted_incidents": 0
   },
-  "last_run": "2026-08-05T16:12:26Z",
+  "last_run": "2026-08-05T18:01:48Z",
   "open_items": 2,
   "in_pool": [
     "mile_dee8e30a — K1451 高收債對投資級債的價差…只剩 3.7%",
@@ -52,10 +52,10 @@
     "owner_path": "src/volpred/charts/article_charts.py:282（非內容部轄區）",
     "evidence": "逐 IP connect 連測三輪；DNS 0.01s 正常；對照組 api.github.com 0.05s；job r1 掛第 3 張、r2 掛第 1 張",
     "impact": "單張失敗率約 1/2 → 懶人包連傳三張全成功機率約 12.5%；無人值守 compute-worker 無法手動重試",
-    "escalated_to": "manager（已裁 P1，記入 manager 私有記憶，排隊等主線程互動 session 動手——Codex Zone A 的 src/ mutation 連 manager 本身的 session 也被 harness 擋，不是部門或經理能繞過的權限問題）",
-    "status": "contained（手動重試可繞過，本部門兩次交付皆已成功）— 非 root_cause_fixed，但指派鏈已走到底（等主線程互動 session），經理明確告知內容部不需再催",
+    "escalated_to": "platform_ops（2026-08-05T17:45Z 部門拆分：scripts/ 含 publish_draft.py 由 platform_eng 移交新設 platform_ops 部門，原單原樣轉交並標 P1）；經理先前裁決（記入私有記憶、等主線程互動 session 處理 Codex Zone A）本身未被推翻，只是承接部門換了",
+    "status": "contained（手動重試可繞過，本部門兩次交付皆已成功）— 非 root_cause_fixed，指派鏈因部門拆分轉移到 platform_ops，內容部仍不需主動催（經理先前已明示）",
     "explicitly_told_not_to_downgrade": true,
-    "last_update": "manager 2026-08-05T16:11Z：已裁 P1、記入私有記憶，等主線程互動 session 處理，內容部不需再追"
+    "last_update": "platform_eng 2026-08-05T17:45Z：msg1629 部門拆分，本缺陷連同另一件 drafts-charts 收編請求已原樣轉交 platform_ops inbox，後續請直接對 platform_ops"
   },
   "next_run_queue": [
     "orphan 補圖：K1597 缺 1 張圖；K1710 缺 1 張圖（查重已過，可寫，與 K451 mile_f2e4c991 arc 不同——描述性分解 vs 預測力比較，正文半形逗號要改全形）；K1658/K1419/K1357 缺圖且字數偏少需先確認深度，K1658 與 K1419 的圖路徑要從 assets/ 改成 storage/drafts/assets/",

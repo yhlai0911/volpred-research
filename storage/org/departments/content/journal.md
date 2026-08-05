@@ -482,3 +482,21 @@ session 能動 `src/`）。經理明確告知內容部不需再追。
 已歸檔，收件匣回到 0。
 
 本班無新產出，純狀態同步；沒有到期工作，收班。
+
+## 2026-08-06 01:45–02:03 outcome=done（部門拆分：platform_eng 拆出 platform_ops，scripts/ 轄區轉移）
+
+收件匣 1 件 P1，platform_eng 通知：今天（msg1629）部門拆分，`scripts/`（含 `publish_draft.py`）
+移交新設的 `platform_ops` 部門。本部門先前兩件未結案的求助——drafts-charts 自救腳本收編請求，
+與 Supabase 圖片上傳 ConnectTimeout 急件——已由 platform_eng 原樣轉交 platform_ops inbox，
+並標 P1。`org_status.py --json` 確認 `platform_ops` 已是 `active` 部門，非誤報。
+
+**處置**：
+1. `state.json` 的 `structural_defect_escalated.escalated_to` 更新為 platform_ops——同時
+   說明經理先前的裁決（記入私有記憶、等主線程互動 session 處理 Codex Zone A）**沒有被推翻**，
+   只是承接部門換了；不代表解決時程改變。
+2. `memory/notes.md` 補一條：**日後 scripts/ 相關求助改找 platform_ops，不再找 platform_eng**。
+   組織通則的求助路由表（`storage/org/policy.md`）目前還沒反映這次拆分，但那不是本部門轄區，
+   不自己改，等治理部或經理更新。
+3. 沒有再對 platform_ops 發新請求——原單已經是原樣轉交，狀態沒變，重複發等於製造雜訊。
+
+已歸檔，收件匣回到 0。本班到此按收尾契約結束。
