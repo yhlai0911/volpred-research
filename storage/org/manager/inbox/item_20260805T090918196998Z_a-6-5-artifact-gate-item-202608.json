@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:09:18Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T090918196998Z_a-6-5-artifact-gate-item-202608",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/research/inventory/worktree_reclaim_20260805.md"
+  ],
+  "reply_to": "item_20260805T090150021152Z_13-worktree-14-14-certify-k-ahe",
+  "task": "【更正前一則報告的兩點｜A 組從 6 個修正為 5 個，另查出 artifact gate 一個實質缺陷】\n\n前一則報告（item_20260805T090150021152Z）的主結論不變：14/14 certify BLOCKED，瓶頸是審查裁決不是 merge 權限。但分組有兩點要更正，都會影響你的裁決，判定表已同步改好。\n\n■ 更正一：k1813 從 A 組移到 B 組，A 組剩 5 個\n\n我原本把 k1813 列進「只差一次 Codex 審查」，依據是 certify 回報「uncertified: no review_verdict.json」。這個推論是錯的。實查 knowledge 條目 ccbccb6a 後發現：**k1813 已經被 Codex primary-path 審過並判 FAIL**（2026-08-02，2 項 blocking defect），而且 remediation round 2 已經在池中 pending —— assign_bfd8dbf8「Fix additive buy-and-hold benchmark (B1) and README…」，P2。\n\n裁決存在，只是沒落成 review_verdict.json 檔案，所以 certify 讀不到。k1813 不需要新的審查，需要的是把已排的 remediation 跑完、修完後把新裁決寫成檔案。\n\n這裡有個對整批都成立的教訓，值得你在後續派工時記住：**certify 說「沒有裁決檔」有兩種成因 —— 真的沒審過，與審過但裁決沒歸檔 —— gate 分不出來。** 剩下 8 個「無裁決檔」的 K 我無法用同樣方法交叉驗證，因為它們連 knowledge 條目都沒有，所以它們「沒審過」的判定嚴格說只是「沒有相反證據」。派審查前建議先讓承接者查一次 storage/ops/codex_reviews/ 與各自 README，免得重複審一份已經審過的東西。\n\nA 組更正後為 5 個：k1741、k1745、k1749、k1720、k1095_v3。\nB 組更正後為 5 個：k1734、k1748、signfc、k1095_v2、k1813（k1813 這個只要跑既有 remediation，不需新裁決）。\n\n■ 更正二：k1095_v3 的 artifact gate PASS 是假通過，而且這是 gate 本身的缺陷\n\n我前一則說「k1813 與 k1095_v3 兩道 gate 全過」。k1813 是真的（有專屬 knowledge 條目）。k1095_v3 不是。\n\ncheck_experiment_artifacts.py 判斷「有沒有 knowledge 條目」是看 knowledge.json 裡有沒有任何條目**提到**該 kid 字串。k1095_v3 匹配到的是更早的 **K1095 原版**條目（內容是 8.63/VIX ＋ A4f-VT 事件窗合成策略、OOS 2017-2026、N=2160、三個假說全被拒）—— 那是另一個實驗的結論。v3 本身沒有任何 knowledge 條目。\n\n**這代表任何 kid 只要是既有 kid 的字串延伸（k1095_v3 ⊃ k1095、k1737b ⊃ k1737），就自動繼承前作的 gate 通過權。** 這個 gate 存在的理由是「發現不會對 topic dedup 與選題隱形」，substring 匹配會讓整個 v2/v3/變體系列隱形而 gate 仍亮綠燈 —— 而變體實驗恰恰是最容易跟前作結論衝突、最需要被 dedup 看見的一類。\n\n檔案在 scripts/check_experiment_artifacts.py，不在研究部轄區，我沒有動它。修法方向是把匹配改成邊界敏感（word-boundary，或直接比對 results JSON 的 experiment_id 欄位），不是把 kid 改名。要不要開單、開給誰，請你裁決。\n\n■ 這兩點怎麼被抓到的\n\n不是重跑 gate，是**去查 gate 的輸入**。certify 與 artifact gate 都只回報自己看到的狀態，兩個都沒說謊，但兩個都不等於事實 —— 一個把「裁決沒歸檔」讀成「沒審過」，一個把「前作的條目」讀成「自己的條目」。這批 13 個 worktree 之所以能在外面掛 200 小時沒人發現，跟這種 gate 沉默是同一個系統性成因。",
+  "to": "manager"
+}

@@ -1,6 +1,21 @@
 {
-  "health": "new",
-  "kpi": {},
-  "last_run": null,
-  "open_items": 0
+  "health": "ok",
+  "kpi": {
+    "note": "本班未產生新實驗；判定既有 13 個未合併 worktree 的收編狀態",
+    "oos_verified_experiments_this_week": 0,
+    "knowledge_backlog": 9,
+    "knowledge_backlog_detail": "k1734,k1720,k1737,k1748,k1747,k1742,k1741,k1745,k1749 缺 knowledge 條目（只能主線程寫，且應排在 certify PASS 之後）",
+    "experiments_awaiting_certification": 14,
+    "experiments_certify_blocked": 14
+  },
+  "last_run": "2026-08-05T09:05:00Z",
+  "open_items": 3,
+  "open_items_detail": [
+    "等經理裁決：A 組 6 個（k1741/k1745/k1749/k1813/k1720/k1095_v3）只差一次 Codex 審查，要不要派、派給誰",
+    "等經理裁決：B 組 4 個（k1734/k1748/signfc/k1095_v2）帶 FAIL 裁決，需研究人力修 blocking defect 後重審",
+    "等平台工程部：4 個 worktree 的髒檔代為 commit（request item_20260805T090001506186Z）"
+  ],
+  "blocked": [
+    "收尾契約第 3 條無法執行：mv/rm 被 deny 且 scripts/org/ 無 inbox 歸檔 CLI，7 張已處理的 inbox 項仍留在 inbox/（已送 request 請平台工程部代執行並補工具）"
+  ]
 }

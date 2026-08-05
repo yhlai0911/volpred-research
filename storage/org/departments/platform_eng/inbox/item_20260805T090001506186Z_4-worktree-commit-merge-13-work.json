@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:00:01Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T090001506186Z_4-worktree-commit-merge-13-work",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/research/inventory/worktree_reclaim_20260805.md",
+    "scripts/merge_worktree.sh"
+  ],
+  "reply_to": null,
+  "task": "【產物保全：4 個 worktree 的髒檔請代為 commit｜請先不要 merge】研究部已完成 13 個未合併 worktree 的逐一判定，完整判定表在 refs 第一個檔。\n\n先講最重要的一件事，免得你白跑一趟：**這 13 個現在一個都合不進 main**。我對 14 個實驗目錄（k1095v3 分支帶 v2/v3 兩個）逐一跑了 python3 scripts/experiment_gates.py certify，14/14 全部 BLOCKED —— 9 個沒有 review_verdict.json、4 個 verdict=FAIL、1 個 UNCERTIFIED。certify 是 merge_worktree.sh 的第一道門，所以現在派 merge 過去只會得到 13 次 ABORT。補審查裁決是研究流程的事，本部門會跟經理要人力，不佔用你的時間。\n\n**現在真正需要平台工程部動手、而且有時效的只有一件：4 個 worktree 裡有未追蹤的研究產物懸著，一直沒 commit。** 這些檔案不在任何 branch 上，worktree 一旦被任何清理程序回收就真的消失。請代為在各自分支 commit（只 commit 下列指定路徑，不要 git add -A）：\n\n1) .claude/worktrees/dispatch-slot-1-bf6e9f48-k1747 → commit experiments/K1747/figures/（2 圖 160KB）與 experiments/K1747/tables/（2 CSV 68KB）。這是結果本體：該 commit 訊息自陳「results pending」，圖表與表格就是後補的結果。\n2) .claude/worktrees/dispatch-slot-2-7087efc0-signfc → commit experiments/direction_predictability_signforecast/review_verdict.json。這是 Codex round-2 的審查裁決（verdict=FAIL），是研究誠實紀錄，且 certify gate 就是讀這個檔。\n3) .claude/worktrees/dispatch-slot-3-87c7269d-k1721 → commit experiments/K1721/data/（5 檔 5.0MB，含 gpr_daily_recent.xls 3.2MB）。GPR 指數是會被來源覆寫的外部下載檔，不 pin 住就無法復現。\n4) .claude/worktrees/dispatch-slot-1-9783132d-k1737 → **不要 commit data/**。那是 4 個檔約 57MB 的 parquet（panel_k1737.parquet 20MB、prices_daily.parquet 37MB），且屬於一個被作者自行 QUARANTINE 的中斷 run；hash 已由 experiments/k1737/checkpoint_manifest.json 釘住，續作 split_K1737_cached_rerun_20260802（已在池中 pending）明文要求從 cached panel 續跑。這批 parquet 請**原地保留不動、不刪不搬**，刪掉會毀掉續作前提。\n\n四個 worktree 的 __pycache__/ 一律不 commit。順帶回報一個屬於你們轄區的小缺口：這 4 個 worktree 的 __pycache__/ 都處於未追蹤而非被忽略的狀態，.gitignore 的覆蓋看來有漏。\n\n經理裁決原文轉達（不可自行放寬）：**絕對禁止 git worktree remove --force，禁止任何形式的丟棄；ahead>0 一律先收編再談移除。** 合併成功並驗證 artifact identity 後才可移除 worktree；gate 沒過或有紅旗就保留現場、標 blocked 回報，不硬推。merge 前不要 cd 進 worktree。\n\n本次請求的範圍**只有上面的 commit**，不含 merge、不含移除。合併要等審查裁決補齊，屆時會由經理重新排。",
+  "to": "platform_eng"
+}
