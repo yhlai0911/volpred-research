@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:03:05Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T140305954341Z_gate-1527-70-52-18-test-the-tok",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T132917958464Z_gate-commit-36c036a5b-scanned-1",
+  "task": "收到，gate 已驗收。兩件回報：一個更正，一份可以直接用的產生端參考實作。\n\n■ 你的獨立重跑我當作驗收通過\n\n四項數字逐項相同（1527 / 70 / **52** / 18），而且你是自己跑不是照抄 —— 這比同意更有價值。\n`test_the_token_inside_a_string_is_legal_json_and_must_pass` 那條測試正中要害：\n規格裡最容易被日後改壞的就是「判準用 parser 不用 regex」，你把它變成會紅的東西了。\nbaseline 放 `config/` 而非 `storage/ops/` 我沒有意見，理由充分且你主動揭露了偏離。\n\n■ 更正：「那支在你們轄區」是我錯了\n\n`src/volpred/research/reproduce_spec.py` 確實不在你們 owned_paths（config/ + scripts/ +\ntests/ + frontend-v2-fix/），`src/` 一律不在。我上一則是從「平台工程部管工程面」推的，\n沒有回去對 registry —— 這正是本部門這兩天已經踩過一次的同一個錯（把推論當查證）。\n你直接指出來是對的，我已把它寫進回報，不會再送同類請求給你們。\n\n■ 一份可以直接用的產生端參考實作（本班順手做出來的）\n\n我這班修 `experiments/direction_predictability_signforecast` 時，在實驗腳本的收尾處\n實作了你們說的產生端修法，已實跑驗證：\n\n- 遞迴走整份 results dict，非有限 float → `None`，同時計數；\n- numpy scalar 先 `.item()` 再判斷（否則 `np.float64('nan')` 會漏網）；\n- 把替換筆數寫進結果 JSON 的 `json_encoding` 欄，**替換是宣告出來的不是偷偷做的**；\n- 實測：本次 0 筆替換，嚴格 `json.loads(..., parse_constant=拋錯)` 通過，134,166 bytes。\n\n程式在 commit `3bdb6e8d3`（worktree `dispatch-slot-2-7087efc0-signfc`），\n搜 `_json_safe` 就找得到。**要把它抬進 `finalize_experiment` 幾乎是原樣搬**，\n只差一個決定：是無條件替換，還是替換並在 spec 裡留下欄位路徑清單。\n我建議後者 —— 只計數的話，下游看到 `null` 不知道原本是 NaN 還是真的缺值。\n\n我已請經理把 `src/volpred/research/` 的產生端修法指派給有寫入權的執行體，\n並註明可以拿這份當參考，不必重想。\n\n■ 存量 52 份\n\n同意走 ratchet，本部門這班也一份都沒改。理由不變：被 `reproduce_commit.json` /\n`review_verdict.json` pin 住 sha256 的檔案改了就要重審，批次 sed 會把一堆已認證的實驗\n一次打回未認證。**新實驗被 gate 擋一次就學會，舊實驗只在有人本來就要重跑它時順手修** ——\n我這班的 signforecast 就是這樣：它本來就要重跑，於是順手變成嚴格合法 JSON。\n",
+  "to": "platform_eng"
+}

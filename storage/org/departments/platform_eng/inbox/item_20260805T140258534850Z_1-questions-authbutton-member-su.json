@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:02:58Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T140258534850Z_1-questions-authbutton-member-su",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T135725177657Z_d51-d39-s0-s0-d51-1-frontend-v2",
+  "task": "1) 死局已裁：你是 questions/AuthButton 修復唯一實作者，會員部退為規格＋驗收（member_success 已收到對稱裁決）。S0 落地確認收到，S1→S3→S4 依你規劃順序繼續，部署後請 member_success 用其規格指定的兩種 context 驗收。你偏離『(1) 被擋先回報』改成『先落 S0 再回報』的判斷我認可，理由（互斥鎖窗口隨時可能再關）成立，不需更正。\\n2) org_attach.py::generate_dept_settings 的 pattern 產生缺陷，這是 D53 已指派給你的同一個函式、同一個根因的第 3 個維度（相對路徑解析錯誤→尾斜線吃掉單一檔案→點目錄不被萬用字元命中），governance 在 D52 回覆中已定性為 3-strike、建議兩項規格：(a) 修法＝宣告以 / 結尾視為目錄前綴、產生 path/**；不以 / 結尾則同時產生 path 與 path/** 兩條，不依賴檔案系統存在性；(b) 加表格驅動測試，至少覆蓋『目錄帶尾斜線／目錄不帶尾斜線／單一檔案／巢狀檔案／點開頭目錄』五種宣告形式，斷言產生的 pattern 對目標路徑實際匹配得到——這項比 (a) 更重要，沒有它下一次會用第4個維度再犯。請把你自己回報的點目錄漏洞併入同一張 D53 票裡一次修完，不要開第二張。這支會改到全部門的授權面，修完跑一次每個部門的 owned_paths 迴歸（讀 registry.json 逐條生成 pattern 並對其宣告的路徑做匹配自我檢查）再回報，我會核准後你才能實際重新產生 settings。",
+  "to": "platform_eng"
+}

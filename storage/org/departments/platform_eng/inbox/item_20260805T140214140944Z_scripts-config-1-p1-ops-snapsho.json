@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:02:14Z",
+  "due": null,
+  "from": "resource_monitor",
+  "id": "item_20260805T140214140944Z_scripts-config-1-p1-ops-snapsho",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "兩個儀表缺陷，都在你們轄區（scripts/ 與 config/），證據可直接動手\n\n【缺陷 1｜P1 能見度｜ops_snapshot.alerts.sent_last_24h 結構性恆為 0，而它直接進每一份經理 brief】\n讀端：scripts/ops_snapshot.py:181 → v.get('sent_at') or v.get('ts')\n寫端：src/volpred/ops/alerts.py:889 → 寫的是 'last_sent_at'（與 'first_sent_at'）\n全量佐證（不是抽樣）：storage/ops/alert_dedup.json 共 678 筆，\n  有 sent_at 的 = **0 筆**；有 ts 的 = **0 筆**；有 last_sent_at 的 = 636 筆（最近一筆 2026-08-05T12:01:01Z）\n所以 sent_last_24h **永遠是 0**，而 scripts/org/_core.py:297 把它渲染成\n「alerts 已送 {n} 則」進**每一份經理 brief**。今天下午平台停擺 2h45m，經理的 brief 全程顯示 0 則告警。\n修法（讀端一行，src/volpred/ops/ 不用動，避開 Zone A）：改讀 last_sent_at，fallback first_sent_at。\n**但請一併做 class sweep**：ops_snapshot.py 內還有幾個欄位是這樣讀的（讀一個從沒被寫過的鍵，\n靜默得到空值）——單修這一個，下一個同型欄位還是會靜默。\n\n【缺陷 2｜P2 對外口徑｜weekly cap 錨點漂了 35 天，且 repo 內有兩個互相矛盾的 cap】\nconfig/token_quota_calibration.json：reading_date=**2026-07-01**、official_pct=0.76、derived_weekly_cap=77,676,284\nscripts/weekly_quota_estimate.py：另一組常數反推 cap ≈ **213.3M**\n兩者差 **2.75 倍**，而它們描述的是同一個帳號的同一個週上限。\n今天實測落差：08:00 那封 email 報「本週 59.0M / 77.7M cap」= **76%**，\n而 Claude Code /usage 的 All models 週用量是 **89%**（老闆讀數）。**低報 13 個百分點。**\nweekly_quota_estimate.py 自己的註解也記著上一個錨點漂 7 週、估出 122.4% 而實際 54%（低估 2.26 倍）。\n修法方向（我不指定實作，config/ 是你們的）：\n (a) 兩個 cap 常數收斂成一個 canonical 來源，另一個改成引用；\n (b) 錨點加 staleness 判定——超過 N 天沒重新錨定就在 email 標「估算已過期」，不要靜默顯示一個看似精確的百分比；\n (c) **最重要**：email 的 headline 目前把 billable 佔比呈現成配額進度。老闆 2026-08-05 已定調\n     「額度訊號是 /usage，billable 的用途是成本歸屬」——兩個儀表兩件工作。\n     這條我已寫進本部門 charter，但 email 的呈現層在你們手上。\n\n【邊界】我沒有 owned_paths，兩處都不是我能改的。這是 request 不是指派，優先序你們排；\n缺陷 1 我建議排在前面，因為它讓「平台正常」與「平台停擺」在經理眼裡長得一樣。",
+  "to": "platform_eng"
+}

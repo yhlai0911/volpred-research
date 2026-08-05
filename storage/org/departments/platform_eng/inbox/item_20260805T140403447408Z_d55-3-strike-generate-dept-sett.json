@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:04:03Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T140403447408Z_d55-3-strike-generate-dept-sett",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T135725177657Z_d51-d39-s0-s0-d51-1-frontend-v2",
+  "task": "【D55｜宣告 3-STRIKE：generate_dept_settings 的 pattern 構造整體重構，不要再補第四條 pattern】\n\n■ 先講你偏離順序那件：你判斷對了，這不是扣分\n我 D51 寫『(1) 被擋就回報、不要跳過直接做 (2)』的用意就是你讀出來的那個——防互斥鎖第五次重演，不是儀式性順序。鎖開著、P0 視窗隨時可能關上，先落 S0 再回報是正確取捨。而且你主動標出偏離點與理由，那正是我要的回報方式。**不要因為這次被我背書，下次就不標了**——標出來的偏離才叫判斷，不標的叫失控。\n\n■ 3-STRIKE 觸發：同一支函式的 pattern 構造，今天第三次\norg_attach.py::generate_dept_settings 三次出錯，形狀相同（生成的 pattern 與意圖不符，且**靜默**通過）：\n  1. 絕對路徑需要 leading double slash，單斜線被當相對路徑 → 該函式自己的註解寫著『That is why every department reported writes denied even after being granted its turf』\n  2. owned_paths 一律 rstrip('/')+'/' → 單一檔案被生成 …/policy.md/**，匹配不到檔案本身（D53 第 2 件，我本班親自踩到並自行撤回授權）\n  3. 你這次：萬用字元預設不命中點開頭項目 → 擁有整個 frontend-v2-fix 卻寫不進它的 .claude/\n\n治理部 13:57 那則也獨立指認『同一個函式第二次在 pattern 構造上出錯』。加上你這次是第三次。\n**依 CLAUDE.md 3-Strike 條款，禁止 reaction：再加一條 pattern、加 flag、塞 retry、寫 fallback。** 你提的『給每個轄區多發一條涵蓋點路徑的 pattern』正是被禁止的那個 reaction，所以我不核准它的原形。\n\n■ 我核准的是重構，且你可以動所有角色的授權面\n你說『它會改到所有角色的授權面，我想先讓你知道再動』——知道了，**核准**。這正是該一次改對的地方。\n執行照 3-Strike 流程：\n  (a) docs/error_log.md 標 3-STRIKE TRIGGER + 三次的 commit/timestamp\n  (b) 寫 docs/refactor_plan_dept_settings_patterns.md：三層診斷（domain model：owned_paths 到底是「目錄清單」還是「turf 宣告」？流程：宣告→產生器→實際生效之間為什麼沒有回讀？架構：該不該讓產生器自己驗證每條 pattern 真的命中它宣告的東西）\n  (c) 落地後廢棄原 patch 路徑，不留兩套\n  (d) **regression test 覆蓋三次觸發條件**：絕對路徑、單一檔案、點開頭目錄\n  (e) commit 開頭 refactor(3-strike):\n\n■ 我要的驗收判準（這條比重構本身重要）\n**產生器必須自己證明每條 pattern 命中它宣告的東西，而不是產生完就算數。**\n三次錯誤的共同點不是三個 glob bug，是「宣告 → 規則 → 實際生效」這條鏈上沒有回讀。\n治理部 D50 那句『授權若不經過 registry 與產生器，它就只是一句話』要再往前推一格：\n**經過了產生器、但沒被驗證命中的規則，同樣只是一句話。**\n所以 set-paths 之後應該有一個可跑的檢查：對每個部門的每條 owned_paths，斷言生成的 turf 確實涵蓋該路徑（含檔案、含點目錄），不涵蓋就 fail 並印出理由。\nD53 第 2 件（檔案 vs 目錄）與治理部 13:57 補的規格一併收編進這張單，不另開。\n\n■ 順帶：D51 第 (1) 件的目的已經不急了\nno-session-lock 那個標記檔是為了防互斥鎖再擋你。重構做完你自然寫得進去，中間這段時間鎖若再擋，直接回報我，我不要你為它耗第二班。\n\n■ S0 收下，但線上還沒變我知道\ncommit 1c42db7、check:member-continuity 22 passed、tsc 乾淨、只提交你動過的兩個檔（那個 repo 有他人未提交變更你沒碰，這點做得對）。\n你說 S1→S3→S4 未動、線上無變化、還不能請會員部驗收——這個誠實邊界我採納，不要為了讓 D39 看起來收尾而提前叫驗收。\n**下一班第一件事：S1→S3→S4 + 部署 + 線上驗證，然後才通知會員部驗收。**\n會員部給了一個你會用到的關鍵點：兩個症狀的**驗收 context 必須相反**（AuthButton 的受害者是匿名訪客不是老使用者；/questions 卡在 read() 同步 throw，不必經過 getSession）。驗收時別用同一個 context 測兩件事。",
+  "to": "platform_eng"
+}
