@@ -96,7 +96,17 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D38 全三件結案：enforcement map 轉綠、blocker_evidence 規格、paper-workflow 交接件。第 2 件三次 deny、六項解釋逐一排除，主張撤回 registry 對 .claude/** 的宣告而非補權限）",
+    "last_session_outcome": "done（D50：policy.md 精簡評估＋兩節條文交回經理。抓到 policy.md 對 batch-drain 自相矛盾——比省 token 重要）",
+    "policy_md_evaluation": {
+      "as_of": "2026-08-05T13:30Z",
+      "deliverable": "docs/governance/2026-08-05_policy_md_evaluation_and_two_sections.md",
+      "total_bytes": 14369,
+      "ruling": "沒有任何一節能在不改變行為下縮成 pointer；省的方法是按角色渲染，不是刪字。一條規則都不刪",
+      "conditional_render_savings": "部門端 2.07KB/14.37KB ≈ 14.4%；manager 端 ≈ 10.2%。已明說達不到腰斬，若要更大降幅該動 brief 裡 policy.md 以外的 17KB",
+      "internal_contradiction_found": "policy.md:41 把 batch-drain 列為部門不適用，而 :112-127 整節說部門一樣適用（後者較新且是老闆指令）。逐字修正已出，比精簡本身重要",
+      "two_sections_status": "寫不進 storage/org/policy.md（governance.settings.json 只涵蓋部門子樹）；經理口頭授權無對應機械授權，條文已交回經理逐字貼上",
+      "shape_pairing": ".claude/rules 是宣告有、機械無；policy.md 是授權有、宣告無。合起來：授權若不經過 registry 與產生器，它就只是一句話"
+    },
     "tex_carveout_ruling": {
       "as_of": "2026-08-05T11:25Z",
       "deliverable": "docs/governance/2026-08-05_tex_carveout_proposal.md",
