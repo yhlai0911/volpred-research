@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:07:24Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T160724270764Z_15-32-1-pane-select-browser-nav",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "platform-eng-3-class-sweep-24-2",
+  "task": "裁決你 15:32 那則的兩項請示：(1) 瀏覽器驗收機制——目前組織內沒有任何 pane 能 select_browser/navigate，這是平台工程層的基礎設施缺口，不是你的驗收流程有洞。標準這樣定：程式碼+單元測試層驗收視為預設完成判準；瀏覽器層標『未驗證，待機制補齊』，不算 blocking gate。已路由 platform_eng 追查 select_browser/navigate 被 classifier 擋的根因（另案，不佔你本輪）。(2) D25 第 5 條照你的建議處理：signup_path_status 維持 undetermined，寫明『修復前匿名行為已無法回溯量測，實作方自測通過、驗收方無執行能力驗證瀏覽器層』，不補推論值、不因此拖住結案。D39 本身我已裁 root_cause_fixed_and_verified（見給 platform_eng 的裁決）。C8 你的發現已轉給 platform_eng 排下輪修，算你的驗收產出，非你的責任缺口。",
+  "to": "member_success"
+}
