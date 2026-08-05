@@ -158,6 +158,87 @@ class TestNoFalsePositives:
         assert not verdict["duplicate"], verdict
         assert any("no shared title anchor" in r for r in verdict["reasons"])
 
+    def test_collection_tickets_for_different_experiments_are_not_duplicates(self):
+        """Two K-experiment collection tickets are different work.
+
+        2026-08-04: creating the K1750 collection ticket was refused at the
+        admission gate as a semantic duplicate of the K1749 one (score 12,
+        threshold 5) although the two share no experiment identity at all —
+        K1749.py/K1749_results.json vs K1750.py/K1750_results.json. The whole
+        score came from the verification toolchain every honest collection
+        write-up must cite (check_experiment_artifacts.py, experiment_gates.py,
+        merge_worktree.sh, knowledge.json, git_writer_lock, ...), so the more
+        thoroughly the ticket was written the more certain the refusal.
+
+        Root cause was in the *discriminator*, not the score: `_TAG_PREFIX_RE`
+        stripped the leading `[K1749 collection]` before `_extract_targets` ran,
+        so `title_targets` was empty for every ticket in this family and veto 1
+        ("each title names a concrete target the other does not") could never
+        fire. The K-id lives in the tag by convention, which is exactly where
+        normalisation was throwing it away.
+        """
+        k1749 = {
+            "id": "assign_628bc810",
+            "title": (
+                "[K1749 collection] Low-vol consolidation duration -> high-vol "
+                "transition: NULL result review and merge"
+            ),
+            "description": (
+                "Collect completed agent job agent-k1749-lowvol-b7f47803 from the "
+                "registered worktree dispatch-slot-1-b7f47803-k1749. Re-run "
+                "experiments/K1749/test_K1749.py, scripts/experiment_gates.py and "
+                "scripts/check_experiment_artifacts.py; verify "
+                "reproduce_spec.json canonical_result_identity against "
+                "K1749_results.json bytes and preregistration.json freeze order. "
+                "On PASS merge via scripts/merge_worktree.sh through the canonical "
+                "git_writer_lock run, then the main thread writes knowledge.json."
+            ),
+            "task_type": "platform_ops",
+            "status": "pending",
+        }
+        k1750 = {
+            "id": "assign_1876f3bc",
+            "title": (
+                "[K1750 collection] IPO heat incremental volatility forecast: "
+                "BOUNDED_NULL review and merge"
+            ),
+            "description": (
+                "Collect completed agent job agent-k1750-ipo-b66d62b6 from the "
+                "registered worktree dispatch-slot-1-b66d62b6-k1750. Re-run "
+                "experiments/K1750/tests, scripts/experiment_gates.py and "
+                "scripts/check_experiment_artifacts.py; verify "
+                "reproduce_spec.json canonical_result_identity against "
+                "K1750_results.json bytes and preregistration.json freeze order. "
+                "On PASS merge via scripts/merge_worktree.sh through the canonical "
+                "git_writer_lock run, then the main thread writes knowledge.json."
+            ),
+            "task_type": "platform_ops",
+            "status": "pending",
+        }
+
+        assert extract_signature(k1749).title_targets == frozenset({"k1749"})
+        assert extract_signature(k1750).title_targets == frozenset({"k1750"})
+
+        verdict = duplicate_verdict(k1750, k1749)
+        assert not verdict["duplicate"], verdict
+
+    def test_versioned_experiment_id_is_a_target(self):
+        """``k1095_v3`` must discriminate as well as ``k1095`` does.
+
+        Second manifestation of the same blind spot, found minutes after the
+        first while filing the k1095_v3 collection ticket (refused, score 11).
+        ``_`` is a word character to ``re``, so ``\\b(k\\d{3,5})\\b`` never fires
+        inside ``k1095_v3`` and the versioned remediation ticket extracted no
+        target at all — while ``_GLUED_IDENT_RE`` needs two underscore groups
+        and so did not cover it either.
+        """
+        assert extract_signature("[k1095_v3 collection] review and merge").title_targets == frozenset(
+            {"k1095_v3"}
+        )
+        assert extract_signature("[K1095] original event-switch study").title_targets == frozenset(
+            {"k1095"}
+        )
+
     def test_template_siblings_with_different_subjects_are_not_duplicates(self):
         """One generator, one ticket per item — same boilerplate, different work."""
         a = {
