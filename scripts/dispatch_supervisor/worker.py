@@ -1392,6 +1392,20 @@ def run_worker(
             )
         except ProviderRegistryError as exc:
             LOG.error("provider registry denied worker spawn: %s", exc)
+            # A denial stops EVERY fire until a human edits the registry, and
+            # until now it was silent: only this log line and an outcome field.
+            # The CLI auto-updates (2.1.220 -> .221 on 08-04, .221 -> .222 on
+            # 08-05), so the pin goes stale on its own schedule and the backbone
+            # halts with ops_snapshot still green — twice in two days, found
+            # both times only because someone happened to read the log.
+            try:
+                alerts.send_provider_denial_alert(
+                    reason=str(exc), state_path=state_path,
+                )
+            except Exception as alert_exc:  # noqa: BLE001 — never veto the denial path
+                LOG.warning(
+                    "provider denial alert failed to send: %s", alert_exc,
+                )
             state.record_completion(
                 job_id=job_id,
                 exit_code=2,

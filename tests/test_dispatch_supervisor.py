@@ -14164,3 +14164,36 @@ def test_mutating_e2e_worker_crash_routes_to_terminal_remediation(
     assert final["reason"] == "worker_failure"
     assert settled["status"] == "blocked"
     assert json.loads(queue.read_text(encoding="utf-8"))[0]["status"] == "blocked"
+
+
+def test_provider_denial_raises_a_critical_alert(tmp_path: Path, monkeypatch) -> None:
+    """A provider denial halts every fire; it must not do so silently.
+
+    Both 2026-08-04 and 2026-08-05 backbone outages were provider denials
+    found only because a human read the log — the code path had an ERROR line
+    and an `outcome` field, and nothing that reaches a person.
+    """
+    from scripts.dispatch_supervisor import alerts as sup_alerts
+
+    sent: list[tuple[str, str, str]] = []
+    monkeypatch.setattr(
+        sup_alerts, "_send", lambda level, title, body: sent.append((level, title, body)),
+    )
+    monkeypatch.setattr(
+        sup_alerts.state, "should_dedup_alert", lambda *_a, **_kw: False,
+    )
+    monkeypatch.setattr(sup_alerts.state, "mark_alert_sent", lambda *_a, **_kw: None)
+
+    assert sup_alerts.send_provider_denial_alert(
+        reason="executable identity is not pinned for provider 'claude-cli'",
+        state_path=tmp_path / "state.json",
+    ) is True
+
+    assert len(sent) == 1
+    level, title, body = sent[0]
+    assert level == "critical"
+    assert "派工" in title
+    # The operator must be told what to run AND warned off the two wrong fixes.
+    assert "shasum -a 256" in body
+    assert "不可照抄" in body
+    assert "放寬 pin" in body

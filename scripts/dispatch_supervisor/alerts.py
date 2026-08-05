@@ -205,6 +205,45 @@ def send_auth_alert(*, log_tail: str = "", state_path: Path = state.STATE_PATH) 
     return True
 
 
+def send_provider_denial_alert(
+    *, reason: str, state_path: Path = state.STATE_PATH,
+) -> bool:
+    """Provider registry refused a spawn. Dedup 1h. True if sent.
+
+    A denial halts EVERY fire until someone edits the registry, and it used to
+    be entirely silent — one ERROR log line and an `outcome` field, no alert.
+    The Claude CLI auto-updates on its own schedule (2.1.220 -> .221 on
+    2026-08-04, .221 -> .222 on 2026-08-05), so the pinned sha goes stale
+    without anyone acting, and the backbone stops while ops_snapshot stays
+    green. Both incidents were caught only because a human happened to read
+    the log. Same failure shape as the 274 silent self-reload refusals: a
+    fail-closed gate with no voice.
+    """
+    key = "provider_policy_denied"
+    if state.should_dedup_alert(key, window_s=3600, path=state_path):
+        LOG.info("provider_denial_alert deduped (sent within last 1h)")
+        return False
+    body = (
+        "# Provider 拒絕 worker spawn — 所有派工已停擺\n\n"
+        "## 影響\n"
+        "- dispatch supervisor 無法啟動任何 worker，**排程派工全停**\n"
+        "- heartbeat 與 ops_snapshot 仍會顯示正常（這是「看起來健康」的故障）\n\n"
+        "## 拒絕理由\n\n"
+        "```\n" + reason[:1500] + "\n```\n\n"
+        "## 最常見成因與修法\n"
+        "Claude CLI 自動升級後，新版 sha 不在 `config/provider_registry.json` "
+        "的 pin 清單裡。\n\n"
+        "```\nshasum -a 256 ~/.local/share/claude/versions/<新版>\n```\n\n"
+        "**獨立**算出的 sha 加進 registry 即可 —— 不可照抄本信或 log 裡的字串"
+        "（照抄等於讓被驗證的對象自己提供驗證答案）。registry 是每 tick 熱重載，"
+        "改完不需要重啟 daemon。\n\n"
+        "**不要**用放寬 pin 或關掉檢查來解除警報。\n"
+    )
+    _send("critical", "provider 拒絕 spawn — 派工全停", body)
+    state.mark_alert_sent(key, path=state_path)
+    return True
+
+
 def send_provider_auth_receipt_alert(
     *,
     recovery: dict[str, int],
