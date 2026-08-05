@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-05T03:00:40.848028+00:00",
+  "generated_at": "2026-08-05T03:26:23.402454+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 190.5
+      "age_hours": 190.9
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 190.3
+      "age_hours": 190.7
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 185.6
+      "age_hours": 186.1
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 184.7
+      "age_hours": 185.1
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 349.6
+      "age_hours": 350.1
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 153.8
+      "age_hours": 154.3
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 184.6
+      "age_hours": 185.0
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 201.6
+      "age_hours": 202.0
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 209.7
+      "age_hours": 210.1
     },
     {
       "path": "storage/drafts/k1706_general_draft.md",
@@ -79,14 +79,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 4605,
-      "age_hours": 34.8
+      "age_hours": 35.2
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 105,
-    "grace": 1,
+    "registered": 106,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 10,
@@ -110,29 +110,19 @@
     "drafts": {
       "collectable": [
         {
-          "path": "storage/drafts/event_nfp_20260807_t2_event_draft.md",
+          "path": "storage/drafts/daily_digest_20260805_general_draft.md",
           "kind": "md",
           "reason": "untracked",
           "admission_snapshot": {
-            "head": "95831cdb6fd7424c4d87225aa8cd8e5743c30918",
-            "sha256": "650ae00eaea808bc2f39f74e8f755ea86d97d284bfe223fe229fae8254b51972",
-            "git_blob": "d7873bed65a98fc353cbb97b4a3c79f854b57a0f"
-          }
-        },
-        {
-          "path": "storage/drafts/fb_mile_63e0e1ff.md",
-          "kind": "md",
-          "reason": "untracked",
-          "admission_snapshot": {
-            "head": "95831cdb6fd7424c4d87225aa8cd8e5743c30918",
-            "sha256": "3fff658dfdce5d3411c17af4c337c9e49d94b5a43ddd3f00ddaecdf8eff58ca8",
-            "git_blob": "e12b2f246997f34d116f37aa0d05dceefa77b051"
+            "head": "36fb25712635c092153e6e57eb490ab8df90f40c",
+            "sha256": "215705f4dde3518fe56edde7f99925e339a0b483dbf146946440e994dcf3a7fd",
+            "git_blob": "2c534e8c874e50668261f4ad5c77201a05d21467"
           }
         }
       ],
       "held": [],
       "skipped": {
-        "grace": 1,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -140,11 +130,10 @@
         {
           "namespace": "drafts",
           "paths": [
-            "storage/drafts/event_nfp_20260807_t2_event_draft.md",
-            "storage/drafts/fb_mile_63e0e1ff.md"
+            "storage/drafts/daily_digest_20260805_general_draft.md"
           ],
           "committed": true,
-          "detail": "[2e75c734d877bac34b8aa0443f68aa16f25e4147] chore(draft-reap): collect orphaned draft artifacts (2 files)\n"
+          "detail": "[bdc84611264980429c493165694476093fff7814] chore(draft-reap): collect orphaned draft artifacts (1 files)\n"
         }
       ]
     },
@@ -162,28 +151,18 @@
       "collectable": [],
       "held": [
         {
-          "path": "experiments/nfp_20260807_t2",
+          "path": "experiments/k1814",
           "kind": "atomic_unit_incomplete",
           "reason": "atomic_unit_incomplete",
           "detail": "atomic unit has a held, in-flight, or grace-period member; no sibling may be committed separately",
           "members": [
-            "experiments/nfp_20260807_t2/README.md",
-            "experiments/nfp_20260807_t2/data/nfp_release_dates_2010-01-01_2026-08-05.json",
-            "experiments/nfp_20260807_t2/data/vix_close_2010-01-01_2026-08-04.csv",
-            "experiments/nfp_20260807_t2/nfp_20260807_t2.py",
-            "experiments/nfp_20260807_t2/nfp_20260807_t2_controls.csv",
-            "experiments/nfp_20260807_t2/nfp_20260807_t2_events.csv",
-            "experiments/nfp_20260807_t2/nfp_20260807_t2_results.json",
-            "experiments/nfp_20260807_t2/nfp_20260807_t2_window.png",
-            "experiments/nfp_20260807_t2/render_readme.py",
-            "experiments/nfp_20260807_t2/reproduce_commit.json",
-            "experiments/nfp_20260807_t2/reproduce_spec.json",
-            "experiments/nfp_20260807_t2/review_verdict.json"
+            "experiments/k1814/review_verdict.json",
+            "experiments/k1814/reviews/agy_recert_2026_08_05.md"
           ]
         }
       ],
       "skipped": {
-        "grace": 3,
+        "grace": 5,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -192,6 +171,7 @@
   },
   "held_escalations": [],
   "held_escalated_paths": [
+    "experiments/nfp_20260807_t2",
     "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543",
     "job:compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795"
   ]
