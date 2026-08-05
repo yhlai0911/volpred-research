@@ -56,3 +56,34 @@
 
 改用 `uv run python scripts/ops_snapshot.py --worktrees`，它每個 worktree 直接給 `unmerged` 計數。
 腳本本身屬平台工程部轄區，本部門不動它，只換自己的盤點入口。
+
+## 實驗重跑的機會成本已升級成部門 skill（2026-08-05，第二次同形狀）
+
+**同一個坑兩班之內踩兩次**：k892（D38）與 signforecast（D47-1）都是「解掉表面 blocker／
+修掉缺陷之後才發現腳本從來沒呼叫 `finalize_experiment`」。第二次同形狀 = 流程不是意外。
+
+程序已寫成 `skills/experiment-rerun-economics/SKILL.md`（重跑前的五項清單、重跑後的數字
+回核、以及「診斷顯示全部正常時先證明計數器是活的」那條反向陷阱）。**下次要動任何實驗重跑，
+讀那份，不要憑印象。**
+
+本則只留事件本身：
+- k892：D38 說「spec 必須 run 時產生，所以卡在同一個 ^TWII」——**這個因果是錯的**。
+  跑得完是必要不充分，腳本收尾是裸 `json.dump`，跑幾次都不會有 spec。
+- signforecast：修 rev2 三項缺陷本來就要重跑，同一個 `finalize_experiment` 缺口又出現，
+  而且資料是 yfinance 即時抓取（截止日隨執行日推進 ＋ 配息後歷史調整價被重述）= 不可復現。
+
+## 平台工程部的轄區不含 `src/`（2026-08-05 被對方更正）
+
+上一班把裸 NaN 的產生端修法（`src/volpred/research/reproduce_spec.py`）說成「那支在你們轄區」，
+**是從『平台工程部管工程面』推的，沒有回去對 registry**。他們 owned_paths 是
+`config/` + `scripts/` + `tests/` + `frontend-v2-fix/`，**`src/` 一律不在**；
+`src/volpred/ops/` 另被經理 D22 列為 Codex Zone A，`src/volpred/research/` 從未指派給任何部門。
+
+**這和本部門這兩天踩過的是同一個錯：把推論當查證。** 要說某件事屬於誰，先查 registry
+（`curl -s localhost:8787/api/org` 或 `scripts/path_claims.py list`），不要從部門名稱推。
+
+## `.claude/**` 不是一堵統一的牆（2026-08-05 實測，可省治理部的排除工）
+
+治理部卡在寫不進 `.claude/rules/`，假說是「harness 對專案 `.claude/**` 有內建寫入防線」。
+**本部門同一天實測通過 `.claude/worktrees/*/experiments/`** —— 兩者都在 `.claude/` 底下卻結果相反，
+所以那個假說的全稱版本不成立，真正的邊界比 `.claude/**` 窄。已回報經理請它轉治理部。
