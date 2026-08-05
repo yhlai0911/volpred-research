@@ -1,14 +1,22 @@
 {
   "_meta": {
-    "why": "老闆 2026-08-05 21:50：weekly allowance 89% used，週日 16:00 才重置。指令是 A+C（部門降 model + 只留 P1），但但書明確：每天該寫的文章、該蒐集的資料、該發的文照做，論文寫作延到週日，日常例行優先維持。",
-    "owner": "scripts/model_router.py::pick_model 是唯一套用點；不要在別處複製這張表",
-    "auto_expiry": "expires_at 一到就自動失效，不需要有人記得關掉。手動降檔最大的風險是沒人記得復原，那會讓臨時省錢變成永久降級。"
+    "what": "額度緊縮時的常設分層政策。老闆 2026-08-05：『以後只要 token 不夠時，都是優先支援每日必做工作』——所以這不是一次性處置，是每次緊縮都照這張表走，不必重想。",
+    "owner": "scripts/model_router.py::pick_model 是唯一套用點。不要在別處複製這張表。",
+    "signal": "額度訊號是 Claude Code 的 /usage（All models 週用量 %）。storage/reports/token_usage/daily_*.json 的 billable 計數是**使用報告與成本歸屬**用的，單位不同，不能拿來回答『還剩多少』。兩個儀表兩個工作。",
+    "auto_expiry": "expires_at 一到自動失效。手動降檔最大的風險是沒人記得復原——四天的省錢會變成永久降級。"
   },
+
+  "_tiers": {
+    "tier0_never_cut": "每日必做：文章撰寫、資料蒐集、發文、boss 回覆。降這些等於用內容品質與營運連續性換 token，而那是 mission 1 與 4。",
+    "tier1_downgrade": "ops／治理／審查／查詢：checklist 型工作，sonnet 足夠。",
+    "tier2_defer": "論文寫作與修改：沒有時效性，緩幾天不損失任何東西。用降檔模型改論文比晚幾天改更糟，所以是**暫緩不是降檔**。",
+    "exempt_not_llm": "**不耗 token 的程式運算不受任何限制**（compute queue、回測、模擬、資料抓取）。那是 CPU 不是 token，暫停它只損失研究進度、省不到額度。緊縮時它照跑；只有『需要 LLM 判讀結果』那一段才受 tier 規則管。"
+  },
+
   "active": true,
   "expires_at": "2026-08-09T08:00:00Z",
   "reason": "weekly allowance 89% at 2026-08-05T13:50Z; resets Sun 16:00 台北",
 
-  "_exempt_note": "日常例行與 boss-facing 不降檔 —— 老闆但書：文章、資料蒐集、發文照做。降這些等於用內容品質換 token，而內容品質是 mission 1。",
   "exempt": [
     "daily_article",
     "daily_digest",
@@ -19,7 +27,6 @@
     "telegram_reply"
   ],
 
-  "_overrides_note": "ops / 治理 / 審查類是 checklist 型，sonnet 足夠。experiment 保留 opus 但砍掉最貴的 xhigh 檔位——研究誠實需要能力，不需要最深推演。paper_* 由部門暫停處理（見 deferred_departments），這裡的降檔只是雙保險。",
   "overrides": {
     "platform_ops": ["sonnet", "low"],
     "governance": ["sonnet", "low"],
@@ -36,6 +43,5 @@
     "paper_decision": ["sonnet", "low"]
   },
 
-  "_deferred_note": "論文寫作延到週日（老闆指令）。部門 suspend 後閘門不再喚醒它，收件匣原地保留，expires_at 後 resume 即可接續。",
   "deferred_departments": ["publications"]
 }

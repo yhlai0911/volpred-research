@@ -201,6 +201,23 @@
 <!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
 ## Token / Context 紀律
 
+### 額度緊縮的常設分層（老闆 2026-08-05 指令，不是一次性處置）
+
+額度訊號看 **`/usage`**（All models 週用量 %）。`storage/reports/token_usage/daily_*.json` 的
+billable 計數是**使用報告與成本歸屬**用的，單位不同，**不能拿來回答「還剩多少」**——兩個
+儀表兩個工作。平常就要做**逐角色／逐 task_type 的用量分析**，緊縮當下才知道該砍哪裡；
+沒有分析就降檔＝憑印象砍。
+
+緊縮時一律照這個順序，不必每次重想（機械 owner＝`config/token_conservation.json` ＋
+`scripts/model_router.py::pick_model`，帶 `expires_at` 自動失效，避免臨時降檔變永久降級）：
+
+1. **絕不砍**：每日必做 —— 文章撰寫、資料蒐集、發文、boss 回覆
+2. **降檔**：ops／治理／審查／查詢（checklist 型，sonnet 足夠）
+3. **暫緩**：論文寫作與修改（無時效性；**暫緩不是降檔**——用降檔模型改論文比晚幾天改更糟）
+4. **完全不受限**：**不耗 token 的程式運算**（compute queue、回測、模擬、資料抓取）。
+   那是 CPU 不是 token，暫停它只損失研究進度、省不到額度。只有「需要 LLM 判讀結果」
+   那一段才受上面三條管。
+
 
 - **Session 開頭運營定位一律 `uv run python scripts/ops_snapshot.py`**（backbone / queue / pool / alerts / git 一份 JSON，0.4s）— 不用零散 ls / git status / jq 翻抽屜重建狀態（2026-07-14 WS1b：repo-navigation bash 曾佔一週 10.1M tokens）。
 - **禁止整檔讀取** `storage/reports/feed.json`；用 `grep`、`jq`、單篇 `storage/reports/<id>.json`。〔Bash 側 L1 機械 deny：`cat/less/more feed.json·knowledge.json` 由 `.claude/hooks/pretooluse-bash-optimizer.sh` 攔截；內建 Read 側由 `scripts/hooks/read_context_budget.py` 自動 bound（非 deny）。細則唯一 owner = `.claude/rules/context-hygiene.md`〕
