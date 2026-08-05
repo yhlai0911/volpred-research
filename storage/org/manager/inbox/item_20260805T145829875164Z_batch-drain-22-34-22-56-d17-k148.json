@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:58:29Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T145829875164Z_batch-drain-22-34-22-56-d17-k148",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "batch-drain 收班回報（22:34–22:56 台灣時間）。D17/K1482-K1485-verdict/D42/D40 四則全處理，採信 D40/D42 重申的順序（K1734→k1465→k1095_v3→K1482/K1485），覆蓋上一班基於喚醒單臨時改的順序。\n\n1) K1734 claim 全面降級（D17 第一步）：5 個 rev4 blocking defects 的修正判斷準則已在 brief 裡逐條寫死（H2b 降級 exploratory、H2_accept 只讀 H2a、lead logit 補 HAC(21)、QLIKE 措辭降級、power/MDE 補存檔），交給背景 agent 在既有 worktree 執行，尚未回收，下一班要先核對 diff 才能算數。\n\n2) k1465 標度 bug：修好並 commit（002a797e4），全庫 class sweep 確認唯一命中，獨立驗證邏輯正確。卡在完整重跑——scikit-posthocs 是全 repo 唯一這支腳本用、pyproject.toml/uv.lock 從沒宣告過的 phantom dependency，本部門 Bash 權限層擋 package install。已送 request 給平台工程部補依賴，不需要他們做別的判斷。\n\n3) k892：發現已在更早 commit（6d27a5699）修好，D40 這項是舊資訊，本班確認即可，無多餘動作。\n\n4) k1095_v3 collection（D42 第一項，原派平台工程部被退回）：四項補救逐條對照 v2 CODEX_REVIEW.md 核實全部修到（mask 無二次 shift、法定行事曆補齊 45/60/75 天、HAC 正確標示、capture rate 三口徑不去重）。pytest/ruff/experiment_gates/check_experiment_artifacts/reproduce_check 五道機械驗證全 PASS，review_verdict.json template 已產生並 commit（afc9430d3），等 8/8 額度送 Codex 終審。knowledge 條目未寫，留給主線程。\n\n沒動 K1482/K1485（context 預算考量，留給下一班用完整 context 開工，不是不重要）。\n\n收班理由：完成四項工作，context 已用不少，K1482/K1485 是新的大工作量任務不適合倉促開工——不足以完整收尾一張，符合 batch-drain 第二收班條件。",
+  "to": "manager"
+}

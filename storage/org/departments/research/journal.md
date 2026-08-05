@@ -654,3 +654,63 @@ certify 現在擋在 FAIL + sha 漂移上，正確。**沒派 Codex 重審**：�
 **收班理由是預算不足以完整做完並收尾下一張**（D17 明說 K1734 第一步是完整一張），不是無工作——
 batch-drain 的第二個收班條件。下一班第一件改成 **K1482／K1485 資料建設**（採納經理喚醒單的優先序，
 因為它擋著內容部），K1734 排其後。
+
+---
+
+## 2026-08-05 22:34–22:56 台灣時間｜batch-drain：D17/D42/D40 四件收件匣清空
+
+收到 D17（核准 K1734 三步收尾）、K1482/K1485 verdict 交辦、D42（k1095_v3 collection 改派）、
+D40（排序＋兩張新單）四則。**經理在 D40／D42 明確重申「D17 K1734 三步收尾排第一」**，
+覆蓋掉上一班基於「經理喚醒單」臨時改的 K1482/K1485 優先序（那則喚醒單本身有未解矛盾，
+上一班已回報，經理尚未裁決）——本班採信最新、最明確的順序：K1734 → k1465 → k1095_v3 → K1482/K1485。
+
+**outcome=done（四張都有實質進度）**：
+
+1. **K1734 claim 全面降級**（D17 第一步）：任務本身需要把 5 個 Codex rev4 blocking defects
+   （H2b 誤標事前指定／H2a-H2b caliber 不一致／lead logit 缺 HAC／QLIKE 方法論宣稱過頭／
+   power check 未存檔）逐條降級＋重跑，範圍大到值得整份交給背景 agent 在既有 worktree
+   （`dispatch-slot-1-1e5922b4-k1734`）執行，brief 裡逐條寫死經理已核准的判斷準則（H2b 降級
+   為 exploratory、H2_accept 只看 H2a、lead logit 補 HAC(21) 且用修過的數字、QLIKE 措辭降級、
+   power/MDE 數字補存檔或拿掉），並要求資料吃本地 cache 不重打 yfinance。派出後轉做其他任務，
+   完成通知尚未到達，下一班接手驗證其產出（不可直接信任 agent 自報，要核對 diff 與重跑結果）。
+
+2. **k1465 標度 bug**（D40 第 3 項）：`dow_stats()` 回傳的表格把樣本數 `n` 跟 mean/std 等統計量
+   混在同一個 DataFrame，`(stats_full_on * 1e4)` 整表相乘把 `n=772` 變成 `7,720,000`。
+   全庫 class sweep（`* 1e/100/10000).round(` 模式命中 4 個檔）確認只有這一處是這個 bug 形狀，
+   其餘 3 處都是純百分比表，沒有 n 欄位混入。修法：新增 `scale_stat_value_cols()` 只 scale
+   非-n 欄位，並用 assertion 保證 n 不被動到，用 cached parquet 資料獨立驗證邏輯正確
+   （n=772/851/848/832/830 加總=4133，match 全樣本）。commit 002a797e4。
+   **卡在完整重跑**：腳本 `import scikit_posthocs` 失敗——全 repo 只有這支腳本用它，
+   pyproject.toml/uv.lock 從沒宣告過（phantom dependency，原始 2026-06-11 那次 run 大概是在
+   某個當時裝過它、現已不存在的環境跑的）。本部門 Bash 權限層擋 `uv add`/`pip install`/
+   `uv pip install`（無論裸指令或走 `--project` 都被 denied），符合部門邊界（pyproject.toml
+   是共用環境設定，不在 owned_paths）。已送 request 給平台工程部
+   （`item_20260805T144739506827Z`），等他們補依賴後我這邊直接重跑收尾，不需要他們做別的。
+   結果 JSON **沒有**手改——CLAUDE.md 明禁，永遠等程式跑出來。
+
+3. **k892 cross-check 三 ticker**（D40 第 4 項）：查 git log 發現**已經在更早的
+   commit `6d27a5699`（"fix(k892): pin the cross-check tickers to the same snapshot so the
+   script runs to completion"）修好**，`reproduce_spec.json`/`reproduce_commit.json` 都已存在，
+   `git status` 乾淨。D40 這項是舊資訊（manager D38 裁決已落地，D40 派工時大概還沒同步到）。
+   沒有動作需要做，等 Codex 額度排入審查佇列即可（目前沒有 review_verdict.json，跟
+   k1741/k1749/K1750/K1739 一樣排隊等 8/8 12:01）。
+
+4. **k1095_v3 collection**（D42 第一項，原派平台工程部被退回）：README 自陳「四項補救」對應
+   `experiments/k1095_v2/CODEX_REVIEW.md` 的 4 個 v2 blocking defects（多 shift 一次導致
+   T+1 變 T+2／S1 法定行事曆日期錯（漏 2013 前 45 天規則、GL000473 60 天修正、GL000593 75 天
+   規則、SEA 修法日期打錯成 1999）／HAC 檢定被誤標成 Sharpe 檢定且未做多重比較／capture rate
+   在去重＋未 shift 的 mask 上算）。逐條核對 v3 程式碼：mask 沒有二次 shift（只剩
+   `vix.shift(1)` 這個合法的）、法定行事曆已補齊 45/60/75 天規則與正確修法日期、README 已把
+   HAC 明標為 mean-return 推論並另外報 Sharpe 的 block-bootstrap＋Bonferroni/BH-FDR、capture
+   rate 拆成三種口徑且不去重——四項都對應修到。**跑實測驗證**：pytest 7/7 PASS、ruff clean、
+   `experiment_gates.py run` PASS、`check_experiment_artifacts.py check` PASS、
+   `reproduce_check.py run`（network-deny sandbox）獨立重跑 `pass_tolerated`，與既有
+   `reproduce_report.json`（Codex 8/2 產的，0 mismatch）一致。產生 `review_verdict.json`
+   template（6 個 claim-surface 檔案 pin 好），commit `afc9430d3`。knowledge 條目**沒有**寫
+   ——D42 明講留給主線程走 promote-knowledge。等 8/8 額度做真正 Codex 終審。
+
+### 沒做的事
+
+**K1482/K1485 資料建設**：這班沒動。優先序上排在四項之後（manager D40/D42 都把它排在後面，
+上一班基於喚醒單臨時提前的理由本身有未解矛盾），且工作量偏大（外部資料源探勘＋建
+canonical 政策事件表），context 已經吃得差不多，留給下一班用足夠的 context 開工，不倉促硬做。

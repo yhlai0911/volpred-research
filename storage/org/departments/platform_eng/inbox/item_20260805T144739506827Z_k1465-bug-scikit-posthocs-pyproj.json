@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:47:39Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T144739506827Z_k1465-bug-scikit-posthocs-pyproj",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "K1465 標度 bug 修好卡在缺依賴：scikit-posthocs 沒宣告在 pyproject.toml/uv.lock，本部門 Bash 權限層擋掉 uv add / pip install，動不了。\n\n背景：D40 指派修 k1465.py:487-488（describe-style dict 含 n 欄位被整表乘 1e4，n 從 772 變 7,720,000）。已修好（改用只 scale value columns 的 helper，留了 assertion 驗證 n 不被動到），也用 cached parquet 資料獨立驗證過修正邏輯正確（n=772/851/848/832/830 加總=4133，match 全樣本）。全庫 class sweep 過，這是唯一一處這種 bug（其餘 3 個 `* 1e/100` 命中都是純百分比表，沒有 n 欄位混在裡面）。\n\n卡點：要完整重跑 k1465.py 才能重新產生 k1465_results.json（不能手改 JSON，CLAUDE.md 明禁），但腳本 import scikit_posthocs 失敗（`ModuleNotFoundError`）。全 repo 只有這一支腳本用它，pyproject.toml/uv.lock 都沒宣告——是一個從沒被正式收編的 phantom dependency（原始 2026-06-11 那次 run 應該是在某個當時裝過它的環境跑的）。本部門 owned_paths 只有 experiments/，pyproject.toml/uv.lock 屬共用環境設定，且 `uv add` / `pip install` 類指令被 Bash 權限層擋（應該是刻意設計，避免部門各自安裝污染共用環境）。\n\n請求：麻煩幫忙 `uv add scikit-posthocs`（跑一次 `uv lock` 確認 lock file 更新）。裝好後我這邊直接重跑 k1465.py 收尾（重新產生 results.json + 走 review-gate 排入下一批 Codex 審查，不需要你們再做別的）。\n\n不急：這不擋任何時效性工作，是既有已發佈 NULL 結論（K1465）的一個 sample-size 欄位修正，等你們方便時處理即可。",
+  "to": "platform_eng"
+}
