@@ -8,20 +8,63 @@
     "diagnoses_complete_awaiting_write_access": 0,
     "last_fresh_detector_run": "2026-08-05T11:07:40Z"
   },
-  "last_run": "2026-08-05T15:29:00Z",
-  "open_items": 54,
+  "last_run": "2026-08-06T00:16:00Z",
+  "open_items": 49,
   "owned_paths_now_effective": {
     "paths": ["config/", "frontend-v2-fix/", "scripts/", "tests/"],
     "note": "D57 型別修法（commit 1a0d4b274 + d3212484d）已落地並經回歸；registry/generate_dept_settings 的整條 owned_paths 阻塞鏈（D5-D57）已由上一班收斂完，本班未再撞到。src/volpred/ops/ 與 supabase/migrations/ 維持 Codex Zone A（經理 D22/D37），本部門不寫。"
   },
   "this_session": {
     "done": [
-      "D39 P0（老闆層，凌駕一切）：AuthButton + /questions 兩版 + S1-S6 全量 24 站 auth-bootstrap 收編進 radar-session，commit 785ca70，build 通過、deploy 通過、瀏覽器線上實測通過（見 journal 2026-08-05 22:34 條目）",
-      "歸檔已被 D57/D42 最終裁決取代的 D5→D57 saga inbox 訊息（46 件，逐一核對後歸檔，5 件先補簡短回覆）；收件匣 95 → 54"
+      "D39 P0（老闆層，凌駕一切）：AuthButton + /questions 兩版 + S1-S6 全量 24 站 auth-bootstrap 收編進 radar-session，commit 785ca70，build 通過、deploy 通過、瀏覽器線上實測通過、member_success 正式驗收通過、經理裁決結案（見 journal 2026-08-05 22:34 條目）",
+      "ops_snapshot.alerts_state 讀了 writer 從沒寫過的鍵（sent_at/ts vs 實際的 last_sent_at）修好並驗證，sent_last_24h 0→37，加回歸測試",
+      "歸檔第一輪 D5→D57 saga + 第二輪雜項共 ~70 件 inbox 訊息；收件匣 95 → 49（剩下幾乎全是 canonical 任務池項目，見下方 canonical_backlog_35_pending）"
     ],
     "declined_or_deferred": [
       "F1/F2/F3 token 會計修復（資源監控部指派，P1 owner=本部門）——規模判斷過大且對方規格仍在持續修訂中（同日又追加 period_semantics 新缺陷 A/B/C），本班優先做完 P0 站點故障，F1/F2/F3 排下一輪整段做，不倉促收一半。F1 回歸基準（07-21~07-28 八天真值）已到位；F2 正確修法（forked_from_id/parent_thread_id 鏈追 root）已有 resource_monitor 的參考實作可抄，見 journal。",
-      "platform_ops canonical pending 池逐筆 triage（74 筆，33 筆 >7 天）——本班未動，留待下一班"
+      "canonical 任務池 35 件（platform_ops pending 74 筆的其中一大塊）——逐筆核對 storage/next_tasks.json 全部仍是 pending（非已自癒雜訊），但內容多數是需要真的讀懂再動手的研究驗證/工程除錯，見 canonical_backlog_35_pending，判斷不宜在本班尾端倉促速刷"
+    ]
+  },
+  "canonical_backlog_35_pending": {
+    "verified_all_still_pending_in_next_tasks_json": "2026-08-06T00:16Z",
+    "research_verification_k_collection_merge": [
+      "assign_1fe316ba K1750 IPO heat（BOUNDED_NULL，11 步科學驗證清單，含 preregistration 凍結順序核對）",
+      "assign_5b63c16f K1741 short-credit tail-hedge",
+      "assign_628bc810 K1749 low-vol consolidation duration",
+      "assign_71636a7a K1813 transient-500 但 artifact 完整",
+      "assign_bfd8dbf8 K1813 remediation round 2",
+      "k1730_k1731_review_certification_codex_20260729 K1731 critical path"
+    ],
+    "note_research_items": "task_type 標 platform_ops（因為是 collect_completed 派工步驟），但實質是 worktree-merge-verification skill 治理的研究誠實紅線工作（knowledge.json 只能主線程寫、merge 前要獨立 Codex 覆核）。不建議在非研究情境下速刷。",
+    "governance_lifecycle_review": [
+      "control_gate_review_candidate_silent_fallback_audit...",
+      "control_gate_review_dispatch_collision...",
+      "control_gate_review_publisher_provenance_contract...",
+      "control_gate_review_task_generation...",
+      "dreaming_missing_retry_strategy_k1221/k1730/k1739/k1742（4 件）",
+      "dreaming_observation_ledger_breach_single_gateway_claim_next_removal",
+      "dreaming_repeated_tool_failure_dispatch_supervisor_kill_failed_orphan",
+      "dreaming_unfiled_incident_class（3 件，不同 hash）"
+    ],
+    "engineering_fix": [
+      "ci-red-30983363179 CI 紅燈修復",
+      "assign_71c8e587 3-STRIKE×91 selfreload 被 fail-closed 永久封鎖",
+      "assign_9166bcb6 phase-z-foreign 派發組合無解（空 declared_output_paths + 唯讀 sandbox）",
+      "assign_4e4e8030 CLI 自動升級打斷 backbone",
+      "assign_10d0c985 compute queue terminal 矛盾",
+      "gh-54 Graphify integration 完成",
+      "inc_5fa16e7d8d78_rootcause_e1 publishing_freshness 根因重構",
+      "inc_c67bec28dd29_rootcause_e2 silent_fallback_new 根因重構"
+    ],
+    "content_pipeline_blocked": [
+      "lazypack_render_repair_mile_a1d9c5e0（根因已是 upload_chart 無重試，同一件事，已轉 Codex Zone A）",
+      "k528_regenerate_mile_35eef830_charts",
+      "assign_c7c2b761 experiments/k1583 reaper held",
+      "assign_e6cdb287 experiments/K1710 等 2 份 reaper held"
+    ],
+    "org_meta": [
+      "assign_2fdba4c4 platform_ops pending 池 74 筆逐筆 triage 本身",
+      "assign_a33907f7 老闆 approve 部門拆分未落地 + 經理 inbox 積壓 9 則老闆訊息"
     ]
   },
   "d39_completed": {

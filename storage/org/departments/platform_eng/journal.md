@@ -766,3 +766,47 @@ inbox 裡已被 D57/D42 取代的 D5→D57 鏈（46 件，多數 assignment/deci
 （PRICING 缺 5 個 model）。範圍還在增長（資源監控部同一天又送了 period_semantics 的新缺陷 A/B/C），
 且 F1 的回歸基準（07-21~07-28 八天真值）雖已交付，但整體規格仍在被對方持續修訂中。判斷：本班
 先做完 P0 站點故障，F1/F2/F3 排下一輪整段做，不要在規格還在動的狀態下倉促收一半。
+
+## 2026-08-06 00:00-00:16（台灣時間）｜收件匣第二輪批次處理｜outcome=done（部分）+ 誠實留白
+
+D39 收班後老闆／喚醒閘門要求依優先序繼續清收件匣（53→60+ 件，持續有新訊息進來）。本輪完成：
+
+**修好並驗證**：`scripts/ops_snapshot.py::alerts_state` 讀了一個 writer 從沒寫過的鍵
+（`sent_at`/`ts`），實際 writer（`src/volpred/ops/alerts.py`）寫的是 `last_sent_at`/
+`first_sent_at`——678 筆 alert_dedup 記錄裡 0 筆有 `sent_at`，636 筆有 `last_sent_at`。結果是
+`alerts.sent_last_24h` 在每一份經理 brief 裡結構性恆為 0，包含今天下午平台停擺 2h45m 那段。
+改成 fallback 讀取，實測 0→37；加了用真實 writer 鍵形狀的回歸測試（`alerts_state` 現在也接受
+`path=` 參數方便測試，跟 `queue()` 等既有函式同一慣例）。commit（scripts/ops_snapshot.py +
+tests/test_ops_snapshot_queries.py）。
+
+**升級處理（轉發經理裁決，非本部門可獨力解）**：
+- K1465 卡的 `scikit-posthocs` 依賴：`uv add`/`uv lock` 連經理角色都被 harness 擋（經理本人
+  實測驗證），裁決 (c)——非部門/manager 可解，改走下次主線程互動 session 手動處理，K1465
+  non-blocking。
+- 研究部 owned_paths 涵蓋不到 `.claude/worktrees/*/experiments/`：查證後排除
+  `normalize_owned_path`／`turf_patterns` 本身的問題（產出的 pattern 語法跟其他能正常運作的
+  規則一致），但無法進一步驗證 Claude Code 自己的 permission matcher 是否真支援單一 `*`
+  當整段路徑萬用字元——那段邏輯不在本 repo，需要研究部從自己的 session 實測 Edit 呼叫成敗
+  才能回推。已建議研究部下一輪順手用正規寫入工具試寫一個 scratch 檔驗證，查完寫回
+  `docs/error_log.md` 不在本部門 owned_paths，已請經理或治理部代寫。
+- 內容部 P1（Supabase 圖片上傳無退避重試，`src/volpred/charts/article_charts.py::upload_chart`，
+  已用逐 IP TCP 測試證實根因是 Cloudflare edge 間歇性 timeout）與會員部 P2（`questions.py:1640`
+  sticky current_rank）都在 `src/volpred/`，屬 Codex Zone A，均已轉請經理指派，非本部門能碰。
+
+**收尾**：又處理／歸檔約 24 件（含前述修復、升級、以及 mv-permission 抱怨——這些已被
+`scripts/org/inbox_archive.py` 這支既有 CLI 解決，回覆對方直接指去用它，不必再各自 shutil.move
+繞）。
+
+**誠實留白，本班到此為止**：對照 `storage/next_tasks.json` 逐筆核對，剩下的 35 件
+「canonical 任務」全部仍是 `pending`（非已自癒/過期的雜訊），內容是：9 個 K-collection 研究審查
+＋merge（如 K1750/K1741/K1749/K1813，每個都要求 preregistration 凍結順序核對、embargo 驗證、
+bootstrap 敏感度、programmatic README 重建、獨立 Codex 覆核——這是 `worktree-merge-verification`
+skill 治理的科學驗證流程，不是機械 checklist）、9 個 dreaming lifecycle review、4 個 Gate PDCA
+lifecycle review、CI 紅燈修復、3-STRIKE×91 selfreload 封鎖、phase-z-foreign 派發死結、
+platform_ops pending 池 74 筆逐筆 triage、2 個 lazypack render 失敗、mile_35eef830 圖表重製、
+2 份 reaper-held 產物。抽查 `next_tasks.json` 確認全部 `status=pending`，不是已完成的雜訊。
+
+判斷：這些每一件都要求真的讀懂內容再動手（尤其 K-collection 涉及研究誠實紅線，錯誤合併會汙染
+knowledge base），在一個已經很長的 session 尾端倉促逐件速刷，風險比放到下一輪整段開工更大。
+沒有標成 blocked（沒有被鎖擋住），是誠實回報「規模超出本班可負責任完成的量」，留給下一班或
+專門排一輪處理，state.json 已列出完整清單分類。
