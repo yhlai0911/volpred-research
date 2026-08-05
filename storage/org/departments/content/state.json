@@ -1,6 +1,56 @@
 {
-  "health": "new",
-  "kpi": {},
-  "last_run": null,
-  "open_items": 0
+  "health": "blocked",
+  "kpi": {
+    "drafts_landed_this_run": 0,
+    "drafts_finished_awaiting_move": 2,
+    "feed_draft_pool_depth": 4,
+    "feed_draft_pool_threshold": 4,
+    "dedup_rejected": 1,
+    "anti_ai_gate_pass": 2
+  },
+  "last_run": "2026-08-05T09:05:00Z",
+  "open_items": 2,
+  "blockers": [
+    {
+      "what": "storage/drafts/ 目錄級寫入認領被 session b18127d0 持有（08:49:41Z 取得，45 分鐘有效），內容部無法落地 K1451/K1465 兩篇成品",
+      "workaround": "成品暫存 storage/org/departments/content/staging/，認領解除後 mv 到 storage/drafts/ 即可，內容已定稿",
+      "escalated_to": "manager",
+      "report_item": "item_20260805T090136117788Z_canonical-2-1-storage-drafts-k1"
+    },
+    {
+      "what": "K1451/K1465 的文章圖表腳本在 scripts/，不在內容部 owned_paths",
+      "workaround": "已 request platform_eng 代寫；draft 留 placeholder + chart_status=pending_platform_eng",
+      "escalated_to": "platform_eng",
+      "report_item": "item_20260805T085648183331Z_x2-owned-paths-storage-drafts-s"
+    },
+    {
+      "what": "收尾契約第 3 項（inbox 歸檔）機械上做不到：部門 runtime allow-list 沒有 mv，Bash mv 一律被 deny",
+      "workaround": "已處理的四項仍留在 inbox（K1321 判重、research 測試已回覆、deny-allow-list 已完成、orphan triage 已完成），journal 有完整紀錄，待 mv 權限補上後歸檔",
+      "escalated_to": "manager",
+      "report_item": "item_20260805T090546006376Z_orphan-triage-item-20260805t074"
+    },
+    {
+      "what": "收尾契約第 5 項（git_writer_lock commit）失敗：BLOCKED: cannot snapshot current index，根因是 .git/index.lock 存在（17:01 建立，另一個 writer 正在提交中）",
+      "workaround": "五個檔案已寫入磁碟、內容完整，未提交；未刪除他人的 index.lock。下一班或主線程可直接補 commit",
+      "escalated_to": "manager",
+      "report_item": "item_20260805T090546006376Z_orphan-triage-item-20260805t074"
+    }
+  ],
+  "uncommitted_paths": [
+    "storage/org/departments/content/staging/K1451_general_draft.md",
+    "storage/org/departments/content/staging/K1465_general_draft.md",
+    "storage/org/departments/content/journal.md",
+    "storage/org/departments/content/memory/notes.md",
+    "storage/org/departments/content/state.json"
+  ],
+  "inbox_processed_but_not_archived": [
+    "item_20260805T085055250284Z_canonical-k1321-write-general-a",
+    "item_20260805T074945951272Z_item",
+    "item_20260805T084003604010Z_deny-allow-list-111-bash-edit-w",
+    "item_20260805T074549260343Z_orphan-sweep-storage-ops-orphan"
+  ],
+  "pending_on_others": [
+    "platform_eng: scripts/gen_k1451_article_charts.py 與 scripts/gen_k1465_article_charts.py",
+    "manager: storage/drafts/ 認領粒度裁決 + K1321_article_general 收單"
+  ]
 }

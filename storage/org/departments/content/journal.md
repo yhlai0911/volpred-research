@@ -1,1 +1,85 @@
 # content 工作日誌（append-only）
+
+## 2026-08-05（補記，前一班 session）outcome=blocked
+
+依經理 item_20260805T084003604010Z 指示補記。前一班確實做了工作，但當時部門 runtime 沒有任何
+Edit/Write 權限（專案 allow-list 有 111 條 Bash 規則、Edit/Write 一條都沒有），所以寫不進 journal
+與 draft，不是沒做：
+
+- 對補池候選 K1451 / K1465 / K1321 / K1482 / K1485 / K1696 做了 3-layer 查重
+- 判定：K1321 撞硬 arc dup（不碰）；K1482 / K1485 BLOCKED_ON_DATA（不碰）；K1451 / K1465 / K1696 可寫
+- 回覆了 smoke test 訊息
+- 阻塞已於 16:37 由 org_attach 依 registry 轄區自動產生 permissions 修復（經理回報）
+
+## 2026-08-05 16:51–17:05 outcome=blocked
+
+**收到**：manager 三張 canonical P1 派工（K1321 / K1451 / K1465 write general-audience article，
+auto-discovered uncovered K）＋ 補池單 item_...074453840780Z ＋ research 的 P3 測試 request。
+
+**做了什麼**
+
+1. **K1321 判重不寫**。feed 內 `mile_679eb2a1`（2026-08-04 建，status=draft，「我們還差 136 天才敢下
+   結論，中途先抓到自己的資料過期」）已完整覆蓋 K1321：同一個 VIXTWN/VIX 比值、同一個 252 交易日
+   gate、同一組 K1181 基準（1.3906 / CV 0.098）、同一個敘事 arc，只差快照日（該 draft 停 2026-05-28
+   n=116，K1321 是 2026-05-22 n=112）。與經理 08:40 的裁決一致；08:50 的自動派工單沒讀 feed 既有
+   draft，已建議加查重。
+2. **K1451 / K1465 兩篇文字定稿**，`anti_ai_gate.py --no-fb-mode` 兩篇皆 exit 0（PASS，warn 0/3）。
+   所有數字程式化取自 `experiments/k1451/k1451_results.json` 與 `experiments/k1465/k1465_results.json`，
+   未從 README 或摘要轉抄。查重結論：兩篇都與既有同族文章（K651、2026-05-04 四項對決、2026-05-08
+   跨市場 DoW、2026-03-17 VIX 週一）**arc 不同**，且文內明寫與前作的關係。
+3. **圖表走求助路由**（經理 08:40 裁決：`scripts/` 不在內容部 owned_paths）。送 request 給
+   platform_eng（`item_20260805T085648183331Z`），附兩支腳本的輸出路徑、jq 欄位路徑、圖表規格，
+   並標明 `k1465_results.json` 的 `dow_descriptive_full.*.n` 有 ×1e4 標度瑕疵請勿引用。
+4. **回覆 research 的 P3 測試 request**（`item_20260805T090054467298Z`）。
+
+**阻塞（本輪的實質產出為 0 篇落地 draft）**
+
+`storage/drafts/` 被 session `b18127d0` 以**目錄級**寫入認領佔住（08:49:41Z 取得，最後動到
+`K1609_general_draft.md`，研判是主線程的 lazypack 工作），剩 33 分鐘。我要寫的是兩個全新檔名、
+與對方零交集，但認領是目錄前綴比對，照樣被擋。未硬搶、未 release 他人活 claim。
+`Bash run_in_background` 與 `Monitor` 在本部門 runtime settings 下都被 deny，無法在本 session 內等到期。
+
+**處置**：兩篇成品暫存 `storage/org/departments/content/staging/`（自己的轄區），內容已定稿，
+frontmatter 內註明最終路徑，認領解除後直接 mv 即可。已上報經理並請裁決是否把 drafts 的認領粒度
+改成檔案級（根因：drafts 是多方共用的高流量目錄，目錄級鎖等於讓任兩個寫作流程互斥）。
+
+**教訓（已寫進 memory/notes.md）**：目錄級 path claim 撞在共用高流量目錄上會造成整輪空轉；
+遇到時的正確順序是「先把成品寫進自己轄區保住工作 → 送 request/report 走管道 → 才回報」，
+不要停在原地重試。
+
+### 附帶完成：orphan 草稿 triage（item_...074549260343Z）
+
+`storage/ops/orphan_reap_report.json`（09:00Z）的孤兒數已從經理引用的 10 篇降到 7 篇
+（K1536 / K1589 / K1609 這三篇已被主線程的 lazypack 流程接手）。逐篇 triage：
+
+| 草稿 | 字數 | 圖檔實況 | 判定 |
+|---|---|---|---|
+| `k1706_general_draft.md` | 4,605 | 2 張齊全（`storage/drafts/assets/`） | 可救，查重乾淨（2016 SEC 最小報價跳動試點，feed 無同題） |
+| `k1600_general_draft.md` | 3,108 | 2 張齊全（`storage/drafts/article_images/`） | 可救但需先解 arc 關係：2026-07-02 已發「K1582：HARQ / SHARK-style 測量誤差修正」，k1600 的 arc 是「係數對了預測沒進步、美股全數更差台股打平」，屬續作，文內須明寫與 K1582 的關係 |
+| `K1597_general_draft.md` | 3,794 | 1 張（`storage/assets/k1597_tail_vs_forecast_zh.png`，存在） | 需補 1 張圖才過 2 張門檻 |
+| `K1357_general_draft.md` | 1,824 | 1 張（`storage/drafts/assets/`，存在） | 需補 1 張圖；字數偏薄，補圖時一併加深 |
+| `K1658_general_draft.md` | 2,054 | 引用 `assets/k1658_general_raw_vs_holm.png`，**全 repo 不存在** | 需補 2 張圖 |
+| `K1710_general_draft.md` | 2,497 | 引用 `assets/k1710_overnight_edge.png`，**不存在** | 需補 2 張圖 |
+| `K1419_general_draft.md` | 1,731 | 引用 `assets/k1419_0050tw_pinball.png`，**不存在** | 需補 2 張圖；字數最薄，需加深 |
+
+沒有一篇該廢。7 篇的內容都有對應實驗，卡點全在圖表與釋出端。
+
+**流程洞根因（經理指定要回答的問題）**：這 10 篇不是研究端沒產出，是釋出端漏接，四層疊加。
+
+1. **撰稿與圖表生成是兩個分離步驟，中間沒有 gate**。作者在 markdown 寫下圖片路徑就當交付完成，
+   沒有任何機制驗證那個檔案真的被產出來。K1419 / K1658 / K1710 三篇的圖檔在整個 repo 都不存在，
+   `experiments/k1419|k1658|k1710/figures/` 目錄也不存在，等於圖從來沒生成過。
+2. **圖片路徑沒有統一慣例**，七篇用了四種寫法：`assets/`、`storage/assets/`、
+   `storage/drafts/assets/`、`storage/drafts/article_images/`。publisher 以 repo root 解析，
+   寫 `assets/` 的那三篇必然 IMAGE PATH ERROR。
+3. **檢查點只設在釋出端**。2 張真圖與 lazypack plan 的 gate 都在 `publish_draft.py`，撰稿端沒有
+   對應的自檢，所以稿子寫完就靜靜躺在 `storage/drafts/`，沒有任何人被通知，39～355 小時後才被
+   orphan sweep 撿到。
+4. **orphan reaper 只重試、不回單**。它每輪 adopt 失敗（K1357 rc=5 缺圖、K1419 rc=6 圖不存在），
+   把原因寫進報告就結束，不會回開一張「補圖表」任務給任何人。所以同樣兩篇每輪被 reject 一次，
+   永遠不會前進。這是報告有寫、但沒有人被指派的典型死角。
+
+**本輪為何一篇都沒救回**：`publish_draft.py --dry-run` 對 k1706 回
+`DEFERRED LAZYPACK CONTRACT: a general draft without a lazypack section requires --lazypack-plan`。
+lazypack plan 要寫進 `storage/drafts/<K>_lazypack_plan.json`，正好落在被 session b18127d0 認領的目錄裡
+（對方此刻正在做的就是 K1536 / K1589 / K1609 的 lazypack）。救援與新稿被同一個鎖擋住。
