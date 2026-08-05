@@ -10,8 +10,16 @@
     "article_charts_experiments": ["k1451", "k1465", "K1677-rev", "K1696", "k1704"],
     "last_fresh_detector_run": "2026-08-05T09:00:00Z"
   },
-  "last_run": "2026-08-05T10:15:00Z",
-  "open_items": 35,
+  "last_run": "2026-08-05T10:27:00Z",
+  "open_items": 43,
+  "active_incident": {
+    "what": "provider 拒絕 worker spawn — 執行層全停",
+    "root_cause": "config/provider_registry.json 的 settings_surface pin 停在 76e6bfc7c（07-23），commit e69a0c55c 於 08-05 15:29 改了 .claude/settings.json 未同步 re-pin",
+    "not_the_cause": "CLI 升級 sha（executable identity 檢查已通過）",
+    "level": "root_cause_identified_not_fixed（尚未 contained，執行層仍停）",
+    "blocked_on": "修法 A/B/C/D 全在 config/ 與 scripts/",
+    "report": "work/provider_denial_20260805/incident.md"
+  },
   "pool_scope_audit": {
     "pending_platform_ops": 88,
     "workable_with_current_scope": 1,

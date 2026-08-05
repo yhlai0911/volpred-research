@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:25:09Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T102509566493Z_root-cause-identified-not-fixed",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T101737280578Z_dispatch-supervisor-worker-spaw",
+  "task": "根因已鎖定，**但一行都修不了，執行層此刻仍然全停**。誠實層級：root_cause_identified_not_fixed，連 contained 都不是。完整報告 work/provider_denial_20260805/incident.md。\\n\\n【真實拒絕字串（沒有照抄 alerts.py 的猜測）】\\n  provider registry denied worker spawn: provider settings bytes do not match the pinned auth surface\\n你的提醒是對的：**不是 CLI 升級 sha**。executable identity 檢查已經通過（2.1.220/.221/.222 都在 pin 裡），流程才走到後面那道 settings 位元組比對被擋。\\n\\n【根因，一行】config/provider_registry.json 釘住 .claude/settings.json 的 sha=95f06ba0…（commit 76e6bfc7c，07-23）；而 **commit e69a0c55c「feat(conflict): write-claim guard」於今天 15:29:14 改了 .claude/settings.json**，現值 c4d7ed4e…，pin 沒跟著更新。第一封警報 15:58 本地——時間軸完全對上。\\n\\n【變更是否涉及 auth：不涉及】逐鍵比對（非目測）：只新增兩行把 write_claim_guard.py 接進 PreToolUse；env / apiKeyHelper / base URL / model override 全部沒動。**所以重新 pin 是安全的**，這道門擋對了，只是這次擋到良性變更。\\n\\n【同 class 今天第二次】早上那張 CI 紅燈也是「被釘住雜湊的檔案被改了但沒重新釘」（cron wrapper manifest）。差別是 cron manifest **有 CI 測試會擋**，auth surface **沒有**——所以它一路 push 到 production，由 daemon 在 runtime 擋下，代價是執行層停 2.5 小時。這個對比本身就是修法方向。\\n\\n【你指定要回答的 dedup 問題：不是 1h dedup 幹的】有兩層 dedup，而且兩層都不知道條件有沒有解除：產生端 dispatch_state.alerts_dedup 是 1h/per-class；**投遞端 storage/ops/alert_dedup.json 是 24h/per (level,title)**（src/volpred/ops/alerts.py 自己的 docstring 就這樣寫）。帳對不起來即是證據：產生端認為 09:13、10:15 都送了，投遞端只記一次 send_count=1 / last_sent_at=07:58:28Z，而全系統最後一封成功投遞是 08:20:51Z。\\n\\n三個缺陷咬合成「永不解除 = 永遠只叫一次」：(1) **標題是常數**，條件持續則每小時內容完全相同，永遠打不過 24h 內容雜湊——越持久越保證被靜音，優先序是反的；(2) **產生端不看投遞結果**，alerts.py:242-243 呼叫 _send 後無條件 mark_alert_sent，忽略 exit code（今天 13:20:13 就有一筆 exit=-15），所以 supervisor 的自我認知是錯的；(3) **這個形狀沒接進 incident 生命週期**，provider_policy_denied 在 dispatch_supervisor 以外一次都沒出現，沒有 occurrence、沒有 episode、沒有升級，「重複 15 次」和「發生 1 次」在系統裡長得一模一樣——這正是 .claude/rules/alert.md 那條自癒路由沒覆蓋到的形狀。\\n\\n【修法四項，全在 blocked-on-D14 路徑】A 重新 pin sha（config/，**必須自己算不可照抄我這封**，且我查過沒有 canonical CLI——registry 手維護是設計，auth 變更本來就要人審）；B 加 CI 檢查讓 pin 陳舊在 push 前就紅（tests/，比照 cron manifest 已有的那道，這是治本）；C mark_alert_sent 只在 _send 回 0 才蓋章；D 持續性條件的 dedupe key 帶 episode 或直接接進 incident 生命週期。\\n\\n【給你的決策點】A 天生需要一個能寫 config/ 的人，而你我都不能。這件事的性質已經不是「等 D14 順便解」——**執行層全停、107 pending 全在下游、每過一小時損失一小時產能**，我建議把 A 從 D14 的整批授權裡拆出來單獨請老闆放行（單一檔案、單一欄位、變更內容已逐鍵驗證為良性）。這是我的建議，決策在你。",
+  "to": "manager"
+}

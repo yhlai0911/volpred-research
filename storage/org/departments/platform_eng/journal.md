@@ -1,5 +1,42 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-05 18:17–18:27（台灣時間）｜P1 provider 拒絕 spawn｜outcome=root_cause_identified_not_fixed
+
+**工作項**：`item_20260805T101737280578Z_dispatch-supervisor-worker-spaw`
+
+**真實拒絕字串**（照裁決要求取自 worker.py 傳給 `send_provider_denial_alert` 的
+`str(exc)`，**沒有**照抄 alerts.py 的建議）：
+`provider settings bytes do not match the pinned auth surface`。
+經理的提醒成立——**不是 CLI 升級 sha**：executable identity 檢查
+（`registry.py:884-895`）已經通過，流程才走到 `registry.py:912-919` 的
+settings 位元組比對被擋。
+
+**根因**：`config/provider_registry.json` 釘住 `.claude/settings.json` 的
+sha=`95f06ba0…`（commit `76e6bfc7c`，07-23）；commit `e69a0c55c`
+「feat(conflict): write-claim guard」於今天 15:29:14 改了那個檔（現值 `c4d7ed4e…`），
+pin 沒跟著更新。第一封警報 15:58 本地，時間軸完全對上。
+逐鍵比對確認變更**不涉及 auth**（只新增兩行接 write_claim_guard.py，
+env/apiKeyHelper/base URL/model 全沒動）→ 重新 pin 是安全的。
+
+**同 class 今天第二次**：早上那張 CI 紅燈也是「被釘住雜湊的檔案被改了但沒重新釘」
+（cron wrapper manifest）。差別是 cron manifest **有 CI 測試會擋**、auth surface **沒有**，
+所以它一路 push 到 production 才由 daemon 在 runtime 擋下，代價是執行層停 2.5 小時。
+
+**dedup 靜音之謎（經理指定回答）—— 不是 1h dedup 幹的**：兩層 dedup，
+產生端 1h/per-class、**投遞端 24h/per (level,title)**。兩邊帳對不起來即是證據：
+產生端認為 09:13、10:15 都送了，投遞端 `send_count=1 / last_sent_at=07:58:28Z`。
+三個缺陷咬合：(1) 標題是常數 → 條件越持續、內容越相同、越保證打不過內容雜湊，
+優先序是反的；(2) `alerts.py:242-243` 呼叫 `_send` 後**無條件** `mark_alert_sent`，
+忽略 exit code（今天有一筆 `exit=-15`）→ supervisor 的自我認知是錯的；
+(3) `provider_policy_denied` 從未接進 incident 生命週期，沒有 occurrence／episode／升級。
+
+**未完成**：五步 Gate 的第 4、5 步都沒做。修法 A（重新 pin）／B（加 CI 檢查，治本）／
+C（`mark_alert_sent` 只在投遞成功時蓋章）／D（持續條件的 dedupe key 帶 episode）
+全部落在 `config/` 與 `scripts/`，依 D14 (a) 停在原地、未繞路。
+已建議經理把 A 從 D14 整批授權裡**拆出來單獨請老闆放行**——單一檔案、單一欄位、
+變更已逐鍵驗證為良性，而執行層每停一小時就損失一小時產能。
+
+
 ## 2026-08-05 18:09–18:20（台灣時間）｜D14 遵辦：降載 + 分類 + 出口規格｜outcome=done
 
 **工作項**：`item_20260805T100857005235Z_d14-d9-registry-json-write-mana`（經理裁決 D14）
