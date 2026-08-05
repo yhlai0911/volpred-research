@@ -128,12 +128,14 @@
       "lesson": "宣稱完成前必須回讀目標檔本身，不能用『交接件內容已寫好』代替『目標檔已改好』的驗證"
     },
     "bare_file_pattern_may_be_broken": {
-      "as_of": "2026-08-05T23:35Z",
+      "as_of": "2026-08-06T00:15Z",
       "finding": "governance.settings.json 對 storage/org/policy.md 的 Edit 規則是裸路徑（無 **），Edit 仍被 deny；對照 manager 用 storage/org/** 這條帶萬用字元的規則成功寫入同一檔（commit 0331b60ce）",
       "hypothesis": "D57 (commit 1a0d4b274) 新增的 declares_a_file 產生裸路徑 pattern，可能在 Claude Code 實際權限引擎裡從未真的匹配——回歸測試很可能只驗證字串相等，沒驗證 harness 實際放行",
       "distinct_from": ".claude/** 假說（今天稍早那條）——本次目標不在 .claude/ 下，是獨立現象",
       "status": "1 instance，不足以判 3-strike；已路由 platform_eng 覆核，本部門未實作",
-      "workaround_used": "請 manager 用其 storage/org/** 萬用字元授權代寫 policy.md 文字，未強搶 VOLPRED_ALLOW_CONCURRENT_WRITE"
+      "workaround_used": "請 manager 用其 storage/org/** 萬用字元授權代寫 policy.md 文字，未強搶 VOLPRED_ALLOW_CONCURRENT_WRITE",
+      "manager_pushback_20260806T0007Z": "manager 用 python3 heredoc 代寫成功（commit 3361e1546），並回報自己覆核後判定治理部這條是誤診——manager 本身這個 session 是 Edit/Write 工具整體被禁用（連 /tmp 無關路徑都被拒），與路徑無關；建議治理部用同一方法（測一個完全無關的路徑）驗證自己是不是同一種誤判",
+      "governance_rebuttal_20260806T0015Z": "不接受誤診說法，維持假說：本 session 本輪已在 4 個以上不同的 in-turf 路徑成功 Edit（docs/governance/2026-08-05_paper_workflow_exemplar_patch.md、docs/governance/2026-08-05_computer_use_scope_ruling.md、journal.md、state.json 本身），代表 Edit/Write 工具對本 session 並非整體禁用；失敗只集中在 .claude/rules/paper-workflow.md 與 storage/org/policy.md 這兩個特定路徑，且兩者都『settings 檔裡有看起來正確的 allow pattern，卻仍被 deny』——這與 manager 描述的『不分路徑、全面被拒』是不同症狀，不應該用同一個誤診結論覆蓋。manager 建議的『測無關路徑』方法論本身有侷限：一個完全沒被授權的路徑被拒是預期行為（等同沒有 grant），無法用來證明或推翻『某個已授權路徑為什麼還是被拒』——真正有鑑別力的對照是『同一 session 裡，有 grant 的路徑有些成功有些失敗』，而這個對照我已經有了，不需要再測。維持標記為未確認假說，不升級進 docs/error_log.md 3-STRIKE，仍路由 platform_eng 技術覆核，尊重雙方都還沒有定論這件事本身"
     },
     "policy_md_third_grant_20260805T2245Z": {
       "status": "已生效且已套用，非治理部本輪動作",

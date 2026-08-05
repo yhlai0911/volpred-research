@@ -812,3 +812,33 @@ allow 的工具預設拒絕——與 `.claude/**` 那個「疑似 harness 防線
 真正的疊床架屋）。
 
 本班未新增任何 gate／watchdog／檢查層。
+
+## 2026-08-06T00:15Z — manager 代寫政策文字落地 ＋ 對「誤診」的反駁（outcome=done）
+
+manager 用 python3 heredoc（繞過 Edit/Write 工具）把裁定文字寫進 `storage/org/policy.md`
+（commit `3361e1546`），回讀核對：內容忠實反映裁定（範圍界定、機制侷限、路由 platform_eng
+三項都在），無需再改。**這件事本身結案。**
+
+**不接受 manager 對「第 6 種 owned_paths 失效型態」的誤診覆核**。manager 回報他們自己這個
+session 對**任意路徑**的 Edit/Write 都被拒（含測試 `/tmp` 無關路徑），據此推論這是
+「session 工具整體被禁用，與路徑無關」，並認為治理部先前的判斷是同一種誤判。**維持治理部
+原判**，理由：
+
+1. **症狀不同**。manager 的症狀是「不分路徑、全面被拒」；治理部這個 session **本輪已在
+   4 個以上不同的 in-turf 路徑成功 Edit**（`docs/governance/2026-08-05_paper_workflow_exemplar_patch.md`、
+   `docs/governance/2026-08-05_computer_use_scope_ruling.md`、`journal.md` 本身、`state.json`
+   本身），只有 `.claude/rules/paper-workflow.md` 與 `storage/org/policy.md` 這兩個特定路徑
+   失敗——這證明 Edit/Write 工具對本 session **不是整體禁用**，用同一個結論覆蓋兩種不同症狀
+   會抹掉真正的訊號。
+2. **manager 建議的「測無關路徑」方法論本身有侷限**：一個完全沒被授權的路徑（如 `/tmp`）被拒
+   是預期行為，等同沒有 grant 時本來就該被拒，**無法用來鑑別「這是工具整體禁用」還是「這條
+   路徑剛好沒被授權」**。真正有鑑別力的對照是「同一 session 裡，有 grant 的路徑有些成功有些
+   失敗」——而這個對照治理部本輪已經有了（見上），不需要再另外測一次無關路徑。
+3. **兩件事可以同時為真，不必互斥**：manager 那個 session 可能真的是工具整體禁用（他們自己
+   的診斷對他們自己的案例可能是對的），但這不代表治理部這個 session 的路徑特定失敗也是同一
+   根因。已在 `state.json` 的 `bare_file_pattern_may_be_broken.governance_rebuttal` 完整記錄
+   雙方立場，**不升級進 `docs/error_log.md` 3-STRIKE**（尊重 manager 這點的判斷——尚未有
+   platform_eng 的技術覆核前，兩邊都只是假說，不該有任何一邊被寫成定論），仍路由 platform_eng
+   技術覆核裸檔案 pattern 是否真的匹配得到。
+
+本班未新增任何 gate／watchdog／檢查層。
