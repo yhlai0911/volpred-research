@@ -1,0 +1,369 @@
+{
+  "experiment_id": "nfp_20260807_t2",
+  "generated_for": "NFP_US_2026_08_07 / T-2",
+  "question": "Does the pre-NFP VIX ramp live in the final two sessions (T-3 close -> T-1 close), i.e. in the part of the week a T-2 reader can still act on?",
+  "analysis_class": "descriptive_event_study_with_HAC_inference",
+  "verdict": "NULL_FAILURE_TO_DETECT",
+  "sibling_study": {
+    "experiment_id": "nfp_20260807_t7",
+    "window": "T-7 close -> T-1 close (six returns)",
+    "verdict": "NULL_FAILURE_TO_DETECT",
+    "relation": "this study shortens the window to the final two sessions to test the dilution explanation for the sibling's null"
+  },
+  "data": {
+    "vix_source": "Yahoo Finance ^VIX daily close, pinned local snapshot",
+    "vix_requested_start": "2010-01-01",
+    "vix_as_of": "2026-08-04",
+    "vix_observations": 4172,
+    "vix_invalid_rows_dropped": [
+      "2026-06-19",
+      "2026-07-03"
+    ],
+    "release_source": "FRED/ALFRED release dates API, release id 50 (Employment Situation)",
+    "release_selected_rule": "earliest release-id-50 entry in each calendar month",
+    "release_snapshot_acquired_at": "2026-08-05T00:13:44Z"
+  },
+  "sample": {
+    "n_releases_matched": 191,
+    "first_release": "2010-02-05",
+    "last_release": "2026-07-02"
+  },
+  "event_window": {
+    "definition": "VIX close at T-3 trading days -> VIX close at T-1 (two returns)",
+    "n": 191,
+    "mean_pct": -0.17185212143133796,
+    "median_pct": -1.9213997440488018,
+    "sd_pct": 10.822786653188672,
+    "share_up_pct": 41.8848167539267,
+    "mean_abs_pct": 8.127713950408761
+  },
+  "control_window": {
+    "definition": "all two-return VIX windows whose return intervals do not overlap an NFP T-3->T-1 interval",
+    "exclusion_math": "event intervals i-2..i-1; control intervals k+1..k+2; exclude i-4 <= k <= i-2",
+    "n": 3597,
+    "mean_pct": 0.7181639668437,
+    "median_pct": -0.47468685116288656,
+    "sd_pct": 11.3883085881055,
+    "share_up_pct": 47.17820405893801,
+    "mean_abs_pct": 7.669843006832791
+  },
+  "primary_inference": {
+    "method": "OLS event indicator with Newey-West HAC covariance",
+    "reason": "rolling two-return control outcomes overlap and are not iid",
+    "n": 3788,
+    "n_event": 191,
+    "n_control": 3597,
+    "lag": 22,
+    "effect_pct_points": -0.8900160882750295,
+    "hac_se": 0.8377046835148462,
+    "hac_t": -1.0624461170978474,
+    "p_two_sided": 0.28803320720064374,
+    "ci95_low": -2.5318870976446526,
+    "ci95_high": 0.7518549210945934
+  },
+  "hac_lag_sensitivity": {
+    "6": {
+      "n": 3788,
+      "n_event": 191,
+      "n_control": 3597,
+      "lag": 6,
+      "effect_pct_points": -0.8900160882750295,
+      "hac_se": 0.8207232162487592,
+      "hac_t": -1.0844290385045814,
+      "p_two_sided": 0.27817461432072754,
+      "ci95_low": -2.4986040333984763,
+      "ci95_high": 0.7185718568484171
+    },
+    "22": {
+      "n": 3788,
+      "n_event": 191,
+      "n_control": 3597,
+      "lag": 22,
+      "effect_pct_points": -0.8900160882750295,
+      "hac_se": 0.8377046835148462,
+      "hac_t": -1.0624461170978474,
+      "p_two_sided": 0.28803320720064374,
+      "ci95_low": -2.5318870976446526,
+      "ci95_high": 0.7518549210945934
+    },
+    "60": {
+      "n": 3788,
+      "n_event": 191,
+      "n_control": 3597,
+      "lag": 60,
+      "effect_pct_points": -0.8900160882750295,
+      "hac_se": 0.8554410990015895,
+      "hac_t": -1.0404177322246893,
+      "p_two_sided": 0.2981458669296524,
+      "ci95_low": -2.566649833213508,
+      "ci95_high": 0.7866176566634487
+    }
+  },
+  "release_clean_control_sensitivity": {
+    "definition": "controls additionally dropped when either of their two returns is a release-day return",
+    "n_control_dropped": 193,
+    "n": 3595,
+    "n_event": 191,
+    "n_control": 3404,
+    "lag": 22,
+    "effect_pct_points": -0.8195983664476447,
+    "hac_se": 0.8433453137311925,
+    "hac_t": -0.9718419644991152,
+    "p_two_sided": 0.3311291754013441,
+    "ci95_low": -2.4725248078914146,
+    "ci95_high": 0.8333280749961252
+  },
+  "naive_iid_reference": {
+    "note": "reported only to show what an unadjusted test would have claimed",
+    "welch_t": -1.104510128190252,
+    "welch_p": 0.27061828517035025,
+    "mannwhitney_p": 0.09367130172947039
+  },
+  "week_decomposition": {
+    "note": "same 191-ish releases, week split into its early four returns and its final two returns; per-return means make the halves comparable",
+    "early_T7_to_T3": {
+      "n": 191,
+      "mean_pct": 1.7755225275949191,
+      "median_pct": -0.9540837390856316,
+      "sd_pct": 12.809862188697767,
+      "share_up_pct": 47.64397905759162,
+      "mean_abs_pct": 9.194766426558198,
+      "n_returns": 4,
+      "mean_per_return_pct": 0.4438806318987298
+    },
+    "final_T3_to_T1": {
+      "n": 191,
+      "mean_pct": -0.17185212143133796,
+      "median_pct": -1.9213997440488018,
+      "sd_pct": 10.822786653188672,
+      "share_up_pct": 41.8848167539267,
+      "mean_abs_pct": 8.127713950408761,
+      "n_returns": 2,
+      "mean_per_return_pct": -0.08592606071566898
+    },
+    "full_T7_to_T1": {
+      "n": 191,
+      "mean_pct": 1.6309835561722523,
+      "median_pct": -1.8022934643983635,
+      "sd_pct": 17.307449059625263,
+      "share_up_pct": 44.50261780104712,
+      "mean_abs_pct": 12.617868700110893,
+      "n_returns": 6,
+      "mean_per_return_pct": 0.2718305926953754
+    }
+  },
+  "event_day_and_decay": {
+    "definition": "event_day = VIX close T-1 -> T-0; next_day = VIX close T-0 -> T+1",
+    "event_day": {
+      "n": 191,
+      "mean_pct": -1.3049401527178306,
+      "median_pct": -2.9991463511701455,
+      "sd_pct": 8.912326031473468,
+      "share_up_pct": 31.93717277486911,
+      "mean_abs_pct": 6.32954160371757
+    },
+    "next_day": {
+      "n": 191,
+      "mean_pct": 3.30042731993097,
+      "median_pct": 1.8399246676243264,
+      "sd_pct": 12.797643072246334,
+      "share_up_pct": 62.82722513089005,
+      "mean_abs_pct": 6.950191958134916
+    },
+    "weekday_controlled": {
+      "note": "NFP releases are almost all Fridays, so the unconditional means above are confounded with weekday seasonality; these regressions add weekday fixed effects and HAC standard errors",
+      "event_day_vs_ordinary_days": {
+        "n": 3979,
+        "n_flagged": 192,
+        "weekday_mix_of_flagged": {
+          "1": 2,
+          "2": 1,
+          "3": 6,
+          "4": 183
+        },
+        "raw_flagged_mean_pct": -1.3235567674139166,
+        "raw_baseline_mean_pct": 0.24443848368240167,
+        "lag": 22,
+        "effect_pct_points": -0.7511664995992953,
+        "hac_se": 0.7022764918303551,
+        "hac_t": -1.0696164663600192,
+        "p_two_sided": 0.2847919802481682,
+        "ci95_low": -2.127603130775929,
+        "ci95_high": 0.6252701315773384
+      },
+      "day_after_vs_ordinary_days": {
+        "n": 3979,
+        "n_flagged": 192,
+        "weekday_mix_of_flagged": {
+          "0": 177,
+          "1": 11,
+          "2": 2,
+          "3": 1,
+          "4": 1
+        },
+        "raw_flagged_mean_pct": 3.266575525493297,
+        "raw_baseline_mean_pct": 0.24443848368240167,
+        "lag": 22,
+        "effect_pct_points": 1.9213767592815443,
+        "hac_se": 0.9761361454295047,
+        "hac_t": 1.9683491573156828,
+        "p_two_sided": 0.0490278775423741,
+        "ci95_low": 0.008185070231962577,
+        "ci95_high": 3.834568448331126
+      }
+    }
+  },
+  "regime_conditional": [
+    {
+      "regime": "<15",
+      "n_event": 67,
+      "event_final2_mean_pct": 2.288310500369887,
+      "control_final2_mean_pct": 2.0588283233343914,
+      "event_day_mean_pct": -2.725680712063927,
+      "event_day_mean_abs_pct": 5.195713982491383,
+      "next_day_mean_pct": 4.456427478650535,
+      "hac_n": 1308,
+      "hac_n_event": 67,
+      "hac_n_control": 1241,
+      "hac_lag": 22,
+      "hac_effect_pct_points": 0.2294821770354957,
+      "hac_hac_se": 1.143773493893927,
+      "hac_hac_t": 0.20063603349841028,
+      "hac_p_two_sided": 0.8409831802870074,
+      "hac_ci95_low": -2.012272677468145,
+      "hac_ci95_high": 2.471237031539136,
+      "hac_p_holm": 0.9264911529393378
+    },
+    {
+      "regime": "15-20",
+      "n_event": 66,
+      "event_final2_mean_pct": -0.8540544060176453,
+      "control_final2_mean_pct": 1.4056124803643941,
+      "event_day_mean_pct": -1.6857488001948506,
+      "event_day_mean_abs_pct": 6.866848980205566,
+      "next_day_mean_pct": 2.6822824421091593,
+      "hac_n": 1380,
+      "hac_n_event": 66,
+      "hac_n_control": 1314,
+      "hac_lag": 22,
+      "hac_effect_pct_points": -2.259666886382033,
+      "hac_hac_se": 1.250769001482567,
+      "hac_hac_t": -1.806622073063527,
+      "hac_p_two_sided": 0.07082122547891881,
+      "hac_ci95_low": -4.711129082266989,
+      "hac_ci95_high": 0.19179530950292412,
+      "hac_p_holm": 0.28328490191567524
+    },
+    {
+      "regime": "20-25",
+      "n_event": 30,
+      "event_final2_mean_pct": 0.6404311015351671,
+      "control_final2_mean_pct": -1.6243771070247233,
+      "event_day_mean_pct": 2.934757086520838,
+      "event_day_mean_abs_pct": 7.939449070886268,
+      "next_day_mean_pct": 2.433750723184732,
+      "hac_n": 596,
+      "hac_n_event": 30,
+      "hac_n_control": 566,
+      "hac_lag": 22,
+      "hac_effect_pct_points": 2.264808208559892,
+      "hac_hac_se": 3.0876181878589657,
+      "hac_hac_t": 0.7335130416919744,
+      "hac_p_two_sided": 0.4632455764696689,
+      "hac_ci95_low": -3.7868122376545075,
+      "hac_ci95_high": 8.316428654774292,
+      "hac_p_holm": 0.9264911529393378
+    },
+    {
+      "regime": ">=25",
+      "n_event": 28,
+      "event_final2_mean_pct": -5.320925034537798,
+      "control_final2_mean_pct": -1.8893855402185094,
+      "event_day_mean_pct": -1.5502233301281276,
+      "event_day_mean_abs_pct": 6.051218023677779,
+      "next_day_mean_pct": 2.919921934374387,
+      "hac_n": 504,
+      "hac_n_event": 28,
+      "hac_n_control": 476,
+      "hac_lag": 22,
+      "hac_effect_pct_points": -3.4315394943192934,
+      "hac_hac_se": 2.05930476069756,
+      "hac_hac_t": -1.666358258287573,
+      "hac_p_two_sided": 0.09564207948335673,
+      "hac_ci95_low": -7.467702658478386,
+      "hac_ci95_high": 0.6046236698397993,
+      "hac_p_holm": 0.2869262384500702
+    }
+  ],
+  "target": {
+    "release": "2026-08-07",
+    "publishing_slot": "T-2",
+    "conditioning_close": "2026-08-04",
+    "conditioning_trading_day_label": "T-3",
+    "vix": 16.5,
+    "regime": "15-20",
+    "matched_regime_stats": {
+      "regime": "15-20",
+      "n_event": 66,
+      "event_final2_mean_pct": -0.8540544060176453,
+      "control_final2_mean_pct": 1.4056124803643941,
+      "event_day_mean_pct": -1.6857488001948506,
+      "event_day_mean_abs_pct": 6.866848980205566,
+      "next_day_mean_pct": 2.6822824421091593,
+      "hac_n": 1380,
+      "hac_n_event": 66,
+      "hac_n_control": 1314,
+      "hac_lag": 22,
+      "hac_effect_pct_points": -2.259666886382033,
+      "hac_hac_se": 1.250769001482567,
+      "hac_hac_t": -1.806622073063527,
+      "hac_p_two_sided": 0.07082122547891881,
+      "hac_ci95_low": -4.711129082266989,
+      "hac_ci95_high": 0.19179530950292412,
+      "hac_p_holm": 0.28328490191567524
+    }
+  },
+  "limitations": [
+    "Failure to reject is not evidence that the event effect is exactly zero.",
+    "Daily closes do not identify intraday announcement reactions; a ramp that starts and ends inside the T-1 session is invisible here.",
+    "VIX only: nothing here establishes effects for rates, FX, single stocks or the options term structure.",
+    "Regime cells are conditioned on a realised VIX level, so they are descriptive comparisons, not a causal decomposition.",
+    "HAC lag choice is finite-sample judgment; lags 6, 22 and 60 are reported."
+  ],
+  "code_trace": {
+    "path": "experiments/nfp_20260807_t2/nfp_20260807_t2.py",
+    "sha256": "97a21197a109655fe7172a0b5ca190510b6b1b03e215ccfa024c4d2b18db8ffe",
+    "size_bytes": 28302
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "e05354953867738d64d8931f97754ef5d1e083a05922ca3fc9f002a77725cd43",
+    "output_identities": [
+      {
+        "path": "nfp_20260807_t2_controls.csv",
+        "sha256": "42a5fc495b3520e9a4d7c8dd62c1cd5faa2b89b1e002b2fad62906ba3ca5eabe",
+        "size_bytes": 212628
+      },
+      {
+        "path": "nfp_20260807_t2_events.csv",
+        "sha256": "67b660fcdee3155183708e8188cd94666b26f3e8dd86e5f438f314c6f46b5f57",
+        "size_bytes": 37244
+      },
+      {
+        "path": "nfp_20260807_t2_window.png",
+        "sha256": "69055b4a30260dec924bd70c4fd4b841d2b23b9634289f84184c69cc32c8fb22",
+        "size_bytes": 73279
+      }
+    ]
+  },
+  "runtime_seconds": 0.226,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": []
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "nfp_20260807_t2.py",
+    "args": [],
+    "sha256": "97a21197a109655fe7172a0b5ca190510b6b1b03e215ccfa024c4d2b18db8ffe",
+    "size_bytes": 28302
+  },
+  "canonical_result": "nfp_20260807_t2_results.json",
+  "inputs": [
+    {
+      "path": "experiments/nfp_20260807_t2/data/vix_close_2010-01-01_2026-08-04.csv",
+      "sha256": "ee0763c6efa0c99f6e1dfaa6ce5f5fbd4e8377022e2c5e5c647ca4cdd0c08f42",
+      "size_bytes": 121649
+    },
+    {
+      "path": "experiments/nfp_20260807_t2/data/nfp_release_dates_2010-01-01_2026-08-05.json",
+      "sha256": "b934bcf05320e03cf36f9a814af300cde227bff8e43511ef7431c5df5a5a36ae",
+      "size_bytes": 3928
+    }
+  ],
+  "outputs": [
+    "nfp_20260807_t2_controls.csv",
+    "nfp_20260807_t2_events.csv",
+    "nfp_20260807_t2_results.json",
+    "nfp_20260807_t2_window.png",
+    "reproduce_commit.json"
+  ],
+  "timeout_seconds": 60,
+  "network": "deny",
+  "randomness": {
+    "status": "not_applicable",
+    "seeds": []
+  },
+  "runtime": {
+    "runtime_seconds": 0.226,
+    "recorded_at": "2026-08-05T00:15:06Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": []
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "nfp_20260807_t2_results.json",
+    "sha256": "dbc29cf74c4626c5d4e16746672cd37bbbe34372052ecae3064b11351d35d916",
+    "size_bytes": 12884
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "e05354953867738d64d8931f97754ef5d1e083a05922ca3fc9f002a77725cd43",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": [
+      {
+        "path": "nfp_20260807_t2_controls.csv",
+        "sha256": "42a5fc495b3520e9a4d7c8dd62c1cd5faa2b89b1e002b2fad62906ba3ca5eabe",
+        "size_bytes": 212628
+      },
+      {
+        "path": "nfp_20260807_t2_events.csv",
+        "sha256": "67b660fcdee3155183708e8188cd94666b26f3e8dd86e5f438f314c6f46b5f57",
+        "size_bytes": 37244
+      },
+      {
+        "path": "nfp_20260807_t2_window.png",
+        "sha256": "69055b4a30260dec924bd70c4fd4b841d2b23b9634289f84184c69cc32c8fb22",
+        "size_bytes": 73279
+      }
+    ]
+  }
+}
