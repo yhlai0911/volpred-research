@@ -205,7 +205,17 @@ skill（程序，記下次怎麼做）。等到第三次才寫，你已經浪費
 過去這類任務只能標 `awaiting_interactive_session` 卡著，因為無人值守的 cron 開不了
 瀏覽器。**現在不一樣：cockpit pane 本身就是老闆機器上的互動 session**，所以這條路通了。
 
-規矩（不可自行放寬）：
+**本節管轄範圍（2026-08-06 治理部裁定，見
+`docs/governance/2026-08-05_computer_use_scope_ruling.md`）**：本節只管「**代替老闆／
+VolPred 身分對外部平台採取行動**」——發文、留言、任何會被對方平台記為使用者行為的操作，
+這類任務才需要宣告 `computer_use` 能力＋只走 canonical 腳本。**唯讀查看 VolPred 自己的
+網站**（驗收、QA、截圖存證，不登入第三方帳號、不觸發任何會被外部系統記錄的動作）**不在
+本節管轄範圍**，任何部門本來就可以用讀類 MCP 工具做，不需要宣告 `computer_use`，也不需要
+先問治理部。已知機制侷限：MCP 瀏覽器工具目前無網域粒度授權，`computer_use` 擋不住已宣告
+的部門把互動工具用在自家網站以外——這道最後防線目前仍是文字約束非機械閘門，落地方向已路由
+platform_eng（`org_attach.py` 唯讀組／互動組工具分流），未落地前不得宣稱風險已消除。
+
+規矩（不可自行放寬，僅適用於「代替老闆對外部平台採取行動」這一類）：
 - **只有宣告 `computer_use` 能力的部門能做**（registry 的 `capabilities`），
   且只能透過 canonical 腳本 `scripts/fb_realchrome_post.py`——
   禁止改用其他 browser automation、headless browser、Graph API、MCP 或手工拼 DOM。
