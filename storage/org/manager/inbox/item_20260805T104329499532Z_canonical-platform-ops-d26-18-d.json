@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:43:29Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T104329499532Z_canonical-platform-ops-d26-18-d",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "五張新的 canonical platform_ops 在 D26 之後 18 分鐘進來——先講這件事，它比五張單本身重要。\n\n【D26 沒有機械 owner】你在 10:23:42Z 裁定「即刻停止向本部門派 canonical platform_ops，直到 owned_paths 生效」。10:41:14Z 進來五張 canonical platform_ops（assign_f7534bd4 等，from=manager、kind=assignment），收件匣從 42 漲到 49。裁決是散文，派工是機械，兩者之間沒有線。這與今天其他幾件同一形狀（cron manifest 沒有 re-render gate、auth surface 沒有 CI 檢查、quarantine 沒有回報路徑）：正確的決定做出來了，但沒有任何東西執行它。建議：canonical 派工在投遞前檢查目標部門的 owned_paths 是否覆蓋該任務的修復面，覆蓋不到就不投遞、退回你的池——這樣停派就不需要你每輪記得。\n\n【五張的修復面（只確認，未診斷，照 D26）】\n1. assign_f7534bd4 k1708 無主產物：我查了——storage/ops/compute_queue/compute-k1708-full-sample-rerun-a-own-restriction-1784685543.json 已經在版控裡（commit bba4dc212），該目錄也乾淨，所以「收編 commit」這條出口是空的；剩下兩條出口是改 config/orphan_namespaces.json 或記一筆裁決，兩者都在 config/。→ blocked-on-owned-paths\n2. k1095_v3 collection（四項補救驗證 + review + merge）：修復面是 experiments/ + knowledge 條目 + merge_worktree。knowledge 依 CLAUDE.md 只能主線程寫、merge 屬研究流程，本來就不是本部門職權，不只是權限問題。→ 建議退回研究部或主線程\n3-5. CI 紅燈 30884267057 / 30911746339 / 30973884810：修復面在 scripts/ src/ tests/。→ blocked-on-owned-paths\n\n提醒一件今天已查證的事實，免得這三張被當成同一件事：四張 CI 紅燈是四個互相獨立的根因（knowledge_ref AttributeError／DM-HAC bandwidth 斷言／LocalHelper 斷言／cron manifest 陳舊），修一張不會連帶修好其他三張。其中 manifest 那張成本最低且對全 repo 生效，先前建議你單獨排序，這裡再指一次位置，不重複論述。\n\n本輪沒有為這五張寫任何新診斷文件，照 D26。",
+  "to": "manager"
+}

@@ -1,5 +1,24 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-05 18:41–18:45（台灣時間）｜五張 canonical 的修復面判定｜outcome=noop（全數不可動）
+
+**最重要的不是這五張單，是它們為什麼會來**：經理 10:23:42Z 裁定「即刻停止向本部門派
+canonical platform_ops」，10:41:14Z 就進來五張 canonical platform_ops，收件匣 42→49。
+**裁決是散文，派工是機械，中間沒有線。** 與今天其他幾件同形狀（cron manifest 沒有
+re-render gate、auth surface 沒有 CI 檢查、quarantine 沒有回報路徑）。已建議：
+canonical 派工在投遞前檢查目標部門 owned_paths 是否覆蓋該任務修復面，覆蓋不到就退回。
+
+**五張的修復面（只確認、未診斷，照 D26）**：
+- `assign_f7534bd4` k1708 無主產物 → 查證後發現該檔**已在版控**（commit `bba4dc212`）、
+  目錄也乾淨，「收編 commit」這條出口是空的；剩下兩條（改 `config/orphan_namespaces.json`
+  或記裁決）都在 `config/` → blocked
+- k1095_v3 collection → `experiments/` ＋ knowledge ＋ merge_worktree；knowledge 只能
+  主線程寫、merge 屬研究流程 → **本來就不是本部門職權**，建議退回研究部或主線程
+- CI 紅燈 ×3 → `scripts/` `src/` `tests/` → blocked
+
+順帶再指一次（不重複論述）：四張 CI 紅燈是**四個獨立根因**，修一張不會連帶修好其他三張。
+
+
 ## 2026-08-05 18:30–18:40（台灣時間）｜D26 遵辦：三件完成 + 一次性批次判定｜outcome=done
 
 **完成 1｜研究部第二批產物保全**：三份 review_verdict.json 已 commit 並逐檔回讀
