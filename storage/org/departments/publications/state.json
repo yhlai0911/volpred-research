@@ -1,6 +1,30 @@
 {
-  "health": "new",
-  "kpi": {},
-  "last_run": null,
+  "health": "attention",
+  "health_note": "inbox 空、無待辦；但 13/13 論文全部超過 pipeline 自訂 7 天 stall 門檻，2026-08 至今 0 篇推進。已上報經理待裁決。",
+  "kpi": {
+    "definition": "每篇 active paper 每月 ≥1 次 review round 或 stage 推進",
+    "snapshot_at": "2026-08-05T08:41:36Z",
+    "source": "scripts/paper_pipeline_check.py（機械檢查，非人工估算）",
+    "total_papers": 13,
+    "stall_threshold_days": 7,
+    "stalled_count": 13,
+    "max_days_in_stage": 76.7,
+    "data_issues": 0,
+    "advance_2026_08": 0,
+    "advance_2026_07_verifiable": 5,
+    "advance_2026_07_unverifiable": 8,
+    "advance_provenance_caveat": "8 篇 last_advance_at=2026-07-01，與 _meta.baseline_set_at 同日且無對應敘述證據，疑為 portfolio audit 批次填寫而非真實推進事件；不採計為 KPI 達成。有敘述證據的 5 篇：vt-trend-following(07-19)、prg-periodic-garch(07-14)、volatility-absorption(07-14)、vt-insurance-cost(07-13)、leverage-direction(07-02)。",
+    "stage_distribution": {
+      "revision": 10,
+      "draft": 2,
+      "multi_round_review": 1
+    },
+    "do_not_advance": [
+      "leverage-direction",
+      "taiwan-vt"
+    ],
+    "note_days_in_stage_semantics": "days_in_stage 由 stage_entered_at 起算（停在同一 stage 多久），不等於「多久沒有任何動作」。後者看 last_advance_at，最近一次為 2026-07-19（17 天前）。"
+  },
+  "last_run": "2026-08-05T08:41:36Z",
   "open_items": 0
 }

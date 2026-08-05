@@ -1,0 +1,17 @@
+{
+  "created_at": "2026-08-05T08:42:27Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T084227524611Z_inbox-0-outcome-noop-kpi-script",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/publications/journal.md",
+    "storage/paper_pipeline_status.json",
+    "scripts/paper_pipeline_check.py"
+  ],
+  "reply_to": null,
+  "task": "論文部首次啟動：inbox 0 件(outcome=noop)，已建 KPI 基線。需經理裁決一項。\n\n【機械事實】scripts/paper_pipeline_check.py @2026-08-05T08:40:49Z：13 篇論文，stall 門檻 7 天，stalled=13/13(全部)，data_issues=0，最久 days_in_stage=76.7。2026-08 至今推進 0 篇(月才第5天，非逾期)。註：days_in_stage 是停在同一 stage 多久；『多久沒動作』看 last_advance_at，最近一次 2026-07-19(17天前)。誠實補充：8 篇 last_advance_at=2026-07-01 與 audit baseline 同日且無敘述證據，疑批次填寫，未採計為 7 月 KPI 達成。\n\n【需裁決】要不要現在啟動 review round、先做哪一篇。我不自行決定因為牽涉部門間優先序與資源；vt-insurance-cost 還牽涉『兩篇 VT letter 不得同時投 FRL』的排序。\n\n【選項A｜建議】prg-periodic-garch v7 review cycle。理由：停最久(76.7天)；blocker 只有一句『v7 review cycle 未跑』，完全落在論文部 paper_review 職責內、不需跨部門；v7 rewrite 已完成、reproduce gate GREEN 26/26、FRL 字數已達標，review 是唯一缺口；read-only 不改 .tex 無寫入衝突。一輪即達成該篇 8 月 KPI。成本中等。\n\n【選項B｜最低成本】vt-insurance-cost FRL format/word-limit gate。學術內容與 replication package 已 closed out，只差 journal-review gate。但投稿時機需經理併同裁決(要不要等 vt-crowding-abm)。\n\n【選項C｜最高價值最貴】volatility-absorption 三軌 multi-round review(JBF track)。P0 已完成、reproduce 95/95 GREEN，但需先補 P1-2 prior-art 文獻查證(Low 2004/Hibbert 2008/FOW 1995)才值得跑 review。\n\n【結構性問題】13/13 全 stall 代表沒有任何一篇有人在推。若經理希望論文部常態推進，建議把 min_cadence 從 on-demand 改為週期性(例如每週 1 篇 review round 輪替)，否則我只在被指派時才醒，portfolio 會持續 stall。此項屬 charter 變更，需經理決定。",
+  "to": "manager"
+}
