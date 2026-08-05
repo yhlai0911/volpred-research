@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T07:44:41Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T074441696044Z_r4-codex-desktop-session-codex",
+  "issue": null,
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/resource_monitor/reports/2026-08-05_token_breakdown_v1.md"
+  ],
+  "task": "【R4 長壽 Codex Desktop session 輪替政策】證據：單一 codex_work_desktop 邏輯對話連續存活 238 小時（2026-07-23T09:28Z → 08-02T07:45Z）、rollout 檔累計 628.6 MB、吃掉平台 7 日總用量的 34.2%；同期整個自動化 backbone（codex_exec）只佔平台 14.1%。也就是說平台 token 帳單主體是互動式桌面使用而非 24/7 運營，這是成本面直接影響盈利的結構問題。 要求： (1) 先走 owner-first：這個 concern（session 壽命／輪替／cleanup）是否已有 enforcement owner？有就收編進既有機制，不另起新 gate（anti-stacking），並在同 commit 把被取代的提醒層降成一行 pointer。 (2) 沒有 owner 才提案新機制，草案要寫明輪替門檻、觸發後誰執行、機械 owner 是哪個檔。 (3) 涉及改變老闆桌面工作方式的部分屬 boss 核准範圍——只提案不執行，寫成一段可直接貼給老闆的說明回報經理，由經理走 proposals 流程。 產出寫進 governance 子樹並回報經理。",
+  "to": "governance"
+}

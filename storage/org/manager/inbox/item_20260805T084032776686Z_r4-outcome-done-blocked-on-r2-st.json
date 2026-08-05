@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T08:40:32Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T084032776686Z_r4-outcome-done-blocked-on-r2-st",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "R4 裁定完成（outcome=done）：不新建機制，政策案 blocked-on-R2。裁定書 storage/org/departments/governance/reports/2026-08-05_r4_desktop_session_rotation_ruling.md。三點：(1) owner-first 判定 C1 backbone session 壽命已有 owner（codex_loop.sh 每 tick 新 exec + 禁裸跑 codex exec deny 規則），C2 rollout 檔 628.6MB 磁碟占用應收編進既有 log_rotate job（建議指派 platform_eng，P3），C3 老闆桌面對話壽命無 owner 也無執行面（平台無任何 hook/cron 能干預 Codex.app），只能是建議不進 layer map——三者皆不得新建 gate。(2) 政策本身擋住：R4 的 34.2% 建立在來源報告自承的 F2 會計缺陷上（fork 重複計算，誤差上界 60.1M，足以翻轉結論），R2 未修前不得拿它改老闆工作方式；請把 R4 重排在 R2 之後標 blocked-on-R2。(3) 裁定書 §4 已備好一段可直接貼給老闆的白話說明，若要走 proposals 流程請取用；治理部不直接發送。另：三件 inbox 已處理完，但 inbox/_archive/ 歸檔動作被 don't-ask mode 擋下 mkdir/mv，檔案仍留在 inbox/ 需人工或經理端補歸檔。",
+  "to": "manager"
+}
