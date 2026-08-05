@@ -224,3 +224,71 @@ def test_departments_are_told_they_have_no_schedule(org_root: Path) -> None:
     assert "部門沒有自己的排程" in identity
     assert "hourly-dispatch" in identity, "the exact leaked instruction must be named"
     assert "回報對象是經理" in identity
+
+
+def _tick():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("manager_tick_mod", ORG_SCRIPTS / "manager_tick.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_wake_refuses_to_stack_headless_rounds(org_root: Path) -> None:
+    """A 30-minute tick must not pile coordinators on a slow round."""
+    tick = _tick()
+    _core.write_lease(org_root, "manager", {"runner": "headless"})
+
+    result = tick.wake_manager(org_root, ["reason"])
+
+    assert result["woken"] is False
+    assert "already in flight" in result["reason"]
+
+
+def test_wake_does_not_interrupt_a_busy_cockpit_manager(org_root: Path, monkeypatch) -> None:
+    tick = _tick()
+    _core.write_lease(org_root, "manager", {"runner": "herdr", "pane_id": "w1:p1"})
+    import subprocess
+
+    class _R:
+        returncode = 0
+        stdout = json.dumps({"result": {"agent": {"agent_status": "working"}}})
+        stderr = ""
+
+    calls = []
+    monkeypatch.setattr(subprocess, "run", lambda cmd, **k: (calls.append(cmd), _R())[1])
+
+    result = tick.wake_manager(org_root, ["reason"])
+
+    assert result["woken"] is False and "不打斷" in result["reason"]
+    assert not any("prompt" in c for c in calls)
+
+
+def test_wake_prompts_an_idle_cockpit_manager(org_root: Path, monkeypatch) -> None:
+    tick = _tick()
+    _core.write_lease(org_root, "manager", {"runner": "herdr", "pane_id": "w1:p1"})
+    import subprocess
+    sent = []
+
+    class _Get:
+        returncode = 0
+        stdout = json.dumps({"result": {"agent": {"agent_status": "idle"}}})
+        stderr = ""
+
+    class _Ok:
+        returncode = 0
+        stdout = "{}"
+        stderr = ""
+
+    def _run(cmd, **k):
+        if "prompt" in cmd:
+            sent.append(cmd)
+            return _Ok()
+        return _Get()
+
+    monkeypatch.setattr(subprocess, "run", _run)
+
+    result = tick.wake_manager(org_root, ["manager inbox has 2 items"])
+
+    assert result["woken"] is True and result["via"] == "cockpit"
+    assert "manager inbox has 2 items" in sent[0][-1], "the wake must say why it woke"

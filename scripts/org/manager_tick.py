@@ -4,12 +4,14 @@
 Gate facts (no heuristics — lesson from pregate retirement):
   1. manager/inbox has unprocessed items
   2. any active department inbox has a due/overdue item
-  3. manager state.json next_review_due is overdue
-  4. (--check-github) open issues labeled dept:* not yet mirrored
+  3. a department declaring a min_cadence is overdue for its round
+  4. manager state.json next_review_due is overdue
+  5. (--check-github) open issues labeled dept:* not yet mirrored
 
 All-negative → skip receipt, exit 0, no LLM spawned.
-Any-positive → in --shadow mode: would-fire receipt + log only (P1 trial);
-               live spawn wiring arrives in a later phase behind --live.
+Any-positive → wake the coordinator: its live cockpit pane if there is one and it
+               is idle, otherwise a headless round under a lease. `--shadow`
+               records the decision without waking anyone.
 """
 
 from __future__ import annotations
@@ -21,7 +23,21 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _core import DEFAULT_ORG_ROOT, dept_dir, load_registry, write_receipt  # noqa: E402
+from _core import (  # noqa: E402
+    DEFAULT_ORG_ROOT,
+    REPO_ROOT,
+    dept_dir,
+    load_registry,
+    read_lease,
+    write_receipt,
+)
+
+HERDR = "/opt/homebrew/bin/herdr"
+MANAGER = "manager"
+BUSY_STATES = {"working", "blocked"}
+
+# How long a declared cadence may go unserved before the department is due.
+CADENCE_SECONDS = {"hourly": 3600, "daily": 86400, "weekly": 604800}
 
 
 def _inbox_items(inbox: Path) -> list[dict]:
@@ -68,6 +84,30 @@ def evaluate_gate(root: Path, *, check_github: bool = False) -> dict:
         if due:
             reasons.append(f"dept {dept} has {len(due)} due item(s)")
 
+        window = CADENCE_SECONDS.get(str(meta.get("min_cadence") or "").lower())
+        if not window:
+            continue  # on-demand departments are woken by work, not by the clock
+        state_file = dept_dir(root, dept) / "state.json"
+        last = None
+        if state_file.exists():
+            try:
+                last = json.loads(state_file.read_text(encoding="utf-8")).get("last_run")
+            except (json.JSONDecodeError, OSError) as exc:  # silent-ok: not silent — becomes a wake reason on the next line
+                reasons.append(f"dept {dept} state unreadable ({type(exc).__name__})")
+                continue
+        if not last:
+            reasons.append(f"dept {dept} declares {meta['min_cadence']} cadence but has never run")
+            continue
+        try:
+            elapsed = (now - datetime.fromisoformat(str(last).replace("Z", "+00:00"))).total_seconds()
+        except ValueError:  # silent-ok: not silent — becomes a wake reason on the next line
+            reasons.append(f"dept {dept} last_run unparseable ({last})")
+            continue
+        if elapsed > window:
+            reasons.append(
+                f"dept {dept} is {int(elapsed // 3600)}h past its {meta['min_cadence']} cadence"
+            )
+
     state_path = root / "manager" / "state.json"
     if state_path.exists():
         try:
@@ -102,6 +142,55 @@ def _github_dept_labels() -> list[str]:
         return [f"github check unavailable ({type(exc).__name__}) — treated as no-signal"]
 
 
+def wake_manager(root: Path, reasons: list[str]) -> dict:
+    """Wake the coordinator: prefer its live cockpit pane, else run headless.
+
+    Never stacks: a busy pane is left alone (the boss may be talking to it) and
+    an existing lease means a round is already in flight.
+    """
+    import subprocess
+
+    lease = read_lease(root, MANAGER)
+    if lease and lease.get("runner") == "headless":
+        return {"woken": False, "reason": "a headless round is already in flight"}
+
+    if lease and lease.get("runner") == "herdr":
+        try:
+            got = subprocess.run([HERDR, "agent", "get", MANAGER],
+                                 capture_output=True, text=True, timeout=20)
+            status = (json.loads(got.stdout)["result"]["agent"]["agent_status"]
+                      if got.returncode == 0 else None)
+        except (OSError, subprocess.SubprocessError, ValueError, KeyError) as exc:
+            status = None
+            note = f"cockpit status unreadable ({type(exc).__name__})"
+        else:
+            note = None
+        if status in BUSY_STATES:
+            return {"woken": False, "reason": f"cockpit manager is {status} — 不打斷"}
+        if status:
+            text = ("開始本輪協調：" + "；".join(reasons[:4]) +
+                    "。依優先序處理並派工，判斷記進 bulletin。")
+            sent = subprocess.run([HERDR, "agent", "prompt", MANAGER, text],
+                                  capture_output=True, text=True, timeout=60)
+            if sent.returncode == 0:
+                return {"woken": True, "via": "cockpit", "pane": lease.get("pane_id")}
+            return {"woken": False, "reason": f"cockpit prompt rejected: {sent.stderr.strip()[:80]}"}
+        if note:
+            return {"woken": False, "reason": note}
+
+    runner = REPO_ROOT / "scripts" / "org" / "manager_run.py"
+    try:
+        subprocess.Popen(
+            ["uv", "run", "python", str(runner), "--root", str(root),
+             "--reason", "; ".join(reasons[:4])],
+            cwd=str(REPO_ROOT), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return {"woken": False, "reason": f"headless spawn failed ({type(exc).__name__}: {exc})"}
+    return {"woken": True, "via": "headless"}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--root", type=Path, default=DEFAULT_ORG_ROOT)
@@ -122,7 +211,9 @@ def main() -> int:
         state = "FIRE" if decision["fire"] else "skip"
         print(f"[manager_tick] {state}: " + ("; ".join(decision["reasons"]) or "no runnable signal"))
     if decision["fire"] and not args.shadow:
-        print("[manager_tick] live spawn not wired yet (P1 shadow phase) — receipt recorded only")
+        result = wake_manager(args.root, decision["reasons"])
+        write_receipt(args.root, "manager_wake", result)
+        print(f"[manager_tick] wake: {json.dumps(result, ensure_ascii=False)}")
     return 0
 
 
