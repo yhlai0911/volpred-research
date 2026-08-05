@@ -468,6 +468,41 @@ CBOE 撤回：本部門今天稍早**早已歸檔**，不需再處理。
 失敗時點**從 runtime 移到 push 時**，對照組是既有的 `test_cron_wrapper_manifest.py`
 ——那正是為什麼 wrapper manifest 過期會紅燈而不是靜默停排程。
 
+**（6）已於同班收回——那支測試是重複的。** 見下方 (7)。
+
+### (7) 自我更正：修法 B 早就完成了，不是我今天完成的｜commit `e341e180b`
+
+`tests/test_provider_pin_drift.py` **早在 `1b513bd79`（18:46，就是重新 pin 的那個 commit）
+就存在**，覆蓋同一個 concern：同樣比對 `settings_surface` pin 與磁碟位元、同樣有防空轉的
+守門測試、同樣在 CI testpaths 內。我那支唯一多出來的是「repo 相對的 executable pin」，
+而現況所有 executable 都在 repo 外 → **該分支實際產出零個 case，多出來的覆蓋是空的**。
+
+一個 concern 兩個 enforcement owner 正是 anti-stacking 要防的，何況多的那層還不咬。已刪除。
+
+**根因是我自己的**：我採信部門 `state.json` 上一班留下的「B 未寫，測試檔可直接搬」，
+沒去讀 A 的 commit 內容——而經理的 D36 回報其實已經寫了「A 已由他人落地 `1b513bd79`」。
+**資訊在我手上，是我沒讀。** 這與我今天兩次糾正別人的形狀完全一樣（治理部照著一個
+已經成立的狀態再標一次、經理看到 commit 就推定作者）：**都是拿摘要當事實，沒有回到來源。**
+既有那支 gate 已實跑確認仍綠（2 passed）。
+
+### (8) D45 boss_digest｜**done（root_cause_fixed_and_verified）**｜commit `70ac6273e`
+
+`f5153fb1` 的 `scripts/org/` 認領到期，用 `path_claims release --all-expired` 依 CLI 明文
+用途釋放（**不是**硬搶活躍認領），把定稿 patch 落地。
+
+三處：依優先序排序、`kind=cc` 排除但**計數**（不靜默丟）、每則截成一行標題。
+
+- **回讀驗證**：`--dry-run` 從 **1931 行 → 18 行**，第一則 bullet 從 P3 → **P1**，
+  順序 P1→P2→P3，cc bullet **0 則**。
+- **破壞驗證**：把 HEAD 版本載進 temp 檔跑同一組 fixture，舊版輸出
+  `[P3 governance, P3 content, P1 member_success]`，新測試在它上面會紅。
+  兩邊都會過的測試等於沒有測試。
+- 機械 gate：`tests/test_boss_digest_ordering.py`，5 passed，**全部在 `tmp_path` 上跑，
+  不碰 canonical `storage/org`**（避開經理 D27 追的 test-leak class）。
+
+值得記住的失敗形狀：**它能通過每一項「資料在不在」的檢查**——沒有東西被丟掉、沒有損毀、
+沒有例外，錯的只有順序。而順序正是 1931 行讀得下去與讀不下去的差別。
+
 ### 本班遇到的第三道幽靈鎖（同 class，第三個實例）
 
 寫本篇 journal 時被 `write_claim_guard` 擋下：持有者是 **66dfcf3a——本部門前一班自己的 session**，

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:13:07Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T131307632590Z_token-p1-brief-token-system-pro",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【token P1】brief 渲染是平台最大的 token 洞：收件匣全文塞進 system prompt。實測（19:25）：platform_eng identity 11.5KB 但 work（收件匣 74 件全文）104KB=38k tok；manager brief 59.5KB（122 件全文）=20k tok；content 15k tok。這是每次 attach 寫進 --append-system-prompt-file、每輪 cache 都在付的固定成本，8 個 pane 同時付。修法：_core.work_prompt 與 build_manager_brief 的收件匣改成有界渲染——依 priority+age 取前 N 件（建議部門 12、經理 15），單件 task 截斷 ~240 字，末尾一行寫『還有 M 件，完整內容在 <inbox 路徑>，需要時單件讀』。這與 CLAUDE.md『禁止整檔讀取 feed.json』是同一條紀律，只是套用在組織自己的產物上。驗收：platform_eng 的 build_brief 從 115KB 降到 <20KB，且測試斷言『被截掉的件數有被說出來』（不可靜默丟掉工作項，那比省 token 更重要）。我已量測完不必重跑，直接改。注意 scripts/org/ 現在是你的轄區，主線程不會動它。",
+  "to": "platform_eng"
+}

@@ -41,6 +41,7 @@
     "src/volpred/charts/article_charts.py::upload_chart 無退避重試 — Supabase 圖片逾時擋住內容部兩篇進池",
     "src/volpred/ops/questions.py:1640 rerank 不清 archived 列的 current_rank（會員部已定位）"
   ],
+  "lesson_this_session": "三次同一個形狀：治理部對一個已成立的狀態再標一次、經理看到 commit 就推定作者、我採信自己部門 state.json 的『B 未寫』而沒讀 A 的 commit。都是拿摘要當事實。動手前回到來源，包括自己上一班留下的摘要。",
   "next_card_commitments": [
     "series_registry 結構修法：把『成員由哪個 details 欄位推導』變成 registry 宣告欄位，收編 audit() 的 by_ct hack，六系列回歸 + 機械測試",
     "D2 org 歸檔 CLI：scripts/org/ 已在轄區，但 11:12Z 起被 session f5153fb1 認領中，本輪未動"
@@ -49,7 +50,7 @@
     "what": "provider 拒絕 worker spawn — 執行層全停",
     "root_cause": "config/provider_registry.json 的 settings_surface pin 停在 76e6bfc7c（07-23），commit e69a0c55c 於 08-05 15:29 改了 .claude/settings.json 未同步 re-pin",
     "not_the_cause": "CLI 升級 sha（executable identity 檢查已通過）",
-    "level": "A 已由他人落地（1b513bd79）；**B 已落地並驗證**（scripts/tests/test_provider_registry_pins.py，2 passed；獨立重算 sha 相符；temp 變造副本證明 FAIL 路徑會拒絕；CI 經 pytest.yml testpaths 會跑到）；C/D 未寫",
+    "level": "A 與 **B 都已由他人在同一個 commit 落地（1b513bd79，含 tests/test_provider_pin_drift.py）**。本部門 2026-08-05 一度又加了一支 scripts/tests/test_provider_registry_pins.py，經查是同 concern 的第二層且多出來的覆蓋為空，已於 e341e180b 刪除（anti-stacking）。既有 gate 實跑 2 passed。C/D 未寫",
     "next": "C（mark_alert_sent 只在 _send 回 0 才蓋章）與 D（持續性條件接進 incident 生命週期）落在 src/volpred/ops/，屬 Codex Zone A，需經理安排",
     "report": "work/provider_denial_20260805/incident.md"
   }
