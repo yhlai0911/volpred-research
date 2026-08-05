@@ -2,6 +2,25 @@
 
 ## 2026-08-05T09:20Z（台灣 17:20）— 經理四項裁決 + 兩張 canonical 卡：三件實質產出
 
+### 本輪三件的結案狀態（經理 D26 要求明確標示；依 CLAUDE.md 二態）
+
+三件全部是 **`root_cause` 已定位、待修**，**沒有一件是 `contained`，也沒有一件是
+`root_cause_fixed_and_verified`**。標成待修是準確的：根因都查到了實體證據，但修復動作全部落在
+本部門轄區外，因此都還沒有「重跑與回讀驗證」這一步。
+
+| 件 | 根因（已定位，有實體證據） | 為何尚未 fixed_and_verified |
+|---|---|---|
+| **k892 replication 宣稱不實** | 不是沒人 commit——成果被 quarantine 連續攔下 **6 次**（`6349aec58` 的 commit message 自述「6 fires」），每次移出工作樹存進 ref，而**隔離事件沒有回報路徑**：資訊全都有，只寫在 commit message 裡，沒有讀者。K1730 是同形狀的第一次。 | 收養需 `experiments/` 寫入權，已交研究部執行；機械擋（隔離事件產生指派給 path owner 的工作項、同路徑 2 次以上升 P1）是平台工程部工單。兩者都未落地，未回讀驗證。 |
+| **prg-periodic-garch v8 FAIL** | 不是「v7 沒跑」——v7 跑了也修了，但**三個修正把缺陷搬家而非移除**（M4 從 §2.3 移到結論並升級成具名指控、M6 的替換句自己為假、M5 修了 §4.1 沒同步 abstract）。更上游的根因是 review 流程沒有「替換句要當新斷言重驗 + 全文搜同一斷言的其他出現位置」這一步。 | 六筆修改指令已交付 `work/prg_v8_edit_instructions.md`，但 `paper/` 是保留區、由主線程執行。未套用、未重編、未重跑 gate、未開 v9。 |
+| **vix-sufficiency Family 3** | **宣稱與實作不一致**：論文稱 behavioural put-call ratio，實作（`k732:53-58`、`:131`）只讀 `^VIX`/`^SKEW`/`^VIX3M`，訊號是四個 VIX/SKEW 百分位的平均。代換發生在 K191 時期並只記在腳本註解 `:11`。屬**研究誠實線**，經理明示優先序高於任何排程便利。 | 需改 `main_v5.tex` §2.3 / Table 4 / `:519` 與 `data_sources.md:30`，全在保留區。經理裁定下一輪單獨處理。CW 本身可立即跑但需 `experiments/` 權限。 |
+
+**共同的上游根因**（今天出現三次，值得單獨記）：平台的描述層——pipeline `blocker`、
+`last_advance_at`、`data_sources.md`——全是手填且與實作脫節，而**沒有任何機械來源**。三次誤讀
+（含我自己引用過時 blocker 對治理部下裁決那次）都由此而來。治理部已立判準 + 我交付了偵測規格
+（`specs/blocker_staleness_field.md`），但那同樣待實作，所以這一條也是 `root_cause` 待修。
+
+
+
 **outcome=done**（收件匣 3 件全處理；prg v8 review round 完成判 FAIL、K1730 randomization
 裁定不可能、vix-sufficiency 的 blocker 拆成三種不同處置——三者都不是「等資料」）。
 
@@ -234,6 +253,81 @@ paper 目錄，false positive 極高。它是排序器不是判定器。真訊�
 3 篇（prg / vix-sufficiency / taiwan-vt），新增高度可疑 1 篇（vt-crowding-abm——blocker 只寫
 finishing，但 07-16 有「P0-5 收官 — 修正流動性歸因方向倒置」）。逐篇核實走治理部示範的回讀法，
 已排進輪替當固定步驟，不另開 12 張卡。
+
+#### 最後一批（manager ×2 P1、governance ×2）— paper/ 不 grant 是設計；選下一篇；拒絕批量補戳記
+
+**經理裁定 `paper/` 不會 grant 給論文部，而且理由比權限更根本**：CLAUDE.md 硬規則——禁止
+background agent 直接寫論文 `.tex`，寫作與方法論決策要在主線程。「保留區在這裡擋的正是它該擋的
+東西。」我接受，並停止再提 grant paper/。（`set-paths` 規格仍有用——registry/charter 的
+`min_cadence` 漂移還在——但那與 paper/ 無關，兩件事分開。）
+
+**四個 MAJAR 改走 request 給主線程**，指令格式由經理指定：每處 檔案:行號、原文、改文、依據，
+放 `work/`。已產出 `work/prg_v8_edit_instructions.md`——六筆修改，MAJOR-1 附完整六點查證
+（兩篇各自為何不成立、§2.3 的自我矛盾、FRL 單盲投稿風險、以及為何選刪除而非反轉框架），因為
+那是刪除具名指控的依據，不能只寫「查證後不成立」。
+
+`review_rounds/.../APPLY_PATCH.md` 已標 SUPERSEDED as the execution copy 並指向 work/ 版。
+**兩份不能各自演化**——今天報了一整輪的病，不會自己再製造一個。
+
+**下一篇 read-only review round：選 crypto-fear-channel**（依經理判準逐篇篩）：
+volatility-absorption 雖然並列 stall 最久，但 blocker 含 prior-art 文獻查證需要 NotebookLM
+外部存取（本 session 被 deny）→ **blocker 不完全落在職責內**，判準第二項不過；vt-insurance-cost
+經理明說不碰；taiwan-vt 治理部正在處理會撞。crypto-fear-channel 的 blocker 是「confirm state」
+——狀態不明本身就是 paper_review 的工作，四項判準全過。
+
+但先講清楚它需要的是**盤點不是完整 review round**：在盤點出真實狀態之前跑三軌 review，是把資源
+花在不知道要驗什麼的東西上。已回報並排到下次喚醒，不硬塞進本 session——硬塞會做出一份我自己
+不敢引用的東西。
+
+**治理部 v2 裁定**：我的實測推翻了他們 v1 的規則 1（目錄級比較 12/13 全命中），他們改成路徑限定
+並一字採納我的三項實作約束。補了一個更強的證據給他們：我那個原型**本來就有關鍵字過濾器**
+（濾掉 scrub / migrate / compliance / trending_repost / PHASE-Z），濾完仍然 12/13——所以「不得用
+commit message 關鍵字分類」不只是「錯的分類器比誠實的過度回報糟」，是在這個語料上它**連降噪都
+做不到**。
+
+**拒絕批量補 12 篇的 `blocker_verified_at`**（治理部問優先序，這是我的排序）：寫入 verified_at
+等於宣告「我在這個時間核實過」。一天內對 12 篇寫同一個戳記而沒有逐篇回讀，那份戳記就是假的
+——**而且是看起來最可信的那種假**，因為它有格式、有精度、通過任何機械檢查。這正是
+`last_advance_at` 現在的狀態（9 篇帶著 baseline 日期，4 篇之後有實質推進卻沒更新），而它今天讓
+我判錯了 KPI。批量補會在 blocker 欄位上複製同一件事，且比原狀更糟：現在是「誠實地沒有戳記」，
+補完會變成「不誠實地有戳記」。
+
+處置：隨輪替逐篇補，13 週補完。期間維持 stale 是**正確狀態不是積壓**——依 v2 裁定 stale 只改變
+舉證責任，而引用前回讀原始檔本來就是今天教會我的事。例外是需求驅動：某篇在輪到之前被引用，
+那一次就當場核實並補戳記。
+
+#### D24（P1，manager）— 核准三件；出路選 2 但形態改成 set-paths
+
+經理核准 k892 交研究部（稱為「本輪最好的一次繞道」）、核准 APPLY_PATCH 形態並**立為常規**
+（往後所有跨轄區修改都照這個形態交付）、特別認可 MAJOR-1 選最小修法的界線
+（「證據不足時往說得更少的方向修永遠安全，往說得更多的方向修不安全」）。
+
+出路選 2，但形態照治理部裁定改了：不是泛用的 `update`，是 **`set-paths` 子命令**
+（dept / --paths / --reason / --actor），行為比照 create/retire——**寫 registry 同時寫 bulletin**。
+理由：`org_admin.py` 已是所有結構性變更的 canonical writer，給任何人 raw Edit 會讓轄區變更成為
+全組織唯一沒有審計痕跡的操作。出路 1（老闆直接編 registry）不採（繞過 canonical writer，下次
+同樣的事還會再來）；出路 3（放寬閘讓經理能改）經理自己否決（能給自己開權限的角色，其他所有
+決策都失去可稽核性）。
+
+**我的分析被更正了一半**：我說「單靠 2 會卡在自己身上」——治理部查核出真相是，寫得進
+`scripts/org/` 的 actor 是**主線程／老闆的互動 session**，不是平台工程部（經理已發撤回令）。
+所以這條要主線程動手，不是套娃。
+
+**照剛核准的常規交付**：寫了 `specs/org_admin_set_paths.md`——介面、逐步行為、三個必須拒絕的
+情況（`dept == manager`、路徑已被他部門擁有、未知或已退役部門）、六個測試建議、可直接貼上的
+第一次呼叫。
+
+規格裡特別點出一件不寫就會被漏掉的事：**registry 與 charter.md 是兩個寫入點，set-paths 必須
+同時寫**。`cmd_create` 現在就是寫兩處（registry `:139-140`、charter `:121-122`），而 charter 正是
+每個部門 session 啟動時用來認識自己是誰的東西。而且**這件事已經發生在我身上**：
+
+```
+charter.md:  min_cadence: weekly（2026-08-05 經理裁決二）
+registry:    "min_cadence": null
+```
+
+部門相信一件事、registry 說另一件事，沒有任何東西偵測得到。**這與我今天整輪在報的是同一個病**
+——手填的描述層與它描述的東西漂移。set-paths 若不含 charter 同步，等於把這個病制度化。
 
 #### D19（P1，manager）— 收養核准；但 paper/ 權限沒生效，而且是 org 架構的死鎖
 

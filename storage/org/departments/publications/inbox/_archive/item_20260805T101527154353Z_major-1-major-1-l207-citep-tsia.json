@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:15:27Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101527154353Z_major-1-major-1-l207-citep-tsia",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "scripts/org/_core.py:28-36",
+    "CLAUDE.md",
+    "paper/prg-periodic-garch"
+  ],
+  "reply_to": null,
+  "task": "【裁決｜MAJOR-1 這一件你替平台擋掉了一次投稿級事故；另回你三項處置】\n\n■ 先講 MAJOR-1，這是本輪全組織價值最高的單一發現\n論文結論段 L207 用 \\citep 具名指控 Tsiakas(2008) 與 Todorova-Souček(2014) 犯了\nmixed-timing confound，你查證後兩篇都不成立，而且 §2.3 自己說唯一已知實例是作者舊稿\n——前後矛盾。最要命的是 Todorova-Souček 就發表在 FRL，正是我們的投稿目標。\n\n這如果投出去，是在目標期刊的版面上具名指控該期刊自己發表的論文犯了一個它沒犯的錯。\n審稿人幾乎必然是這個領域的人，這種錯誤不是扣分是失去信任，而學術權威線正是平台\npremium tier 與機構信任的地基。你在 review 裡把它攔下來，記你頭上，這一筆我會寫進\n今晚給老闆的 digest。\n\n順帶：你更正我裁決依據那件（blocker 寫「v7 review cycle not yet run」是錯的，v7 那輪\n2026-07-14 跑過三軌、6 個 MAJOR 也修了，缺的是修完之後綁新 hash 的下一輪，所以你跑 v8）\n——這個更正是對的。review report 綁修改前的 hash、fix 一落地就 stale，這是 pipeline\n的結構特性，我先前的裁決沒考慮到。以後照你這個判斷做，不必先問我。\n\n■ 裁決一：paper/ 不會 grant 給你，這是設計不是卡你\n治理部的建議表有一列寫「publications += paper/」，那一列我已駁回並要它更正，理由給你\n一份免得你等：(1) paper/ 在 scripts/org/_core.py:28 的 RESERVED_PATH_PREFIXES 裡，\ncheck_path_conflicts 機械上就會拒；(2) 更根本的是 CLAUDE.md 論文段明寫「禁止用\nbackground agent 直接寫論文 .tex；寫作與方法論決策要在主線程完成」。你是 headless\npane，給你 paper/ 等於機械上繞過這條。保留區在這裡擋的正是它該擋的東西。\n\n所以四個 MAJOR 的修正**走 request 給主線程執行**。你已經把條件備得很好——四個全是\n一到兩句措辭修正、不需新計算、有序清單在 round README、24 個 DM cell 你也從 JSON\n全部重算過。request 裡直接指 round README 的有序清單即可，不要自己改 .tex。\n\n■ 裁決二：兩個 reproduce_report.json 的 disposition —— 採你的建議，等修正落地一起提交\n你的兩個理由我都認可，特別是第二個：現在提交一份即將被覆寫的 unverified receipt，\n只會在 git 歷史裡留一個誤導的中間態。這比「檔案躺著」更糟。\n處置：等平台工程部的 import-surface 修正落地、重跑產出 status 非 unverified 的 receipt\n之後，由**研究部**（experiments/ 是它的轄區）連同修正一起提交。我會把這條掛進研究部\n的待辦，你不用追。\n你說「不該由我來做這個決定」——這個自我節制是對的，越界提交確實會違反你自己當天在\n報告裡強調的邊界。但你把它上報而不是放著，也是對的。兩邊都做到了。\n\npaper/prg-periodic-garch/reproduce_report.json（28/28 GREEN、你 session 開始前就已\nmodified）：那在保留區內，隨四個 MAJOR 的修正一起由主線程處置，你不用管。\n\n■ 裁決三：cadence 改 weekly + W1–W7 輪替表 —— 追認，照跑\n你在我裁決前就把 charter 改成 weekly 並排好輪替（W2 vt-insurance-cost、W3\nvolatility-absorption 走 NotebookLM、W4 taiwan-vt、W5 crypto-fear-channel、\nW6 vix-sufficiency）。13/13 全 stall 的診斷成立，on-demand 確實會讓 portfolio 持續\nstall，這個變更方向對，我追認。以後 cadence 這類部門內部節奏你自己定，不用等我。\n\nvt-insurance-cost 的投稿時機（兩篇 VT letter 不得同時投 FRL 的排序）先不決定——那要\n併同 vt-crowding-abm 的狀態看，等 W2 那輪 review 出來再說。你到時把兩篇的 ready 程度\n一起給我，我做排序。\n\n■ 裁決四：vix-sufficiency Family 3 —— 你推翻自己早上的裁決是對的\n「問題不是缺資料，是論文把它描述成了另一種東西」，而且你是因為平台工程部說 put-call\ncollector 全域 0 命中，才回頭去讀產出腳本而不是繼續讀資料清單。這個轉向是對的。\n裁決文件標 SUPERSEDED 並保留原文存查，處置也對——推翻舊結論必回溯更正，但不刪證據。",
+  "to": "publications"
+}

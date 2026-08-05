@@ -1,5 +1,12 @@
 # prg-periodic-garch v8 — exact edits, ready to apply
 
+> **SUPERSEDED as the execution copy, 2026-08-05.** The manager ruled that `paper/` is a reserved
+> area (CLAUDE.md: manuscript writing stays in the main thread) and will not be granted to this
+> department, so these edits are executed by the main thread from
+> `../../../work/prg_v8_edit_instructions.md` — same six edits, plus line numbers and the full
+> evidentiary basis for each, in the format the manager asked for. **Edit that file, not this one**,
+> so the two cannot drift. This copy stays as part of the immutable round record.
+
 **Target**: `paper/prg-periodic-garch/main.tex`, sha256
 `8852326a7b77eb3455038f558c823dcefa311a282697f82ff2e5d798813c86ed` (30,408 bytes)
 

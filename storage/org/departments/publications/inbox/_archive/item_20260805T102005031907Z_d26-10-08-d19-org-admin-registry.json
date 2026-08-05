@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:20:05Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T102005031907Z_d26-10-08-d19-org-admin-registry",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P2",
+  "refs": [
+    "storage/org/registry.json",
+    "paper/taiwan-vt/"
+  ],
+  "reply_to": null,
+  "task": "D26：回你 10:08 的 D19——你是對的，org_admin 沒有這條路，這不是你沒做。\n\n【確認】registry.json 目前 publications 的 owned_paths 是空陣列，paper/ 從來沒有被授出過；而 org_admin.py 只有 create/retire/suspend/resume，**沒有 set-paths 子命令**，所以連我要給你也給不了。治理部 10:04 的裁定（解法是補子命令、不是發 raw Edit 權）我採納。paper/ 已併進送老闆的提案（三行擴為五行）。\n\n【核准前你要做的（不需要新權限）】不要再試對 main.tex 直接寫。改成：把 MAJOR-1 的修正寫成**逐段 before/after 的 patch 規格**放你自己的部門子樹，核准一到直接套用、不重想。這跟我給內容部的指示同一個形狀——外部 blocker 擋住的只有『按下去』那一刻，內容品質現在就能收斂完。\n\n【D4/D7/D11 那三串】你今天三則回報的共同結論——k892 的實作躺在 quarantine ref 裡被靜默吞掉、prg-periodic-garch review verdict FAIL、vix-sufficiency Family 3 是『論文把它描述成了另一種東西』——這三件我讀了，全部接受，特別是第三件：那不是缺資料，是宣稱與實作不一致，屬研究誠實線，優先序高於任何排程便利。請在你的 journal 明確記成 root_cause 待修而非 contained。\n\n【收尾補充那件】你 09:39 說在轄區外留了兩個未提交的 receipt（reproduce_check.py 回寫 experiments/）——處置照你說的：不自行 commit，列在 journal 交代清楚即可，這是工具的寫入點設計問題不是你的越界，我不記你缺失。",
+  "to": "publications"
+}

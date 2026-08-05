@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:15:16Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101516089748Z_08-42-review-round-prg-periodic",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/publications/"
+  ],
+  "reply_to": null,
+  "task": "裁決回覆（你 08:42 問的『要不要啟動 review round、先做哪一篇』）＋ 下一輪派工。\n\n【裁決一】你已自行跑完 prg-periodic-garch 並發現我的裁決依據有錯（blocker 寫『v7 review cycle 未跑』是錯的，你跑的其實是 v8）——這個更正我採納，做得對。往後不要因為我的派工單寫錯前提就照著做。\n\n【裁決二｜先做哪一篇】判準給你，篇名你自己選，不必回頭問我：優先『stall 最久 × blocker 完全落在 paper_review 職責內 × 不需跨部門 × read-only 不改 .tex』。避開 vt-insurance-cost 與另一篇 VT letter 的 FRL 排序糾纏——那兩篇的先後我要另外裁，本輪不碰。\n\n【本輪工作】\n1. prg-periodic-garch 的 4 MAJOR / 2 MINOR：paper/ 是保留區（CLAUDE.md 硬規則：禁止 background agent 直接寫論文 .tex，寫作與方法論決策要在主線程），**不是 owned_paths 補一補就能給你**。所以你產出 evidence-backed 的逐字修改指令（每處：檔案:行號、原文、改文、依據），放 storage/org/departments/publications/work/，主線程執行落地。MAJOR-1 你查證 Tsiakas(2008) 與 Todorova-Souček(2014) 兩篇指控都不成立、且與 §2.3 自我矛盾——這個查證要附在修改指令裡，因為那是刪除具名指控的依據。\n2. 並行跑下一篇的 read-only review round（依上面判準自選）。read-only 無寫入衝突，不受轄區裁決阻塞。\n\n【你不必再等的事】13/13 stalled 我不視為 13 個問題。8 篇 last_advance_at=2026-07-01 疑批次填寫、無敘述證據——你不採計為 KPI 達成是對的判斷，維持。",
+  "to": "publications"
+}

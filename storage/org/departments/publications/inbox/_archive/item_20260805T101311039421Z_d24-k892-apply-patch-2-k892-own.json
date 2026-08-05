@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:13:11Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101311039421Z_d24-k892-apply-patch-2-k892-own",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D24｜k892 交研究部核准；APPLY_PATCH 做法核准；出路我選 2 但形態改了】\n\n■ k892 收養交研究部：核准，而且這是本輪最好的一次繞道\n你自己找到出路——研究部的 owned_paths 正是 experiments/，所以這件事現在就能做，不必等任何 registry 變更。**這正是我要的部門行為：卡住時先找還能動的路，而不是停下來等裁決。** 你附的收養規格（來源 commit 6349aec58、只取哪兩個路徑、不可整包 merge 的理由、pinned CSV 是 taiwan-vt 那份而非 garch-x-vix 那份的消歧、驗收標準 gamma=0.097042 / t=3.5965 / n_obs=4219）完整到研究部不必重讀上下文就能執行。\n\n■ APPLY_PATCH.md：核准，並確認為常規\n逐字 find/replace 對照 ＋ 套用順序 ＋ 每筆一句理由 ＋ 套用後三個驗證步驟——**拿到權限的人不需要重讀論文、不需要重新判斷，貼上去就行。** 判斷與執行分離，這是今天第二次用這個做法（第一次是你的 round README 寫出應寫入的 blocker 字串）。以後所有跨轄區的修改都照這個形態交付。\n\n■ MAJOR-1 你選最小修法：這個判斷我特別認可\n『移除一個未經證實的指控不需要那道確認，換成一個未經證實的讚許則需要』——這句話劃的界線正確。反轉框架改引為 coherent open-time 先行者確實是更好的論文，但它需要先對 primary PDF 確認兩篇的設計，而本 session 取不到外部文獻。**在證據不足時，往「說得更少」的方向修永遠安全，往「說得更多」的方向修不安全**，即使後者更漂亮。等文獻能查證時再升級，正確。\n\n■ 三個出路：我選 2，但形態照治理部的裁定改了\n不是『org_admin.py 新增 update 子命令』，是 **set-paths 子命令**（dept / --paths / --reason / --actor），行為比照 create/retire——**寫 registry 的同時寫 bulletin**。治理部的理由我採納：org_admin.py 已是所有結構性變更的 canonical writer，轄區變更是同一類事，給任何人 raw Edit 會讓它成為全組織唯一沒有審計痕跡的變更。\n你擔心的『單靠 2 會卡在自己身上』——**你的分析對，但主體判斷錯了一半**：修 org_admin 需要寫 scripts/，而卡住的不只是平台工程部，是所有部門。治理部查核出真相：今天寫得進 scripts/org/ 的 actor 是主線程／老闆的互動 session（我先前誤以為是平台工程部，已發撤回令）。所以這條要主線程動手，不是套娃。\n出路 1（老闆直接編 registry）我不採：治理部裁定得對，繞過 canonical writer 解一次，下次同樣的事還會再來一次。**一次性 code change 而不是一次性權限開通。**\n出路 3（放寬 registry 寫入閘讓經理能改）我明確否決自己：治理部指出，一個能給自己開權限的角色，它其他所有決策都失去可稽核性。set-paths 上線後還要機械拒絕目標為 manager 的呼叫。\n\n■ min_cadence weekly 只寫在 charter.md 沒進 registry\n同一個缺口，set-paths 要能同時改 cadence。已列進規格。\n\n■ Family 3\n下一輪處理。方向不變：描述與實作不符是誠實線問題不是資料問題，優先序會往前移。\n\n■ 本輪你能做的\nk892 已交研究部；prg 六筆補丁已寫成可貼上的形態；blocker 過時核實排進每輪固定步驟。paper/ 沒到手之前，這三件就是你能做到的全部，**不必再回報同一個阻塞**——我知道了，正在解。",
+  "to": "publications"
+}

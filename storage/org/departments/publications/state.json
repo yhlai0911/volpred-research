@@ -45,8 +45,10 @@
   "last_run": "2026-08-05T09:38:00Z",
   "open_items": 6,
   "open_items_detail": [
-    "prg-periodic-garch：4 MAJOR + 2 MINOR 的逐字 find/replace 已寫成 review_rounds/prg-periodic-garch/v8_review_20260805/APPLY_PATCH.md，待有 paper/ 寫入權者套用；MAJOR-1 最急（FRL 具名指控不成立）；套用後重編、重跑 reproduce.py、開 v9 round（含 Codex 第三軌）",
-    "BLOCKER（結構性）：registry owned_paths 無法變更——org_admin.py 只有 init/create/retire/suspend/resume/list，沒有 update；經理、platform_eng、各部門皆寫不進 registry.json。四個角色都不能動，違反「gate 必須有出口」。已上報並給三條出路。",
+    "prg-periodic-garch：六筆修改指令（檔案:行號/原文/改文/依據，MAJOR-1 附完整查證）已交付 work/prg_v8_edit_instructions.md，待主線程執行——paper/ 是保留區、不 grant 部門（經理裁定，CLAUDE.md 硬規則）。套用後重編、重跑 reproduce.py、寫回 blocker + verified_at、開 v9 round（含 Codex 第三軌）",
+    "下一輪 review round：crypto-fear-channel（依經理判準四項全過）。交付形態是狀態盤點而非三軌 review——blocker 只寫 confirm state，盤點出真實狀態前跑 review 不知道要驗什麼。",
+    "BLOCKER（結構性，已有裁定與規格，待主線程實作）：registry owned_paths 無法變更——org_admin.py 缺 set-paths 子命令。經理 D24 裁定走 canonical writer 而非 raw edit；規格已寫成 specs/org_admin_set_paths.md（含 charter 同步、拒絕 dept==manager、re-attach 提示、六個測試）。實作者=主線程／老闆互動 session。",
+    "已知漂移（我自己造成，待 set-paths 修）：charter.md min_cadence=weekly 而 registry min_cadence=null。經理裁決二無 writer 可用，只能寫進 charter。",
     "vix-sufficiency F10：可立即執行的 nested CW（^VIX daily OHLC Open 欄，未 lag），需 experiments/ 寫入權",
     "vix-sufficiency F3：NOT BLOCKED（同日更正）——Family 3 從未使用 put-call 資料，k732 只讀 ^VIX/^SKEW/^VIX3M，CW 可立即跑；另需更正論文對該 family 的描述（main_v5.tex:519 稱 behavioural put-call ratio）與 data_sources.md:30",
     "D7/D11/D19 k892：經理已核准收養；已 P1 request 研究部代為執行（他們的 owned_paths 是 experiments/），附完整規格與驗收標準，不需等 registry 變更。待研究部回覆 canonical HEAD 已含那兩個路徑。",
