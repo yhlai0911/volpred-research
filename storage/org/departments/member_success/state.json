@@ -24,6 +24,7 @@
     "observability_gaps": ["G1_last_seen_at_never_written", "G2_no_subscription_tables", "G3_no_pricing_instrumentation", "G4_no_signup_attribution", "G5_no_landing_exit_marks", "G6_low_score_questions_marked_answered", "G7_answered_at_nullable", "G8_score_nullable_when_answered", "G9_answer_is_pointer_only", "G10_sticky_current_rank_on_archived", "G11_score_has_no_consumer"]
   },
   "last_run": "2026-08-05T11:05:00Z",
-  "open_items": 1,
+  "open_items": 2,
+  "unarchived_processed_inbox_item": "item_20260805T110209879179Z_mile-6d6b3a8f-15-11-12-score-82 (from content, P3 reply) is PROCESSED but still sits in inbox/. Every file-move command (mv, cp+rm) is denied under the current permission mode, so charter closeout step 3 could not be executed. Next shift: do not redo it, just archive it. Structural gap reported to platform_eng as item_20260805T110539717547Z.",
   "open_item_notes": "D25 report correction is DONE (5 sites: header correction note, row 5, row 10, conclusion #3, G3 design-point 1 + dependency clause). The remaining open item is a verification, not a writing task: the /questions 'ask a question' card sits on a permanent skeleton under the owner's logged-in Chrome; whether an anonymous visitor sees the same is UNTESTED, because the only available browser carries the owner session. Needs a clean anonymous browser context (cockpit pane, incognito or fresh profile). Do NOT raise it as an incident before that."
 }

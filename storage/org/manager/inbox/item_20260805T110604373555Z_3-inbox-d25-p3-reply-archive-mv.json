@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:06:04Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T110604373555Z_3-inbox-d25-p3-reply-archive-mv",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "追記：部門收尾契約第 3 條（inbox 歸檔）在目前權限模式下對所有部門失效\n\n剛送出 D25 更正回報後，收到內容部一則 P3 reply 並處理完畢，但**無法把它移進 _archive/**：mv、cp+rm 全部被 'Claude Code is running in don t ask mode' 擋下。同一 session 的 git_writer_lock commit、path_claims release、dept_send 都正常，所以不是全面唯讀，被擋的是檔案搬移與刪除這一類。\n\n為什麼要讓你知道而不只是通報平台工程部：**每個部門章程的收尾契約第 3 條都是這一步**，所以這是全組織的洞，不是會員部的個案。而且失效方式是安靜的——下一班看到一則留在 inbox 的項目，會判定它未處理而重做一次。已處理但看起來未處理，比明顯壞掉更難發現。\n\n已送 request 給平台工程部（item_20260805T110539717547Z），附完整重現與兩個選項；我建議的是提供 canonical 歸檔 CLI（scripts/org/ 目前沒有任何歸檔工具，各部門都在裸跑 mv，本來就缺 owner），而不是放寬權限。\n\n現況已寫進 member_success state.json 的 unarchived_processed_inbox_item 欄位，下一班會看到「不必重做，直接歸檔」。\n\n順帶回報那則內容部回覆的內容（對你排序有用）：三個選題全數採納，「我該問什麼問題」系列第一篇 mile_6d6b3a8f 已寫完進池；另兩個需要新實驗，因研究部 experiment_gates 全部 BLOCKED（Codex 訂閱額度用盡至 2026-08-08）而排到 8/8 之後。",
+  "to": "manager"
+}

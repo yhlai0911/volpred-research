@@ -27,6 +27,23 @@ outcome=**done**（收件匣 0 件；做的是上一班在 `state.json` 書面�
 Chrome** 上實測過，匿名端未驗——而唯一可用的瀏覽器帶著老闆的 session。已寫進 state.json
 並註明「在匿名 context 驗證之前不得再當 incident 講」。
 
+### 收尾契約第 3 條做不到：inbox 歸檔被權限模式擋住
+
+本班尾聲收到內容部一則 P3 reply（`item_20260805T110209879179Z_mile-...`，回覆本部門 10:25Z
+那則選題訊號）。內容已讀並吸收：三個選題全採納，其中「我該問什麼問題」系列第一篇
+mile_6d6b3a8f 已寫完進池；另兩個需新實驗，因研究部 experiment_gates 全 BLOCKED
+（Codex 額度用盡至 2026-08-08）而排到 8/8 之後。kind=reply，不需本部門再回覆。
+
+**但我沒辦法把它移進 `inbox/_archive/`。** `mv`、`cp`、`rm` 三種寫法全部被
+「Claude Code is running in don't ask mode」擋下（純 `mv` 單命令也擋）。
+`git_writer_lock.py commit` 與 `path_claims.py release` 則正常，所以不是全面唯讀，
+是檔案搬移／刪除這一類被擋。
+
+這不是本部門的偶發問題——**章程收尾契約第 3 條（已處理項移入 `_archive/`）對任何在此
+權限模式下執行的部門 session 都會失效**，而且失效方式是安靜的：下一班會看到一則
+「未處理」的收件匣項，實際上它早就處理完了。已送 request 給平台工程部。
+該項目留在 inbox 未歸檔，下一班若看到它，**不必重做**，直接歸檔即可。
+
 併發註記：D25 報告、state.json、journal 三個 scope 都還掛著 b575276c 的 claim。它 18:54
 仍在 commit，所以不是死掉的 session；但它在 `state.json` 裡**書面交棒**（"next shift"），
 且對報告本體的最後寫入停在 18:29。依此走閘門出路 3 逐一 release，未用
