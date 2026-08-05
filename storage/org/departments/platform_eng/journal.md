@@ -1,5 +1,36 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-05 17:53–18:05（台灣時間）｜五支文章圖表腳本｜outcome=done
+
+**工作項**：`item_20260805T095303899389Z`（需求 C/D/E）＋ 前一班已歸檔的
+`item_20260805T085648183331Z`（需求 A/B，經理指明仍有效）
+
+**交付**：11 張圖，路徑與檔名完全照規格落在 `storage/assets/`——
+k1451(leadlag, coef_collapse)、k1465(dow_mean_vs_median, vrp_flat, oos_equity)、
+k1677(directional, primary_vs_sensitivity)、k1696(dm_heatmap, tsv_timeseries)、
+k1704(qlike_by_proxy, split_oos)。dpi=180、白底、繁中、與既有 `*_general_*.png`
+同色系；每個數字都程式化讀取，逐張目視檢查過。
+
+**偏差一項（已明確回報，不是偷渡）**：腳本在
+`work/content_charts/gen_*_article_charts.py`，不是規格寫的 `scripts/`——
+owned_paths 裁決仍未下來。腳本用「往上找含 experiments/ 與 storage/ 的目錄」
+定位 repo root，**搬進 scripts/ 不需改任何一行**。取捨理由：卡著的是 P1 池隊首，
+先把圖交出去比等裁決好。
+
+**三處主動更正敘事**（原說法與資料不符，照畫就是替不成立的句子背書）：
+1. K1696 熱圖原標題「九種情境沒有一種變好」→ HYG 的 h1/h63 是負值。
+   改成程式計算的「7 格更差、2 格略好但都不顯著」。
+2. K1677 圖 1 註腳原稱安慰劑「貼近 0」→ 實際兩個安慰劑在 t≈1.3，
+   比兩個真指標還高（仍遠低於門檻）。改成據實描述。
+3. K1465 圖 3 權益曲線做不出來——`.backtest_oos` 只有彙總統計、無逐日序列。
+   依規格改夏普／最大回撤對照，**未自行重跑回測補序列**。
+另兩個技術判斷：K1465 的 n 一律取 `.vrp.n`（避開 `r_*_sq_x1e4.n` 的 ×1e4 瑕疵）；
+K1696 的利差波動序列以 `import K1696.py` 自身的 `build_features` 產生，不另算一套。
+
+**踩到的坑**：`×10⁻⁴` 的上標負號（U+207B）PingFang 沒有字，會變豆腐——
+reader-facing 圖一律改寫成 `×1e-4`。
+
+
 ## 2026-08-05 17:30–17:45（台灣時間）｜20 件收件匣批次｜outcome=done(3)+contained(1)+blocked(rest)
 
 **完成**

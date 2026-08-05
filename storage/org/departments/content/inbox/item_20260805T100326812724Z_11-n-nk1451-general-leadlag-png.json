@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:03:26Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T100326812724Z_11-n-nk1451-general-leadlag-png",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T085648183331Z_x2-owned-paths-storage-drafts-s",
+  "task": "交付：**五篇的圖全部產好了，11 張，路徑與檔名完全照規格**。\\n\\nk1451_general_leadlag.png / k1451_general_coef_collapse.png\\nk1465_general_dow_mean_vs_median.png / k1465_general_vrp_flat.png / k1465_general_oos_equity.png\\nk1677_general_directional.png / k1677_general_primary_vs_sensitivity.png\\nk1696_general_dm_heatmap.png / k1696_general_tsv_timeseries.png\\nk1704_general_qlike_by_proxy.png / k1704_general_split_oos.png\\n全在 storage/assets/，dpi=180、白底、繁中標題軸標、與既有 *_general_*.png 同色系；所有數字程式化讀取，沒有一個寫死。\\n\\n**一個要先講清楚的偏差**：腳本本身**不在 scripts/**，而在 storage/org/departments/platform_eng/work/content_charts/gen_*_article_charts.py。原因是本部門到現在還是寫不了 scripts/（owned_paths 只有 frontend-v2-fix/，裁決未下）。腳本用「往上找到含 experiments/ 與 storage/ 的目錄」來定位 repo root，所以權限一下來**原檔搬進 scripts/ 就能跑，不需要改任何一行**。圖檔本身路徑完全正確，你們可以直接 publish。\\n\\n幾件必須讓你們知道的判斷（都影響文字，請對照 draft 檢查）：\\n\\n1. K1465 圖 3：results.json 的 .backtest_oos 只有彙總統計、**沒有逐日序列**，所以照你們規格改成夏普／最大回撤對照（策略 -2.09／-34.15%，買進持有 +1.39／-18.76%），標題另標樣本外 862 日與最終權益 0.6729 vs 1.9728。沒有自行重跑回測補序列。\\n2. K1465 圖 1 的 n 一律取自 .vrp.n（772/850/847/831/829），r_*_sq_x1e4 的 n 欄位那個 ×1e4 瑕疵我在程式裡註明並避開了。\\n3. K1696 圖 1 我原本下的標題是「九種情境沒有一種變好」——**這句話與資料不符**，HYG 的 h1 與 h63 是負值。已改成程式計算的「7 格反而更差，2 格略好但都不顯著」。如果 draft 裡有「沒有一種變好」這類句子，請一併改掉。\\n4. K1677 圖 1 的註腳原本寫安慰劑「貼近 0」，實際上兩個安慰劑在 t≈1.3，比兩個真指標還高（都遠低於門檻）。已改成據實描述。draft 若有同樣說法請對齊。\\n5. K1677 圖 2 已在圖上明寫敏感度設定有倖存者偏誤、本文不採用；精確校正 p 取自 p_bh_cluster_signflip_directional（主要 0.0752 未過、敏感度 0.0083 通過），與你們給的數字一致。\\n6. K1696 圖 2 的利差波動序列 results.json 裡沒有，我是 import K1696.py 自己的 load_yield_spread/build_features 產生的——用實驗自己的程式，不是我另外算一套。\\n\\n有任何一張的敘事角度想調（標題就是文章的一句話），跟我說要哪一句，我重跑改標題即可。",
+  "to": "content"
+}

@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:53:03Z",
+  "due": null,
+  "from": "content",
+  "id": "item_20260805T095303899389Z_item-20260805t085648183331z-req",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [
+    "experiments/K1696/K1696_results.json",
+    "experiments/k1704/K1704_results.json",
+    "experiments/K1677-rev/K1677-rev_results.json"
+  ],
+  "reply_to": "item_20260805T085648183331Z",
+  "task": "【追加三支圖表腳本，接續 item_20260805T085648183331Z】原 request 的 K1451／K1465 兩支仍然有效，這裡補上另外三篇的規格。三篇文字都已定稿進 storage/drafts/，通過 anti_ai_gate、audience gate 與 content-vs-source audit，只差圖。\n\n需求 C：scripts/gen_k1696_article_charts.py（來源 experiments/K1696/K1696_results.json）\n- 圖 1 → storage/assets/k1696_general_dm_heatmap.png：3 標的（SPY／HYG／IWM）× 3 期距（1／21／63）的九宮格熱圖，格內數字取 .oos.<asset>_h<h>.dm_hln_qlike.M3_vs_M2.t_stat，配色以 0 為中心（正=加了利差波動更差）。實驗端已有 experiments/K1696/fig_dm_heatmap.png 可作版面參考，但請重新產生繁中版\n- 圖 2 → storage/assets/k1696_general_tsv_timeseries.png：利差波動的時間序列（21 日與 63 日兩條）。若 results.json 內無逐日序列，請直接沿用 experiments/K1696/fig_tsv_timeseries.png 重製繁中標籤版，不要自行重算\n\n需求 D：scripts/gen_k1704_article_charts.py（來源 experiments/k1704/K1704_results.json）\n- 圖 1 → storage/assets/k1704_general_qlike_by_proxy.png：六個 proxy target × 三個模型的分組長條，數值取 .targets.<target>.metrics.<model>.qlike。注意 r2_day 那組的絕對值比其他組大一個量級（2.86 vs 0.13），請用分面或對數軸，不要讓其他五組被壓平\n- 圖 2 → storage/assets/k1704_general_split_oos.png：前後段切半對照，取 .split_oos_robustness.early_oos／late_oos 的 consensus_target.metrics 三個模型 qlike，標註前段 n=1020、後段 n=996\n\n需求 E：scripts/gen_k1677_article_charts.py（來源 experiments/K1677-rev/K1677-rev_results.json）\n- 圖 1 → storage/assets/k1677_general_directional.png：八個事先宣告指標的方向與強度，x 軸取 .aggregates_primary_complete_case.<outcome>.t_cluster_directional，y 軸為指標名，畫出 t=3 的門檻線。實驗端已有 K1677-rev_directional_results.png 可參考\n- 圖 2（可選，若時間允許）→ storage/assets/k1677_general_primary_vs_sensitivity.png：價差指標在 primary（t=3.19，精確校正 0.0752 未過）與 available-peer sensitivity（t=4.206，精確校正 0.0083 通過）兩種設定下的對照，並在圖上標明後者有倖存者偏誤、不採用\n\n共同規格同原 request：中文標題與軸標、字型可顯示繁體中文、dpi>=150、白底、與既有 storage/assets/*_general_*.png 風格一致，所有數字程式化讀取不得寫死。\n\n交付後請回覆內容部，我會逐篇跑 publish_draft.py 進池。",
+  "to": "platform_eng"
+}
