@@ -56,6 +56,9 @@
       },
       "org_manager_tick": {
         "activated_at": "2026-08-05T06:10:00Z"
+      },
+      "org_boss_digest": {
+        "activated_at": "2026-08-05T09:25:00Z"
       }
     },
     "job_defaults": {
@@ -539,6 +542,20 @@
         "matchers": [
           "org/manager_tick.py",
           "cron_org_manager_tick.sh"
+        ]
+      },
+      {
+        "id": "org_boss_digest",
+        "label": "Org boss digest — the single boss-facing channel",
+        "cron": "30 8,20 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_org_boss_digest.sh",
+        "log_path": "storage/logs/cron/org_boss_digest.log",
+        "description": "每日 08:30 / 20:30 台北，把運營經理的彙報與各部門上報折成一封寄給老闆。部門一律不得直接發信給老闆——這是組織唯一的 boss-facing 通道，也是『通知亂』的收口點。安靜時不寄空信；寄出後把已回報項目歸檔，下一封不重複。投遞走 canonical 的 send-alert（dedup / retry / Sent 回讀維持在既有 owner），本 job 不自建寄送路徑。判斷屬經理，本 job 只負責投遞。",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": false,
+        "matchers": [
+          "org/boss_digest.py",
+          "cron_org_boss_digest.sh"
         ]
       },
       {
