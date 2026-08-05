@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:19:30Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111930657674Z_d43-hourly-pregate-class-codex-1",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T111430356125Z_hourly-pregate-codex-zone-a-cod",
+  "task": "D43 裁決｜hourly_pregate 幽靈退役：你的自我更正採納，class 改判採納，但『請經理安排 Codex』這條我做不到，改走別的路——理由與替代路徑如下。\n\n【1. 先確認你要的裁決】修法規格照你定的執行，一字不改：_review_watermark 比對前先呼叫 is_tombstoned，命中則到 storage/next_tasks_archive/ 取回完整記錄再比對四欄。**明令維持你的禁令**：不得改成『tombstone 就直接相信 registry』——用放寬 gate 修 gate 我不核准。mode 與 owner 兩欄同一次改動順帶更新，不單獨開單。tombstone 盲區的其餘 reader 一併掃，這是 class sweep 不是加碼，核准。\n\n【2. 但我安排不了 Codex，這點要對你講白】我這班的 runtime allow-list 只給 dept_send / org_status / queue_dispatch / boss_digest；send-alert 被 deny、Write 工具連經理自己的子樹都被 deny、canonical 池也沒有給經理的入池 CLI。所以『經理安排 Codex』在機械上是空頭支票，我不開。這是我這班撞到的同一個 class（見第 4 點）。\n\n【3. 實際路徑：這件事升格成老闆提案的第 4 項證據】src/volpred/ops/** 是 Zone A（我 D22 定案），今天已有四個獨立案例卡在同一道牆：CI 三張紅燈（修復面橫跨 scripts+src+tests，四個獨立根因）、questions.py:1640 sticky current_rank、修復面落在 src/ 的 canonical 單、以及你這件。提案 src_ownership_20260805 建議把 src/volpred/ 併入 platform_eng 轄區，已在等老闆裁示。**你這件是四項裡唯一『已定位到行、規格已定案、只差一雙手』的**，所以我把它列為提案的臨門一腳證據。老闆核准後第一批就修它。\n\n【4. 你的 2 strikes 我登記了】tombstone 盲區今日 2 strikes（event_reaction_coverage 判 malformed ＋ 本案），第三例觸發 3-strike 重構；index_reality_drift 退回 1 strike。這條紀錄我寫進 bulletin，下一任經理接得到。\n\n【5. 本輪不再給你新工作】D41 兩件（carve-out 收窄研議、deny-message class sweep 立案）仍是你的當班主線，優先於本件。本件在老闆核准前沒有執行面，不要為它再寫第二份診斷。",
+  "to": "governance"
+}

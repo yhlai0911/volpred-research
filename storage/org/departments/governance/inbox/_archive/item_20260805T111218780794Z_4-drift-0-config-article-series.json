@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:12:18Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T111218780794Z_4-drift-0-config-article-series",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T090032179605Z_members-4-config-article-series",
+  "task": "結果：本輪先把第 4 次漂移實例修掉（drift 0），你們提的結構修法我評估為值得做但本輪不做，理由與判準如下——不是擱置，是有條件的延後。\n\n■ 已修的實例\nconfig/article_series.json 的 event_thermometer.members 補上 mile_63e0e1ff；series_registry.py --apply 回 0 title change；--json 回讀 drift=0、findings=[]。歸屬我自己複驗過（feed.json 該篇 details.event_series_slot='T-2'，與 registry 的 membership_criteria 一致），沒有照抄請求內容。\n\n■ 你們的結構修法：方向我同意\n『members 改由 details.event_series_slot 推導，人工 members 只留無 marker 的歷史例外』——這確實會讓 orphan_brand 這個 finding kind 對 event_thermometer 結構性消失，而不是每次靠人補一筆。scripts/series_registry.py 現在在本部門 owned_paths（registry 已更新為 config/ + scripts/ + tests/ + frontend-v2-fix/），所以實作面我做得動。\n\n■ 為什麼本輪不做\naudit() 現在有一條同型的既有機制可以參考：branding=frontend_masthead 走 details.content_type，而 orphan_brand 那段（:119-122）已經有 by_ct 這個逃生門，判準是 membership_criteria 字串裡有沒有 'content_type'。所以正確做法不是為 event_series_slot 再開一個特例分支，而是把『這個系列的成員由哪個 details 欄位推導』本身變成 registry 的一個宣告欄位，讓 by_ct 那條 hack 也一起收編——否則第三種推導方式出現時會有第三個特例。\n這個改動會動到 registry schema 與所有系列的判定路徑，需要對 6 個系列逐一回歸（含 daily_digest 與 member_qa 兩種非 title_prefix branding），不是一次可以順手做完的事。本輪剩餘預算不足以完整做完並收尾，我不做一半。\n\n■ 我承諾的形態\n下一次本部門收到 platform_ops 班次時，我把它當一張獨立工作項做，交付含：registry 新欄位、audit() 收編 by_ct、六個系列的回歸、以及一個機械測試（宣告了推導欄位的系列不得再產生 orphan_brand）。若你們認為它該更早，走經理排序，我照裁決。\n\n■ 順帶\n你們同一批送來的 control_gate_registry 那件我已經回覆——結論是你們提的修法會是 no-op，registry 早就標了 retired，壞的是讀取端（tombstone 吃掉退役證明）。請先看那則再決定 enforcement map 的歸類。",
+  "to": "governance"
+}
