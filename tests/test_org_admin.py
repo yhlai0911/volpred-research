@@ -670,9 +670,19 @@ def test_everyone_is_told_where_the_org_panorama_is(org_root: Path) -> None:
 # --- intake: the boss's door ----------------------------------------------
 
 @pytest.fixture()
-def captured_wake(monkeypatch):
-    """Record wake calls instead of spawning a coordinator."""
+def captured_wake(monkeypatch, org_root: Path):
+    """Record wake calls instead of spawning a coordinator.
+
+    ``org_intake._wake`` refuses any root that is not the canonical one, because
+    waking starts a real coordinator against the real repo — on 2026-08-05 a
+    subprocess-based test did exactly that and left write tracks under storage/.
+    That guard is deliberately not caller-trusting, so an in-process test cannot
+    opt out of it by patching the waker alone: it has to declare that *this* tmp
+    root is the canonical one for *this* process. A subprocess is unaffected,
+    which is precisely the case the guard exists for.
+    """
     import manager_tick
+    import org_intake
 
     calls: list[tuple] = []
 
@@ -681,6 +691,7 @@ def captured_wake(monkeypatch):
         return {"woken": True, "via": "test"}
 
     monkeypatch.setattr(manager_tick, "wake_manager", _fake)
+    monkeypatch.setattr(org_intake, "DEFAULT_ORG_ROOT", org_root)
     return calls
 
 
@@ -754,6 +765,9 @@ def test_failed_wake_still_leaves_the_instruction_on_disk(org_root, monkeypatch,
     quiet_platform(org_root)
     monkeypatch.setattr(manager_tick, "wake_manager",
                         lambda *a, **k: (_ for _ in ()).throw(OSError("herdr gone")))
+    # The subject here is a *broken waker*, not a refused root — so this test has
+    # to get past the root guard to reach the failure it is about.
+    monkeypatch.setattr(org_intake, "DEFAULT_ORG_ROOT", org_root)
 
     result = org_intake.record_boss_message(org_root, "急件", msg_id="1706")
 
@@ -1190,6 +1204,9 @@ def test_a_boss_message_never_waits_for_that_floor(org_root: Path, monkeypatch) 
         return {"woken": True, "via": "test"}
 
     monkeypatch.setattr(manager_tick, "wake_manager", _fake)
+    # See the captured_wake fixture: the wake guard is on the root, so an
+    # in-process test has to declare this tmp root canonical for this process.
+    monkeypatch.setattr(org_intake, "DEFAULT_ORG_ROOT", org_root)
 
     result = org_intake.record_boss_message(org_root, "急件", msg_id="2001")
 

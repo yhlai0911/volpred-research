@@ -104,6 +104,26 @@ def _wake(root: Path, reasons: list[str]) -> dict:
     the boss's message is not lost. The outcome is written into the receipt so
     "the manager was never woken" stays searchable instead of invisible.
     """
+    # Waking is an OUTWARD side effect: it starts a real coordinator session that
+    # acts on the real repo and messages the owner. Against a throwaway org root
+    # that is always a bug, never an intention -- and it has happened: pytest runs
+    # this module as a real subprocess with tmp_path as the root, so
+    # monkeypatching wake_manager (which the in-process tests do) cannot reach it.
+    # The woken coordinator then rehydrated from the pytest tmpdir and briefed
+    # itself on a fictional org: 1 inbox item, no policy file, no active
+    # departments. It also left write tracks under storage/ and turned the CI
+    # test-leak gate red.
+    #
+    # The guard is on the root rather than on the caller so it holds however this
+    # is reached -- direct import, subprocess, `uv run`, an orphaned grandchild.
+    if root.resolve() != DEFAULT_ORG_ROOT.resolve():
+        return {
+            "woken": False,
+            "reason": (
+                f"refused: org root {root} is not the canonical {DEFAULT_ORG_ROOT} "
+                "— waking a real coordinator against a throwaway root is always a bug"
+            ),
+        }
     try:
         from manager_tick import wake_manager  # noqa: PLC0415 — avoids an import cycle
 
