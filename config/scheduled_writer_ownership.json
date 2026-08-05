@@ -65,7 +65,8 @@
           "fomc-2026-07-29-t7", "fomc-2026-07-29-t2", "fomc-2026-07-29-t0",
           "nfp-2026-08-07-t7", "nfp-2026-08-07-t2", "nfp-2026-08-07-t0",
           "cpi-us-2026-08-12-t2", "cpi-us-2026-08-12-t0",
-          "tsmc-revenue-2026-08-10-t0"
+          "tsmc-revenue-2026-08-10-t0",
+          "owner-decisions-quota-restored"
         ],
         "policy": "event_delivery_contract",
         "tracked_outputs": ["storage/next_tasks.json", "storage/ops/event_ledger/**", "dynamic article outputs"],
@@ -512,6 +513,19 @@
       "policy": "delegated_delivery_contract",
       "tracked_outputs": ["storage/ops/**", "agent fire-owned paths"],
       "reason": "Supervisor state is machine-owned; each fire takes a pre-fire dirty snapshot and PHASE-Z commits only fire-owned or declared machine paths."
+    },
+    "org_manager_tick": {
+      "entrypoint": "scripts/org/manager_tick.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "The gate's only writes are the wake-stamp and its own lease, both under gitignored storage/org/runtime/; a due wake hands off to the coordinator's own session, which commits nothing itself."
+    },
+    "org_boss_digest": {
+      "entrypoint": "scripts/org/boss_digest.py",
+      "commit_owner": "scripts/org/boss_digest.py",
+      "policy": "self_commit",
+      "tracked_outputs": ["storage/org/manager/inbox/*.json", "storage/org/manager/inbox/_archive/*.json"],
+      "reason": "Archiving reported inbox items mutates tracked storage/org/** state; the job guards and commits only the items it itself moved this run. digest_pending.md is declared and cleared defensively but has no writer yet, so it is not a currently tracked Git output."
     }
   },
   "launchagents": {
