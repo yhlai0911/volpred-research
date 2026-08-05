@@ -25,7 +25,7 @@ import os
 import subprocess
 import sys
 import time
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dept_routing import resolve_dept_routing  # noqa: E402
@@ -154,6 +154,47 @@ def find_org_tab(label: str) -> str | None:
     return None
 
 
+def turf_patterns(declared: list[str]) -> list[str]:
+    """Turn declared ownership into the permission patterns that grant it.
+
+    Two ways a real grant used to deny every write:
+
+    1. **A declaration that names a file.** Everything was treated as a
+       directory and given ``/**``, so ``scripts/gen_*_article_charts.py``
+       became ``...py/**`` — a pattern matching nothing. The registry said the
+       department owned the file, the settings said it owned a directory that
+       does not exist, and the department was told "denied" with no explanation.
+       Ownership of a single file is a legitimate declaration (content owns its
+       chart scripts, governance owns policy.md) and must survive the trip.
+
+    2. **Dot-directories inside an owned tree.** ``**`` does not cross a path
+       segment beginning with a dot in most glob implementations, so a
+       department owning ``frontend-v2-fix/`` still could not write
+       ``frontend-v2-fix/.claude/no-session-lock`` — a file inside its own turf
+       that the manager had explicitly approved (D51, 2026-08-05).
+
+    A trailing slash, or the absence of a filename-looking last segment, means
+    directory. Anything with a suffix or a glob in its final segment names a
+    file and is passed through untouched.
+    """
+    patterns: list[str] = []
+    for raw in declared:
+        item = (raw or "").strip()
+        if not item:
+            continue
+        last = PurePosixPath(item.rstrip("/")).name
+        names_a_file = not item.endswith("/") and ("." in last)
+        if names_a_file:
+            patterns.append(item)
+            continue
+        base = item.rstrip("/")
+        # The dot patterns are additive, never a replacement: `**` still carries
+        # every ordinary path, and stating the dot case explicitly is cheaper
+        # than depending on one matcher's opinion about leading dots.
+        patterns += [f"{base}/**", f"{base}/.*", f"{base}/.*/**"]
+    return patterns
+
+
 def generate_dept_settings(root: Path, dept: str) -> Path | None:
     """Grant a department write access to exactly the turf its charter declares.
 
@@ -188,9 +229,10 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
     # matches nothing. That is why every department reported writes denied even
     # after being granted its turf. Absolute patterns need a LEADING DOUBLE
     # SLASH; a single slash is still read as relative.
-    rel = [f"storage/org/departments/{dept}/"]
-    rel += [p.rstrip("/") + "/" for p in (meta.get("owned_paths") or [])]
-    turf = [f"/{REPO_ROOT}/{r}**" for r in rel]
+    rel = turf_patterns(
+        [f"storage/org/departments/{dept}/", *(meta.get("owned_paths") or [])]
+    )
+    turf = [f"/{REPO_ROOT}/{r}" for r in rel]
     allow = [f"{tool}({t})" for t in turf for tool in ("Edit", "Write")]
     # Capabilities a department declares in the registry. Kept out of the turf
     # list because these are TOOLS, not territory: two departments may both need
