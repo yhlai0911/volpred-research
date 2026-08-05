@@ -226,6 +226,36 @@ PRICING = {
 }
 
 
+# 產出類 = 直接服務 5 missions 的類別（研究/論文/文章/QA/圖表/知識）。
+# 2026-08-05 owner 指令：報告頭條必須是「產出佔比」——token 花在 mission 還是
+# 花在維運自己，一眼可見。門檻與趨勢由報告消費端裁決，這裡只誠實計算。
+MISSION_OUTPUT_CATEGORIES = frozenset({
+    "experiment",
+    "paper_work",
+    "article_writing",
+    "knowledge_recording",
+    "research_planning",
+    "chart_generation",
+    "member_qa",
+    "knowledge_index",
+})
+
+
+def mission_output_summary(by_category, billable_total):
+    """回傳 {share_pct, billable, categories} — 產出類 billable 佔比。"""
+    output_billable = sum(
+        _billable_total(usage)
+        for cat, usage in by_category.items()
+        if cat in MISSION_OUTPUT_CATEGORIES
+    )
+    denominator = billable_total or 1
+    return {
+        "billable": output_billable,
+        "share_pct": round(output_billable / denominator * 100, 2),
+        "categories": sorted(MISSION_OUTPUT_CATEGORIES),
+    }
+
+
 def _empty_bucket():
     return {
         "input_tokens": 0,
@@ -1707,6 +1737,12 @@ def generate_daily_report(target_date=None, include_commits=False):
             "unique_sessions": totals["unique_sessions"],
             "estimated_cost_usd": round(total_cost_usd, 4),
         },
+        "mission_output": mission_output_summary(
+            by_category,
+            totals["input_tokens"]
+            + totals["output_tokens"]
+            + totals["cache_create_tokens"],
+        ),
         "by_model": {
             model: {
                 **usage,
@@ -1811,6 +1847,12 @@ def generate_weekly_report(week_start=None):
             "unique_sessions": totals["unique_sessions"],
             "estimated_cost_usd": round(total_cost_usd, 4),
         },
+        "mission_output": mission_output_summary(
+            by_category,
+            totals["input_tokens"]
+            + totals["output_tokens"]
+            + totals["cache_create_tokens"],
+        ),
         "by_model": {
             model: {
                 **usage,
@@ -1871,6 +1913,19 @@ def format_report_text(report):
     lines.append(f"**數據源**: {report['source']}")
     lines.append(f"**Assistant messages**: {t.get('assistant_messages', t.get('messages', 0)):,}")
     lines.append(f"**Sessions**: {t['unique_sessions']}")
+    mission = report.get("mission_output")
+    if mission:
+        share = mission["share_pct"]
+        verdict = "🟢" if share >= 30 else ("🟡" if share >= 10 else "🔴")
+        lines.append("")
+        lines.append(
+            f"## {verdict} 產出佔比（頭條 KPI）: {share:.1f}%"
+        )
+        lines.append(
+            f"研究/論文/文章/QA/圖表/知識 billable {mission['billable']:,} / "
+            f"{t['billable_total']:,}。目標：1 個月 ≥10%、3 個月 ≥30%。"
+            "低於目標 = token 花在維運自己而不是 mission —— 查 idle_gate 與 pool 組成。"
+        )
     lines.append("")
 
     # Totals table

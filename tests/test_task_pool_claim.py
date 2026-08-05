@@ -4788,3 +4788,91 @@ def test_dispatch_preassign_atomically_persists_admission_outbox(
             "created_at": pending["pending"][0]["intent"]["created_at"],
         },
     }]
+
+
+# ── H4-5 idle-fire gate 輸入：tail return 必須區分「有 generic 工作」vs「全池無工」──
+
+
+def test_dispatch_preassign_reports_runnable_generic_for_idle_gate(
+    tmp_path, monkeypatch
+) -> None:
+    """一張新鮮的 daily_article（非 mutating、非 immediate、未 starved）不會
+    觸發任何 early return，但 supervisor 必須知道它存在 —— worker 進場後的
+    generic menu 會把它派出去，所以這班不可以被 idle gate 關掉。"""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "k9999-fresh-article",
+                    "status": "pending",
+                    "priority": 3,
+                    "task_type": "daily_article",
+                    "dispatch_lane": "agent",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-idle-gate-a",
+            job_id="job-idle-gate-a",
+        )
+    )
+
+    assert result["ok"] is True
+    assert result["assigned"] is False
+    assert result["reason"] == "no_contract_complete_mutating_task"
+    assert result["runnable_generic"] == 1
+    assert result["runnable_generic_sample"] == "k9999-fresh-article"
+    rows = {row["id"]: row for row in json.loads(next_tasks.read_text())}
+    assert rows["k9999-fresh-article"]["status"] == "pending", "回報不是 claim，狀態不得動"
+
+
+def test_dispatch_preassign_reports_zero_runnable_when_pool_is_dead(
+    tmp_path, monkeypatch
+) -> None:
+    """終態與 blocked 行都不算 runnable —— 這是 idle gate 可以關班的唯一憑據。"""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "done-row",
+                    "status": "succeeded",
+                    "priority": 2,
+                    "task_type": "daily_article",
+                },
+                {
+                    "id": "blocked-row",
+                    "status": "blocked",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "blocked_reason": "awaiting_external_data",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="hourly-slot-1-job",
+            session="claim-idle-gate-b",
+            job_id="job-idle-gate-b",
+        )
+    )
+
+    assert result["ok"] is True
+    assert result["assigned"] is False
+    assert result["reason"] == "no_contract_complete_mutating_task"
+    assert result["runnable_generic"] == 0
+    assert "runnable_generic_sample" not in result

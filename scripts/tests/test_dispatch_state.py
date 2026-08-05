@@ -1632,6 +1632,13 @@ def _drive_every_writer(path: Path) -> None:
     )
     st.consume_fire_request(path=path)
 
+    # H4-5 idle-fire gate 路徑：reserve 之後 pool 無 runnable 工作 → cancel
+    # （不還原 demand、不排 PHASE-Z），下一班真 spawn 時 streak 歸零
+    idle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                           log_path="/tmp/idle.log", path=path)
+    st.cancel_reserved_fire(job_id=idle.job_id, reason="no_runnable_work", path=path)
+    st.note_worker_spawned(path=path)
+
     orphan_handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                                     log_path="/tmp/x.log", path=path)
     custody = {
@@ -1903,6 +1910,9 @@ KNOWN_CONTAINERS = {
     "$.completions[].workspace",
     # The exhaustive writer drive leaves custody in its terminal receipt.
     "$.completions[].producer_custody",
+    # H4-5 idle-fire gate ledger（cancel_reserved_fire / note_worker_spawned）。
+    # shape gate = test_idle_gate_ledger_shape_is_flat_and_documented。
+    "$.idle_gate",
 }
 
 # WS-B workspace receipt 的欄位契約（state.py docstring schema 同步列出）。
@@ -2072,4 +2082,80 @@ def test_no_undocumented_nested_container(tmp_state):
     for k, v in state["alerts_dedup"].items():
         assert not isinstance(v, (dict, list)), (
             f"alerts_dedup[{k!r}] 是 {type(v).__name__} —— 動態 map 必須保持扁平"
+        )
+
+
+# ── H4-5 idle-fire gate state closers（2026-08-05 owner 指令：關掉純空轉班）──
+
+
+def test_cancel_reserved_fire_closes_slot_without_demand_or_phase_z(tmp_state):
+    """對照組是它的兩個兄弟：defer 會還原 demand（下一 tick 重 fire），
+    record_completion 會排 PHASE-Z closeout（產生 churn-only commit）。
+    idle 班兩者都不要 —— cancel 必須安靜地收回 slot 並記帳。"""
+    handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                             log_path="/tmp/idle.log", path=tmp_state)
+    snapshot = st.cancel_reserved_fire(
+        job_id=handle.job_id, reason="no_runnable_work", path=tmp_state,
+    )
+    assert snapshot is not None
+    assert snapshot["job_id"] == handle.job_id
+    data = st.read_state(tmp_state)
+    assert data["current_jobs"] == []
+    assert data["current_job"] is None
+    assert not data.get("fire_requested_at"), "cancel 不得還原 demand（那是 defer 的語義）"
+    assert data["phase_z_pending"] == [], "cancel 不得排 PHASE-Z（churn commit 正是要消滅的東西）"
+    gate = data["idle_gate"]
+    assert gate["skips_total"] == 1
+    assert gate["streak"] == 1
+    assert gate["last_skip_reason"] == "no_runnable_work"
+    assert gate["last_skip_at"] is not None
+
+
+def test_cancel_reserved_fire_refuses_advanced_job(tmp_state):
+    """只有未啟動的 reservation（pid=None、phase=reserved）可以 cancel；
+    任何往前走過的 job 屬於正常 completion/recovery，不歸 gate 管。"""
+    handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                             log_path="/tmp/started.log", path=tmp_state)
+    with st._locked_state(tmp_state) as (_fh, data):
+        found = st._find_job(data, handle.job_id)
+        assert found is not None
+        _index, job = found
+        job["phase"] = "running"
+        job["pid"] = 4242
+    assert st.cancel_reserved_fire(
+        job_id=handle.job_id, reason="no_runnable_work", path=tmp_state,
+    ) is None
+    data = st.read_state(tmp_state)
+    assert len(data["current_jobs"]) == 1, "advanced job 必須原封不動留在 slot"
+    assert data["idle_gate"]["skips_total"] == 0
+
+
+def test_note_worker_spawned_resets_streak_but_keeps_total(tmp_state):
+    for i in range(2):
+        handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                                 log_path=f"/tmp/idle{i}.log", path=tmp_state)
+        st.cancel_reserved_fire(job_id=handle.job_id, reason="no_runnable_work",
+                                path=tmp_state)
+    before = st.read_state(tmp_state)["idle_gate"]
+    assert before["streak"] == 2
+    assert before["skips_total"] == 2
+    st.note_worker_spawned(path=tmp_state)
+    after = st.read_state(tmp_state)["idle_gate"]
+    assert after["streak"] == 0, "真 spawn 之後 streak 歸零（streak = 距上次真 fire 的連續 gated 班數）"
+    assert after["skips_total"] == 2, "skips_total 是終身計數，不隨 spawn 歸零"
+
+
+def test_idle_gate_ledger_shape_is_flat_and_documented(tmp_state):
+    """`$.idle_gate` 的欄位契約 gate（KNOWN_CONTAINERS 註解所指之處）。
+    四個 key、全部純量 —— 有人往裡塞巢狀結構時這裡先叫。"""
+    handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                             log_path="/tmp/shape.log", path=tmp_state)
+    st.cancel_reserved_fire(job_id=handle.job_id, reason="no_runnable_work",
+                            path=tmp_state)
+    st.note_worker_spawned(path=tmp_state)
+    gate = st.read_state(tmp_state)["idle_gate"]
+    assert set(gate) == {"skips_total", "streak", "last_skip_at", "last_skip_reason"}
+    for key, value in gate.items():
+        assert not isinstance(value, (dict, list)), (
+            f"idle_gate[{key!r}] 是 {type(value).__name__} —— ledger 必須保持扁平"
         )

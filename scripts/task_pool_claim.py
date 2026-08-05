@@ -1185,6 +1185,12 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
             if selected_mutating is not None
             else ordered_tasks
         )
+        # H4-5 idle-fire gate input: eligible generic rows the worker menu
+        # would still hand out in-session.  The tail return must distinguish
+        # "generic work awaits a worker" (spawn) from "nothing runnable at
+        # all" (the supervisor may close the slot without waking an LLM).
+        runnable_generic = 0
+        runnable_generic_sample: str | None = None
         for task in candidates:
             if not _eligible(task):
                 continue
@@ -1209,6 +1215,9 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
                         "selected_task_id": _task_key(task),
                         "blocked_contracts": blockers[:20],
                     }
+                runnable_generic += 1
+                if runnable_generic_sample is None:
+                    runnable_generic_sample = _task_key(task)
                 continue
             contract = contracts[id(task)]
             now = _now()
@@ -1258,6 +1267,12 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
         "ok": True,
         "assigned": False,
         "reason": "no_contract_complete_mutating_task",
+        "runnable_generic": runnable_generic,
+        **(
+            {"runnable_generic_sample": runnable_generic_sample}
+            if runnable_generic_sample
+            else {}
+        ),
         "blocked_contracts": blockers[:20],
     }
 

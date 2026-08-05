@@ -540,6 +540,181 @@ def test_scheduler_carries_generic_preselection_into_prompt_and_worker(
     assert "task_id=article-starved" in received[0]["prompt_text"]
 
 
+_IDLE_POOL_EMPTY = {
+    "ok": True,
+    "assigned": False,
+    "reason": "no_contract_complete_mutating_task",
+    "runnable_generic": 0,
+    "blocked_contracts": [],
+}
+
+
+def _idle_gate_schedules(tmp_path: Path) -> Path:
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(
+        json.dumps({
+            "cron_jobs": [
+                {"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}
+            ],
+            "daemons": [{
+                "id": "volpred-dispatch-supervisor",
+                "max_slots": 1,
+                "writer_isolation": {"mode": "pilot", "lanes": ["platform_ops"]},
+            }],
+        }),
+        encoding="utf-8",
+    )
+    return schedules
+
+
+def test_idle_fire_gate_closes_pure_cron_slot_without_worker(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """H4-5：claim authority 回報全池無 runnable 工作 + refill 空手 → 該班關閉。
+
+    驗證的不是「有 skip」而是空轉班的三個成本全部歸零：worker 不 spawn（LLM
+    session 費用）、slot 乾淨收回（無 demand 還原、無 retry loop）、PHASE-Z 不
+    enqueue（無 churn-only commit）。"""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = _idle_gate_schedules(tmp_path)
+    monkeypatch.setattr(
+        scheduler, "_preassign_mutating_task",
+        lambda **_kwargs: dict(_IDLE_POOL_EMPTY),
+    )
+    monkeypatch.setattr(
+        scheduler, "_mechanical_pool_refill", lambda **_kwargs: 0,
+    )
+    worker_calls: list[dict] = []
+    monkeypatch.setattr(
+        scheduler.worker, "run_worker",
+        lambda **kwargs: worker_calls.append(kwargs),
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+        schedules_path=schedules,
+    ))
+
+    assert decision["action"] == "skip"
+    assert decision["reason"] == "no_runnable_work"
+    assert decision["refill_added"] == 0
+    assert worker_calls == [], "gate 關班時絕不可 spawn LLM worker"
+    data = state.read_state(state_path)
+    assert data["current_jobs"] == []
+    assert data["phase_z_pending"] == [], "idle 班不得留下 PHASE-Z closeout（churn commit 源頭）"
+    assert not data.get("fire_requested_at"), "idle skip 不得還原 demand（否則每 tick 重 fire）"
+    assert data["idle_gate"]["skips_total"] == 1
+    assert data["idle_gate"]["streak"] == 1
+
+
+def test_idle_fire_gate_retries_after_refill_and_spawns_for_new_work(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """機械 refill 補進新文章/實驗任務後，同一班必須重新問一次 claim
+    authority 並正常開工 —— gate 的出口是「產生 mission 工作」，不是 skip。"""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = _idle_gate_schedules(tmp_path)
+    preassign_calls: list[int] = []
+
+    def fake_preassign(**_kwargs):
+        preassign_calls.append(1)
+        if len(preassign_calls) == 1:
+            return dict(_IDLE_POOL_EMPTY)
+        return {
+            "ok": True,
+            "assigned": False,
+            "reason": "starved_non_mutating_task",
+            "selected_task_id": "k-refilled-article",
+            "blocked_contracts": [],
+        }
+
+    monkeypatch.setattr(scheduler, "_preassign_mutating_task", fake_preassign)
+    monkeypatch.setattr(
+        scheduler, "_mechanical_pool_refill", lambda **_kwargs: 3,
+    )
+    received: list[dict] = []
+
+    def fake_run_worker(**kwargs):
+        received.append(kwargs)
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+        schedules_path=schedules,
+    ))
+
+    assert decision["action"] == "fired"
+    assert len(preassign_calls) == 2, "refill 有補貨就必須重新問一次 claim authority"
+    assert received[0]["preselected_task_id"] == "k-refilled-article"
+    assert state.read_state(state_path)["idle_gate"]["streak"] == 0
+
+
+def test_idle_fire_gate_never_gates_requested_fires(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """fire request（老闆急件 / burst）永遠 spawn —— gate 只認 pure-cron。
+    連 refill probe 都不可以跑：急件的延遲預算不付給 pool 整理。"""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    state.request_fire(reason="boss_urgent", path=state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = _idle_gate_schedules(tmp_path)
+    monkeypatch.setattr(
+        scheduler, "_preassign_mutating_task",
+        lambda **_kwargs: dict(_IDLE_POOL_EMPTY),
+    )
+
+    def _refill_must_not_run(**_kwargs):
+        raise AssertionError("requested fire 不得進 idle gate 的 refill probe")
+
+    monkeypatch.setattr(scheduler, "_mechanical_pool_refill", _refill_must_not_run)
+    received: list[dict] = []
+
+    def fake_run_worker(**kwargs):
+        received.append(kwargs)
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+        schedules_path=schedules,
+    ))
+
+    assert decision["action"] == "fired"
+    assert len(received) == 1, "急件班必須照常 spawn worker"
+
+
 def test_scheduler_does_not_admit_next_fire_while_deferred_reload_is_active(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

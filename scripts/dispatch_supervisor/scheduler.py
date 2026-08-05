@@ -661,6 +661,45 @@ def _task_pool_command(
     return payload
 
 
+def _mechanical_pool_refill(*, repo_root: Path) -> int:
+    """Zero-LLM pool top-up before the idle-fire gate may close a slot.
+
+    "任務池永遠要有待辦任務" (owner hard rule) used to depend on a worker
+    session running `continue_task_dispatch`'s refill hook — which deadlocks
+    the moment fires are gated on pool emptiness. Running the same idempotent
+    `refill_task_pool.py --apply` here keeps the demand ledger self-refilling
+    without an LLM in the loop, and turns the gate's exit into fresh
+    article/experiment work (the mission-serving kind) instead of a skip.
+
+    Fail-open by design: a broken refill must not veto the gate NOR the fire;
+    the failure is logged (no-silent-fallback rule) and the next hourly slot
+    retries.
+    """
+    script = repo_root / "scripts" / "refill_task_pool.py"
+    if not script.is_file():
+        return 0
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script), "--apply", "--json"],
+            cwd=repo_root,
+            env=external_child_environment(),
+            capture_output=True,
+            text=True,
+            timeout=120,
+            check=False,
+        )
+        payload = json.loads(proc.stdout or "{}")
+        added = payload.get("added")
+        if isinstance(added, list):
+            return len(added)
+        return int(added or 0)
+    except (OSError, subprocess.TimeoutExpired, ValueError,
+            json.JSONDecodeError) as exc:
+        LOG.warning("mechanical pool refill failed (fail-open, gate may "
+                    "still close the slot): %s", exc)
+        return 0
+
+
 def _preassign_mutating_task(
     *,
     repo_root: Path,
@@ -2123,6 +2162,122 @@ async def _tick_once(
                 "claim them: %s",
                 preassignment["blocked_contracts"],
             )
+    # ── H4-5 idle-fire gate (2026-08-05 owner directive) ────────────────────
+    # The claim authority above just walked the ENTIRE pool with the worker's
+    # own eligibility policy — the same oracle that would hand the worker its
+    # task. "no_contract_complete_mutating_task" + zero runnable generic rows
+    # means a spawned worker would boot, read the same empty menu, and exit as
+    # a "state churn (no agent output)" commit (188 of 591 commits in the week
+    # before this gate). A pure-cron slot with no demand is therefore closed
+    # WITHOUT waking an LLM. Answering the H4-4 retirement objection: the old
+    # pregate was a demand *heuristic* that diverged from the worker (9/10
+    # skips discarded real work); this gate consumes the claim authority's own
+    # verdict, so gate and worker cannot disagree about what is claimable.
+    # Fire requests (boss / urgent / burst) always spawn — the gate only ever
+    # sees fire_reason == "cron".
+    def _pool_probe_empty(result: dict[str, Any]) -> bool:
+        try:
+            runnable = int(result.get("runnable_generic") or 0)
+        except (TypeError, ValueError) as exc:
+            # Malformed probe data fails OPEN into a normal spawn (agy review
+            # 2026-08-05 LOW): a wrongly spawned worker costs one idle
+            # session; a wrongly closed slot could starve real work.
+            LOG.warning("idle-fire gate: malformed runnable_generic %r (%s) "
+                        "— treating pool as non-empty",
+                        result.get("runnable_generic"), exc)
+            return False
+        return (
+            bool(result.get("ok"))
+            and not result.get("assigned")
+            and str(result.get("reason") or "")
+            == "no_contract_complete_mutating_task"
+            and not runnable
+        )
+
+    refill_added = 0
+    if (
+        task_binding is None
+        and fire_reason == "cron"
+        and iso_cfg["mode"] in {"pilot", "enforce"}
+        and _pool_probe_empty(preassignment)
+    ):
+        # Deadlock exit (feedback_gates_smooth_no_deadlock): refill used to
+        # run only inside worker sessions — gating fires on pool emptiness
+        # without it would freeze the pool empty forever. Top up mechanically,
+        # then re-ask the SAME claim authority once.
+        refill_added = await asyncio.to_thread(
+            _mechanical_pool_refill, repo_root=repo_root,
+        )
+        if refill_added:
+            try:
+                preassignment = await asyncio.to_thread(
+                    _preassign_mutating_task,
+                    repo_root=repo_root,
+                    slot_id=slot_id,
+                    job_id=job_id,
+                )
+            except (OSError, subprocess.TimeoutExpired, RuntimeError) as exc:
+                # Same crash-consistency path as the first preassign call: the
+                # CLI may have committed a claim we never saw, so the fire is
+                # deferred and reconcile_admission_settlements cleans up.
+                deferred = state.defer_reserved_fire(
+                    job_id=job_id,
+                    reason=f"mutating_preassignment_exception:{job_id[:8]}",
+                    path=state_path,
+                )
+                LOG.error(
+                    "post-refill preassignment failed job_id=%s: %s",
+                    job_id,
+                    exc,
+                )
+                return {
+                    "action": "isolation_deferred",
+                    "reason": "mutating_preassignment_exception",
+                    "error": str(exc),
+                    "state_deferred": deferred is not None,
+                }
+            if not preassignment.get("ok"):
+                deferred = state.defer_reserved_fire(
+                    job_id=job_id,
+                    reason=f"mutating_preassignment_failed:{job_id[:8]}",
+                    path=state_path,
+                )
+                return {
+                    "action": "isolation_deferred",
+                    "reason": "mutating_preassignment_failed",
+                    "detail": preassignment,
+                    "state_deferred": deferred is not None,
+                }
+            if preassignment.get("assigned"):
+                task_binding = dict(preassignment["contract"])
+        if task_binding is None and _pool_probe_empty(preassignment):
+            cancelled = state.cancel_reserved_fire(
+                job_id=job_id,
+                reason="no_runnable_work",
+                path=state_path,
+            )
+            if cancelled is not None:
+                LOG.info(
+                    "idle-fire gate closed slot job_id=%s: pool has no "
+                    "runnable work (refill added %d) — no worker spawned, "
+                    "no churn commit",
+                    job_id,
+                    refill_added,
+                )
+                return {
+                    "action": "skip",
+                    "reason": "no_runnable_work",
+                    "job_id": job_id,
+                    "refill_added": refill_added,
+                }
+            # Reservation advanced past "reserved" under our feet — impossible
+            # pre-spawn in the current flow, but fail open into a normal fire
+            # rather than stranding the lease (no-silent-fallback: logged).
+            LOG.warning(
+                "idle-fire gate could not cancel reservation job_id=%s — "
+                "spawning normally",
+                job_id,
+            )
     try:
         workdir = _slot_workdir(
             job_log_path, slot_id=slot_id, job_id=job_id, repo_root=repo_root
@@ -2388,6 +2543,9 @@ async def _tick_once(
         "firing worker job_id=%s slot=%s prev_scheduled=%s log=%s",
         job_id, slot_id, prev_fire.isoformat(), job_log_path,
     )
+    # A real worker is about to launch — idle_gate.streak counts consecutive
+    # gated slots since the last real fire, so it resets here.
+    state.note_worker_spawned(path=state_path)
     # PHASE-Z safety net (post-fire deterministic commit) — port of the legacy
     # cron_hourly_dispatch.sh PHASE-Z block. Runs ONCE per real fire regardless
     # of worker outcome — success / hang / failure AND the case where the worker

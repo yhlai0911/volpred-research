@@ -167,6 +167,12 @@ Schema (version 1)::
       "fire_requested_at": "<ISO|null>",          # pending out-of-band fire request (request_fire)
       "fire_request_reason": "<str|null>",        # why; cleared with request identity
       "fire_request_id": "<uuid|null>",           # immutable CAS identity (legacy fallback = timestamp)
+      "idle_gate": {                              # H4-5 idle-fire gate ledger (cancel_reserved_fire)
+        "skips_total": 0,                         # lifetime gated slots
+        "streak": 0,                              # consecutive gated slots since last real spawn
+        "last_skip_at": "<ISO|null>",
+        "last_skip_reason": "<str|null>"
+      },
       "alerts_dedup": {                           # alert_key -> last_sent_at (for dedup window)
         "auth_blocked": "<ISO>"
       }
@@ -425,6 +431,16 @@ def _empty_state() -> dict[str, Any]:
         "fire_requested_at": None,
         "fire_request_reason": None,
         "fire_request_id": None,
+        # H4-5 idle-fire gate ledger (2026-08-05, owner directive: kill pure
+        # idle fires). `cancel_reserved_fire()` increments; a real worker
+        # spawn resets `streak` via `note_worker_spawned()`. Declared here so
+        # the ghost-field AST gate can see every writer's target.
+        "idle_gate": {
+            "skips_total": 0,
+            "streak": 0,
+            "last_skip_at": None,
+            "last_skip_reason": None,
+        },
         "alerts_dedup": {},
     }
 
@@ -508,6 +524,13 @@ def _normalise_state(data: dict[str, Any]) -> dict[str, Any]:
         data["phase_z_receipts"] = []
     if not isinstance(data.get("cutover_quiesce"), dict):
         data["cutover_quiesce"] = None
+    if not isinstance(data.get("idle_gate"), dict):
+        data["idle_gate"] = {
+            "skips_total": 0,
+            "streak": 0,
+            "last_skip_at": None,
+            "last_skip_reason": None,
+        }
     return data
 
 
@@ -1011,6 +1034,71 @@ def defer_reserved_fire(
         if _IMPLICIT_JOB_ID.get() == str(job.get("job_id")):
             _IMPLICIT_JOB_ID.set(None)
         return snapshot
+
+
+def cancel_reserved_fire(
+    *,
+    job_id: str,
+    reason: str,
+    path: Path = STATE_PATH,
+) -> dict[str, Any] | None:
+    """Close one unstarted reservation with NO demand restore and NO PHASE-Z.
+
+    H4-5 idle-fire gate (2026-08-05 owner directive): when the claim authority
+    itself reports zero runnable work for a pure-cron slot, the fire is closed
+    here instead of spawning a worker that would boot, find the same empty
+    menu, and exit as a "state churn (no agent output)" commit.
+
+    Deliberate contrasts with its two siblings:
+    - `defer_reserved_fire` restores demand as a fire request — correct for a
+      substrate failure that must retry, WRONG here (it would re-fire every
+      tick against the same empty pool).
+    - `record_completion` enqueues the PHASE-Z closeout drain — correct after
+      a worker ran, WRONG here (nothing was produced; a churn-only commit is
+      exactly what this gate exists to eliminate). Daemon-written state churn
+      simply waits for the next real fire's PHASE-Z.
+
+    Only an unstarted reservation (`pid is None`, `phase == "reserved"`) is
+    eligible; anything further along belongs to normal completion/recovery.
+    """
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            return None
+        index, job = found
+        if job.get("pid") is not None or job.get("phase") != "reserved":
+            return None
+        snapshot = dict(job)
+        del data["current_jobs"][index]
+        gate = data.get("idle_gate")
+        if not isinstance(gate, dict):
+            gate = {"skips_total": 0, "streak": 0,
+                    "last_skip_at": None, "last_skip_reason": None}
+        gate["skips_total"] = int(gate.get("skips_total") or 0) + 1
+        gate["streak"] = int(gate.get("streak") or 0) + 1
+        gate["last_skip_at"] = _now()
+        gate["last_skip_reason"] = str(reason)[:200]
+        data["idle_gate"] = gate
+        _sync_projection(data)
+        if _IMPLICIT_JOB_ID.get() == str(job.get("job_id")):
+            _IMPLICIT_JOB_ID.set(None)
+        return snapshot
+
+
+def note_worker_spawned(path: Path = STATE_PATH) -> None:
+    """Reset the idle-gate streak — a real worker just launched.
+
+    `idle_gate.streak` therefore means "consecutive gated slots since the last
+    real fire", which is the quantity the pathological-gating alert watches
+    (a long streak while the pool claims pending work = probe drift).
+    """
+    with _locked_state(path) as (_fh, data):
+        gate = data.get("idle_gate")
+        if not isinstance(gate, dict):
+            gate = {"skips_total": 0, "streak": 0,
+                    "last_skip_at": None, "last_skip_reason": None}
+        gate["streak"] = 0
+        data["idle_gate"] = gate
 
 
 def consume_fire_request(path: Path = STATE_PATH) -> str | None:

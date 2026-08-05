@@ -203,3 +203,75 @@ Bash 端要省，必須走「逐 class 判定為無 shell-state 副作用才包�
 
 下兩期 token 週報應看到：`drilldown.by_tool.Read` 的無 limit/offset 佔比從 73.8% 明顯下降；
 tool_result 總量下降 ≥1M/週。**若沒有下降 = 政策沒生效或被繞過，回來查，不要自我安慰。**
+
+---
+
+## 8. 3-STRIKE 整體重構：idle-fire gate + mission KPI（2026-08-05 owner 直接指令）
+
+**更正紀錄**：2026-08-05 上午的回報曾宣稱本節「已落地」，實際當時未寫入 —— 本節
+於同日中午實作完成後才補寫。宣稱與檔案不符是本計畫 §4「一天全 ✅ 但 22 天後指標
+反向惡化」同一類病；記入以自警。
+
+### 8.0 觸發證據（全部真實量測）
+
+| 事實 | 數值 | 來源 |
+|---|---|---|
+| 產出類佔比（研究+論文+文章+QA+圖表+知識） | 基準週 2.1% → 07-26 完整週 **1.7%** → 08-04 單日 **1.2%** | token 週報/日報 by_category |
+| 07-26 週 `unclassified`（空轉 session） | **221.8M / 82% of billable / 50,176 則** | weekly_2026-07-26.json |
+| 近 7 天 churn commits | **188 / 591（32%）**：`PHASE-Z state churn (no agent output this fire)` | git log |
+| Pending 池組成 | platform_ops 85/120（71%）；daily_article 9、paper_body 2 | next_tasks.json |
+| 3-STRIKE 認定 | 2026-04-23 計畫、2026-07-14 計畫（§0-§7）、2026-08-05 老闆再點名 —— 同根因第三次 | 本檔 + docs/token_optimization_plan_2026-04-23.md |
+
+**Owner 指令（2026-08-05）**：「純空轉的 PHASE-Z 可以關了吧 沒意義」「優化計畫立刻詳細規劃並執行」。
+
+### 8.1 三層診斷
+
+1. **底層邏輯**：H4-4 退役 heuristic pregate 後，cron-due fire **無條件 spawn LLM worker**；
+   `dispatch-preassign` 找不到工作時 worker 照樣開機（`preselected_task_id=None`），翻一圈
+   空手退場，PHASE-Z 收尾成 churn-only commit。正確 domain model：**「該不該叫醒 LLM」由
+   claim authority（與 worker 同一個 oracle）機械判定** —— selector 說無工，worker 醒來也
+   只會複讀同一個空 menu，gate 與 worker 不可能分歧（這正是 H4-4 打掉舊 pregate 的理由的
+   反面：舊的是需求猜測，新的是 claim authority 自己的裁決）。
+2. **流程**：refill（「池永遠有工」）寄生在 worker session 內 —— gate 一旦按池空關班就會
+   死鎖凍結。修正 = refill 移成 supervisor 側零 token 機械步驟，gate 的出口是「補進
+   文章/實驗工作然後正常開工」，不是 skip。
+3. **架構**：任務生成端長期偏 platform_ops（71%），mission 工作被擠出 menu；「產出佔比」
+   從未是任何報告的頭條，退化無人看見。
+
+### 8.2 落地（2026-08-05，全部含回歸測試）
+
+**Layer 1 — idle-fire gate（最大槓桿，直接執行 owner「關掉純空轉」）**：
+- `scripts/task_pool_claim.py::cmd_dispatch_preassign`：尾端 return 新增
+  `runnable_generic`（worker menu 仍會派出的 generic 行數）+ `runnable_generic_sample`，
+  區分「有 generic 工作待 worker 自取」vs「全池無工」。
+- `scripts/dispatch_supervisor/state.py`：新 writer `cancel_reserved_fire()`（收回未啟動
+  reservation；**不還原 demand**〔defer 語義〕、**不排 PHASE-Z**〔churn commit 源頭〕）+
+  `note_worker_spawned()`（streak 歸零）+ `idle_gate` ledger（skips_total / streak /
+  last_skip_at / last_skip_reason；docstring schema、_empty_state、KNOWN_CONTAINERS、
+  shape gate 全數同步）。
+- `scripts/dispatch_supervisor/scheduler.py::_tick_once`：preassign 回報空池且
+  `fire_reason == "cron"` → 機械 refill（`_mechanical_pool_refill` → refill_task_pool.py
+  --apply，fail-open）→ 補到貨就重問一次 preassign 並正常開工；仍無工 →
+  `cancel_reserved_fire` 關班，**不 spawn LLM、不產 churn commit**。fire request
+  （老闆急件/burst）永不進 gate，連 refill probe 都不跑。
+- 測試：state 側 3 案 + shape gate、scheduler 側 3 案（關班零成本三斷言 / refill 復活 /
+  request 不受 gate）、claim 側 2 案（runnable_generic 回報）。四檔回歸 593 passed。
+
+**Layer 3 — mission KPI 頭條**：
+- `scripts/token_usage_report.py`：新增 `MISSION_OUTPUT_CATEGORIES` + `mission_output_summary()`；
+  日報/週報 JSON 增 `mission_output`，markdown 第一個 section = 「產出佔比」紅黃綠頭條
+  （🔴<10% / 🟡10-30% / 🟢≥30%）。08-04 實測輸出 🔴 1.2%。
+
+**Layer 2 — 池組成矯正（本節內排程，未完成項誠實列出）**：
+- ⬜ platform_ops 生成 share cap（收編進 `volpred.ops.pool_pressure` 既有 owner，
+  不建新 gate）—— 規劃：pending 中 platform_ops share > 50% 時非白名單 platform_ops
+  生成 defer。
+- ⬜ 既有 85 筆 pending platform_ops 逐筆 triage（機械初篩 + 主線程裁決，不盲刪）。
+
+### 8.3 驗證 Gate（宣告完成的唯一憑據 = 線上數字）
+
+- [ ] 部署後 48h：`PHASE-Z state churn (no agent output)` commits ≤ 2/day（原 ~27/day）
+- [ ] 下期週報：`unclassified` share < 30%（原 82%）；assistant messages < 20K（原 63K）
+- [ ] 產出佔比：1 個月 ≥10%、3 個月 ≥30%（頭條 KPI 自動可見）
+- [ ] `idle_gate.streak` 長期 > 12 且池有 pending 時要能被看見（alerts 收編，待辦）
+- 未過 gate 前本節狀態 = **contained**，不得標 root_cause_fixed_and_verified。
