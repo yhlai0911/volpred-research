@@ -1808,6 +1808,30 @@
             "event_type": "TSMC_REVENUE"
           }
         }
+      },
+      {
+        "id": "owner-decisions-quota-restored",
+        "event_key": "OWNER_DECISIONS_QUOTA_RESTORED",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "owner-decisions-quota-restored:one_shot",
+        "not_before": "2026-08-09T16:30:00+08:00",
+        "deadline": "2026-08-11T23:00:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "none",
+        "task_template": {
+          "title": "額度恢復：把 docs/pending_owner_decisions.md 的待討論事項送給老闆",
+          "description": "老闆 2026-08-05 22:38 指令：把待討論事項寫下來，額度恢復後提醒。\n\n週限額已於 08-09 16:00 重置，Codex 額度也已於 08-08 恢復——兩個當初把這些事卡住的理由都消失了。\n\n做法：讀 docs/pending_owner_decisions.md，逐項確認現況是否仍成立（有些可能已經被做掉或被推翻，不要照抄一份過期清單給老闆），然後用 Telegram 送一則精簡摘要，每項給出你的建議而不是開放式問題。\n\n同時要做的：把 config/token_conservation.json 的 active 設為 false（它的 expires_at 本來就會讓它自動失效，但留著 active=true 會讓下一個人以為還在節流），並確認org_manager_tick 的 cron 已從節流期的每小時恢復。",
+          "task_family": "ops",
+          "priority": 1,
+          "preferred_agent": "claude",
+          "fallback_allowed": true,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "none",
+          "payload_patch": {
+            "source": "event_expander"
+          }
+        }
       }
     ]
   },
