@@ -51,6 +51,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from plot_style import apply_cjk_style
 
 from volpred.research.reproduce_spec import finalize_experiment
+from volpred.stats.inference import holm_step_down
 
 EXPERIMENT_ID = "nfp_20260807_t2"
 START = "2010-01-01"
@@ -346,17 +347,6 @@ def hac_effect(panel: pd.DataFrame, lag: int) -> dict[str, float | int]:
     }
 
 
-def holm_adjust(pvalues: dict[str, float]) -> dict[str, float]:
-    ordered = sorted(pvalues.items(), key=lambda item: item[1])
-    running = 0.0
-    adjusted: dict[str, float] = {}
-    m = len(ordered)
-    for rank, (name, pvalue) in enumerate(ordered):
-        running = max(running, min(1.0, (m - rank) * float(pvalue)))
-        adjusted[name] = running
-    return adjusted
-
-
 def _summary(values: pd.Series) -> dict[str, float | int]:
     values = values.astype(float).dropna()
     return {
@@ -425,7 +415,16 @@ def analyze(
                 **{f"hac_{k}": v for k, v in inference.items()},
             }
         )
-    holm = holm_adjust(raw_pvalues)
+    # Holm step-down comes from the canonical implementation, not a local copy.
+    # A hand-written one lived here and was numerically identical, which is
+    # precisely why it was a liability: a private copy of a shared statistical
+    # definition drifts silently, and the divergence only shows up when two
+    # experiments disagree about a number that should have exactly one meaning.
+    # holm_step_down also validates its inputs (finite, in [0,1]) where the copy
+    # did not, so a malformed p-value now raises instead of being adjusted.
+    holm_names = list(raw_pvalues)
+    holm_result = holm_step_down([raw_pvalues[name] for name in holm_names])
+    holm = dict(zip(holm_names, holm_result.adjusted_p_values))
     for row in regime_rows:
         row["hac_p_holm"] = float(holm[row["regime"]])
 
