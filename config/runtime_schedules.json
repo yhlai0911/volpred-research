@@ -56,6 +56,9 @@
       },
       "volpred-compute-worker": {
         "activated_at": "2026-07-28T23:45:00Z"
+      },
+      "org_manager_tick": {
+        "activated_at": "2026-08-05T06:10:00Z"
       }
     },
     "job_defaults": {
@@ -515,6 +518,20 @@
           "populate_upcoming_events.py",
           "cron_populate_events.sh",
           "populate_events"
+        ]
+      },
+      {
+        "id": "org_manager_tick",
+        "label": "Org manager tick (P1 shadow) — zero-cost hard-fact gate",
+        "cron": "*/30 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_org_manager_tick.sh",
+        "log_path": "storage/logs/cron/org_manager_tick.log",
+        "description": "運營經理＋部門制（plan agents-herdr）P1 shadow：每 30 分鐘跑 scripts/org/manager_tick.py --shadow —— 純 Python 硬事實 gate（manager/部門 inbox、review 到期），只寫 would-fire/skip receipt 到 storage/org/receipts/，絕不 spawn LLM。7 天 shadow 對照通過才進 P2。Operations Core 直持（host_crontab_managed=false）。",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": false,
+        "matchers": [
+          "org/manager_tick.py",
+          "cron_org_manager_tick.sh"
         ]
       },
       {
