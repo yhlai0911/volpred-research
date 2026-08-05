@@ -38,6 +38,8 @@ BUSY_STATES = {"working", "blocked"}
 
 # How long a declared cadence may go unserved before the department is due.
 CADENCE_SECONDS = {"hourly": 3600, "daily": 86400, "weekly": 604800}
+# The coordinator patrols on its own clock even with an empty inbox.
+PATROL_SECONDS = 4 * 3600
 
 
 def _inbox_items(inbox: Path) -> list[dict]:
@@ -64,7 +66,11 @@ def _is_due(item: dict, now: datetime) -> bool:
         return True  # silent-ok: malformed due treated as due-now so bad data cannot hide work; item surfaces in the fire reasons
 
 
-def evaluate_gate(root: Path, *, check_github: bool = False) -> dict:
+def evaluate_gate(root: Path, *, check_github: bool = False,
+                  platform_facts=None) -> dict:
+    """`platform_facts` is injectable so tests can isolate org semantics from
+    the live platform without monkeypatching subprocess out from under the
+    helpers that drive the CLI."""
     now = datetime.now(timezone.utc)
     reasons: list[str] = []
 
@@ -121,7 +127,69 @@ def evaluate_gate(root: Path, *, check_github: bool = False) -> dict:
     if check_github:
         reasons.extend(_github_dept_labels())
 
+    reasons.extend((platform_facts or _platform_facts)())
+    reasons.extend(_patrol_due(root, now))
+
     return {"fire": bool(reasons), "reasons": reasons}
+
+
+def _platform_facts() -> list[str]:
+    """Hard facts from outside the org that are the coordinator's problem.
+
+    An empty org inbox never meant an idle platform: 98 tasks sat pending while
+    the gate reported nothing to do. These are counts, not judgements — the
+    coordinator still decides what they mean.
+    """
+    import subprocess
+
+    try:
+        raw = subprocess.run(["uv", "run", "python", "scripts/ops_snapshot.py"],
+                             cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=60)
+        snap = json.loads(raw.stdout)
+    except (OSError, subprocess.SubprocessError, ValueError) as exc:
+        return [f"platform snapshot unavailable ({type(exc).__name__}) — 需人工確認"]
+
+    out: list[str] = []
+    q = snap.get("queue") or {}
+    by_p = q.get("pending_by_priority") or {}
+    if by_p.get("p1"):
+        out.append(f"canonical 池有 {by_p['p1']} 件 P1 pending")
+    if q.get("urgent_pending"):
+        out.append(f"{q['urgent_pending']} 件老闆急件 pending")
+    if q.get("blocked"):
+        out.append(f"{q['blocked']} 件 blocked 待裁決")
+    pool = snap.get("content_pool") or {}
+    if isinstance(pool.get("draft"), int) and pool["draft"] < 4:
+        out.append(f"draft 池只剩 {pool['draft']} 篇（閾值 4）")
+    alerts = snap.get("alerts") or {}
+    if alerts.get("recent"):
+        out.append(f"近期 alert {len(alerts['recent'])} 則未收斂")
+    return out
+
+
+def _patrol_due(root: Path, now: datetime) -> list[str]:
+    """The coordinator owes a proactive round even when nothing is queued.
+
+    "沒有待辦" is not a reason to stand down — it is a reason to go looking:
+    read the platform, find what is degrading, propose the work nobody filed.
+    Time elapsed is a hard fact, so this stays a fact-gate, not a heuristic.
+    """
+    state = root / "manager" / "state.json"
+    last = None
+    if state.exists():
+        try:
+            last = json.loads(state.read_text(encoding="utf-8")).get("last_patrol")
+        except (json.JSONDecodeError, OSError) as exc:  # silent-ok: becomes a wake reason below
+            return [f"manager state unreadable ({type(exc).__name__})"]
+    if not last:
+        return ["經理尚未做過主動巡檢"]
+    try:
+        elapsed = (now - datetime.fromisoformat(str(last).replace("Z", "+00:00"))).total_seconds()
+    except ValueError:
+        return [f"manager last_patrol unparseable ({last})"]
+    if elapsed > PATROL_SECONDS:
+        return [f"主動巡檢已逾期 {int(elapsed // 3600)}h（每 {PATROL_SECONDS // 3600}h 一次）"]
+    return []
 
 
 def _github_dept_labels() -> list[str]:

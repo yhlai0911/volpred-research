@@ -30,6 +30,23 @@ def run_tool(tool: str, *args: str, root: Path) -> subprocess.CompletedProcess:
 
 
 @pytest.fixture()
+def quiet_platform():
+    """Neutralise facts from outside the org.
+
+    Tests about inbox/cadence semantics must not depend on the live platform
+    queue or on how long ago the manager last patrolled.
+    """
+    from datetime import datetime, timezone
+
+    def _mark(root: Path) -> None:
+        (root / "manager" / "state.json").write_text(json.dumps({
+            "last_patrol": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }), encoding="utf-8")
+
+    return _mark
+
+
+@pytest.fixture()
 def org_root(tmp_path: Path) -> Path:
     root = tmp_path / "org"
     result = run_tool("org_admin.py", "init", root=root)
@@ -105,10 +122,11 @@ def test_create_rejects_path_and_type_overlap(org_root: Path) -> None:
     assert "owned by first" in overlap_type.stdout
 
 
-def test_dept_send_and_gate(org_root: Path) -> None:
+def test_dept_send_and_gate(org_root: Path, quiet_platform) -> None:
+    quiet_platform(org_root)
     assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
 
-    gate = evaluate_gate(org_root)
+    gate = evaluate_gate(org_root, platform_facts=lambda: [])
     assert gate["fire"] is False, gate
 
     result = run_tool(
@@ -121,38 +139,41 @@ def test_dept_send_and_gate(org_root: Path) -> None:
     item = json.loads(item_path.read_text())
     assert item["to"] == "alpha" and item["priority"] == "P2"
 
-    gate = evaluate_gate(org_root)
+    gate = evaluate_gate(org_root, platform_facts=lambda: [])
     assert gate["fire"] is True
     assert any("alpha" in r for r in gate["reasons"])
 
 
-def test_dept_send_refuses_inactive(org_root: Path) -> None:
+def test_dept_send_refuses_inactive(org_root: Path, quiet_platform) -> None:
+    quiet_platform(org_root)
     assert run_tool("org_admin.py", "create", "beta", root=org_root).returncode == 0
     assert run_tool("org_admin.py", "suspend", "beta", root=org_root).returncode == 0
     result = run_tool(
         "dept_send.py", "beta", "--from", "manager", "--task", "x", root=org_root,
     )
     assert result.returncode == 1
-    gate = evaluate_gate(org_root)
+    gate = evaluate_gate(org_root, platform_facts=lambda: [])
     assert gate["fire"] is False, "suspended dept must not trigger the gate"
 
 
-def test_boss_intake_triggers_gate(org_root: Path) -> None:
+def test_boss_intake_triggers_gate(org_root: Path, quiet_platform) -> None:
+    quiet_platform(org_root)
     result = run_tool("org_intake.py", "--boss-message", "急件", root=org_root)
     assert result.returncode == 0, result.stderr
-    gate = evaluate_gate(org_root)
+    gate = evaluate_gate(org_root, platform_facts=lambda: [])
     assert gate["fire"] is True
     assert any("manager inbox" in r for r in gate["reasons"])
 
 
-def test_future_due_item_does_not_fire(org_root: Path) -> None:
+def test_future_due_item_does_not_fire(org_root: Path, quiet_platform) -> None:
+    quiet_platform(org_root)
     assert run_tool("org_admin.py", "create", "gamma", root=org_root).returncode == 0
     result = run_tool(
         "dept_send.py", "gamma", "--from", "manager", "--task", "later",
         "--due", "2099-01-01T00:00:00Z", root=org_root,
     )
     assert result.returncode == 0, result.stderr
-    gate = evaluate_gate(org_root)
+    gate = evaluate_gate(org_root, platform_facts=lambda: [])
     assert gate["fire"] is False, gate
 
 
@@ -176,18 +197,20 @@ def test_missing_policy_is_reported_not_hidden(org_root: Path) -> None:
     assert "policy.md 不存在" in brief, "a missing standing-rules file must be visible, not silent"
 
 
-def test_declared_cadence_actually_wakes_a_department(org_root: Path) -> None:
+def test_declared_cadence_actually_wakes_a_department(org_root: Path, quiet_platform) -> None:
+    quiet_platform(org_root)
     """A cadence the gate never reads is a decoration, not a schedule."""
     assert run_tool("org_admin.py", "create", "infra", "--min-cadence", "daily",
                     root=org_root).returncode == 0
 
-    gate = evaluate_gate(org_root)
+    gate = evaluate_gate(org_root, platform_facts=lambda: [])
 
     assert gate["fire"] is True
     assert any("never run" in r and "infra" in r for r in gate["reasons"])
 
 
-def test_cadence_is_satisfied_by_a_recent_run(org_root: Path) -> None:
+def test_cadence_is_satisfied_by_a_recent_run(org_root: Path, quiet_platform) -> None:
+    quiet_platform(org_root)
     from datetime import datetime, timezone
     assert run_tool("org_admin.py", "create", "infra", "--min-cadence", "daily",
                     root=org_root).returncode == 0
@@ -196,15 +219,16 @@ def test_cadence_is_satisfied_by_a_recent_run(org_root: Path) -> None:
         "last_run": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }), encoding="utf-8")
 
-    gate = evaluate_gate(org_root)
+    gate = evaluate_gate(org_root, platform_facts=lambda: [])
 
     assert not any("infra" in r for r in gate["reasons"]), gate
 
 
-def test_on_demand_department_is_not_woken_by_the_clock(org_root: Path) -> None:
+def test_on_demand_department_is_not_woken_by_the_clock(org_root: Path, quiet_platform) -> None:
+    quiet_platform(org_root)
     assert run_tool("org_admin.py", "create", "ondemand", root=org_root).returncode == 0
 
-    gate = evaluate_gate(org_root)
+    gate = evaluate_gate(org_root, platform_facts=lambda: [])
 
     assert gate["fire"] is False, "an idle on-demand dept must not burn a wake"
 
@@ -330,3 +354,64 @@ def test_manager_is_told_loudly_when_platform_state_is_unavailable(org_root: Pat
 
     assert "無法取得平台全局狀態" in brief, "blindness must be visible, never silent"
     assert "不要當作沒事" in brief
+
+
+def test_manager_owes_a_patrol_even_with_an_empty_org(org_root: Path, monkeypatch) -> None:
+    """An empty inbox never meant an idle platform."""
+    tick = _tick()
+    import subprocess
+
+    class _R:
+        returncode = 0
+        stdout = json.dumps({"queue": {}, "content_pool": {}, "alerts": {}})
+        stderr = ""
+
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: _R())
+
+    gate = tick.evaluate_gate(org_root)
+
+    assert gate["fire"] is True
+    assert any("巡檢" in r for r in gate["reasons"])
+
+
+def test_recent_patrol_stops_the_clock(org_root: Path, monkeypatch) -> None:
+    from datetime import datetime, timezone
+    tick = _tick()
+    import subprocess
+
+    class _R:
+        returncode = 0
+        stdout = json.dumps({"queue": {}, "content_pool": {}, "alerts": {}})
+        stderr = ""
+
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: _R())
+    (org_root / "manager" / "state.json").write_text(json.dumps({
+        "last_patrol": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }), encoding="utf-8")
+
+    gate = tick.evaluate_gate(org_root)
+
+    assert gate["fire"] is False, "a just-patrolled, quiet org must not burn a wake"
+
+
+def test_platform_backlog_alone_wakes_the_manager(org_root: Path, monkeypatch) -> None:
+    from datetime import datetime, timezone
+    tick = _tick()
+    import subprocess
+
+    class _R:
+        returncode = 0
+        stdout = json.dumps({"queue": {"pending_by_priority": {"p1": 7}, "blocked": 18},
+                             "content_pool": {"draft": 2}, "alerts": {}})
+        stderr = ""
+
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: _R())
+    (org_root / "manager" / "state.json").write_text(json.dumps({
+        "last_patrol": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }), encoding="utf-8")
+
+    gate = tick.evaluate_gate(org_root)
+
+    assert gate["fire"] is True
+    assert any("P1 pending" in r for r in gate["reasons"])
+    assert any("draft 池" in r for r in gate["reasons"])
