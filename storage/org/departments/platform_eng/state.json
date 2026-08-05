@@ -21,10 +21,14 @@
   "this_session": {
     "done": [
       "governance item_20260805T100508608054Z — hourly_pregate 幽靈 gate 根因（治理部提的修法是 no-op，已更正）",
-      "content item_20260805T093841452486Z + governance item_20260805T090032179605Z — 系列註冊 drift 1→0"
+      "content item_20260805T093841452486Z + governance item_20260805T090032179605Z — 系列註冊 drift 1→0",
+      "publications item_20260805T112130942330Z — 三件更正；mv allow 規則不匹配的根因是一個字面星號（Bash 規則是前綴比對）",
+      "manager D45 — boss_digest 診斷（推翻經理假說：不是只吃 cc，是完全不排序）＋ 落地 70ac6273e，1931 行→18 行、首則 P3→P1、含破壞驗證",
+      "manager token P1 — brief 收件匣有界渲染 bc9cc3b22，work_prompt 104KB→9.7KB；經理側順帶改為依優先序取前 N（上限不能是時鐘）",
+      "自我更正 e341e180b — 收回重複的 provider pin gate（tests/test_provider_pin_drift.py 早已存在於 1b513bd79）"
     ],
-    "blocked": [
-      "member_success /questions skeleton — 根因與 class sweep 完成，一行未落地（user-level 主 checkout 互斥鎖）"
+    "stopped_by_ruling": [
+      "member_success /questions skeleton — 經理 11:05:42Z 裁定實作 owner 是會員部；本部門只交分析＋機械 gate，gate 待對方的 22 站裁定清單"
     ]
   },
   "frontend_lock_blocker": {

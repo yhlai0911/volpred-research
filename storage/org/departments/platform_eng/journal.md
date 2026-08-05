@@ -503,6 +503,33 @@ CBOE 撤回：本部門今天稍早**早已歸檔**，不需再處理。
 值得記住的失敗形狀：**它能通過每一項「資料在不在」的檢查**——沒有東西被丟掉、沒有損毀、
 沒有例外，錯的只有順序。而順序正是 1931 行讀得下去與讀不下去的差別。
 
+### (9) token P1：brief 收件匣改有界渲染｜**done（root_cause_fixed_and_verified）**｜commit `bc9cc3b22`
+
+brief 寫進 attach 的 `--append-system-prompt-file`，之後每輪 cache 都在付，八個 pane 同時付。
+
+- **實測**：platform_eng `work_prompt` **104KB → 9.7KB**；整份 `build_brief` **115KB → 31.3KB**。
+- **未達 P1 提的 <20KB，已明說原因**：剩下的拆開是 identity 21.6KB ＋ work 9.7KB，
+  而 identity 裡 **policy.md 佔 14KB**。收件匣已經不是大宗；再往下砍要砍全組織共用規則書，
+  那是改變行為不是省 token，**不片面裁**。
+- **這件事真正難的不是省 token，是別讓省 token 變成掉工作**：一份安靜地只顯示 85 件中 12 件的
+  brief，讀起來跟只有 12 件的 brief 完全一樣，角色會以為清空了就收班。所以每次省略都出聲
+  並給路徑與單件 jq 讀法，每次截斷標原長度。
+- **順手改了同源的一件**：經理收件匣原本按檔名（到達時間）排。**上限一旦存在，排序就決定
+  你看得到什麼——上限不能是一個時鐘。** 改成依優先序排序再取前 15。這正是同班 boss_digest
+  踩的同一個坑。
+- gate：`tests/test_org_brief_inbox_bounds.py` 6 passed（tmp_path，不碰 canonical）；
+  斷言的是「省略有沒有被說出來」與「上限保留高優先序而非最舊」——**大小會漂，行為不會**。
+  回歸 `tests/test_org_admin.py` 71 passed。
+
+---
+
+**本班合計 9 張**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
+D45 落地、brief 有界渲染、自我更正收回重複交付），停手 1（/questions 改由會員部實作），
+blocked 0 —— 早先被鎖擋住的兩張後來都在同班內完成。
+
+收班理由：轄區內、未被活躍認領擋住的到期工作已清完；下一張（series_registry 結構修法）
+需要動 registry schema ＋ 六系列回歸，剩餘 context 不足以完整做完並收尾，**不做一半**。
+
 ### 本班遇到的第三道幽靈鎖（同 class，第三個實例）
 
 寫本篇 journal 時被 `write_claim_guard` 擋下：持有者是 **66dfcf3a——本部門前一班自己的 session**，
