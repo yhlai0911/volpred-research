@@ -134,10 +134,17 @@ DUP_SCORE_THRESHOLD = 5
 _CJK_RUN_RE = re.compile(r"([　-〿㐀-䶿一-鿿豈-﫿]+)")
 
 
-def _normalize_text(text: str) -> str:
-    """Lowercase, NFKC-fold, strip tag prefixes and dates, isolate CJK runs."""
+def _normalize_text(text: str, *, strip_tags: bool = True) -> str:
+    """Lowercase, NFKC-fold, strip tag prefixes and dates, isolate CJK runs.
+
+    ``strip_tags=False`` keeps the leading ``[...]`` tag. Callers scoring token
+    similarity want the tag gone (it is template boilerplate); callers mining
+    *discriminators* must not, because the tag is where a whole family of titles
+    keeps its only distinguishing id — see ``_extract_targets``.
+    """
     text = unicodedata.normalize("NFKC", str(text or ""))
-    text = _TAG_PREFIX_RE.sub("", text)
+    if strip_tags:
+        text = _TAG_PREFIX_RE.sub("", text)
     text = _DATE_RE.sub(" ", text)
     text = _CJK_RUN_RE.sub(r" \1 ", text)
     return text.lower()
@@ -176,7 +183,11 @@ def _extract_rare_ids(text: str) -> set[str]:
 
 
 #: knowledge-entry / experiment target ids: K1319, k1592, paper9, mile_903fd2cf
-_TARGET_RE = re.compile(r"\b(k\d{3,5}|paper\d{1,2}|mile_[0-9a-f]{6,})\b")
+#: The optional ``_v<n>`` is load-bearing, not cosmetic: ``_`` is a word char to
+#: ``re``, so a bare ``k\d{3,5}\b`` never fires inside ``k1095_v3`` and the
+#: versioned remediation of an experiment extracted NO target at all — the same
+#: blind spot as the stripped tag prefix, one level down.
+_TARGET_RE = re.compile(r"\b(k\d{3,5}(?:_v\d+)?|paper\d{1,2}|mile_[0-9a-f]{6,})\b")
 
 
 def _extract_targets(text: str) -> set[str]:
@@ -280,6 +291,15 @@ def extract_signature(task: dict[str, Any] | Any) -> TaskSignature:
         task_id = str(task.get("id") or task.get("task_id") or "")
 
     n_title = _normalize_text(title)
+    # Same title, tag prefix intact. Only ever read for `title_targets`: the tag
+    # is boilerplate for token similarity but load-bearing for discrimination,
+    # because `[K1749 collection] ...` / `[K1750 collection] ...` carry their
+    # only distinguishing id there. Stripping it first made every collection
+    # ticket's `title_targets` empty, so veto 1 could never fire and two
+    # unrelated experiments collapsed onto their shared toolchain vocabulary
+    # (check_experiment_artifacts.py, experiment_gates.py, merge_worktree.sh,
+    # git_writer_lock, ...) — the better the write-up, the likelier the refusal.
+    n_title_tagged = _normalize_text(title, strip_tags=False)
     n_body = f"{n_title}\n{_normalize_text(description)}"
     # CJK-glued variant of the title: identifiers whose slot value is CJK
     # (`trending_repost_2026_07_17_債市波動度`) only survive without CJK splitting.
@@ -297,6 +317,7 @@ def extract_signature(task: dict[str, Any] | Any) -> TaskSignature:
         title_topics=frozenset(_extract_topics(n_title)),
         title_tokens=_title_tokens(n_title),
         title_targets=frozenset(_extract_targets(n_title))
+        | frozenset(_extract_targets(n_title_tagged))
         | frozenset(m.group(0) for m in _GLUED_IDENT_RE.finditer(glued_title)),
         title_slots=frozenset(_title_slots(title)),
     )
