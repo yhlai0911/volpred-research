@@ -84,6 +84,21 @@ owner —— 這條規則寫在 `CLAUDE.md`，**`AGENTS.md` 沒有**，所以 Co
 （它會同步寫 bulletin），禁裸編輯 JSON；部門 owned_paths 由 `org_admin.py create`
 在建立時做衝突檢查，不得與 A/B 區或其他部門重疊。
 
+## 併發寫入：機械 owner ＝ `scripts/hooks/write_claim_guard.py`（2026-08-05 立）
+
+本檔的區域劃分是**契約**，但散文不會 fire。「兩個 session 同時改同一處」這個 concern
+的 enforcement owner 是 PreToolUse hook `write_claim_guard.py`：寫入時自動認領該路徑
+所屬區域（本檔的區域前綴 ＋ 部門 charter 的 owned_paths；共用目錄則以單檔為單位），
+別的 session 想動同一區會被 deny 並告知持有者與三條出路。45 分鐘 TTL 自動釋放。
+
+- 看誰正在改什麼：`uv run python scripts/path_claims.py list`
+- 對方已停工、認領卡住：`uv run python scripts/path_claims.py release --scope <scope>`
+- 硬搶（留紀錄）：`VOLPRED_ALLOW_CONCURRENT_WRITE=1`
+
+與既有機制分工：`git_writer_lock.py` 管**commit** 序列化（兩人各自編輯一小時再依序
+commit，它擋不住設計分岔——那是本 hook 的職責）；org 的 runner lease 管**部門**由誰執行；
+`gate_edit_guard.py` 管實驗 gate bytes 保存。四者 concern 不同，不得互相取代。
+
 ## 動手前的 30 秒檢查
 
 改任何 `src/volpred/ops/**`、`scripts/dispatch_supervisor/**`、`tests/**` 之前：

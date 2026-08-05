@@ -69,6 +69,8 @@ TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
     # Ops / 驗證 / governance — opus / low (短流程 + checklist，effort 低即可)
     "platform_ops":       ("opus", "low"),     # bug fix / refactor / cron 修整
     "governance":         ("opus", "low"),     # rules/skills/docs 修整
+    "resource_audit":     ("opus", "medium"),  # token/成本消耗分解與異常偵測；要跨源對帳與
+                                               # 判讀會計缺陷（F1/F2 級），非 checklist 型
 
     # Lookup / classification — opus / low (參考型，effort 低但仍用 opus)
     "lookup":             ("opus", "low"),
@@ -107,6 +109,7 @@ TASK_TYPE_TO_TOPOLOGY: dict[str, str] = {
     "telegram_reply":     "inline",     # dedicated Telegram responder；不進一般 subagent lane
     "platform_ops":       "subagent",   # Claude/Codex claim 制
     "governance":         "subagent",
+    "resource_audit":     "subagent",   # 長分析、大量 log 掃描 — 隔離 context
     "lookup":             "inline",
     "verify":             "inline",
     "classification":     "inline",
