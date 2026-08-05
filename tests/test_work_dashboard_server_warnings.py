@@ -24,6 +24,7 @@ def _point_sources_at_tmp(module, tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(module, "FEED", tmp_path / "feed.json")
     monkeypatch.setattr(module, "RELEASE", tmp_path / ".release_settings.json")
     monkeypatch.setattr(module, "CRON_LOG_DIR", tmp_path / "cron")
+    monkeypatch.setattr(module, "ORG_ROOT", tmp_path / "org")
     monkeypatch.setattr(module, "_daemon_alive", lambda _label, *args, **kwargs: False)
     monkeypatch.setattr(module, "_proc_count", lambda _pattern, *args, **kwargs: 0)
     monkeypatch.setattr(module, "_git_recent", lambda *args, **kwargs: [])

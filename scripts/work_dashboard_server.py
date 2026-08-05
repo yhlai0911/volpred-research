@@ -48,6 +48,7 @@ CRON_LAST = ROOT / "storage" / "ops" / "cron_last_run.json"
 FEED = ROOT / "storage" / "reports" / "feed.json"
 RELEASE = ROOT / "storage" / ".release_settings.json"
 CRON_LOG_DIR = ROOT / "storage" / "logs" / "cron"
+ORG_ROOT = ROOT / "storage" / "org"
 PORT = int(os.environ.get("PORT", "8787"))
 ONGOING = {"claimed", "running", "active", "in_progress"}
 
@@ -238,6 +239,83 @@ def _file_age(path: Path) -> str:
         return "?"
 
 
+def _inbox_depth(inbox: Path) -> int:
+    return len(list(inbox.glob("*.json"))) if inbox.is_dir() else 0
+
+
+def _journal_last(path: Path) -> str:
+    """Last substantive journal line (skips the markdown header)."""
+    if not path.exists():
+        return ""
+    lines = [ln.strip() for ln in path.read_text(encoding="utf-8").splitlines()
+             if ln.strip() and not ln.startswith("#")]
+    return lines[-1][:110] if lines else ""
+
+
+def build_org(warnings: list[str]) -> dict:
+    """Organization view: the disk-persisted manager + departments (storage/org).
+
+    This is the canonical operating surface for the department architecture —
+    Herdr panes are only an optional live-view when someone is at the terminal.
+    """
+    registry_path = ORG_ROOT / "registry.json"
+    if not registry_path.exists():
+        # Not an error: an uninitialized org is a legitimate state (pre-P0, or a
+        # test//standby checkout). Only a registry that exists but cannot be read
+        # is a real fault worth a warning.
+        return {"available": False, "departments": [], "manager": {}}
+    registry = _load(registry_path, None, warnings)
+    if not isinstance(registry, dict) or "departments" not in registry:
+        _warn_dashboard(warnings, f"org registry malformed path={registry_path}")
+        return {"available": False, "departments": [], "manager": {}}
+
+    depts = []
+    for name, meta in sorted((registry.get("departments") or {}).items()):
+        status = meta.get("status", "?")
+        if status == "retired":
+            continue
+        ddir = ORG_ROOT / "departments" / name
+        state = _load(ddir / "state.json", {}, warnings)
+        if not isinstance(state, dict):
+            _warn_dashboard(warnings, f"dept state not an object dept={name}")
+            state = {}
+        depts.append({
+            "name": name,
+            "title": meta.get("title") or name,
+            "status": status,
+            "inbox": _inbox_depth(ddir / "inbox"),
+            "task_types": meta.get("owned_task_types") or [],
+            "cadence": meta.get("min_cadence") or "on-demand",
+            "last_run": _rel_time(state["last_run"]) if state.get("last_run") else "未執行",
+            "health": state.get("health", "?"),
+            "journal": _journal_last(ddir / "journal.md"),
+        })
+
+    gate = {}
+    receipts_dir = ORG_ROOT / "receipts"
+    if receipts_dir.is_dir():
+        newest = sorted(receipts_dir.glob("*.json"))[-1:]
+        if newest:
+            payload = _load(newest[0], {}, warnings)
+            if isinstance(payload, dict):
+                gate = {
+                    "kind": payload.get("kind", "?"),
+                    "fire": bool(payload.get("fire")),
+                    "reasons": payload.get("reasons") or [],
+                    "when": _rel_time(str(payload.get("at") or "")),
+                }
+    return {
+        "available": True,
+        "manager": {
+            "inbox": _inbox_depth(ORG_ROOT / "manager" / "inbox"),
+            "proposals": len(list((ORG_ROOT / "manager" / "outbox" / "proposals").glob("*.md")))
+            if (ORG_ROOT / "manager" / "outbox" / "proposals").is_dir() else 0,
+            "gate": gate,
+        },
+        "departments": depts,
+    }
+
+
 def build_work() -> dict:
     warnings: list[str] = []
     tasks = _load(NEXT_TASKS, [], warnings)
@@ -277,7 +355,14 @@ def build_work() -> dict:
     schedule = []
     for item in (scheds.get("system_crontab", {}) or {}).get("items", []):
         jid = item.get("id")
-        ntw, nrel, nsort, nday = _fmt_tw(_next_fire_dt(item.get("cron", ""), warnings, str(jid or "?")))
+        # A resident daemon (telegram_poll) has no cron by design — it is always
+        # running, so there is no "next fire". Parsing its empty cron produced a
+        # spurious warning on every dashboard load.
+        cron_expr = item.get("cron") or ""
+        if cron_expr:
+            ntw, nrel, nsort, nday = _fmt_tw(_next_fire_dt(cron_expr, warnings, str(jid or "?")))
+        else:
+            ntw, nrel, nsort, nday = "常駐", "持續運行", 9e18, 9999
         cat = JOB_CAT.get(jid, "other")
         cname, ccolor = CAT_META.get(cat, CAT_META["other"])
         # Single liveness source (WS-D1): marker + execution-log banner/mtime
@@ -285,7 +370,7 @@ def build_work() -> dict:
         live = job_liveness(item, marker_state=last_run, repo_root=ROOT)
         last_iso = live.last_activity.isoformat() if live.last_activity else ""
         schedule.append({
-            "id": jid, "cron": item.get("cron", "?"),
+            "id": jid, "cron": cron_expr or "daemon",
             "label": item.get("label") or (item.get("description") or "")[:36],
             "desc": JOB_DESC.get(jid) or (item.get("description") or "")[:34],
             "cat": cname, "color": ccolor,
@@ -337,6 +422,7 @@ def build_work() -> dict:
         "slots": {"used": len(ongoing), "cap": 4},
         "counts": dict(Counter((t.get("status") or "?") for t in tasks if isinstance(t, dict))),
         "ongoing": ongoing, "future": future, "schedule": schedule,
+        "org": build_org(warnings),
         "content": content, "past_tasks": past_tasks, "past_commits": _git_recent(warnings=warnings),
     }
 
@@ -384,10 +470,20 @@ h1{font-size:15px;margin:0}h2{font-size:13px;margin:0;padding:9px 13px;backgroun
 .ct{display:inline-block;padding:0 5px;border-radius:7px;font-size:9px;font-weight:600}
 button{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:2px 7px;font-size:10px;cursor:pointer;margin-left:4px}button:hover{background:#30363d}
 .sbtn{font-size:10px;padding:2px 8px}.sbtn.on{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.orgbar{padding:7px 13px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.orgbar h2{border:0;padding:0;margin:0;display:inline}
+.orggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:7px;padding:0 13px 9px}
+.dept{border:1px solid #30363d;border-left-width:3px;border-radius:7px;padding:7px 9px;background:#0d1117}
+.dept .dn{font-size:12px;font-weight:600;margin-bottom:3px}
+.dept .dm{font-size:10px;color:#8b949e;line-height:1.5}
+.dept .jn{font-size:10px;color:#6e7681;margin-top:4px;border-top:1px dashed #21262d;padding-top:3px}
+.ibx{display:inline-block;min-width:16px;text-align:center;border-radius:9px;padding:0 5px;font-size:10px}
 </style></head><body>
 <header><h1>🤖 VolPred · AI 工作監控</h1><span id=health class=pill>…</span><span id=daemons></span>
 <span class=muted id=gen></span><span class=muted style=margin-left:auto>每 15s 自動刷新</span></header>
 <div class=strip id=strip></div>
+<div class=orgbar><h2>🏢 組織 · 運營經理與部門</h2><span class=muted id=org-mgr></span></div>
+<div class=orggrid id=org></div>
 <div class=cols>
   <div class=col><h2><span>⏰ 工作排程 · 台灣時間</span><span><button id=sb-next class="sbtn on">下次時間</button><button id=sb-day class=sbtn>每日順序</button></span></h2><div id=schedule></div></div>
   <div class=col>
@@ -423,6 +519,8 @@ async function load(){
     chip('最近釋出',esc(c.last_release)+' (每'+esc(c.release_interval)+'min)'),
     chip('台股資料',esc(c.data_tw)),chip('美股資料',esc(c.data_us)),chip('FRED',esc(c.data_fred)),
   ].join('');
+  // org(運營經理 + 部門)
+  renderOrg(d.org);
   // schedule
   SCHED=d.schedule; renderSchedule();
   // ongoing
@@ -457,6 +555,30 @@ function renderSchedule(){
     '<br><span class=dsc>'+esc(s.desc)+'</span><br><span class=muted>上次 '+esc(s.last)+'</span></span>'+
     '<span class=nx>'+esc(s.next_tw)+'<br><span class=muted>'+esc(s.next_rel)+'</span></span></div>').join('');
   el('sb-next').classList.toggle('on',sortMode==='next');el('sb-day').classList.toggle('on',sortMode==='day');
+}
+const DEPT_COLOR={research:'#58a6ff',publications:'#bc8cff',content:'#3fb950',member_success:'#f0883e',
+  platform_eng:'#e3b341',governance:'#8b949e',growth:'#f778ba',resource_monitor:'#39c5cf'};
+function renderOrg(o){
+  if(!o||!o.available){
+    el('org-mgr').textContent='組織未初始化(storage/org 不存在或無法讀取)';
+    el('org').innerHTML='';return;
+  }
+  const m=o.manager||{},g=m.gate||{};
+  let mgr='經理收件匣 '+esc(m.inbox)+' · 待批提案 '+esc(m.proposals);
+  if(g.kind) mgr+=' · 上次判斷 '+(g.fire?'該喚醒':'無事跳過')+'('+esc(g.when)+')'+
+    (g.reasons&&g.reasons.length?'：'+esc(g.reasons.join('；')):'');
+  el('org-mgr').textContent=mgr;
+  el('org').innerHTML=o.departments.map(function(t){
+    const col=DEPT_COLOR[t.name]||'#30363d';
+    const ibxCol=t.inbox>0?'#1f6feb':'#21262d';
+    return '<div class=dept style="border-left-color:'+col+'">'+
+      '<div class=dn>'+esc(t.title)+' <span class=ibx style="background:'+ibxCol+'">'+esc(t.inbox)+'</span></div>'+
+      '<div class=dm>'+esc(t.name)+' · '+esc(t.status)+' · '+esc(t.cadence)+'</div>'+
+      '<div class=dm>上次執行 '+esc(t.last_run||'—')+' · 狀態 '+esc(t.health)+'</div>'+
+      (t.task_types.length?'<div class=dm>'+esc(t.task_types.join(', '))+'</div>':'')+
+      (t.journal?'<div class=jn>'+esc(t.journal)+'</div>':'')+
+    '</div>';
+  }).join('')||'<div class=card><span class=muted>尚無 active 部門</span></div>';
 }
 el('sb-next').onclick=function(){sortMode='next';renderSchedule()};
 el('sb-day').onclick=function(){sortMode='day';renderSchedule()};
