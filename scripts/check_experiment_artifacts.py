@@ -84,6 +84,7 @@ SPEC_SCHEMA = "volpred.reproduce_spec.v1"
 COMMIT_NAME = "reproduce_commit.json"
 COMMIT_SCHEMA = "volpred.reproduce_commit.v1"
 EXCLUSIONS_REL = Path("config/experiment_artifact_exclusions.json")
+NONFINITE_BASELINE_REL = Path("config/bare_nonfinite_results_baseline.json")
 
 # Same shape reproduce_check.knowledge_recorded_ids scans for. Two entry shapes coexist
 # in knowledge.json (modern item_id/content, legacy title/experiment_id) and neither has
@@ -209,6 +210,103 @@ def exclusions_from_payload(raw: object) -> dict[str, str] | None:
 
 def result_files(exp_dir: Path) -> list[Path]:
     return sorted(exp_dir.glob("*_results.json"))
+
+
+def _raise_on_constant(name: str) -> float:
+    raise ValueError(name)
+
+
+def rejects_as_strict_json(text: str) -> bool:
+    """True when a spec-compliant JSON reader would refuse this document.
+
+    Python's ``json`` emits *and* accepts ``NaN`` / ``Infinity`` / ``-Infinity``,
+    so a results file containing them round-trips through every in-house tool and
+    every gate stays green. They are not JSON (RFC 8259 has no such literals):
+    a browser's ``JSON.parse``, Go's ``encoding/json``, ``serde_json`` and ``jq``
+    reject **the whole document**, not the offending field. The failure is silent
+    here and total downstream.
+
+    The criterion is the parser, never a regex. A 2026-08-05 full-corpus scan of
+    1527 files found 70 regex hits but only 52 real violations -- in the other 18
+    the token sits inside a string value, which is legal JSON that must not be
+    "fixed".
+    """
+    try:
+        json.loads(text, parse_constant=_raise_on_constant)
+    except ValueError:
+        return True  # silent-ok: the exception IS this predicate's answer, not a fallback
+    return False
+
+
+def load_nonfinite_baseline(root: Path | None = None) -> set[str]:
+    """Repo-relative results paths already carrying bare NaN/Infinity.
+
+    A ratchet, not an amnesty: new experiments fail, the frozen 52 do not, and the
+    list may only shrink. Clearing the backlog is deliberately NOT a batch sed --
+    several of these files are pinned by sha256 in ``reproduce_commit.json`` /
+    ``review_verdict.json``, so editing one drifts a certification and forces a
+    re-review. The real fix is at the producer, then the path leaves this list.
+    """
+    path = (root or _canonical_root()) / NONFINITE_BASELINE_REL
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        # An absent baseline must not read as "nothing was ever wrong": that would
+        # turn 52 known violations into 52 fresh merge blocks with no explanation.
+        print(f"[artifacts] WARN — no nonfinite baseline at {path}; every legacy "
+              "violation will now be reported as new", file=sys.stderr)
+        return set()
+    except (OSError, ValueError) as exc:
+        print(f"[artifacts] WARN — nonfinite baseline unreadable at {path}: "
+              f"{type(exc).__name__}: {exc}", file=sys.stderr)
+        return set()
+    entries = raw.get("entries") if isinstance(raw, dict) else None
+    if not isinstance(entries, list):
+        print(f"[artifacts] WARN — nonfinite baseline at {path} has no 'entries' list",
+              file=sys.stderr)
+        return set()
+    return {str(item) for item in entries if isinstance(item, str)}
+
+
+def _nonfinite_violation(
+    exp_dir: Path,
+    baseline: set[str],
+    root: Path | None = None,
+) -> tuple[str | None, str]:
+    """Block results files that a spec-compliant JSON reader would reject."""
+    repo = root or _canonical_root()
+    offenders: list[str] = []
+    grandfathered = 0
+    for path in result_files(exp_dir):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            return (
+                f"{path.name} is unreadable ({type(exc).__name__}) — a results file "
+                "the gate cannot read cannot be certified",
+                "unreadable",
+            )
+        if not rejects_as_strict_json(text):
+            continue
+        try:
+            rel = path.relative_to(repo).as_posix()
+        except ValueError:
+            rel = path.as_posix()
+        if rel in baseline:
+            grandfathered += 1
+            continue
+        offenders.append(rel)
+    if offenders:
+        return (
+            f"{', '.join(offenders)} contains bare NaN/Infinity — legal to Python, "
+            "rejected outright by JSON.parse / Go / serde / jq, which drop the WHOLE "
+            "file rather than the field. Emit null (or an explicit string marker) "
+            "from the producing script; do not hand-edit the JSON.",
+            "violation",
+        )
+    if grandfathered:
+        return None, f"baseline({grandfathered})"
+    return None, "clean"
 
 
 def _spec_violation(exp_dir: Path) -> tuple[str | None, str]:
@@ -516,6 +614,7 @@ def audit_experiment(
     exp_dir: Path,
     knowledge_ids: set[str] | None,
     exclusions: dict[str, str],
+    nonfinite_baseline: set[str] | None = None,
 ) -> dict[str, Any]:
     """Audit one experiment directory. ``violations == []`` means it may be merged."""
     name = exp_dir.name
@@ -535,6 +634,7 @@ def audit_experiment(
         "entrypoint_drift": None,
         "canonical_result_identity": None,
         "artifact_generation": None,
+        "strict_json": None,
     }
 
     if kid and kid in exclusions:
@@ -593,6 +693,15 @@ def audit_experiment(
         record["artifact_generation"] = generation_status
         if generation_violation:
             record["violations"].append(generation_violation)
+
+    # Independent of the spec: a results file that strict readers reject is
+    # unusable downstream whether or not its spec parses, so this check does not
+    # sit behind the spec gate like the drift checks above.
+    baseline = load_nonfinite_baseline() if nonfinite_baseline is None else nonfinite_baseline
+    nonfinite_violation, nonfinite_status = _nonfinite_violation(exp_dir, baseline)
+    record["strict_json"] = nonfinite_status
+    if nonfinite_violation:
+        record["violations"].append(nonfinite_violation)
 
     return record
 
@@ -731,7 +840,11 @@ def cmd_check(args: argparse.Namespace) -> int:
     else:
         knowledge_ids = load_knowledge_ids()
     exclusions = load_exclusions()
-    records = [audit_experiment(t, knowledge_ids, exclusions) for t in targets]
+    nonfinite_baseline = load_nonfinite_baseline()
+    records = [
+        audit_experiment(t, knowledge_ids, exclusions, nonfinite_baseline)
+        for t in targets
+    ]
     failed = [r for r in records if r["violations"]]
 
     if args.knowledge_ref and failed:
@@ -792,7 +905,11 @@ def cmd_sweep(args: argparse.Namespace) -> int:
     )
     knowledge_ids = load_knowledge_ids()
     exclusions = load_exclusions()
-    records = [audit_experiment(p, knowledge_ids, exclusions) for p in dirs]
+    nonfinite_baseline = load_nonfinite_baseline()
+    records = [
+        audit_experiment(p, knowledge_ids, exclusions, nonfinite_baseline)
+        for p in dirs
+    ]
 
     gated = [r for r in records if r["gated"]]
     missing = [r for r in gated if r["violations"]]
