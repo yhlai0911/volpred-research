@@ -1983,7 +1983,7 @@
    "clean_streak_started_at": null,
    "control_gate_id": "dispatch_worker_ownership",
    "current_task_id": null,
-   "episode_count": 1002,
+   "episode_count": 1005,
    "episode_failures": [
     {
      "at": "2026-08-04T04:16:20.228925+00:00",
@@ -1993,7 +1993,7 @@
      "task_id": "inc_792a94b0ecf4_e1"
     }
    ],
-   "episode_opened_at": "2026-08-05T04:03:05.631256+00:00",
+   "episode_opened_at": "2026-08-05T04:08:38.828108+00:00",
    "escalation": {
     "at": "2026-08-04T04:16:20.270924+00:00",
     "notification_id": "effect_owned_email_5b3a5d4b722faea245a48bbb9ca01d93",
@@ -2945,7 +2945,7 @@
      },
      "first_seen_at": "2026-08-04T06:55:40.479741+00:00",
      "key": "dispatch-slot-1-3175c52f",
-     "last_seen_at": "2026-08-05T04:02:52.220897+00:00"
+     "last_seen_at": "2026-08-05T04:08:14.659595+00:00"
     },
     {
      "cleared_at": null,
@@ -2959,7 +2959,7 @@
      },
      "first_seen_at": "2026-08-04T07:21:54.991363+00:00",
      "key": "dispatch-slot-1-1675be8d",
-     "last_seen_at": "2026-08-05T04:02:58.938397+00:00"
+     "last_seen_at": "2026-08-05T04:08:26.033824+00:00"
     },
     {
      "cleared_at": null,
@@ -2973,7 +2973,7 @@
      },
      "first_seen_at": "2026-08-04T07:46:21.551654+00:00",
      "key": "dispatch-slot-1-592ef34e",
-     "last_seen_at": "2026-08-05T04:03:05.631256+00:00"
+     "last_seen_at": "2026-08-05T04:08:38.828108+00:00"
     },
     {
      "cleared_at": null,
@@ -3035,30 +3035,15 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-592ef34e unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-05T04:03:05.631256+00:00",
+   "last_seen_at": "2026-08-05T04:08:38.828108+00:00",
    "notified_at": null,
-   "occurrence_count": 11306,
+   "occurrence_count": 11309,
    "resolution": {
-    "at": "2026-08-05T04:03:05.631256+00:00",
+    "at": "2026-08-05T04:08:38.828108+00:00",
     "by": "inc_792a94b0ecf4_rootcause_e2",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
-    {
-     "at": "2026-08-05T03:38:58.492120+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T03:56:53.653143+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T03:57:04.976487+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
     {
      "at": "2026-08-05T03:57:16.910205+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
@@ -3101,6 +3086,21 @@
     },
     {
      "at": "2026-08-05T04:03:05.631256+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T04:08:14.659595+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T04:08:26.033824+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T04:08:38.828108+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     }
@@ -5232,6 +5232,6 @@
    }
   }
  },
- "updated_at": "2026-08-05T04:05:41.195142+00:00",
+ "updated_at": "2026-08-05T04:09:57.498944+00:00",
  "version": 1
 }
