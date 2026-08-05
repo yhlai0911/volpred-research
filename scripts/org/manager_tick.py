@@ -284,8 +284,13 @@ def wake_departments(root: Path) -> list[dict]:
         if status in BUSY_STATES or status is None:
             out.append({"dept": dept, "woken": False, "reason": f"pane is {status} — 不打斷"})
             continue
+        # The drain instruction rides on every wake, not just on attach: the
+        # identity prompt is written when the pane is created, so a rule added
+        # afterwards would not reach any department already running.
         text = (f"收件匣有 {len(due)} 件到期工作（最高 {due[0].get('priority', 'P3')}）。"
-                f"依優先序處理，結束前務必執行 Session 收尾契約。")
+                f"依優先序處理，每張都走完 Session 收尾契約。"
+                f"**做完一張直接接下一張**——收件匣清空、或 context／預算不夠完整收尾下一張，"
+                f"才是收班條件；不要做完一張就回去等下一班喚醒。")
         sent = subprocess.run([HERDR, "agent", "prompt", dept, text],
                               capture_output=True, text=True, timeout=60)
         out.append({"dept": dept, "woken": sent.returncode == 0,

@@ -499,6 +499,9 @@ def work_prompt(root: Path, dept: str) -> str:
 處理收件匣中優先序最高、已到期的工作項。**結束前必須執行章程末段的「Session 收尾契約」**
 （寫 journal、更新 state.json、歸檔已處理項、回報給運營經理、經 git_writer_lock 提交、
 清理自己的 worktree）。少做一步，下一個接手的 session 就會失去脈絡。
+
+**收完一張就接下一張**（組織通則的 batch-drain：收班條件只有「沒有到期工作」與
+「剩餘 context／預算不夠完整做完並收尾下一張」兩個），不要收工回去等下一班喚醒。
 """
 
 

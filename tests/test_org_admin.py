@@ -959,3 +959,57 @@ def test_intake_source_is_registered_for_the_canonical_queue() -> None:
         "issue ingress is mechanical: classifying it as user ingress would exempt "
         "it from the machine-P1 clamp and let a label buy boss-level urgency"
     )
+
+
+# --- batch drain -----------------------------------------------------------
+
+def test_departments_are_told_not_to_wait_for_the_next_wake(org_root: Path) -> None:
+    """A 30-minute gate is a floor for sleepers, not a metronome for workers.
+
+    A department that finishes an item and stands down waits up to 30 minutes for
+    the next tick, so a 20-minute item occupies a 50-minute slot and the
+    department's throughput is cut to a third — with a full inbox sitting there
+    the whole time.
+    """
+    import shutil
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    shutil.copy(REPO / "storage" / "org" / "policy.md", org_root / "policy.md")
+
+    identity = _core.identity_prompt(org_root, "alpha")
+    work = _core.work_prompt(org_root, "alpha")
+
+    assert "接下一張" in identity, "the standing rule belongs in the org policy, once"
+    assert "接下一張" in work
+    for text in (identity, work):
+        assert "收班條件" in text, "an unbounded drain is how a session runs itself into the ground"
+
+
+def test_the_wake_message_carries_the_drain_rule(org_root: Path, monkeypatch) -> None:
+    """Identity is written when the pane is created — a rule added afterwards
+    only reaches a running department through the wake message."""
+    import subprocess as sp
+    import manager_tick
+
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "alpha", "--from", "manager", "--task", "做事",
+                    "--no-wake", root=org_root).returncode == 0
+    _core.write_lease(org_root, "alpha", {"runner": "herdr", "pane_id": "w1:p1"})
+
+    sent: list[list[str]] = []
+
+    class _R:
+        returncode = 0
+        stdout = json.dumps({"result": {"agent": {"agent_status": "idle"}}})
+        stderr = ""
+
+    def _run(cmd, **kw):
+        sent.append(cmd)
+        return _R()
+
+    monkeypatch.setattr(sp, "run", _run)
+
+    manager_tick.wake_departments(org_root)
+
+    prompts = [c[-1] for c in sent if len(c) > 2 and c[1:3] == ["agent", "prompt"]]
+    assert prompts, "an idle department holding due work must be woken"
+    assert "做完一張直接接下一張" in prompts[0]
