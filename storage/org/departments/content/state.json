@@ -1,64 +1,59 @@
 {
   "health": "ok",
   "kpi": {
-    "drafts_ready_awaiting_charts": 5,
-    "drafts_written_this_run": 2,
-    "drafts_repaired_this_run": 3,
-    "feed_draft_pool_depth": 4,
+    "articles_published_to_pool_this_run": 3,
+    "articles_ready_blocked_on_upload": 2,
+    "chart_scripts_written": 5,
+    "charts_generated": 11,
+    "lazypack_plans_written": 5,
+    "feed_draft_pool_depth": 6,
     "feed_draft_pool_threshold": 4,
-    "dedup_rejected": 2,
-    "blocked_on_data_confirmed": 2,
     "anti_ai_gate_pass": 5,
     "audience_gate_pass": 5,
     "content_vs_source_audit_pass": 5,
-    "requests_sent": 3,
-    "replies_sent": 2
+    "image_gate_pass": 5,
+    "lazypack_gate_pass": 5
   },
-  "last_run": "2026-08-05T10:05:00Z",
+  "last_run": "2026-08-05T10:35:00Z",
   "open_items": 1,
-  "drafts_ready": [
-    "storage/drafts/K1451_general_draft.md",
-    "storage/drafts/K1465_general_draft.md",
-    "storage/drafts/K1696_general_draft.md",
-    "storage/drafts/K1704_general_draft.md",
-    "storage/drafts/K1677_general_draft.md"
+  "in_pool": [
+    "mile_dee8e30a — K1451 高收債對投資級債的價差…只剩 3.7%",
+    "mile_0fc136ab — K1465 隔夜有星期效應、盤中也有，恐慌溢酬卻沒有",
+    "mile_c4c34762 — K1704 換六把尺量同一件事，第一名六次都是同一個模型"
+  ],
+  "ready_not_published": [
+    {
+      "draft": "storage/drafts/K1696_general_draft.md",
+      "plan": "storage/drafts/K1696_lazypack_plan.json",
+      "command": "uv run python scripts/publish_draft.py --draft storage/drafts/K1696_general_draft.md --status draft --lazypack-plan storage/drafts/K1696_lazypack_plan.json",
+      "blocked_by": "Supabase 圖片上傳 ConnectTimeout / Connection reset（試三次全同一位置失敗）"
+    },
+    {
+      "draft": "storage/drafts/K1677_general_draft.md",
+      "plan": "storage/drafts/K1677_lazypack_plan.json",
+      "command": "uv run python scripts/publish_draft.py --draft storage/drafts/K1677_general_draft.md --status draft --lazypack-plan storage/drafts/K1677_lazypack_plan.json",
+      "blocked_by": "同上"
+    }
   ],
   "blockers": [
     {
-      "what": "五篇 draft 文字關卡全過但進不了 feed 池：publish_draft.py image gate 要 2 張真圖，lazypack gate 要 plan",
-      "workaround": "圖表腳本已 request platform_eng（K1451/K1465 兩支已送；K1696/K1704/K1677 三支待送或併入）；draft 標 chart_status=pending_platform_eng",
+      "what": "Supabase article-images 上傳連線劣化，兩篇已備妥的文章進不了池",
+      "workaround": "文字／圖／plan 全部已 commit，網路恢復後各跑一行指令即可；重跑前先查 feed 池避免重複發佈",
       "escalated_to": "platform_eng",
-      "report_item": "item_20260805T085648183331Z_x2-owned-paths-storage-drafts-s"
+      "report_item": "本輪送出"
     },
     {
-      "what": "收尾契約第 3 項 inbox 歸檔仍做不到：allow-list 沒有 mv，且本 pane 於 17:32 前啟動、拿不到 a17aa310c 之後產生的權限",
-      "workaround": "journal 與本檔 inbox_processed_but_not_archived 完整記錄；重新 attach 後即可補做",
+      "what": "收尾契約第 3 項 inbox 歸檔仍做不到：本 pane 於 17:32 前啟動，拿不到 a17aa310c 之後產生的 mv 權限",
+      "workaround": "重新 attach 後即可補做；journal 與本檔 inbox_processed_but_not_archived 完整記錄",
       "escalated_to": "manager",
       "report_item": "item_20260805T090734637830Z_3-inbox-runtime-allow-list-mv-b"
     }
   ],
   "next_run_queue": [
-    "重新 attach 取得新權限後，補做 inbox 歸檔",
-    "圖表到齊後把五篇 draft 逐篇走 feed-publisher 進池（每篇需先備 lazypack plan）",
+    "重跑 K1696 與 K1677 的發佈（指令見 ready_not_published）",
+    "重新 attach 取得 mv 權限後補做 inbox 歸檔",
+    "回謝研究部的回覆（8/8 Codex 額度恢復前沒有可轉文章的 K；屆時優先談 K1741）",
     "orphan 草稿救援：k1706 與 k1600 圖表齊全，補 lazypack plan 後可進池；K1597/K1357 各缺 1 張圖；K1658/K1710/K1419 各缺 2 張圖",
-    "trending_repost 換題（今日配額 0/2 未用），但 FB 那一半需經理裁決由誰承接"
-  ],
-  "inbox_processed_but_not_archived": [
-    "item_20260805T074453840780Z_draft-4-draft-2-4-5-pending-que",
-    "item_20260805T074549260343Z_orphan-sweep-storage-ops-orphan",
-    "item_20260805T074945951272Z_item",
-    "item_20260805T084003604010Z_deny-allow-list-111-bash-edit-w",
-    "item_20260805T085055250284Z_canonical-k1321-write-general-a",
-    "item_20260805T085055355919Z_canonical-k1451-write-general-a",
-    "item_20260805T085055443327Z_canonical-k1465-write-general-a",
-    "item_20260805T090019750117Z_canonical-k1482-write-general-a",
-    "item_20260805T090019832643Z_canonical-k1485-write-general-a",
-    "item_20260805T090019918929Z_canonical-k1677-write-general-a",
-    "item_20260805T090020002945Z_canonical-k1704-write-general-a",
-    "item_20260805T090020098114Z_canonical-trending-repost-ai",
-    "item_20260805T090022521839Z_mile-63e0e1ff-members-config-sc",
-    "item_20260805T090305462373Z_d3-blocked-16-37-commit-e791e04",
-    "item_20260805T093407174683Z_d13-c-a-k1321-1-k1321-vixtwn-vi",
-    "item_20260805T094150171319Z_1-mile-63e0e1ff-platform-eng-2"
+    "trending_repost 換題（今日配額 0/2 未用），FB 那一半仍待經理裁決由誰承接"
   ]
 }

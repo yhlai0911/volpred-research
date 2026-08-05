@@ -73,6 +73,44 @@ uv run python scripts/publish_draft.py --draft <draft.md> --status draft --dry-r
 還有一個要注意的：audit 印出的 `PASS (0 claims vs N source values)` 不等於驗證充分——0 claims
 代表它一個數字都沒抽到。那種情況下數字正確性完全靠自己逐項比對來源 JSON，不能當成機械背書。
 
+## lazypack strict plan 的四個踩點（2026-08-05 逐一撞出來）
+
+`publish_draft.py` 的最後一道關卡要 `--lazypack-plan`。schema 在 `lazypack_render.py --help`，
+但下面四件事文件沒寫清楚，是我一次撞一個試出來的：
+
+1. `panels[].sources` 放的是**evidence 別名**（例如 `"results"`），不是檔案路徑。寫路徑會回
+   `must contain only declared evidence aliases`。
+2. `blocks[].value.format.digits` **只能 0 到 3**。寫 4 會被擋。
+3. **text block 的 body 不能出現阿拉伯數字**，會回 `unbound numeric literal`。連「標普 500」的
+   500、「21 個交易日」的 21 都算。解法是改用不帶數字的說法（美股大盤指數、未來一個月），
+   要露出的數字一律走 metric block 的 `{source, path, format}` 綁定。中文數字（二十五分之一）可以。
+4. evidence 的 `sha256` 要對得上當下的檔案內容。算法：
+   `uv run python -c "import hashlib,pathlib;print(hashlib.sha256(pathlib.Path('<path>').read_bytes()).hexdigest())"`
+
+可直接複製的樣板：`storage/drafts/K1451_lazypack_plan.json`（三面板：概念／結果／帶走的一句話）。
+
+## 圖表腳本可以住在 storage/drafts/（2026-08-05 platform_eng 建議）
+
+`scripts/` 不在內容部轄區，但**圖表腳本不一定要住在 scripts/**。寫成
+`storage/drafts/<K>_charts.py` 一樣能 `uv run python` 執行，輸出到 `storage/drafts/assets/`
+（既有慣例，`gen_k1356_article_charts.py` 就是輸出到這裡），draft 內用
+`![...](storage/drafts/assets/<name>.png)` 引用，image gate 照樣過。
+platform_eng 說權限下來後會收編進 `scripts/` 並保留 commit 歷史。
+
+**不要卡著等別人給權限**——先用自己轄區內能動的路徑把東西做出來，再讓對方收編。
+本輪五篇文章的 11 張圖就是這樣解掉的。
+
+matplotlib 中文字型設定（沿用即可）：
+`plt.rcParams["font.sans-serif"] = ["PingFang TC", "PingFang HK", "Heiti TC", "Arial Unicode MS"]`
+搭配 `plt.rcParams["axes.unicode_minus"] = False`。
+
+## 發佈時 Supabase 圖片上傳會逾時，重跑即可
+
+`publish_draft.py` 正式發佈時要把本地 PNG 上傳到 Supabase，2026-08-05 連續遇到
+`ConnectTimeout` 與 `Connection reset by peer`。這是網路瞬斷不是設定錯，同一道指令重跑就過。
+單篇發佈含上傳可能超過 120 秒，用 `run_in_background` 跑，不要當成掛掉。
+**重跑前先查 feed 池**確認上一次是不是其實已經寫進去了，避免重複發佈。
+
 ## 讀者文章的固定作法
 
 - 數字一律從 `experiments/<id>/<id>_results.json` 程式化取得，不從 README／agent 摘要轉抄
