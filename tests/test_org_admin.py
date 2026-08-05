@@ -428,3 +428,93 @@ def test_policy_tells_departments_to_use_the_org_channel_when_stuck(org_root: Pa
     assert "不是問視窗前的人" in identity
     assert "--to-manager" in identity, "the blocked-report command must be in reach"
     assert "老闆不是你的上級介面" in identity
+
+
+def test_handled_request_without_a_reply_is_surfaced(org_root: Path, quiet_platform) -> None:
+    """Help that never comes back makes the boss the transport layer."""
+    quiet_platform(org_root)
+    for d in ("content", "research"):
+        assert run_tool("org_admin.py", "create", d, root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "research", "--from", "content",
+                    "--task", "請幫我確認數字", "--no-wake", root=org_root).returncode == 0
+
+    inbox = _core.dept_dir(org_root, "research") / "inbox"
+    item = next(inbox.glob("*.json"))
+    archive = inbox / "_archive"
+    archive.mkdir(exist_ok=True)
+    item.replace(archive / item.name)
+
+    gate = _tick().evaluate_gate(org_root, platform_facts=lambda: [])
+
+    assert any("沒有回覆" in r for r in gate["reasons"]), gate
+
+
+def test_a_replied_request_is_not_flagged(org_root: Path, quiet_platform) -> None:
+    quiet_platform(org_root)
+    for d in ("content", "research"):
+        assert run_tool("org_admin.py", "create", d, root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "research", "--from", "content",
+                    "--task", "請幫我確認數字", "--no-wake", root=org_root).returncode == 0
+    inbox = _core.dept_dir(org_root, "research") / "inbox"
+    item_path = next(inbox.glob("*.json"))
+    rid = json.loads(item_path.read_text())["id"]
+    assert run_tool("dept_send.py", "content", "--from", "research", "--reply-to", rid,
+                    "--task", "結果：42", "--no-wake", root=org_root).returncode == 0
+    archive = inbox / "_archive"
+    archive.mkdir(exist_ok=True)
+    item_path.replace(archive / item_path.name)
+
+    gate = _tick().evaluate_gate(org_root, platform_facts=lambda: [])
+
+    assert not any("沒有回覆" in r for r in gate["reasons"]), gate
+
+
+def test_queue_dispatch_routes_by_declared_ownership(org_root: Path, tmp_path: Path, monkeypatch) -> None:
+    """One queue, one dispatcher: departments receive pointers, not copies."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("queue_dispatch_mod", ORG_SCRIPTS / "queue_dispatch.py")
+    qd = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(qd)
+
+    assert run_tool("org_admin.py", "create", "research", "--task-types", "experiment",
+                    root=org_root).returncode == 0
+    assert run_tool("org_admin.py", "create", "content", "--task-types", "daily_article",
+                    root=org_root).returncode == 0
+
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(json.dumps([
+        {"id": "K1", "status": "pending", "task_type": "experiment", "priority": 1},
+        {"id": "A1", "status": "pending", "task_type": "daily_article", "priority": 2},
+        {"id": "X1", "status": "pending", "task_type": "mystery_type", "priority": 2},
+        {"id": "D1", "status": "succeeded", "task_type": "experiment", "priority": 1},
+    ]), encoding="utf-8")
+    monkeypatch.setattr(qd, "NEXT_TASKS", pool)
+
+    result = qd.plan(org_root)
+
+    assert [t["id"] for t in result["by_dept"]["research"]] == ["K1"]
+    assert [t["id"] for t in result["by_dept"]["content"]] == ["A1"]
+    assert result["unmapped"] == {"mystery_type": 1}, "an unowned type must be surfaced, not dropped"
+    assert "D1" not in json.dumps(result["by_dept"]), "terminal tasks must not be re-dispatched"
+
+
+def test_queue_dispatch_is_idempotent(org_root: Path, tmp_path: Path, monkeypatch) -> None:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("queue_dispatch_mod2", ORG_SCRIPTS / "queue_dispatch.py")
+    qd = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(qd)
+
+    assert run_tool("org_admin.py", "create", "research", "--task-types", "experiment",
+                    root=org_root).returncode == 0
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(json.dumps([{"id": "K1", "status": "pending",
+                                 "task_type": "experiment", "priority": 1}]), encoding="utf-8")
+    monkeypatch.setattr(qd, "NEXT_TASKS", pool)
+
+    assert run_tool("dept_send.py", "research", "--from", "manager", "--task", "【canonical】K1",
+                    "--canonical-task-id", "K1", "--no-wake", root=org_root).returncode == 0
+
+    result = qd.plan(org_root)
+
+    assert result["by_dept"] == {}, "a task already pointed at must not be dispatched twice"
+    assert result["already_dispatched"] == 1

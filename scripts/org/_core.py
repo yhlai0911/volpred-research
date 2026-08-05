@@ -311,6 +311,9 @@ def build_manager_brief(root: Path) -> str:
 
 ## 你的工具（全部用 `uv run python` 執行）
 
+- **每輪必做：把 canonical 池的待辦依 task_type 派給對應部門**
+  `scripts/org/queue_dispatch.py --dry-run`（先看分佈與無主型別）→ `--apply [--limit N]`
+  部門收到的是**指標**不是副本：canonical 任務仍是唯一真相，部門用 task_pool_claim 結案。
 - 派工到部門（**會直接送進該部門的視窗**，若對方 idle）：
   `scripts/org/dept_send.py <dept> --from manager --priority P1|P2|P3 --task "..."`
 - 看組織狀態：`scripts/org/org_status.py`　｜　看誰在哪個 pane：`scripts/org/org_attach.py status`

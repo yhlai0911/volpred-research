@@ -48,9 +48,6 @@
       "ndc_indicator_refresh": {
         "activated_at": "2026-07-26T10:35:00Z"
       },
-      "agent_dispatch_tick": {
-        "activated_at": "2026-07-26T11:42:00Z"
-      },
       "growth_experiment_lifecycle": {
         "activated_at": "2026-07-28T22:45:00Z"
       },
@@ -158,6 +155,16 @@
       "active": "operations core owns every enabled system_crontab job",
       "cutover_rule": "set active_jobs.<id>.activated_at before removing that exact legacy owner",
       "rollback_rule": "remove active_jobs.<id>, reconcile legacy owner, then verify next legacy receipt"
+    },
+    "paused_jobs": {
+      "agent_dispatch_tick": {
+        "paused_at": "2026-08-05T08:55:00Z",
+        "reason": "兩個引擎從同一個 canonical 池認領，互相卡住且無法歸因是誰造成的（老闆 2026-08-05）。派工權收歸運營經理單一來源：scripts/org/queue_dispatch.py 依 task_type 歸屬派給部門。",
+        "rollback": "把本條目搬回 active_jobs 即恢復舊引擎；wrapper、worker、decision.py 全數保留未動，回滾不需要改任何程式碼。",
+        "previous": {
+          "activated_at": "2026-07-26T11:42:00Z"
+        }
+      }
     }
   },
   "system_crontab": {

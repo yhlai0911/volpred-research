@@ -127,10 +127,42 @@ def evaluate_gate(root: Path, *, check_github: bool = False,
     if check_github:
         reasons.extend(_github_dept_labels())
 
+    reasons.extend(_unanswered_requests(root, registry))
     reasons.extend((platform_facts or _platform_facts)())
     reasons.extend(_patrol_due(root, now))
 
     return {"fire": bool(reasons), "reasons": reasons}
+
+
+def _unanswered_requests(root: Path, registry: dict) -> list[str]:
+    """Requests a department handled without ever answering the asker.
+
+    Collaboration only works if help comes back on its own. Archiving a peer's
+    request without replying leaves the asker waiting forever and makes the boss
+    the transport layer, which is exactly what this org removes.
+    """
+    replied: set[str] = set()
+    open_requests: dict[str, tuple[str, str]] = {}
+    for dept in list(registry.get("departments", {})) + [MANAGER]:
+        base = (dept_dir(root, dept) if dept != MANAGER else root / MANAGER) / "inbox"
+        for folder in (base, base / "_archive"):
+            if not folder.is_dir():
+                continue
+            for path in folder.glob("*.json"):
+                try:
+                    item = json.loads(path.read_text(encoding="utf-8"))
+                except (json.JSONDecodeError, OSError):  # silent-ok: malformed items surface via the inbox reader
+                    continue
+                if item.get("reply_to"):
+                    replied.add(str(item["reply_to"]))
+                elif item.get("kind") == "request" and folder.name == "_archive":
+                    open_requests[str(item.get("id"))] = (dept, str(item.get("from")))
+
+    out = []
+    for rid, (handler, asker) in open_requests.items():
+        if rid not in replied:
+            out.append(f"{handler} 處理完 {asker} 的請求但沒有回覆（{rid[:40]}）")
+    return out[:5]
 
 
 def _platform_facts() -> list[str]:

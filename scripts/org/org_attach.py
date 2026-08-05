@@ -170,8 +170,15 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
     if meta is None:
         return None
 
-    turf = [f"storage/org/departments/{dept}/**"]
-    turf += [p.rstrip("/") + "/**" for p in (meta.get("owned_paths") or [])]
+    # Relative patterns resolve against the SETTINGS FILE's directory, not the
+    # project root — a generated file under storage/org/runtime/ turned
+    # "storage/drafts/**" into "storage/org/runtime/storage/drafts/**", which
+    # matches nothing. That is why every department reported writes denied even
+    # after being granted its turf. Absolute patterns need a LEADING DOUBLE
+    # SLASH; a single slash is still read as relative.
+    rel = [f"storage/org/departments/{dept}/"]
+    rel += [p.rstrip("/") + "/" for p in (meta.get("owned_paths") or [])]
+    turf = [f"/{REPO_ROOT}/{r}**" for r in rel]
     allow = [f"{tool}({t})" for t in turf for tool in ("Edit", "Write")]
     allow += [
         "Bash(uv run python scripts/org/dept_send.py:*)",

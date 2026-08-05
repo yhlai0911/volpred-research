@@ -411,9 +411,16 @@ def test_generated_permissions_match_the_declared_turf(org_root: Path) -> None:
     path = attach.generate_dept_settings(org_root, "content")
     allow = json.loads(path.read_text())["permissions"]["allow"]
 
-    assert "Write(storage/drafts/**)" in allow
-    assert "Write(storage/org/departments/content/**)" in allow
-    assert not any("research" in rule for rule in allow), "turf must not widen past the charter"
+    # A relative pattern resolves against the settings FILE's directory, so a
+    # generated file under storage/org/runtime/ would point at a path that does
+    # not exist. Absolute patterns require a leading DOUBLE slash.
+    assert all(r.startswith(("Edit(//", "Write(//", "Bash(")) for r in allow), allow
+    assert any(r.endswith("/storage/drafts/**)") and r.startswith("Write(//") for r in allow)
+    assert any("/storage/org/departments/content/**)" in r for r in allow)
+    assert not any("/departments/research/" in rule for rule in allow), \
+        "turf must not widen past the charter"
+    assert not any(r.startswith(("Edit(/Users", "Write(/Users")) for r in allow), \
+        "a single leading slash is still read as relative — that was the bug"
 
 
 def test_hand_written_settings_beat_the_generated_one(org_root: Path) -> None:

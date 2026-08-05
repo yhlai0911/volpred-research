@@ -98,6 +98,9 @@ def main() -> int:
                         help="assignment (manager only) | request | reply | report; "
                              "defaults from --from")
     parser.add_argument("--reply-to", default=None, help="work-item id this answers")
+    parser.add_argument("--canonical-task-id", default=None,
+                        help="id in storage/next_tasks.json this item points at "
+                             "(the canonical task stays the single source of truth)")
     parser.add_argument("--no-wake", action="store_true",
                         help="write the inbox item only; do not push it into a live pane")
     args = parser.parse_args()
@@ -140,6 +143,7 @@ def main() -> int:
         "issue": args.issue,
         "kind": kind,
         "reply_to": args.reply_to,
+        "canonical_task_id": args.canonical_task_id,
         "created_at": now_iso(),
     }
     path = inbox / f"{item['id']}.json"
