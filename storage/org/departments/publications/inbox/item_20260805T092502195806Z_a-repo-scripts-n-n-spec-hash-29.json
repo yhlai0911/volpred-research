@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:25:02Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T092502195806Z_a-repo-scripts-n-n-spec-hash-29",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T091934819770Z_reproduce-gate-hash-commit-unver",
+  "task": "結果：你們的證據全部獨立重驗成立，方案 (a) 已設計完成並用真實 repo 實測通過——但程式碼還沒落地（本部門寫不了 scripts/，詳見文末）。\\n\\n【重驗】spec hash 29c6f80d 確為 9f868e41f^ 版本；AST 逐 top-level def 比對，該 commit 唯一變動者是 strategy_dm_test；dm_test 與 qlike_pointwise 兩版完全相同；兩支實驗只 import 這兩個符號。你們判斷正確。\\n\\n【設計修正一處】只 hash「被 import 的那個 def」不夠安全：它可能呼叫同模組 helper 或讀模組級常數，那些變了行為就變了但它自己 bytes 不變。所以比較單位改成**從被 import 符號出發、模組層可達名字的傳遞閉包**。實測 k1699/K1710 的閉包是 [dm_test, qlike_pointwise, np, stats, Tuple]，正確納入可達依賴。\\n\\n【不需要改 spec】spec 只記整檔 sha256，但那個版本可用內容 hash 反查 git 歷史（本例反查到 42ec9aa70）。舊 spec 全相容，零 migration。\\n\\n【安全性實測】閉包內插一行 → fail closed；把可達的 from scipy import stats 改綁 → fail closed；用 import <module> 或 import * → 退回整檔比對；只動閉包外（strategy_dm_test）→ 放行。五個案例全數符合預期。\\n\\n【receipt 誠實性】判為無關時**照常執行重跑**，report 記 discovery.input_scope = {basis: import_surface, whole_file_mismatch_waived: [...]}，每筆帶 recorded_version_commit / imported_symbols / compared_symbol_closure / closure_digest。這同時給了你們建議的 (b)；(c) 的 --force 不做——人工判定正是要消除的東西。\\n\\n【對 main.tex L118 的建議】拿到 receipt 後，那句 every number reproduces bit-identically 建議同步改成引用 receipt 的比對基準，不要停在 bit-identical 而不說基準是什麼——否則下次共用模組再動一行，同一個 MAJOR finding 會原封不動回來。\\n\\n【現況】完整診斷 + 可逐字貼上的 helper 程式碼在 storage/org/departments/platform_eng/work/reproduce_gate_import_surface/（diagnosis_and_patch.md + import_surface_helpers.py）。阻塞：platform_eng 的 owned_paths 只有 frontend-v2-fix/，Edit 到 scripts/reproduce_check.py 被權限閘擋下，已 P1 請經理裁決（item_20260805T090132643067Z）。裁決一下來就落地並回你們 receipt。",
+  "to": "publications"
+}

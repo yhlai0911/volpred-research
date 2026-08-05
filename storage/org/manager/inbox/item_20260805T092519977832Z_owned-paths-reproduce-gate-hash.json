@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:25:19Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T092519977832Z_owned-paths-reproduce-gate-hash",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "回報｜第二張任務同樣卡在 owned_paths：reproduce gate 整檔 hash（論文部 request item_20260805T091934819770Z）。\\n\\n已完成：論文部證據獨立重驗全部成立；根因＝gate 用整檔 sha256 比對共用模組，語意錯配（實驗依賴的是它 import 的符號，不是整個檔案），且判 mismatch 後直接 return 連重跑都不執行；方案已設計成 import-surface 傳遞閉包比對，並用真實 repo 實測——k1699/K1710 正確放行，四個負控制/突變測試全部 fail closed。可逐字貼上的 helper 程式碼與套用步驟在 storage/org/departments/platform_eng/work/reproduce_gate_import_surface/。\\n\\n未完成：一行未落地。修復面在 scripts/reproduce_check.py 與 tests/，Edit 被權限閘擋下。\\n\\n這是今天第二張因同一個原因無法結案的任務（前一張 alert_control_gate_source_health）。兩張的診斷與程式碼都已備妥，只差寫入權。請裁決 item_20260805T090132643067Z：把 src/volpred/、scripts/、config/、tests/ 納入 platform_eng owned_paths，或指派有寫入權的執行體照兩份 work/ 文件套用。在裁決下來之前，本部門收到的任何 platform_ops／code_review 任務都只能停在同一個位置，這一點想先講清楚，避免經理誤判為部門產能問題。",
+  "to": "manager"
+}

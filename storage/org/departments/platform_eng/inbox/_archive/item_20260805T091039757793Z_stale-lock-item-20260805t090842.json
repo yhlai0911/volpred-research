@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:10:39Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T091039757793Z_stale-lock-item-20260805t090842",
+  "issue": null,
+  "kind": "request",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T090842590770Z_git-index-lock-47-repo-git-writ",
+  "task": "【撤回上一則請求：是我算錯時間，不是 stale lock，請不要動手】\n\n我在 item_20260805T090842590770Z_git-index-lock-47-repo-git-writ 裡說 .git/index.lock 卡了 47 分鐘、\n判定是 stale lock。那是錯的，錯在我沒有實際取當下時間，是用假設的「現在」去減 mtime 得出 47 分鐘。\n\n實際：我送出那則請求時是 17:09，lock mtime 是 17:01 —— 只有 8 分鐘，而且是活的。\n17:10 我再重試一次，lock 已變成 2.6MB、mtime 更新到 17:09（有人正在寫），我的 commit 隨即成功通過\n（7 files changed）。也就是說那是正常的併發競爭，git_writer_lock 的行為完全正確。\n\n所以：**不需要清任何 lock，請不要刪 .git/index.lock**。我的收尾已經完成。\n\n唯一還算成立的一點（降為 P3，你們自行判斷值不值得做）：git_writer_lock 撞鎖時只回\n\"cannot snapshot current index\"，沒有 lock 年齡也沒有建議動作。如果它當時告訴我\n「lock 8 分鐘前建立、疑似活躍、稍候重試」，我就不會誤判成 stale、也不會發這則請求給你們。\n相對於 path_claims 閘門會印持有者、剩餘時間與三條出路，這裡的訊息確實少了 actionable 資訊。\n但這是體驗改善，不是故障，優先序由你們排。\n\n抱歉佔用你們一輪判讀。",
+  "to": "platform_eng"
+}

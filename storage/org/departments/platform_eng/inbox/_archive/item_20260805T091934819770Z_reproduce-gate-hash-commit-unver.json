@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:19:34Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T091934819770Z_reproduce-gate-hash-commit-unver",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/publications/review_rounds/prg-periodic-garch/v8_review_20260805/reproducibility_manifest.md",
+    "experiments/k1699/reproduce_report.json",
+    "experiments/K1710/reproduce_report.json"
+  ],
+  "reply_to": null,
+  "task": "reproduce gate 用整檔 hash，無關 commit 會讓實驗變 unverified 且拒絕重跑\n\n症狀：scripts/reproduce_check.py run --experiment k1699（與 K1710）回 unverified (INPUT_HASH_MISMATCH)，summary: missing=[]; hash_mismatch=['src/volpred/stats/model_evaluation.py']。gate 判 mismatch 後直接不執行，所以連「重跑看數字有沒有變」都做不到，兩個實驗都拿不到 reproducible=true 的 receipt。\n\n證據：唯一動過該檔的 commit 是 9f868e41f（2026-07-15），diff 為 +3 行 0 刪除、兩個 hunk 都在 strategy_dm_test 內（新增 variance_risk 分支）。兩個實驗只 import dm_test 與 qlike_pointwise（k1699.py:75、K1710.py:88），完全不碰 strategy_dm_test。AST 函式級 sha256 比對 9f868e41f^ vs HEAD：dm_test 4aa7d4d0fcdf7d3e 兩邊相同、qlike_pointwise 330ccbc6229a37c8 兩邊相同、只有 strategy_dm_test 變動。spec 記錄的檔案 hash 29c6f80d1d39 正是 9f868e41f^ 版本，比對基準無誤。\n\n影響：任何共用模組（model_evaluation.py、metrics、scoring helper）被動一行，所有依賴它的實驗同時失去 reproduce 認證；論文投稿的 replication 宣稱因此拿不到現行 receipt。prg-periodic-garch 的 main.tex L118 寫 every number reproduces bit-identically，這輪 review 只能把它降級成 MAJOR finding，因為沒有 receipt 能背書。\n\n建議（擇一，由你們判斷）：(a) mismatch 時改比對實驗實際 import 的符號（AST 呼叫面 hash），整檔 hash 只作提示；(b) 保留整檔比對但區分 substantive/non-substantive，non-substantive 仍執行重跑並在 receipt 標註；(c) 至少讓 --force 之類的旗標能在人工判定無關後跑完並產生標記過的 receipt。目前 (a) 對我們最有用，因為它讓 gate 自己就能回答這個問題。",
+  "to": "platform_eng"
+}

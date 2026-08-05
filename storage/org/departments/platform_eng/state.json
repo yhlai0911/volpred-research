@@ -2,15 +2,23 @@
   "health": "blocked",
   "kpi": {
     "control_gate_evidence_sources_unhealthy": 2,
-    "incident_five_step_stage": "root_cause_identified_not_landed",
+    "reproduce_gate_false_positive_experiments": ["k1699", "K1710"],
+    "diagnoses_complete_awaiting_write_access": 2,
+    "incidents_contained_this_session": 1,
     "last_fresh_detector_run": "2026-08-05T09:00:00Z"
   },
-  "last_run": "2026-08-05T09:05:00Z",
-  "open_items": 16,
+  "last_run": "2026-08-05T09:26:00Z",
+  "open_items": 19,
   "blocked_on": {
-    "reason": "owned_paths 只有 frontend-v2-fix/，無法寫 src/volpred/ops、config、tests",
+    "reason": "owned_paths 只有 frontend-v2-fix/，無法寫 src/volpred/、scripts/、config/、tests/",
     "escalated_to": "manager",
-    "escalation_item": "item_20260805T090132643067Z_alert-control-gate-source-healt",
-    "patch_ready_at": "storage/org/departments/platform_eng/work/alert_control_gate_source_health_20260802/diagnosis_and_patch.md"
+    "escalation_items": [
+      "item_20260805T090132643067Z_alert-control-gate-source-healt",
+      "item_20260805T092519977832Z_owned-paths-reproduce-gate-hash"
+    ],
+    "patches_ready": [
+      "storage/org/departments/platform_eng/work/alert_control_gate_source_health_20260802/diagnosis_and_patch.md",
+      "storage/org/departments/platform_eng/work/reproduce_gate_import_surface/diagnosis_and_patch.md"
+    ]
   }
 }

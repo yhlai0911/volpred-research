@@ -1,5 +1,41 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-05 17:19–17:27（台灣時間）｜reproduce gate 整檔 hash｜outcome=blocked
+
+**工作項**：`item_20260805T091934819770Z_reproduce-gate-hash-commit-unver`
+（論文部 `request`，非 canonical 派工）
+
+**做了什麼**
+
+1. 論文部的證據逐項獨立重驗（不轉抄）：spec hash `29c6f80d` 確為 `9f868e41f^` 版本；
+   AST 逐 top-level def 比對後該 commit 唯一變動者是 `strategy_dm_test`；
+   `dm_test`／`qlike_pointwise` 兩版完全相同；兩支實驗只 import 這兩個符號。**全部成立。**
+2. 根因：`audit_experiment()`（`scripts/reproduce_check.py:1169-1183`）用**整檔** sha256
+   比對 `spec["inputs"]`。整檔 hash 的語意是「檔案沒變」，實驗依賴的卻是「我 import 的
+   符號沒變」——在共用模組上這兩者**必然發散**。更糟的是判定後直接 `return`，
+   連「重跑看數字有沒有變」都做不到，等於把唯一能產生證據的路也關掉。
+3. 採論文部建議的 (a)，但把比較單位從「單一函式」修正為**從被 import 符號出發、
+   模組層可達名字的傳遞閉包**——只 hash 那個 def 會漏掉它呼叫的 helper 與讀的常數。
+   三條 fail-closed 退路：整模組 import／`import *`、模組頂層有副作用敘述、
+   spec 版本在 git 歷史查不到，任一成立就退回整檔比對。
+4. **不需改 spec schema**：spec 只記整檔 hash，但那個版本可用內容 hash 反查 git 歷史
+   （本例反查到 `42ec9aa70`）。舊 spec 全相容、零 migration。
+5. 寫成可執行原型跑真實 repo 實測：k1699／K1710 正確放行（閉包
+   `[dm_test, qlike_pointwise, np, stats, Tuple]`）；四個負控制/突變測試
+   （閉包內插一行、改綁可達的 `stats` import、`import <module>`、只動閉包外）
+   全部符合預期。**設計不是紙上的。**
+
+**結論（誠實）**：**一行未落地。** 修復面在 `scripts/reproduce_check.py` 與 `tests/`，
+`Edit` 再次被權限閘擋下（今天第二張同因卡住的任務）。定稿修正與可逐字貼上的 helper
+在 `work/reproduce_gate_import_surface/`（`diagnosis_and_patch.md` +
+`import_surface_helpers.py`）。
+
+**已走管道**：回覆論文部（含對 `main.tex:118` 那句話的建議：拿到 receipt 後應改成
+引用比對基準，否則下次共用模組再動一行，同一個 MAJOR finding 會原封不動回來）；
+P1 上報經理 `item_20260805T092519977832Z`，並言明在 owned_paths 裁決下來之前，
+本部門收到的任何 platform_ops／code_review 任務都只能停在同一個位置。
+
+
 ## 2026-08-05 16:51–17:0x（台灣時間）｜alert_control_gate_source_health｜outcome=blocked
 
 **工作項**：`item_20260805T085055{722967,835067,932635}Z_canonical-alert-evidence-source`
