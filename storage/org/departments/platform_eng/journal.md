@@ -665,9 +665,31 @@ S0 是它們的前置。context 不足以完整做完並收尾，不做一半。
 而那個方向**已經實現在程式裡**——「知道目錄／檔案／隱藏目錄的建構器」就是
 `declares_a_file` + `turf_patterns`，「並自我驗證」就是那 8 條表格測試。
 
+### (16) 資源監控部 P3：session id 綁定｜**done**｜commit `9d9429a23`
+
+**缺的那一塊一直在環境裡**：`CLAUDE_CODE_SESSION_ID` 對子行程可見（本班
+`7e813e78-…`），而且**它就是 transcript 的檔名**。所以綁定不必從 attach 端猜，
+session 自己就知道自己是誰——對方原本以為要從 attach 寫入。
+
+- 形狀採對方偏好的 `runtime/<dept>.sessions.jsonl`（非 lease 欄位）：一個 pane 一天換好幾次
+  session，**單一欄位會默默蓋掉先前那些，而那通常正是你回頭要找的那一段**。
+- **註冊點放在 `dept_send`**，不另開 CLI：每個角色每班至少送一則（收尾契約要求），
+  所以綁定是**既有動作的副作用，不是新步驟**。另開註冊 CLI 等於要七個角色每班多記一件事，
+  那種東西第三天就會有人忘。代價是它絕不能弄壞送信 → best-effort ＋ 測試守著。
+- **回讀驗證**：commit 之前送出的那則 request 已寫下第一筆
+  （`{7e813e78…, platform_eng, …, w1:p2A}`）。5 passed；`test_org_admin.py` 71 passed。
+- **邊界（已明說）**：只對從現在起的 session 有效，今天那 95 個補不回來，
+  29.9% 要等新資料累積才會下降——**沒有宣稱歷史歸屬已解決**。
+
+併：`_billable_total` docstring 補上「輸入必須是 `_usage_breakdown` 的輸出」。
+raw usage 是 `cache_creation_input_tokens`、正規化後是 `cache_create_tokens`，餵錯會把整個
+cache creation 算成 0——對方自己的工具因此把 08-04 低估 9.8 倍而毫無異狀。
+平台側每一處都先正規化（已複驗），所以這行是防下一個人：
+**一個看起來合理的錯誤數字，比一次崩潰更糟。**
+
 ---
 
-**本班合計 14 張完成**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
+**本班合計 15 張完成**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
 D45 落地、brief 有界渲染、自我更正收回重複交付），停手 1（/questions 改由會員部實作），
 blocked 0 —— 早先被鎖擋住的兩張後來都在同班內完成。
 
