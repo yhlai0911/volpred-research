@@ -32,12 +32,15 @@ from _core import (  # noqa: E402
 
 PRIORITIES = ("P1", "P2", "P3")
 
+# `decision` is a department asking the coordinator to rule. It is tracked like
+# a request: the asker is blocked until answered, so an unanswered ruling is a
+# defect, not a backlog item.
 # Tasking flows through the manager; peers may only ASK. A department that could
 # assign work to another department would recreate the tangle the org exists to
 # remove — eight peers issuing orders is not an organization, it is the "所有
 # 東西擠在一起" state with extra steps. A request is declinable; an assignment
 # is not, and only the coordinator may issue one.
-KINDS = ("assignment", "request", "reply", "report")
+KINDS = ("assignment", "request", "decision", "reply", "report")
 HERDR = "/opt/homebrew/bin/herdr"
 
 # Statuses in which a pane must not be interrupted. The boss may be mid-

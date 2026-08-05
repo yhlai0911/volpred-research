@@ -615,3 +615,37 @@ def test_department_with_an_empty_inbox_is_left_alone(org_root: Path) -> None:
     _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
 
     assert tick.wake_departments(org_root) == [], "no work means no wake, cockpit or not"
+
+
+def test_unanswered_decision_request_is_flagged(org_root: Path, quiet_platform) -> None:
+    """A ruling nobody was told about is the same as no ruling."""
+    quiet_platform(org_root)
+    assert run_tool("org_admin.py", "create", "research", root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "--to-manager", "--from", "research", "--kind", "decision",
+                    "--priority", "P1", "--task", "需決策：A 還是 B", root=org_root).returncode == 0
+
+    inbox = org_root / "manager" / "inbox"
+    item = next(inbox.glob("*.json"))
+    archive = inbox / "_archive"
+    archive.mkdir(exist_ok=True)
+    item.replace(archive / item.name)
+
+    gate = _tick().evaluate_gate(org_root, platform_facts=lambda: [])
+
+    assert any("經理" in r and "沒有回覆" in r for r in gate["reasons"]), gate
+
+
+def test_plain_report_needs_no_reply(org_root: Path, quiet_platform) -> None:
+    quiet_platform(org_root)
+    assert run_tool("org_admin.py", "create", "research", root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "--to-manager", "--from", "research",
+                    "--task", "本班完成 X", root=org_root).returncode == 0
+    inbox = org_root / "manager" / "inbox"
+    item = next(inbox.glob("*.json"))
+    archive = inbox / "_archive"
+    archive.mkdir(exist_ok=True)
+    item.replace(archive / item.name)
+
+    gate = _tick().evaluate_gate(org_root, platform_facts=lambda: [])
+
+    assert not any("沒有回覆" in r for r in gate["reasons"]), "status reports are not questions"

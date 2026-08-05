@@ -135,7 +135,11 @@ def evaluate_gate(root: Path, *, check_github: bool = False,
 
 
 def _unanswered_requests(root: Path, registry: dict) -> list[str]:
-    """Requests a department handled without ever answering the asker.
+    """Requests and decisions handled without ever answering the asker.
+
+    Covers both directions: a department that never answers a peer, and the
+    coordinator that rules on a department's `decision` item without telling it.
+    Either way someone is blocked while believing they are waiting on progress.
 
     Collaboration only works if help comes back on its own. Archiving a peer's
     request without replying leaves the asker waiting forever and makes the boss
@@ -155,13 +159,14 @@ def _unanswered_requests(root: Path, registry: dict) -> list[str]:
                     continue
                 if item.get("reply_to"):
                     replied.add(str(item["reply_to"]))
-                elif item.get("kind") == "request" and folder.name == "_archive":
+                elif item.get("kind") in {"request", "decision"} and folder.name == "_archive":
                     open_requests[str(item.get("id"))] = (dept, str(item.get("from")))
 
     out = []
     for rid, (handler, asker) in open_requests.items():
         if rid not in replied:
-            out.append(f"{handler} 處理完 {asker} 的請求但沒有回覆（{rid[:40]}）")
+            role = "經理" if handler == MANAGER else handler
+            out.append(f"{role} 處理完 {asker} 的請求/裁決請示但沒有回覆（{rid[:40]}）")
     return out[:5]
 
 
