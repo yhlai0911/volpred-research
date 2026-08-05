@@ -96,6 +96,24 @@
 **踩坑要留給下一個人**：屬於自己領域的教訓寫進 `memory/notes.md`；屬於全平台的根因與
 防錯規則走既有的 `docs/error_log.md`（append-only）。同一個坑不該有人踩第二次。
 
+## 需要操作瀏覽器的工作（computer use）
+
+有些工作非得真的開瀏覽器不可——Ivan Lai 個人 FB 發文、粉專貼文、需要登入的頁面操作。
+過去這類任務只能標 `awaiting_interactive_session` 卡著，因為無人值守的 cron 開不了
+瀏覽器。**現在不一樣：cockpit pane 本身就是老闆機器上的互動 session**，所以這條路通了。
+
+規矩（不可自行放寬）：
+- **只有宣告 `computer_use` 能力的部門能做**（registry 的 `capabilities`），
+  且只能透過 canonical 腳本 `scripts/fb_realchrome_post.py`——
+  禁止改用其他 browser automation、headless browser、Graph API、MCP 或手工拼 DOM。
+  邊界由 `fb-publishing` skill 擁有，動手前先讀它。
+- **只有 cockpit pane 做得到**：headless 部門 session 沒有瀏覽器，遇到這類工作
+  一律以 `outcome=blocked` 回報並說明「需 cockpit」，不要假裝完成。
+- **對外發佈是不可回復的**：送出前必做 preflight（`--check`）與 dry-run，
+  並先確認老闆是否已經手動發過同一篇（重複發文是實際踩過的坑）。
+- 發完必寫 canonical status（`mark_fb_post_status.py` 是唯一 state writer），
+  並回報經理。沒有回讀確認就不算發完。
+
 ## 邊界（所有角色）
 
 - 只寫自己的轄區。發現別人轄區有問題 → 回報經理指派，不要自己動手。

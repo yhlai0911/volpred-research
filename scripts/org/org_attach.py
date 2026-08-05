@@ -180,6 +180,25 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
     rel += [p.rstrip("/") + "/" for p in (meta.get("owned_paths") or [])]
     turf = [f"/{REPO_ROOT}/{r}**" for r in rel]
     allow = [f"{tool}({t})" for t in turf for tool in ("Edit", "Write")]
+    # Capabilities a department declares in the registry. Kept out of the turf
+    # list because these are TOOLS, not territory: two departments may both need
+    # the browser, and neither owns it.
+    #
+    # computer_use unlocks what `awaiting_interactive_session` used to park
+    # forever: a cockpit pane IS an interactive session on the boss's machine,
+    # so the real-Chrome path that headless cron could never drive is reachable
+    # now. The canonical script stays the only door — no MCP, no headless
+    # browser, no hand-rolled DOM steps (fb-publishing owns that boundary).
+    capability_rules = {
+        "computer_use": [
+            "Bash(uv run python scripts/fb_realchrome_post.py:*)",
+            "Bash(uv run python scripts/mark_fb_post_status.py:*)",
+            "Bash(uv run python scripts/fb_page_post.py:*)",
+        ],
+    }
+    for cap in meta.get("capabilities") or []:
+        allow += capability_rules.get(cap, [])
+
     allow += [
         "Bash(uv run python scripts/org/dept_send.py:*)",
         "Bash(uv run python scripts/org/org_status.py:*)",

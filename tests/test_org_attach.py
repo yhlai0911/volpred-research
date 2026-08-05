@@ -432,3 +432,33 @@ def test_hand_written_settings_beat_the_generated_one(org_root: Path) -> None:
     args = attach.dept_session_args(org_root, "content")
 
     assert str(own) in args, "a department's own settings must win over the generated default"
+
+
+def test_computer_use_capability_is_declared_not_assumed(org_root: Path) -> None:
+    """A cockpit pane can drive real Chrome; that power must be granted, not inherited."""
+    attach = _load_attach()
+    assert run_tool("org_admin.py", "create", "content", root=org_root).returncode == 0
+
+    plain = json.loads(attach.generate_dept_settings(org_root, "content").read_text())
+    assert not any("fb_realchrome" in r for r in plain["permissions"]["allow"])
+
+    registry = json.loads((org_root / "registry.json").read_text())
+    registry["departments"]["content"]["capabilities"] = ["computer_use"]
+    (org_root / "registry.json").write_text(json.dumps(registry, ensure_ascii=False), encoding="utf-8")
+
+    granted = json.loads(attach.generate_dept_settings(org_root, "content").read_text())
+    allow = granted["permissions"]["allow"]
+    assert any("fb_realchrome_post.py" in r for r in allow)
+    assert any("mark_fb_post_status.py" in r for r in allow), "the canonical state writer comes with it"
+
+
+def test_unknown_capability_grants_nothing(org_root: Path) -> None:
+    attach = _load_attach()
+    assert run_tool("org_admin.py", "create", "content", root=org_root).returncode == 0
+    registry = json.loads((org_root / "registry.json").read_text())
+    registry["departments"]["content"]["capabilities"] = ["telekinesis"]
+    (org_root / "registry.json").write_text(json.dumps(registry, ensure_ascii=False), encoding="utf-8")
+
+    allow = json.loads(attach.generate_dept_settings(org_root, "content").read_text())["permissions"]["allow"]
+
+    assert not any("fb_" in r for r in allow), "an unrecognised capability must not widen anything"
