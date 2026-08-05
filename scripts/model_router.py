@@ -71,6 +71,9 @@ TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
     "governance":         ("opus", "low"),     # rules/skills/docs 修整
     "resource_audit":     ("opus", "medium"),  # token/成本消耗分解與異常偵測；要跨源對帳與
                                                # 判讀會計缺陷（F1/F2 級），非 checklist 型
+    "org_manager":        ("opus", "high"),    # 運營經理：讀全組織狀態、對照 mission 排序、
+                                               # 派工、彙整回報、提案開/裁部門。判斷密度高、
+                                               # 錯一步整個組織走偏，但不做 xhigh 的深度推演
 
     # Lookup / classification — opus / low (參考型，effort 低但仍用 opus)
     "lookup":             ("opus", "low"),

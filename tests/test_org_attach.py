@@ -122,12 +122,28 @@ def test_attach_skips_departments_already_live(org_root: Path, monkeypatch, caps
     monkeypatch.setattr(attach, "live_agents", lambda: {"w1:p9": {"agent_status": "working"}})
     _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
 
-    args = attach.build_parser().parse_args(["--root", str(org_root), "attach", "--dry-run"])
+    args = attach.build_parser().parse_args(
+        ["--root", str(org_root), "attach", "--dry-run", "--no-manager"])
     assert args.func(args) == 0
 
     out = capsys.readouterr().out
     assert "skip research" in out
     assert "沒有需要新開的部門 pane" in out
+
+
+def test_manager_is_attached_by_default(org_root: Path, monkeypatch, capsys) -> None:
+    """The coordinator is a first-class role, not an afterthought."""
+    attach = _load_attach()
+    monkeypatch.setenv("HERDR_ENV", "1")
+    monkeypatch.setattr(attach, "HERDR", sys.executable)
+    monkeypatch.setattr(attach, "live_agents", lambda: {})
+
+    args = attach.build_parser().parse_args(["--root", str(org_root), "attach", "--dry-run"])
+    assert args.func(args) == 0
+
+    out = capsys.readouterr().out
+    assert "manager" in out
+    assert "opus/high" in out, "manager routing must come from model_router, not a literal"
 
 
 def test_attach_dry_run_touches_no_herdr(org_root: Path, monkeypatch, capsys) -> None:
@@ -197,3 +213,89 @@ def test_department_without_task_types_falls_back_to_router_default():
 
     assert session["model"] and session["effort"]
     assert "default" in session["basis"]
+
+
+def _dept_send_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("dept_send_module", ORG_SCRIPTS / "dept_send.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_delivery_is_skipped_without_a_cockpit_pane(org_root: Path) -> None:
+    mod = _dept_send_module()
+
+    result = mod.deliver_to_pane(org_root, "research", {"id": "x", "priority": "P2", "task": "t"})
+
+    assert result["delivered"] is False
+    assert "inbox" in result["reason"]
+
+
+def test_delivery_never_interrupts_a_busy_pane(org_root: Path, monkeypatch) -> None:
+    """The boss may be mid-conversation with that department."""
+    mod = _dept_send_module()
+    _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
+
+    class _Result:
+        returncode = 0
+        stdout = json.dumps({"result": {"agent": {"agent_status": "working"}}})
+        stderr = ""
+
+    calls = []
+
+    def _fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        return _Result()
+
+    monkeypatch.setattr(mod.subprocess, "run", _fake_run)
+
+    result = mod.deliver_to_pane(org_root, "research", {"id": "x", "priority": "P2", "task": "t"})
+
+    assert result["delivered"] is False
+    assert "working" in result["reason"]
+    assert not any("prompt" in c for c in calls), "a busy pane must never be prompted"
+
+
+def test_delivery_pushes_into_an_idle_pane(org_root: Path, monkeypatch) -> None:
+    mod = _dept_send_module()
+    _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
+    sent = []
+
+    class _Get:
+        returncode = 0
+        stdout = json.dumps({"result": {"agent": {"agent_status": "idle"}}})
+        stderr = ""
+
+    class _Prompt:
+        returncode = 0
+        stdout = "{}"
+        stderr = ""
+
+    def _fake_run(cmd, **kwargs):
+        if "prompt" in cmd:
+            sent.append(cmd)
+            return _Prompt()
+        return _Get()
+
+    monkeypatch.setattr(mod.subprocess, "run", _fake_run)
+
+    result = mod.deliver_to_pane(org_root, "research", {"id": "x", "priority": "P1", "task": "做這個"})
+
+    assert result["delivered"] is True
+    assert sent, "an idle pane must actually receive the work"
+    assert "做這個" in sent[0][-1]
+
+
+def test_delivery_failure_never_loses_the_inbox_item(org_root: Path, monkeypatch) -> None:
+    mod = _dept_send_module()
+    _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
+
+    def _explode(*a, **k):
+        raise OSError("herdr is gone")
+
+    monkeypatch.setattr(mod.subprocess, "run", _explode)
+
+    result = mod.deliver_to_pane(org_root, "research", {"id": "x", "priority": "P2", "task": "t"})
+
+    assert result["delivered"] is False, "delivery problems must degrade, not raise"

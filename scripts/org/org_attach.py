@@ -28,11 +28,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dept_routing import resolve_dept_routing  # noqa: E402
+from model_router import pick_model  # noqa: E402
 from _core import (  # noqa: E402
     DEFAULT_ORG_ROOT,
     REPO_ROOT,
     brief_path,
     build_brief,
+    build_manager_brief,
     clear_lease,
     inbox_items,
     load_registry,
@@ -44,6 +46,8 @@ from _core import (  # noqa: E402
 
 HERDR = "/opt/homebrew/bin/herdr"
 DEFAULT_KIND = "claude"
+MANAGER = "manager"
+MANAGER_TASK_TYPE = "org_manager"
 
 
 class HerdrError(RuntimeError):
@@ -124,6 +128,12 @@ def cmd_attach(args: argparse.Namespace) -> int:
 
     alive = live_agents()
     plan, skipped = [], []
+    if args.with_manager and not wanted:
+        lease = read_lease(root, MANAGER)
+        if lease and lease.get("pane_id") in alive:
+            skipped.append((MANAGER, f"已有 live pane {lease['pane_id']}"))
+        else:
+            plan.append((MANAGER, {"title": "運營經理"}))
     for name, meta in depts:
         lease = read_lease(root, name)
         if lease and lease.get("pane_id") in alive:
@@ -144,6 +154,10 @@ def cmd_attach(args: argparse.Namespace) -> int:
     # it: a cockpit that shows opus/xhigh while the session runs on CLI defaults
     # is a dashboard lying about its own subject.
     routing = resolve_dept_routing(load_registry(root))["departments"]
+    mm, me = pick_model(MANAGER_TASK_TYPE)
+    routing[MANAGER] = {"title": "運營經理",
+                        "session": {"model": mm, "effort": me,
+                                    "basis": f"model_router[{MANAGER_TASK_TYPE}]"}}
     print(f"將開 {len(plan)} 個 pane（kind={args.kind}）：")
     for name, _ in plan:
         s = (routing.get(name) or {}).get("session") or {}
@@ -177,7 +191,10 @@ def cmd_attach(args: argparse.Namespace) -> int:
             herdr("pane", "rename", pane_id, f"{title} · {name}")
 
             bpath = brief_path(root, name)
-            bpath.write_text(build_brief(root, name), encoding="utf-8")
+            bpath.write_text(
+                build_manager_brief(root) if name == MANAGER else build_brief(root, name),
+                encoding="utf-8",
+            )
             write_lease(root, name, {
                 "runner": "herdr", "pane_id": pane_id, "tab_id": tab_id,
                 "agent": name, "kind": args.kind, "since": now_iso(),
@@ -185,13 +202,18 @@ def cmd_attach(args: argparse.Namespace) -> int:
                 "effort_basis": "cli override" if args.effort else session.get("basis"),
             })
 
-            pending = len(inbox_items(root, name))
+            if name == MANAGER:
+                pending = len(list((root / "manager" / "inbox").glob("*.json")))
+                opening = (f"你是 VolPred 平台的運營經理（協調者），收件匣有 {pending} 件。"
+                           f"先完整讀 {bpath} 這份 brief 建立你的身分、組織現況與工具，"
+                           f"然後依優先序開始協調。")
+            else:
+                pending = len(inbox_items(root, name))
+                opening = (f"你是 VolPred「{title}」部門（`{name}`），收件匣有 {pending} 件待辦。"
+                           f"先完整讀 {bpath} 這份 brief 建立你的身分與脈絡，然後依優先序開始工作。"
+                           f"結束前務必執行章程裡的 Session 收尾契約。")
             if not args.no_prompt:
-                herdr("agent", "prompt", name,
-                      f"你是 VolPred「{title}」部門（`{name}`），收件匣有 {pending} 件待辦。"
-                      f"先完整讀 {bpath} 這份 brief 建立你的身分與脈絡，然後依優先序開始工作。"
-                      f"結束前務必執行章程裡的 Session 收尾契約。",
-                      timeout=90)
+                herdr("agent", "prompt", name, opening, timeout=90)
             attached.append((name, pane_id, pending))
             print(f"  ✓ {title} → pane {pane_id}  {model}/{effort}（待辦 {pending}）")
         except (HerdrError, subprocess.TimeoutExpired) as exc:
@@ -209,21 +231,28 @@ def cmd_status(args: argparse.Namespace) -> int:
     root: Path = args.root
     alive = live_agents()
     routing = resolve_dept_routing(load_registry(root))["departments"]
+    mm, me = pick_model(MANAGER_TASK_TYPE)
+    routing[MANAGER] = {"title": "運營經理",
+                        "session": {"model": mm, "effort": me,
+                                    "basis": f"model_router[{MANAGER_TASK_TYPE}]"}}
     rows = []
-    for name, meta in active_departments(root, None):
+    roles = [(MANAGER, {"title": "運營經理"})] + active_departments(root, None)
+    for name, meta in roles:
         session = (routing.get(name) or {}).get("session") or {}
         want = f"{session.get('model', '?')}/{session.get('effort', '?')}"
         lease = read_lease(root, name)
         if not lease:
-            rows.append((name, meta.get("title") or name, "—", "未附掛", want, "—",
-                         len(inbox_items(root, name))))
+            pend = (len(list((root / "manager" / "inbox").glob("*.json")))
+                    if name == MANAGER else len(inbox_items(root, name)))
+            rows.append((name, meta.get("title") or name, "—", "未附掛", want, "—", pend))
             continue
         pane = lease.get("pane_id", "?")
         state = alive.get(pane, {}).get("agent_status")
         status = f"live · {state}" if state else "租約過期（pane 已消失）"
         running = f"{lease.get('model', '?')}/{lease.get('effort', '?')}"
-        rows.append((name, meta.get("title") or name, pane, status, want, running,
-                     len(inbox_items(root, name))))
+        pend = (len(list((root / "manager" / "inbox").glob("*.json")))
+                if name == MANAGER else len(inbox_items(root, name)))
+        rows.append((name, meta.get("title") or name, pane, status, want, running, pend))
 
     if args.as_json:
         keys = ("dept", "title", "pane", "status", "routed", "running", "inbox")
@@ -267,6 +296,8 @@ def build_parser() -> argparse.ArgumentParser:
     a = sub.add_parser("attach", help="one pane + named agent per active department")
     a.add_argument("--depts", default=None, help="comma-separated subset (default: all active)")
     a.add_argument("--kind", default=DEFAULT_KIND, help=f"agent kind (default {DEFAULT_KIND})")
+    a.add_argument("--no-manager", dest="with_manager", action="store_false",
+                   help="departments only; do not open the coordinator pane")
     a.add_argument("--effort", choices=("low", "medium", "high", "xhigh", "max"), default=None,
                    help="override the routed effort for every pane in this attach")
     a.add_argument("--label", default="VolPred 組織", help="tab label")

@@ -160,6 +160,92 @@ def inbox_items(root: Path, dept: str) -> list[dict]:
     return items
 
 
+def build_manager_brief(root: Path) -> str:
+    """The coordinator's rehydration brief: charter, org state, inbox, tools."""
+    mdir = root / "manager"
+    registry = load_registry(root)
+
+    def _read(path: Path, limit: int | None = None) -> str:
+        if not path.exists():
+            return "（無）"
+        text = path.read_text(encoding="utf-8").strip()
+        if limit:
+            text = "\n".join(text.splitlines()[-limit:])
+        return text or "（無）"
+
+    lines = []
+    for name, meta in sorted(registry.get("departments", {}).items()):
+        if meta.get("status") == "retired":
+            continue
+        ddir = dept_dir(root, name)
+        state = {}
+        if (ddir / "state.json").exists():
+            try:
+                state = json.loads((ddir / "state.json").read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError) as exc:
+                state = {"health": f"unreadable ({type(exc).__name__})"}
+        lease = read_lease(root, name)
+        runner = f"{lease.get('runner')}·{lease.get('pane_id')}" if lease else "未附掛"
+        lines.append(
+            f"- **{meta.get('title') or name}** (`{name}`) — 收件匣 {len(inbox_items(root, name))} 件"
+            f"；上次執行 {state.get('last_run') or '未執行'}；健康 {state.get('health', '?')}"
+            f"；執行體 {runner}"
+        )
+
+    inbox = []
+    for path in sorted((mdir / "inbox").glob("*.json")) if (mdir / "inbox").is_dir() else []:
+        try:
+            item = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):  # silent-ok: not silent — surfaced to the manager as ⚠️ in its brief
+            inbox.append(f"- ⚠️ 無法解析 `{path.name}`")
+            continue
+        inbox.append(f"- [{item.get('priority', 'P3')}] 來自 **{item.get('from')}**：{item.get('task')}")
+
+    return f"""你現在是 VolPred 平台的**運營經理**（協調者）。
+
+你是這個平台唯一的協調者。各部門是常駐角色，身分與記憶都在磁碟上
+（`{root}`）；你這個 session 是經理這個角色的執行體。你不做部門的專業工作，
+你決定「現在該做什麼、由誰做、什麼時候回報老闆」。
+
+## 你的章程（職責、決策權限邊界）
+
+{_read(mdir / "charter.md")}
+
+## 你的私有記憶
+
+{_read(mdir / "memory" / "notes.md")}
+
+## 組織現況
+
+{chr(10).join(lines) or "（尚無 active 部門）"}
+
+## 你的收件匣（{len(inbox)} 件；老闆指令與部門上報都在這裡）
+
+{chr(10).join(inbox) or "（空）"}
+
+## 你的工具（全部用 `uv run python` 執行）
+
+- 派工到部門（**會直接送進該部門的視窗**，若對方 idle）：
+  `scripts/org/dept_send.py <dept> --from manager --priority P1|P2|P3 --task "..."`
+- 看組織狀態：`scripts/org/org_status.py`　｜　看誰在哪個 pane：`scripts/org/org_attach.py status`
+- 看部門的 model/effort 路由：`scripts/org/dept_routing.py`
+- 開/裁部門（裁撤與新開屬重大變更，需先寫提案 email 老闆）：`scripts/org/org_admin.py`
+- 彙整給老闆的日報：`scripts/org/boss_digest.py --dry-run`
+- 誰正在改哪些檔（避免撞車）：`scripts/path_claims.py list`
+
+## 現在該做什麼
+
+1. 先看收件匣：老闆指令永遠最優先，其次是部門上報的 P1。
+2. 對照 CLAUDE.md 的 5 個 mission 與終極目標（商業盈利）判斷輕重，把工作派到對的部門。
+3. **部門正在忙（老闆可能正在跟它協作）時不要打斷**——工作留在收件匣即可，
+   `dept_send.py` 會自動判斷並告訴你。
+4. 需要老闆決策的（開/裁部門、對外新通路、不可回復操作）寫提案到
+   `manager/outbox/proposals/`，不要自己執行。
+5. 結束前把這次的判斷與理由 append 到 `bulletin/`（組織佈告欄），
+   下一個經理 session 靠它接續。
+"""
+
+
 def build_brief(root: Path, dept: str) -> str:
     """The rehydration brief: how an ephemeral session becomes this department.
 
