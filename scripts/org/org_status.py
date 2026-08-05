@@ -14,6 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _core import DEFAULT_ORG_ROOT, dept_dir, load_registry  # noqa: E402
+from dept_routing import resolve_dept_routing  # noqa: E402
 
 
 def _tail(path: Path, n: int) -> list[str]:
@@ -24,6 +25,7 @@ def _tail(path: Path, n: int) -> list[str]:
 
 def collect(root: Path) -> dict:
     registry = load_registry(root)
+    routing = resolve_dept_routing(registry)["departments"]
     manager_inbox = len(list((root / "manager" / "inbox").glob("*.json")))
     depts = {}
     for name, meta in registry.get("departments", {}).items():
@@ -44,6 +46,7 @@ def collect(root: Path) -> dict:
             "inbox_open": len(list((ddir / "inbox").glob("*.json"))),
             "state": state,
             "journal_tail": _tail(ddir / "journal.md", 3),
+            "task_routing": routing.get(name, {}).get("task_routing", {}),
         }
     return {
         "registry_updated_at": registry.get("updated_at"),
@@ -69,6 +72,12 @@ def main() -> int:
             if d.get("status") == "retired":
                 continue
             print(f"  [{d['status']:>9}] {name:<18} inbox={d['inbox_open']}  last_run={d['state'].get('last_run')}")
+            if d.get("task_routing"):
+                pairs = "  ".join(
+                    f"{tt}={r['model']}/{r['effort']}" + ("" if r["mapped"] else "[UNMAPPED]")
+                    for tt, r in d["task_routing"].items()
+                )
+                print(f"              routing: {pairs}")
 
     if args.herdr:
         if os.environ.get("HERDR_ENV") != "1":
