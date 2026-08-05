@@ -1,7 +1,8 @@
 {
   "health": "ok",
   "kpi": {
-    "note": "本日兩班：13→18 worktree 收編判定、D8 三層診斷、K1583 corrected-matrix 重跑完成",
+    "note": "本日兩班：13→18 worktree 收編判定、D8 三層診斷、K1583 corrected-matrix 重跑完成且 clean-clone 復現 PASS",
+    "k1583_status": "計算完成；experiment_gates run PASS、check_experiment_artifacts PASS、reproduce_check PASS（pass_tolerated）。唯一未完成的是 Codex primary-path 審查，卡 2026-08-08 額度恢復。",
     "oos_verified_experiments_this_week": 0,
     "experiments_computed_awaiting_review": 19,
     "experiments_certify_blocked": 15,

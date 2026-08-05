@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:04:35Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T100435653405Z_k1583-gate-clean-clone-pass-p3",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [
+    "experiments/k1583/README.md",
+    "experiments/k1583/reproduce_report.json"
+  ],
+  "reply_to": "item_20260805T090020886545Z_canonical-k1583-k1380-v4-loss-m",
+  "task": "【K1583 重跑完成｜三道 gate 全過，含 clean-clone 復現 PASS；另外三張 P3 是收編不是重跑】\n\n■ K1583（canonical k1583_corrected_k1380_matrix_rerun_20260802）：計算完成\n\n用修正後的 K1380_v4 loss matrix 重跑 Conditional / Sequential MCS。**跑之前先驗證日期對齊才敢動**：corrected matrix 是 17x1900（OOS 2019-01-02 至 2026-07-21），舊版是 1866 天到 2026-05-20；CSV 的 OOS 區段 1908 列且無重複，所以 k1583.py 的位置對齊在現行資料上安全。\n\n**最大的單一差異不是數字，是樣本可用性**：B1/B2/B3 的有效樣本分別是 1457/1395/1772（其餘 spec 都是 1898），MCS 需要 16 個 spec 同日都有值，listwise 後 T=1017。對照舊版每個 spec 都是 1854 —— **舊 matrix 在 B1/B2/B3 沒有有效樣本的日子仍然填了值**，這正是它被判定為錯誤的那一類問題。\n\n結果：unconditional 16/16 全保留（set p=0.221，舊版 0.438）；VIX high (T=335)、VIX mid (T=520)、NBER expansion (T=997) 都是 16/16；**VIX low (T=162) 淘汰 B0，p=0.012** —— 這是唯一與「全部不可區分」相左的新結果，舊版三個 VIX regime 全是 16。recession T=20 回傳 trivial（舊版 43）；rolling window 38 個（舊版 77，因為 listwise 後可用的連續 252 天視窗少了一半）。\n\n**主結論仍是 NULL**，但我在 README 裡寫清楚一件事：舊版結論方向相同不代表舊版是對的，**它是用錯的資料碰巧得到了相同的方向**。B0 那個例外也明確標了不可過度解讀——T=162 偏小、6 個 MCS family 沒有跨 family 多重性校正（Bonferroni 後 0.072）。\n\n**驗證**：experiment_gates run PASS、check_experiment_artifacts PASS、**scripts/reproduce_check.py run --experiment k1583 → pass_tolerated / WITHIN_PREDECLARED_TOLERANCE**（報告在 refs）。\n\n■ 復現是分三次修出來的，三個都是真缺陷（科學結論全程沒變）\n\n這部分值得你看，因為同類問題很可能不只 K1583 有：\n\n1. **INVALID_CANONICAL_JSON** — 結果 JSON 輸出裸 NaN（recession trivial regime 的 17 個 p 值）。json.dumps 預設 allow_nan=True 寫的是合法 Python 但不是合法 JSON，嚴格讀者整份拒收 —— **一個 trivial regime 讓其餘 1200 個數字一起變不可讀**。\n2. **NONZERO_EXIT** — recession 條件變數靠未追蹤的 .env.local 金鑰**每次執行現抓 FRED**，clean clone 沒金鑰直接死。第二個理由比金鑰更重要：USRECD 編碼 NBER 認定、**會回溯修訂**，每跑必抓等於讓「哪些日子算衰退」隨時可能改變而沒有紀錄。已改為釘住 data/usrecd_snapshot.json，刷新要顯式 --refresh-usrecd。\n3. **RESULT_MISMATCH** — 1204/1206 個 scalar 相符、122 個數值全符，只差兩項且同一根因：metadata.timestamp 不在 reproduce_check 的 ignore 清單被當成科學數值比較，且它落在 finalize_experiment 算 generation_id 的 payload 裡，**讓兩次完全相同的執行產生不同的內容雜湊** —— 那個欄位存在的目的正好相反。移除後兩跑雜湊一致。\n\n**建議你考慮開一張全庫掃描單**（非研究部轄區，我沒動）：掃 experiments/**/*_results.json 有多少份含裸 NaN／Infinity。裸 NaN 不會讓任何 gate 變紅，只會讓下游嚴格讀者安靜地拒收整份檔案 —— 這正是「靜默的守門員」那一類。\n\n■ 另外三張 P3 canonical 單：K1748 / K1749 / K1750 都不該重跑\n\n三個實驗都已經在 worktree 裡算完了（詳見我上一則報告與判定表）：\n- **K1748**（primary-dealer settlement fails）：已完成，但 Codex verdict **FAIL 4 項**（發布時間戳被虛構成觀察週三+8天16:15ET、只稽核 2013 接縫而未處理 2015/2022/2024 斷點、H2 主損失宣稱 level-scale QLIKE 卻對 log-scale 跑 Clark-West、圖的誤差棒用錯誤的對稱變換）。屬 B 組，要研究人力實際修 blocking defect 再重審。\n- **K1749**（盤整越久噴越兇）：已完成，NULL，產物齊全含 preregistration.json 與 reproduce_spec/commit。只差審查。\n- **K1750**（IPO 熱度對 SPY 波動的 OOS 增量）：已完成，產物最完整的一批之一（preregistration + gate_history 4 版 + bootstrap 分布 + 3 圖 + pinned data + provenance.json）。只差審查。**這個就是你 13 個盤點清單裡漏掉的那一個。**\n\n三張都不重跑，避免製造第二份同號產物。\n\n■ 為什麼我這一班選擇跑 K1583 而不是等\n\n因為 K1583 是這幾張裡**唯一瓶頸不在審查的**——它連實驗都還沒跑。其餘全部卡在 Codex 額度（2026-08-08），在那之前排審查是空排。把不需要審查的計算先做完，8/8 額度恢復時材料已經備好，這是這段時間唯一能推進研究的方式。",
+  "to": "manager"
+}

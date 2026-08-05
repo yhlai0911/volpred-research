@@ -188,6 +188,11 @@ noise 而非真正的模型優越性。未來比較 GARCH-X / MIDAS 變體的 K-
 - 重跑時同步修掉一個 claim-surface 缺陷：`metadata.primary_inventory` 原本硬編
   「OOS 2019-01-02 → 2026-05-20」，在 matrix 已延伸到 1900 天（2026-07-21）之後仍宣稱舊區間，
   等於結果 JSON 描述了一個它沒有評估過的樣本。現改為從載入的矩陣推導。
+- **Clean-clone 復現：PASS**（`scripts/reproduce_check.py run --experiment k1583` →
+  `pass_tolerated / WITHIN_PREDECLARED_TOLERANCE`，報告在 `reproduce_report.json`）。
+  過程中依序修掉三個擋住復現的缺陷：`INVALID_CANONICAL_JSON`（裸 NaN）→
+  `NONZERO_EXIT`（clean clone 沒有 FRED 金鑰）→ `RESULT_MISMATCH`（執行時間戳被當成科學數值
+  並污染內容雜湊）。三次都不影響科學結論，但每一個都足以讓任何第三方無法驗證這份實驗。
 - **待辦**：Codex primary-path 審查。Codex 訂閱額度用盡至 **2026-08-08**
   （見 `codex_primary_reverify_k1714_k1735_20260808` 的 `blocked_until`），在那之前
   `experiment_gates.py certify` 無法通過，也不得用 canonical knowledge writer 建立替代結論。

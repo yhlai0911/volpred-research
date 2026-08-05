@@ -128,7 +128,19 @@ worktree 盤點漏了 5 個（含 2 個完整實驗），以及整批實驗真�
 - 順手修掉兩個 claim-surface 缺陷：`metadata.primary_inventory` 與 recession limitation 都寫死
   舊數字（宣稱一個沒評估過的樣本），改成從實際資料推導
 - 改用 `finalize_experiment` 在 run 時同時產出 results 與 `reproduce_spec.json`（K1708 教訓）
-- `experiment_gates.py run` PASS、`check_experiment_artifacts.py` PASS
+- `experiment_gates.py run` PASS、`check_experiment_artifacts.py` PASS、
+  **clean-clone 復現 PASS**（`pass_tolerated / WITHIN_PREDECLARED_TOLERANCE`）
+- **復現是分三次修出來的，每一次都是真缺陷**（科學結論全程未變，但每個都足以讓第三方無法驗證）：
+  1. `INVALID_CANONICAL_JSON` — 結果 JSON 輸出裸 `NaN`（recession trivial regime 的 17 個 p 值）。
+     `json.dumps` 預設 `allow_nan=True` 寫的是合法 Python 不是合法 JSON，嚴格讀者整份拒收 ——
+     **一個 trivial regime 讓其餘 1200 個數字一起變不可讀**。
+  2. `NONZERO_EXIT` — recession 條件變數靠未追蹤的 `.env.local` 金鑰**每次執行現抓 FRED**，
+     clean clone 沒有金鑰直接死在那行。第二個理由比金鑰更重要：USRECD 編碼 NBER 認定、
+     **會回溯修訂**，每跑必抓等於讓樣本定義隨時可能改變而無紀錄。改為釘住
+     `data/usrecd_snapshot.json`，刷新要顯式 `--refresh-usrecd`。
+  3. `RESULT_MISMATCH` — 1204/1206 scalar 相符、122 個數值全符，只差兩項且同一根因：
+     `metadata.timestamp` 不在 ignore 清單被當科學數值比較，且它落在 `generation_id` 的
+     payload 裡，**讓兩次相同的執行產生不同的內容雜湊**——那個欄位存在的目的正好相反。移除。
 
 ### 新發現
 
