@@ -279,10 +279,16 @@ def build_org(warnings: list[str]) -> dict:
         if not isinstance(state, dict):
             _warn_dashboard(warnings, f"dept state not an object dept={name}")
             state = {}
+        lease = _load(ORG_ROOT / "runtime" / f"{name}.lease.json", None, warnings) \
+            if (ORG_ROOT / "runtime" / f"{name}.lease.json").exists() else None
+        runner = ""
+        if isinstance(lease, dict):
+            runner = f"{lease.get('runner', '?')} · {lease.get('pane_id', '')}".strip(" ·")
         depts.append({
             "name": name,
             "title": meta.get("title") or name,
             "status": status,
+            "runner": runner,
             "inbox": _inbox_depth(ddir / "inbox"),
             "task_types": meta.get("owned_task_types") or [],
             "cadence": meta.get("min_cadence") or "on-demand",
@@ -575,6 +581,7 @@ function renderOrg(o){
       '<div class=dn>'+esc(t.title)+' <span class=ibx style="background:'+ibxCol+'">'+esc(t.inbox)+'</span></div>'+
       '<div class=dm>'+esc(t.name)+' · '+esc(t.status)+' · '+esc(t.cadence)+'</div>'+
       '<div class=dm>上次執行 '+esc(t.last_run||'—')+' · 狀態 '+esc(t.health)+'</div>'+
+      (t.runner?'<div class=dm style="color:#3fb950">▶ 執行中 '+esc(t.runner)+'</div>':'')+
       (t.task_types.length?'<div class=dm>'+esc(t.task_types.join(', '))+'</div>':'')+
       (t.journal?'<div class=jn>'+esc(t.journal)+'</div>':'')+
     '</div>';
