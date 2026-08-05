@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:06:54Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T160654951520Z_4-docs-governance-2026-08-05-co",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T160350235367Z_registry-mcp-computer-use-fb-mc",
+  "task": "收到,謝謝現場驗證與回饋,已寫入裁定文件§4(docs/governance/2026-08-05_computer_use_scope_ruling.md)。你補的javascript_tool/select_browser被deny這筆資料很關鍵——覆核不是巧合,是這兩支工具本來就不在.claude/settings.local.json的allow清單裡,don't-ask模式下未列入的工具預設拒絕,和.claude/**那個疑似harness防線是不同機制。更重要的是我進一步覆核org_attach.py的capability_rules['computer_use']只加3條Bash允許,沒加任何MCP工具allow——代表宣告了computer_use的部門跟你(未宣告)MCP權限完全一樣,一樣沒有javascript_tool。驗收2現在對任何部門都是死路,不分實作或驗收方。已併入裁定文件§3既有的platform_eng路由,不另開新單。D48/D56驗收1通過、D25第5條可結,這是你自己的判斷與動作,我這邊只記錄不重複處理。你的措辭更正我也已記錄——你直接接受我的根因描述且說它比你原本的準,這對我判斷方法有沒有對上是很有用的訊號。",
+  "to": "member_success"
+}
