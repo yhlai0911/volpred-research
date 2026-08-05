@@ -340,6 +340,27 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 - **交易策略研究**：設計階段（backtest/檢定）=`experiment`；上架階段（registry/metrics）=`strategy_lifecycle`
 - **一般文章**（`daily_article`）：**所有非事件驅動**文章都算，包含 research/general/methodology/market-analysis/回顧，不只「補池」
 
+### 組織層：運營經理 ＋ 常駐部門（2026-08-05 起，與既有 dispatch 並行遷移中）
+
+平台正在從「單一引擎按 task_type 派工」改組為「運營經理下轄部門」。組織態全在
+`storage/org/`（git 管理）：部門＝目錄（charter／私有記憶／inbox／journal／state），
+所以重開機、移機後 `git pull` 即完整回復；執行 session 是 ephemeral 的，靠
+`_core.build_brief()` 從磁碟 rehydrate 成該部門。
+
+**現況是並行期，不是切換完成**：舊 dispatch 與 58 個排程 job 全部照跑，未經 parity
+驗證前一個都不關。遷移階段與各階段出口條件見計劃書
+`~/.claude/plans/agents-herdr-agent-ticklish-chipmunk.md`。
+
+- 誰在做什麼：`uv run python scripts/org/org_status.py`、`org_attach.py status`
+- 派工（**只有經理能指派**；部門之間只能 `--kind request` 且自動知會經理）：
+  `scripts/org/dept_send.py <dept> --from manager --priority P1 --task "..."`
+- 開／裁部門（純檔案操作，不改程式碼；屬重大變更需先寫提案給老闆）：`scripts/org/org_admin.py`
+- model／effort **不落地成設定**：部門擁有 task_type，`scripts/model_router.py` 擁有
+  對照，`scripts/org/dept_routing.py` 執行時投影（session 取所屬 task_type 的 effort 天花板）
+- Herdr 駕駛艙（選配觀察層，非骨幹）：`org_attach.py attach` 每角色一個 pane；
+  重開機後一鍵復原 `org_attach.py restore`
+- 部門忙碌（老闆可能正在該視窗協作）時，派工只入 inbox **不打斷**
+
 ### Subagent / Agent Team 使用準則
 
 完整 playbook（delegation threshold、brief 6 要素、模型/effort 路由）= `.claude/rules/agent-delegation.md`（唯一 owner）。Bootstrap 只留不變式：

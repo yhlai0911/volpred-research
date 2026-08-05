@@ -226,6 +226,45 @@ def cmd_attach(args: argparse.Namespace) -> int:
     return 1 if failed else 0
 
 
+def reap_dead_leases(root: Path, alive: dict) -> list[str]:
+    """Drop leases whose pane no longer exists (every lease after a reboot).
+
+    A lease naming a dead pane makes dispatch try to deliver into nothing and
+    makes status claim a runner that is not there. Reaping is safe: the lease is
+    runtime state, never the department's identity or work.
+    """
+    reaped = []
+    registry = load_registry(root)
+    for name in list(registry.get("departments", {})) + [MANAGER]:
+        lease = read_lease(root, name)
+        if lease and lease.get("runner") == "herdr" and lease.get("pane_id") not in alive:
+            clear_lease(root, name)
+            reaped.append(name)
+    return reaped
+
+
+def cmd_restore(args: argparse.Namespace) -> int:
+    """One command to bring the whole organization back after a reboot."""
+    require_herdr()
+    root: Path = args.root
+
+    print("1/3 檢查無人值守骨幹（重開機後由 launchd 自動復活，與 Herdr 無關）")
+    for label in ("com.volpred.operations-core-scheduler", "com.volpred.dispatch-supervisor"):
+        try:
+            probe = subprocess.run(["launchctl", "list", label],
+                                   capture_output=True, text=True, timeout=15)
+            print(f"    {'✓' if probe.returncode == 0 else '✗'} {label}")
+        except (OSError, subprocess.SubprocessError) as exc:
+            print(f"    ? {label}（無法查詢：{type(exc).__name__}）")
+
+    print("2/3 清理指向已消失 pane 的租約")
+    reaped = reap_dead_leases(root, live_agents())
+    print(f"    清掉 {len(reaped)} 筆" + (f"：{', '.join(reaped)}" if reaped else ""))
+
+    print("3/3 重開經理與各部門 pane")
+    return cmd_attach(args)
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     require_herdr()
     root: Path = args.root
@@ -304,6 +343,16 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--dry-run", action="store_true")
     a.add_argument("--no-prompt", action="store_true", help="start agents but send no work prompt")
     a.set_defaults(func=cmd_attach)
+
+    r = sub.add_parser("restore", help="one-shot recovery after a reboot")
+    r.add_argument("--depts", default=None)
+    r.add_argument("--kind", default=DEFAULT_KIND)
+    r.add_argument("--label", default="VolPred 組織")
+    r.add_argument("--dry-run", action="store_true")
+    r.add_argument("--no-prompt", action="store_true")
+    r.add_argument("--no-manager", dest="with_manager", action="store_false")
+    r.add_argument("--effort", choices=("low", "medium", "high", "xhigh", "max"), default=None)
+    r.set_defaults(func=cmd_restore)
 
     s = sub.add_parser("status", help="which departments have a live pane")
     s.add_argument("--json", action="store_true", dest="as_json")

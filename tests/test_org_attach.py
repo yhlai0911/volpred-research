@@ -299,3 +299,70 @@ def test_delivery_failure_never_loses_the_inbox_item(org_root: Path, monkeypatch
     result = mod.deliver_to_pane(org_root, "research", {"id": "x", "priority": "P2", "task": "t"})
 
     assert result["delivered"] is False, "delivery problems must degrade, not raise"
+
+
+def test_a_department_may_not_assign_work_to_another(org_root: Path) -> None:
+    """Eight peers issuing orders is not an organization."""
+    result = run_tool("dept_send.py", "research", "--from", "content",
+                      "--kind", "assignment", "--task", "去做這個", root=org_root)
+
+    assert result.returncode == 2
+    assert "只有運營經理能指派" in result.stderr
+    assert not list((_core.dept_dir(org_root, "research") / "inbox").glob("*.json"))
+
+
+def test_peer_request_is_allowed_and_cc_s_the_manager(org_root: Path) -> None:
+    result = run_tool("dept_send.py", "research", "--from", "content",
+                      "--task", "想請你確認一個數字", "--no-wake", root=org_root)
+
+    assert result.returncode == 0
+    items = list((_core.dept_dir(org_root, "research") / "inbox").glob("*.json"))
+    assert len(items) == 1
+    assert json.loads(items[0].read_text())["kind"] == "request"
+
+    cc = list((org_root / "manager" / "inbox").glob("cc_*.json"))
+    assert cc, "the coordinator must keep oversight of peer traffic"
+    assert json.loads(cc[0].read_text())["priority"] == "P3", "oversight must not be noisy"
+
+
+def test_manager_keeps_the_power_to_assign(org_root: Path) -> None:
+    result = run_tool("dept_send.py", "research", "--from", "manager",
+                      "--priority", "P1", "--task", "跑實驗", "--no-wake", root=org_root)
+
+    assert result.returncode == 0
+    item = json.loads(next((_core.dept_dir(org_root, "research") / "inbox").glob("*.json")).read_text())
+    assert item["kind"] == "assignment"
+    assert not list((org_root / "manager" / "inbox").glob("cc_*.json")), "no CC for its own dispatch"
+
+
+def test_reply_does_not_cc_the_manager(org_root: Path) -> None:
+    """Echoing both halves would rebuild the inbox noise the digest ended."""
+    run_tool("dept_send.py", "research", "--from", "content",
+             "--task", "問題", "--no-wake", root=org_root)
+    before = len(list((org_root / "manager" / "inbox").glob("cc_*.json")))
+
+    run_tool("dept_send.py", "content", "--from", "research", "--reply-to", "item_x",
+             "--task", "答案是 42", "--no-wake", root=org_root)
+
+    assert len(list((org_root / "manager" / "inbox").glob("cc_*.json"))) == before
+
+
+def test_restore_reaps_leases_whose_pane_is_gone(org_root: Path, monkeypatch) -> None:
+    """Every cockpit lease is stale after a reboot."""
+    attach = _load_attach()
+    _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
+
+    reaped = attach.reap_dead_leases(org_root, alive={})
+
+    assert "research" in reaped
+    assert _core.read_lease(org_root, "research") is None
+
+
+def test_restore_keeps_a_lease_whose_pane_survived(org_root: Path) -> None:
+    attach = _load_attach()
+    _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
+
+    reaped = attach.reap_dead_leases(org_root, alive={"w1:p9": {"agent_status": "idle"}})
+
+    assert reaped == []
+    assert _core.read_lease(org_root, "research") is not None
