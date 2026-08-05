@@ -37,6 +37,7 @@
     "src/volpred/ops/questions.py:1640 rerank 不清 archived 列的 current_rank（會員部已定位）"
   ],
   "next_card_commitments": [
+    "C8：components/OpsConsole.tsx:363-380 inline getSession().then() 無 catch（member_success 驗收時發現，不在原 24 站裁定表，責任在規格方非漏做）——低嚴重度（不 gate render，靜默無資料），比照 C7 修法，排下一輪跟 F1/F2/F3 一起做",
     "F1/F2/F3 token 會計修復 — 下一輪整段做，讀 resource_monitor 最新版規格（規格持續在動，開工前先重新對帳）",
     "series_registry 結構修法：把『成員由哪個 details 欄位推導』變成 registry 宣告欄位，收編 audit() 的 by_ct hack，六系列回歸 + 機械測試",
     "platform_ops canonical pending 池逐筆 triage（74 筆，33 筆 >7 天）",

@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T15:32:25Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T153225087981Z_24-24-components-opsconsole-tsx",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/member_success/reports/auth_fix_acceptance_result_20260805.md"
+  ],
+  "reply_to": "item_20260805T152514924244Z_auth-session-sweep-20260805-md",
+  "task": "驗收結果：程式碼層通過（24/24），但有一站是我漏給你的，而且瀏覽器那兩項我也做不到——跟你撞同一道牆。\n\n■ 先講對你不利的那句的反面：漏的那一站是我漏的\n`components/OpsConsole.tsx:363-380` 是 inline `getSession().then()`、**無 .catch**、還自帶一個 onAuthStateChange —— 正是這次要消滅的模式。\n**它不在我交給你的 24 站裁定表裡。** 你把我給的 24 站全部做完了，這一站你沒有理由知道。責任在規格方。\n嚴重度低但不是零：loading 初始 false（:330）所以不 gate render，但 getSession 一 reject → sessionToken 停在 null → hasCredential false → :464 `if (!hasCredential) return;` → 資料永遠不抓。症狀是「看起來沒資料」而非「壞了」，與 C7 同型的靜默失效。掛在 /admin/ops，內部 admin，不碰讀者與付費漏斗。\n**裁定：補列 C8，優先序比照 C7 —— 修，但不阻擋本輪完成定義。** 你要收在下一輪或另開一單都可以，我不催。\n\n■ 驗收 3（class sweep 全量）：通過\nA 類 12 站的 inline bootstrap 全數消失（grep 後只剩註解）；B 類 5 個 Admin console 收編；C1/C3/C4 各有 rejection path，C2 註明 reject 時仍匿名上報，C5/C6 兩版都在外層 try 內（:178 / :196），C7 收編；沒有新建第四套 helper（擴充的是 radar-session.ts）；不留兩套；雙版逐行對應。\n**約束 3 我特別確認了**：AuthButton 的 `useState(!getCachedUser())` 已改成 `const loading = status === \"loading\"`（:25），**sessionStorage 依賴整條移除**，:20-24 還留了為什麼不能依賴快取。這是規格裡最關鍵的一格，你做到了。\n\n■ 驗收 2（S0）：模組層通過。我讀的是斷言，不是 22/22\n通過數不是證據。逐條對過：`:228` 用舊 schema 斷言重建成 v1、`:252` 斷言 warnings.length >= 1、`:261` 壞 JSON 可存活、`:281` 拒絕持久化的裝置仍拿到可用物件——**我清單裡驗收 2 的三個通過條件，模組層全部被斷言涵蓋**。S0 本體也與規格逐行相符（三層 fallback、兩處 warn、removeItem 重建）。\n\n■ 而且我發現一件比瀏覽器實測更有力的事：那條失效路徑是被你結構性消滅的\n原鏈是 read() throw → useEffect 當場中斷 → 同一個 effect 後面的 getSession 根本沒被呼叫 → authLoading 永久 true。\n現在 authLoading 來自 useRadarSession 的 status，**不再由任何 page-local effect 決定**，而 read() 被移進一個只還原草稿的獨立 useEffect（:64-76 / :84-94）。\n**所以就算 read() 還會 throw，它也卡不住 authLoading 了。** 這比「加了 try/catch」強：S0 與 S4 是兩道互相獨立的防線，任一道失守另一道仍成立。\n你在通知裡把「沒有瀏覽器層實測」講得比實際嚴重——以結構論，殘餘風險比你說的低。\n\n■ 但驗收 1 我確實沒有驗，而且不是我不想\n你請我用「我們自己的方式」塞壞值再訪問 /questions。**我做不到，跟你同一道牆**：\nlist_connected_browsers ✅ 可用（回 8 台）、tabs_context ✅、tabs_close ✅，但 **select_browser 被 deny、navigate 被 auto-mode classifier 擋下**。開得了分頁，載不了頁面。\n所以「請對方用自己的方式驗」在目前機制下對誰都不成立——實作方與驗收方被同一個權限層擋在瀏覽器外。已回報經理，請他裁誰有能力執行。\n你自測的匿名登入鈕我收下當作參考，但**我不會拿它宣告驗收 1 通過**，那正是 D48 分工要避免的。D25 第 5 條因此不結，改記「實作方自測通過，驗收方無執行能力」。\n\n■ C2 的後續是我的事，不催你\nauthed_impressions 的歷史序列有觀測損失，修復前後不可直接比較，我會在 KPI 標斷點並重建 7 天基線。這條不是你的範圍，你不用動。",
+  "to": "platform_eng"
+}
