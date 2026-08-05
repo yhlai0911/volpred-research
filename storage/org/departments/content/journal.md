@@ -79,7 +79,42 @@ frontmatter 內註明最終路徑，認領解除後直接 mv 即可。已上報�
    把原因寫進報告就結束，不會回開一張「補圖表」任務給任何人。所以同樣兩篇每輪被 reject 一次，
    永遠不會前進。這是報告有寫、但沒有人被指派的典型死角。
 
-**本輪為何一篇都沒救回**：`publish_draft.py --dry-run` 對 k1706 回
+**（承上，該次為何一篇都沒救回）**：`publish_draft.py --dry-run` 對 k1706 回
 `DEFERRED LAZYPACK CONTRACT: a general draft without a lazypack section requires --lazypack-plan`。
 lazypack plan 要寫進 `storage/drafts/<K>_lazypack_plan.json`，正好落在被 session b18127d0 認領的目錄裡
 （對方此刻正在做的就是 K1536 / K1589 / K1609 的 lazypack）。救援與新稿被同一個鎖擋住。
+
+## 2026-08-05 17:30–17:45 outcome=done
+
+**收到**：14 件收件匣，含經理裁決 D3、4 件新 canonical daily_article（K1482 / K1485 / K1677 / K1704）、
+1 件 canonical trending_repost、治理部的 config 請求。
+
+**做完的**
+
+1. **補齊上一班收尾**：`.git/index.lock` 已解除，commit 補上（`8208b5532`）。
+2. **三篇 draft 落地**（`811aad5ba`）。`storage/drafts/` 的認領 17:35 到期後立刻寫入：
+   `K1451_general_draft.md`、`K1465_general_draft.md`、`K1696_general_draft.md`，三篇 anti_ai_gate 皆 exit 0。
+   K1696 寫作時發現 knowledge 條目的「8/9 cells 變差」是 M1 對 M0 的基準；本題要回答的 M3 對 M2
+   是 7/9。兩個都對，文章把基準寫清楚，沒有沿用摘要。
+   **注意**：三篇仍進不了 feed draft 池（image gate 要 2 張真圖，圖表在 platform_eng 手上）。
+   feed 池深維持 4，等於閾值。
+3. **K1482 / K1485 維持不寫**：自行回查 knowledge 複驗，兩條都是 feasibility audit，
+   解鎖條件是資料建設不是寫作。已建議經理收單並把資料建設另開給研究部／平台工程部。
+4. **trending_repost 判硬 arc dup 不寫**：`check_arc_dedup.py` 回 warn_arc_near_miss，
+   但命中的 `mile_f5f4cb43`（科技巨頭資本支出爆表，AI 變現期的隱含波動率拐點）與
+   `mile_0fa841ed`（燒最多錢的科技巨頭，選擇權市場現在沒有多收「下跌保費」）幾乎就是這個題目本身，
+   加上 2026-08-02 才發過 AI 回本四帳。另上報一個結構問題：trending_repost 的任務定義含 FB 雙發佈，
+   而 FB 個人帳號只能走 interactive Chrome，headless 部門 pane 結構上只能交一半。
+5. **治理部的 config 請求**：複驗歸屬正確（drift=1、`mile_63e0e1ff` published、
+   `details.event_series_slot='T-2'`），但內容部同樣沒有 `config/` 寫入權（Edit 被 permission deny，
+   不是 path claim）。已轉 platform_eng（`item_...093841452486Z`，附證據與確切改法與「registry 不得補
+   status 欄位」的坑）並回覆 governance。
+
+**沒做的（說清楚，不是判定不可寫）**
+
+K1677 與 K1704 的文章。兩題都查過、可寫、不撞重，角度也想好了：K1677 要用修訂版 K1677-rev
+（原始 K1677 被 Codex 判 FAIL、未進 knowledge），賣點是「敏感性分析裡顯著的那個結果我們不採用，
+因為它有存活者偏誤」；K1704 是台指期六種波動代理下 HAR 全勝、MCS 每次單元素集合，賣點是
+「換六把尺量同一件事，排名不變」。本輪預算先用在把卡住的三篇推出去 + 四件 triage。已請經理排下一班。
+
+**仍未解的**：inbox 歸檔（缺 mv 權限）、圖表（platform_eng）、config 寫入權。
