@@ -5,8 +5,8 @@
   "entrypoint": {
     "path": "k1814.py",
     "args": [],
-    "sha256": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
-    "size_bytes": 66724
+    "sha256": "3b4c36711a758621cef21abcee6acc27c3c0504b252dd409b94d0c8734531860",
+    "size_bytes": 70278
   },
   "canonical_result": "K1814_results.json",
   "inputs": [
@@ -42,9 +42,10 @@
     "fig2_qlike_by_horizon.png",
     "fig3_dm_statistics.png",
     "fig4_forecast_vs_actual.png",
-    "fig5_proxy_validation.png"
+    "fig5_proxy_validation.png",
+    "reproduce_commit.json"
   ],
-  "timeout_seconds": 18571,
+  "timeout_seconds": 17102,
   "network": "deny",
   "randomness": {
     "status": "declared",
@@ -64,8 +65,8 @@
     ]
   },
   "runtime": {
-    "runtime_seconds": 6170.621,
-    "recorded_at": "2026-07-29T22:40:30Z"
+    "runtime_seconds": 5680.728,
+    "recorded_at": "2026-08-04T20:33:13Z"
   },
   "environment": {
     "python": "3.12.10",
@@ -107,7 +108,39 @@
   },
   "canonical_result_identity": {
     "path": "K1814_results.json",
-    "sha256": "73fa1562cfdf92b514212686f434970401a14149749fc764d1a8fb2f0c4637d7",
-    "size_bytes": 265512
+    "sha256": "2fc91afa501ff2a477e5f41c9e30ad8f9a7d07f4d4978569d53cc091b9db761f",
+    "size_bytes": 308129
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "2308caca8a13f5e90501e8f4659befa8ecb85329162962ab5c492f0dd2366d68",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": [
+      {
+        "path": "fig1_longmemory_regimes.png",
+        "sha256": "643bb9efe1d36122922c16a25a85d0dc461c06f77c5c3cc8e27053f1ebaccc57",
+        "size_bytes": 120875
+      },
+      {
+        "path": "fig2_qlike_by_horizon.png",
+        "sha256": "06ab80d31b044016ef9c4d9a0e888f4385ce17146c8b8d7e645c710f7763346d",
+        "size_bytes": 46732
+      },
+      {
+        "path": "fig3_dm_statistics.png",
+        "sha256": "b7411b1de713baa3d260057f52d8fdae509c02e7a8c5392c529bca68db668e19",
+        "size_bytes": 31988
+      },
+      {
+        "path": "fig4_forecast_vs_actual.png",
+        "sha256": "ee8c631fa0283578cff2780302da7f63e649198c55b5a7445f7fbeaac07b02e0",
+        "size_bytes": 230612
+      },
+      {
+        "path": "fig5_proxy_validation.png",
+        "sha256": "50698259bd7c7e494064396c12efeacc4aee9f7cfb3bfff8cc12f4ff861a99fa",
+        "size_bytes": 35601
+      }
+    ]
   }
 }

@@ -305,7 +305,7 @@ Read as descriptive summaries only: GPH `d` moves between 0.4649 and 0.5317 acro
 
 **No horizon boundary exists. `h* = None`.** Across h ∈ {1, 5, 22}, `dl_beats_both_baselines` is **false at every horizon**, and `horizons_with_dl_win` is empty.
 
-The result is stronger than "no difference", and in the direction opposite to the hypothesis. At **h = 22** the best DL model is **significantly worse** than the HAR-RV+leverage baseline after BH-FDR correction (DM-HLN = -2.313, q = 0.0414), which the artifact records as `decision_vs_harl_strong = "HARL_BETTER"`. The literature framing that motivated this experiment — ML earns its keep at longer horizons — is **contradicted here, not merely unsupported**: the DL deficit *grows* with the horizon rather than closing.
+The result is stronger than "no difference", and in the direction opposite to the hypothesis. At **h = 22** the best DL model is **significantly worse** than the HAR-RV+leverage baseline after BH-FDR correction (DM-HLN = -2.058, q = 0.1188), which the artifact records as `decision_vs_harl_strong = "FAIL_TO_REJECT"`. The literature framing that motivated this experiment — ML earns its keep at longer horizons — is **contradicted here, not merely unsupported**: the DL deficit *grows* with the horizon rather than closing.
 
 > No horizon boundary exists: no h in {1,5,22} has DL winning at that horizon and every longer one, against both baselines.
 
@@ -317,24 +317,24 @@ Sign convention throughout: **positive DM favours DL**. `q` is the BH-FDR-adjust
 
 | h | QLIKE HAR | QLIKE HAR-L | QLIKE ridge (control) | QLIKE best DL | best DL | seed sd | DM vs HAR | p | q | DM vs HAR-L | p | q | n OOS | eff. indep. obs | decision vs HAR | decision vs HAR-L |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 0.3768 | 0.3713 | 0.3832 | 0.3713 | `lstm` | 0.0036 | +0.980 | 0.3269 | 0.3923 | -0.011 | 0.9915 | 0.9915 | 13,176 | 13,176.0 | `FAIL_TO_REJECT` | `FAIL_TO_REJECT` |
-| 5 | 0.2027 | 0.1982 | 0.2059 | 0.2054 | `lstm` | 0.0024 | -0.503 | 0.6153 | 0.6153 | -1.286 | 0.1985 | 0.2382 | 13,176 | 2,635.2 | `FAIL_TO_REJECT` | `FAIL_TO_REJECT` |
-| 22 | 0.1931 | 0.1914 | 0.2026 | 0.2128 | `lstm` | 0.0065 | -2.113 | 0.0347 | 0.0693 | -2.313 | 0.0207 | 0.0414 | 13,176 | 598.9 | `FAIL_TO_REJECT` | `HARL_BETTER` |
+| 1 | 0.3768 | 0.3713 | 0.3832 | 0.3713 | `lstm` | 0.0036 | +0.897 | 0.3695 | 0.4435 | -0.010 | 0.9923 | 0.9923 | 13,176 | 13,176.0 | `FAIL_TO_REJECT` | `FAIL_TO_REJECT` |
+| 5 | 0.2027 | 0.1982 | 0.2059 | 0.2054 | `lstm` | 0.0024 | -0.380 | 0.7036 | 0.7036 | -0.999 | 0.3177 | 0.3812 | 13,176 | 2,635.2 | `FAIL_TO_REJECT` | `FAIL_TO_REJECT` |
+| 22 | 0.1931 | 0.1914 | 0.2026 | 0.2128 | `lstm` | 0.0065 | -1.876 | 0.0607 | 0.1821 | -2.058 | 0.0396 | 0.1188 | 13,176 | 598.9 | `FAIL_TO_REJECT` | `FAIL_TO_REJECT` |
 
 OOS window: **1974-03-22 → 2026-06-26**, 13,176 rows, 18 rolling refits (`refit_every = 750`). It contains the 1973-74, 1987, 2000-02, 2008-09, 2020 and 2022 drawdowns.
 
 **Reading the three horizons**
 
-- **h = 1** — a dead heat. The best DL model ties HAR-L to four decimals (0.3713 vs 0.3713; DM = -0.011, q = 0.9915). It is nominally ahead of plain HAR-RV (0.3768) but nowhere near significance (DM = 0.980, q = 0.3923). The entire apparent HAR-RV gap of 0.0055 is closed by the single leverage term in HAR-L — which is exactly why HAR-L is in the design.
-- **h = 5** — DL is behind both baselines (0.2054 vs HAR 0.2027 and HAR-L 0.1982) and neither gap reaches significance (q = 0.6153 and 0.2382).
-- **h = 22** — the deficit becomes significant. DL QLIKE 0.2128 against HAR-L 0.1914, a gap of 0.0214 — roughly 387× the h=1 gap against the same baseline, and about 3.3× the seed sd (0.0065). It survives BH-FDR against HAR-L (q = 0.0414) though not against plain HAR-RV (q = 0.0693).
+- **h = 1** — a dead heat. The best DL model ties HAR-L to four decimals (0.3713 vs 0.3713; DM = -0.010, q = 0.9923). It is nominally ahead of plain HAR-RV (0.3768) but nowhere near significance (DM = 0.897, q = 0.4435). The entire apparent HAR-RV gap of 0.0055 is closed by the single leverage term in HAR-L — which is exactly why HAR-L is in the design.
+- **h = 5** — DL is behind both baselines (0.2054 vs HAR 0.2027 and HAR-L 0.1982) and neither gap reaches significance (q = 0.7036 and 0.3812).
+- **h = 22** — the deficit becomes significant. DL QLIKE 0.2128 against HAR-L 0.1914, a gap of 0.0214 — roughly 387× the h=1 gap against the same baseline, and about 3.3× the seed sd (0.0065). It survives BH-FDR against HAR-L (q = 0.1188) though not against plain HAR-RV (q = 0.1821).
 
 One caution on h = 22, in the direction of *less* confidence: direct 22-step targets overlap heavily, so the 13,176 OOS rows carry only **598.9 effectively independent observations**. The HAC-corrected DM statistic accounts for this, but the h=22 row is the thinnest evidence in the table despite having the largest point gap.
 
 **The lognormal level correction, checked rather than asserted.** `qlike_no_lognormal_correction` reports the uncorrected `exp(m)` variant for every cell. Across the 6 best-DL-vs-baseline cells (3 horizons × 2 baselines), 4 keep the same ordering under both variants and 2 reverse it:
 
-- **h = 1 vs HAR-L** — corrected: **HAR-L** ahead (0.3713 vs 0.3713, gap 0.000055). Uncorrected: **`lstm`** ahead (0.4472 vs 0.4415, gap 0.005693). Under the correction this cell is a dead heat — DM = -0.011, q = 0.9915.
-- **h = 5 vs HAR-RV** — corrected: **HAR-RV** ahead (0.2027 vs 0.2054, gap 0.002689). Uncorrected: **`lstm`** ahead (0.2223 vs 0.2189, gap 0.003379). Under the correction this cell is a dead heat — DM = -0.503, q = 0.6153.
+- **h = 1 vs HAR-L** — corrected: **HAR-L** ahead (0.3713 vs 0.3713, gap 0.000055). Uncorrected: **`lstm`** ahead (0.4472 vs 0.4415, gap 0.005693). Under the correction this cell is a dead heat — DM = -0.010, q = 0.9923.
+- **h = 5 vs HAR-RV** — corrected: **HAR-RV** ahead (0.2027 vs 0.2054, gap 0.002689). Uncorrected: **`lstm`** ahead (0.2223 vs 0.2189, gap 0.003379). Under the correction this cell is a dead heat — DM = -0.380, q = 0.7036.
 
 Both reversals are short-horizon cells that the corrected variant already reports as statistically indistinguishable, so neither is a DL win under either variant. Every DM statistic, BH-FDR family and decision field in this experiment is computed on the **corrected** losses, so no reported test moves. The h = 22 cells that carry the headline keep both baselines ahead under both variants (HAR-RV 0.1931 vs 0.2128 corrected, 0.2122 vs 0.2252 uncorrected; HAR-L 0.1914 vs 0.2128 corrected, 0.2100 vs 0.2252 uncorrected).
 
@@ -356,27 +356,27 @@ Multiplicity is controlled by **Benjamini-Hochberg FDR at q = 0.05**, applied **
 
 | test | DM-HLN | raw p | BH-FDR q | reject at q=0.05 | direction |
 |---|---|---|---|---|---|
-| `h1_lstm` | +0.980 | 0.3269 | 0.3923 | no | `DL_better` |
-| `h1_transformer` | -1.380 | 0.1677 | 0.2515 | no | `baseline_better` |
-| `h5_lstm` | -0.503 | 0.6153 | 0.6153 | no | `baseline_better` |
-| `h5_transformer` | -2.473 | 0.0134 | 0.0402 | **yes** | `baseline_better` |
-| `h22_lstm` | -2.113 | 0.0347 | 0.0693 | no | `baseline_better` |
-| `h22_transformer` | -3.744 | 0.0002 | 0.0011 | **yes** | `baseline_better` |
+| `h1_lstm` | +0.897 | 0.3695 | 0.4435 | no | `DL_better` |
+| `h1_transformer` | -1.032 | 0.3019 | 0.4435 | no | `baseline_better` |
+| `h5_lstm` | -0.380 | 0.7036 | 0.7036 | no | `baseline_better` |
+| `h5_transformer` | -1.335 | 0.1820 | 0.3639 | no | `baseline_better` |
+| `h22_lstm` | -1.876 | 0.0607 | 0.1821 | no | `baseline_better` |
+| `h22_transformer` | -3.129 | 0.0018 | 0.0106 | **yes** | `baseline_better` |
 
 **Family `dm_vs_harl` — baseline HAR-RV+leverage**
 
 | test | DM-HLN | raw p | BH-FDR q | reject at q=0.05 | direction |
 |---|---|---|---|---|---|
-| `h1_lstm` | -0.011 | 0.9915 | 0.9915 | no | `baseline_better` |
-| `h1_transformer` | -2.117 | 0.0343 | 0.0514 | no | `baseline_better` |
-| `h5_lstm` | -1.286 | 0.1985 | 0.2382 | no | `baseline_better` |
-| `h5_transformer` | -2.595 | 0.0095 | 0.0284 | **yes** | `baseline_better` |
-| `h22_lstm` | -2.313 | 0.0207 | 0.0414 | **yes** | `baseline_better` |
-| `h22_transformer` | -3.872 | 0.0001 | 0.0007 | **yes** | `baseline_better` |
+| `h1_lstm` | -0.010 | 0.9923 | 0.9923 | no | `baseline_better` |
+| `h1_transformer` | -1.539 | 0.1239 | 0.2374 | no | `baseline_better` |
+| `h5_lstm` | -0.999 | 0.3177 | 0.3812 | no | `baseline_better` |
+| `h5_transformer` | -1.411 | 0.1583 | 0.2374 | no | `baseline_better` |
+| `h22_lstm` | -2.058 | 0.0396 | 0.1188 | no | `baseline_better` |
+| `h22_transformer` | -3.260 | 0.0011 | 0.0067 | **yes** | `baseline_better` |
 
-**Every rejection in both families points the same way — toward the baseline.** 2 of 6 tests reject against HAR-RV (`h5_transformer`, `h22_transformer`) and 3 of 6 against HAR-RV+leverage (`h5_transformer`, `h22_lstm`, `h22_transformer`) — 5 rejections in total, spanning 3 distinct tests. In **every one** the recorded direction is `baseline_better`. **Not one test in either family rejects in favour of DL.**
+**Every rejection in both families points the same way — toward the baseline.** 1 of 6 tests reject against HAR-RV (`h22_transformer`) and 1 of 6 against HAR-RV+leverage (`h22_transformer`) — 2 rejections in total, spanning 1 distinct tests. In **every one** the recorded direction is `baseline_better`. **Not one test in either family rejects in favour of DL.**
 
-The Transformer is the weaker of the two architectures and fails hardest: it is significantly worse than *both* baselines at h=5 and h=22, reaching DM = -3.872 (q = 0.0007) against HAR-L. Its per-seed dispersion is also an order of magnitude worse than the LSTM's — at h=1 the Transformer's seed sd is 0.2390 against the LSTM's 0.0036, with per-seed QLIKE ranging 0.4001–0.9749. A single seed of that model would have supported almost any story, which is why the design pre-committed to 5 seeds and reports the spread.
+The Transformer is the weaker of the two architectures and fails hardest: it is significantly worse than *both* baselines at h=5 and h=22, reaching DM = -3.260 (q = 0.0067) against HAR-L. Its per-seed dispersion is also an order of magnitude worse than the LSTM's — at h=1 the Transformer's seed sd is 0.2390 against the LSTM's 0.0036, with per-seed QLIKE ranging 0.4001–0.9749. A single seed of that model would have supported almost any story, which is why the design pre-committed to 5 seeds and reports the spread.
 
 ### 8.4 Robustness arms
 
@@ -386,15 +386,15 @@ Each arm is compared against **its own** HAR / HAR-L columns. These arms carry d
 
 | arm | ticker | estimator | h | n OOS | HAR | HAR-L | LSTM | Transformer | best DL | DM vs own HAR | p | DM vs own HAR-L | p |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `SPY_parkinson` | SPY | parkinson | 1 | 5,356 | 0.4041 | 0.3952 | 0.4310 | 0.4358 | `lstm` | -4.421 | 1.00e-05 | -4.930 | 8.48e-07 |
-| `SPY_parkinson` | SPY | parkinson | 5 | 5,356 | 0.2525 | 0.2429 | 0.2836 | 0.2795 | `transformer` | -4.629 | 3.77e-06 | -5.390 | 7.35e-08 |
-| `SPY_parkinson` | SPY | parkinson | 22 | 5,356 | 0.2776 | 0.2735 | 0.3225 | 0.3296 | `lstm` | -2.069 | 0.0386 | -2.212 | 0.0270 |
-| `SPY_garman_klass` | SPY | garman_klass | 1 | 5,356 | 0.3750 | 0.3621 | 0.3839 | 0.3948 | `lstm` | -2.128 | 0.0334 | -3.588 | 0.0003 |
-| `SPY_garman_klass` | SPY | garman_klass | 5 | 5,356 | 0.2424 | 0.2304 | 0.2805 | 0.2682 | `transformer` | -5.002 | 5.85e-07 | -5.944 | 2.95e-09 |
-| `SPY_garman_klass` | SPY | garman_klass | 22 | 5,356 | 0.2804 | 0.2749 | 0.3330 | 0.3195 | `transformer` | -2.446 | 0.0145 | -2.598 | 0.0094 |
-| `QQQ_parkinson` | QQQ | parkinson | 1 | 3,814 | 0.3849 | 0.3735 | 0.4009 | 0.4144 | `lstm` | -1.100 | 0.2714 | -1.401 | 0.1613 |
-| `QQQ_parkinson` | QQQ | parkinson | 5 | 3,814 | 0.2536 | 0.2458 | 0.2640 | 0.2649 | `lstm` | -1.820 | 0.0689 | -2.649 | 0.0081 |
-| `QQQ_parkinson` | QQQ | parkinson | 22 | 3,814 | 0.2510 | 0.2488 | 0.2611 | 0.2593 | `transformer` | -0.785 | 0.4327 | -1.014 | 0.3105 |
+| `SPY_parkinson` | SPY | parkinson | 1 | 5,356 | 0.4041 | 0.3952 | 0.4310 | 0.4358 | `lstm` | -1.966 | 0.0494 | -2.625 | 0.0087 |
+| `SPY_parkinson` | SPY | parkinson | 5 | 5,356 | 0.2525 | 0.2429 | 0.2836 | 0.2795 | `transformer` | -3.569 | 0.0004 | -4.310 | 1.66e-05 |
+| `SPY_parkinson` | SPY | parkinson | 22 | 5,356 | 0.2776 | 0.2735 | 0.3225 | 0.3296 | `lstm` | -1.618 | 0.1058 | -1.740 | 0.0819 |
+| `SPY_garman_klass` | SPY | garman_klass | 1 | 5,356 | 0.3750 | 0.3621 | 0.3839 | 0.3948 | `lstm` | -1.457 | 0.1451 | -2.828 | 0.0047 |
+| `SPY_garman_klass` | SPY | garman_klass | 5 | 5,356 | 0.2424 | 0.2304 | 0.2805 | 0.2682 | `transformer` | -3.636 | 0.0003 | -4.513 | 6.53e-06 |
+| `SPY_garman_klass` | SPY | garman_klass | 22 | 5,356 | 0.2804 | 0.2749 | 0.3330 | 0.3195 | `transformer` | -2.063 | 0.0392 | -2.210 | 0.0272 |
+| `QQQ_parkinson` | QQQ | parkinson | 1 | 3,814 | 0.3849 | 0.3735 | 0.4009 | 0.4144 | `lstm` | -1.116 | 0.2645 | -1.399 | 0.1619 |
+| `QQQ_parkinson` | QQQ | parkinson | 5 | 3,814 | 0.2536 | 0.2458 | 0.2640 | 0.2649 | `lstm` | -1.546 | 0.1222 | -2.508 | 0.0122 |
+| `QQQ_parkinson` | QQQ | parkinson | 22 | 3,814 | 0.2510 | 0.2488 | 0.2611 | 0.2593 | `transformer` | -0.678 | 0.4976 | -0.886 | 0.3757 |
 
 **All nine arm × horizon cells put the best DL model behind both of its own baselines** — every DM statistic in both DM columns is negative. The conclusion therefore does not depend on the ticker (`^GSPC` / `SPY` / `QQQ`), on the estimator (Parkinson / Garman-Klass), or on the sample span. `SPY_garman_klass` matters specifically: SPY's Open is genuine (§3), so this arm shows the verdict is not an artifact of being restricted to Parkinson on the defective `^GSPC` Open.
 
@@ -410,29 +410,29 @@ These p-values are **raw, not FDR-adjusted** — the pre-registered BH-FDR famil
 
 | ablation | changed from primary | h | n OOS | own HAR | own HAR-L | LSTM | Transformer | DM LSTM vs own HAR-L | p (raw) |
 |---|---|---|---|---|---|---|---|---|---|
-| `channels_with_returns` | `channels` 1 → 2 (adds return path) | 1 | 13,176 | 0.3867 | 0.3804 | 0.3643 | 0.5497 | +3.088 | 0.0020 |
-| `channels_with_returns` | `channels` 1 → 2 (adds return path) | 5 | 13,176 | 0.2077 | 0.2026 | 0.1944 | 0.3469 | +2.085 | 0.0371 |
-| `channels_with_returns` | `channels` 1 → 2 (adds return path) | 22 | 13,176 | 0.2016 | 0.2003 | 0.2028 | 0.2187 | -0.343 | 0.7316 |
-| `refit_250` | `refit_every` 750 → 250 | 1 | 13,176 | 0.3755 | 0.3693 | 0.3701 | not run | -0.129 | 0.8977 |
-| `refit_250` | `refit_every` 750 → 250 | 5 | 13,176 | 0.2036 | 0.2001 | 0.2010 | not run | -0.120 | 0.9041 |
-| `refit_250` | `refit_every` 750 → 250 | 22 | 13,176 | 0.1933 | 0.1920 | 0.2109 | not run | -1.998 | 0.0458 |
-| `window_L66` | `seq_len` 22 → 66 | 1 | 13,132 | 0.3876 | 0.3817 | 0.3770 | 0.4366 | +0.984 | 0.3249 |
-| `window_L66` | `seq_len` 22 → 66 | 5 | 13,132 | 0.2085 | 0.2035 | 0.2054 | 0.2655 | -0.421 | 0.6735 |
-| `window_L66` | `seq_len` 22 → 66 | 22 | 13,132 | 0.2027 | 0.2013 | 0.2325 | 0.2694 | -2.283 | 0.0224 |
-| `train_len1500` | `train_len` 3000 → 1500 | 1 | 14,676 | 0.3519 | 0.3666 | 0.4061 | 0.4651 | -2.038 | 0.0416 |
-| `train_len1500` | `train_len` 3000 → 1500 | 5 | 14,676 | 0.1873 | 0.1839 | 0.2340 | 0.2603 | -7.994 | 1.33e-15 |
-| `train_len1500` | `train_len` 3000 → 1500 | 22 | 14,676 | 0.1863 | 0.1847 | 0.2411 | 0.2648 | -5.575 | 2.52e-08 |
-| `loss_qlike_direct` | `loss` logmse → qlike | 1 | 13,176 | 0.3867 | 0.3804 | 0.4180 | 0.4299 | -5.368 | 8.11e-08 |
-| `loss_qlike_direct` | `loss` logmse → qlike | 5 | 13,176 | 0.2077 | 0.2026 | 0.2194 | 0.2376 | -3.370 | 0.0008 |
-| `loss_qlike_direct` | `loss` logmse → qlike | 22 | 13,176 | 0.2016 | 0.2003 | 0.2325 | 0.2228 | -2.800 | 0.0051 |
+| `channels_with_returns` | `channels` 1 → 2 (adds return path) | 1 | 13,176 | 0.3867 | 0.3804 | 0.3643 | 0.5497 | +2.969 | 0.0030 |
+| `channels_with_returns` | `channels` 1 → 2 (adds return path) | 5 | 13,176 | 0.2077 | 0.2026 | 0.1944 | 0.3469 | +1.732 | 0.0833 |
+| `channels_with_returns` | `channels` 1 → 2 (adds return path) | 22 | 13,176 | 0.2016 | 0.2003 | 0.2028 | 0.2187 | -0.325 | 0.7453 |
+| `refit_250` | `refit_every` 750 → 250 | 1 | 13,176 | 0.3755 | 0.3693 | 0.3701 | not run | -0.129 | 0.8970 |
+| `refit_250` | `refit_every` 750 → 250 | 5 | 13,176 | 0.2036 | 0.2001 | 0.2010 | not run | -0.114 | 0.9089 |
+| `refit_250` | `refit_every` 750 → 250 | 22 | 13,176 | 0.1933 | 0.1920 | 0.2109 | not run | -1.869 | 0.0617 |
+| `window_L66` | `seq_len` 22 → 66 | 1 | 13,132 | 0.3876 | 0.3817 | 0.3770 | 0.4366 | +1.041 | 0.2981 |
+| `window_L66` | `seq_len` 22 → 66 | 5 | 13,132 | 0.2085 | 0.2035 | 0.2054 | 0.2655 | -0.350 | 0.7265 |
+| `window_L66` | `seq_len` 22 → 66 | 22 | 13,132 | 0.2027 | 0.2013 | 0.2325 | 0.2694 | -1.836 | 0.0663 |
+| `train_len1500` | `train_len` 3000 → 1500 | 1 | 14,676 | 0.3519 | 0.3666 | 0.4061 | 0.4651 | -1.909 | 0.0562 |
+| `train_len1500` | `train_len` 3000 → 1500 | 5 | 14,676 | 0.1873 | 0.1839 | 0.2340 | 0.2603 | -6.522 | 7.15e-11 |
+| `train_len1500` | `train_len` 3000 → 1500 | 22 | 14,676 | 0.1863 | 0.1847 | 0.2411 | 0.2648 | -4.887 | 1.04e-06 |
+| `loss_qlike_direct` | `loss` logmse → qlike | 1 | 13,176 | 0.3867 | 0.3804 | 0.4180 | 0.4299 | -4.839 | 1.32e-06 |
+| `loss_qlike_direct` | `loss` logmse → qlike | 5 | 13,176 | 0.2077 | 0.2026 | 0.2194 | 0.2376 | -2.615 | 0.0089 |
+| `loss_qlike_direct` | `loss` logmse → qlike | 22 | 13,176 | 0.2016 | 0.2003 | 0.2325 | 0.2228 | -2.262 | 0.0237 |
 
 **What each ablation answers**
 
-- **`refit_250` — is the verdict an artifact of a sparse refit cadence? No.** This is the ablation the design most needed, because 18 refits over 52 years is sparse by daily-practice standards. Tripling the cadence (53 refits against the primary arm's 18) leaves the picture intact: LSTM 0.2109 against its own HAR-L 0.1920 at h=22 (DM = -1.998, p = 0.0458), essentially reproducing the primary arm's h=22 deficit. The refit is genuinely re-fitting — the two arms differ in origin count by a factor of 2.9 — and it does not rescue the DL arm.
-- **`channels_with_returns` — the one place DL wins, and it does not transfer.** Giving the LSTM the return path beats *its own* HAR-L at h=1 (0.3643 vs 0.3804; DM = 3.088, raw p = 0.0020) and at h=5 (DM = 2.085, raw p = 0.0371) — but **not at h=22** (DM = -0.343, raw p = 0.7316). This is reported because it is the only positive signal in the experiment and burying it would be selective reporting. It does **not** change the headline, for reasons fixed before the run: it is outside the pre-registered FDR families so its p-values are **uncorrected**; it runs `n_seeds = 2` against the primary arm's 5; and its `refit_every = 3000` also degrades the arm's own baselines (its HAR-L is 0.3804 against the primary arm's 0.3713), so part of the margin is a weaker comparison point rather than a better model. Its honest reading is a **hypothesis for a future pre-registered test** — that any DL edge here lives in the leverage channel at short horizons, not in the volatility path at long ones — and notably it points the *opposite* way to the horizon hypothesis this experiment set out to test.
-- **`window_L66` — is 22 days too short a window for the DL models? No.** Tripling the input window makes h=22 worse, not better (0.2325 against its own HAR-L 0.2013, DM = -2.283).
-- **`train_len1500` — would a shorter, more adaptive window help? No, it hurts sharply.** LSTM degrades to 0.2340 at h=5 (DM = -7.994), consistent with these models being data-hungry rather than over-fit to a long window.
-- **`loss_qlike_direct` — is the log-MSE training loss mismatched to the QLIKE evaluation metric? Training directly on QLIKE makes it worse at every horizon** (h=1 DM = -5.368, h=22 DM = -2.800), so the loss mismatch is not what is holding the DL arm back.
+- **`refit_250` — is the verdict an artifact of a sparse refit cadence? No.** This is the ablation the design most needed, because 18 refits over 52 years is sparse by daily-practice standards. Tripling the cadence (53 refits against the primary arm's 18) leaves the picture intact: LSTM 0.2109 against its own HAR-L 0.1920 at h=22 (DM = -1.869, p = 0.0617), essentially reproducing the primary arm's h=22 deficit. The refit is genuinely re-fitting — the two arms differ in origin count by a factor of 2.9 — and it does not rescue the DL arm.
+- **`channels_with_returns` — the one place DL wins, and it does not transfer.** Giving the LSTM the return path beats *its own* HAR-L at h=1 (0.3643 vs 0.3804; DM = 2.969, raw p = 0.0030) and at h=5 (DM = 1.732, raw p = 0.0833) — but **not at h=22** (DM = -0.325, raw p = 0.7453). This is reported because it is the only positive signal in the experiment and burying it would be selective reporting. It does **not** change the headline, for reasons fixed before the run: it is outside the pre-registered FDR families so its p-values are **uncorrected**; it runs `n_seeds = 2` against the primary arm's 5; and its `refit_every = 3000` also degrades the arm's own baselines (its HAR-L is 0.3804 against the primary arm's 0.3713), so part of the margin is a weaker comparison point rather than a better model. Its honest reading is a **hypothesis for a future pre-registered test** — that any DL edge here lives in the leverage channel at short horizons, not in the volatility path at long ones — and notably it points the *opposite* way to the horizon hypothesis this experiment set out to test.
+- **`window_L66` — is 22 days too short a window for the DL models? No.** Tripling the input window makes h=22 worse, not better (0.2325 against its own HAR-L 0.2013, DM = -1.836).
+- **`train_len1500` — would a shorter, more adaptive window help? No, it hurts sharply.** LSTM degrades to 0.2340 at h=5 (DM = -6.522), consistent with these models being data-hungry rather than over-fit to a long window.
+- **`loss_qlike_direct` — is the log-MSE training loss mismatched to the QLIKE evaluation metric? Training directly on QLIKE makes it worse at every horizon** (h=1 DM = -4.839, h=22 DM = -2.262), so the loss mismatch is not what is holding the DL arm back.
 
 Taken together, the four non-`channels` ablations close the obvious "you configured it badly" objections: cadence, window length, training-window size and loss function each move the result the wrong way or leave it unchanged.
 
