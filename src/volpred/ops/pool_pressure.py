@@ -79,6 +79,16 @@ GATED_KINDS = {
 #: 豁免的 kind —— 產出是 task_urgency 認定的 time_critical，時效過了價值歸零。
 EXEMPT_KINDS = {"reader_facing"}
 
+#: 產出主要是 platform_ops 修繕單的 kind —— 受「組成 cap」二層閘（2026-08-05
+#: owner 指令：pending 池 71% 是平台維運，mission 工作被擠出 menu）。dreaming 是
+#: 最大生成者（盤點當日 25/74 筆 pending platform_ops）。research_backlog /
+#: refill 產出實驗與文章，不在此列。
+PLATFORM_OPS_PRODUCING_KINDS = {"dreaming"}
+
+#: 組成 cap 預設：pending 中 platform_ops share 超過此值時，platform_ops 生成
+#: kind 停產（總水位閘之外的第二個維度）。覆寫走 pending_caps.platform_ops_share_cap。
+DEFAULT_PLATFORM_OPS_SHARE_CAP = 0.5
+
 #: writer 層 observability 用：機器來源的 source token。人的 ingress 不在此列，
 #: 超水位時不對他們印 warn（老闆指派本來就該無視水位）。
 MACHINE_SOURCE_TOKENS = frozenset(
@@ -138,6 +148,14 @@ class PoolSnapshot:
     pending: int
     pending_by_priority: dict[str, int]
     daily: list[dict[str, Any]] = field(default_factory=list)
+    pending_platform_ops: int = 0
+
+    @property
+    def platform_ops_share(self) -> float:
+        """pending 中 platform_ops 的占比（pending=0 時為 0.0）。"""
+        if not self.pending:
+            return 0.0
+        return self.pending_platform_ops / self.pending
 
     @property
     def net_positive_streak(self) -> int:
@@ -176,6 +194,7 @@ def load_policy(rules_path: str | Path = RULES_PATH_DEFAULT) -> dict[str, Any]:
         "enabled": True,
         "pending_cap": DEFAULT_PENDING_CAP,
         "exit_streak_days": DEFAULT_EXIT_STREAK_DAYS,
+        "platform_ops_share_cap": DEFAULT_PLATFORM_OPS_SHARE_CAP,
     }
     p = Path(rules_path)
     if not p.exists():
@@ -186,7 +205,12 @@ def load_policy(rules_path: str | Path = RULES_PATH_DEFAULT) -> dict[str, Any]:
         return policy  # silent-ok: config 壞掉時用內建預設，閘門不該因設定檔而失效
     caps = rules.get("pending_caps")
     if isinstance(caps, dict):
-        for key in ("enabled", "pending_cap", "exit_streak_days"):
+        for key in (
+            "enabled",
+            "pending_cap",
+            "exit_streak_days",
+            "platform_ops_share_cap",
+        ):
             if key in caps:
                 policy[key] = caps[key]
     return policy
@@ -219,6 +243,7 @@ def pool_snapshot(
     succeeded: dict[date, int] = {d: 0 for d in days}
 
     pending = 0
+    pending_platform_ops = 0
     by_priority: dict[str, int] = {}
     for t in tasks:
         if not isinstance(t, dict):
@@ -227,6 +252,8 @@ def pool_snapshot(
             pending += 1
             key = f"p{t.get('priority', '?')}"
             by_priority[key] = by_priority.get(key, 0) + 1
+            if str(t.get("task_type") or "") == "platform_ops":
+                pending_platform_ops += 1
         cday = _parse_day(t.get("created_at"))
         if cday in created:
             created[cday] += 1
@@ -248,6 +275,7 @@ def pool_snapshot(
         pending=pending,
         pending_by_priority=dict(sorted(by_priority.items())),
         daily=daily,
+        pending_platform_ops=pending_platform_ops,
     )
 
 
@@ -368,6 +396,29 @@ def pool_admits_new_work(
     active = bool(state["active"])
     cap = int(state["pending_cap"])
     if not active:
+        # 第二維度：組成 cap（2026-08-05 owner 指令 —— pending 71% 是平台維運，
+        # mission 工作被擠出 menu）。只閘「產出主要是 platform_ops」的 kind；
+        # 總水位正常但池子已被維運單灌滿時，維運生成端先停，讓文章/實驗
+        # generator 把組成拉回來。
+        share_cap = float(load_policy(rules_path)["platform_ops_share_cap"])
+        if (
+            kind in PLATFORM_OPS_PRODUCING_KINDS
+            and snap.pending > 0
+            and snap.platform_ops_share > share_cap
+        ):
+            return Admission(
+                admitted=False,
+                kind=kind,
+                reason=(
+                    f"platform_ops_share: {snap.pending_platform_ops}/"
+                    f"{snap.pending}={snap.platform_ops_share:.0%} > "
+                    f"cap={share_cap:.0%} —— 維運單已擠壓 mission 工作，"
+                    "此 kind 停產至組成回到 cap 內"
+                ),
+                pending=snap.pending,
+                cap=cap,
+                drain_first=False,
+            )
         return Admission(True, kind, "pool_ok", snap.pending, cap, False)
     return Admission(
         admitted=False,

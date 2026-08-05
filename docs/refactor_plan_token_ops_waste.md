@@ -262,11 +262,18 @@ tool_result 總量下降 ≥1M/週。**若沒有下降 = 政策沒生效或被�
   日報/週報 JSON 增 `mission_output`，markdown 第一個 section = 「產出佔比」紅黃綠頭條
   （🔴<10% / 🟡10-30% / 🟢≥30%）。08-04 實測輸出 🔴 1.2%。
 
-**Layer 2 — 池組成矯正（本節內排程，未完成項誠實列出）**：
-- ⬜ platform_ops 生成 share cap（收編進 `volpred.ops.pool_pressure` 既有 owner，
-  不建新 gate）—— 規劃：pending 中 platform_ops share > 50% 時非白名單 platform_ops
-  生成 defer。
-- ⬜ 既有 85 筆 pending platform_ops 逐筆 triage（機械初篩 + 主線程裁決，不盲刪）。
+**Layer 2 — 池組成矯正**：
+- ✅ platform_ops 生成組成 cap（2026-08-05 同日落地，收編 `volpred.ops.pool_pressure`
+  既有 admission owner）：`PoolSnapshot.pending_platform_ops` / `platform_ops_share`、
+  policy key `pending_caps.platform_ops_share_cap`（預設 0.5，runtime 覆寫）、
+  `pool_admits_new_work` 對 `PLATFORM_OPS_PRODUCING_KINDS = {"dreaming"}` 加二層閘
+  （總水位 latch 之外的組成維度；mission generator 不受閘，組成靠它們拉回）。
+  測試 4 案 + 全檔 23 passed。Live 讀數（落地當下）：pending 93、platform_ops 74
+  （**80%**）——目前總水位 latch 先生效（93>80），池深回 80 內後組成 cap 接手：
+  dreaming 續停、refill 恢復產文章。
+- ⬜ 既有 74 筆 pending platform_ops 逐筆 triage（機械初篩 + 主線程裁決，不盲刪）
+  —— dreaming 25 / agent 9 / auto_remediation 8 / compute_queue_followup 6 /
+  alert_remediation_bridge 6 / 其他 20；33 筆 >7 天。排 P2 main-thread 任務。
 
 ### 8.3 驗證 Gate（宣告完成的唯一憑據 = 線上數字）
 

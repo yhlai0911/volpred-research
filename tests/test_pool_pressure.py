@@ -204,3 +204,66 @@ def test_evaluate_persist_false_leaves_no_state(tmp_path, rules):
     evaluate_drain_first(tasks=_pending(11), state_path=state, rules_path=rules,
                          persist=False, now=NOW)
     assert not state.exists()
+
+
+# ── 組成 cap：platform_ops share 二層閘（2026-08-05 owner 指令）──────────────
+
+
+def _mixed_pool(platform_n, article_n):
+    rows = [
+        _task(id=f"po{i}", priority=2, task_type="platform_ops")
+        for i in range(platform_n)
+    ]
+    rows += [
+        _task(id=f"art{i}", priority=2, task_type="daily_article")
+        for i in range(article_n)
+    ]
+    return rows
+
+
+def test_platform_ops_share_cap_blocks_dreaming_when_pool_is_ops_heavy(
+    tmp_path, rules
+):
+    """總水位正常（8 < cap 10）但 75% 是 platform_ops → dreaming 停產。
+    這是 owner 抱怨「pending 幾乎都平台維運」的機械答案：生成端先停。"""
+    adm = pool_admits_new_work(
+        "dreaming", tasks=_mixed_pool(6, 2),
+        state_path=tmp_path / "s.json", rules_path=rules, now=NOW,
+    )
+    assert not adm.admitted
+    assert not adm.drain_first, "組成 cap 不是總水位 latch，兩者語義要分開"
+    assert "platform_ops_share" in adm.reason
+
+
+def test_platform_ops_share_cap_spares_article_generators(tmp_path, rules):
+    """同一個 ops-heavy 池，refill（產文章/實驗）必須照常放行 ——
+    組成要靠 mission generator 拉回來，全停等於凍結。"""
+    adm = pool_admits_new_work(
+        "refill_task_pool", tasks=_mixed_pool(6, 2),
+        state_path=tmp_path / "s.json", rules_path=rules, now=NOW,
+    )
+    assert adm.admitted and adm.reason == "pool_ok"
+
+
+def test_platform_ops_share_cap_admits_dreaming_when_composition_healthy(
+    tmp_path, rules
+):
+    adm = pool_admits_new_work(
+        "dreaming", tasks=_mixed_pool(2, 6),
+        state_path=tmp_path / "s.json", rules_path=rules, now=NOW,
+    )
+    assert adm.admitted and adm.reason == "pool_ok"
+
+
+def test_platform_ops_share_cap_is_configurable(tmp_path):
+    """pending_caps.platform_ops_share_cap 覆寫生效（runtime 讀）。"""
+    rules_p = tmp_path / "rules.json"
+    rules_p.write_text(json.dumps({"pending_caps": {
+        "enabled": True, "pending_cap": 10, "exit_streak_days": 3,
+        "platform_ops_share_cap": 0.9,
+    }}), encoding="utf-8")
+    adm = pool_admits_new_work(
+        "dreaming", tasks=_mixed_pool(6, 2),
+        state_path=tmp_path / "s.json", rules_path=rules_p, now=NOW,
+    )
+    assert adm.admitted, "share 75% < 覆寫後 cap 90% → 放行"
