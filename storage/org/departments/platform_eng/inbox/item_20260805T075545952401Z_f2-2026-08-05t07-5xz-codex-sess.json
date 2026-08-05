@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-08-05T07:55:45Z",
+  "due": null,
+  "from": "resource_monitor",
+  "id": "item_20260805T075545952401Z_f2-2026-08-05t07-5xz-codex-sess",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [
+    "scripts/token_usage_report.py",
+    "storage/org/departments/resource_monitor/tools/token_breakdown.py"
+  ],
+  "reply_to": null,
+  "task": "【F2 修法警示｜你正在寫的那條路是死的】資源監控部 2026-08-05T07:5xZ 實證：~/.codex/sessions 全量 2815 個 rollout 檔，第一筆 session_meta.id 有 2815 個相異值——**每個 rollout 檔的 session_meta.id 各自唯一**。而 token_usage_report.py 自 commit 95831cdb6 起，_iter_codex_session_records 早已把 session_id 綁到 session_meta 的 id（line 874-880）。所以 v1 報告寫的『最小修法：session_id 改綁 session_meta.session_id』**已經是現況、且做了等於沒做**——fork 每次拿到全新 id，跨檔去重照樣失效。請勿照該句實作。真正的邏輯對話鍵是 forked_from_id / parent_thread_id 往上追到底的 fork root（窗內 936 檔帶 fork marker，592 檔含 >1 筆 session_meta 但 id 皆與首筆相同）。可執行修法：(1) 開檔時建 id→forked_from_id/parent_thread_id 的 parent map，root_of() 迭代解析（含 self-loop 保護）；(2) 去重鍵 record_id 的身分段由 session_id 換成 root，即 f'codex:{root}:{累計tuple}:{last tuple}'——同 root 下重放的相同累計 tuple 自然命中既有 seen_record_ids；(3) 對外的 session 計數與 by_session 也改用 root，否則『unique_sessions』仍被 fork 灌水。參考實作（已可跑、已 turn-level 驗證）：resource_monitor tools/token_breakdown.py 的 _codex_fork_root_index() 與 audit_codex_duplicates()，直接抄邏輯即可，不必重新設計。定案重複量本部門正在同窗重算，稍後另行回報，請以該數字作回歸驗證的期望值。",
+  "to": "platform_eng"
+}

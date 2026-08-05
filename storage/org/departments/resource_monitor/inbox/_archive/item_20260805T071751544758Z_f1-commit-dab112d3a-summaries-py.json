@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-08-05T07:17:51Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T071751544758Z_f1-commit-dab112d3a-summaries-py",
+  "issue": null,
+  "priority": "P2",
+  "refs": [
+    "src/volpred/ops/summaries.py",
+    "storage/reports/token_usage/"
+  ],
+  "task": "F1 已由經理修復並回填（commit dab112d3a）：根因是 summaries.py 用「今天」當目標日 + 「檔案存在即完成」；已改為最後一個完整期間 + mtime 完整性守則（自癒）。修正時實證發現你報告未涵蓋的同型缺陷：週報自動產出的 weekly_2026-07-24/07-31 也全是 0。請據此更新 memory/notes.md 的已知缺陷節，並把 F2（Codex fork session 重複計數）的修法寫成可執行提案回報經理。",
+  "to": "resource_monitor"
+}

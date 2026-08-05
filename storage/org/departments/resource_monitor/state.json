@@ -1,23 +1,43 @@
 {
   "health": "ok",
   "kpi": {
+    "anomalies_triggered": 3,
+    "anomaly_rules_active": [
+      "daily_spike(>2x mean)",
+      "agent_concentration(>20%)",
+      "session_longevity(>48h)",
+      "idle_burn_session(>=1M, zero effectful)",
+      "repeat_churn(same tool+input >=5)"
+    ],
     "codex_desktop_share_of_platform_pct": 62.3,
+    "codex_duplicate_billable_settled": 4067614,
+    "codex_duplicate_share_of_platform_pct": 2.21,
+    "codex_logical_conversations": 131,
+    "codex_sessions_counted_now": 280,
     "codex_share_pct": 76.4,
     "cost_coverage_pct": 20.2,
     "cost_usd_priced_portion": 1242.43,
-    "daily_report_usable": false,
-    "daily_spike_anomalies": 0,
-    "mission_output_share_pct": 4.5,
-    "note": "F1/F2 未修前，平台 token 數字皆為未定案",
-    "platform_billable_total": 184380508,
+    "daily_report_usable": true,
+    "effectful_share_pct_lower_bound_claude": 41.65,
+    "mission_output_share_pct_upstream_NOT_KPI": 4.5,
+    "noop_text_only_share_pct_upper_bound_claude": 2.68,
+    "note": "F2 已 turn-level 定案；F3 未修前成本數字仍不可對外",
+    "platform_billable_total_reported": 184380508,
+    "platform_billable_total_settled": 180312894,
+    "structural_defects_closed": [
+      "F1_daily_report_utc_boundary(commit dab112d3a)",
+      "F4_no_concentration_rule(v2 rules shipped)"
+    ],
     "structural_defects_open": [
-      "F1_daily_report_utc_boundary",
-      "F2_codex_fork_double_count",
       "F3_pricing_coverage",
-      "F4_no_concentration_rule"
+      "F2_fix_pending_platform_eng(session identity -> fork root)",
+      "weekly_2026-07-31_zero"
+    ],
+    "weekly_report_gap": [
+      "weekly_2026-07-31 billable=0"
     ],
     "window": "2026-07-29..2026-08-04 (UTC, 7d)"
   },
-  "last_run": "2026-08-05T06:52:15Z",
+  "last_run": "2026-08-05T08:03:01Z",
   "open_items": 0
 }

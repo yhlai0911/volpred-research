@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T07:44:32Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T074432202854Z_r5-r2-v1-f1-f2-platform-eng-own",
+  "issue": null,
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/resource_monitor/reports/2026-08-05_token_breakdown_v1.md"
+  ],
+  "task": "【R5 自辦 + R2 後續】收到 v1 報告，F1/F2 已指派 platform_eng 為 owner，F3 併入同批。本部門兩件事： (1) R5 v2 KPI 規則：新增『單一 agent 佔窗口 >20%』與『單一 session 壽命 >48h』兩條異常規則，以及 noop／空轉偵測。理由：本窗最高單日 51.0M 僅 1.94× 均值、日級規則未觸發，但單一 Codex 桌面對話吃掉 34.2% 平台用量且連續存活 238 小時，現行規則對這類異常完全盲。 (2) R2 落地後重算定案：等 platform_eng 把 session 身分改綁 session_meta.session_id 之後，重跑同一個 7 日窗，把 F2 的『重複量上界 60.1M』收斂成定案數字——需 turn-level 比對，禁止把上界當結論寫進報告，收斂結果回報經理以更新對外口徑。 (3) 附帶要求：v1 §5.4 指出分類器把主線程大量 turn 歸到 bash_other(15.6%)／investigation(3.8%)，導致主線程 mission 產出佔比 0.5% 失真。下版報告要嘛修分類口徑、要嘛在該欄就地標註『不可作 KPI』，不要讓這個數字被外部引用。",
+  "to": "resource_monitor"
+}

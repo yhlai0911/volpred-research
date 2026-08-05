@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-08-05T08:03:33Z",
+  "due": null,
+  "from": "resource_monitor",
+  "id": "item_20260805T080333311697Z_v2-inbox-1-r5-v2-kpi-agent-conc",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/resource_monitor/reports/2026-08-05_token_breakdown_v2.md",
+    "storage/org/departments/resource_monitor/memory/token_breakdown_2026-08-04_7d.json"
+  ],
+  "reply_to": "item_20260805T074432202854Z_r5-r2-v1-f1-f2-platform-eng-own",
+  "task": "【v2 報告完成｜含對外口徑更新請求】三件事全數落地，兩張 inbox 單已歸檔。 (1) R5 v2 KPI 規則已上線並在同窗實測：新增 agent_concentration(>20%)、session_longevity(>48h)、idle_burn_session(≥1M 且零寫入)、repeat_churn(同 tool+同輸入 ≥5 次) 四條，門檻是 tools/token_breakdown.py 頂部常數（改常數＝改規則）。同窗觸發 3 件——單一 Codex 桌面對話佔 34.2%、窗內存活 103.8h（跨窗真實壽命 ≥ 此值）、main_thread 一處 Read 同輸入重複 6 次；日級規則仍 0 件，證明 F4 盲區為真。idle_burn 0 件（Codex 因無工具內容被排除，是『無法量測』不是『通過檢查』）。 (2) 【F2 定案，請據此更新對外口徑】turn-level 重算：重複量 = 4,067,614 ＝ Codex 的 2.89%、平台的 2.21%。**v1 的上界 60.1M 高估約 15 倍**，因為 v1 假設跨檔重放完全沒被去重，但 _iter_codex_session_records 既有的 fork retract 機制早已丟掉大部分重放前綴。平台 7 日 billable 定案 184.4M → **180.3M**。**但 session 計數灌水是真的**：現行 unique_sessions 280 → fork root 收斂後 **131 個邏輯對話（2.14×）**，凡『平均每 session 花多少』『幾個 agent 在跑』的推論目前皆錯。 (3) 分類口徑兩件都做了：JSON 欄位改名為 mission_output_share_pct_upstream_NOT_KPI（欄名自帶警告，複製走也帶著），並新增部門自有結構性口徑 —— Claude 側 effectful = **41.65%（下界）**，vs 上游 4.5%，差 9 倍；『主線程只有 0.5% 產出』正式被推翻。noop_text_only 僅 2.68%（上界），本窗無系統性空轉。 【給 platform_eng 的重要更正，已於 07:55Z 直送其 inbox（當時他們正在寫該檔）】v1 寫的『最小修法：session_id 改綁 session_meta.session_id』**是錯的**：全量 2815 個 rollout 檔有 2815 個相異 session_meta.id（每檔唯一），且該綁定自 commit 95831cdb6 起早已存在，照抄＝零效果。正確鍵是 forked_from_id/parent_thread_id 追到底的 fork root。回歸驗證期望值：同窗 Codex billable 136,756,562、邏輯 session 131。 【未竟，均不在本部門 owned_paths】F3 PRICING 覆蓋率仍 20.2%，成本 $1,242 不可對外；另實測發現經理 F1 便箋的週報敘述需更正——weekly_2026-07-31.json 確實仍是 0，但 weekly_2026-07-24.json = 238,499,898（非 0，應已回填），**07-31 那份仍需回填**。",
+  "to": "manager"
+}

@@ -1,8 +1,8 @@
 {
   "report_type": "per_agent_per_model_token_breakdown",
-  "version": 1,
+  "version": 2,
   "produced_by": "resource_monitor",
-  "generated_at": "2026-08-05T06:51:25.466979+00:00",
+  "generated_at": "2026-08-05T07:57:48.566737+00:00",
   "window": {
     "start_utc_date": "2026-07-29",
     "end_utc_date_exclusive": "2026-08-05",
@@ -23,6 +23,16 @@
       "claude-sonnet-5"
     ]
   },
+  "kpi_rules": {
+    "daily_spike": "single day billable > 2.0x window mean",
+    "agent_concentration": "single agent > 20.0% of window billable",
+    "session_longevity": "single session lifetime > 48.0h",
+    "idle_burn_session": "billable >= 1000000 with zero effectful turn",
+    "repeat_churn": "identical tool call repeated >= 5 times in a session"
+  },
+  "kpi_field_warnings": {
+    "mission_output_share_pct_upstream_NOT_KPI": "上游分類器把主線程大量真實產出歸進 bash_other / investigation（v1 §5.4），此欄嚴重低估主線程，不可作 KPI、不可對外引用。改用 effectfulness.effectful_share_pct_lower_bound。"
+  },
   "totals": {
     "input_tokens": 130673208,
     "output_tokens": 17230045,
@@ -35,7 +45,7 @@
     "sessions": 526,
     "billable_total": 184380508,
     "cost_coverage_pct": 20.2,
-    "mission_output_share_pct": 4.5,
+    "mission_output_share_pct_upstream_NOT_KPI": 4.5,
     "turns": 38563
   },
   "by_date": {
@@ -51,7 +61,7 @@
       "sessions": 117,
       "billable_total": 51024977,
       "cost_coverage_pct": 13.4,
-      "mission_output_share_pct": 6.4
+      "mission_output_share_pct_upstream_NOT_KPI": 6.4
     },
     "2026-08-01": {
       "input_tokens": 35925914,
@@ -65,7 +75,7 @@
       "sessions": 181,
       "billable_total": 43240765,
       "cost_coverage_pct": 10.3,
-      "mission_output_share_pct": 6.0
+      "mission_output_share_pct_upstream_NOT_KPI": 6.0
     },
     "2026-07-30": {
       "input_tokens": 27636789,
@@ -79,7 +89,7 @@
       "sessions": 31,
       "billable_total": 30600777,
       "cost_coverage_pct": 3.5,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "2026-08-02": {
       "input_tokens": 20918830,
@@ -93,7 +103,7 @@
       "sessions": 129,
       "billable_total": 25093007,
       "cost_coverage_pct": 9.7,
-      "mission_output_share_pct": 8.2
+      "mission_output_share_pct_upstream_NOT_KPI": 8.2
     },
     "2026-08-04": {
       "input_tokens": 912976,
@@ -107,7 +117,7 @@
       "sessions": 38,
       "billable_total": 24178959,
       "cost_coverage_pct": 70.1,
-      "mission_output_share_pct": 1.2
+      "mission_output_share_pct_upstream_NOT_KPI": 1.2
     },
     "2026-08-03": {
       "input_tokens": 4341270,
@@ -121,7 +131,7 @@
       "sessions": 38,
       "billable_total": 9698197,
       "cost_coverage_pct": 51.7,
-      "mission_output_share_pct": 0.4
+      "mission_output_share_pct_upstream_NOT_KPI": 0.4
     },
     "2026-07-31": {
       "input_tokens": 4476,
@@ -135,7 +145,7 @@
       "sessions": 3,
       "billable_total": 543826,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     }
   },
   "by_agent_class": {
@@ -151,7 +161,7 @@
       "sessions": 280,
       "billable_total": 140824176,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 4.1
+      "mission_output_share_pct_upstream_NOT_KPI": 4.1
     },
     "main_thread": {
       "input_tokens": 16192,
@@ -165,7 +175,7 @@
       "sessions": 9,
       "billable_total": 22859887,
       "cost_coverage_pct": 72.7,
-      "mission_output_share_pct": 0.5
+      "mission_output_share_pct_upstream_NOT_KPI": 0.5
     },
     "dispatch_worker": {
       "input_tokens": 8246,
@@ -179,7 +189,7 @@
       "sessions": 92,
       "billable_total": 9349116,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 3.0
+      "mission_output_share_pct_upstream_NOT_KPI": 3.0
     },
     "worktree_agent": {
       "input_tokens": 65575,
@@ -193,7 +203,7 @@
       "sessions": 110,
       "billable_total": 6478246,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 32.7
+      "mission_output_share_pct_upstream_NOT_KPI": 32.7
     },
     "dispatch_worker_subagent": {
       "input_tokens": 12063,
@@ -207,7 +217,7 @@
       "sessions": 27,
       "billable_total": 3594217,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.3
+      "mission_output_share_pct_upstream_NOT_KPI": 0.3
     },
     "main_thread_subagent": {
       "input_tokens": 841,
@@ -221,7 +231,7 @@
       "sessions": 6,
       "billable_total": 1014978,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "worktree_agent_subagent": {
       "input_tokens": 78,
@@ -235,7 +245,7 @@
       "sessions": 2,
       "billable_total": 259888,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     }
   },
   "by_agent_id_top": {
@@ -251,7 +261,7 @@
       "sessions": 1,
       "billable_total": 63061780,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "main_thread": {
       "input_tokens": 16192,
@@ -265,7 +275,7 @@
       "sessions": 9,
       "billable_total": 22859887,
       "cost_coverage_pct": 72.7,
-      "mission_output_share_pct": 0.5
+      "mission_output_share_pct_upstream_NOT_KPI": 0.5
     },
     "codex/019fbd3d-de61-7a71-a7e4-90f2c7659505": {
       "input_tokens": 4667375,
@@ -279,7 +289,7 @@
       "sessions": 1,
       "billable_total": 4834664,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019fbd3d-9fa3-7ee2-9b74-13247cd314ac": {
       "input_tokens": 3634770,
@@ -293,7 +303,7 @@
       "sessions": 1,
       "billable_total": 3844107,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019fc08b-ad02-7b83-94fe-f1c3c772edef": {
       "input_tokens": 3436909,
@@ -307,7 +317,7 @@
       "sessions": 1,
       "billable_total": 3704694,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019fb1a1-b520-7b91-88fd-b04a268d4733": {
       "input_tokens": 2666509,
@@ -321,7 +331,7 @@
       "sessions": 1,
       "billable_total": 2809617,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019fb1a1-8ae9-7f42-85bf-dbb83abefe22": {
       "input_tokens": 2562458,
@@ -335,7 +345,7 @@
       "sessions": 1,
       "billable_total": 2692990,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019faa9f-3f3c-7de3-b838-840cd8f2583c": {
       "input_tokens": 2376411,
@@ -349,7 +359,7 @@
       "sessions": 1,
       "billable_total": 2505119,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019fb28e-281e-7f92-bdcb-6fe0a2e31643": {
       "input_tokens": 2026288,
@@ -363,7 +373,7 @@
       "sessions": 1,
       "billable_total": 2122262,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019faa9f-0f11-7392-87e9-90d458addc21": {
       "input_tokens": 1695615,
@@ -377,7 +387,7 @@
       "sessions": 1,
       "billable_total": 1808548,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019fada5-d5c3-7dd3-9322-4383c630fdf9": {
       "input_tokens": 1323039,
@@ -391,7 +401,7 @@
       "sessions": 1,
       "billable_total": 1449184,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019fb12f-9a02-7830-9163-15c58814434b": {
       "input_tokens": 1103910,
@@ -405,7 +415,7 @@
       "sessions": 1,
       "billable_total": 1145371,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019fb130-24b8-7ba3-b206-6e0207c9cd09": {
       "input_tokens": 1104752,
@@ -419,7 +429,7 @@
       "sessions": 1,
       "billable_total": 1143685,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019fb046-0086-77b2-bc0c-394cc59a7c2f": {
       "input_tokens": 1099993,
@@ -433,7 +443,7 @@
       "sessions": 1,
       "billable_total": 1142379,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex/019faf57-44d0-7f21-9078-fa21a7eb8f5b": {
       "input_tokens": 1057800,
@@ -447,77 +457,7 @@
       "sessions": 1,
       "billable_total": 1141237,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
-    },
-    "codex/019fbcf7-6892-7830-b0c1-cc253fc5f1d4": {
-      "input_tokens": 1083544,
-      "output_tokens": 55964,
-      "cache_read_tokens": 19039232,
-      "cache_create_tokens": 0,
-      "messages": 168,
-      "cost_usd": 0.0,
-      "cost_priced_billable": 0,
-      "mission_billable": 0,
-      "sessions": 1,
-      "billable_total": 1139508,
-      "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
-    },
-    "codex/019fbcf7-342a-7b83-9b72-b20f53781c8f": {
-      "input_tokens": 1065854,
-      "output_tokens": 71726,
-      "cache_read_tokens": 23000576,
-      "cache_create_tokens": 0,
-      "messages": 198,
-      "cost_usd": 0.0,
-      "cost_priced_billable": 0,
-      "mission_billable": 0,
-      "sessions": 1,
-      "billable_total": 1137580,
-      "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
-    },
-    "main_thread/subagent": {
-      "input_tokens": 841,
-      "output_tokens": 46227,
-      "cache_read_tokens": 14857923,
-      "cache_create_tokens": 967910,
-      "messages": 119,
-      "cost_usd": 8.6204,
-      "cost_priced_billable": 1014978,
-      "mission_billable": 0,
-      "sessions": 6,
-      "billable_total": 1014978,
-      "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
-    },
-    "codex/019fbb9c-2a0e-7881-896a-b1d44b010c5b": {
-      "input_tokens": 913925,
-      "output_tokens": 80742,
-      "cache_read_tokens": 34281984,
-      "cache_create_tokens": 0,
-      "messages": 270,
-      "cost_usd": 0.0,
-      "cost_priced_billable": 0,
-      "mission_billable": 0,
-      "sessions": 1,
-      "billable_total": 994667,
-      "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
-    },
-    "codex/019facea-5349-7e31-9f91-53f2f091eb87": {
-      "input_tokens": 893190,
-      "output_tokens": 69007,
-      "cache_read_tokens": 14694656,
-      "cache_create_tokens": 0,
-      "messages": 129,
-      "cost_usd": 0.0,
-      "cost_priced_billable": 0,
-      "mission_billable": 0,
-      "sessions": 1,
-      "billable_total": 962197,
-      "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     }
   },
   "by_model": {
@@ -533,7 +473,7 @@
       "sessions": 275,
       "billable_total": 136038916,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 4.2
+      "mission_output_share_pct_upstream_NOT_KPI": 4.2
     },
     "claude-opus-5": {
       "input_tokens": 92221,
@@ -547,7 +487,7 @@
       "sessions": 111,
       "billable_total": 36090122,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 6.8
+      "mission_output_share_pct_upstream_NOT_KPI": 6.8
     },
     "claude-fable-5": {
       "input_tokens": 9883,
@@ -561,7 +501,7 @@
       "sessions": 3,
       "billable_total": 6251884,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 1.1
+      "mission_output_share_pct_upstream_NOT_KPI": 1.1
     },
     "codex-auto-review": {
       "input_tokens": 3405395,
@@ -575,7 +515,7 @@
       "sessions": 3,
       "billable_total": 3653425,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "claude-sonnet-5": {
       "input_tokens": 865,
@@ -589,7 +529,7 @@
       "sessions": 7,
       "billable_total": 1161969,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "gpt-5.4-mini": {
       "input_tokens": 698192,
@@ -603,7 +543,7 @@
       "sessions": 4,
       "billable_total": 774200,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "gpt-5.6-terra": {
       "input_tokens": 313728,
@@ -617,7 +557,7 @@
       "sessions": 1,
       "billable_total": 357635,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "claude-haiku-4-5-20251001": {
       "input_tokens": 26,
@@ -631,7 +571,7 @@
       "sessions": 1,
       "billable_total": 52357,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "<synthetic>": {
       "input_tokens": 0,
@@ -645,7 +585,7 @@
       "sessions": 130,
       "billable_total": 0,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     }
   },
   "by_provider": {
@@ -661,7 +601,7 @@
       "sessions": 280,
       "billable_total": 140824176,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 4.1
+      "mission_output_share_pct_upstream_NOT_KPI": 4.1
     },
     "claude": {
       "input_tokens": 102995,
@@ -675,7 +615,7 @@
       "sessions": 246,
       "billable_total": 43556332,
       "cost_coverage_pct": 85.6,
-      "mission_output_share_pct": 5.8
+      "mission_output_share_pct_upstream_NOT_KPI": 5.8
     }
   },
   "by_category": {
@@ -691,7 +631,7 @@
       "sessions": 80,
       "billable_total": 111143306,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "bash_other": {
       "input_tokens": 27707,
@@ -705,7 +645,7 @@
       "sessions": 115,
       "billable_total": 28714239,
       "cost_coverage_pct": 84.8,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex_exec": {
       "input_tokens": 18472398,
@@ -719,7 +659,7 @@
       "sessions": 165,
       "billable_total": 20278206,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "experiment": {
       "input_tokens": 5166514,
@@ -733,7 +673,7 @@
       "sessions": 72,
       "billable_total": 8225112,
       "cost_coverage_pct": 29.4,
-      "mission_output_share_pct": 100.0
+      "mission_output_share_pct_upstream_NOT_KPI": 100.0
     },
     "investigation": {
       "input_tokens": 54798,
@@ -747,7 +687,7 @@
       "sessions": 116,
       "billable_total": 6955585,
       "cost_coverage_pct": 86.9,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex_review": {
       "input_tokens": 3405395,
@@ -761,7 +701,7 @@
       "sessions": 3,
       "billable_total": 3653425,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "file_edit": {
       "input_tokens": 6659,
@@ -775,7 +715,7 @@
       "sessions": 96,
       "billable_total": 1485146,
       "cost_coverage_pct": 93.3,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "text_only": {
       "input_tokens": 602,
@@ -789,7 +729,7 @@
       "sessions": 204,
       "billable_total": 1238047,
       "cost_coverage_pct": 82.5,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "tool_setup": {
       "input_tokens": 38,
@@ -803,7 +743,7 @@
       "sessions": 16,
       "billable_total": 681851,
       "cost_coverage_pct": 99.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "worktree_merge": {
       "input_tokens": 349,
@@ -817,7 +757,7 @@
       "sessions": 37,
       "billable_total": 522533,
       "cost_coverage_pct": 89.7,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "scheduling": {
       "input_tokens": 27,
@@ -831,7 +771,7 @@
       "sessions": 5,
       "billable_total": 481261,
       "cost_coverage_pct": 3.6,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "script_dev": {
       "input_tokens": 311,
@@ -845,7 +785,7 @@
       "sessions": 29,
       "billable_total": 388291,
       "cost_coverage_pct": 94.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "git_sync": {
       "input_tokens": 161,
@@ -859,7 +799,7 @@
       "sessions": 24,
       "billable_total": 237192,
       "cost_coverage_pct": 81.1,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "agent_delegation": {
       "input_tokens": 88,
@@ -873,7 +813,7 @@
       "sessions": 43,
       "billable_total": 131455,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "web_research": {
       "input_tokens": 8742,
@@ -887,77 +827,7 @@
       "sessions": 10,
       "billable_total": 130867,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
-    },
-    "platform_ops": {
-      "input_tokens": 15,
-      "output_tokens": 10022,
-      "cache_read_tokens": 1173379,
-      "cache_create_tokens": 15201,
-      "messages": 9,
-      "cost_usd": 0.9893,
-      "cost_priced_billable": 25238,
-      "mission_billable": 0,
-      "sessions": 5,
-      "billable_total": 25238,
-      "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
-    },
-    "chart_generation": {
-      "input_tokens": 23,
-      "output_tokens": 6983,
-      "cache_read_tokens": 2044259,
-      "cache_create_tokens": 16272,
-      "messages": 12,
-      "cost_usd": 1.3595,
-      "cost_priced_billable": 23278,
-      "mission_billable": 23278,
-      "sessions": 7,
-      "billable_total": 23278,
-      "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 100.0
-    },
-    "skill_invoke": {
-      "input_tokens": 15,
-      "output_tokens": 5038,
-      "cache_read_tokens": 950097,
-      "cache_create_tokens": 15163,
-      "messages": 8,
-      "cost_usd": 0.7527,
-      "cost_priced_billable": 20216,
-      "mission_billable": 0,
-      "sessions": 8,
-      "billable_total": 20216,
-      "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
-    },
-    "knowledge_recording": {
-      "input_tokens": 11,
-      "output_tokens": 5512,
-      "cache_read_tokens": 2011676,
-      "cache_create_tokens": 6897,
-      "messages": 6,
-      "cost_usd": 0.9779,
-      "cost_priced_billable": 8199,
-      "mission_billable": 12420,
-      "sessions": 3,
-      "billable_total": 12420,
-      "cost_coverage_pct": 66.0,
-      "mission_output_share_pct": 100.0
-    },
-    "task_management": {
-      "input_tokens": 14,
-      "output_tokens": 1362,
-      "cache_read_tokens": 3173444,
-      "cache_create_tokens": 7992,
-      "messages": 8,
-      "cost_usd": 0.2702,
-      "cost_priced_billable": 5016,
-      "mission_billable": 0,
-      "sessions": 2,
-      "billable_total": 9368,
-      "cost_coverage_pct": 53.5,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     }
   },
   "agent_class_x_model": {
@@ -973,7 +843,7 @@
       "sessions": 275,
       "billable_total": 136038916,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 4.2
+      "mission_output_share_pct_upstream_NOT_KPI": 4.2
     },
     "main_thread | claude-opus-5": {
       "input_tokens": 6259,
@@ -987,7 +857,7 @@
       "sessions": 4,
       "billable_total": 16408655,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.2
+      "mission_output_share_pct_upstream_NOT_KPI": 0.2
     },
     "dispatch_worker | claude-opus-5": {
       "input_tokens": 8246,
@@ -1001,7 +871,7 @@
       "sessions": 59,
       "billable_total": 9349116,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 3.0
+      "mission_output_share_pct_upstream_NOT_KPI": 3.0
     },
     "worktree_agent | claude-opus-5": {
       "input_tokens": 65575,
@@ -1015,7 +885,7 @@
       "sessions": 19,
       "billable_total": 6478246,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 32.7
+      "mission_output_share_pct_upstream_NOT_KPI": 32.7
     },
     "main_thread | claude-fable-5": {
       "input_tokens": 9883,
@@ -1029,7 +899,7 @@
       "sessions": 3,
       "billable_total": 6251884,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 1.1
+      "mission_output_share_pct_upstream_NOT_KPI": 1.1
     },
     "codex_worker | codex-auto-review": {
       "input_tokens": 3405395,
@@ -1043,7 +913,7 @@
       "sessions": 3,
       "billable_total": 3653425,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "dispatch_worker_subagent | claude-opus-5": {
       "input_tokens": 12063,
@@ -1057,7 +927,7 @@
       "sessions": 27,
       "billable_total": 3594217,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.3
+      "mission_output_share_pct_upstream_NOT_KPI": 0.3
     },
     "main_thread_subagent | claude-sonnet-5": {
       "input_tokens": 815,
@@ -1071,7 +941,7 @@
       "sessions": 5,
       "billable_total": 962621,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex_worker | gpt-5.4-mini": {
       "input_tokens": 698192,
@@ -1085,7 +955,7 @@
       "sessions": 4,
       "billable_total": 774200,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "codex_worker | gpt-5.6-terra": {
       "input_tokens": 313728,
@@ -1099,7 +969,7 @@
       "sessions": 1,
       "billable_total": 357635,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "worktree_agent_subagent | claude-opus-5": {
       "input_tokens": 78,
@@ -1113,7 +983,7 @@
       "sessions": 2,
       "billable_total": 259888,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "main_thread | claude-sonnet-5": {
       "input_tokens": 50,
@@ -1127,7 +997,7 @@
       "sessions": 2,
       "billable_total": 199348,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "main_thread_subagent | claude-haiku-4-5-20251001": {
       "input_tokens": 26,
@@ -1141,7 +1011,7 @@
       "sessions": 1,
       "billable_total": 52357,
       "cost_coverage_pct": 100.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "dispatch_worker | <synthetic>": {
       "input_tokens": 0,
@@ -1155,7 +1025,7 @@
       "sessions": 35,
       "billable_total": 0,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     },
     "main_thread | <synthetic>": {
       "input_tokens": 0,
@@ -1169,35 +1039,7 @@
       "sessions": 1,
       "billable_total": 0,
       "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
-    },
-    "main_thread_subagent | <synthetic>": {
-      "input_tokens": 0,
-      "output_tokens": 0,
-      "cache_read_tokens": 0,
-      "cache_create_tokens": 0,
-      "messages": 1,
-      "cost_usd": 0.0,
-      "cost_priced_billable": 0,
-      "mission_billable": 0,
-      "sessions": 1,
-      "billable_total": 0,
-      "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
-    },
-    "worktree_agent | <synthetic>": {
-      "input_tokens": 0,
-      "output_tokens": 0,
-      "cache_read_tokens": 0,
-      "cache_create_tokens": 0,
-      "messages": 93,
-      "cost_usd": 0.0,
-      "cost_priced_billable": 0,
-      "mission_billable": 0,
-      "sessions": 93,
-      "billable_total": 0,
-      "cost_coverage_pct": 0.0,
-      "mission_output_share_pct": 0.0
+      "mission_output_share_pct_upstream_NOT_KPI": 0.0
     }
   },
   "agent_id_model_mix_top": {
@@ -1251,47 +1093,454 @@
     },
     "codex/019faf57-44d0-7f21-9078-fa21a7eb8f5b": {
       "gpt-5.6-sol": 1141237
-    },
-    "codex/019fbcf7-6892-7830-b0c1-cc253fc5f1d4": {
-      "gpt-5.6-sol": 1139508
-    },
-    "codex/019fbcf7-342a-7b83-9b72-b20f53781c8f": {
-      "gpt-5.6-sol": 1137580
-    },
-    "main_thread/subagent": {
-      "claude-sonnet-5": 962621,
-      "claude-haiku-4-5-20251001": 52357,
-      "<synthetic>": 0
-    },
-    "codex/019fbb9c-2a0e-7881-896a-b1d44b010c5b": {
-      "gpt-5.6-sol": 994667
-    },
-    "codex/019facea-5349-7e31-9f91-53f2f091eb87": {
-      "gpt-5.6-sol": 962197
     }
   },
-  "anomalies": [],
+  "effectfulness": {
+    "definition": "部門自有結構性口徑：turn 內是否出現寫檔工具（write）或明確變更型 Bash/工具（mutating_command）。不使用上游任務分類器。",
+    "denominator": "Claude turns only（Codex telemetry 無工具內容，另計）",
+    "billable_by_effect": {
+      "mutating_command": 13852124,
+      "read_only": 24250315,
+      "write": 4288492,
+      "noop_text_only": 1165401,
+      "unknown_no_content": 140824176
+    },
+    "turns_by_effect": {
+      "mutating_command": 2862,
+      "read_only": 4470,
+      "write": 1266,
+      "noop_text_only": 453,
+      "unknown_no_content": 29512
+    },
+    "effectful_share_pct_lower_bound": 41.65,
+    "noop_text_only_share_pct_upper_bound": 2.68,
+    "caveat": "mutating_command 是保守白名單 ⇒ effectful 是下界、noop/read_only 是上界。"
+  },
+  "sessions_top": [
+    {
+      "session_id": "codex/019f8e4d-ca99-73e2-a3d0-a7aa7a8cac5f",
+      "agent_id": "codex/019f8e4d-ca99-73e2-a3d0-a7aa7a8cac5f",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 63061780,
+      "turns": 16365,
+      "first_seen_utc": "2026-07-29T00:00:06.134000+00:00",
+      "last_seen_utc": "2026-08-02T07:45:55.763000+00:00",
+      "lifetime_within_window_hours": 103.76,
+      "effect_turns": {
+        "unknown_no_content": 16365
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "c4ef4804-4fe0-4950-af7c-8f22d3f398ce",
+      "agent_id": "main_thread",
+      "agent_class": "main_thread",
+      "provider": "claude",
+      "billable": 10184529,
+      "turns": 974,
+      "first_seen_utc": "2026-08-03T11:37:34.111000+00:00",
+      "last_seen_utc": "2026-08-04T15:44:30.315000+00:00",
+      "lifetime_within_window_hours": 28.12,
+      "effect_turns": {
+        "read_only": 432,
+        "mutating_command": 423,
+        "write": 85,
+        "noop_text_only": 34
+      },
+      "effectful_billable": 4369939,
+      "effectful_share_pct_lower_bound": 42.9,
+      "top_repeated_tool_call": "Read#2905e6f58274",
+      "top_repeated_tool_call_count": 6
+    },
+    {
+      "session_id": "553594d7-ebcb-4356-8fd7-239d51fcad19",
+      "agent_id": "main_thread",
+      "agent_class": "main_thread",
+      "provider": "claude",
+      "billable": 4871085,
+      "turns": 405,
+      "first_seen_utc": "2026-08-04T05:01:31.701000+00:00",
+      "last_seen_utc": "2026-08-04T21:10:06.446000+00:00",
+      "lifetime_within_window_hours": 16.14,
+      "effect_turns": {
+        "read_only": 219,
+        "mutating_command": 143,
+        "write": 19,
+        "noop_text_only": 24
+      },
+      "effectful_billable": 1802081,
+      "effectful_share_pct_lower_bound": 37.0,
+      "top_repeated_tool_call": "Agent#8745a629c950",
+      "top_repeated_tool_call_count": 2
+    },
+    {
+      "session_id": "codex/019fbd3d-de61-7a71-a7e4-90f2c7659505",
+      "agent_id": "codex/019fbd3d-de61-7a71-a7e4-90f2c7659505",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 4834664,
+      "turns": 538,
+      "first_seen_utc": "2026-08-01T12:13:07.850000+00:00",
+      "last_seen_utc": "2026-08-02T07:40:57.677000+00:00",
+      "lifetime_within_window_hours": 19.46,
+      "effect_turns": {
+        "unknown_no_content": 538
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "codex/019fbd3d-9fa3-7ee2-9b74-13247cd314ac",
+      "agent_id": "codex/019fbd3d-9fa3-7ee2-9b74-13247cd314ac",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 3844107,
+      "turns": 564,
+      "first_seen_utc": "2026-08-01T12:12:52.833000+00:00",
+      "last_seen_utc": "2026-08-02T07:41:02.244000+00:00",
+      "lifetime_within_window_hours": 19.47,
+      "effect_turns": {
+        "unknown_no_content": 564
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "codex/019fc08b-ad02-7b83-94fe-f1c3c772edef",
+      "agent_id": "codex/019fc08b-ad02-7b83-94fe-f1c3c772edef",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 3704694,
+      "turns": 855,
+      "first_seen_utc": "2026-08-02T03:36:56.426000+00:00",
+      "last_seen_utc": "2026-08-03T12:06:33.343000+00:00",
+      "lifetime_within_window_hours": 32.49,
+      "effect_turns": {
+        "unknown_no_content": 855
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "47bce991-2c91-48d5-b252-be85ea48197f",
+      "agent_id": "main_thread",
+      "agent_class": "main_thread",
+      "provider": "claude",
+      "billable": 3461942,
+      "turns": 514,
+      "first_seen_utc": "2026-08-04T04:14:50.538000+00:00",
+      "last_seen_utc": "2026-08-04T16:41:28.439000+00:00",
+      "lifetime_within_window_hours": 12.44,
+      "effect_turns": {
+        "read_only": 286,
+        "mutating_command": 126,
+        "write": 66,
+        "noop_text_only": 36
+      },
+      "effectful_billable": 665676,
+      "effectful_share_pct_lower_bound": 19.2,
+      "top_repeated_tool_call": "Bash#2c8c1d4b51b5",
+      "top_repeated_tool_call_count": 2
+    },
+    {
+      "session_id": "codex/019fb1a1-b520-7b91-88fd-b04a268d4733",
+      "agent_id": "codex/019fb1a1-b520-7b91-88fd-b04a268d4733",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 2809617,
+      "turns": 462,
+      "first_seen_utc": "2026-07-30T06:06:58.879000+00:00",
+      "last_seen_utc": "2026-07-30T12:02:59.844000+00:00",
+      "lifetime_within_window_hours": 5.93,
+      "effect_turns": {
+        "unknown_no_content": 462
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "0b870f0c-0f69-41ff-9735-3e6de27e0273",
+      "agent_id": "main_thread",
+      "agent_class": "main_thread",
+      "provider": "claude",
+      "billable": 2709456,
+      "turns": 578,
+      "first_seen_utc": "2026-08-03T11:36:43.077000+00:00",
+      "last_seen_utc": "2026-08-04T04:53:15.055000+00:00",
+      "lifetime_within_window_hours": 17.28,
+      "effect_turns": {
+        "read_only": 230,
+        "mutating_command": 270,
+        "write": 51,
+        "noop_text_only": 27
+      },
+      "effectful_billable": 1964396,
+      "effectful_share_pct_lower_bound": 72.5,
+      "top_repeated_tool_call": "Bash#3880a9d3a6a8",
+      "top_repeated_tool_call_count": 1
+    },
+    {
+      "session_id": "codex/019fb1a1-8ae9-7f42-85bf-dbb83abefe22",
+      "agent_id": "codex/019fb1a1-8ae9-7f42-85bf-dbb83abefe22",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 2692990,
+      "turns": 413,
+      "first_seen_utc": "2026-07-30T06:06:43.182000+00:00",
+      "last_seen_utc": "2026-07-30T12:04:54.069000+00:00",
+      "lifetime_within_window_hours": 5.97,
+      "effect_turns": {
+        "unknown_no_content": 413
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "codex/019faa9f-3f3c-7de3-b838-840cd8f2583c",
+      "agent_id": "codex/019faa9f-3f3c-7de3-b838-840cd8f2583c",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 2505119,
+      "turns": 275,
+      "first_seen_utc": "2026-07-29T00:08:15.357000+00:00",
+      "last_seen_utc": "2026-07-29T06:58:39.907000+00:00",
+      "lifetime_within_window_hours": 6.84,
+      "effect_turns": {
+        "unknown_no_content": 275
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "codex/019fb28e-281e-7f92-bdcb-6fe0a2e31643",
+      "agent_id": "codex/019fb28e-281e-7f92-bdcb-6fe0a2e31643",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 2122262,
+      "turns": 282,
+      "first_seen_utc": "2026-07-30T10:24:48.903000+00:00",
+      "last_seen_utc": "2026-07-30T10:28:44.126000+00:00",
+      "lifetime_within_window_hours": 0.07,
+      "effect_turns": {
+        "unknown_no_content": 282
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "codex/019faa9f-0f11-7392-87e9-90d458addc21",
+      "agent_id": "codex/019faa9f-0f11-7392-87e9-90d458addc21",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 1808548,
+      "turns": 332,
+      "first_seen_utc": "2026-07-29T00:08:05.448000+00:00",
+      "last_seen_utc": "2026-07-29T06:58:17.736000+00:00",
+      "lifetime_within_window_hours": 6.84,
+      "effect_turns": {
+        "unknown_no_content": 332
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "codex/019fada5-d5c3-7dd3-9322-4383c630fdf9",
+      "agent_id": "codex/019fada5-d5c3-7dd3-9322-4383c630fdf9",
+      "agent_class": "codex_worker",
+      "provider": "codex",
+      "billable": 1449184,
+      "turns": 372,
+      "first_seen_utc": "2026-07-29T11:32:52.965000+00:00",
+      "last_seen_utc": "2026-07-29T12:55:37.638000+00:00",
+      "lifetime_within_window_hours": 1.38,
+      "effect_turns": {
+        "unknown_no_content": 372
+      },
+      "effectful_billable": 0,
+      "effectful_share_pct_lower_bound": null,
+      "top_repeated_tool_call": null,
+      "top_repeated_tool_call_count": 0
+    },
+    {
+      "session_id": "8de7199c-a879-4142-8305-4f7bdbd99610",
+      "agent_id": "main_thread",
+      "agent_class": "main_thread",
+      "provider": "claude",
+      "billable": 1145535,
+      "turns": 327,
+      "first_seen_utc": "2026-08-04T04:53:56.482000+00:00",
+      "last_seen_utc": "2026-08-04T17:26:44.707000+00:00",
+      "lifetime_within_window_hours": 12.55,
+      "effect_turns": {
+        "read_only": 154,
+        "mutating_command": 103,
+        "write": 32,
+        "noop_text_only": 38
+      },
+      "effectful_billable": 272575,
+      "effectful_share_pct_lower_bound": 23.8,
+      "top_repeated_tool_call": "Bash#50c3c8eeb4b7",
+      "top_repeated_tool_call_count": 1
+    }
+  ],
+  "session_count": 526,
+  "anomalies": [
+    {
+      "kind": "agent_concentration",
+      "rule": "single agent billable share > 20.0% of window",
+      "agent_id": "codex/019f8e4d-ca99-73e2-a3d0-a7aa7a8cac5f",
+      "billable_total": 63061780,
+      "share_pct": 34.2
+    },
+    {
+      "kind": "session_longevity",
+      "rule": "single session lifetime > 48.0h",
+      "session_id": "codex/019f8e4d-ca99-73e2-a3d0-a7aa7a8cac5f",
+      "agent_id": "codex/019f8e4d-ca99-73e2-a3d0-a7aa7a8cac5f",
+      "lifetime_within_window_hours": 103.76,
+      "billable_total": 63061780,
+      "share_pct": 34.2,
+      "note": "壽命只在觀測窗內量測；跨窗 session 的真實壽命 >= 此值"
+    },
+    {
+      "kind": "repeat_churn",
+      "rule": "same tool + identical input repeated >= 5 times in one session (billable >= 200000)",
+      "session_id": "c4ef4804-4fe0-4950-af7c-8f22d3f398ce",
+      "agent_id": "main_thread",
+      "tool_call": "Read#2905e6f58274",
+      "repeats": 6,
+      "billable_total": 10184529
+    }
+  ],
+  "codex_duplicate_audit": {
+    "method": "turn-level：對每筆 Codex token_count delta，把去重鍵從 'session_id + 累計tuple' 換成 'fork root + 累計tuple' 重算",
+    "fork_root_key": "session_meta.forked_from_id / parent_thread_id 追到底",
+    "session_meta_id_unique_per_rollout_file": 303,
+    "forked_files_in_window": 149,
+    "logical_conversations": 131,
+    "codex_sessions_counted_now": 303,
+    "current_billable": 140824176,
+    "deduplicated_billable": 136756562,
+    "duplicate_billable": 4067614,
+    "duplicate_share_of_codex_pct": 2.89,
+    "records_current": 29512,
+    "records_deduplicated": 29044,
+    "worst_roots": [
+      {
+        "root_session_id": "019f8e4d-ca99-73e2-a3d0-a7aa7a8cac5f",
+        "rollout_files": 76,
+        "current_billable": 110477880,
+        "deduplicated_billable": 106410266,
+        "duplicate_billable": 4067614
+      },
+      {
+        "root_session_id": "019fab94-83b0-7ab2-abdf-db893a187d19",
+        "rollout_files": 1,
+        "current_billable": 71422,
+        "deduplicated_billable": 71422,
+        "duplicate_billable": 0
+      },
+      {
+        "root_session_id": "019fab98-4b61-7593-ad9a-e83e5f4f77ce",
+        "rollout_files": 1,
+        "current_billable": 46076,
+        "deduplicated_billable": 46076,
+        "duplicate_billable": 0
+      },
+      {
+        "root_session_id": "019fab99-1b72-7be0-9c6e-b504e766449e",
+        "rollout_files": 1,
+        "current_billable": 75112,
+        "deduplicated_billable": 75112,
+        "duplicate_billable": 0
+      },
+      {
+        "root_session_id": "019fad35-f09d-7c63-8240-b609fd92988e",
+        "rollout_files": 1,
+        "current_billable": 57813,
+        "deduplicated_billable": 57813,
+        "duplicate_billable": 0
+      },
+      {
+        "root_session_id": "019fad35-f278-7792-b2a1-8f3aaf759eb0",
+        "rollout_files": 1,
+        "current_billable": 53547,
+        "deduplicated_billable": 53547,
+        "duplicate_billable": 0
+      },
+      {
+        "root_session_id": "019fad38-129c-76b1-bb3e-c828bb2d8e9b",
+        "rollout_files": 1,
+        "current_billable": 42120,
+        "deduplicated_billable": 42120,
+        "duplicate_billable": 0
+      },
+      {
+        "root_session_id": "019fad38-1977-7ab1-a802-146bcdee6565",
+        "rollout_files": 1,
+        "current_billable": 51351,
+        "deduplicated_billable": 51351,
+        "duplicate_billable": 0
+      },
+      {
+        "root_session_id": "019fad3a-0b13-72a0-997d-98a0610ed6a3",
+        "rollout_files": 1,
+        "current_billable": 44678,
+        "deduplicated_billable": 44678,
+        "duplicate_billable": 0
+      },
+      {
+        "root_session_id": "019fad43-deef-7922-aec8-76a8a5c89ede",
+        "rollout_files": 1,
+        "current_billable": 52367,
+        "deduplicated_billable": 52367,
+        "duplicate_billable": 0
+      }
+    ],
+    "status": "settled_measurement",
+    "caveat": "此為 turn-level 定值（同一 root 內累計 tuple 完全相同的 delta 只計一次），不是上界。fork 檔內真正新增的 turn 有不同的累計 tuple，會被保留。"
+  },
   "stored_daily_drift": [
     {
       "date": "2026-07-29",
-      "stored_daily_billable": 0,
+      "stored_daily_billable": 51024977,
       "recomputed_billable": 51024977,
       "stored_report_exists": true,
-      "understated_by": 51024977
+      "understated_by": 0
     },
     {
       "date": "2026-07-30",
-      "stored_daily_billable": 0,
+      "stored_daily_billable": 30600777,
       "recomputed_billable": 30600777,
       "stored_report_exists": true,
-      "understated_by": 30600777
+      "understated_by": 0
     },
     {
       "date": "2026-07-31",
-      "stored_daily_billable": 0,
+      "stored_daily_billable": 547759,
       "recomputed_billable": 543826,
       "stored_report_exists": true,
-      "understated_by": 543826
+      "understated_by": -3933
     },
     {
       "date": "2026-08-01",
@@ -1302,24 +1551,24 @@
     },
     {
       "date": "2026-08-02",
-      "stored_daily_billable": 0,
+      "stored_daily_billable": 25093007,
       "recomputed_billable": 25093007,
       "stored_report_exists": true,
-      "understated_by": 25093007
+      "understated_by": 0
     },
     {
       "date": "2026-08-03",
-      "stored_daily_billable": 0,
+      "stored_daily_billable": 9698197,
       "recomputed_billable": 9698197,
       "stored_report_exists": true,
-      "understated_by": 9698197
+      "understated_by": 0
     },
     {
       "date": "2026-08-04",
-      "stored_daily_billable": 0,
+      "stored_daily_billable": 24178959,
       "recomputed_billable": 24178959,
       "stored_report_exists": true,
-      "understated_by": 24178959
+      "understated_by": 0
     }
   ]
 }
