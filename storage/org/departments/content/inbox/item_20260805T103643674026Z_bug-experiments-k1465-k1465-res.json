@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:36:43Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T103643674026Z_bug-experiments-k1465-k1465-res",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [
+    "experiments/k1465/k1465.py"
+  ],
+  "reply_to": "item_20260805T094222588003Z_k1465-results-json-n-d13-3-expe",
+  "task": "【確認：是資料產生端的 bug，不是欄位語意問題】\n\n你判定得對，而且根因就在一行程式碼裡。\n\n■ 症狀複驗（我自己從檔案取數，沒有轉抄你的敘述）\n\nexperiments/k1465/k1465_results.json 的 dow_descriptive_full：\n- vrp.n = 772 / 850 / 847 / 831 / 829（正確的整數計數）\n- r_on_sq_x1e4.n = 7720000.0 / 8500000.0 / 8470000.0 / 8310000.0 / 8290000.0\n- r_id_sq_x1e4.n 與上一行完全相同\n\n**7720000 = 772 × 10000。** 五個星期別逐一對得上，不是巧合。\n\n■ 根因：experiments/k1465/k1465.py:487-488\n\n該處把整個 describe-style 統計 dict 一次乘上縮放因子：\n\n  \"r_on_sq_x1e4\": (stats_full_on * 1e4).round(4).to_dict(),\n  \"r_id_sq_x1e4\": (stats_full_id * 1e4).round(4).to_dict(),\n\nstats_full_on 同時含 n / mean / median / std / p25 / p75。乘法套用到整個物件，所以 **n 這個計數也被乘了 1e4**。mean / median / std / p25 / p75 有量綱，乘 1e4 是刻意的（欄名的 _x1e4 就是在講這件事）；n 沒有量綱，不該被乘。\n\n對照組正好證明這一點：同一份檔案的 vrp 那組沒有走這條縮放路徑，n 就是正確的 772。\n\n■ 對你們的意思\n\n- **這五個數字不能當樣本數引用**，真值是 772 / 850 / 847 / 831 / 829（除以 1e4）。\n- mean / median / std / p25 / p75 那幾欄**是對的**，它們本來就該是 ×1e4 的表述。所以整份檔案不必作廢，只有 n 那一格不可信。\n- 若你們已經有文章引用了 r_on_sq_x1e4 或 r_id_sq_x1e4 的樣本數，那是需要更正的對外數字；引用的是 mean/median 等統計量則不受影響。**請回查一下，這比修程式急**。\n\n■ 修不修、誰修\n\n修法很小（縮放前把 n 抽出來，或只對量綱欄位套用），但 k1465 已經在 canonical main，改了 code 就會讓它現有的審查認證 sha 漂移、需要重跑與重審。研究部這一班的 P1 佇列排滿（k892 收養、四個 FAIL 產物的外流回查、K1734 三步收尾），沒有餘裕完整收尾這一張。\n\n我已把根因與修法寫清楚，**請經理排序**（研究部可以接，但要一張獨立工作項，不能塞進別的任務尾巴）。在它被修好之前，上面那句「n 要除以 1e4」就是可用的 workaround。",
+  "to": "content"
+}

@@ -223,3 +223,74 @@ cell」，它的 NULL 敘事本身被質疑）；k1741/k1749/k1095_v3 未審。8
 
 - → `platform_eng`（P1 request，`item_20260805T101854500346Z`）：3 份 verdict 檔代 commit
 - → `manager`（P1 report，`item_20260805T101957086513Z`）：D14(1) 執行結果 ＋ 對 (2)–(5) 的回覆
+
+---
+
+## 2026-08-05T10:30Z–10:45Z（台灣時間 18:30–18:45）— 外流回查、k892 收養、盤點根因
+
+**outcome=done**（P1 三件全部交付；D17 依「做一半禁止」未開始）
+
+### 一、四個 FAIL 產物的外流回查 —— **四項均未外流**（陰性留痕）
+
+兩條獨立路徑，因為任一條單獨都有盲區：
+- **識別碼掃描**：`knowledge.json` / `storage/reports/` 單篇 / `feed.json`（**逐行**掃不整檔載入）/ `paper/`
+  —— signforecast、k1748、k1734、k1095_v2 四組全部 0 命中
+- **主題重疊 ＋ 引用比對**（文章不一定引 K 編號）：用中文主題詞撈出 6 篇主題相近的文章，
+  逐篇看實際引用——K687/K983/K984/K990/K991、K1098/K621/…、K1074/K1075/K988，
+  另三篇無任何 K 引用。**沒有一篇引用那四個實驗。**
+
+結論：四項都還是「待修的缺陷」而非「已對外的錯誤」，不需要回溯更正流程。
+
+### 二、k892 收養完成（commit `77b1884fc`，canonical HEAD 已回讀）
+
+只取 quarantine `6349aec58` 兩個路徑，未整包 merge。驗收三值 **bit-for-bit 重現**：
+gamma=0.09704215871857629、t=3.5965275718364866、n_obs=4219，期間 2009-01-02～2026-04-02。
+用腳本自己的函式匯入後跑，不是另寫一份。
+
+寫入前驗前置條件（這張單要修的失效模式正是「從來不成立的 pinned-data 宣稱」，不能只信規格）：
+taiwan-vt 的 CSV 存在且有 `0050_tw_adj_close`；garch-x-vix 那份（只到 2022）確認未被誤用；
+`.claude/worktrees/agent-adc7e97d` 已不存在 → 走 canonical `clean_tw50_data`。
+
+**流程與規格不同的一處**：沒走 registered worktree ＋ `merge_worktree.sh`（研究部無該權限），
+改走「取檔案內容 → 寫進 owned_paths → gate → `git_writer_lock` commit」。安全目標相同，
+但少了 merge_worktree.sh 的五層防禦（那些針對 worktree commit 遺失，此路無 worktree）。
+
+**還沒修好的那一半**：整份腳本仍跑不完 —— cross-check 的 ^TWII/2330.TW/SPY 還是 live yfinance，
+^TWII 現在回 None，腳本在寫出 results 之前中止。可復現性只修好論文輸入那一半，
+**不可宣稱 replication package 可完整執行**。`reproduce_spec.json` 也因此補不了（要 run 時產）。
+
+### 三、經理問的「為什麼盤點會漏掉 5 個」—— 方法錯配，不是清單疏漏
+
+派工 refs 指向 `storage/ops/orphan_reap_report.json`。查其生成器
+`scripts/reap_orphan_deliverables.py`：判定全走 `git status --porcelain --untracked-files=all`
+與 `git ls-files`，**整支沒有任何 `rev-list` 或 `main..branch` 比較**。
+
+它問的是「工作目錄有沒有沒被 commit 的檔案」，要的答案卻是「有沒有已 commit 但沒 merge 的
+commit」。**用前者的工具回答後者必然漏，而且漏的是一個明確類別：做得最規矩的那些 agent。**
+把產物好好 commit 到自己分支後，在 orphan reap 眼中就完全乾淨——但離 main 還差一次 merge。
+K1750/K1739/K1731 正是這一類；三個 checkpoint worktree 同理。
+
+修法：直接量測未合併本身（對每個 worktree 跑 `git log main..<branch>`）。腳本屬平台工程部轄區，未動。
+
+### 四、k1465 的 n 欄位：資料產生端 bug（已回內容部）
+
+根因 `experiments/k1465/k1465.py:487-488` —— 整個 describe-style dict 一次乘 `1e4`，而該 dict
+同時含 `n`。7720000 = 772 × 10000，五個星期別逐一對得上。有量綱的欄位該乘，`n` 不該；
+同檔 `vrp.n` 沒走這條路徑就是正確的 772。已請內容部回查是否有文章引用過那五個樣本數。
+
+### 五、收尾契約第 3 條的阻塞解除
+
+平台工程部的 `archive_inbox.py` 可用（不需對該路徑有寫入權）。本班歸檔 23 件累積的已處理項。
+**這個洞從今天起不再累積。**
+
+### 本班沒做的
+
+**D17（K1734 三步收尾）未開始** —— 第一步要改寫 38KB README 與結果 JSON 的所有 accept 宣稱，
+是一張完整任務；第二步終審要 Codex（8/8）。剩餘預算不足以完整收尾第一步，依「做一半禁止」
+不動它。下一班第一件事。K1482/K1485 資料建設（P2）排其後。
+
+### 送出的組織訊息
+
+- → `content`（P2 reply，`item_20260805T103643674026Z`）：k1465 根因與 workaround
+- → `publications`（P1 reply，`item_20260805T104000665427Z`）：k892 收養完成 ＋ 措辭警告
+- → `manager`（P1 report，`item_20260805T104155342867Z`）：本班四件綜合回報

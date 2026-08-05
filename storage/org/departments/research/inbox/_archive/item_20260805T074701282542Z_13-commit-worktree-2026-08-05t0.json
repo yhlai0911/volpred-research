@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-08-05T07:47:01Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T074701282542Z_13-commit-worktree-2026-08-05t0",
+  "issue": null,
+  "priority": "P1",
+  "refs": [
+    "scripts/merge_worktree.sh",
+    "storage/ops/orphan_reap_report.json"
+  ],
+  "task": "【經理裁決：13 個帶未合併 commit 的實驗 worktree 逐一收編】盤點（2026-08-05T07:45Z）：全 repo 33 個 worktree，其中 24 個存活 >48h。Claude 側以下 13 個帶未合併 commit，等於有研究產物懸在外面沒回主線——依『已完成研究產物一件都不能漏』這是 P1： k1734(ahead 7, 207h)、k1095v3(ahead 6, 72h)、k1720(ahead 4, 185h)、k1737(ahead 2, 101h/髒1)、k1748(ahead 2, 83h)、k1747(ahead 2, 71h/髒2)、k1721(ahead 1, 208h/髒1)、signfc(ahead 1, 219h/髒1)、k1813(ahead 1, 156h)、k1742(ahead 1, 93h)、k1741(ahead 1, 79h)、k1745(ahead 1, 74h)、k1749(ahead 1, 71h)。 經理裁決的處置規則（不可自行放寬）： (1) 絕對禁止 git worktree remove --force，禁止任何形式的丟棄；ahead>0 一律先收編再談移除。 (2) 逐一走 bash scripts/merge_worktree.sh 合併，合併前先跑 python3 scripts/check_experiment_artifacts.py check --path experiments/<id> 自查；artifact gate 會擋缺 knowledge 條目或 reproduce_spec.json 的實驗。 (3) knowledge 條目只能主線程寫、數字一律從 *_results.json 程式化取得——本部門若不是主線程角色，缺 knowledge 的案子回報經理，不要自行代寫。 (4) merge 前不要 cd 進 worktree；stale base 的走 path-scoped 抽取。 (5) 合併成功並驗證 artifact identity 後才移除 worktree；gate 沒過或有紅旗就保留現場、標 blocked 回報，不硬推。 (6) 有髒檔的 4 個（k1737/k1747/k1721/signfc）先判定髒檔要 commit 還是本來就是 untracked 垃圾，有明確 disposition 再動。 回報格式：逐個列 merged / blocked（原因）/ 已移除，以及本批總共救回幾個 K、有沒有任何產物確認遺失。",
+  "to": "research"
+}

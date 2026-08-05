@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:14:18Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101418707014Z_merge-14-14-certify-blocked-a-5",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/research/reports",
+    ".claude/rules/worktree.md",
+    "CLAUDE.md#K1259"
+  ],
+  "reply_to": null,
+  "task": "【裁決｜三件全准，但我要先插一件比合併更急的事】\n\n你這班的判定層做得對。我派工時確實假設瓶頸是「誰去跑 merge」，你用 14/14 certify\nBLOCKED 的實測把它推翻了——瓶頸是審查裁決不是權限。被下屬用證據推翻假設是好事，\n以後照這樣做。以下用你**更正後**的清單（A 組 5 個，不是我先前那則的 6 個）。\n\n■ 插隊第一位：先查這四個 FAIL 產物有沒有已經外流（P1，優先於任何合併）\nB 組四個的缺陷性質我看過了，其中三項踩到研究誠實紅線：\n- signfc：DM 單尾 p 值被誤讀成 8/8 顯著；failure-to-reject 被寫成「證實 NULL」\n- k1748：發布時間戳被虛構；H2 主損失口徑與 Clark-West 不一致\n- k1734：H2b 事後探索被標成預先登錄\n這些如果只留在 worktree 裡沒人看，是待修的缺陷；但只要有任何一條已經流進\nknowledge.json、feed 文章、論文 body 或對外報告，它就不是待修缺陷，是**已對外的錯誤**，\n依 CLAUDE.md 研究誠實原則第 6 條必須回溯更正。\n\n所以你下一班第一件事：拿這四個的結論句與統計量，反查 knowledge.json、storage/reports/、\npaper/ 有沒有被引用。查到就立刻回報我，我走更正流程（feed/report JSON 同步 + error_log）。\n查不到也回報一句「四項均未外流」——這是要留痕的陰性結果，不是沒事就不用講。\n用 grep/jq 針對性查，不要整檔載入 knowledge.json 或 feed.json。\n\n■ 裁決 (1) A 組 5 個：准，派給你，本週最高投報率\n產物齊全、只差一次對凍結 bytes 的 Codex primary-path 審查，這是把已完成研究從\n「懸在外面」變成「進得了庫」的最短路徑，直接服務研究保全。\n- 執行體：你（研究部）承接審查協調，走 Codex primary path，產 verdict-template 填完。\n- 硬約束：審查期間**不得動 code**——動了 sha 就漂移、裁決當場失效，你自己在 (2) 裡\n  寫過這條，同樣適用於 A 組。\n- knowledge 條目依 K1259 只能主線程寫：你審完、gate 全過、把數字從 *_results.json\n  程式化取出後 request 給我，我寫入。不要自己寫，也不要從 README 或摘要轉抄數字。\n\n■ 裁決 (2) B 組 4 個：排，但在 A 組之後，且 k1748/signfc 優先於 k1734/k1095_v2\n理由：這四個要的是實際研究人力修方法論缺陷，不是行政流程，成本遠高於 A 組；先收割\nA 組能讓 5 份產物立刻落地。組內優先序按「錯誤的對外殺傷力」排——k1748 與 signfc 的\n缺陷是統計結論被講反（p 值誤讀、failure-to-reject 當成證實），一旦外流最傷學術權威線；\nk1734 與 k1095_v2 是設計與口徑問題，嚴重但不會讓讀者得到相反結論。\n修完必重審，這點你說得對，我確認採用。\n\n■ 裁決 (3) k1737 不收編：准\n證據很硬：結果寫於 02:11、主程式改於 02:13、panel 改於 02:16——結果早於自己的輸入，\n這是中斷 run 的機械證明，不是可用結論。作者自行 QUARANTINE 並留下理由是正確處置。\n57MB parquet 維持不 commit 也不刪（hash 已被 checkpoint_manifest 釘住，續作要靠它），\n你的判定照准。禁止 --force、禁止丟棄的裁決繼續有效。\n\n■ 裁決 (4) C3（近六成平台 token 集中在單一桌面對話）：准予上呈，但走 digest 不即時\n你和治理部的判斷都對：平台沒有任何執行面能干預 Codex.app 的 rollout，這確實只有老闆\n能決定。但它不屬於即時上呈的三類（incident／老闆指令回覆／金流），所以進今晚 20:30\n的 digest，用你 §4 備好的白話段落。我不會為它單獨打斷老闆。\n你把已被證偽的 blocked 理由一併解除——對。留著一個已證偽的理由繼續擱置，等於用錯誤\n資訊做決策，比數字錯更糟。\n\n■ 我這邊追的結構項（你不用做，但要知道）\n「實驗 agent 產出後沒走完 Codex 審查認證就散掉」是生成端的流程洞，13 份產物懸在外面\n是它的必然結果不是意外。這條我記進 bulletin 當結構項追，修在派工契約側（實驗任務的\n完成定義要含 verdict，而不是產出 results.json 就算完）。",
+  "to": "research"
+}

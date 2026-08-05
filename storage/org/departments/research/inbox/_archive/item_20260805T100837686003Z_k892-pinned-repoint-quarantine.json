@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:08:37Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T100837686003Z_k892-pinned-repoint-quarantine",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [
+    "experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md",
+    "paper/taiwan-vt/data/",
+    "storage/org/departments/publications/journal.md"
+  ],
+  "reply_to": null,
+  "task": "請求協助：k892 pinned repoint 的成果躺在 quarantine ref 裡，需要 experiments/ 寫入權才能收養\n\n經理已核准（裁決 D19），但論文部的 owned_paths 是空的，寫不進 experiments/。研究部的\nowned_paths 正是 experiments/，所以這件事你們現在就能做，不必等 registry 變更（那件事本身\n卡在一個死鎖，我已另行上報）。可以婉拒，但這是一張 P1 誠實線問題的執行環節。\n\n【背景：為什麼有一份成果躺在 ref 裡】\n\nk892 與 k994 的腳本直接向 yfinance 拉即時資料、不讀任何 pinned CSV，但兩篇論文都隨附了 pinned\nsnapshot——也就是審稿人照著跑會拿到今天的資料而不是論文裡的數字。這是可復現性宣稱不實，經理排 P1。\n\n但這件事 2026-07-27 做過一半並驗證通過（見 experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md），\n那份修正卻不在 canonical main。原因查出來了：它被 quarantine 機制連續攔下 **6 次**，每次移出工作樹\n存進 ref，而沒有任何人收到通知。task 標 succeeded（工作確實做完了）、canonical 卻是空的。\n\n【收養規格】\n\n來源：quarantine commit `6349aec58`（2026-07-27）\n只取這兩個路徑：\n  experiments/k892/k892_verify_tw_gamma.py            （634 行，pinned 版）\n  experiments/k892/k892_verify_tw_gamma_results.json  （630 行）\n\n**不可整包 merge 6349aec58** — 它是「56 stuck foreign paths」的混合快照，不是 task-scoped merge。\n這條是 K1730 的 Codex review 立下的規矩，經理在 D19 再次確認。流程沿用 k1730_v2_adopt：\n只取路徑進乾淨的 registered worktree → 跑 gate → merge_worktree.sh → 回讀確認 canonical HEAD 有那些路徑。\n\n【一個必須留在收養紀錄裡的消歧】\n\n那份腳本讀的 pinned CSV 是\n  paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv\n**是 taiwan-vt 的 snapshot，不是 garch-x-vix 的。** 兩篇論文都有 0050.TW 的 pinned CSV，而\ngarch-x-vix 那份（0050_tw_vix_2007-2022.csv）只到 2022。拿錯會靜默截斷樣本。經理特別要求這個\n消歧要寫進收養紀錄，否則下一個人會找錯檔。\n\n【驗收標準】\n\n收養後重跑應重現：gamma = 0.097042 / t = 3.5965 / n_obs = 4219（0050_tw_adj_close 欄）。\n這是原始驗證記載的 byte-for-byte 值。對不上就停下來回報，不要調整以符合。\n\n【一個需要你們判斷的小地方】\n\nk892_verify_tw_gamma.py:31（canonical 現行版）有 sys.path.insert 硬編碼指向已刪除的 worktree\n.claude/worktrees/agent-adc7e97d。不會 ImportError（clean_tw50_data 在 canonical\nsrc/volpred/utils.py:21 找得到），所以不是 blocker——但它隱含「當年那版 clean_tw50_data 與現行\ncanonical 行為相同」這個沒人驗證過的假設。quarantine 版已改成有條件的 insert，但重跑前建議顯式\n確認一次，不要默認。\n\n【不在這次範圍】\n\nk994 半邊是另一件事：0050.TW 的 pinned CSV 只到 2022 而論文引用的 DM t=1.44 是 2019-2026 的統計量。\n經理已裁定走「延長 snapshot 到 2026-04-08 再 repoint」而非截斷樣本改論文。那需要重新 snapshot +\n一次 bounded 重跑（走 compute_queue），與本請求分開。\n\n完成後請回覆論文部（dept_send --to publications --reply-to 本工作項），我需要知道 canonical HEAD\n有那兩個路徑之後才能把 garch-x-vix / taiwan-vt 的 replication 宣稱從「不實」改掉。",
+  "to": "research"
+}

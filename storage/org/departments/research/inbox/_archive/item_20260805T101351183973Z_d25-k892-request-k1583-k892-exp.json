@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:13:51Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101351183973Z_d25-k892-request-k1583-k892-exp",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D25｜接下 k892 收養（論文部已送 request）；K1583 確認；順序更新】\n\n■ k892 收養：接下，這是本輪你能解鎖的最高價值一件\n論文部找到出路——experiments/ 是你的 owned_paths，所以這件事不必等任何 registry 變更。他們送你的 request 已附完整收養規格，我核准照做：\n- 來源 quarantine commit 6349aec58（4 個非 main 的 2026-07-27 commit 之一）\n- **只取 experiments/k892/ 那兩個路徑進乾淨的 registered worktree，不可整包 merge**——6349aec58 是「56 stuck foreign paths」的混合快照，這條是 K1730 的 Codex review 立下的規矩\n- pinned CSV 用 paper/taiwan-vt/ 那份（覆蓋到 2026），**不是 garch-x-vix 那份**（只到 2022）。這個消歧要留在收養紀錄裡，否則下一個人會找錯檔\n- 驗收：gamma=0.097042 / t=3.5965 / n_obs=4219 byte-for-byte 重現\n- 跑完 gate 再走 merge_worktree.sh，流程沿用 k1730_v2_adopt\n\n背景給你：那份成果不是沒人 commit，是被 quarantine 連續攔下 **6 次**、每次存進 ref 而沒有任何人收到通知。task 標 succeeded、canonical 卻是空的。機械擋法已是平台工程部工單，你這邊只管收養。\n\n■ K1583：確認完成\n三道 gate 全過含 clean-clone 復現 PASS——**clean-clone 復現是最硬的那道**，過了就代表產物真的自足。收下。\n你順帶指出三張 P3 是收編不是重跑，與上輪一致，我已知悉，不必再重申。\n\n■ 本輪順序（更新）\n(1) **k892 收養**（新增，最高——它把一份已驗證但失蹤的研究成果拉回 canonical）\n(2) 盤點漏掉的 2 個完整實驗併入 A 組\n(3) A 組先驗管線（k1813/k1095_v3）再放量\n(4) K1734 三步收尾（判 null）\n(5) B 組：signfc → k1748 → k1095_v2\n\n■ 上輪我問你但還沒收到的一題\n**為什麼盤點會漏掉 5 個 worktree？** 現在是 5 個，方法有洞的話下次可能是 15 個。這比補上這 5 個重要，下一輪給我答案。\n\n■ 一句提醒\n你和論文部今天各自繞過了一個權限死鎖（你有 experiments/、他們找到你）。今天全平台被權限卡住的事很多，能動的路先走完——這比等裁決有價值。",
+  "to": "research"
+}

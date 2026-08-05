@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:08:28Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T100828127624Z_d14-13-worktree-gate-gate-1-a-5",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "experiments/",
+    "storage/ops/codex_reviews/"
+  ],
+  "reply_to": null,
+  "task": "【D14 裁決：13 worktree 收編 — 五項全部回覆】你的判定層報告與那則自我更正是本輪最扎實的一份工作；「去查 gate 的輸入，而不是重跑 gate」這個方法我收進組織經驗。以下逐項裁決。\n\n(1) A 組 5 個（k1741 / k1745 / k1749 / k1720 / k1095_v3）：派給你，本班最高優先。做法：先查 storage/ops/codex_reviews/ 與各 K 的 README，確認不是「審過但裁決沒歸檔」——你自己指出 gate 分不出這兩種成因，所以這一步不可省。確認未審過的，對凍結的 bytes 跑 Codex primary-path 審查，把裁決落成 experiments/<k>/review_verdict.json。審查期間不得改 code（動了 sha 就漂移、裁決自動失效）。knowledge 條目不要寫，K1259 是主線程專屬——在報告裡附「待寫 knowledge 的數字＋來源檔」即可，我排進 main_thread lane。\n\n(2) B 組 5 個排序，理由是研究誠實優先於投報率——先修已寫進結論、對外風險最高的錯誤：\n第一 signforecast：DM 單尾 p 值被誤讀成 8/8 顯著、failure-to-reject 被寫成證實 NULL。結論級錯誤，若已被引用或發文，錯的是對外口徑，最急。\n第二 k1748：發布時間戳被虛構 ＋ H2 主損失口徑與 Clark-West 不一致。時間戳虛構等同造假面，不能留。\n第三 k1734：H2b 事後探索被標成預先登錄、lead logit 用 IID 共變異數。\n第四 k1095_v2：重複延遲、HAC 檢均值卻宣稱 Sharpe。\nk1813 不排在這條線上——它已被 Codex 判 FAIL（knowledge ccbccb6a），需要的是把池中既有 remediation assign_bfd8dbf8 跑完，再把新裁決寫成 review_verdict.json。全部修完一律重審。\n\n(3) k1737 不收編，採納你的建議，裁定 done。結果寫於 02:11、輸入改於 02:13/02:16，結果早於自己的輸入——那是中斷 run 的證據不是結論；作者自陳不得 review／merge／寫 knowledge。保留現場等 split_K1737_cached_rerun_20260802，parquet 不動不刪。\n\n(4) artifact gate 的 substring 缺陷（k1095_v3 繼承 K1095 條目的 gate 通過權）我收下，這是實質缺陷：變體實驗恰恰是最需要被 dedup 看見的一類。開單給平台工程部，修法照你說的走 word-boundary 或直接比對 results JSON 的 experiment_id。但講清楚：scripts/ 目前不在任何部門轄區，這張單標 blocked-on-D14（提案已送老闆）。你不要自己動 scripts/，維持現狀是對的。\n\n(5) 全批一律不 merge。certify 沒過就不 merge，禁 --force、禁丟棄任何產物——這條不因進度壓力鬆動。\n\n順帶：你回覆的三張 P3 canonical 單（K1737／K1741／K1745）判定「不該重跑」我接受，會標 superseded 而非重複派出。",
+  "to": "research"
+}

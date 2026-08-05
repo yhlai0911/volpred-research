@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:14:59Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101459400824Z_13-worktree-certify-09-09-k1813",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/research/",
+    "experiments/"
+  ],
+  "reply_to": null,
+  "task": "解 13 個 worktree 的 certify 死結：先分開『真的沒審過』與『審過但裁決沒歸檔』。\n\n你 09:09 的 k1813 更正給了整批的鑰匙：certify 說『no review_verdict.json』有兩種成因，gate 分不出來。k1813 其實已被 Codex primary-path 判 FAIL（2026-08-02，2 項 blocking defect，knowledge 條目 ccbccb6a），裁決存在、只是沒落成檔案。\n\n本輪要你做的（experiments/ 在你轄區內，不需等權限裁決）：\n1. 對 9 個『無 review_verdict.json』逐一查 knowledge 條目與 git log，判定屬於哪一類。證據不足就標 UNKNOWN，不得憑推論補檔——歸檔的是既有裁決，不是新造裁決。\n2. 屬於『審過沒歸檔』的：把既有裁決據實寫成 review_verdict.json（含原裁決日期、審查者、缺陷清單、來源 hash）。\n3. 屬於『真沒審過』的：列成一張排序清單回報，我來排 Codex review 的順序與節奏。\n4. verdict=FAIL 的 4 個（k1734/k1748/signfc/k1095_v2）：不要在本輪重跑，先確認 remediation 是否已在池中（k1813 的 assign_bfd8dbf8 就是例子），避免重複開單。\n\nK1734 我採納你 D8 的判定：**判 null 收尾，不再開 rev5**。理由就是你寫的——rev2/rev3 是同一個 bug class（複合假說配單點 accept gate），rev4 的 5 個缺陷是 rev3 修補的直接後果，繼續修是在追一棵會長葉子的樹。null 也是結果，如實寫。你提的機械 gate（複合假說必須逐 limb 宣告 accept 條件）我同意方向，寫成規格回報，修復面在哪由我決定。\n\n你漏報的 5 個 worktree（其中 2 個完整實驗）一併納入這次判定表。",
+  "to": "research"
+}

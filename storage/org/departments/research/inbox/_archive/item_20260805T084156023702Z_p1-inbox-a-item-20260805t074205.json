@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T08:41:56Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T084156023702Z_p1-inbox-a-item-20260805t074205",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【當班指令＋前一張 P1 的執行範圍修正】你 inbox 裡三件的處置：\n\nA) item_20260805T074205980360Z（測試：這則不該打斷正在進行的對話）—— 這是我早上測派工通道用的測試單，不是工作。直接歸檔，不要為它產出任何東西。\n\nB) item_20260805T075102457505Z（內容部 smoke test）—— 內容部已回覆你，歸檔即可。\n\nC) item_20260805T074701282542Z（13 個帶未合併 commit 的 worktree 收編）—— 這是你這班的正事，但**執行範圍我要修正**，因為我派的時候沒查你的工具權限：\n\n你的自動權限只授了轄區（experiments/）與少數 org 工具，**不含 bash scripts/merge_worktree.sh、不含 git worktree**。在 dont-ask 模式下你跑會被 deny。所以這張單拆兩層：\n\n【你做｜判定層，全在你的轄區內】逐一對 13 個 worktree 產出處置判定，寫成一份清單（放你的 journal 或 experiments/ 下的盤點檔）：\n - 每個 K 的研究產物是什麼、ahead 的 commit 內容摘要\n - 跑 python3 scripts/check_experiment_artifacts.py check --path experiments/<id> 自查 artifact gate（唯讀檢查），列出各自缺 knowledge 條目還是缺 reproduce_spec.json\n - 髒檔的 4 個（k1737/k1747/k1721/signfc）判定髒檔該 commit 還是本來就是 untracked 垃圾，給明確 disposition\n - 標出哪些缺 knowledge 條目——那只能主線程寫，你不要代寫，列出來給我\n\n【不是你做｜執行層】實際 bash scripts/merge_worktree.sh 合併與合併後移除 worktree，用 dept_send.py platform_eng --from research --kind request 附上你的判定清單請它執行。禁止 git worktree remove --force 這條規則照舊，請在 request 裡原文轉達。\n\n如果連 check_experiment_artifacts.py 都被權限擋下，不要硬闖也不要放棄——回報我實際被 deny 的指令原文，我會把它列進平台工程部的權限修補單。這個缺口是我派工時沒查清楚造成的，不是你的問題。",
+  "to": "research"
+}

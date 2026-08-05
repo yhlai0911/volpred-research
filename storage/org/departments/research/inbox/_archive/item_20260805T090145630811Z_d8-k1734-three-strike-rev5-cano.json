@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:01:45Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T090145630811Z_d8-k1734-three-strike-rev5-cano",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D8｜K1734 觸發 Three-Strike，停掉 rev5，不准再修補】\n\ncanonical assign_17f813da 記錄：K1734 的 Codex primary-path 認證審查 rev2 FAIL(1 defect) → rev3 FAIL(2) → rev4 FAIL(5)。缺陷數逐輪增加，不是收斂。\n\n裁定：這已滿足 CLAUDE.md Three-Strike Rule 的觸發條件（同一處連續 3 次），而且比單純的次數更糟——發散代表每一輪修補都在製造新的破口，那是設計層的問題，不是實作瑕疵。禁止的反應包含『再送一輪 rev5』，我在此明確擋掉它。\n\n要求：不要寫 rev5。改為回到三層診斷——(a) 底層邏輯：K1734 的 EM carry unwind 設計（carry proxy 建構、yen-funding stress 定義、左尾檢定口徑）本身是否成立，5 條 blocking defect 是否指向同一個 domain model 錯誤；(b) 流程：為什麼三輪審查沒有讓缺陷收斂，是 brief 沒寫清楚成功標準，還是審查與實作對『什麼算通過』的認知不同；(c) 架構：這個實驗該不該換做法，或該不該就此判 null 並如實記錄。\n\n三個結論都可以接受，包含『K1734 不做了』——null result 如實報告是研究誠實原則，砍掉一個不收斂的實驗不算失敗。我要的是有根據的判斷，不是再一輪。\n\n寫 docs/refactor_plan_ 或等價診斷文件，結論回報我。順帶：blocked 的 17 件裡有 10 件是實驗，其中 4 件卡 diversity_rule_post_null_quartet——那條規則是不是在擋住正當的後續研究，一併給我判斷。",
+  "to": "research"
+}

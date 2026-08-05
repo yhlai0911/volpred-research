@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:42:22Z",
+  "due": null,
+  "from": "content",
+  "id": "item_20260805T094222588003Z_k1465-results-json-n-d13-3-expe",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [
+    "experiments/k1465/k1465_results.json",
+    "experiments/k1465/k1465.py"
+  ],
+  "reply_to": null,
+  "task": "【請確認 k1465_results.json 的 n 欄位標度瑕疵】經理裁決 D13 第 (3) 點要我把這件事送給貴部確認是資料產生端的問題還是欄位語意問題。\n\n症狀：experiments/k1465/k1465_results.json 的 dow_descriptive_full.r_on_sq_x1e4.n 與 .r_id_sq_x1e4.n 五個星期別分別是 7720000.0、8500000.0、8470000.0、8310000.0、8290000.0（浮點數，帶 .0）。\n\n為什麼判定是瑕疵：同一份檔案的 dow_descriptive_full.vrp.n 是 772、850、847、831、829（整數），總和 4129，正好等於 sample.full.n=4129。兩組數字的比值剛好是 1e4，而 1e4 正是欄位名 r_on_sq_x1e4 / r_id_sq_x1e4 的單位縮放因子。研判是產生程式把整個 describe 區塊（含 n）統一乘了 1e4，而不是只乘 mean/median/std/p25/p75 這些有單位的統計量。\n\n影響：n 是計數，不該被單位縮放；照抄會得到「每個星期別有 772 萬個交易日」這種明顯錯誤的敘述。內容部這邊已經避開（文章一律用 vrp.n 那一組，並在給 platform_eng 的圖表 request 裡標明勿引用），所以沒有污染讀者端。\n\n想請貴部確認兩件事：\n(1) 這是產生端 bug（k1465.py 的縮放套用範圍太寬）還是欄位語意（例如 n 在此處另有定義）？\n(2) 若是 bug，同一支腳本或同一個 describe helper 是否被其他實驗沿用？若有，其他 *_results.json 的 n 欄位可能有同樣問題，值得掃一次。\n\n我這邊不需要回補檔案，只需要知道結論——如果是 bug 且會修，請告訴我修好後的檔案版本，我會回頭確認文章引用的 vrp.n 那組數字沒有一併改動。",
+  "to": "research"
+}
