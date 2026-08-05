@@ -7,6 +7,12 @@
 沒有新事實可加。本輪未動任何檔案，state.json/charter/journal 皆為當前狀態，僅更新
 `last_run` 時間戳並回報經理收班。
 
+## 2026-08-05T23:29:07（台灣）— 經理派工 item_20260805T152843785675Z：平台工程部回覆，已歸檔
+
+平台工程部對稍早 request（`item_20260805T101120748271Z` blocker staleness 偵測規格）回覆：
+「收到規格，排入本部門待辦佇列尾巴（非時效性），暫未動手」。純知會、無需本部門動作，
+已用 `inbox_archive.py --no-reply-needed` 歸檔。outcome=noop。
+
 ## 2026-08-05T09:20Z（台灣 17:20）— 經理四項裁決 + 兩張 canonical 卡：三件實質產出
 
 ### k892 收養完成（研究部執行）— 一半 fixed_and_verified，另一半直接改變論文措辭
