@@ -220,6 +220,7 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
 
     allow += [
         "Bash(uv run python scripts/org/dept_send.py:*)",
+        "Bash(uv run python scripts/org/inbox_archive.py:*)",
         "Bash(uv run python scripts/org/org_status.py:*)",
         "Bash(uv run python scripts/org/dept_routing.py:*)",
         "Bash(uv run python scripts/git_writer_lock.py:*)",

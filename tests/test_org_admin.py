@@ -1207,3 +1207,56 @@ def test_an_unreadable_stamp_fails_open(org_root: Path) -> None:
     stamp.write_text("{ not json", encoding="utf-8")
 
     assert manager_tick._too_soon_for_manager(org_root, datetime.now(timezone.utc)) is None
+
+
+def test_archiving_is_a_tool_not_a_bare_mv(org_root: Path) -> None:
+    """Eleven hours of content's inbox never dropping by one.
+
+    Every charter ends with "archive what you handled" and no tool existed, so
+    each department improvised `mv` and the permission layer denied it —
+    quietly. The next shift saw handled items as unprocessed and redid them.
+    """
+    import inbox_archive
+
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "alpha", "--from", "manager", "--task", "做事",
+                    "--no-wake", root=org_root).returncode == 0
+    item_id = next((org_root / "departments" / "alpha" / "inbox").glob("item_*.json")).stem
+
+    result = inbox_archive.archive(org_root, "alpha", [item_id])
+
+    assert result["moved"] == [item_id]
+    assert (org_root / "departments" / "alpha" / "inbox" / "_archive" / f"{item_id}.json").is_file()
+    assert not (org_root / "departments" / "alpha" / "inbox" / f"{item_id}.json").exists()
+
+
+def test_the_manager_can_archive_its_own_inbox(org_root: Path) -> None:
+    """The stopgap only accepted departments/, so 122 coordinator items could
+    not be filed at all — the role with the largest inbox had no way to clear it."""
+    import inbox_archive
+
+    assert run_tool("dept_send.py", "--to-manager", "--from", "alpha", "--task", "報告",
+                    root=org_root).returncode == 0
+    item_id = next((org_root / "manager" / "inbox").glob("item_*.json")).stem
+
+    assert inbox_archive.archive(org_root, "manager", [item_id])["moved"] == [item_id]
+
+
+def test_filing_an_unanswered_request_is_refused_with_the_fix(org_root: Path) -> None:
+    """The wake gate already names whoever does this; making it impossible beats
+    detecting it after the asker has waited a shift."""
+    import inbox_archive
+
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    assert run_tool("org_admin.py", "create", "beta", root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "alpha", "--from", "beta", "--kind", "request",
+                    "--task", "幫個忙", "--no-wake", root=org_root).returncode == 0
+    item_id = next((org_root / "departments" / "alpha" / "inbox").glob("item_*.json")).stem
+
+    result = inbox_archive.archive(org_root, "alpha", [item_id])
+
+    assert result["moved"] == []
+    assert result["blocked"][0]["id"] == item_id
+    assert "--reply-to" in result["blocked"][0]["fix"], "a gate must ship its own exit"
+    assert inbox_archive.archive(org_root, "alpha", [item_id],
+                                 no_reply_needed=True)["moved"] == [item_id]
