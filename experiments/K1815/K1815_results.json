@@ -1,0 +1,89 @@
+{
+  "experiment_id": "K1815",
+  "title": "Nested Clark-West increment test -- vix-sufficiency Family 10 (overnight VIX gap)",
+  "predecessors": [
+    "k1116c (weekly F12/F13)",
+    "k1116e (daily F2/F4)",
+    "k1116g (daily F1/F8/F11)"
+  ],
+  "adjudication": "storage/org/departments/publications/adjudications/vix_sufficiency_f3_f9_f10_20260805.md",
+  "baseline": "fwd_rv22 ~ 1 + VIX_level (M2, restricted); VIX_level = VIX close-of-day-t, identical to k1116e/k1116g baseline",
+  "augmented": "fwd_rv22 ~ 1 + VIX_level + sig_F10_overnight_vix (nests baseline)",
+  "signal_definition": "sig_F10_overnight_vix[t] = |VIX_Open[t] - VIX_Close[t-1]|, from an UNLAGGED daily ^VIX OHLC series pinned independently of the lagged VIX snapshot used by every other family in this replication package (main_v5.tex:240)",
+  "target": "22-day FORWARD realized vol of SPY (annualized, x100)",
+  "horizon_H": 22,
+  "inference_nw_lag": 21,
+  "is_end": "2018-12-31",
+  "oos_start": "2019-01-01",
+  "embargo_days": 22,
+  "harvey_threshold": 3.0,
+  "lag_convention": "VIX_level baseline feature = close-of-day-t info set (identical to k1116e/k1116g); sig_F10 = day-t OPEN vs day-(t-1) CLOSE, both known strictly before day t's close and strictly before the target's (t, t+H] realization window -> no lookahead in either the baseline or the augmented model",
+  "table4_dm_target": {
+    "F10": 1.12,
+    "note": "paper main-table DM |t| (main_v5.tex Table 4); fixed-split DM here is a directional cross-check only (cf. k1116e/k1116g), not an exact reproduction of the expanding-window Table-3/4 DM"
+  },
+  "references": [
+    "Clark-West (2007) JoE 138:291-311",
+    "Harvey-Leybourne-Newbold (1997) IJF 13:281-291",
+    "Harvey-Liu-Zhu (2016) RFS 29:5-68",
+    "Diebold-Mariano (1995) JBES 13:253-263"
+  ],
+  "family_covered": "F10_overnight_vix",
+  "spec": {
+    "signal_col": "sig_F10_overnight_vix",
+    "n_is": 6505,
+    "n_oos": 1861,
+    "oos_start": "2019-01-02",
+    "oos_end": "2026-05-28",
+    "is_signal_tstat": -4.523214693650083,
+    "mspe_baseline_vixonly": 81.6301834268023,
+    "mspe_augmented_vixplus": 82.13663995862477,
+    "mspe_adjustment_mean": 0.1867021591089304,
+    "dm_mspe": {
+      "t": -0.6589732387997089,
+      "p_two": 0.5099945217323976,
+      "p_one_greater": 0.7450027391338012,
+      "n": 1861,
+      "hln_factor": 0.9884470349525796,
+      "nw_lag": 21,
+      "note": "fixed-split DM on squared fwd-RV errors; +t => augmented beats VIX-only; directional cross-check, not exact Table-3 expanding-window DM"
+    },
+    "clark_west": {
+      "t": -0.42823371500434476,
+      "p_one_greater": 0.6657347231657069,
+      "p_two": 0.6685305536685862,
+      "hln_factor": 0.9884470349525796,
+      "nw_lag": 21,
+      "mspe_adjusted_mean": -0.3197543727135273,
+      "note": "one-sided H1: VIX+signal improves on VIX; |t|>3.0 => Harvey pass"
+    },
+    "harvey_pass_cw": false,
+    "verdict": "CW FAILS to reject: no incremental value beyond VIX (sufficiency holds under the MORE-POWERFUL nested CW test)"
+  },
+  "seed": 1815,
+  "code_trace": {
+    "path": "experiments/K1815/K1815.py",
+    "sha256": "b99836ca685f958236eeaf1b3a576b8bb750b5f6ead6e28e2528afb94baf0909",
+    "size_bytes": 14102
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "97c7ae2de35fe854c4760db4a1b95b4a8adc48d6ab2d890e0839e930288e0e65",
+    "output_identities": []
+  },
+  "runtime_seconds": 0.026,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1815
+      }
+    ]
+  }
+}

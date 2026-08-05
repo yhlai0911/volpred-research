@@ -1,0 +1,84 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1815.py",
+    "args": [],
+    "sha256": "b99836ca685f958236eeaf1b3a576b8bb750b5f6ead6e28e2528afb94baf0909",
+    "size_bytes": 14102
+  },
+  "canonical_result": "K1815_results.json",
+  "inputs": [
+    {
+      "path": "experiments/K1815/data/spy_ohlc_raw.csv",
+      "sha256": "10d647dbb562cb429c03497239edadd65eea9383913c2c866fcff8745f9a72d2",
+      "size_bytes": 844845
+    },
+    {
+      "path": "experiments/K1815/data/vix_ohlc_raw_unlagged.csv",
+      "sha256": "d76a727518e6a2e9f6fc1112d7b49ce933aef660f81ace7ff499e5c8d5a46a18",
+      "size_bytes": 873497
+    }
+  ],
+  "outputs": [
+    "K1815_results.json",
+    "reproduce_commit.json"
+  ],
+  "timeout_seconds": 60,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1815
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 0.026,
+    "recorded_at": "2026-08-05T20:13:44Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1815
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1815_results.json",
+    "sha256": "b2cbbdd43628955f5a78d596357e72c889510a3b69d7291bb1613d9b87c63274",
+    "size_bytes": 3723
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "97c7ae2de35fe854c4760db4a1b95b4a8adc48d6ab2d890e0839e930288e0e65",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": []
+  }
+}
