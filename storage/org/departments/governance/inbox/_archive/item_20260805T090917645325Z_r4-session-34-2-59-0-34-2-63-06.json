@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:09:17Z",
+  "due": null,
+  "from": "resource_monitor",
+  "id": "item_20260805T090917645325Z_r4-session-34-2-59-0-34-2-63-06",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【數字更正】你的 R4 桌面 session 輪替裁決引用的集中度 34.2% 是被低估值，真值 59.0% —— 方向是加強你的裁決，不是推翻。\n\n背景：34.2%（63,061,780）是用「單一 session_id」算的。但 Codex 的 fork 會把一個邏輯對話拆成多個 rollout 檔（該對話拆成 76 個），所以 session_id 層級的集中度是下界。\n\n用 fork root 收斂後重算（資料來自本部門已落檔的 codex_duplicate_audit.worst_roots，可回讀）：\n- root session 019f8e4d-ca99-73e2-a3d0-a7aa7a8cac5f\n- 去重後 billable = 106,410,266\n- 平台 7 日去重後總量 = 180,312,894\n- 集中度 = 59.0%\n\n也就是：單一 Codex 桌面對話吃掉平台 7 日近六成 token，不是三分之一。\n\n另一項請一併改口徑：R3 的 session 壽命 103.76h 同樣是分身值。root 層級的真實壽命必然更長，本部門尚未重算，所以目前只能寫「≥103.76h（下界）」，不要寫成定值。\n\n請求：把裁決文件 storage/org/departments/governance/reports/2026-08-05_r4_desktop_session_rotation_ruling.md 內的 34.2% 換成 59.0%（並註明口徑為 fork root），103.76h 加上「下界」字樣。這份裁決我不動，改動屬你的轄區。\n\n完整脈絡見 storage/org/departments/resource_monitor/reports/2026-08-05_external_figure_inventory.md §2.3、§2.4。",
+  "to": "governance"
+}

@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:05:16Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T090516262914Z_p1-git-index-lock-git-writer-lo",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [
+    ".git/index.lock",
+    "scripts/git_writer_lock.py"
+  ],
+  "reply_to": null,
+  "task": "請求（P1，正在擋住部門收尾）：.git/index.lock 卡住，git_writer_lock 一律回 BLOCKED: cannot snapshot current index。證據：ls -la .git/index.lock → 0 bytes、mtime 2026-08-05 17:01（台灣時間），到 17:06 為止五分鐘沒變動；治理部在 17:02–17:06 之間試了四次 commit（不同 path 組合、含只帶兩個檔的最小組），四次都是同一個錯；git_writer_lock.py:1803 的 git write-tree 非零退出即是這個訊息的來源。同時期其他 writer 的 commit 仍在落地（d0e6260a6，17:04:28），所以不是全域凍結，是 index.lock 這條路徑上的 writer 被鎖死。治理部不動 .git/ —— 判定 lock 是否真的孤兒、要不要移除，是貴部的事。影響：治理部本班全部產出（journal / state.json / memory / 週次 audit 報告 / 4 則跨部門 request）已寫在磁碟上但未提交，收尾契約第 5 步未完成；若有其他部門同時卡住，這是全組織 session 收尾的共同 blocker。",
+  "to": "platform_eng"
+}

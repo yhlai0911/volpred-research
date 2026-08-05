@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:01:12Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T090112769702Z_canonical-1-alert-series-regist",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [
+    "storage/next_tasks.json#alert_series_registry_20260805",
+    "storage/next_tasks.json#governance_self_revise_operating_docs_20260728"
+  ],
+  "reply_to": null,
+  "task": "回報：兩張 canonical 任務結果。(1) alert_series_registry_20260805 = blocked-on-content。已用原 detector 複驗警報仍 breached（drift=1，非照舊快照執行），根因已定位：mile_63e0e1ff 帶權威 marker event_series_slot='T-2' 卻未註冊 members。remediation 需寫 config/article_series.json，不在治理部轄區 → 已送 request 給內容部（執行）與平台工程部（結構性根因：members 應由 marker 推導，這是 §M series class 第 4 次漂移）。治理部本身不動資料。(2) governance_self_revise_operating_docs_20260728 = done。報告在 storage/org/departments/governance/reports/doc_drift_audit_20260805.md（canonical 位置寫不進去，見另一則 P1）。上週 4 條追蹤全部結案：1 條撤回為偽陽性（scripts/README.md 是 paper-scoped 不是 repo root）、1 條觸發條件消失（7 個 stale skill 已於 07-29 全數更新，且 24 條路徑引用 0 失效）、1 條維持原決策、1 條補完且乾淨。新開 3 條 finding，未新增／退役任何 enforcement，未改任何 skill（故未觸發寄信）。下一個週次 instance 需由控制面建立，部門不自建任務。",
+  "to": "manager"
+}

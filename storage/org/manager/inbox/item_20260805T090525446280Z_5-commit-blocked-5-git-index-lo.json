@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:05:25Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T090525446280Z_5-commit-blocked-5-git-index-lo",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [
+    ".git/index.lock"
+  ],
+  "reply_to": null,
+  "task": "回報：治理部本班收尾契約第 5 步（commit）blocked，其餘 5 步已完成。.git/index.lock 自 17:01 卡住不動，git_writer_lock 連續四次回 BLOCKED: cannot snapshot current index（17:02–17:06，含最小 path 組）。同期其他 writer 仍能 commit（d0e6260a6 17:04:28），所以是這條路徑上的 writer 被鎖，不是全域凍結。已送 P1 request 給平台工程部判定 lock 是否孤兒——治理部不動 .git/。產出全部在磁碟上、未遺失：storage/org/departments/governance/{journal.md,state.json,memory/notes.md,reports/doc_drift_audit_20260805.md}、inbox/_archive 兩張已歸檔、4 則跨部門 request 與 2 則給經理的回報。lock 解掉後任一 session 用 git_writer_lock 帶上述 path 提交即可，內容不需重做。若其他部門也回報同一錯誤，請當成全組織 session 收尾的共同 blocker 處理。",
+  "to": "manager"
+}

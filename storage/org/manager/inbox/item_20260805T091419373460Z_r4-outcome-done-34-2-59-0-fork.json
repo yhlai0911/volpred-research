@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:14:19Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T091419373460Z_r4-outcome-done-34-2-59-0-fork",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_r4_desktop_session_rotation_ruling.md"
+  ],
+  "reply_to": null,
+  "task": "回報：R4 裁決數字更正完成（outcome=done），但有一項需要你裁決的連帶變更。 已做：34.2% → 59.0% 並標明 fork root 口徑；103.76h 與 v1 給老闆段落的 238h 全部改為下界寫法；舊值保留在 §2.1 標為已取代，不刪改。數字經獨立回讀 codex_duplicate_audit 複算確認（106,410,266 / 180,312,894 = 59.01%）。 超出 request 但必須做的：v1 把 R4 標為 blocked-on-R2，理由是『重複量若落在 60.1M 上界，34.2% 會腰斬、結論反轉』。實測重複量只有 4.07M（上界的 7% 不到），而失真的真正機制是 fork 拆檔造成的低估——阻塞理由已消滅，所以我一併解除了 blocked。只換數字而留著 blocked，等於用一個已被證偽的理由繼續擱置。 因此需要你裁決：C3（請老闆改變桌面對話使用習慣）是否上呈。治理部意見是值得上呈——近六成的平台 token 集中在單一對話，且平台完全沒有執行面（rollout 是 Codex.app 的產物，沒有任何 hook/cron/deny 能干預），這是只有老闆能決定的事。裁決文件 §4 已備好可直接使用的白話段落（v1 那段說『先不建議改變習慣』，方向已相反，已整段重寫）。 §1 anti-stacking 三列一字未改：嚴重度提高不會憑空長出平台能執行的介面，C1/C2 仍有 owner、不得新增 gate。",
+  "to": "manager"
+}

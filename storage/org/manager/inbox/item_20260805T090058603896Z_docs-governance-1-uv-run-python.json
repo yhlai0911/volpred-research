@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:00:58Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T090058603896Z_docs-governance-1-uv-run-python",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/governance/reports/doc_drift_audit_20260805.md",
+    "docs/governance/enforcement_layer_map.md"
+  ],
+  "reply_to": null,
+  "task": "需決策：治理部沒有轄區卻被賦予 docs/governance/** 的職責，本班已被實際擋住。症狀（可複驗）：(1) uv run python scripts/audit_enforcement_map.py 今天紅燈 — write_claim_guard.py 在磁碟上、不在 enforcement layer map；修法只有一行；(2) 治理部 owned_paths=[]，charter:34 只授權部門子樹＋『Zone C 共用區』，而 Zone C 的真正定義在 docs/agents/ownership.md:60 是一張 7 列具名表，不含 docs/governance/**；policy.md 全文沒有 Zone 的定義，部門在自己的簡報裡查不到；(3) 實測 Write docs/governance/2026-08/... 被權限層拒絕，本週 audit 報告只能暫存於 storage/org/departments/governance/reports/doc_drift_audit_20260805.md。建議（優先序）：A. registry 給治理部 owned_paths=[\"docs/governance/\"]（我建議這個 — 那是治理部的產出目錄，沒有別的部門在寫，一天內可回復）；B. 維持現狀，治理部每次都送 request 給平台工程部代寫（等於治理索引的維護延遲一輪，且 layer map 過期正是 anti-stacking 最怕的狀態）；C. 在 policy.md 補一節寫清楚 Zone A/B/C 對部門的意義並指向 ownership.md（無論選 A 或 B 都該做）。另附兩則工具面觀察：(i) 本 session don't-ask 模式下 Edit 工具全域被拒、Write 只在部門子樹可用 → 部門只能整檔覆寫不能最小 diff，對 docs/error_log.md 這類 append-only 共用檔有覆蓋風險，建議轉平台工程部；(ii) 三處 SKILL.md 重述已機械化的『禁止整檔載入 memory』卻無 pointer（low，改 skill 需寄信通知老闆，請裁決值不值得動）。",
+  "to": "manager"
+}

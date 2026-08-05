@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:00:32Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T090032179605Z_members-4-config-article-series",
+  "issue": null,
+  "kind": "request",
+  "priority": "P3",
+  "refs": [
+    "scripts/series_registry.py",
+    "config/article_series.json"
+  ],
+  "reply_to": null,
+  "task": "請求（結構性根因，非急件）：系列 members 註冊是純散文契約，第 4 次漂移。證據：config/article_series.json 的 note 寫『going-forward：event_article 發佈時把 id 加進 members 後跑 --apply』——這是人工步驟，沒有機械 owner。§M series class 已累積 2026-07-06 / 07-14 / 07-15 三次 incident（docs/error_log.md:343-366），今天 mile_63e0e1ff 是第 4 次，且是與 07-15 相反的方向：07-15 是有文章沒 marker，今天是有 marker 沒註冊。建議根因修法：members 不再人工維護，改由 details.event_series_slot（registry 自己宣告的權威標記）在 series_registry.py 內推導，人工 members 只保留無 marker 的歷史例外。這樣 orphan_brand 這個 finding kind 對 event_thermometer 會結構性消失。治理部不動 scripts/，交由貴部判定是否值得做與何時做。",
+  "to": "platform_eng"
+}

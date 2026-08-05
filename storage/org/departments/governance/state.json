@@ -1,9 +1,37 @@
 {
-  "health": "ok",
+  "health": "degraded",
+  "health_reason": "治理部 owned_paths=[] 但職責涵蓋 docs/governance/**；本班兩項修法皆因此被擋（enforcement map 一行、週次報告落點）。等經理裁決。",
   "kpi": {
     "skill_architecture_check": "not_run_this_session",
-    "three_strike_tracking": "no_open_strikes",
-    "owner_first_rulings_issued": 1,
+    "skills_reference_integrity": {
+      "as_of": "2026-08-05",
+      "skills_checked": 7,
+      "repo_path_refs": 24,
+      "broken_refs": 0,
+      "note": "上週 7 個 stale_skills 已於 2026-07-29 全數更新；改以實質路徑檢查取代時間戳啟發式"
+    },
+    "enforcement_map_green": false,
+    "enforcement_map_missing": ["scripts/hooks/write_claim_guard.py"],
+    "r4_desktop_session_concentration": {
+      "as_of": "2026-08-05",
+      "metric": "單一 Codex 桌面對話佔平台 7 日去重後 billable",
+      "value_pct": 59.0,
+      "basis": "fork root 收斂（106,410,266 / 180,312,894）",
+      "superseded_value_pct": 34.2,
+      "superseded_basis": "單一 session_id（下界）",
+      "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
+      "ruling_status": "blocked-on-R2 已解除；C3 是否上呈老闆待經理裁決"
+    },
+    "three_strike_tracking": {
+      "series_membership_class_M": {
+        "strikes": ["2026-07-06", "2026-07-14", "2026-07-15", "2026-08-05"],
+        "status": "根因已提交平台工程部（members 由 event_series_slot 推導），治理部不自行實作"
+      },
+      "governance_index_staleness": {
+        "strikes": ["2026-08-05 gate 盤點", "2026-08-05 週次 audit"],
+        "status": "同一件事連兩班指出、皆無權修；第三次即觸發 3-strike 重構（map 改為從 settings.json 生成）"
+      }
+    },
     "gate_inventory": {
       "as_of": "2026-08-05",
       "control_plane_gates": 29,
@@ -14,7 +42,7 @@
       "enforcement_layer_map_stale": true
     }
   },
-  "last_run": "2026-08-05T08:50:00Z",
-  "open_items": 1,
-  "notes": "gate 盤點提案已送經理，7 項待裁決（治理部未動任何 gate）。open_item = 提案 #7 arc dedup/digest/silent-fallback 三組疑似疊層待下一輪複核。前案 R4 仍 blocked-on-R2。"
+  "last_run": "2026-08-05T09:15:00Z",
+  "open_items": 2,
+  "notes": "open_items = (1) 經理裁決治理部 owned_paths（P1，卡住 enforcement map 修復與本週報告落點）；(2) 前一班 gate 盤點 7 項提案仍待裁決，其中提案 #7 arc dedup/digest/silent-fallback 三組疑似疊層待複核。R4 案已結：數字更正為 59.0%（fork root 口徑），自訂的 blocked-on-R2 已解除，C3 是否上呈老闆改由經理裁決。已送出 request：內容部（series members 補登）、平台工程部（members 推導根因、claim-on-deny 缺陷、.git/index.lock P1）、論文部（taiwan-vt 缺 scripts/README.md）。commit 仍受 .git/index.lock 阻塞。"
 }

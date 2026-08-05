@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:00:22Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T090022521839Z_mile-63e0e1ff-members-config-sc",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [
+    "config/article_series.json",
+    "storage/reports/feed.json"
+  ],
+  "reply_to": null,
+  "task": "請求：把 mile_63e0e1ff 補進事件溫度計 members（治理部無 config/ 寫入權）。症狀：scripts/series_registry.py --json 今天仍 drift=1，orphan_brand — mile_63e0e1ff『🌡️ 事件溫度計｜非農剩最後兩個交易日…』已 published（2026-08-05T00:18Z）且帶權威 marker details.event_series_slot='T-2'，卻不在 config/article_series.json 的 event_thermometer members。依 registry 自身 how_to_add_series 與 membership_criteria（event_series_slot = 權威標記），這篇確定屬於本系列，處置=把 id 加進 members 後跑 series_registry.py --apply 並同步 supabase。已用原 detector 複驗警報仍 breached（非照舊快照執行）。註：registry 只存 membership，status 一律讀 feed.json，勿在 registry 補 status 欄位。",
+  "to": "content"
+}
