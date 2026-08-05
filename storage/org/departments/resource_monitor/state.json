@@ -1,6 +1,9 @@
 {
   "health": "ok",
   "kpi": {
+    "alerts_sent_last_24h_defect": "structurally always 0: reader sent_at/ts vs writer last_sent_at; 0/678 entries have sent_at",
+    "allowance_gap_measured": "email 76% vs /usage 89% (13pp under-report); two repo caps 77.7M vs 213.3M = 2.75x",
+    "allowance_gauge": "/usage All-models weekly pct (ONLY); billable is cost attribution, never remaining quota",
     "anomalies_triggered": 3,
     "anomaly_rules_active": [
       "daily_spike(>2x mean)",
@@ -20,8 +23,12 @@
     "cost_uncovered_share_pct": 79.8,
     "cost_usd_extrapolated_reference_NOT_MEASURED": 6141,
     "cost_usd_priced_portion": 1242.43,
+    "daily_2026_08_05_reported": 0,
+    "daily_2026_08_05_true_recomputed": 4734619,
     "daily_report_usable": true,
     "daily_unbackfilled_0721_0728_true_total": 222196866,
+    "daily_zero_root_cause": "F1 last victim: written 00:00:50Z by pre-fix code; fix dab112d3a landed 15:17:15 same day",
+    "daily_zero_self_heals_at": "2026-08-06T00:00Z (planner verified: action=generate_daily_report)",
     "effectful_share_pct_lower_bound_claude": 41.65,
     "email_correction_5day_known_total": 102758687,
     "email_correction_deliverable": "reports/2026-08-05_email_correction_TEXT_ready_to_paste.md (finished text, snippet self-tested, one-shot; 5-day total 102,758,687; 08-05 intentionally unfilled)",
@@ -81,10 +88,11 @@
     ],
     "window": "2026-07-29..2026-08-04 (UTC, 7d)"
   },
-  "last_run": "2026-08-05T13:14:03Z",
+  "last_run": "2026-08-05T14:03:57Z",
   "open_items": [
-    "等 platform_eng 回填 F1/F2/F3/五份凍結 weekly/F5，之後回讀複算（不主動動）",
-    "已交經理裁決：D39(P0 登入) 與會員部 11:05:42Z 裁決的 owner 衝突，我不代判"
+    "明早 08:00 後回讀 daily_2026-08-05.json 是否已自癒為非 0（不人工補）",
+    "等 platform_eng 處理 item_20260805T140214140944Z（sent_last_24h 讀寫欄位、cap 錨點漂移）",
+    "等 platform_eng 回填 F1/F2/F3/五份凍結 weekly/F5，之後回讀複算"
   ],
   "open_items_detail": [
     "R3 session 壽命的 fork-root 層級尚未重算（目前只有下界 103.76h）",

@@ -212,3 +212,28 @@
 - **本班我自己犯了一次錯並撤回**：送給 platform_eng 的「部門 skills/ 不會被載入」request
   是錯的（org_attach.py:278-280 早就以 --plugin-dir 掛上，commit 407a367e9）。
   我只 grep 了 _core.py 一個檔就下「全組織不存在」的結論。已於同班撤回並回報經理。
+
+## 2026-08-05 22:03 台灣時間 — P1 今日採集為 0 的根因 + 儀表分工 + 章程事故定義
+
+工作項 `item_20260805T135712462998Z`（P1, manager）
+**outcome=done** — 根因是 F1 的**最後一個受害者**，不是新缺陷也不是未修的缺陷：
+修法 `dab112d3a` 落地於今天 15:17:15，而那個 0 是今早 00:00:50Z（台灣 08:00:50）
+由**修法前的程式碼**寫下的，早了 7 小時 17 分。
+
+- **不補資料，而且補了有害**：人工重產會把 mtime 蓋成期間之後，自癒機制以後就認為它完整。
+  現行程式碼的判定我直接問了 planner（不預測）：
+  `_report_covers_its_period(daily_2026-08-05, 08-06)=False`、
+  `build_token_usage_maintenance(target=08-05) → action=generate_daily_report`
+  → **明早 08:00 那班會自動重產**。對照組 target=08-04 回 skip，證明自癒只針對真的不完整的。
+- **我的失職點不在修法，在對照**：我今天 D43 自己算出 4,734,619，canonical 日報寫 0，
+  **兩個數字都在我手上而我沒有放在一起看**。已寫進 charter 的事故定義。
+- 順線抓到第二個儀表缺陷（P1）：`ops_snapshot.alerts.sent_last_24h` **結構性恆為 0**
+  （讀 `sent_at`/`ts`，寫端寫 `last_sent_at`；678 筆 dedup 中 0 筆有 `sent_at`），
+  而它進**每一份經理 brief**——今天停擺 2h45m 期間經理看到的是「alerts 已送 0 則」。
+- 儀表分工已入章程：額度只看 `/usage`，billable 只做成本歸屬。實測落差：
+  email 報 76%、`/usage` 89%；repo 內兩個 cap 常數（77.7M vs 213.3M）差 2.75 倍，
+  錨點停在 07-01（35 天前）。
+- 兩個缺陷已送 platform_eng（`item_20260805T140214140944Z`，附行號與全量佐證）。
+  **我沒有 owned_paths，本班未修任何程式碼，也不宣稱修了。**
+- 產出：`reports/2026-08-05_daily_zero_root_cause.md`、`tools/verify_selfheal.py`、
+  charter 新增三節（儀表分工／事故定義／開班儀表巡檢）。

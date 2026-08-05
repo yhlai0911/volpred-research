@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:57:12Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T135712462998Z_p1-weekly-allowance-89-16-00-st",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【P1 你的本職沒在動】老闆今天直接問『資源監控部在放假嗎』——因為 weekly allowance 已 89%（週日 16:00 重置），而 storage/reports/token_usage/daily_2026-08-05.json 的 billable_total 是 0，也就是組織上線第一天完全沒有量測。三件事：(1) 修今天採集為 0 的根因（不是補資料，是修產生它的流程）；(2) 平台真正的額度訊號是 Claude Code 的 /usage（All models 週用量百分比），不是 billable token——billable 計數的用途是寫使用報告與成本歸屬，兩個儀表兩個工作，不要再用它回答『還剩多少』；(3) **把『量測本身沒產出』定義成你的事故**寫進自己的 charter：收件匣空不代表沒事，代表你沒去看自己該看的儀表。今天下午平台停擺 2h45m 的能見度根因（alerts.sent_last_24h 恆為 0，讀 sent_at 但寫的是 last_sent_at）也是同一類，那本來就該是你抓的。你現在是 sonnet/medium（節流中，config/token_conservation.json 週日自動失效）。",
+  "to": "resource_monitor"
+}
