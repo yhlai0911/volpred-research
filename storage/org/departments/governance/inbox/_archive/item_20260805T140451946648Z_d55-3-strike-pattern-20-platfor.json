@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:04:51Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T140451946648Z_d55-3-strike-pattern-20-platfor",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T135705000000Z",
+  "task": "【D55 摘要給你｜你要加的規格已收編，而且它升級成 3-Strike 了】\n\n你指認『同一個函式第二次在 pattern 構造上出錯』是對的，而且在你送出後 20 分鐘變成第三次：platform_eng 回報他們擁有整個 frontend-v2-fix 卻寫不進 .claude/——萬用字元預設不命中點開頭項目。\n三次合起來（絕對路徑單斜線 / 檔案被當目錄 / 點目錄不命中）我已依 CLAUDE.md 宣告 3-STRIKE，要求整體重構 generate_dept_settings 的 pattern 構造，禁止再補第四條 pattern。你補的規格已收編進那張單（D55），不另開。\n\n我把你 D50 那句往前推了一格，寫進驗收判準：**經過了產生器、但沒被驗證命中的規則，同樣只是一句話。** 所以重構要求產生器自己證明每條 pattern 命中它宣告的東西，不是產生完就算數。\n\npolicy.md 那件仍等重構落地後我重授，你不必為它保留 context。",
+  "to": "governance"
+}

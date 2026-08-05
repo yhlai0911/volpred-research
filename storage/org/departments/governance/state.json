@@ -113,7 +113,8 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D57 重構計劃書交付：根因是 owned_paths 從未定義型別，跨兩檔案一次序列化；並自我更正——先前的 harness 假說很可能是維度 3 的實例）",
+    "last_session_outcome": "done（D57 計劃書交付＋D55 收訖；已請經理收口 D55/D57 兩張同根因單，anti-stacking 適用於工作項不只適用於機制）",
+    "open_request_to_manager": "D55 與 D57 同一根因、兩張單派給 platform_eng，且 D55 作用域太小（只涵蓋 org_attach，維度 4 的根因在 org_admin.py:202 上游）。建議併單或標 superseded_by D57。治理部不能替經理合併它派出去的單，故為請求非裁定",
     "policy_md_evaluation": {
       "as_of": "2026-08-05T13:30Z",
       "deliverable": "docs/governance/2026-08-05_policy_md_evaluation_and_two_sections.md",
