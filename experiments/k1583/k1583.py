@@ -1,7 +1,8 @@
 """K1583 — Conditional / Sequential MCS Evaluation.
 
 Pure ex-post meta-analysis: reuses existing K1380_v4 OOS daily QLIKE loss
-matrix (17 GARCH-X-VIX specs on SPY, OOS 2019-01-02 → 2026-05-20, 1866 days)
+matrix (17 GARCH-X-VIX specs on SPY; the corrected matrix covers OOS
+2019-01-02 → 2026-07-21, 1900 days — the superseded one stopped at 1866)
 and re-evaluates Hansen-Lunde-Nason (2011) Model Confidence Set under two
 conditioning regimes (VIX level, NBER recession) plus rolling-window
 sequential drift detection.
@@ -36,6 +37,7 @@ import json
 import logging
 import os
 import sys
+import time
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,6 +49,7 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+from volpred.research.reproduce_spec import finalize_experiment  # type: ignore
 from volpred.stats.mcs import model_confidence_set  # type: ignore
 
 
@@ -500,6 +503,7 @@ def make_plots(
 # ----------------------------------------------------------------------
 
 def main() -> int:
+    started_at = time.time()
     rng = np.random.default_rng(SEED)  # global anchor (not strictly needed)
     log.info("=" * 70)
     log.info("K1583 Conditional / Sequential MCS")
@@ -578,7 +582,15 @@ def main() -> int:
             "rolling_window_days": ROLLING_WINDOW,
             "rolling_stride_days": ROLLING_STRIDE,
             "vix_thresholds": {"high>=": VIX_HIGH_THRESH, "low<": VIX_LOW_THRESH},
-            "primary_inventory": "K1380_v4 SPY 17 specs, OOS 2019-01-02 → 2026-05-20",
+            # Derived from the loaded matrix, never hard-coded: this string was
+            # frozen at "2019-01-02 → 2026-05-20" while the corrected K1380_v4
+            # matrix already covered 1900 days ending 2026-07-21, so the results
+            # JSON was describing a sample it had not evaluated.
+            "primary_inventory": (
+                f"K1380_v4 SPY {len(SPEC_LABELS)} specs, OOS "
+                f"{losses_df.index[0].date()} → {losses_df.index[-1].date()} "
+                f"({len(losses_df)} days)"
+            ),
             "loss_proxy": "Patton (2011) r² QLIKE",
             "conditioning_variables": {
                 "vix": "spy_vix_qqq_eem_fez_2000-2026.csv vix_close (contemporaneous, not lagged — characterizes the day's regime)",
@@ -609,15 +621,40 @@ def main() -> int:
         "limitations": [
             "Loss inventory is restricted to a single asset (SPY) and a single OOS sample. The K1258 multi-asset panels are inventoried but NOT pooled (K1355 rule against asset-day stacked inference); cross-market conditional results would require per-asset MCS or a panel-HAC re-design (out of scope here).",
             "Conditional MCS via subsample slicing is a coarse approximation. A proper conditional MCS (Liu, Pelger & Yang 2025 JRSS-B, qkag066) uses kernel-weighted loss differentials; reproducing it would require a separate implementation pass.",
-            "NBER recession sample in OOS is small (61 raw regime-labeled trading days, 43 days actually used in the MCS after joint NaN cleaning; covers only COVID 2020-03 to 2020-04). The recession-regime MCS is therefore underpowered; results should be read as descriptive, not inferential.",
+            # Derived, not hard-coded: this sentence used to state "61 raw / 43 used"
+            # from an earlier run and kept saying so after the corrected loss matrix
+            # cut the usable recession sample to a fraction of that.
+            (
+                f"NBER recession sample in OOS is small ({int((recession == 'recession').sum())} raw "
+                f"regime-labeled trading days, {rec_results['recession']['T']} days actually used in "
+                "the MCS after joint NaN cleaning; covers only COVID 2020-03 to 2020-04). The "
+                "recession-regime MCS is therefore underpowered; results should be read as "
+                "descriptive, not inferential."
+            ),
             "Sequential drift detection here is rolling-window MCS top-1 with a 252-day window and 21-day stride. This is not equivalent to Inoue, Jin & Rossi-style online SPA tests; change-points should be read as visualization aids, not formal break-tests.",
             "Tie-breaking in 'top-1' uses min mean QLIKE within tied MCS p-values, which biases the winner toward low-mean models; alternative tie-breaks (e.g. mean rank) would shift the timeline marginally.",
         ],
     }
 
-    out_path = SCRIPT_DIR / "k1583_results.json"
-    out_path.write_text(json.dumps(out, indent=2, default=str))
-    log.info("Wrote %s", out_path.relative_to(PROJECT_ROOT))
+    # Results and reproduce_spec are written together so that code_trace and
+    # spec.entrypoint describe the same bytes by construction (K1708 lesson: a
+    # spec assembled after the fact drifts from the run it claims to describe).
+    out_path, _spec = finalize_experiment(
+        results=out,
+        entrypoint=__file__,
+        canonical_result="k1583_results.json",
+        exp_dir=SCRIPT_DIR,
+        inputs=[LOSS_MATRIX_PATH, SPY_DATA_CSV],
+        # declared outputs are resolved against exp_dir, so pass bare filenames —
+        # plot_paths carries repo-relative paths for the results JSON's own use.
+        outputs=sorted(
+            Path(p).name
+            for p in (plot_paths.values() if isinstance(plot_paths, dict) else plot_paths)
+        ),
+        seeds=[("numpy_default_rng", SEED), ("mcs_bootstrap", SEED)],
+        started_at=started_at,
+    )
+    log.info("Wrote %s (+ reproduce_spec.json)", out_path.relative_to(PROJECT_ROOT))
 
     # Pretty summary to stdout
     print("\n" + "=" * 70)

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:45:31Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T094531920790Z_k-experiments-id-id-results-jso",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T090054467298Z_2026-08-05t07-49z-request-reply",
+  "task": "【回覆：研究部目前沒有可轉文章的 K，原因與預計時間點】\n\n謝謝提出具體的合作方式（附 experiments/<id>/<id>_results.json 路徑與 verdict、你們做 3-layer 查重後排 draft 池）——這個介面很清楚，之後就照這個走。\n\n**但現在必須誠實說：研究部手上沒有任何一個「已完成且經審」的 K 可以給你們。** 這不是沒做研究，是卡在審查那一關：\n\n研究部今天對所有帶未合併 commit 的 worktree 做了逐一判定，至少 18 個實驗已經算完並凍結（含 K1741 尾部對沖 CONDITIONAL_PASS、K1745 TVP-HAR NULL、K1749、K1750 IPO 熱度、K1813 隔夜 VRP 等），但 experiment_gates.py certify 全部 BLOCKED——沒有一個帶著有效的 Codex primary-path 審查裁決。\n\n**根本原因是 Codex 訂閱額度用盡到 2026-08-08**（任務池裡 codex_primary_reverify_k1714_k1735_20260808 的 blocked_until 是 2026-08-08T04:05Z，老闆 2026-08-04 指令寫明 8/8 12:01 恢復後才能跑補驗）。在那之前，certify 這條路對研究部是關閉的。\n\n平台規則不允許把未經審查的結論轉成讀者文章（研究誠實原則第 2、6 條與 K1259 的 provenance gate），所以研究部不會在 8/8 之前送任何 K 給你們——**送了你們也不該用**。\n\n**預計時間點**：8/8 Codex 額度恢復後，優先送審的是產物最完整的那幾個。屆時研究部會按你們的介面送 request，附 results.json 路徑、verdict 與一句話結論。\n\n有兩件事現在就可以先講，讓你們排 draft 池時心裡有底：\n\n1. **這批的結論多半是 NULL 或 CONDITIONAL**（K1745 TVP-HAR 明確 NULL、K1749 NULL、K1813 NULL、K1741 只到 CONDITIONAL_PASS）。如果你們的選題偏好是「有正面發現」的題材，這批能給的不多；但「某個流行做法其實沒用」本身是好題材，你們若願意接這類，研究部可以提供的量會大很多。\n2. **K1741（放空信用債作股票尾部對沖 vs put/VIX overlay）可能是這批裡最適合讀者的**：題目具體、有 2018Q4/2020/2022 幾次真實崩跌事件、有效率前緣圖與危機期報酬圖。但它的誠實結論是「方向性有效率，但只有 4 個事件、多重性檢定不支持無條件排序」——寫的時候不能寫成「放空信用債比買 put 好」，那會超出證據。等 8/8 審完再談。\n\n在那之前，若你們有想確認的研究面問題（某個 K 的數字口徑、某個結論的強度邊界、某篇舊文章的結論是否已被新實驗推翻），隨時送 request 過來，這類問題不受額度限制，研究部當班就能回。",
+  "to": "content"
+}

@@ -1,6 +1,6 @@
 {
   "experiment_id": "k1583",
-  "title": "Conditional / Sequential MCS \u2014 meta-evaluation of K1380_v4 17-spec SPY horse race",
+  "title": "Conditional / Sequential MCS — meta-evaluation of K1380_v4 17-spec SPY horse race",
   "metadata": {
     "seed": 42,
     "n_bootstrap": 1000,
@@ -11,179 +11,179 @@
       "high>=": 20.0,
       "low<": 15.0
     },
-    "primary_inventory": "K1380_v4 SPY 17 specs, OOS 2019-01-02 \u2192 2026-05-20",
-    "loss_proxy": "Patton (2011) r\u00b2 QLIKE",
+    "primary_inventory": "K1380_v4 SPY 17 specs, OOS 2019-01-02 → 2026-07-21 (1900 days)",
+    "loss_proxy": "Patton (2011) r² QLIKE",
     "conditioning_variables": {
-      "vix": "spy_vix_qqq_eem_fez_2000-2026.csv vix_close (contemporaneous, not lagged \u2014 characterizes the day's regime)",
+      "vix": "spy_vix_qqq_eem_fez_2000-2026.csv vix_close (contemporaneous, not lagged — characterizes the day's regime)",
       "recession": "FRED USRECD daily, ffill across non-trading days"
     },
     "lookahead_policy": "ex-post meta-analysis on already-realized losses; conditioning variables describe the day's realized state (not future); rolling-window MCS at origin t uses only past 252 differentials",
-    "cross_asset_pooling": "DISABLED per K1355 rule \u2014 K1258 multi-asset panels are inventoried only, never stacked into a single MCS",
+    "cross_asset_pooling": "DISABLED per K1355 rule — K1258 multi-asset panels are inventoried only, never stacked into a single MCS",
     "implementation_notes": [
       "Subsample MCS is a coarse approximation of true conditional MCS (JRSS-B 2025 qkag066 weighted-loss-differential approach); documented as a limitation, not a substitute.",
-      "Rolling-window MCS top-1 is a proxy for full sequential SPA (Hansen 2005) \u2014 change-point = winner switch.",
+      "Rolling-window MCS top-1 is a proxy for full sequential SPA (Hansen 2005) — change-point = winner switch.",
       "B=1000 for static MCS (task budget); B=500 for inner rolling loops to keep runtime bounded.",
       "MCS implementation reused from src/volpred/stats/mcs.py (HLN 2011 T_R variant, stationary bootstrap, HAC SE)."
     ],
-    "timestamp": "2026-06-30T03:57:26.422474+00:00"
+    "timestamp": "2026-08-05T09:51:09.541155+00:00"
   },
   "loss_inventory": [
     {
       "model_id": "K1380_v4::A1",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::A2",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::A3",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::A4",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::A5",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::A2f",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::A4f",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::A3f",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::A2n",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::A4n",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::B1",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1457,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::B2",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1395,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::B3",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1772,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::C1",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 0,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": false
     },
     {
       "model_id": "K1380_v4::C2",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::C3",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1380_v4::B0",
-      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r\u00b2 QLIKE)",
+      "source": "K1380_v4 SPY GARCH-X-VIX horse race (Patton r² QLIKE)",
       "date_start": "2019-01-02",
-      "date_end": "2026-05-20",
-      "n_obs_raw": 1866,
-      "n_obs_valid": 1854,
+      "date_end": "2026-07-21",
+      "n_obs_raw": 1900,
+      "n_obs_valid": 1898,
       "eligible": true
     },
     {
       "model_id": "K1258::SPY::sigma2_GARCH_N",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -191,7 +191,7 @@
     },
     {
       "model_id": "K1258::SPY::sigma2_GJR_N",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -199,15 +199,15 @@
     },
     {
       "model_id": "K1258::SPY::sigma2_GJR_t",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
-      "n_obs_valid": 1581
+      "n_obs_valid": 1518
     },
     {
       "model_id": "K1258::SPY::sigma2_EGARCH_N",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -215,7 +215,7 @@
     },
     {
       "model_id": "K1258::SPY::sigma2_HAR_ABS",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -223,7 +223,7 @@
     },
     {
       "model_id": "K1258::SPY::sigma2_A4f_IV2",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -231,7 +231,7 @@
     },
     {
       "model_id": "K1258::0050_TW::sigma2_GARCH_N",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 3979,
@@ -239,7 +239,7 @@
     },
     {
       "model_id": "K1258::0050_TW::sigma2_GJR_N",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 3979,
@@ -247,7 +247,7 @@
     },
     {
       "model_id": "K1258::0050_TW::sigma2_GJR_t",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 3979,
@@ -255,7 +255,7 @@
     },
     {
       "model_id": "K1258::0050_TW::sigma2_EGARCH_N",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 3979,
@@ -263,7 +263,7 @@
     },
     {
       "model_id": "K1258::0050_TW::sigma2_HAR_ABS",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 3979,
@@ -271,7 +271,7 @@
     },
     {
       "model_id": "K1258::0050_TW::sigma2_A4f_IV2",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 3979,
@@ -279,7 +279,7 @@
     },
     {
       "model_id": "K1258::GLD::sigma2_GARCH_N",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -287,7 +287,7 @@
     },
     {
       "model_id": "K1258::GLD::sigma2_GJR_N",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -295,7 +295,7 @@
     },
     {
       "model_id": "K1258::GLD::sigma2_GJR_t",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -303,7 +303,7 @@
     },
     {
       "model_id": "K1258::GLD::sigma2_EGARCH_N",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -311,7 +311,7 @@
     },
     {
       "model_id": "K1258::GLD::sigma2_HAR_ABS",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -319,7 +319,7 @@
     },
     {
       "model_id": "K1258::GLD::sigma2_A4f_IV2",
-      "source": "K1258 multi-asset HAR/GARCH panel \u2014 INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
+      "source": "K1258 multi-asset HAR/GARCH panel — INVENTORIED ONLY, not pooled into MCS (K1355 rule: no cross-asset stacked-day inference)",
       "date_start": "2020-01-02",
       "date_end": "2026-04-17",
       "n_obs_raw": 4096,
@@ -347,24 +347,24 @@
     ],
     "eliminated_order": [],
     "p_values": {
-      "A1": 0.438,
-      "A2": 0.438,
-      "A3": 0.438,
-      "A4": 0.438,
-      "A5": 0.438,
-      "A2f": 0.438,
-      "A4f": 0.438,
-      "A3f": 0.438,
-      "A2n": 0.438,
-      "A4n": 0.438,
-      "B1": 0.438,
-      "B2": 0.438,
-      "B3": 0.438,
-      "C2": 0.438,
-      "C3": 0.438,
-      "B0": 0.438
+      "A1": 0.221,
+      "A2": 0.221,
+      "A3": 0.221,
+      "A4": 0.221,
+      "A5": 0.221,
+      "A2f": 0.221,
+      "A4f": 0.221,
+      "A3f": 0.221,
+      "A2n": 0.221,
+      "A4n": 0.221,
+      "B1": 0.221,
+      "B2": 0.221,
+      "B3": 0.221,
+      "C2": 0.221,
+      "C3": 0.221,
+      "B0": 0.221
     },
-    "T": 1849,
+    "T": 1017,
     "M": 16,
     "trivial": false
   },
@@ -390,24 +390,24 @@
       ],
       "eliminated_order": [],
       "p_values": {
-        "A1": 0.384,
-        "A2": 0.384,
-        "A3": 0.384,
-        "A4": 0.384,
-        "A5": 0.384,
-        "A2f": 0.384,
-        "A4f": 0.384,
-        "A3f": 0.384,
-        "A2n": 0.384,
-        "A4n": 0.384,
-        "B1": 0.384,
-        "B2": 0.384,
-        "B3": 0.384,
-        "C2": 0.384,
-        "C3": 0.384,
-        "B0": 0.384
+        "A1": 0.314,
+        "A2": 0.314,
+        "A3": 0.314,
+        "A4": 0.314,
+        "A5": 0.314,
+        "A2f": 0.314,
+        "A4f": 0.314,
+        "A3f": 0.314,
+        "A2n": 0.314,
+        "A4n": 0.314,
+        "B1": 0.314,
+        "B2": 0.314,
+        "B3": 0.314,
+        "C2": 0.314,
+        "C3": 0.314,
+        "B0": 0.314
       },
-      "T": 717,
+      "T": 335,
       "M": 16,
       "trivial": false
     },
@@ -432,24 +432,24 @@
       ],
       "eliminated_order": [],
       "p_values": {
-        "A1": 0.42,
-        "A2": 0.42,
-        "A3": 0.42,
-        "A4": 0.42,
-        "A5": 0.42,
-        "A2f": 0.42,
-        "A4f": 0.42,
-        "A3f": 0.42,
-        "A2n": 0.42,
-        "A4n": 0.42,
-        "B1": 0.42,
-        "B2": 0.42,
-        "B3": 0.42,
-        "C2": 0.42,
-        "C3": 0.42,
-        "B0": 0.42
+        "A1": 0.409,
+        "A2": 0.409,
+        "A3": 0.409,
+        "A4": 0.409,
+        "A5": 0.409,
+        "A2f": 0.409,
+        "A4f": 0.409,
+        "A3f": 0.409,
+        "A2n": 0.409,
+        "A4n": 0.409,
+        "B1": 0.409,
+        "B2": 0.409,
+        "B3": 0.409,
+        "C2": 0.409,
+        "C3": 0.409,
+        "B0": 0.409
       },
-      "T": 718,
+      "T": 520,
       "M": 16,
       "trivial": false
     },
@@ -469,29 +469,33 @@
         "B2",
         "B3",
         "C2",
-        "C3",
-        "B0"
+        "C3"
       ],
-      "eliminated_order": [],
+      "eliminated_order": [
+        [
+          "B0",
+          0.012
+        ]
+      ],
       "p_values": {
-        "A1": 0.373,
-        "A2": 0.373,
-        "A3": 0.373,
-        "A4": 0.373,
-        "A5": 0.373,
-        "A2f": 0.373,
-        "A4f": 0.373,
-        "A3f": 0.373,
-        "A2n": 0.373,
-        "A4n": 0.373,
-        "B1": 0.373,
-        "B2": 0.373,
-        "B3": 0.373,
-        "C2": 0.373,
-        "C3": 0.373,
-        "B0": 0.373
+        "B0": 0.012,
+        "A1": 0.121,
+        "A2": 0.121,
+        "A3": 0.121,
+        "A4": 0.121,
+        "A5": 0.121,
+        "A2f": 0.121,
+        "A4f": 0.121,
+        "A3f": 0.121,
+        "A2n": 0.121,
+        "A4n": 0.121,
+        "B1": 0.121,
+        "B2": 0.121,
+        "B3": 0.121,
+        "C2": 0.121,
+        "C3": 0.121
       },
-      "T": 414,
+      "T": 162,
       "M": 16,
       "trivial": false
     }
@@ -518,26 +522,26 @@
       ],
       "eliminated_order": [],
       "p_values": {
-        "A1": 0.467,
-        "A2": 0.467,
-        "A3": 0.467,
-        "A4": 0.467,
-        "A5": 0.467,
-        "A2f": 0.467,
-        "A4f": 0.467,
-        "A3f": 0.467,
-        "A2n": 0.467,
-        "A4n": 0.467,
-        "B1": 0.467,
-        "B2": 0.467,
-        "B3": 0.467,
-        "C2": 0.467,
-        "C3": 0.467,
-        "B0": 0.467
+        "A1": NaN,
+        "A2": NaN,
+        "A3": NaN,
+        "A4": NaN,
+        "A5": NaN,
+        "A2f": NaN,
+        "A4f": NaN,
+        "A3f": NaN,
+        "A2n": NaN,
+        "A4n": NaN,
+        "B1": NaN,
+        "B2": NaN,
+        "B3": NaN,
+        "C2": NaN,
+        "C3": NaN,
+        "B0": NaN
       },
-      "T": 43,
+      "T": 20,
       "M": 16,
-      "trivial": false
+      "trivial": true
     },
     "expansion": {
       "mcs_models": [
@@ -560,24 +564,24 @@
       ],
       "eliminated_order": [],
       "p_values": {
-        "A1": 0.463,
-        "A2": 0.463,
-        "A3": 0.463,
-        "A4": 0.463,
-        "A5": 0.463,
-        "A2f": 0.463,
-        "A4f": 0.463,
-        "A3f": 0.463,
-        "A2n": 0.463,
-        "A4n": 0.463,
-        "B1": 0.463,
-        "B2": 0.463,
-        "B3": 0.463,
-        "C2": 0.463,
-        "C3": 0.463,
-        "B0": 0.463
+        "A1": 0.19,
+        "A2": 0.19,
+        "A3": 0.19,
+        "A4": 0.19,
+        "A5": 0.19,
+        "A2f": 0.19,
+        "A4f": 0.19,
+        "A3f": 0.19,
+        "A2n": 0.19,
+        "A4n": 0.19,
+        "B1": 0.19,
+        "B2": 0.19,
+        "B3": 0.19,
+        "C2": 0.19,
+        "C3": 0.19,
+        "B0": 0.19
       },
-      "T": 1806,
+      "T": 997,
       "M": 16,
       "trivial": false
     }
@@ -585,369 +589,9 @@
   "sequential_drift": {
     "timeline": [
       {
-        "date": "2019-12-31",
-        "top_model": "C3",
-        "top_p": 0.356,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-01-31",
-        "top_model": "A2",
-        "top_p": 0.39,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-03-03",
-        "top_model": "A2",
-        "top_p": 0.364,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-04-01",
-        "top_model": "A2",
-        "top_p": 0.368,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-05-01",
-        "top_model": "A3f",
-        "top_p": 0.52,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-06-02",
-        "top_model": "A3f",
-        "top_p": 0.51,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-07-01",
-        "top_model": "A3f",
-        "top_p": 0.534,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-07-31",
-        "top_model": "A3f",
-        "top_p": 0.498,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-08-31",
-        "top_model": "B0",
-        "top_p": 0.34,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
         "date": "2020-09-30",
-        "top_model": "B0",
-        "top_p": 0.33,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-10-29",
-        "top_model": "B0",
-        "top_p": 0.386,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-11-30",
-        "top_model": "B0",
-        "top_p": 0.36,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2020-12-30",
-        "top_model": "B0",
-        "top_p": 0.354,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2021-02-01",
-        "top_model": "B0",
-        "top_p": 0.31,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2021-03-03",
-        "top_model": "B0",
-        "top_p": 0.312,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2021-04-01",
-        "top_model": "B0",
-        "top_p": 0.344,
+        "top_model": "A4f",
+        "top_p": 0.532,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -970,8 +614,8 @@
       },
       {
         "date": "2021-05-03",
-        "top_model": "B0",
-        "top_p": 0.396,
+        "top_model": "A4f",
+        "top_p": 0.512,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -994,8 +638,8 @@
       },
       {
         "date": "2021-06-02",
-        "top_model": "B0",
-        "top_p": 0.536,
+        "top_model": "A4f",
+        "top_p": 0.492,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -1018,8 +662,8 @@
       },
       {
         "date": "2021-07-01",
-        "top_model": "B0",
-        "top_p": 0.438,
+        "top_model": "A5",
+        "top_p": 0.524,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -1042,8 +686,8 @@
       },
       {
         "date": "2021-08-02",
-        "top_model": "B0",
-        "top_p": 0.41,
+        "top_model": "A5",
+        "top_p": 0.562,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -1066,8 +710,8 @@
       },
       {
         "date": "2021-08-31",
-        "top_model": "B0",
-        "top_p": 0.22,
+        "top_model": "A5",
+        "top_p": 0.616,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -1090,8 +734,8 @@
       },
       {
         "date": "2021-09-30",
-        "top_model": "B0",
-        "top_p": 0.112,
+        "top_model": "A5",
+        "top_p": 0.614,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -1108,85 +752,15 @@
           "B2",
           "B3",
           "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2021-10-29",
-        "top_model": "B0",
-        "top_p": 0.126,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2021-11-30",
-        "top_model": "B0",
-        "top_p": 0.258,
-        "mcs_size": 15,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2021-12-30",
-        "top_model": "B0",
-        "top_p": 0.26,
-        "mcs_size": 15,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
           "C3",
           "B0"
         ]
       },
       {
         "date": "2022-01-31",
-        "top_model": "B0",
-        "top_p": 0.226,
-        "mcs_size": 15,
+        "top_model": "A5",
+        "top_p": 0.562,
+        "mcs_size": 16,
         "mcs_models": [
           "A1",
           "A2",
@@ -1201,14 +775,15 @@
           "B1",
           "B2",
           "B3",
+          "C2",
           "C3",
           "B0"
         ]
       },
       {
         "date": "2022-03-02",
-        "top_model": "B0",
-        "top_p": 0.136,
+        "top_model": "A5",
+        "top_p": 0.57,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -1231,8 +806,8 @@
       },
       {
         "date": "2022-03-31",
-        "top_model": "B0",
-        "top_p": 0.198,
+        "top_model": "A5",
+        "top_p": 0.68,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -1254,9 +829,9 @@
         ]
       },
       {
-        "date": "2022-05-02",
-        "top_model": "B0",
-        "top_p": 0.226,
+        "date": "2023-02-01",
+        "top_model": "A5",
+        "top_p": 0.494,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -1278,801 +853,9 @@
         ]
       },
       {
-        "date": "2022-06-01",
-        "top_model": "B0",
-        "top_p": 0.178,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2022-07-01",
-        "top_model": "B0",
-        "top_p": 0.204,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2022-08-02",
-        "top_model": "B0",
-        "top_p": 0.308,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2022-09-01",
-        "top_model": "B0",
-        "top_p": 0.316,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2022-10-03",
-        "top_model": "B1",
-        "top_p": 0.198,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2022-11-01",
-        "top_model": "B1",
-        "top_p": 0.242,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2022-12-01",
-        "top_model": "B1",
-        "top_p": 0.232,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-01-03",
-        "top_model": "B1",
-        "top_p": 0.256,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-02-02",
-        "top_model": "B1",
-        "top_p": 0.148,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-03-06",
-        "top_model": "B1",
-        "top_p": 0.1,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-04-04",
-        "top_model": "B1",
-        "top_p": 0.152,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-05-04",
-        "top_model": "B1",
-        "top_p": 0.258,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-06-05",
-        "top_model": "B3",
-        "top_p": 0.276,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-07-06",
-        "top_model": "B3",
-        "top_p": 0.252,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-08-07",
-        "top_model": "A1",
-        "top_p": 0.346,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-09-06",
-        "top_model": "A1",
-        "top_p": 0.312,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-10-05",
-        "top_model": "A1",
-        "top_p": 0.426,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-11-03",
-        "top_model": "B3",
-        "top_p": 0.416,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2023-12-05",
-        "top_model": "B3",
-        "top_p": 0.43,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-01-05",
-        "top_model": "B3",
-        "top_p": 0.406,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-02-06",
-        "top_model": "B3",
-        "top_p": 0.44,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-03-07",
-        "top_model": "B3",
-        "top_p": 0.41,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-04-08",
-        "top_model": "B3",
-        "top_p": 0.422,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-05-07",
-        "top_model": "B3",
-        "top_p": 0.406,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-06-06",
-        "top_model": "A1",
-        "top_p": 0.408,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-07-09",
-        "top_model": "A1",
-        "top_p": 0.434,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-08-07",
-        "top_model": "A1",
-        "top_p": 0.402,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-09-06",
-        "top_model": "A1",
-        "top_p": 0.418,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-10-07",
-        "top_model": "A1",
-        "top_p": 0.398,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-11-05",
-        "top_model": "A1",
-        "top_p": 0.386,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2024-12-05",
-        "top_model": "A1",
-        "top_p": 0.454,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2025-01-07",
-        "top_model": "A4f",
-        "top_p": 0.36,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2025-02-07",
-        "top_model": "A4f",
-        "top_p": 0.402,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2025-03-11",
+        "date": "2023-03-03",
         "top_model": "A3f",
-        "top_p": 0.4,
+        "top_p": 0.532,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -2094,9 +877,9 @@
         ]
       },
       {
-        "date": "2025-04-09",
-        "top_model": "A4f",
-        "top_p": 0.402,
+        "date": "2023-04-03",
+        "top_model": "A5",
+        "top_p": 0.774,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -2118,9 +901,9 @@
         ]
       },
       {
-        "date": "2025-05-09",
-        "top_model": "A4f",
-        "top_p": 0.348,
+        "date": "2023-08-04",
+        "top_model": "A5",
+        "top_p": 0.734,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -2142,9 +925,9 @@
         ]
       },
       {
-        "date": "2025-06-10",
-        "top_model": "A2",
-        "top_p": 0.322,
+        "date": "2023-09-05",
+        "top_model": "A3f",
+        "top_p": 0.748,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -2166,9 +949,9 @@
         ]
       },
       {
-        "date": "2025-07-11",
-        "top_model": "A4",
-        "top_p": 0.312,
+        "date": "2024-04-05",
+        "top_model": "A3f",
+        "top_p": 0.922,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -2190,57 +973,9 @@
         ]
       },
       {
-        "date": "2025-08-11",
-        "top_model": "A4",
-        "top_p": 0.282,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2025-09-10",
-        "top_model": "A4",
-        "top_p": 0.324,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2025-10-09",
+        "date": "2024-05-06",
         "top_model": "B0",
-        "top_p": 0.39,
+        "top_p": 0.734,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -2262,10 +997,227 @@
         ]
       },
       {
-        "date": "2025-11-07",
+        "date": "2024-06-05",
+        "top_model": "A3f",
+        "top_p": 0.324,
+        "mcs_size": 15,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1",
+          "B2",
+          "B3",
+          "C2",
+          "C3",
+          "B0"
+        ]
+      },
+      {
+        "date": "2025-01-06",
+        "top_model": "A3f",
+        "top_p": 0.162,
+        "mcs_size": 15,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1",
+          "B2",
+          "B3",
+          "C2",
+          "C3",
+          "B0"
+        ]
+      },
+      {
+        "date": "2025-02-06",
+        "top_model": "A3f",
+        "top_p": 0.124,
+        "mcs_size": 16,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1",
+          "B2",
+          "B3",
+          "C2",
+          "C3",
+          "B0"
+        ]
+      },
+      {
+        "date": "2025-03-10",
+        "top_model": "A3f",
+        "top_p": 0.138,
+        "mcs_size": 14,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1",
+          "B2",
+          "B3",
+          "B0"
+        ]
+      },
+      {
+        "date": "2025-04-08",
+        "top_model": "A4f",
+        "top_p": 0.172,
+        "mcs_size": 16,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1",
+          "B2",
+          "B3",
+          "C2",
+          "C3",
+          "B0"
+        ]
+      },
+      {
+        "date": "2025-05-08",
+        "top_model": "A3f",
+        "top_p": 0.238,
+        "mcs_size": 16,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1",
+          "B2",
+          "B3",
+          "C2",
+          "C3",
+          "B0"
+        ]
+      },
+      {
+        "date": "2025-06-09",
+        "top_model": "A3f",
+        "top_p": 0.424,
+        "mcs_size": 11,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1"
+        ]
+      },
+      {
+        "date": "2025-07-10",
+        "top_model": "A3f",
+        "top_p": 0.11,
+        "mcs_size": 12,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1",
+          "B2"
+        ]
+      },
+      {
+        "date": "2025-08-08",
+        "top_model": "A3f",
+        "top_p": 0.216,
+        "mcs_size": 11,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1"
+        ]
+      },
+      {
+        "date": "2025-09-09",
+        "top_model": "A4f",
+        "top_p": 0.224,
+        "mcs_size": 11,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1"
+        ]
+      },
+      {
+        "date": "2025-10-08",
         "top_model": "A2",
-        "top_p": 0.33,
-        "mcs_size": 16,
+        "top_p": 0.242,
+        "mcs_size": 10,
         "mcs_models": [
           "A1",
           "A2",
@@ -2276,19 +1228,143 @@
           "A4f",
           "A3f",
           "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
+          "A4n"
         ]
       },
       {
-        "date": "2025-12-09",
+        "date": "2025-11-06",
+        "top_model": "A1",
+        "top_p": 0.272,
+        "mcs_size": 10,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n"
+        ]
+      },
+      {
+        "date": "2025-12-08",
+        "top_model": "A1",
+        "top_p": 0.272,
+        "mcs_size": 10,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n"
+        ]
+      },
+      {
+        "date": "2026-01-08",
         "top_model": "A2",
-        "top_p": 0.378,
+        "top_p": 0.164,
+        "mcs_size": 11,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1"
+        ]
+      },
+      {
+        "date": "2026-02-09",
+        "top_model": "A2",
+        "top_p": 0.448,
+        "mcs_size": 10,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n"
+        ]
+      },
+      {
+        "date": "2026-03-11",
+        "top_model": "A2",
+        "top_p": 0.124,
+        "mcs_size": 11,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1"
+        ]
+      },
+      {
+        "date": "2026-04-10",
+        "top_model": "A5",
+        "top_p": 0.272,
+        "mcs_size": 11,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1"
+        ]
+      },
+      {
+        "date": "2026-05-11",
+        "top_model": "A2",
+        "top_p": 0.31,
+        "mcs_size": 11,
+        "mcs_models": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A2f",
+          "A4f",
+          "A3f",
+          "A2n",
+          "A4n",
+          "B1"
+        ]
+      },
+      {
+        "date": "2026-06-09",
+        "top_model": "A5",
+        "top_p": 0.198,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -2310,9 +1386,9 @@
         ]
       },
       {
-        "date": "2026-01-09",
+        "date": "2026-07-08",
         "top_model": "A5",
-        "top_p": 0.37,
+        "top_p": 0.144,
         "mcs_size": 16,
         "mcs_models": [
           "A1",
@@ -2334,10 +1410,10 @@
         ]
       },
       {
-        "date": "2026-02-10",
-        "top_model": "A5",
-        "top_p": 0.38,
-        "mcs_size": 16,
+        "date": "2026-07-20",
+        "top_model": "A2",
+        "top_p": 0.232,
+        "mcs_size": 15,
         "mcs_models": [
           "A1",
           "A2",
@@ -2353,147 +1429,74 @@
           "B2",
           "B3",
           "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2026-03-12",
-        "top_model": "A5",
-        "top_p": 0.3,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2026-04-13",
-        "top_model": "A5",
-        "top_p": 0.352,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
-        ]
-      },
-      {
-        "date": "2026-05-19",
-        "top_model": "A5",
-        "top_p": 0.326,
-        "mcs_size": 16,
-        "mcs_models": [
-          "A1",
-          "A2",
-          "A3",
-          "A4",
-          "A5",
-          "A2f",
-          "A4f",
-          "A3f",
-          "A2n",
-          "A4n",
-          "B1",
-          "B2",
-          "B3",
-          "C2",
-          "C3",
-          "B0"
+          "C3"
         ]
       }
     ],
     "change_points": [
       {
-        "date": "2020-01-31",
-        "new_top_model": "A2"
-      },
-      {
-        "date": "2020-05-01",
-        "new_top_model": "A3f"
-      },
-      {
-        "date": "2020-08-31",
-        "new_top_model": "B0"
-      },
-      {
-        "date": "2022-10-03",
-        "new_top_model": "B1"
-      },
-      {
-        "date": "2023-06-05",
-        "new_top_model": "B3"
-      },
-      {
-        "date": "2023-08-07",
-        "new_top_model": "A1"
-      },
-      {
-        "date": "2023-11-03",
-        "new_top_model": "B3"
-      },
-      {
-        "date": "2024-06-06",
-        "new_top_model": "A1"
-      },
-      {
-        "date": "2025-01-07",
-        "new_top_model": "A4f"
-      },
-      {
-        "date": "2025-03-11",
-        "new_top_model": "A3f"
-      },
-      {
-        "date": "2025-04-09",
-        "new_top_model": "A4f"
-      },
-      {
-        "date": "2025-06-10",
-        "new_top_model": "A2"
-      },
-      {
-        "date": "2025-07-11",
-        "new_top_model": "A4"
-      },
-      {
-        "date": "2025-10-09",
-        "new_top_model": "B0"
-      },
-      {
-        "date": "2025-11-07",
-        "new_top_model": "A2"
-      },
-      {
-        "date": "2026-01-09",
+        "date": "2021-07-01",
         "new_top_model": "A5"
+      },
+      {
+        "date": "2023-03-03",
+        "new_top_model": "A3f"
+      },
+      {
+        "date": "2023-04-03",
+        "new_top_model": "A5"
+      },
+      {
+        "date": "2023-09-05",
+        "new_top_model": "A3f"
+      },
+      {
+        "date": "2024-05-06",
+        "new_top_model": "B0"
+      },
+      {
+        "date": "2024-06-05",
+        "new_top_model": "A3f"
+      },
+      {
+        "date": "2025-04-08",
+        "new_top_model": "A4f"
+      },
+      {
+        "date": "2025-05-08",
+        "new_top_model": "A3f"
+      },
+      {
+        "date": "2025-09-09",
+        "new_top_model": "A4f"
+      },
+      {
+        "date": "2025-10-08",
+        "new_top_model": "A2"
+      },
+      {
+        "date": "2025-11-06",
+        "new_top_model": "A1"
+      },
+      {
+        "date": "2026-01-08",
+        "new_top_model": "A2"
+      },
+      {
+        "date": "2026-04-10",
+        "new_top_model": "A5"
+      },
+      {
+        "date": "2026-05-11",
+        "new_top_model": "A2"
+      },
+      {
+        "date": "2026-06-09",
+        "new_top_model": "A5"
+      },
+      {
+        "date": "2026-07-20",
+        "new_top_model": "A2"
       }
     ],
     "n_change_points": 16
@@ -2505,8 +1508,48 @@
   "limitations": [
     "Loss inventory is restricted to a single asset (SPY) and a single OOS sample. The K1258 multi-asset panels are inventoried but NOT pooled (K1355 rule against asset-day stacked inference); cross-market conditional results would require per-asset MCS or a panel-HAC re-design (out of scope here).",
     "Conditional MCS via subsample slicing is a coarse approximation. A proper conditional MCS (Liu, Pelger & Yang 2025 JRSS-B, qkag066) uses kernel-weighted loss differentials; reproducing it would require a separate implementation pass.",
-    "NBER recession sample in OOS is small (61 raw regime-labeled trading days, 43 days actually used in the MCS after joint NaN cleaning; covers only COVID 2020-03 to 2020-04). The recession-regime MCS is therefore underpowered; results should be read as descriptive, not inferential.",
-    "Sequential drift detection here is rolling-window MCS top-1 with a 252-day window and 21-day stride. Of 77 rolling windows, 74/77 retain MCS size=16 and only 3/77 (2021-11-30, 2021-12-30, 2022-01-31; all top_model=B0) shrink to size=15. This is not equivalent to Inoue, Jin & Rossi-style online SPA tests; change-points should be read as visualization aids, not formal break-tests. The reported per-spec p-values are MCS survivor-set stopping p (worst-model bootstrap p at termination), NOT individual per-model scores.",
+    "NBER recession sample in OOS is small (43 raw regime-labeled trading days, 20 days actually used in the MCS after joint NaN cleaning; covers only COVID 2020-03 to 2020-04). The recession-regime MCS is therefore underpowered; results should be read as descriptive, not inferential.",
+    "Sequential drift detection here is rolling-window MCS top-1 with a 252-day window and 21-day stride. This is not equivalent to Inoue, Jin & Rossi-style online SPA tests; change-points should be read as visualization aids, not formal break-tests.",
     "Tie-breaking in 'top-1' uses min mean QLIKE within tied MCS p-values, which biases the winner toward low-mean models; alternative tie-breaks (e.g. mean rank) would shift the timeline marginally."
-  ]
+  ],
+  "code_trace": {
+    "path": "experiments/k1583/k1583.py",
+    "sha256": "8337cb2d8cce9821a2416426c69dca20764e2d6dc4f859a5e3ebdeddcef820cd",
+    "size_bytes": 27314
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "b7a1b644102772a70152ca004cc178a1cea05b82f3b7e4e88efde50981c75765",
+    "output_identities": [
+      {
+        "path": "k1583_conditional_mcs_heatmap.png",
+        "sha256": "a860717e91c0dceaa47b837ff18761dd9acd0cf1ff0d5a1a9f51f2df26f62736",
+        "size_bytes": 52041
+      },
+      {
+        "path": "k1583_sequential_winner_timeline.png",
+        "sha256": "45c55f4af5ea5aa0a7049c89c951dea449cc451c52d419a2606c7011bfad9ec9",
+        "size_bytes": 29596
+      }
+    ]
+  },
+  "runtime_seconds": 14.169,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy_default_rng",
+        "value": 42
+      },
+      {
+        "library": "mcs_bootstrap",
+        "value": 42
+      }
+    ]
+  }
 }

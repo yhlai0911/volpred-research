@@ -1,0 +1,105 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "k1583.py",
+    "args": [],
+    "sha256": "8337cb2d8cce9821a2416426c69dca20764e2d6dc4f859a5e3ebdeddcef820cd",
+    "size_bytes": 27314
+  },
+  "canonical_result": "k1583_results.json",
+  "inputs": [
+    {
+      "path": "experiments/K1380_v4/k1380_v4_losses_all.npy",
+      "sha256": "2b7232b99a7cb9521adfce843f399cf51099581ef9ac6a9d2e2e4f74e35551f4",
+      "size_bytes": 258528
+    },
+    {
+      "path": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+      "sha256": "43870c199d00c922ca607c674254edd66c5acca00209eb501a94c5c339449830",
+      "size_bytes": 3179160
+    }
+  ],
+  "outputs": [
+    "k1583_conditional_mcs_heatmap.png",
+    "k1583_results.json",
+    "k1583_sequential_winner_timeline.png",
+    "reproduce_commit.json"
+  ],
+  "timeout_seconds": 102,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy_default_rng",
+        "value": 42
+      },
+      {
+        "library": "mcs_bootstrap",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 14.169,
+    "recorded_at": "2026-08-05T09:51:09Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy_default_rng",
+        "value": 42
+      },
+      {
+        "library": "mcs_bootstrap",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "k1583_results.json",
+    "sha256": "60de62c7298ae22242c94ad03bd3050684fd8ebe5a00f22e6b3b06a7c08202f1",
+    "size_bytes": 35070
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "b7a1b644102772a70152ca004cc178a1cea05b82f3b7e4e88efde50981c75765",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": [
+      {
+        "path": "k1583_conditional_mcs_heatmap.png",
+        "sha256": "a860717e91c0dceaa47b837ff18761dd9acd0cf1ff0d5a1a9f51f2df26f62736",
+        "size_bytes": 52041
+      },
+      {
+        "path": "k1583_sequential_winner_timeline.png",
+        "sha256": "45c55f4af5ea5aa0a7049c89c951dea449cc451c52d419a2606c7011bfad9ec9",
+        "size_bytes": 29596
+      }
+    ]
+  }
+}
