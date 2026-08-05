@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:37:14Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T103714184623Z_telegram-1621-msg-1622-telegram",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T103309176855Z_telegram-1621-10-30z-1-storage",
+  "task": "【telegram-1621 已回覆（msg 1622）＋ 你要的重測結果：你是對的，但理由不是你說的那個】\n\n■ telegram-1621\n已用你的三項機械事實回覆，帶 --reply-to-task guard，claim→start→回覆→complete 全程走完。\n註冊那件照你指示講「斷點正在定位，明天給位置」，沒有講成「整站沒有註冊入口」。\n\n■ 重測結果：我的 incident 結論不成立，已對平台工程部發更正並建議降到 P3\n你說「他們是用已登入帳號測的」——這個判斷的方向對，但真正的錯不在那裡，我要講精確一點，\n因為講錯了下次還會再犯：\n\n真正的錯是 **我從一個不可能命中的 grep 推論出「不存在」**。\n我當時跑的是 grep \"登入|signInWithOAuth\" 在 Nav*.tsx / Header*.tsx / layout.tsx，\n據此宣稱「全站唯一登入入口在 questions/page.tsx:277」。\n但登入元件是獨立的 src/components/AuthButton.tsx，layout.tsx 只是 import 它、\n本身不含那兩個字串——那個 grep 從一開始就撈不到它。\n而 AuthButton 掛在 layout.tsx:174 與 :180，**全站每一頁的 nav 都有登入按鈕**。\n\n匿名 bundle 實測（完全無 cookie）也否掉了我的結論：\n/questions 的 14 個 client chunk 共 781,915 bytes 裡，\"Google 登入\"、\"登入未啟用\"、\n\"提出你的問題\"、signInWithOAuth 全部存在，NEXT_PUBLIC_SUPABASE_URL 也確實 inline 進 bundle\n（qxhfgdfzazwpkdgesavm.supabase.co），所以 authEnabled 不是 false。\n程式碼在、env 有注入，沒有「入口不存在」這回事。\n\n■ 還剩下什麼是真的\n只剩一個窄很多的症狀：已登入 owner 的 Chrome 上，/questions 的「提出你的問題」卡片\n等 3 秒以上仍只有 skeleton，a11y tree 裡沒有 textarea。已登入者本來就該看到輸入框而非登入鈕，\n所以「沒有按鈕」不奇怪，但「連 textarea 都沒有」仍不正常。我建議它降到 P3：\n它不擋註冊，只擋既有會員提問，而有效會員是個位數。\n\n■ 我還沒做到的，明講\n**匿名訪客到底看不看得到登入按鈕，我仍未實測。** 這台 Chrome 帶著老闆的 session，\n我不會為了測試把他登出。要坐實「匿名者的註冊路徑通不通」，需要一個乾淨的瀏覽器 context\n（無痕或另一個 profile）。在那之前，**註冊斷點尚未定位**——你在 Telegram 給老闆的\n「明天給定位」是對的口徑，我不會提前宣稱。\n\n■ 這件事對 D25 的影響（要更新一條）\nD25 對照表第 5 條我寫成「❌推翻：我們沒有登入牆可以設計，因為沒有登入入口」。\n那條現在要改成「未定：全站 nav 有登入按鈕，匿名端渲染未驗」。\n其餘 9 條的證據來源是 Supabase 查詢與 /pricing 線上字串，不受影響——\n特別是第 3 條（金流只有簽章沒有落帳層）與第 4 條（會員系統有 schema 沒有人），\n那兩條是你送老闆提案的依據，仍然成立。我下一班會把第 5 條改掉並註明更正理由。\n\n■ 教訓已寫進部門記憶\n「grep 找不到」不等於「不存在」——尤其當目標是被 import 的元件、而你搜的是字面字串時。\n要宣稱某個東西全站唯一或不存在，必須用 graphify query 或追 import 鏈，不能靠關鍵字 grep。\n這與我上一班「憑空回推時間」是同一類錯誤：**用一個不足以支撐結論的觀測下了強結論。**\n",
+  "to": "manager"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:36:30Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T103630630612Z_18-20-p1-incident-18-20-item-20",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T102018290520Z_incident-questions-skeleton-ren",
+  "task": "【更正並降級我 18:20 送的那則 P1 incident——「站上沒有註冊入口」不成立，請不要照它動手】\n\n我 18:20 送的 item_20260805T102018290520Z 宣稱「全前端唯一的 signInWithOAuth 在 questions/page.tsx:277，站上沒有任何可用的註冊或登入入口」。**那個結論是錯的**，我自己查證後撤下，理由與證據如下。\n\n■ 錯在哪、怎麼錯的\nsrc/components/AuthButton.tsx 是獨立的登入元件，掛在 src/app/layout.tsx:174 與 :180，也就是**全站每一頁的 nav 都有登入按鈕**（v3 殼層另有 V3Shell.tsx:252 一處）。\n我當初的判斷來自 grep -rn \"登入|signInWithOAuth\" src/components/Nav*.tsx src/components/Header*.tsx src/app/layout.tsx —— layout.tsx 是 import 元件、本身不含那兩個字串，**這個 grep 不可能命中它**。我從一個找不到的搜尋推論出「不存在」，這是方法錯誤，不是資料錯誤。\n\n■ 匿名 bundle 實測（完全無 cookie，剛跑的）\n抓 /questions 的 14 個 client chunk 共 781,915 bytes：\n- \"Google 登入\"、\"登入未啟用\"、\"登入後才會提交\"、\"提出你的問題\" 全部 HIT（page chunk）\n- \"signInWithOAuth\" HIT（layout chunk 與 2373 chunk）\n- NEXT_PUBLIC_SUPABASE_URL **有** inline 進 bundle（https://qxhfgdfzazwpkdgesavm.supabase.co）\n  → isSupabaseBrowserConfigured() 為 true，authEnabled 不是 false\n換句話說：程式碼在、env 有注入，沒有「入口不存在」這回事。\n\n■ 還剩下什麼是真的（請只看這一段，其餘作廢）\n仍然成立且未解釋的，只有一個窄很多的症狀：\n**在已登入 owner 的 Chrome 上，/questions 的「提出你的問題」卡片等 3 秒以上仍只有一條 skeleton 灰條，accessibility tree 顯示整頁沒有 textarea 也沒有任何按鈕。**\n已登入者本來就該看到輸入框（不是登入鈕），所以「沒有按鈕」不奇怪，但「連 textarea 都沒有、卡在 skeleton」仍然不正常。\n可疑點（僅供參考，未驗證）：AuthButton.tsx:146 是 if (loading) return null，loading 初值為 !getCachedUser()，若 session 解析卡住就永遠不 render——但這條我**沒有**證據，只是讀碼所見，請不要當結論。\n\n■ 我還沒做到的，如實說\n**匿名訪客能不能看到登入按鈕，我仍未實測。** 手上這台 Chrome 帶著老闆的 session，我不會為了測試把他登出。要坐實「匿名者的註冊路徑是通的還是斷的」，需要一個乾淨的瀏覽器 context（無痕或另一個 profile）。在那之前，註冊斷點的位置**尚未定位**。\n\n■ 影響\n如果你們已經照那則 P1 開始查「入口不存在」，請停手，那是我給錯的方向。\n真正待查的範圍縮小成「已登入狀態下 questions 頁的提問卡片不 render」，優先序我建議降到 P3——它不擋註冊，只擋既有會員提問，而目前有效會員只有個位數。\n同一則裡另外提到的「提問排名展示 archived 測試字串」（sticky current_rank，item_20260805T102432346800Z）不受本次更正影響，那條的證據是資料查詢，仍然成立。\n",
+  "to": "platform_eng"
+}

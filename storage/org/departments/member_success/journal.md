@@ -1,5 +1,80 @@
 # member_success 工作日誌（append-only）
 
+## 2026-08-05 18:33–18:38（台灣時間）— 第三班：telegram-1621 ＋ 自我證偽
+
+outcome=**done**（一件工作項）。
+
+### 1. telegram-1621「有改了？」
+
+claim → start → 回覆（msg 1622）→ complete，帶 `--reply-to-task` guard。
+採經理提供的三項機械事實（registry.json owned_paths 未變、`org_admin.py` 無 `set-paths`、
+需主線程加子命令），並補上等待期間的實際損失（執行層停 2.5 小時，根因是
+`config/provider_registry.json` 釘住的雜湊未重釘、而無角色能寫 `config/`）。
+註冊那件依經理指示講「斷點正在定位」，**未**宣稱整站無註冊入口。
+
+### 2. 重測：我 18:20 那則 P1 incident 的結論不成立，已自行撤下並降級
+
+**「站上沒有任何註冊／登入入口」是錯的。**
+`src/components/AuthButton.tsx` 掛在 `src/app/layout.tsx:174` 與 `:180`，
+全站每一頁的 nav 都有登入按鈕（v3 殼層另有 `V3Shell.tsx:252`）。
+
+匿名 bundle 實測（完全無 cookie）：/questions 的 14 個 client chunk 共 781,915 bytes，
+「Google 登入」「登入未啟用」「登入後才會提交」「提出你的問題」與 `signInWithOAuth`
+全部存在，`NEXT_PUBLIC_SUPABASE_URL` 確實 inline 進 bundle
+（qxhfgdfzazwpkdgesavm.supabase.co）→ `authEnabled` 不是 false。
+
+**錯因（比經理猜的更具體）**：經理判斷是「用已登入帳號測」，方向對；但真正的錯是
+我跑了一個**不可能命中的 grep**（搜 `Nav*/Header*/layout.tsx` 裡的中文字串與
+`signInWithOAuth`，而 layout 是 import 元件、不含那些字串），然後從「找不到」推論「不存在」。
+
+**仍然成立的部分（窄很多）**：已登入 owner 下 /questions 的「提出你的問題」卡片
+永久停在 skeleton、a11y tree 無 textarea。建議降 P3——不擋註冊，只擋既有會員提問。
+
+**仍未做到、已明講**：匿名端渲染未實測。這台 Chrome 帶老闆 session，不會為了測試登出他。
+**註冊斷點尚未定位**，未提前宣稱。
+
+已發更正給平台工程部（`item_20260805T103630630612Z`，建議停手勿照錯方向查）
+與經理（`item_20260805T103714184623Z`）。
+
+### 3. D27（經理裁決）＋ 解開平台工程部的鎖 ＋ telegram-1616~1619
+
+**D27**：經理的兩點更正（signInWithOAuth 8 處、AuthButton 掛全域 layout）我在收到前已自查並撤下。
+第 1 項「無痕重測」**做不到，如實回報為硬阻塞**：這台 Chrome 帶老闆 session（不登出、不清他的
+localStorage，那會湮滅現場）；`javascript_tool` 與 `read_console_messages` 被權限擋；
+連線的 8 個 Chrome 全是裸 deviceId，不拿裸 id 去打擾老闆。已請平台工程部順手驗（他們要動那兩個檔）。
+
+**解鎖**：平台工程部說「frontend-v2-fix 的鎖在 session b575276c（我）手上」——查 claim 記錄後
+**持有者其實是 66dfcf3a，也就是他們自己部門的 session**，且其 last_path 正是根因指的
+`member-continuity-browser.ts`。我名下的 claim 全在自己的部門子樹。已回覆並請他們先跟自己人對。
+
+**class sweep 補一處**：沿平台工程部的根因往外掃，找到他們沒點到的第三處——
+`AuthButton.tsx:99` 的 `getSession().then()` 沒有 `.catch()`，而 `setLoading(false)` 只在
+then 裡，配上 `:146 if (loading) return null` → getSession 一 reject，**整站 nav 登入鈕不 render**。
+影響面比 questions 頁大。已送他們。
+
+由此推出對「匿名端」的**假說**（靜態閱讀，標明未經執行期驗證）：全新訪客 sessionStorage 空、
+無舊 session → getSession 應 resolve null → 清 loading → 渲染「登入」。
+**若成立，111 天零註冊的斷點不在「找不到入口」，方向要整個換。** 未驗，不當結論。
+
+**telegram-1616~1619**：四張都是老闆同一句「這要怎麼處理」回四則不同回報。
+判定實質已由經理 msg 1623 與我 msg 1622 答畢，**只補真正沒答到的缺口**——
+老闆尚未回那句 approve，而經理在等它。故只發一則（msg 1624）指明唯一動作＋不核准的實際代價，
+順帶一行答掉 1617；其餘三張結案不重複發（經理明示老闆今日已因重複連問六次）。
+
+### 待辦（下一班）
+
+`reports/D25_feasibility_vs_funnel_20260805.md` 對照表**第 5 條要改**：
+現寫「❌推翻：沒有登入入口」→ 應改為「未定：全站 nav 有登入按鈕，匿名端渲染未驗」，
+並註明更正理由。其餘 9 條證據來自 Supabase 查詢與 /pricing 線上字串，不受影響
+（特別是第 3、4 條是經理送老闆提案的依據，仍成立）。
+
+### 本班教訓
+
+兩班內第二次「用不足以支撐結論的觀測下強結論」（前一次是憑空回推時間）。
+已寫進 `memory/notes.md`，含一條自問：**這個結論是我量到的，還是從「沒看到」推出來的？**
+後者一律降成「未驗」再送。另補記 CLAUDE.md 的 graphify-first 我這次跳過了——
+要宣稱「全站唯一／不存在」必須走 graphify query 或追 import 鏈，不能靠關鍵字 grep。
+
 ## 2026-08-05 18:16–19:0x（台灣時間）— 第二班：註冊路徑 incident、12 題稽核、D25、telegram-1615
 
 四件工作項全部處理完並歸檔，outcome=**done**。

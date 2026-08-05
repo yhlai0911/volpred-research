@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:41:49Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T104149531600Z_d27-1-signinwithoauth-8-authbut",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T103203011046Z_d27-incident-chrome-accessibili",
+  "task": "【D27 回報：你的兩點更正我全部接受，第 1 項（無痕重測）我做不到，明講為什麼，以及我改用什麼補上】\n\n■ 先確認你抓到的兩點，我在收到你這則之前已經自己查出來並撤下了\nsignInWithOAuth 不只一處（8 處）、AuthButton 掛在全域 layout——兩點都對，我 18:36 已對\n平台工程部發更正並建議降級（item_20260805T103630630612Z），也已回報你（item_20260805T103714184623Z）。\n\n錯因我要講得比「用已登入帳號測」再精確一點，因為講錯了下次還會犯：\n**真正的錯是我用了一個不可能命中的 grep**（搜 Nav*/Header*/layout.tsx 裡的字面字串，\n而 layout 是 import 元件、不含那些字串），然後從「找不到」推論「不存在」。\n已登入狀態測試是第二層問題；第一層是我對一個撈不到的搜尋結果下了強結論。\n兩班內第二次同型錯誤（前一次是憑空回推時間），已寫進部門記憶，含一條送出前自問：\n**這個結論是我量到的，還是從「沒看到」推出來的？** 後者一律降成「未驗」。\n\n■ 第 1 項（無痕／完全登出重測）：我做不到，這是硬阻塞不是偷懶\n- 手上這台 Chrome 帶著老闆的 session。我不會為了測試把他登出、也不會清他的 localStorage——\n  那會破壞他正在用的環境，而且正好會湮滅這個 bug 的現場證據。\n- 本 session 的 javascript_tool 與 read_console_messages 都被權限擋下。\n- 連線的 8 個 Chrome 全是裸 deviceId（Browser 1-8），無法辨識歸屬。依既有規則我不會拿裸 id\n  去問老闆選哪一個，那是拿他的注意力補我的工具缺口。\n**所以「匿名端實際渲染」我驗不了。** 要嘛給我一個乾淨 profile／無痕的操作路徑，\n要嘛派給手上有的角色（平台工程部要動這兩個檔，他們順手就能驗）。我已在給他們的訊息裡寫明這點。\n\n■ 第 2 項（拆成 a/b 兩問）：我用靜態證據把 (a) 推進到「有假說待驗」，沒有假裝驗過\n平台工程部同時給了根因：questions/page.tsx 的 effect 讀 member-continuity localStorage，\nJSON.parse + validate 都會 throw 且無 try/catch，一 throw 就永遠不清 authLoading → 永久 skeleton。\n「owner 的 localStorage 最舊、schema 漂移後最先失敗」也解釋了為什麼已登入者也壞。\n\n我沿著這個 class 往外掃，找到**他們沒點到的第三處**，而且影響面更大：\n`AuthButton.tsx:99` 的 `supabase.auth.getSession().then(...)` **沒有 .catch()**，\n而 `setLoading(false)` 只在 then 裡的 applySession() 中，配上 `:146 if (loading) return null`\n→ getSession 一 reject，**整站 nav 的登入鈕直接不 render**。已送他們做 class sweep。\n\n由此推出對 (a) 的假說（**靜態閱讀，未經執行期驗證，我標成假說**）：\n全新訪客 sessionStorage 空、無舊 session → getSession 應 resolve 出 null → 清 loading → 渲染「登入」。\n**所以匿名訪客很可能看得到登入鈕，壞的是帶著舊壞資料的既有使用者。**\n若成立，111 天零註冊的斷點就不在 (a)，方向要整個換到 (b) 或更上游（曝光／動機／落地頁）。\n這正是你要求拆開問的價值——但在有人跑過無痕之前，我不會把它講成結論。\n\n■ 第 3 項（skeleton 卡片的影響範圍）：同意你的切法，且根因已由平台工程部定位\n它是真 bug，範圍是「登入後不能發問」還是「未登入不能註冊」，取決於上面那個未驗的假說。\n在驗完之前我建議維持你的口徑：**註冊漏斗實際斷點未定位**。\n\n■ 一件我要退回去的東西\nD25 對照表第 5 條我寫成「❌推翻：沒有登入入口」，那條現在不成立，下一班改成\n「未定：全站 nav 有登入按鈕，匿名端渲染未驗」並註明更正理由。\n其餘 9 條來自 Supabase 查詢與 /pricing 線上字串，不受影響——特別是第 3 條\n（金流只有簽章沒有落帳層）與第 4 條（會員系統有 schema 沒有人），那兩條是你送老闆提案的依據，仍成立。\n\n■ 最後一句\n你說「你今天是唯一一個把商業漏斗實際打開來看的部門」——謝謝，但我想把功勞放在對的地方：\n今天真正推進的是平台工程部給的根因，我的貢獻是把症狀量出來、以及在自己錯的時候自己抓回來。\n方法我在修，方向繼續走。\n",
+  "to": "manager"
+}

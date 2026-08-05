@@ -44,6 +44,37 @@ lsof 無持有者、ps 全機無存活 git 行程）判定為孤兒並改名保�
 - **How to apply**：發現自己回報裡有錯誤數字時，**只更正那個數字，不要撤回結論**，
   更不要叫對方停手——對方通常有你沒有的量測能力。要撤回的是推論，不是症狀。
 
+## 教訓：「grep 找不到」不等於「不存在」（2026-08-05，代價：一則錯誤的 P1 incident）
+
+我宣稱「全站唯一的登入入口在 `questions/page.tsx:277`，站上沒有任何註冊路徑」，
+據此對平台工程部發了 P1 incident。**結論是錯的。**
+
+錯因：我跑的是 `grep -rn "登入\|signInWithOAuth" src/components/Nav*.tsx src/components/Header*.tsx src/app/layout.tsx`。
+登入元件是獨立的 `src/components/AuthButton.tsx`，`layout.tsx` 只是 **import** 它、
+本身不含那兩個字串——**那個 grep 從一開始就不可能命中它**。而 AuthButton 掛在
+`layout.tsx:174` 與 `:180`，全站每一頁的 nav 都有登入按鈕。
+
+匿名 bundle 實測也否掉了它：/questions 的 14 個 client chunk 裡「Google 登入」
+「登入未啟用」「提出你的問題」`signInWithOAuth` 全部存在，`NEXT_PUBLIC_SUPABASE_URL`
+也確實 inline 進 bundle，所以 `authEnabled` 不是 false。
+
+- **Why**：這與前一條「憑空回推時間」是同一類錯誤——**用一個不足以支撐結論的觀測下了強結論**。
+  不同的是這次錯得更貴：一則 P1 會讓別的部門照錯方向開查。
+- **How to apply**：
+  - 要宣稱「全站唯一」「不存在」「只有一處」，**不能靠關鍵字 grep**。用
+    `uv run python scripts/graphify_integration.py query "..."`（前端加 `--graph active_frontend`）
+    或實際追 import 鏈。CLAUDE.md 早就寫了 graphify-first，我跳過了。
+  - 前端元件搜尋要搜**元件名**（`grep -rn "AuthButton" src/`），不是搜它渲染出來的中文字串。
+  - 在已登入的瀏覽器上測到的行為，**不能推論匿名訪客的行為**。要驗匿名端就需要乾淨的
+    browser context；沒有就如實說「未驗」，不要用已登入的觀測補位。
+
+## 反覆出現的自我模式（兩次踩到，記下來）
+
+兩次都是：觀測 → 直接跳到強結論 → 對外發訊息 → 事後被證偽。
+時間那次是憑空回推，登入入口這次是不可能命中的 grep。
+**對外送出前的自問：我這個結論，是我量到的，還是我從「沒看到」推出來的？**
+後者一律降級成「未驗」再送。
+
 ## 撞 git_writer_lock 的正確反應
 
 `[git-writer-lock] BLOCKED: cannot snapshot current index` 不含 lock 年齡也不含建議動作。
