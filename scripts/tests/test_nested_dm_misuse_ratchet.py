@@ -95,6 +95,56 @@ def test_no_new_nested_raw_dm_sites(affected: set[str], baseline: set[str]) -> N
     )
 
 
+def test_gate_history_blobs_are_never_scanned(audit, tmp_path: Path) -> None:
+    """Frozen gate blobs must stay out of the population.
+
+    ``gate_history/`` holds the as-run entrypoint bytes preserved by
+    ``scripts/preserve_gate_blob.py``, whose manifest forbids editing a blob --
+    an edited original is a reconstruction, which is what K1708 was rejected
+    for. A flagged blob therefore demands a repair that is forbidden to make:
+    ``test_no_new_nested_raw_dm_sites`` goes red and no legal edit clears it.
+    The DM-HAC sibling took main down that way on 2026-08-04 (run
+    30911746339), on ``experiments/k1814/gate_history/b1a67269__k1814.py``.
+
+    ``scan_population`` skips those paths, but nothing pinned the skip -- and
+    the auditor still classifies a blob when handed one directly, which is the
+    negative control below. The same rule for ``experiment_gates.python_files``
+    is locked in ``test_experiment_gates_gate_history_exclusion.py``, and for
+    ``audit_dm_hac_lag`` in ``test_dm_hac_lag_ratchet.py``.
+    """
+    donors = sorted(finding.file for finding in audit.findings)
+    assert donors, "no flagged site left to build the fixture from"
+    source = (REPO_ROOT / donors[0]).read_text(encoding="utf-8")
+
+    experiment = tmp_path / "experiments" / "k9001"
+    (experiment / "gate_history").mkdir(parents=True)
+    (experiment / "__pycache__").mkdir()
+    for relative in (
+        "k9001.py",
+        "gate_history/deadbeef__k9001.py",
+        "__pycache__/k9001.cpython-312.py",
+    ):
+        (experiment / relative).write_text(source, encoding="utf-8")
+
+    blob = experiment / "gate_history" / "deadbeef__k9001.py"
+    assert scan_file(blob, tmp_path) is not None, (
+        "negative control failed: the classifier no longer flags this fixture, "
+        "so the exclusion below would pass vacuously"
+    )
+
+    result = scan_population(tmp_path)
+    scanned = {finding.file for finding in result.findings} | {
+        finding.file for finding in result.reviewed_safe
+    }
+
+    assert "experiments/k9001/k9001.py" in scanned, (
+        "the live twin was not scanned, so this fixture proves nothing"
+    )
+    assert not [p for p in scanned if "gate_history" in p or "__pycache__" in p], (
+        f"unrepairable path entered the population: {sorted(scanned)}"
+    )
+
+
 def test_baseline_only_contains_active_sites(
     affected: set[str], baseline: set[str]
 ) -> None:

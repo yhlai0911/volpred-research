@@ -116,6 +116,57 @@ def test_no_new_degenerate_dm(affected_sites: set[str], baseline: set[str]) -> N
     )
 
 
+def test_gate_history_blobs_are_never_scanned(tmp_path: Path) -> None:
+    """Frozen gate blobs must stay out of the population (CI run 30911746339).
+
+    ``gate_history/`` holds the as-run entrypoint bytes preserved by
+    ``scripts/preserve_gate_blob.py``, whose manifest forbids editing a blob --
+    an edited original is a reconstruction, which is what K1708 was rejected
+    for. So a blob flagged here demands a repair that is forbidden to make:
+    ``test_no_new_degenerate_dm`` goes red and no legal edit clears it. That is
+    exactly how main went red on 2026-08-04, on
+    ``experiments/k1814/gate_history/b1a67269__k1814.py``.
+
+    ``scan_population`` skips those paths since aea1646fb, but nothing pinned
+    the skip. This does. The sibling rule for ``experiment_gates.python_files``
+    is locked in ``test_experiment_gates_gate_history_exclusion.py``.
+    """
+    source = (
+        "import numpy as np\n"
+        "def dm_test(loss1, loss2, h=1):\n"
+        "    d = np.asarray(loss1) - np.asarray(loss2)\n"
+        "    gamma0 = np.mean((d - d.mean()) ** 2)\n"
+        "    gamma_sum = 0.0\n"
+        "    for lag in range(1, h):\n"
+        "        gamma_sum += np.mean((d[lag:] - d.mean()) * (d[:-lag] - d.mean()))\n"
+        "    variance = gamma0 + 2.0 * gamma_sum\n"
+        "    return d.mean() / np.sqrt(variance / len(d))\n"
+    )
+    assert _verdict_of_source(source, "dm_test") == DEGENERATE, (
+        "fixture no longer trips the auditor; the exclusion below would pass "
+        "vacuously"
+    )
+
+    experiment = tmp_path / "experiments" / "k9001"
+    (experiment / "gate_history").mkdir(parents=True)
+    (experiment / "__pycache__").mkdir()
+    for relative in (
+        "k9001.py",
+        "gate_history/deadbeef__k9001.py",
+        "__pycache__/k9001.cpython-312.py",
+    ):
+        (experiment / relative).write_text(source, encoding="utf-8")
+
+    scanned = {finding.file for finding in scan_population(tmp_path)}
+
+    assert "experiments/k9001/k9001.py" in scanned, (
+        "the live twin was not scanned, so this fixture proves nothing"
+    )
+    assert not [p for p in scanned if "gate_history" in p or "__pycache__" in p], (
+        f"unrepairable path entered the population: {sorted(scanned)}"
+    )
+
+
 def test_baseline_only_contains_active_sites(
     affected_sites: set[str], baseline: set[str]
 ) -> None:
