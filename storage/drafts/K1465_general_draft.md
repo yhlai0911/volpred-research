@@ -9,7 +9,8 @@ experiment_refs: ["K1465"]
 tags: ["一般讀者", "美股", "波動率", "選擇權", "日曆效應"]
 evidence_source_paths: ["experiments/k1465/k1465_results.json", "experiments/k1465/README.md"]
 details: {experiment_refs: ["K1465"], evidence_source_paths: ["experiments/k1465/k1465_results.json"], sample_start: "2010-01-11", sample_end: "2026-06-10", n_obs: 4129, n_is: 3266, n_oos: 862, seed: 42, verdict: "NULL", cost_bps_per_side: 30}
-chart_status: pending_platform_eng
+chart_status: ready
+chart_script: storage/drafts/K1465_charts.py
 ---
 
 # 隔夜有星期效應、盤中也有，兩者算出來的恐慌溢酬卻沒有
@@ -31,8 +32,7 @@ chart_status: pending_platform_eng
 
 兩截都有結構。看起來很有戲。
 
-![五個星期別的隔夜與盤中平方報酬，平均值與中位數並列](storage/assets/k1465_general_dow_mean_vs_median.png)
-<!-- CHART PENDING: 圖表腳本待 platform_eng 交付（request item_20260805T085648183331Z），資料來自 k1465_results.json 的 dow_descriptive_full 區塊 -->
+![五個星期別的隔夜與盤中平方報酬，平均值與中位數並列](storage/drafts/assets/k1465_general_dow_mean_vs_median.png)
 
 不過平均值和中位數要一起看，否則會看錯。
 
@@ -57,8 +57,7 @@ chart_status: pending_platform_eng
 
 每個星期別的樣本數是 772、850、847、831、829，不算少。
 
-![五個星期別的恐慌溢酬平均值，全期與樣本外](storage/assets/k1465_general_vrp_flat.png)
-<!-- CHART PENDING: 圖表腳本待 platform_eng 交付（request item_20260805T085648183331Z），資料來自 k1465_results.json 的 dow_descriptive_full/dow_descriptive_oos 區塊 -->
+![五個星期別的恐慌溢酬平均值，全期與樣本外](storage/drafts/assets/k1465_general_vrp_flat.png)
 
 兩截原料各自有星期結構，相減之後的成品沒有。合理的解釋是選擇權的報價已經同步反映了同一套日曆：星期一的隱含波動本來就報得比較高，實際波動也比較高，兩邊一起動，相減之後抵銷掉。
 
@@ -81,8 +80,7 @@ chart_status: pending_platform_eng
 
 全樣本跑一次也一樣：夏普值 -1.30，期末淨值 0.208，對照一直持有的 8.437。
 
-![樣本外 862 天的淨值對照](storage/assets/k1465_general_oos_equity.png)
-<!-- CHART PENDING: 圖表腳本待 platform_eng 交付（request item_20260805T085648183331Z），資料來自 k1465_results.json 的 backtest_oos 區塊 -->
+![樣本外 862 天的四項績效對照](storage/drafts/assets/k1465_general_oos_equity.png)
 
 再用預測誤差比較檢定的小樣本修正版，比較「照星期開關」和「一直開著」兩種做法，樣本外的統計量 1.53，機率值 0.1255。方向指向一直開著比較好，但沒到顯著。
 

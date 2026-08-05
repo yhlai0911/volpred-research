@@ -9,7 +9,8 @@ experiment_refs: ["K1696"]
 tags: ["一般讀者", "公債", "波動率", "小型股", "研究方法"]
 evidence_source_paths: ["experiments/K1696/K1696_results.json", "experiments/K1696/README.md"]
 details: {experiment_refs: ["K1696"], evidence_source_paths: ["experiments/K1696/K1696_results.json"], assets: ["SPY", "HYG", "IWM"], horizons: [1, 21, 63], seed: 42, verdict: "NULL", cells: 9, reviewer: "codex_cli_0.141.0 PASS"}
-chart_status: pending_platform_eng
+chart_status: ready
+chart_script: storage/drafts/K1696_charts.py
 ---
 
 # 公債利差自己也會抖，但把這個抖動加進預測，九格裡有七格變更差
@@ -49,8 +50,7 @@ M3 這一層裡，利差波動的係數在九格的 t 值分別是：
 
 九格的絕對值全部小於 2。最大的一格是小型股的 63 天，1.54，離常用的 1.96 還有距離。連正負號都不一致：明天那一欄兩正一負，63 天那一欄三個全負。
 
-![九格的樣本內係數與樣本外損失](storage/assets/k1696_general_dm_heatmap.png)
-<!-- CHART PENDING: 圖表腳本待 platform_eng 交付，資料來自 K1696_results.json 的 insample／oos 區塊；實驗端已有 experiments/K1696/fig_dm_heatmap.png 可作為版面參考 -->
+![九格的樣本外檢定統計量熱圖](storage/drafts/assets/k1696_general_dm_heatmap.png)
 
 ## 樣本外：不是沒用，是有害
 
@@ -90,14 +90,13 @@ MOVE 在 21 天期距上才開始有點用（標普 500 那格的損失分數從
 
 所以這題的完整答案要分兩層講：利差波動被 MOVE 蓋掉了，而 MOVE 自己在短期距也不見得比「昨天抖多少、今天大概也差不多」這種最笨的做法強。
 
-![利差波動的時間序列，21 日與 63 日兩種算法](storage/assets/k1696_general_tsv_timeseries.png)
-<!-- CHART PENDING: 圖表腳本待 platform_eng 交付，資料來自 K1696_results.json；實驗端已有 experiments/K1696/fig_tsv_timeseries.png 可作為版面參考 -->
+![九格的損失分數變化，七格為正代表加了之後更差](storage/drafts/assets/k1696_general_loss_delta.png)
 
 ## 兩個範圍限制
 
 這份研究沒有把景氣循環的官方認定拉進來，所以「利差波動在衰退前後表現不同」這個可能性沒有被檢驗過，留給後續。
 
-63 日版的利差波動只畫了圖，沒有進迴歸。原因是時間預算，不是結果不好看。要完整回答，這一格得補。
+利差波動還有一個 63 日的版本，這份研究只把它畫出來看，沒有讓它進迴歸。原因是時間預算，不是結果不好看。要完整回答，這一格得補。
 
 ## 這對一般投資人的意思
 

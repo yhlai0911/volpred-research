@@ -9,7 +9,8 @@ experiment_refs: ["K1451"]
 tags: ["一般讀者", "信用市場", "波動率", "恐慌指數", "研究方法"]
 evidence_source_paths: ["experiments/k1451/k1451_results.json", "experiments/k1451/README.md"]
 details: {experiment_refs: ["K1451"], evidence_source_paths: ["experiments/k1451/k1451_results.json"], sample_start: "2008-05-12", sample_end: "2026-05-07", n_obs: 4526, seed: 42, verdict: "NULL", primary_tests: 4, surviving_tests: 0}
-chart_status: pending_platform_eng
+chart_status: ready
+chart_script: storage/drafts/K1451_charts.py
 ---
 
 # 高收債對投資級債的價差看起來能預告波動，把恐慌指數放進來後只剩 3.7%
@@ -28,8 +29,7 @@ chart_status: pending_platform_eng
 
 到這裡為止，這是一個可以寫成「信用市場確實領先」的結果。
 
-![訊號與未來波動的相關係數在正負五日的落後期之間](storage/assets/k1451_general_leadlag.png)
-<!-- CHART PENDING: 圖表腳本待 platform_eng 交付（request item_20260805T085648183331Z），資料來自 k1451_results.json 的 lead_lag_cross_corr 區塊 -->
+![訊號與未來波動的相關係數在正負五日的落後期之間](storage/drafts/assets/k1451_general_leadlag.png)
 
 不過那張跨落後期的相關圖有一件事要先說。從落後 5 天到領先 5 天，相關係數一路在 -0.20 到 -0.29 之間平緩移動，沒有在任何一個特定的落後期出現尖峰。真正的領先訊號通常會有一個最佳落點；這裡沒有。這張圖是探索性的，不能拿來下結論，但它先給了一個提醒。
 
@@ -41,8 +41,7 @@ chart_status: pending_platform_eng
 
 同一條式子裡，VIX 的斜率是 0.8830，機率值 6.5 乘以 10 的負 25 次方。R² 從 0.0551 跳到 0.4625。
 
-![加入 VIX 前後，信用價差斜率從 -1.1137 掉到 -0.0410](storage/assets/k1451_general_coef_collapse.png)
-<!-- CHART PENDING: 圖表腳本待 platform_eng 交付（request item_20260805T085648183331Z），資料來自 k1451_results.json 的 models 區塊 -->
+![加入 VIX 前後，信用價差斜率從 -1.1137 掉到 -0.0410](storage/drafts/assets/k1451_general_coef_collapse.png)
 
 換兩種寫法再試。把訊號改成標準分數，斜率變成 -0.0000085，機率值 0.9985。把訊號改成「價差是不是處在最寬的那 19.2% 的日子」這種是非題，斜率 0.0169，機率值 0.3049。
 

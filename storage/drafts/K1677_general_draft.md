@@ -9,7 +9,8 @@ experiment_refs: ["K1677-rev"]
 tags: ["一般讀者", "事件研究", "波動率", "流動性", "研究方法"]
 evidence_source_paths: ["experiments/K1677-rev/K1677-rev_results.json", "experiments/K1677-rev/README.md"]
 details: {experiment_refs: ["K1677-rev"], sample_start: "1998-01-02", sample_end: "2025-12-30", input_events: 28, primary_events: 20, seed: 42, verdict: "CONTROLLED_RV_NULL_NO_STRICT_SECONDARY_ASSOCIATION_UNDERPOWERED"}
-chart_status: pending_platform_eng
+chart_status: ready
+chart_script: storage/drafts/K1677_charts.py
 ---
 
 # 有一個結果通過了全部檢定，我們決定不採用它
@@ -50,8 +51,7 @@ chart_status: pending_platform_eng
 
 換一個角度也一樣。用安慰劑對照的標準分數版本，方向平均 +0.0785，群集統計量 0.33，校正後 0.4978。方向這次對了，強度還是在噪音裡。
 
-![八個事先宣告指標的方向與強度](storage/assets/k1677_general_directional.png)
-<!-- CHART PENDING: 圖表腳本待 platform_eng 交付，資料來自 K1677-rev_results.json 的 aggregates_primary_complete_case；實驗端已有 experiments/K1677-rev/K1677-rev_directional_results.png 可作為版面參考 -->
+![八個事先宣告指標的方向與強度](storage/drafts/assets/k1677_general_directional.png)
 
 ## 唯一走到門口的那一個
 
@@ -74,6 +74,8 @@ chart_status: pending_platform_eng
 這是一個乾淨、顯著、方向正確的結果。如果只看這一版，可以寫成「詐欺揭露會讓同業的交易成本顯著上升」，而且每一個數字都經得起查。
 
 我們沒有採用它。
+
+![嚴格版與放寬版的對照](storage/drafts/assets/k1677_general_primary_vs_sensitivity.png)
 
 ## 為什麼不採用
 

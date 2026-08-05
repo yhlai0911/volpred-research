@@ -9,7 +9,8 @@ experiment_refs: ["K1704"]
 tags: ["一般讀者", "台指期", "波動率", "研究方法", "模型比較"]
 evidence_source_paths: ["experiments/k1704/K1704_results.json", "experiments/k1704/README.md"]
 details: {experiment_refs: ["K1704"], sample_start: "2012-01-02", sample_end: "2026-07-14", n_days: 3548, n_oos: 2016, seed: 42, verdict: "PROXY_ROBUST_STATISTICAL_RANKING"}
-chart_status: pending_platform_eng
+chart_status: ready
+chart_script: storage/drafts/K1704_charts.py
 ---
 
 # 換六把尺量同一件事，第一名六次都是同一個模型
@@ -56,8 +57,7 @@ chart_status: pending_platform_eng
 
 六列，同一個順序，沒有一列翻盤。
 
-![六把尺下的三個模型損失分數](storage/assets/k1704_general_qlike_by_proxy.png)
-<!-- CHART PENDING: 圖表腳本待 platform_eng 交付，資料來自 K1704_results.json 的 targets 區塊；實驗端已有 experiments/k1704/K1704_qlike_by_proxy.png 可作為版面參考 -->
+![六把尺下的三個模型損失分數](storage/drafts/assets/k1704_general_qlike_by_proxy.png)
 
 順帶可以看到一件事：整列的數字隨著尺變粗而整體變大。最細的一分鐘那列，最好的分數是 0.1335；最粗的當日漲跌幅平方那列，最好的也要 2.8573。這不是模型變差，是尺本身變吵，噪音進了分母。
 
@@ -82,6 +82,8 @@ chart_status: pending_platform_eng
 前段 2018 年 2 月到 2022 年 4 月，1,020 天。後段 2022 年 4 月到 2026 年 7 月，996 天。
 
 兩段的排名一樣，淘汰賽剩下的也都只有多尺度模型。差別在「贏得多乾脆」：前段被淘汰者的機率值是 0.093，勉強擦過 0.10 這條線；後段是 0.061，比較穩。
+
+![驗收期切成前後兩段，排名不變](storage/drafts/assets/k1704_general_split_oos.png)
 
 前段包含 2020 年那次崩盤。那段時間所有模型的預測都變爛，彼此的差距也被壓縮，所以淘汰得比較勉強。這個現象本身合理，但它也提醒一件事：這個結論在極端行情下的邊際比平常薄。
 
