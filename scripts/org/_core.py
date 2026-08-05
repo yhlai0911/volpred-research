@@ -179,6 +179,42 @@ def clear_lease(root: Path, dept: str) -> bool:
     return False
 
 
+# The brief is written into --append-system-prompt-file at attach and is paid
+# for on every cached turn, by every pane at once. On 2026-08-05 the inbox
+# block alone was 104KB (~38k tokens) for platform_eng and 59.5KB for the
+# manager,
+# because every item was rendered in full. This is the same discipline as
+# "never read feed.json whole" -- applied to the org's own product.
+#
+# Bounded rendering is only safe if the truncation SAYS SO. A brief that
+# quietly shows 12 of 74 items reads exactly like a brief with 12 items, and a
+# role would close its shift believing the inbox was drained. Losing a work
+# item is worse than the tokens saved, so every omission is counted out loud
+# and the path to the full text is given.
+INBOX_RENDER_LIMIT_DEPT = 12
+INBOX_RENDER_LIMIT_MANAGER = 15
+INBOX_TASK_CHARS = 240
+
+
+def clip_task(task: object, chars: int = INBOX_TASK_CHARS) -> str:
+    """First `chars` characters of an item body, on one line, marked if cut."""
+    text = " ".join(str(task or "").split())
+    if len(text) <= chars:
+        return text
+    return text[:chars] + f" …（截斷，全文 {len(text)} 字）"
+
+
+def inbox_overflow_note(total: int, shown: int, inbox_path: Path) -> str:
+    """Say what was left out. Never let a bounded view look like a full one."""
+    if total <= shown:
+        return ""
+    return (
+        f"\n（依優先序與時間顯示前 {shown} 件，**另有 {total - shown} 件未列出**——"
+        f"這裡的截斷只是為了省 token，不代表那些工作不存在。"
+        f"完整內容在 `{inbox_path}`，用 jq 讀單件：`jq -r '.task' <該檔>`）"
+    )
+
+
 def inbox_items(root: Path, dept: str) -> list[dict]:
     inbox = dept_dir(root, dept) / "inbox"
     items: list[dict] = []
@@ -338,14 +374,30 @@ def build_manager_brief(root: Path) -> str:
             f"；執行體 {runner}"
         )
 
-    inbox = []
+    manager_items: list[dict] = []
     for path in sorted((mdir / "inbox").glob("*.json")) if (mdir / "inbox").is_dir() else []:
         try:
-            item = json.loads(path.read_text(encoding="utf-8"))
+            manager_items.append(json.loads(path.read_text(encoding="utf-8")))
         except (json.JSONDecodeError, OSError):  # silent-ok: not silent — surfaced to the manager as ⚠️ in its brief
-            inbox.append(f"- ⚠️ 無法解析 `{path.name}`")
-            continue
-        inbox.append(f"- [{item.get('priority', 'P3')}] 來自 **{item.get('from')}**：{item.get('task')}")
+            manager_items.append(
+                {"priority": "P1", "from": "?", "task": f"⚠️ 無法解析 `{path.name}`"}
+            )
+    # Arrival order buried the decisions: the boss digest hit exactly this on
+    # 2026-08-05 (54 P1 items below 41 cc copies, because cc arrives first).
+    # The coordinator reads a capped list, so the cap must keep the top, not
+    # the oldest.
+    manager_items.sort(
+        key=lambda i: (str(i.get("priority") or "P3"), str(i.get("created_at") or ""))
+    )
+    manager_shown = manager_items[:INBOX_RENDER_LIMIT_MANAGER]
+    inbox = [
+        f"- [{item.get('priority', 'P3')}] 來自 **{item.get('from')}**："
+        f"{clip_task(item.get('task'))}"
+        for item in manager_shown
+    ]
+    inbox_note = inbox_overflow_note(
+        len(manager_items), len(manager_shown), mdir / "inbox"
+    )
 
     return f"""你現在是 VolPred 平台的**運營經理**（協調者）。
 
@@ -377,9 +429,9 @@ def build_manager_brief(root: Path) -> str:
 
 {org_blockages(root)}
 
-## 你的收件匣（{len(inbox)} 件；老闆指令與部門上報都在這裡）
+## 你的收件匣（{len(manager_items)} 件；老闆指令與部門上報都在這裡）
 
-{chr(10).join(inbox) or "（空）"}
+{chr(10).join(inbox) or "（空）"}{inbox_note}
 
 ## 你的工具（全部用 `uv run python` 執行）
 
@@ -487,8 +539,9 @@ def work_prompt(root: Path, dept: str) -> str:
 
     items = inbox_items(root, dept)
     if items:
+        shown = items[:INBOX_RENDER_LIMIT_DEPT]
         rendered = []
-        for i in items:
+        for i in shown:
             due = f" due={i['due']}" if i.get("due") else ""
             refs = f" refs={', '.join(i['refs'])}" if i.get("refs") else ""
             issue = f" issue=#{i['issue']}" if i.get("issue") else ""
@@ -496,7 +549,7 @@ def work_prompt(root: Path, dept: str) -> str:
             kind = i.get("kind") or "assignment"
             rendered.append(
                 f"- [{i.get('priority', 'P3')}] **來自 {sender}**（{kind}）"
-                f" `{i.get('id')}`\n  {i.get('task')}{due}{refs}{issue}"
+                f" `{i.get('id')}`\n  {clip_task(i.get('task'))}{due}{refs}{issue}"
             )
             # The reply command, spelled out: a department that has to work out
             # who asked and how to answer will skip answering.
@@ -510,7 +563,9 @@ def work_prompt(root: Path, dept: str) -> str:
                     f"  ⓘ 這是 canonical 任務 `{i['canonical_task_id']}` 的指標——"
                     f"結案走 task_pool_claim，不要只歸檔本張工單"
                 )
-        inbox_block = "\n".join(rendered)
+        inbox_block = "\n".join(rendered) + inbox_overflow_note(
+            len(items), len(shown), dept_dir(root, dept) / "inbox"
+        )
     else:
         inbox_block = "（收件匣是空的——沒有待辦就不要製造工作，回報 outcome=noop 後結束）"
 
