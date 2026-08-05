@@ -1,58 +1,64 @@
 {
   "health": "ok",
   "kpi": {
-    "articles_published_to_pool_this_run": 3,
-    "articles_ready_blocked_on_upload": 2,
-    "chart_scripts_written": 5,
-    "charts_generated": 11,
-    "lazypack_plans_written": 5,
-    "feed_draft_pool_depth": 6,
+    "articles_published_to_pool_this_run": 6,
+    "feed_draft_pool_depth": 8,
     "feed_draft_pool_threshold": 4,
-    "anti_ai_gate_pass": 5,
-    "audience_gate_pass": 5,
-    "content_vs_source_audit_pass": 5,
-    "image_gate_pass": 5,
-    "lazypack_gate_pass": 5
+    "chart_scripts_written": 6,
+    "charts_generated": 13,
+    "lazypack_plans_written": 6,
+    "anti_ai_gate_pass": 6,
+    "audience_gate_pass": 6,
+    "content_vs_source_audit_pass": 6,
+    "image_gate_pass": 6,
+    "lazypack_gate_pass": 6,
+    "self_inflicted_incidents": 1
   },
-  "last_run": "2026-08-05T10:35:00Z",
+  "last_run": "2026-08-05T10:45:00Z",
   "open_items": 1,
   "in_pool": [
     "mile_dee8e30a — K1451 高收債對投資級債的價差…只剩 3.7%",
     "mile_0fc136ab — K1465 隔夜有星期效應、盤中也有，恐慌溢酬卻沒有",
-    "mile_c4c34762 — K1704 換六把尺量同一件事，第一名六次都是同一個模型"
+    "mile_c4c34762 — K1704 換六把尺量同一件事，第一名六次都是同一個模型",
+    "mile_cea5a8b3 — K1696 公債利差自己也會抖，九格裡七格更差",
+    "mile_a1d9c5e0 — K1677 有一個結果通過了全部檢定，我們決定不採用它",
+    "mile_6d6b3a8f — K1700 近百年的美股，沒有任何一個三十年做到年化 15%（會員留存訊號第一篇）"
   ],
-  "ready_not_published": [
-    {
-      "draft": "storage/drafts/K1696_general_draft.md",
-      "plan": "storage/drafts/K1696_lazypack_plan.json",
-      "command": "uv run python scripts/publish_draft.py --draft storage/drafts/K1696_general_draft.md --status draft --lazypack-plan storage/drafts/K1696_lazypack_plan.json",
-      "blocked_by": "Supabase 圖片上傳 ConnectTimeout / Connection reset（試三次全同一位置失敗）"
-    },
-    {
-      "draft": "storage/drafts/K1677_general_draft.md",
-      "plan": "storage/drafts/K1677_lazypack_plan.json",
-      "command": "uv run python scripts/publish_draft.py --draft storage/drafts/K1677_general_draft.md --status draft --lazypack-plan storage/drafts/K1677_lazypack_plan.json",
-      "blocked_by": "同上"
-    }
-  ],
+  "member_signal_topics": {
+    "source": "manager item_20260805T102509264113Z（yaoxk1431 八題主題分布）",
+    "verdict_by_topic": [
+      {
+        "topic": "產業概念股 ≠ alpha 的一般化檢定",
+        "dedup": "arc 新（既有 2026-05-26 進口車那篇是單案）",
+        "blocked_by": "需要新實驗；研究部 8/8 前 certify 全 BLOCKED",
+        "owner_next": "research"
+      },
+      {
+        "topic": "敘事型目標價的機率化系列",
+        "dedup": "方法現成（台股六萬點已用蒙地卡羅算過），對新敘事重算不撞重",
+        "blocked_by": "仍屬研究性計算，需研究部或 compute queue",
+        "owner_next": "research"
+      },
+      {
+        "topic": "「我該問什麼問題」系列",
+        "dedup": "(K1700, general) 無既有文章；同 K 不同 audience 是產品設計",
+        "status": "第一篇已完成並進池 mile_6d6b3a8f",
+        "owner_next": "content"
+      }
+    ]
+  },
   "blockers": [
     {
-      "what": "Supabase article-images 上傳連線劣化，兩篇已備妥的文章進不了池",
-      "workaround": "文字／圖／plan 全部已 commit，網路恢復後各跑一行指令即可；重跑前先查 feed 池避免重複發佈",
-      "escalated_to": "platform_eng",
-      "report_item": "本輪送出"
-    },
-    {
       "what": "收尾契約第 3 項 inbox 歸檔仍做不到：本 pane 於 17:32 前啟動，拿不到 a17aa310c 之後產生的 mv 權限",
-      "workaround": "重新 attach 後即可補做；journal 與本檔 inbox_processed_but_not_archived 完整記錄",
-      "escalated_to": "manager",
-      "report_item": "item_20260805T090734637830Z_3-inbox-runtime-allow-list-mv-b"
+      "workaround": "重新 attach 後即可補做；journal 完整記錄",
+      "escalated_to": "manager"
     }
   ],
   "next_run_queue": [
-    "重跑 K1696 與 K1677 的發佈（指令見 ready_not_published）",
     "重新 attach 取得 mv 權限後補做 inbox 歸檔",
-    "回謝研究部的回覆（8/8 Codex 額度恢復前沒有可轉文章的 K；屆時優先談 K1741）",
+    "「我該問什麼問題」系列第二篇：候選是已發佈的 30 年年化 7% 那題（mile_0205a444）改寫 general 版",
+    "回謝研究部（8/8 Codex 額度恢復前沒有可轉文章的 K；屆時優先談 K1741）",
+    "選題一與選題二送 request 給研究部，附經理的訊號證據與內容部要的產出格式",
     "orphan 草稿救援：k1706 與 k1600 圖表齊全，補 lazypack plan 後可進池；K1597/K1357 各缺 1 張圖；K1658/K1710/K1419 各缺 2 張圖",
     "trending_repost 換題（今日配額 0/2 未用），FB 那一半仍待經理裁決由誰承接"
   ]

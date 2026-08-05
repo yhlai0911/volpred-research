@@ -111,6 +111,23 @@ matplotlib 中文字型設定（沿用即可）：
 單篇發佈含上傳可能超過 120 秒，用 `run_in_background` 跑，不要當成掛掉。
 **重跑前先查 feed 池**確認上一次是不是其實已經寫進去了，避免重複發佈。
 
+## macOS 大小寫不敏感：`K1700_general_draft.md` 會覆寫 `k1700_general_draft.md`（2026-08-05 實際踩到）
+
+寫新 draft 前**先 `ls -b storage/drafts/ | grep -i <k編號>`**。這個 repo 的 draft 檔名大小寫混用
+（`K1609_general_draft.md` 與 `k1600_general_draft.md` 並存），而 macOS 檔案系統大小寫不敏感：
+用大寫 K 開頭的檔名 Write，會**靜默覆寫**同名的小寫檔，Write 工具只會回「updated」不會回「created」。
+
+**「updated」而不是「created」就是警訊**——你以為在建新檔，其實在改別人的檔。
+
+2026-08-05 我因此覆寫了 `k1700_general_draft.md`（member_qa `mile_d84aa7d0` 的原稿），
+95 行變 62 行。發現方式是 `git_writer_lock commit` 回「路徑規格未符合任何 git 已知檔案」——
+git 索引是大小寫敏感的，所以它認不得我給的大寫路徑，這個錯誤訊息就是那次覆寫的唯一線索。
+還原方式：`git show <commit>~1:<path>` 導出到 scratchpad，再用 Write 寫回（**不能**用
+`git checkout --`，主 checkout 禁止裸 git mutation，hook 會擋）。
+
+同一個 K 要出第二個 audience 的版本時，檔名加上用途區隔（例如 `K1700_reader_longterm_draft.md`），
+不要只靠大小寫區分。
+
 ## 讀者文章的固定作法
 
 - 數字一律從 `experiments/<id>/<id>_results.json` 程式化取得，不從 README／agent 摘要轉抄
