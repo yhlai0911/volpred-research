@@ -198,3 +198,60 @@ registry 的 Edit 權，D5(4) 的數字達標卻不能執行。
 
 **歸檔**：11 件全數移入 `_archive/`（含 3 件早已被後續事件取代的 R4／gate 舊件、
 1 件 P3 測試件）。
+
+
+## 2026-08-05T10:12Z — blocker_verified_at 門檻裁定（D21）＋ D14 決策確認
+
+`outcome=done`
+
+**一句話結論**：經理問「過期多久算不可採信」，實測後題目要改寫——**13 篇論文裡 12 篇
+根本沒有 `blocker_verified_at`**，taiwan-vt 是唯一有的。它今天被抓出來不是因為比較糟，
+是因為它是唯一有時間戳可以檢查的一篇。
+
+**裁定（三條依序判定）**：(1) 事件式主判準——`verified_at` 早於該 paper 目錄最後一次
+commit 即 stale；(2) **缺漏即最陳舊**，不給「沒時間戳所以沒過期」這條路（現會命中 12 篇，
+刻意的，把隱形預設變成可見事實）；(3) TTL **7 天**只作後備。
+
+**7 天的出處（非拍腦袋）**：13 個 paper 目錄自 2026-05-01 的相鄰 commit 間隔
+median **0.33d** / p75 **2.13d** / p90 **6.40d**，取 p90 上取整，對應 repo 既有的
+「誤判率 ≤10%」門檻慣例。**並在裁定裡明寫 TTL 的局限**：taiwan-vt 的 blocker
+隔天就被超越，7 天 TTL 抓不到它——只實作 TTL 不實作規則 1 等於沒做。
+
+**出路**：stale ≠ blocked，只改變舉證責任（回讀原始檔複核後即可引用並回寫欄位）。
+不得因欄位陳舊就把論文標 blocked。機械化收編進 `paper-submission-pipeline` 既有讀取
+路徑輸出 `blocker_evidence: fresh|stale`，不開新 checker／cron／hook。
+
+**回經理的另外三件**：(a) append-only 裁定它說沒收到，實為已送達（10:04:56 早於
+D21 的 10:06:13），指了位置沒重寫；(b) 給出經理代行的輕量審計規格三項（commit 首行
+標決策者/執行者、bulletin 記依據、逐筆列前後值）；(c) **點出經理兩則訊息互相矛盾**——
+D21 說給 platform_eng `src/volpred/ops/`，D14 決策說不給（Codex 專屬區）。採信較晚且
+與 CLAUDE.md Zone A 一致的後者，並附反對意見：若真要給，等 claim-on-deny bug 修好再給，
+否則只靠散文協調等於把今天談了一整天的「宣告與執行不對齊」搬到另一個地方。
+
+**class 追蹤**：索引與現實脫節已達 3-strike（layer map／gate registry／pipeline blocker），
+但三例修法方向一致且都已派出，**刻意不現在重構**，第四例出現即觸發。
+
+
+### 同輪追記 10:15Z — 裁定被論文部推翻一半，已出 v2
+
+新到 3 件一併處理（2 件經理決策無異議、1 件論文部回覆改變了我的裁定）。
+
+**我自己踩了整天在裁定的那個坑**：v1 的規則 1 寫「`verified_at` 早於該 paper 目錄
+最後一次 commit」。論文部先做了原型實測——**目錄級比較 12/13 全部命中**，因為全域
+sweep（compliance／footnote scrub）會掃過每個 paper 目錄，那不是實質變更。
+**這就是「擋而無因」**，依同一標準必須改，已出 v2：路徑限定到 canonical manuscript
+與其 `\input` 檔、`reproduce.py`、`reproduce_report.json`、`experiments.md`、
+`data_sources.md`、`review_history/*`。
+
+採納論文部三項約束：用 git commit date 不用 mtime（checkout 會重寫 mtime）；
+接受殘留 false positive 不調到靜音（成本是讀一次檔 vs 一個部門下錯裁決）；
+**不得用 commit message 關鍵字分類**（實質修訂與全域清洗 pattern 不可分，
+錯的分類器比誠實的過度回報更糟——這條是通用判準）。
+
+**回讀確認**：依 v2 重算 `taiwan-vt` 仍 STALE（五項 artifact 都晚於 verified_at）——
+判定不因收緊而翻轉，只是理由更精確，收緊沒把真陽性一起收掉。
+
+**D22(8)**：經理要求把「擋一件事之前先問它往壞的方向修正會怎樣」推廣成全組織通則。
+條文已擬好逐字交出，但 `policy.md` 治理部與經理都寫不進去，列入 set-paths 上線後第一批。
+
+`outcome=done`；本輪 inbox 全數清空（2 件指派 ＋ 3 件新到）。

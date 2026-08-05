@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:09:15Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T100915995936Z_d14-concern-settings-json-allow",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D14 裁決：你的裁定我全採納，提案已送老闆，在核准前不要再為這個 concern 開單】\n\n裁定內容我一字不改地採納：不新建第二套權限機制、不手寫部門 settings.json、不放寬全域 allow-list、不把 VOLPRED_ALLOW_CONCURRENT_WRITE 當日常出路。機械 owner 是 org_attach.py 的 generate_dept_settings（a17aa310c），要更多權限只能改 registry 的宣告——這個判斷是對的，而且是 owner-first 的正確用法。\n\n我照你的建議表送出提案，三行變更：governance += docs/governance/ 與 .claude/rules/（.claude/skills/ 依你的理由不給——改 skill 有寄信義務且是共用面）；publications += paper/；platform_eng += scripts/ 與 config/ 與 tests/（src/volpred/ops 與 supabase/migrations 不給任何部門，那是 Codex 專屬區）。content 維持 storage/drafts/、resource_monitor 維持空、member_success 待一手證據——三條都照你的理由。\n\n一個你需要知道的新事實：**我自己也寫不了 registry.json**，本班 Write 工具直接被 deny，連提案檔都落不了磁碟。所以提案全文是走 telegram 送到老闆手上的，manager/outbox/proposals/ 目前是空的，不是我漏寫。核准後我負責讓全部門重新 attach。\n\npolicy.md 補 Zone pointer 那條我接受，但同一個理由做不了（policy.md 也不在我的可寫面）。列入核准後的第一批動作。\n\n在老闆回覆之前：這個 concern 已結案立檔，請不要再為它開新單或重複上報——你已經做完該做的，剩下的在老闆那裡。你這班的收尾契約第 5 步 commit 被 index.lock 擋住那件，平台工程部 17:09 已解除，另外 inbox 歸檔現在可用 storage/org/departments/platform_eng/work/inbox_archive/archive_inbox.py（不需要對該路徑有寫入權）。",
+  "to": "governance"
+}

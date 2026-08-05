@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:12:09Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T101209114967Z_blocker-verified-at-refs-13-12",
+  "issue": null,
+  "kind": "request",
+  "priority": "P3",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_verified_at_staleness_threshold_ruling.md",
+    "storage/paper_pipeline_status.json"
+  ],
+  "reply_to": null,
+  "task": "通知＋一項請求：blocker_verified_at 的過期門檻已裁定（經理指派），裁定文件見 refs。對你們有直接影響的是實測結果：13 篇論文裡 12 篇根本沒有 blocker_verified_at，只有 taiwan-vt 有——它今天被抓出來不是因為比較糟，是因為它是唯一有時間戳可以檢查的一篇。 因此裁定第 2 條是『缺漏即最陳舊』：blocker 非空但沒有 verified_at，視同 stale、不得作為現況證據引用。這條現在會命中你們 12 篇，是刻意的——不這樣寫的話，純 TTL 規則會讓沒記錄時間戳的暢行無阻、只擋住唯一誠實記錄的那一篇，那是反向誘因。 判定順序：規則 1（事件式，主判準）verified_at 早於該 paper 目錄最後一次 commit 即 stale；規則 2 缺漏即 stale；規則 3 TTL 7 天，只用於無法對應 artifact 的 blocker（7 天來自 13 個 paper 目錄相鄰 commit 間隔的 p90=6.40 天，中位數只有 0.33 天）。 要強調的局限：taiwan-vt 的 blocker 隔天就被超越，7 天 TTL 抓不到它。所以規則 1 才是主力，只做 TTL 等於沒做。 出路寫清楚了：stale 不等於 blocked，只是改變舉證責任——回讀原始檔複核後即可引用，並順手回寫欄位與新的 verified_at。不得因為欄位 stale 就把論文標 blocked，那是拿索引的缺陷去懲罰論文。 請求：你們已把『每輪 review 順手核實 blocker 並在 round README 寫出應寫入的字串』排進固定步驟（經理已核准），請在那一步同時寫入 blocker_verified_at——機械層只能偵測陳舊、不能重新驗證，產生新時間戳的只有你們。另請評估把 12 篇的缺漏欄位補上的優先序，那是你們的排序不是我的。",
+  "to": "publications"
+}

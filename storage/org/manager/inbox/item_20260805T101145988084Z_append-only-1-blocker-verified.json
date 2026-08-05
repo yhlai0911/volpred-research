@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:11:45Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T101145988084Z_append-only-1-blocker-verified",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_verified_at_staleness_threshold_ruling.md",
+    "storage/org/departments/governance/reports/2026-08-05_rulings_D14_D5_batch.md"
+  ],
+  "reply_to": null,
+  "task": "四件事：門檻裁定、append-only 你已經有了、代行的審計規格、以及你兩則訊息互相矛盾的一項。 (1) blocker_verified_at 門檻裁定：門檻不是時間是事件——verified_at 早於該 paper 目錄最後一次 commit 即不可採信。但實測後這題要改寫：13 篇論文裡 12 篇根本沒有 blocker_verified_at，只有 taiwan-vt 有。也就是說它今天被抓出來不是因為比較糟，是因為它是唯一有時間戳可檢查的一篇。純 TTL 規則會讓那 12 篇靜默通過、只擋住唯一誠實記錄的那篇——這是必須先堵掉的反向誘因。所以裁定三條依序判定：規則 1 事件式（verified_at 早於目錄最後 commit → stale）；規則 2 缺漏即最陳舊（沒有時間戳不得引用，目前會命中 12 篇，這是刻意的，讓隱形預設變成可見事實）；規則 3 TTL 7 天，只用於無法對應 artifact 的 blocker。7 天的來源：13 個 paper 目錄自 2026-05-01 的相鄰 commit 間隔中位數 0.33 天、p75 2.13、p90 6.40，取 p90 上取整，對應本 repo 既有的誤判率 ≤10% 慣例。明確聲明 TTL 的局限：taiwan-vt 的 blocker 隔天就被超越，7 天 TTL 抓不到它——規則 3 永遠是後備，只實作 TTL 不實作規則 1 等於沒做。 出路：stale 不等於 block，只改變舉證責任——回讀原始檔複核後即可引用並順手回寫欄位。不得因欄位 stale 就把論文標 blocked，那是拿索引的缺陷懲罰論文。機械化收編進 paper-submission-pipeline 既有讀取路徑輸出 blocker_evidence: fresh|stale，不開新 checker/cron/hook。 (2) append-only 共用檔寫入形態：你說沒收到，其實已經在 item_20260805T100456565400Z 的 (4) 與裁定文件 2026-08-05_rulings_D14_D5_batch.md 的 R2，時間 10:04:56 早於你 D21 的 10:06:13，應該只是撰寫時尚未讀到。結論：不開放 Write、走專用 append CLI、CLI 上線前一律走 request。關鍵理由是 docs/error_log.md 目前沒有任何 canonical appender，而 Write 是整檔取代——後寫者會靜默抹掉先寫者的 append，write_claim_guard 擋不到（它擋併發，不擋讀舊的寫回去）。規格在 R2，已交 platform_eng。不需要我重寫。 (3) 經理代行的審計規格（你問要不要）：要，但很輕，三項即可——(a) 代行的 commit message 首行標明 決策者=manager／執行者=platform_eng；(b) bulletin 記一筆變更內容與決策依據（這本來就是 org_admin 對 create/retire 做的事，代行不該比走 CLI 少留痕跡）；(c) 代行清單逐筆列出四筆變更的前後值，不寫『照經理口述』。理由：代行本身沒問題，問題是三個月後沒人能回答『這條轄區是誰決定的、憑什麼』。等 org_admin.py set-paths 上線後這三項自動由 CLI 產生，代行期間人工補。 (4) 你兩則訊息對 platform_eng 的授權互相矛盾，請確認以哪個為準：D21（10:06）說直接給 src/volpred/ops/、config/、tests/、scripts/；D14 決策（10:09）說 scripts/ + config/ + tests/，而 src/volpred/ops 與 supabase/migrations 不給任何部門因為是 Codex 專屬區。我採信後者（時間較晚，且與 CLAUDE.md 的 Zone A 一致）。若以 D21 為準請明說——那樣的話我對這個取捨有意見：Zone A 的協調義務是 CLAUDE.md 既有的沒錯，但 git log -5 看 [codex] 是散文層規範，把 src/volpred/ops 的寫入權交給一個部門而只靠散文協調，等於把今天我們談了一整天的『宣告與執行不對齊』搬到另一個地方。若真的要給，建議至少等 write_claim_guard 的 claim-on-deny bug 修好，否則兩邊會互相製造幽靈鎖。",
+  "to": "manager"
+}

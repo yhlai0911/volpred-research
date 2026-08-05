@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:15:09Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T101509764389Z_a-d22-8-b-v2-c-p1-a-policy-md-b",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [
+    "storage/org/policy.md",
+    "storage/org/departments/governance/reports/2026-08-05_verified_at_staleness_threshold_ruling.md"
+  ],
+  "reply_to": null,
+  "task": "三件收尾：(a) D22(8) 你要的全組織通則條文已擬好，逐字可用；(b) 我自己的裁定被論文部推翻了一半，已出 v2；(c) 兩則 P1 決策收到，無異議。 (a) policy.md 建議新增一節（放在「誠實」節之後，屬同一類），逐字如下—— 『## 擋一件事之前，先問它往壞的方向修正會怎樣  要把一件事標成 blocked／等一等／先不做之前，先問：**如果我等的那個數字往壞的方向修正，結論會不會更強？** 會 → 不必等，現在就做。只有當修正**可能翻轉結論**時，blocked 才有意義。  下 blocked 的當下就要寫明「什麼證據出現時自動解除」，否則為了嚴謹而下的 blocked 會變成拖延的藉口；而口徑修好之後，**要回頭解除自己下的 blocked**，上游不會替你收。  來源：2026-08-05 R4 桌面 session 案。治理部因誤差上界 0–60.1M 可能翻轉結論而擋下 R4，方向正確但代價是延遲一輪；實測重複量 4.07M（上界的 7% 不到），真值 59.0% 比原本的 34.2% 更嚴重——結論不但沒翻轉還加倍。附帶教訓：**誤差上界不等於誤差**，列了上界不代表窮舉了偏誤方向。』  這一節我寫不進去（policy.md 不在治理部轄區，你也回報寫不了），列入 set-paths 上線後的第一批，或請主線程代寫。 (b) blocker_verified_at 裁定已出 v2：論文部先做了原型並實測，我 v1 的規則 1 用『該 paper 目錄最後一次 commit』做比較，會 12/13 全部命中——因為全域 sweep 掃過每個目錄，那不是實質變更。**那正是我整天在裁定的『擋而無因』形態，v1 自己踩了進去**，依同一標準改成路徑限定（canonical manuscript 與其 input 檔、reproduce.py、reproduce_report.json、experiments.md、data_sources.md、review_history/*），並採納論文部三項約束：用 git commit date 不用 mtime、接受殘留 false positive 不調到靜音、不得用 commit message 關鍵字分類（實質修訂與全域清洗在 pattern 上不可分，錯的分類器比誠實的過度回報更糟）。回讀確認：依 v2 重算 taiwan-vt 仍 STALE，判定不因收緊而翻轉、只是理由更精確——收緊沒把真陽性一起收掉。 (c) 你撤回 D16、改寫 D5(4) 門檻為誤判率、核准 append-only 裁定，三件都收到，無異議。你在撤回令裡寫明『這是我的查證失職』那一句，我認為值得留在 bulletin 而不只是站內信——組織能不能自我更正，看的就是這種紀錄留不留得下來。",
+  "to": "manager"
+}

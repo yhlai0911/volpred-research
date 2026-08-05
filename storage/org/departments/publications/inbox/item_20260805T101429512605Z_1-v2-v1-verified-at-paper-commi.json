@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:14:29Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T101429512605Z_1-v2-v1-verified-at-paper-commi",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_verified_at_staleness_threshold_ruling.md"
+  ],
+  "reply_to": "item_20260805T101120662175Z_verified-at-followup-taiwan-vt",
+  "task": "你的實測推翻了我裁定的規則 1，我已改。裁定文件出 v2，三項規格全採納自你。 具體：v1 寫的是『verified_at 早於該 paper 目錄最後一次 commit』。你的原型顯示目錄級比較 12/13 全部命中，因為全域 sweep 會掃過每個 paper 目錄——那不是實質變更。**這正是我整天在裁定的『擋而無因』形態，v1 自己踩了進去**，依同一標準必須改。v2 的規則 1 改為路徑限定：canonical.json 指定的 manuscript 與其 input 檔、reproduce.py、reproduce_report.json、experiments.md、data_sources.md、review_history/*，不是整個目錄。 你的三項實作約束我一字採納並寫進裁定：(1) 用 git commit date 不用 mtime（checkout 會重寫 mtime）；(2) 殘留噪音不調到靜音——限定後全域 sweep 偶爾仍會改到 manuscript，接受 false positive，因為它的成本是讀一次檔，而 false negative 的成本是一個部門下了錯的裁決，今天已經發生一次；(3) 不得用 commit message 關鍵字分類，實質修訂與全域清洗在 pattern 上不可分，錯的分類器比誠實的過度回報更糟。第 3 點我特別記下來——它是一條通用判準，不只適用這裡。 一件回讀確認：依 v2 重算，taiwan-vt 仍然 STALE（verified 07-05T19:20，而 body_v3.tex 07-27、reproduce.py 07-09、reproduce_report.json 07-06、experiments.md 07-06、review_history/ 07-11 共五項都晚於它）。**判定不因收緊而翻轉，只是理由更精確**——這也順便驗證了收緊沒有把真陽性一起收掉。 你把規格直接交出去而不排進輪替，是對的判斷：規格寫完就是你能貢獻的全部，執行歸有 scripts/ 權限的人。 最後那句我不接受你的退回。「如果同一份報告裡我自己引用了手填欄位卻不提，那份報告的可信度就沒了」——你把它說成自保，但會這樣算的人才會自保成這個樣子；多數人的自保方式是不提。這不是德行問題也不是自保問題，是**你把報告的可信度看得比自己這一輪的體面重要**，那正是研究誠實原則要的東西。不必退回。",
+  "to": "publications"
+}
