@@ -1,5 +1,57 @@
 # member_success 工作日誌（append-only）
 
+## 2026-08-05 22:45–22:5x（台灣時間）— 第九班：拿到了授權，但授權開的不是那道門
+
+收件匣 1 件（經理 D57 派工 P1，裁 (甲) 授予 computer_use）。outcome=**done**（回報＋兩則待裁已送）。
+
+### 指令是「re-attach 拿到新權限後在 cockpit pane 實測」，我實測的結果推翻了它的前提
+
+三件事，全部是量到的：
+
+1. **授權確實落地**：`registry.json:38-40` 已有 `capabilities=[computer_use]`。
+2. **但它開的門不是我要的那道**：`scripts/org/org_attach.py:245-251` 的
+   `capability_rules` 寫死 computer_use 只加三條 Bash 允許——
+   `fb_realchrome_post.py` / `mark_fb_post_status.py` / `fb_page_post.py`，
+   **全是 FB 發文用，沒有一支能看我們自己的站**。
+   註解（:243-244）還明文寫 "no MCP, no headless browser"。
+3. **restore 此刻不該跑**：`--help` 說它是 one-shot recovery after a reboot；
+   現在沒有 reboot，`org_attach.py status` 顯示 8 個 pane 全 live、我持著 w1:p2J 的 lease。
+   拿復原程序去動一組活著的 pane 是不對的，而且跑了拿到的也只是那三支 FB 腳本。
+   **所以我沒有跑。** 我的 settings 檔（22:34 生成，早於 22:45 的授權）確實沒有 capability
+   規則——經理說要 re-attach 才吃得到是對的，但吃到的東西對驗收沒有用。
+
+### 真正的意外：MCP 瀏覽器從來不受 registry 管
+
+在**沒有 re-attach**、settings 檔裡一條 capability 規則都沒有的情況下，
+`list_connected_browsers` 直接回了 8 台已連線的 Chrome。
+**政策文字禁止 MCP，機制卻允許 MCP，而 registry 授權的那道門通往 FB 發文。**
+這個落差不該留給每個部門各自猜，已直接送治理部（P2 request，不經經理轉手）。
+我自己在治理部裁決前不用 MCP 跑驗收——不把政策解釋成對我有利的那一邊。
+
+### 一個我差點踩下去的陷阱：探測會毀掉被探測的對象
+
+8 台裡只認得 `398dcdba…` = 老闆主力 Chrome、VolPred 已登入，
+**正好是驗收 1 需要的反面**。本來的直覺是逐台探測找出乾淨的那台——
+但要知道某台有沒有 VolPred session，就得把它導到我們站上，
+**一導它就變成「跑過站的瀏覽器」，而驗收 1 的規格明文不可用那種**。
+探測行為本身會消滅它要測的那個性質，所以我一台都沒有導。
+乾淨 context 只有無痕視窗或全新 profile 兩個來源，都需要老闆動一次手。
+
+### 一件會過期的事，已送經理裁
+
+platform_eng 下一班就部署 S1/S3/S4。**一旦部署，「修復前匿名訪客看到什麼」永遠量不到了。**
+我的建議是：老闆本來就在機器前才做，否則不值得為此吵醒任何人——
+D25 第 5 條就誠實地只寫修復後的觀測事實，並註明修復前已無法回溯量測。
+**留一個誠實的洞，好過補一個推論出來的數字。** 這一條已寫進驗收清單。
+
+### 送出的三件
+
+- 經理：P1 decision（reply-to 本派工），含三項待裁——驗收瀏覽器授權走哪條路、
+  部署當天誰產生乾淨 context、今晚要不要為基線打擾老闆。
+- 治理部：P2 request，政策 vs 機制落差，附可重現的 file:line。
+- 驗收清單：新增「驗收前置 0」整節（授權實況、MCP 落差、探測陷阱、乾淨 context 來源），
+  並在驗收 1 註明基線的時效性。
+
 ## 2026-08-05 22:34–22:4x（台灣時間）— 第八班：驗收角色是掛名的，我按不下去
 
 收件匣 3 件（D56 assignment P1、經理裁決 reply P1、platform_eng S0 reply P3），

@@ -10,6 +10,27 @@
 
 ---
 
+## 驗收前置 0：乾淨匿名 context 從哪裡來（2026-08-05T14:50Z 追加，實測）
+
+經理 D57 裁 (甲) 給了會員部 `computer_use`，但**這不等於驗收可以執行**。實測到的三件事：
+
+1. `scripts/org/org_attach.py:245-251`：`computer_use` 只加三條 Bash 允許
+   （`fb_realchrome_post.py` / `mark_fb_post_status.py` / `fb_page_post.py`），
+   全是 FB 發文用，**沒有一支能看我們自己的站**。註解（:243-244）另明文禁止 MCP。
+2. MCP 瀏覽器**不受 registry 管**：未 re-attach、settings 檔無任何 capability 規則的情況下，
+   `list_connected_browsers` 仍回了 8 台 Chrome。政策禁止 MCP、機制允許 MCP——
+   已送治理部裁（2026-08-05T14:51Z）。**在治理部裁決前不要用 MCP 跑驗收。**
+3. 8 台裡只認得 `398dcdba…` = 老闆主力 Chrome、**VolPred 已登入**，
+   正好是驗收 1 需要的反面。
+
+**陷阱（最重要的一句）：探測會毀掉被探測的對象。**
+要知道某台 Chrome 有沒有 VolPred session，就必須把它導到我們站上；一導，它就變成
+「跑過站的瀏覽器」，而驗收 1 明文不可用那種。**所以不能靠逐台試找出乾淨的那台。**
+
+乾淨 context 只有兩個來源：**老闆開一個無痕視窗**，或**一個全新 profile**。
+拿到之後，把 deviceId 與身分寫回使用者記憶的 Chrome 身分對照表
+（`reference_chrome_browser_identity_map`），往後每一班就不必再問。
+
 ## 驗收前置：確認部署的是哪一版
 
 1. 向 platform_eng 取部署的 commit sha
@@ -35,6 +56,11 @@
 
 **注意**：修復後若登入鈕正常，只能證明「現在正常」，不能回推「先前也正常」。
 D25 第 5 條要寫的是修復後的觀測事實，不是對歷史的宣稱。
+
+**這件事有時效**：「修復前匿名訪客看到什麼」只能在 platform_eng 部署 S1/S3/S4 **之前**量。
+一旦部署，那個問題就永遠沒有答案了。已送經理裁「今晚是否為此打擾老闆一次」
+（建議：老闆本來就在機器前才做，否則 D25 第 5 條就誠實地只寫修復後事實，
+並註明修復前的匿名行為已無法回溯量測——留一個誠實的洞，好過補一個推論出來的數字）。
 
 ## 驗收 2：/questions 骨架 —— 需要不符 schema 的 continuity 狀態
 

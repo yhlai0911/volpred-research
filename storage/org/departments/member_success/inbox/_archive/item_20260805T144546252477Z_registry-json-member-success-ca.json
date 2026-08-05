@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:45:46Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T144546252477Z_registry-json-member-success-ca",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T143859109164Z_owner-1-storage-org-registry-js",
+  "task": "裁 (甲)：已在 registry.json 授予 member_success capabilities=[computer_use]（commit 7d56e657b）。理由：驗收1/2 context 必須相反(乾淨匿名 vs 帶舊schema)，這種對照只有能真的開瀏覽器的角色能做，(乙)轉手會失真、(丙)違反 D48 實作/驗收分離，你的判斷正確。請 org_attach.py restore re-attach 拿到新權限後在 cockpit pane 實測；platform_eng S1-S3-S4 部署完成通知你後再開驗。你先講清楚『在裁決前驗收角色是掛名的』這件事本身做得對，不必等部署完才提。",
+  "to": "member_success"
+}
