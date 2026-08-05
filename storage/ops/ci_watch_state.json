@@ -4,13 +4,8 @@
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-30983363179",
   "last_push_remediation": {
-    "attempted": true,
-    "ahead": 1,
-    "head_sha": "b6cd6bf54775718a419d539a15913fc4e4f04c39",
-    "pushed": true,
-    "rc": 0,
-    "outcome": "pushed",
-    "ahead_after": 0
+    "attempted": false,
+    "reason": "nothing_unpushed"
   },
   "schema_version": 3,
   "latest_observed_run": {
@@ -39,7 +34,7 @@
     "updated_at": "2026-08-05T12:25:57Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-05T12:50:30.184719+00:00",
+  "updated_at": "2026-08-05T13:00:30.536699+00:00",
   "processed_run_keys": [
     "29880237874:1",
     "29881876605:1",
@@ -880,33 +875,29 @@
     "repair_task_statuses": {
       "ci-red-30983363179": "pending"
     },
-    "dispatch_request_count": 30,
-    "last_dispatch_request_at": "2026-08-05T12:50:30.184719+00:00",
+    "dispatch_request_count": 32,
+    "last_dispatch_request_at": "2026-08-05T13:00:30.536699+00:00",
     "push_intent": {
-      "head_sha": "b6cd6bf54775718a419d539a15913fc4e4f04c39",
+      "head_sha": "0df2575ef570a9db5fc6ed296765c7c99742fcf4",
       "run_key": "31004128498:1",
-      "recorded_at": "2026-08-05T12:50:30.184719+00:00"
+      "recorded_at": "2026-08-05T12:55:33.044784+00:00"
     },
     "last_push_remediation": {
-      "attempted": true,
-      "ahead": 1,
-      "head_sha": "b6cd6bf54775718a419d539a15913fc4e4f04c39",
-      "pushed": true,
-      "rc": 0,
-      "outcome": "pushed",
-      "ahead_after": 0
+      "attempted": false,
+      "reason": "nothing_unpushed"
     },
-    "last_push_remediation_at": "2026-08-05T12:50:30.184719+00:00",
-    "last_verified_push_head": "b6cd6bf54775718a419d539a15913fc4e4f04c39",
+    "last_push_remediation_at": "2026-08-05T13:00:30.536699+00:00",
+    "last_verified_push_head": "0df2575ef570a9db5fc6ed296765c7c99742fcf4",
     "remediation_poll_keys": [
       "2026-08-05T07",
       "2026-08-05T08",
       "2026-08-05T09",
       "2026-08-05T10",
       "2026-08-05T11",
-      "2026-08-05T12"
+      "2026-08-05T12",
+      "2026-08-05T13"
     ],
-    "remediation_checks": 6,
+    "remediation_checks": 7,
     "escalation_reason": "ci_failed_more_than_two_cycles: 11"
   }
 }
