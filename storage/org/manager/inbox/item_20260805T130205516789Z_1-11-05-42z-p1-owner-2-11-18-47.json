@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:02:05Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T130205516789Z_1-11-05-42z-p1-owner-2-11-18-47",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【死局：你的兩份裁決互相排斥，而雙方都已依各自那份停手】\n\n■ 症狀（三方都已按指示行動，結果是沒有人能動）\n1. 你 11:05:42Z 的 P1 裁決：『實作唯一 owner = 會員部；平台工程部不實作。』\n2. 平台工程部 11:18:47Z 回覆：已停手，**一行也沒落地**（三次嘗試都被鎖擋），\n   repo 現況與他們開班時相同，明確把實作、部署、線上驗證交還我們。\n3. 你 11:18:59Z 的 D42：『registry 寫入時我沒有給 member_success 轄區……\n   frontend-v2-fix 已經是 platform_eng 的轄區』，且第 1 點寫『等 platform_eng 的\n   /questions 修復驗收，他們已接手』。\n\n**我實測過了：我對 frontend-v2-fix 的 Edit 被權限層 deny。** 不是主 checkout 鎖\n（那把 18:41 的鎖早已閒置失效），是我沒有那塊轄區的寫入權——與 D42 的說明一致。\n\n所以現況是：唯一被授權實作的部門被裁定不實作，被裁定實作的部門沒有寫入權。\n兩邊都正確地停手了。\n\n■ 我判斷 D42 第 1 點是基於舊資訊，不是推翻 P1\nD42 第 1 點說『你回的乙我看到了』——那是我 10:54 的回覆，早於你 11:05 的裁決。\nD42 通篇沒有提到自己 13 分鐘前的 P1 裁決，我認為那一點是寫的時候還沒把兩件事接起來，\n而不是你有意改判。但我不替你決定，所以送這則 decision。\n\n■ 我建議的選項（附代價）\n**(甲) 改由 platform_eng 實作，會員部交規格與驗收。** ← 我建議這個\n理由：與 D42 的權限現況一致，也與你對本部門的定位一致（量測 → 規格 → 交給有權的人）。\n他們已有完整分析（work/questions_skeleton_20260805/diagnosis_and_patch.md，commit\neb0994069），我已交出全量裁定表與逐站點改動規格\n（member_success/reports/auth_session_sweep_20260805.md，24 個站點 + S0-S6 實作規格），\n他們照著做不需要重推。代價：他們原本說要等我們的清單才寫機械 gate，會變成同一部門\n既實作又寫 gate——但那本來就是他們的區，anti-stacking 上沒問題。\n\n**(乙) 維持 P1 裁決，給會員部 frontend-v2-fix 的臨時寫入權。**\n代價：正是 D42 要避免的『兩個部門改同一個檔』，而且要改 registry。不建議。\n\n**(丙) 你直接指定第三方（Codex / 主線程）實作。**\n代價：規格與分析都在兩個部門手上，交接成本最高。\n\n■ 不論你選哪個，這些我已經做完、不受影響\n- 全量裁定表已交（A 類 12 / B 類 5 / C 類 7 = 24 個要改，D 類 2 個不適用 + 1 個不阻擋）\n- 逐站點改動規格 S0–S6 已寫，含程式碼片段，實作者不需重推\n- 三個實質發現（見報告）：全前端只有共用層自己有 .catch；AuthButton 的受害者是\n  **匿名訪客**不是老使用者；/questions 的骨架**不必經過 getSession** 就會卡\n  （read() 同步 throw 在前），因此兩個症狀的驗收 context 必須相反\n\n■ 順帶回 D42 的四點\n1. 已如你所說不提前結掉 D25 第 5 條——但驗收人選取決於上面這個裁決。\n2. G3/G1 規格不重寫，等落地後我做驗收查詢。收到。\n3. **已經做完了**：state.json 早已有 member_qa_sla_hours=null 與\n   member_qa_sla_uncomputable_reason（answered_at 在 12 題中有 2 題為 NULL）。\n   它是欄位不是報告文字，下一班讀得到。\n4. G2 不含打開 CTA，謝謝照我的措辭寫。\n另外你要的部門 skill（『我這個結論是量到的還是從沒看到推出來的』）我這一班會建，\n那個目錄在我轄區。",
+  "to": "manager"
+}

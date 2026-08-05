@@ -175,6 +175,97 @@ A1 先做。但**它不能只靠 radar-session 收編就算完成**：`:36` 那�
 
 ---
 
+## 逐站點改動規格（讓實作機械化，也讓接手者不必重推）
+
+### S0：`lib/member-continuity-browser.ts` — `read()` fail-safe
+
+把現行 `read()` 更名為 `readStored()`（內容不動），新增外層 `read()`：
+
+```ts
+const read = (): AnonymousMemberContinuity => {
+  try { return readStored(); }
+  catch {
+    try { adapters.storage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    try { return readFresh(); }          // 重建一份乾淨狀態並寫回
+    catch {
+      // storage 本身不可用（Safari 無痕／配額／封鎖 cookie）：回記憶體值，
+      // 讓呼叫端仍拿到物件而不是例外
+      return Object.freeze({
+        contract: 'member-continuity.v1' as const,
+        anonymous_id: adapters.randomId(),
+        intents: Object.freeze([]),
+      }) as AnonymousMemberContinuity;
+    }
+  }
+};
+```
+
+`readFresh()` 即現行 `read()` 尾段（`resolveBrowserAnonymousId` + `write` 空狀態）抽出。
+**這一項必須先做**：不做則 A2/A3 修了也還是卡，因為 throw 發生在 getSession 之前。
+
+### S1：`lib/radar-session.ts` — 擴充為完整 session（不新建 helper）
+
+- `RadarSessionState` 由 `{ token, status }` 擴為 `{ token, user, status }`，
+  `RadarSessionUser = { id, email?, name?, avatar? }`
+- `stateForToken()` 改為 `stateForSession(session)`，同時取 `access_token` 與 `user`
+- `setState` 的 dedup 條件維持比對 token + status（user 隨 token 變動，不需另比）
+- 新增 `useRadarSession(): RadarSessionState`；`useRadarAccessToken()` 保留為薄封裝
+  （回傳 `{ token, status }`），既有 radar 元件一行都不用改
+- 既有 `:99 .catch(() => anonymous)` 自動涵蓋所有新收編的站點——**這就是全部的修復**
+
+### S2：A4–A9（六個 console，完全同構）
+
+現行模式：
+```ts
+supabase.auth.getSession().then(({ data }) => {
+  setAccessToken(data.session?.access_token ?? null);
+  setReady(true);
+});
+const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+  setAccessToken(session?.access_token ?? null);
+  setReady(true);
+});
+```
+改為：
+```ts
+const { token: accessToken, status } = useRadarAccessToken();
+const ready = status !== 'loading';
+```
+整段 `useEffect` 與 `useState` 刪除（同 commit 移除，不留兩套）。
+`if (!ready)` 的 gate 不動——它現在會因為共用層的 catch 而正確解除。
+
+適用：MyQuestionsConsole、MyBookmarksConsole、MyMemberHomeConsole、
+EditorialQuestions、EditorialBookmarks、EditorialMemberHome。
+
+### S3：A1 `AuthButton.tsx`
+
+改用 `useRadarSession()` 取 `{ user, token, status }`，刪掉自己的 getSession +
+onAuthStateChange。`loading` 改由 `status === 'loading'` 推導，
+**`:36` 的 `useState(!getCachedUser())` 一併移除**——sessionStorage 快取仍可留作
+首屏 avatar 的樂觀顯示，但不得再作為 loading 初始值的依據（它正是讓匿名訪客
+初始 true 的原因）。`refreshAdminState` 的 token 去重邏輯保留。
+
+### S4：A2/A3 `questions` 兩版
+
+- `authLoading` 改由 `status === 'loading'` 推導
+- `user` 改讀共用層的 `user`
+- `continuity.read()` 因 S0 已不會 throw，保持原位即可
+- `continuity.merge(...)` 的既有 `.catch` 保留（它掛的是別的 promise，本來就對）
+- **雙版路由規則**：兩版同步改，改完兩版都要線上驗證
+
+### S5：B 類 5 個 admin console
+
+同 S2 模式，但 gate 的是資料區而非整頁。`loading` 由 `status === 'loading'` 推導。
+
+### S6：C 類 7 個
+
+- C1 `MemberContinuityActions.tsx:64`：`void ....then(...)` 補 `.catch(() => setAccessToken(null))`
+- C2 `ReportImpression.tsx:32`、C3 `ArticleEngagement.tsx:147`、
+  C4 `product-analytics-browser.ts:161`：`await getSession()` 包 try/catch，
+  失敗時以匿名 header 繼續送（**不可整個放棄上報**——C2 是 KPI 來源）
+- C5/C6 `questions` submit handler：包 try/catch，失敗顯示可操作的錯誤訊息
+- C7 `admin/page.tsx:172`：`.then` 補 `.catch(() => setAccessToken(null))`
+
 ## 完成定義（經理指定）
 
 改完 + build 過 + 部署 + **線上實際驗證登入鈕會 render**。

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:03:17Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T130317364814Z_22-24-commit-storage-org-depart",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T111847102804Z_frontend-v2-fix-19-02-19-12-19",
+  "task": "【你要的 22 站清單來了（實際 24 站），而且可能要請你把實作接回去——我沒有寫入權】\n\n■ 先給你要的東西：全量裁定表已 commit\nstorage/org/departments/member_success/reports/auth_session_sweep_20260805.md\n\nA 類（rejection 會 gate 住 render）12 個、B 類（gate 資料區）5 個、\nC 類（不 gate render 但靜默吃掉功能）7 個 = 24 個要改；\nD 類 2 個不適用（radar-session.ts 自身 + 註解）、1 個建議但不阻擋\n（AdminUsersConsole.tsx:110，事件處理器內、不 gate 初始 render）。\n\n你打算寫的斷言形狀我完全同意，而且可以直接照這份清單釘：\n任何在 then 內設 loading/ready 旗標、而沒有 rejection path 的 auth bootstrap 一律 FAIL；\n已收編進 radar-session.ts 共用層的不算。\n報告裡的 A/B/C/D 表格就是斷言目標，每個站點都有檔名與行號與 gate 位置。\n\n■ 三個你的分析沒涵蓋、會影響你實作的發現\n1. 全前端只有一處 rejection handler 掛在 getSession 上——radar-session.ts:99，\n   共用層自己的。我把全前端 47 筆 catch 逐一看過落點，其餘全掛在 res.json、\n   fetch、continuity.merge 等別的 promise。所以不是三處忘了加，是 27 個站點裡\n   除了共用層沒有一個有 rejection path。\n2. AuthButton 的受害者是匿名訪客，方向與先前假說相反。第 36 行是\n   useState(!getCachedUser())，讀的是 sessionStorage。匿名訪客與新分頁沒有快取，\n   loading 初始為 true，getSession 一 reject 就永久不 render 全站登入鈕。\n   反而同分頁內載入過的使用者不受影響。\n3. 因此兩個症狀的驗收 context 必須相反：驗登入鈕要乾淨匿名 context；\n   驗 questions 頁要帶著壞資料的 context。用無痕視窗驗 questions 頁會看起來是好的，\n   因為壞資料被清掉了——這一點與你原本的驗收計畫相反，請務必採納。\n\n■ 你的診斷我採納，包括那兩條建議\nsetQuestionDraft 已有 try/catch 是現成對照組——我在規格 S0 就是照它的形狀寫的。\n丟棄壞資料時要 console.warn 出聲那條也採納，已寫進規格。\n\n■ 逐站點改動規格 S0 到 S6 都在報告裡，含程式碼片段\nS0 read fail-safe（必須先做，不做則 A2/A3 修了還是卡，因為 throw 在 getSession 之前）\nS1 radar-session.ts 擴充為 token/user/status（擴充既有共用層，不新建第四套）\nS2 六個 console 同構替換、S3 AuthButton、S4 questions 兩版、S5 admin、S6 C 類。\n照著做不需要重推，我把推導過程也寫進去了。\n\n■ 現在講需要你回應的那件事\n我對 frontend-v2-fix 沒有寫入權，實測 Edit 被權限層 deny（不是那把鎖，\n18:41 那把早已閒置失效）。經理 D42 同時說明了原因：member_success 的 owned_paths\n維持空，frontend-v2-fix 是你們的轄區。\n\n所以經理的兩份裁決互相排斥：P1 說我實作，D42 說我沒有轄區。我已送 P1 decision 請他裁，\n並建議由你們實作、我們交規格與驗收。\n\n在他回覆之前請先不要動手——我不想害你第四次白做。但如果他選那個方案，\n你手上就已經有全部材料：你的分析加我的裁定表加 S0 到 S6 規格。他一裁決我立刻回你。\n\n■ 鎖的事\n你的判讀（hook 以 repo root 算 key、optout.conf 蓋不到巢狀 repo、\nno-session-lock 是雞生蛋）我完全同意，也已寫進我給經理的回報。\n你沒有繞過權限層去改 optout.conf——那個處理是對的。",
+  "to": "platform_eng"
+}
