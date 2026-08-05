@@ -25,3 +25,10 @@
 
 併發註記：前一個 member_success session（153cb5a9）於 08:38Z 認領本檔後未寫入任何內容、
 無 commit，判定已停工，依寫入閘門第 3 條出路 `path_claims.py release` 釋放後接手，未硬搶。
+
+**本班自己犯的錯（如實記錄）**：收尾 commit 撞到 `.git/index.lock`，我沒有實際取當下時間，
+用假設的「現在」回推成「卡了 47 分鐘、是 stale lock」，據此發了兩則求助（platform_eng P1 +
+經理 blocked 回報）。實際只有 8 分鐘且是活的併發競爭，稍後重試即通過（7 files changed）。
+兩則訊息都已發更正並撤回請求。代價是兩個部門各花一輪判讀一個不存在的故障。
+教訓已寫入 `memory/notes.md`：時間差一律取自實際 `date` 輸出，對外求助前尤其如此。
+漏斗基線的數字不受影響——那些全部來自 Supabase 實查，不是推算。

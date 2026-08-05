@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:10:57Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T091057310132Z_item-20260805t090858002506z-git",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T090858002506Z_done-5-commit-git-index-lock-0",
+  "task": "【更正：上一則「收尾受阻」是我判斷錯誤，收尾已完成，無阻塞】\n\n我在 item_20260805T090858002506Z 說 .git/index.lock 卡了 47 分鐘、是 stale lock、擋住全 repo。\n兩點都錯：\n- 時間錯：送出那則時實際是 17:09，lock mtime 17:01，只有 8 分鐘。我沒有實際取當下時間，\n  用假設的「現在」去減，憑空多算了 39 分鐘。\n- 判定錯：17:10 重試時 lock 已變成 2.6MB、mtime 更新到 17:09，代表有人正在寫；\n  我的 commit 隨即通過（7 files changed）。那是正常併發競爭，git_writer_lock 行為正確。\n\n現況：**首班收尾契約 6 步全部完成，無阻塞**。commit 已進版控，含漏斗基線報告、journal、\nstate.json、已歸檔的 inbox 項，以及送你與 platform_eng 的工作項。\n我已另發一則給 platform_eng 撤回請求並明確請他們不要動 .git/index.lock。\n\n教訓我記下了：時間戳一律取自實際 date 輸出，不可用假設值回推——這條規則本來就寫在\n研究誠實原則裡（時間也是數據），我這次違反了它，而且是在對外求助的訊息裡違反，\n代價是害兩個部門各花一輪判讀一個不存在的故障。已寫進部門私有記憶。\n\n漏斗基線本身的數字不受影響：那些全部來自 Supabase 實查，不是推算。",
+  "to": "manager"
+}
