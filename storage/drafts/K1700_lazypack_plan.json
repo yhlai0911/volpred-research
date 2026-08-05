@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "title": "三十年年化十五趴，近百年美股沒有出現過（K1700）",
+  "evidence": {
+    "results": {
+      "path": "experiments/K1700/k1700_results.json",
+      "sha256": "a895ed04663ea49f5576200de7643c1f2be1184ec4ec066869dede1f5af627ae",
+      "label": "K1700 三十年滾動報酬與槓桿達標率檢定結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "先問一件事：這個目標在歷史上出現過嗎",
+      "alt": "說明目標換算、樣本期間與滾動視窗數",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "有人問：想要三十年每年賺一成五，該掌握哪些事。",
+            "這種問題通常會得到一篇談心態與紀律的文章。我們決定先做一件更笨的事：去查歷史上到底有沒有人做到過。",
+            "取美股大盤近百年資料，每一個交易日都當成一個三十年的起點往後算，含息計算。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "目標對應的本金倍數",
+          "value": {"source": "results", "path": "target_multiple_30y", "format": {"kind": "number", "digits": 2, "suffix": " 倍"}}
+        },
+        {
+          "kind": "metric",
+          "label": "可用的三十年區間",
+          "value": {"source": "results", "path": "spx_total_return_30y.n_windows", "format": {"kind": "integer", "suffix": " 個"}}
+        },
+        {
+          "kind": "metric",
+          "label": "其中互不重疊的獨立區間",
+          "value": {"source": "results", "path": "spx_total_return_30y.n_independent_windows", "format": {"kind": "number", "digits": 2, "suffix": " 個"}}
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "達標的區間有幾個：零個",
+      "alt": "列出含息三十年滾動報酬的中位數、最佳、最差與達標數",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "中位數年化",
+          "value": {"source": "results", "path": "spx_total_return_30y.cagr_median", "format": {"kind": "percent", "digits": 2}}
+        },
+        {
+          "kind": "metric",
+          "label": "史上最佳的三十年",
+          "value": {"source": "results", "path": "spx_total_return_30y.cagr_max", "format": {"kind": "percent", "digits": 2}}
+        },
+        {
+          "kind": "metric",
+          "label": "史上最差的三十年",
+          "value": {"source": "results", "path": "spx_total_return_30y.cagr_min", "format": {"kind": "percent", "digits": 2}}
+        },
+        {
+          "kind": "metric",
+          "label": "達標區間數",
+          "value": {"source": "results", "path": "spx_total_return_30y.n_ge_target", "format": {"kind": "integer", "suffix": " 個"}}
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這幾個數字",
+          "body": [
+            "史上最好的那個三十年，起點正好買在大蕭條的谷底，抱滿三十年，離目標還差不到三分之一個百分點。",
+            "最差的那個起點跟它相隔不到三年。同一個市場，起點差三年，三十年後的年化差了將近一倍。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "借錢確實能達標，代價寫在回撤那一欄",
+      "alt": "對照兩倍槓桿的達標比例與回撤，以及最佳十分位區間的回撤下限",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "借到兩倍：達標比例",
+          "value": {"source": "results", "path": "leverage_30y.4.share_ge_target", "format": {"kind": "percent", "digits": 2}}
+        },
+        {
+          "kind": "metric",
+          "label": "借到兩倍：最大回撤中位數",
+          "value": {"source": "results", "path": "leverage_30y.4.mdd_median", "format": {"kind": "percent", "digits": 2}}
+        },
+        {
+          "kind": "metric",
+          "label": "報酬最高十分位：跌過三成的比例",
+          "value": {"source": "results", "path": "best_decile_windows.share_with_mdd_worse_than_30pct", "format": {"kind": "percent", "digits": 0}}
+        },
+        {
+          "kind": "metric",
+          "label": "報酬最高十分位：最淺的那個回撤",
+          "value": {"source": "results", "path": "best_decile_windows.mdd_shallowest", "format": {"kind": "percent", "digits": 2}}
+        },
+        {
+          "kind": "text",
+          "heading": "該問的三個問題",
+          "body": [
+            "我的目標在歷史上出現過嗎？超出歷史上界的話，後面所有方法討論都是在討論怎麼做到一件沒發生過的事。",
+            "達標的那條路，回撤長什麼樣？報酬和回撤是同一個決定的兩面，只看一面就是沒看。",
+            "我撐得住入場費嗎？就算完全不借錢，歷史上最好的那批三十年，每一個都跌過三成。"
+          ]
+        }
+      ]
+    }
+  ]
+}
