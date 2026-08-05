@@ -435,3 +435,57 @@ reproduce_spec」，剩餘預算不足以完整做完並收尾，依「做一半
 
 **收班理由：預算到界，非無工作。** 收件匣尚有 D38 裁決一、D40 第 2/3/5 項、D42 第一件。
 下一班第一件 = k892 釘快照（主 checkout experiments/、本班已驗證寫得了）。
+
+---
+
+## 2026-08-05T11:22Z–11:35Z（台灣時間 19:22–19:35）— D38 裁決一：k892 釘住 cross-check 快照
+
+**outcome=done**（`root_cause_fixed_and_verified`）
+
+### 一、根因其實不需要抓任何新資料
+
+已釘住的 CSV `0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv`
+**本來就含 `twii_adj_close` / `2330_tw_adj_close` / `spy_adj_close` 三欄**。
+`PINNED_SOURCES` 只映射了 `0050.TW` 一個 ticker，其餘三個仍走 live yfinance ——
+所以 `^TWII` 一開始回 None，整支腳本在寫出 results 之前就中止。
+
+修法是純粹的對照表擴充（三行映射 + 一個 `_PINNED_CSV` 常數），不是資料工程。
+先前判斷「補不了 reproduce_spec 因為卡在 ^TWII」是對的，但**卡點比想像的淺得多**。
+
+### 二、照 D38 釘快照，不做 D40 提的「可選開關」
+
+D40 第 4 項寫「改成可選（環境變數）或一併釘住快照」，與 D38「要釘快照不要可選」矛盾。
+**照 D38 執行**，理由已在程式碼註解裡寫死：可選開關會讓下一個人跑出一份 cross-check
+靜默缺席的結果，而這正是這張單一開始要修的失效模式（一個從來不成立的 pinned-data 宣稱）。
+已請經理若要改走可選須明說。
+
+### 三、必須揭露的代價（沒有藏起來）
+
+快照從 2008 起，而 live pull 原本從 1997（^TWII）／2000（2330.TW、SPY）起。
+**cross-check 的 gamma 因此是在較短樣本上估的，與 2026-08 之前的舊數字不可比。**
+已寫進 `PINNED_SOURCES` 註解，措辭是「MUST NOT BE READ PAST」。
+
+連帶修掉一個靜態斷言：原本印 `SPY CONTROL (expected gamma ≈ 0.211)`，那個 0.211 來自
+2000 起的 live pull。釘住後 SPY full sample 就是 2008-2026，實際估出 **0.219680**。
+把寫死的期望值改成「說明它的出處、由本次執行自己報數字」——
+靜態句子會替一個執行證明不了的數字背書（memory `feedback_render_gate_static_prose_blindspot`）。
+
+### 四、驗證（三道，全過）
+
+1. **論文引用值 bit-for-bit 不變**（這是最重要的一項——修 cross-check 不可以動到論文輸入）：
+   `gamma == 0.09704215871857629` → True、`gamma_t == 3.5965275718364866` → True、`n = 4219`。
+   用 `==` 比對浮點原值，不是看列印的小數位。
+2. **整支腳本跑得完**：四個資產全數估出，`Results saved` + `Done.`。
+   這是 D38 這張單的原始目標，先前從未達成。
+3. **`scripts/check_experiment_artifacts.py check --path experiments/k892` → PASS**
+   （knowledge entry + reproduce_spec.json、spec check: strict、result identity: clean）。
+
+### 五、reproduce_spec 不是「跑完就會有」——這個前提是錯的
+
+D40 說「spec 必須 run 時產生，所以卡在同一個 ^TWII」。跑得完是**必要不充分**：
+腳本原本用裸 `json.dump` 收尾，**根本沒有呼叫 `finalize_experiment`**，跑幾次都不會有 spec。
+改成 `finalize_experiment`（results 與 spec 由同一次 `trace_file()` 產生，K1708 的事後補 spec 失效模式）
+之後才真的產出 `reproduce_spec.json` + `reproduce_commit.json`。
+
+**教訓**：把「A 卡住所以 B 做不了」當成「A 通了 B 就會好」是推論跳躍。本班兩次都撞到同一形狀
+（另一次是 K1734「下一班第一件」其實卡在寫入權）。**排序與依賴都要戳過才算數。**

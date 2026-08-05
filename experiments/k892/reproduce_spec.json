@@ -1,0 +1,69 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "k892_verify_tw_gamma.py",
+    "args": [],
+    "sha256": "4f629274ef65d9df6e0e3e33eae237e796bbb1b631278b4cce65cc6f9c67d7ef",
+    "size_bytes": 29369
+  },
+  "canonical_result": "k892_verify_tw_gamma_results.json",
+  "inputs": [
+    {
+      "path": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv",
+      "sha256": "98feeea28ce2b948f9becb64763cad70f3efeac7d3bbfaf4e58a8a537aecfbd8",
+      "size_bytes": 3121518
+    }
+  ],
+  "outputs": [
+    "k892_verify_tw_gamma_results.json",
+    "reproduce_commit.json"
+  ],
+  "timeout_seconds": 64,
+  "network": "deny",
+  "randomness": {
+    "status": "not_applicable",
+    "seeds": []
+  },
+  "runtime": {
+    "runtime_seconds": 1.347,
+    "recorded_at": "2026-08-05T13:03:29Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": []
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "k892_verify_tw_gamma_results.json",
+    "sha256": "b590d264250f045f861686115ee43d95742eea4ae86c75e2002b8e6a5f3c5863",
+    "size_bytes": 21899
+  },
+  "artifact_generation": {
+    "schema_version": "volpred.reproduce_commit.v1",
+    "generation_id": "b1615e41e2ab2e678469004ec96b390a64ed4500473c7d84540648d389b5eba0",
+    "commit_file": "reproduce_commit.json",
+    "output_identities": []
+  }
+}

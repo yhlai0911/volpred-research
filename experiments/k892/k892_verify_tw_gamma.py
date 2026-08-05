@@ -23,6 +23,7 @@ Reference: Glosten, Jagannathan, Runkle (1993)
 
 import json
 import os
+import time
 import warnings
 import sys
 from datetime import datetime, timezone
@@ -38,6 +39,11 @@ _LEGACY_UTILS = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-adc7e
 if os.path.isdir(_LEGACY_UTILS):
     sys.path.insert(0, _LEGACY_UTILS)
 from volpred.utils import clean_tw50_data
+from volpred.research.reproduce_spec import finalize_experiment
+
+# Run start. Module import IS the start of this script's run, so this is the
+# real origin rather than a timestamp taken somewhere in the middle of main().
+_STARTED_AT = time.time()
 
 warnings.filterwarnings('ignore')
 
@@ -51,10 +57,26 @@ warnings.filterwarnings('ignore')
 # K892_USE_PINNED=0 to force a live yfinance pull (explicit fallback).
 PINNED_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))), 'paper', 'taiwan-vt', 'data')
+_PINNED_CSV = '0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv'
 PINNED_SOURCES = {
     # ticker: (csv filename, adjusted-close column)
-    '0050.TW': ('0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv',
-                '0050_tw_adj_close'),
+    '0050.TW': (_PINNED_CSV, '0050_tw_adj_close'),
+    # Cross-checks (^TWII / 2330.TW / SPY) are pinned to the SAME snapshot rather
+    # than left on live yfinance. They are not paper inputs, but leaving them live
+    # meant the script could not run to completion at all: ^TWII started returning
+    # None, and the run aborted before writing any results. Making them optional
+    # was rejected (manager ruling D38, 2026-08-05) because an opt-out lets the
+    # next person produce a result with the cross-checks silently missing — which
+    # is the same failure mode this file already exists to close (a pinned-data
+    # claim that was never true).
+    #
+    # CONSEQUENCE THAT MUST NOT BE READ PAST: this snapshot starts in 2008, while
+    # the live pull used to start at 1997 (^TWII) / 2000 (2330.TW, SPY). The
+    # cross-check gammas are therefore estimated on a SHORTER sample than the
+    # pre-2026-08 runs and are not comparable to numbers quoted from those runs.
+    '^TWII': (_PINNED_CSV, 'twii_adj_close'),
+    '2330.TW': (_PINNED_CSV, '2330_tw_adj_close'),
+    'SPY': (_PINNED_CSV, 'spy_adj_close'),
 }
 USE_PINNED = os.environ.get('K892_USE_PINNED', '1') != '0'
 
@@ -466,10 +488,16 @@ def main():
         print(f"  ERROR: {e}")
 
     # ============================================================
-    # 7. SPY control (known gamma ≈ 0.211)
+    # 7. SPY control
     # ============================================================
+    # The long-standing "expected gamma ~ 0.211" was measured on a LIVE SPY pull
+    # starting 2000. SPY is now pinned to the 2008-2026 snapshot, so the full
+    # sample here IS the 2008-2026 window and that figure no longer describes it.
+    # Printing it as an expectation would be a static assertion the run cannot
+    # back up -- state where it came from instead, and let the run report itself.
     print("\n" + "=" * 70)
-    print("SPY CONTROL (expected gamma ≈ 0.211)")
+    print("SPY CONTROL (pinned 2008-2026 snapshot; the historical ~0.211 "
+          "reference was a live 2000-start pull and is NOT the comparand)")
     print("=" * 70)
 
     spy_returns = data['SPY']['returns']
@@ -623,10 +651,23 @@ def main():
 
     results_clean = convert_numpy(results)
 
-    with open(output_path, 'w') as f:
-        json.dump(results_clean, f, indent=2, default=str)
+    # Results + reproduce_spec are written together from ONE trace_file() call, so
+    # results["code_trace"] and spec["entrypoint"] cannot describe different bytes
+    # (the K1708 after-the-fact-spec failure). Writing the spec here -- rather than
+    # adding it by hand afterwards -- is why this experiment could not have a spec
+    # until the script could run to completion: the spec is a run-time artifact.
+    # The pinned CSV is the true input for every asset now that the cross-check
+    # tickers are pinned too, so a silent upstream revision of it fails the
+    # input-hash check before a rerun starts.
+    out, _spec = finalize_experiment(
+        results=results_clean,
+        entrypoint=__file__,
+        canonical_result=os.path.basename(output_path),
+        inputs=[os.path.join(PINNED_DIR, _PINNED_CSV)],
+        started_at=_STARTED_AT,
+    )
 
-    print(f"\n\nResults saved to: {output_path}")
+    print(f"\n\nResults saved to: {out}")
     print("\nDone.")
 
 
