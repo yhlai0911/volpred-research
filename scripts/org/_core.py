@@ -160,6 +160,18 @@ def inbox_items(root: Path, dept: str) -> list[dict]:
     return items
 
 
+def org_policy(root: Path) -> str:
+    """Org-wide standing rules, rendered into every role's brief.
+
+    Single source on purpose: copying the decision chain into seven charters
+    guarantees seven versions of it within a month.
+    """
+    path = root / "policy.md"
+    if not path.exists():
+        return "（組織通則檔 policy.md 不存在——這是缺陷，請回報經理）"
+    return path.read_text(encoding="utf-8").strip()
+
+
 def build_manager_brief(root: Path) -> str:
     """The coordinator's rehydration brief: charter, org state, inbox, tools."""
     mdir = root / "manager"
@@ -206,6 +218,10 @@ def build_manager_brief(root: Path) -> str:
 你是這個平台唯一的協調者。各部門是常駐角色，身分與記憶都在磁碟上
 （`{root}`）；你這個 session 是經理這個角色的執行體。你不做部門的專業工作，
 你決定「現在該做什麼、由誰做、什麼時候回報老闆」。
+
+## 組織通則（全員共用，你是它的執行者與守護者）
+
+{org_policy(root)}
 
 ## 你的章程（職責、決策權限邊界）
 
@@ -283,6 +299,10 @@ def build_brief(root: Path, dept: str) -> str:
 這是一個常駐部門的身分；你這個 session 是它的執行體。你的身分、記憶與工作狀態
 全部存在磁碟上（`{ddir}`），所以 session 結束不等於部門消失——下一個 session 會從
 同一份檔案接續。
+
+## 組織通則（全員共用）
+
+{org_policy(root)}
 
 ## 你的章程（職責、KPI、邊界、收尾契約）
 

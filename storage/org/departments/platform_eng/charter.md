@@ -10,9 +10,22 @@
 
 平台功能主動規劃與開發（frontend 新功能）、bug 修復、CI 紅燈、部署、incident response。Codex 編入此部（Zone A 協作照 ownership.md）。
 
+### 資料管線健康（2026-08-05 補上歸屬洞）
+
+每日數據搜集本身是**機械層**（`collect_tw_data` 平日 15:00、`collect_us_data` 週二至六
+07:03、`fred_backfill_guard` 每日 08:10、`daily_update` 08:03／`_intraday` 14:00、
+`market_calendar_sync` 週一、`ndc_indicator_refresh` 每月 28 日），純事實性工作交給
+cron 最可靠，**不派 agent 去做**。
+
+但**壞掉時歸本部門**：抓取失敗、資料 stale、下游指標斷檔，由平台工程部負責診斷與修復
+（skill `data-collection-ops`，走 `platform_ops` task_type）。在此之前這件事有告警
+（`host_cron_fail`）卻沒有任何部門的 KPI 覆蓋它——有人喊、沒人接。
+
+判準：**告警響了沒人接 = 缺 owner，不是缺告警。**
+
 ## KPI
 
-CI 綠燈率；incident 五步結案率；每月 ≥1 個主動功能提案
+CI 綠燈率；incident 五步結案率；每月 ≥1 個主動功能提案；資料管線無未處理的 stale（七個搜集 job 各自的新鮮度）
 
 ## 喚醒條件
 

@@ -154,3 +154,23 @@ def test_future_due_item_does_not_fire(org_root: Path) -> None:
     assert result.returncode == 0, result.stderr
     gate = evaluate_gate(org_root)
     assert gate["fire"] is False, gate
+
+
+def test_every_brief_carries_the_org_policy(org_root: Path) -> None:
+    """The decision chain lives in one file, not copied into seven charters."""
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    (org_root / "policy.md").write_text("# 通則\n- 部門遇決策問經理\n", encoding="utf-8")
+
+    dept = _core.build_brief(org_root, "alpha")
+    manager = _core.build_manager_brief(org_root)
+
+    assert "部門遇決策問經理" in dept
+    assert "部門遇決策問經理" in manager
+
+
+def test_missing_policy_is_reported_not_hidden(org_root: Path) -> None:
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+
+    brief = _core.build_brief(org_root, "alpha")
+
+    assert "policy.md 不存在" in brief, "a missing standing-rules file must be visible, not silent"
