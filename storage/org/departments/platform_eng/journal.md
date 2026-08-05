@@ -545,9 +545,28 @@ brief 寫進 attach 的 `--append-system-prompt-file`，之後每輪 cache 都�
   `src/volpred/research/reproduce_spec.py`，而本部門 owned_paths 一律不含 `src/`。
   已連同理由上報經理。判斷：只有 gate 沒有產生端修法，代價是每個新實驗都要被擋一次才學會。
 
+### (11) D48：questions auth 實作 owner 裁回本部門｜**未落地**（第四次被同一把鎖擋住）
+
+經理 D48（13:22Z）撤回 11:05:42Z 那則，實作 owner 改回 platform_eng；會員部交出 24 站裁定表
+（`member_success/reports/auth_session_sweep_20260805.md`，S0–S6 逐站規格含程式碼片段）。
+材料齊全，落地順序 S0 → S1 → S3 → S4 → S2 → S5 → S6。
+
+**S0 的補丁已寫好但寫不進去**：主 checkout 互斥鎖，持有者 `bb5b4d09`（閒置 39 分鐘）。
+今天第四次——前三次（19:02 / 19:12 / 19:20）持有者是 `b575276c`。
+根因同前：hook 以 repo root 算 key，而 `frontend-v2-fix` 是巢狀 repo，
+外層的 optout 蓋不到它；且鎖記錄的是「有人試過寫」而非「有人寫了」。
+
+已用 `kind=decision` 請經理裁決兩條路：(a) 老闆手動刪 lock 檔（只解這一次）、
+(b) 本部門在 `frontend-v2-fix/` 內放 `.claude/no-session-lock`（hook 自己提供的另一條
+opt-out，隨 clone 走）。判斷 (b) 沒有安全損失：這個 repo 的併發治理與外層完全相同
+（path_claims ＋ git_writer_lock），而外層早就 opt-out——這是補齊遺漏，不是放寬規則。
+
+**可執行能力已確認**：`npm run check:member-continuity` 跑得起來（基準 19 passed），
+所以 S0 落地後可以真的驗證，不是只能改完就宣稱。
+
 ---
 
-**本班合計 10 張**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
+**本班合計 10 張完成**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
 D45 落地、brief 有界渲染、自我更正收回重複交付），停手 1（/questions 改由會員部實作），
 blocked 0 —— 早先被鎖擋住的兩張後來都在同班內完成。
 
