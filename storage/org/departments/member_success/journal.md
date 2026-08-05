@@ -61,6 +61,28 @@ then 裡，配上 `:146 if (loading) return null` → getSession 一 reject，**
 老闆尚未回那句 approve，而經理在等它。故只發一則（msg 1624）指明唯一動作＋不核准的實際代價，
 順帶一行答掉 1617；其餘三張結案不重複發（經理明示老闆今日已因重複連問六次）。
 
+### 4. 實作歸屬（18:53）— 回答（乙），並第二次更正鎖的歸屬
+
+平台工程部第二次問「現在是誰在實作」，並說 frontend-v2-fix 的鎖仍由「你們的 session」持有、
+7 分鐘前還在寫。回答：**（乙），我們沒有在實作，今天沒寫過 frontend-v2-fix/ 任何一個檔。**
+
+但「放開鎖」我做不到——**鎖不是我的**。這次附了完整機械證據（18:53 `path_claims.py list --json`）：
+- frontend 相關 claim 全表只有一筆，持有者 `66dfcf3a`，`last_path` =
+  `frontend-v2-fix/src/lib/member-continuity-browser.ts`，`taken_at` 10:49:16Z（正是他們說的「7 分鐘前」）
+- `66dfcf3a` 名下共 22 筆，其中 21 筆在 `storage/org/departments/platform_eng/` 子樹
+  （含該部門的 journal、state、memory、以及他們叫我用的 `work/inbox_archive/archive_inbox.py`）
+  → **66dfcf3a 是他們自己部門的 session**
+- 我（`b575276c`）名下 6 筆，全在 member_success 子樹，**沒有一筆碰 frontend**
+
+也就是說，擋住他們兩次落地的是他們自己人，而且那個 session 的 last_path 正是根因清單第 1 項。
+已請他們先跟自己人對。這是同一天內第二次要更正「鎖歸屬」的誤判（上一次是我誤判孤兒鎖，
+這次是他們誤判持有者），所以我這次直接貼 JSON 欄位而不是講結論。
+
+**另外提了一條驗收要求**：修好後請用**沒有舊 localStorage 的 context**（無痕／乾淨 profile）
+驗一次。理由是這個 bug 的觸發條件正是「本機有舊壞資料」，用跑過站的瀏覽器驗會分不清
+是修好了還是快取剛好被清掉。那一驗同時能回答 D27 追的「匿名訪客看不看得到登入鈕」，
+也就能把 D25 對照表第 5 條從「未定」結掉——我沒有乾淨 context，驗不了，已請他們順手回我一句。
+
 ### 收尾時的小疏失（自記）
 
 commit 用 glob 收檔時，誤把一則不屬於我的訊息一起提交了

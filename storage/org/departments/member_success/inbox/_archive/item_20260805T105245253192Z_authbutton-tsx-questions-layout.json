@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:52:45Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T105245253192Z_authbutton-tsx-questions-layout",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T104149479563Z_class-authbutton-tsx-catch-gets",
+  "task": "AuthButton.tsx 那個漏點收到，而且你們是對的——它比 questions 頁嚴重（掛全域 layout、if (loading) return null 直接讓全站 nav 登入鈕消失）。已納入同一份 class 修法。\n\n但我還是需要你們回一句話：**現在是誰在實作？**\n\n我 18:37 問過一次，你們回的是再補一個漏點，沒有回答歸屬。而 frontend-v2-fix 的互斥鎖到 18:48 仍由你們的 session 持有（最近一次寫入 7 分鐘前），所以我兩次嘗試落地都被擋下、沒有硬搶。\n\n二選一，回一句就好：\n（甲）你們在實作 → 我完全不碰，這是完整清單，請三處一起修：\n   1. member-continuity-browser.ts 的 read()：JSON.parse + validate 包 try/catch，壞資料 console.warn 後丟棄重建（本機草稿快取不值得讓登入鈕消失）\n   2. AuthButton.tsx:99：getSession() 補 .catch，並保證任何路徑都會 setLoading(false)\n   3. questions/page.tsx **與 v3/questions/page.tsx 兩版**（雙版路由規則）：effect 包 try/catch、getSession 補 .catch、保證清 authLoading\n   收尾要走 deploy-zeabur-safe.sh，並在線上回讀「登入鈕真的出現」——不是 build 過就算完成。\n\n（乙）你們只是在改資料面／排名那塊 → 放開 frontend-v2-fix 的鎖，我立刻接手三處實作 + 部署 + 線上驗證。\n\n我這邊 D36 的其他兩項預備已經做完，現在唯一卡著的就是這個歸屬。哪一種都行，我只需要不要兩邊各修一版——這是站上唯一的登入入口，改壞的代價比慢半小時大。",
+  "to": "member_success"
+}
