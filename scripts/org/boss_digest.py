@@ -25,6 +25,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _core import DEFAULT_ORG_ROOT, REPO_ROOT, load_registry  # noqa: E402
 
 
+HEADLINE_CHARS = 160
+
+
+def _headline(task: object) -> str:
+    """One scannable line per item; the full text already lives on disk.
+
+    Inlining whole task bodies turned 122 items into 1931 lines on 2026-08-05,
+    which is how 54 P1 reports became invisible without a single one being
+    dropped.
+    """
+    text = " ".join(str(task or "").split())
+    if len(text) <= HEADLINE_CHARS:
+        return text
+    return text[:HEADLINE_CHARS - 1] + "…"
+
+
 def render(root: Path) -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     lines = [f"# VolPred 運營日報（{now}）", ""]
@@ -35,6 +51,7 @@ def render(root: Path) -> str:
 
     reports = sorted((root / "manager" / "inbox").glob("*.json"))
     dept_reports = []
+    cc_count = 0
     corrupt: list[str] = []
     for path in reports:
         try:
@@ -42,13 +59,37 @@ def render(root: Path) -> str:
         except json.JSONDecodeError:
             corrupt.append(path.name)
             continue  # silent-ok: not silent — corrupt items are surfaced in the digest's ⚠️ section below
-        if item.get("from") != "boss":
-            dept_reports.append(item)
+        if item.get("from") == "boss":
+            continue
+        # Department-to-department traffic auto-copies the manager, so most of
+        # this inbox is cc: org bookkeeping the owner takes no action on. On
+        # 2026-08-05 that was 41 of 122 entries, and they arrive EARLIEST, so
+        # an arrival-ordered list put every one of them above the decisions.
+        # Dropped from the owner's list, but counted -- never silently.
+        if item.get("kind") == "cc":
+            cc_count += 1
+            continue
+        dept_reports.append(item)
     if dept_reports:
+        # Order by priority, not by arrival. The digest rendered on 2026-08-05
+        # was 1931 lines with 54 P1 items below the noise; the manager read the
+        # top of it and reported the channel as carrying nothing but cc. A
+        # boss-facing message whose important half is under the fold has already
+        # failed, even though every byte of it was present.
+        rank = {"P1": 0, "P2": 1, "P3": 2}
+        dept_reports.sort(key=lambda i: rank.get(str(i.get("priority") or "P3"), 2))
         lines += ["## 部門上報", ""]
         for item in dept_reports:
-            lines.append(f"- [{item.get('priority', 'P3')}] **{item.get('from')}**: {item.get('task')}")
+            lines.append(
+                f"- [{item.get('priority', 'P3')}] **{item.get('from')}**: "
+                f"{_headline(item.get('task'))}"
+            )
         lines.append("")
+    if cc_count:
+        lines += [
+            f"_另有 {cc_count} 則部門間知會（kind=cc）未列入；完整內容在 manager/inbox_",
+            "",
+        ]
     if corrupt:
         lines += ["## ⚠️ 無法解析的 inbox 項（需人工/經理處理）", ""]
         lines += [f"- `{name}`" for name in corrupt]
