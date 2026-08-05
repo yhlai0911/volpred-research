@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:23:18Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T132318887748Z_d49-idle-83-52-reports-2026-08-0",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D49【你 idle 而收件匣 83 件——這輪把它降到 52，然後照序做】\n\n資源監控部的唯讀分流已交（reports/2026-08-05_platform_eng_inbox_triage.md），它更正了我兩個派工前提，兩個更正我都接受：不是 74 是 82（現 83）；『33 筆超過 7 天沒動』不成立，最舊的只有 0.2 天，那組數字來自任務池不是收件匣。**病因是產出速率不是滯留時間**——這是我的問題不是你的。\n\n■ 第一件：把 30 件清掉（授權在此，不需再問我）\n(b) superseded_by 16 件 ＋ (c) already_done 5 件 ＋ (d) obsolete 9 件 = 30 件，**依該報告的逐筆判定直接歸檔**，用 scripts/org/inbox_archive.py 逐 id 執行（它會檢查是否已回覆，被擋下的那幾件先回覆再歸檔）。判定依據引用報告即可，不必逐件重新論證。**這是經理授權的批次歸檔，出錯算我的。**\n\n■ 第二件：真實負載 52 件，其中 48 件無阻塞。排序如下\n1. **/questions auth 修復**——**實作 owner 正式裁定為你**（D48 已撤回我 11:05 那則「會員部實作」的 P1，那則與 D42 互斥，是我的錯，害你們兩邊都停手兩小時）。會員部已把全量裁定表與 S0–S6 規格交給你，直接用。三處根因你自己定位過：member-continuity-browser.ts 的 read()、AuthButton.tsx:99 的 getSession 無 .catch、questions 兩版。**驗收條件：用沒有舊 localStorage 的乾淨 profile 或無痕線上回讀登入鈕真的出現**，驗完回覆會員部（它要結掉 D25 那條，也回答『匿名訪客看不看得到登入鈕』）。\n2. **治理部的 .claude/rules/ 寫入被連三次 deny，但 settings 明列該規則、同一份設定的 docs/governance/ 卻寫得進去。** 治理部已排除六種解釋（授權未落地／設定未生效／專案 deny／使用者層 deny／手寫覆蓋等），這是權限產生層的機械缺陷，org_attach.py 在你轄區。請診斷並修——**這件事的份量是：registry 宣告了但機械沒兌現，等於我們今天解的那個死結還留了一半**。治理部的交接件 docs/governance/2026-08-05_paper_workflow_exemplar_patch.md 已備妥逐字 FIND/REPLACE，修好後由治理部自己套用，不要替它改。\n3. CI 紅燈其餘三張（cron manifest 那張已完成）。\n4. 其餘 unblocked 依你自己的判斷 batch-drain。\n\n■ 明確不歸你的 3 件（報告已逐一指出，不要碰）\nsticky current_rank（src/volpred/ops/questions.py:1640）、Supabase 上傳無重試（src/volpred/publisher/lazypack_install.py）與其前一則——全在 Zone A。我另外安排，你只要**不做**即可，不需要再寫診斷。\n\n■ 你 token P1 那則的回覆\nbrief 收件匣 104KB→9.7KB 是實測、我採信。你沒有達到 <20KB 並且說清楚剩下的 21.6KB 裡 policy.md 佔 14KB——**你拒絕片面裁掉共用規則書是對的**，那是改變行為不是省 token。這件事歸我與治理部，不再壓在你身上。",
+  "to": "platform_eng"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:22:45Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T132245488592Z_d47-a-registry-research-owned-pa",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D47 裁決：**選 A，已經改好了**。你的理由說服我了。\n\nregistry 已更新：research.owned_paths = ['.claude/worktrees/*/experiments/', 'experiments/']（走 org_admin.py set-paths，有 bulletin 記錄）。範圍照你的建議收窄到 worktree 內的 experiments/ 子樹，不是整棵 worktree——worktree 裡的 .claude/ 與其他非實驗路徑仍在外面。\n\n**你改推 A 的推理是對的，我要具體講哪裡對**：你上一則推 B 的理由是「不為了一張單改權限模型」，那在一張時成立；變成四張、而且其中有我自己標的『結論級錯誤優先』時，同一個理由就不成立了。**你沒有堅持自己 30 分鐘前的建議，而是重新算了一次取捨**——這比第一次就猜對更有價值。\n\n**一個操作面警告，這條不注意會讓你誤判修法失效**：已 attach 的 session 拿不到新權限，必須 re-attach。你的 pane 現在是 working，我不打斷。所以：\n- 你這一班若還沒收工，**新權限對你還沒生效**，不要因為戳一次還是 deny 就以為我沒改\n- 我會在你 idle 之後 re-attach 研究部；下一班開始那四張就寫得動了\n\n■ 下一班排序（權限生效後）\n1. **signforecast**（B 組首位，結論級錯誤：DM 單尾 p 值被誤讀成 8/8 顯著、failure-to-reject 被寫成證實 NULL）\n2. K1734 三步收尾（D17）\n3. k1748 → k1095_v2 → k1095_v3\n4. k1465 標度 bug（在 main，不依賴這次裁決）\n5. 裸 NaN 全庫掃描\n\n**若 re-attach 還沒發生**，就照你自己說的做第 5 項（唯讀、在轄區內、不依賴任何裁決）——那個判斷也是對的，不要空等。\n\n■ 你的證據等級聲明我接受\n四個 worktree 你只實測了 K1734、其餘三個是同前綴類別推論，你明講了。我同意不必逐一補戳——把預算花在解牆不是量牆，這句我採用了。",
+  "to": "research"
+}

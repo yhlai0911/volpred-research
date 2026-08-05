@@ -1,35 +1,49 @@
 {
-  "last_patrol": "2026-08-05T11:25:00Z",
-  "last_tick": "2026-08-05T11:25:00Z",
-  "next_review_due": "2026-08-12T11:25:00Z",
+  "last_patrol": "2026-08-05T13:30:00Z",
+  "last_tick": "2026-08-05T13:30:00Z",
+  "next_review_due": "2026-08-12T13:30:00Z",
   "pending_proposals": [],
   "open_items": [
     {
-      "id": "provider-denial-verification",
-      "what": "執行層 15:5x-18:46 停擺；1b513bd79 已重新 pin，但尚未回讀到非 provider_policy_denied 的 completion",
-      "state": "contained_not_verified",
-      "owner": "platform_eng",
-      "ref": "D37 第 1 項"
+      "id": "research-reattach-pending",
+      "what": "D47 已擴充 research.owned_paths 到 .claude/worktrees/*/experiments/，但已 attach 的 session 拿不到新權限",
+      "state": "waiting_for_idle",
+      "owner": "manager",
+      "next": "研究部 pane 轉 idle 後跑 org_attach.py restore（或只 attach research）"
+    },
+    {
+      "id": "bulletin-single-contended-file",
+      "what": "連兩輪經理紀錄被寫入認領擋下；bulletin 同時是經理判斷紀錄與 org_admin 自動落款，兩種寫者一個檔",
+      "state": "to_assign",
+      "owner": "manager",
+      "next": "開單給 platform_eng：bulletin 改每則一檔或提供 append CLI"
+    },
+    {
+      "id": "tick-record-pending-merge",
+      "what": "D47-D50 的 bulletin 條目暫存於 manager/work/tick_20260805T1330Z_D47_D50.md",
+      "state": "deferred_write_claim",
+      "owner": "manager",
+      "note": "storage/org/bulletin/2026-08.md 由 dept:platform_eng 持有至 2026-08-05T14:07Z"
+    },
+    {
+      "id": "platform-eng-split-proposal",
+      "what": "拆部門提案暫不送老闆；等 30 件批次歸檔與 auth owner 歸位後看真實負載",
+      "state": "deferred_by_judgment",
+      "owner": "manager"
     },
     {
       "id": "policy-md-two-sections",
-      "what": "policy.md 補『訊號與事實之間隔了幾層』與『擋一件事之前先問往壞修正』兩節；條文已由治理部與論文部擬定",
-      "state": "deferred_write_claim",
+      "what": "policy.md 兩節（訊號隔幾層／擋之前先問往壞修正）已授權治理部代寫",
+      "state": "delegated",
+      "owner": "governance",
+      "ref": "D50"
+    },
+    {
+      "id": "zone-a-three-items",
+      "what": "sticky current_rank、Supabase 上傳無重試（含前一則）落在 src/volpred/**，不歸任何部門",
+      "state": "unassigned",
       "owner": "manager",
-      "note": "session f5153fb1 持有 storage/org/policy.md 至 2026-08-05T11:25Z，未硬搶"
-    },
-    {
-      "id": "manager-inbox-has-no-archive-path",
-      "what": "archive_inbox.py 拒絕 manager，經理收件匣只進不出（117 件）",
-      "state": "assigned",
-      "owner": "platform_eng",
-      "ref": "D37 第 5 項"
-    },
-    {
-      "id": "queue-distribution-single-funnel",
-      "what": "canonical 池 56 件可派工作 100% 指向 platform_eng；分佈本身是平台重心壓在 ops 的訊號",
-      "state": "manager_to_propose",
-      "owner": "manager"
+      "next": "走主線程或 Codex，platform_eng 已明確不做"
     }
   ]
 }
