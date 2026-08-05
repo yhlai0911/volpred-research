@@ -49,6 +49,28 @@ from volpred.canonical_write import guard_canonical_write  # noqa: E402
 
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 INBOX = ROOT / "storage" / "ops" / "telegram_inbox.jsonl"
+
+# An update is consumed from Telegram the moment the offset advances, and
+# Telegram will never hand it back. So the offset may only mean "we have it",
+# never "we processed it" -- anything that fails after the offset moves has to
+# survive somewhere local or it is gone.
+#
+# 2026-08-05: it was gone. Two owner messages (updates 351935633/351935634,
+# 09:41 and 09:42 Taipei) raised `cannot import name
+# 'normalize_task_type_value' from 'volpred.ops.next_tasks'` inside
+# _handle_update. The loop logged one line, advanced the offset anyway, and
+# moved on. The owner asked hours later whether Telegram still accepted tasks;
+# nothing else would ever have said otherwise. The import works from every
+# static entry point and could not be reproduced, which is the point: the fix
+# cannot depend on knowing why a handler failed. Poison message, ImportError,
+# full disk, Supabase down -- the message has to outlive all of them.
+#
+# So: still advance the offset (a poison update must not wedge the loop -- that
+# part of the old behaviour was right), but first write the raw update here, and
+# retry it at the top of every pass. A transient failure self-heals within one
+# poll interval. A persistent one escalates instead of accumulating in silence.
+DEADLETTER = ROOT / "storage" / "ops" / "telegram_failed_updates.jsonl"
+DEADLETTER_MAX_ATTEMPTS = 5
 HEARTBEAT_LOG_INTERVAL_SECONDS = 3600
 TELEGRAM_POLL_LOG = Path(
     os.environ.get(
@@ -182,6 +204,108 @@ def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -
     # 的 dedicated-owner 測試釘住。
     append_task_record(record, path=NEXT_TASKS, if_exists="skip")
     return task_id
+
+
+def _load_deadletter() -> list[dict]:
+    if not DEADLETTER.is_file():
+        return []
+    rows: list[dict] = []
+    for line in DEADLETTER.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError as exc:
+            # Never drop a parked message just because a neighbouring line is
+            # corrupt -- dropping is the whole failure this file exists to stop.
+            warn("telegram_deadletter", "unparsable row kept verbatim", error=str(exc))
+            rows.append({"_raw": line, "attempts": 0})
+    return rows
+
+
+def _save_deadletter(rows: list[dict]) -> None:
+    guard_canonical_write(DEADLETTER)
+    DEADLETTER.parent.mkdir(parents=True, exist_ok=True)
+    body = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
+    tmp = DEADLETTER.with_suffix(".jsonl.tmp")
+    tmp.write_text(body, encoding="utf-8")
+    tmp.replace(DEADLETTER)
+
+
+def _record_failed_update(update: dict, exc: Exception) -> None:
+    """Park an update that failed to become a task, so a retry can find it."""
+    update_id = update.get("update_id")
+    rows = _load_deadletter()
+    for row in rows:
+        if row.get("update", {}).get("update_id") == update_id:
+            row["attempts"] = int(row.get("attempts") or 0) + 1
+            row["last_error"] = f"{type(exc).__name__}: {exc}"
+            break
+    else:
+        rows.append({
+            "update": update,
+            "attempts": 1,
+            "first_failed_at": datetime.now(timezone.utc).isoformat(),
+            "last_error": f"{type(exc).__name__}: {exc}",
+        })
+    _save_deadletter(rows)
+    _log(f"update {update_id} parked for retry: {exc}")
+    warn(
+        "telegram_deadletter",
+        "update failed to become a task; parked for retry",
+        update_id=update_id,
+        error=f"{type(exc).__name__}: {exc}",
+        parked=len(rows),
+    )
+
+
+def _drain_failed_updates() -> int:
+    """Retry parked updates. Returns how many finally became tasks.
+
+    Runs before each poll so a transient failure costs one poll interval, not
+    the message. `_append_task` keys on `telegram-<message_id>`, so replaying an
+    update that partly succeeded cannot create a second task.
+    """
+    rows = _load_deadletter()
+    if not rows:
+        return 0
+    kept: list[dict] = []
+    recovered = 0
+    mutated = False
+    for row in rows:
+        update = row.get("update")
+        if not isinstance(update, dict):
+            kept.append(row)  # unparsable; keep for a human, never discard
+            continue
+        try:
+            _handle_update(update)
+            recovered += 1
+            _log(f"update {update.get('update_id')} recovered from deadletter")
+        except Exception as exc:  # noqa: BLE001 — retry must not kill the daemon
+            row["attempts"] = int(row.get("attempts") or 0) + 1
+            row["last_error"] = f"{type(exc).__name__}: {exc}"
+            kept.append(row)
+            mutated = True
+            if row["attempts"] >= DEADLETTER_MAX_ATTEMPTS:
+                # Escalate rather than let it sit. The row stays parked: an
+                # owner message is never deleted because retrying it is hard.
+                warn(
+                    "telegram_deadletter_stuck",
+                    "owner message still not queued after repeated retries",
+                    update_id=update.get("update_id"),
+                    attempts=row["attempts"],
+                    error=row["last_error"],
+                    text=str((update.get("message") or {}).get("text") or "")[:200],
+                )
+    # Persist whenever anything changed at all, not only when a row left the
+    # queue. The first version only saved on recovery, so a row that kept
+    # failing had its attempt counter incremented in memory and thrown away --
+    # the escalation threshold could never be reached and a permanently stuck
+    # owner message would have retried in silence forever.
+    if recovered or mutated or len(kept) != len(rows):
+        _save_deadletter(kept)
+    return recovered
 
 
 def _handle_update(update: dict) -> None:
@@ -353,6 +477,8 @@ def _retry_stuck_replies() -> None:
 
 def poll_pass(timeout: int = 25) -> int:
     """One getUpdates pass; returns number of updates handled."""
+    # Before asking Telegram for anything new, finish what we already owe.
+    _drain_failed_updates()
     state = load_state()
     offset = state.get("update_offset")
     params: dict = {"timeout": timeout}
@@ -367,7 +493,9 @@ def poll_pass(timeout: int = 25) -> int:
         try:
             _handle_update(u)
         except Exception as exc:  # noqa: BLE001 — one bad update must not kill the loop
-            _log(f"update {u.get('update_id')} failed: {exc}")
+            # Park it before the offset moves. The log line alone is what let
+            # two owner messages disappear on 2026-08-05.
+            _record_failed_update(u, exc)
         state = load_state()
         state["update_offset"] = u["update_id"] + 1
         save_state(state)
