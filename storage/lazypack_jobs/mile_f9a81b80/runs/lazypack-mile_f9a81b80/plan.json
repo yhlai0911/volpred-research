@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "title": "報價跳動放大五倍，多晃的只有原本價差最窄的那批股票（K1706）",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1706/K1706_results.json",
+      "sha256": "5981f45c27f534ecebe068b0692f84f0f4fd2c713d0451c1426a81ae75dc1ffe",
+      "label": "K1706 最小報價跳動政策實驗的分層差異中之差異結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "一場真的做過的市場實驗",
+      "alt": "說明政策實驗的設計、分組依據與最終樣本規模",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "發生了什麼事",
+          "body": [
+            "監理機關挑出一千多檔中小型股，把它們的最小報價跳動單位放大五倍，其他同類股票維持原樣，然後看兩年。原本每一分錢都能掛單，改制後只剩五分錢的整數倍，中間那些價位從此不存在。",
+            "關鍵在於**這件事對不同股票根本不是同一件事**：買賣報價本來就擠得很密的股票，新格子直接卡住原有的掛單位置；報價本來就隔很開的股票，新格子還躺在縫裡面，什麼都沒擋到。",
+            "所以先按改制前的價差把股票分成窄、寬兩組，中間帶整批排除。三條門檻在看到任何結果之前就寫死了——先看結果再挑一個剛好顯著的切點，幾乎任何資料都能生出故事。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "分析股票數",
+          "value": {
+            "source": "results",
+            "path": "data.panel_stocks",
+            "format": {
+              "kind": "integer",
+              "suffix": " 檔"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "股票-日觀察數",
+          "value": {
+            "source": "results",
+            "path": "data.panel_rows",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "觀察起點",
+          "value": {
+            "source": "results",
+            "path": "data.panel_start",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "觀察終點",
+          "value": {
+            "source": "results",
+            "path": "data.panel_end",
+            "format": {
+              "kind": "date"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "效果只出現在原本價差最窄的那一組",
+      "alt": "對照窄組與寬組的日內振幅變化幅度與多重比較校正後的機率值",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "怎麼讀這幾個數字",
+          "body": [
+            "看的是日內最高價到最低價的距離，改制股相對於同組對照股多撐開了多少。單位是基點，一個基點等於萬分之一。",
+            "機率值取自隨機重排檢定並經過多重比較校正——同一批資料裡看了好幾個指標，不校正就等於允許自己在其中挑一個漂亮的。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "原本價差窄的一組：振幅變化",
+          "value": {
+            "source": "results",
+            "path": "primary_did.2.ri_estimate_stock_delta",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個基點"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "窄組・校正後機率值",
+          "value": {
+            "source": "results",
+            "path": "primary_did.2.ri_p_holm_8",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "原本價差寬的一組：振幅變化",
+          "value": {
+            "source": "results",
+            "path": "primary_did.3.ri_estimate_stock_delta",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個基點"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "寬組・校正後機率值",
+          "value": {
+            "source": "results",
+            "path": "primary_did.3.ri_p_holm_8",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "帶走的一句話",
+      "alt": "說明分層才看得見效果，以及沒測出差別不等於沒有差別",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "把兩組混在一起，就什麼都看不到",
+          "body": [
+            "同一條規則、同一個市場，對兩群股票的作用方向相反。如果不先按改制前的價差分組、把所有股票放在一起算平均，這個效果會被互相抵消掉，結論會變成「沒什麼影響」。",
+            "**分層不是為了讓數字好看，是因為機制本來就只作用在其中一群身上。**",
+            "另外要說清楚：同一批資料裡的成交金額、波動與流動性衝擊三個指標，校正後都沒測出差別。**沒測出來不等於沒有**——只代表以這個樣本的精確度，還分不出來。"
+          ]
+        }
+      ]
+    }
+  ]
+}
