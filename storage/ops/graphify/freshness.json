@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-04T19:21:57.515508Z",
+  "generated_at": "2026-08-05T19:21:53.745169Z",
   "runs": [
     {
       "graph_id": "root",
@@ -11,8 +11,8 @@
         "--force"
       ],
       "returncode": 0,
-      "stdout_tail": "[graphify extract] --force: full re-scan, semantic cache reads skipped\n[graphify extract] scanning /Users/yhlai0911/volpred-research\n[graphify extract] --code-only: skipping 374 non-code file(s) (368 docs, 4 papers, 2 images) — no LLM extraction\n[graphify extract] found 1261 code, 0 docs, 0 papers, 0 images\n[graphify extract] 23 file(s) not classified (no supported extension or shebang), skipped: .env.example, .gitattributes, .gitignore, .graphify_version, .graphifyignore, .python-version (+17 more)\n[graphify extract] 1 file(s) skipped as potentially sensitive (rename or move if wrongly flagged): token_policy.json\n[graphify extract] AST extraction on 1261 code files...\n  AST extraction: 41/41 uncached files (100%) [10 workers]\n[graphify] Deduplicated 1 node(s) (1 fuzzy).\n[graphify] backed up curated graph (5 files) -> 2026-08-05/\n[graphify extract] wrote /Users/yhlai0911/volpred-research/graphify-out/graph.json: 23764 nodes, 60723 edges, 977 communities\n[graphify extract] wrote /Users/yhlai0911/volpred-research/graphify-out/.graphify_analysis.json\n[graphify extract] next: run `graphify cluster-only /Users/yhlai0911/volpred-research` to generate GRAPH_REPORT.md and name communities\n",
-      "stderr_tail": "  warning: 38 source file(s) produced zero nodes and are absent from the graph: settings.json, hooks.json, article_series.json, ci_test_repo_dependencies.json, control_gate_registry.json (+33 more). A re-run will retry them (empties are no longer cached); if it persists, please report the file(s) (#1666).\n"
+      "stdout_tail": "[graphify extract] --force: full re-scan, semantic cache reads skipped\n[graphify extract] scanning /Users/yhlai0911/volpred-research\n[graphify extract] --code-only: skipping 385 non-code file(s) (379 docs, 4 papers, 2 images) — no LLM extraction\n[graphify extract] found 1302 code, 0 docs, 0 papers, 0 images\n[graphify extract] 23 file(s) not classified (no supported extension or shebang), skipped: .env.example, .gitattributes, .gitignore, .graphify_version, .graphifyignore, .python-version (+17 more)\n[graphify extract] 2 file(s) skipped as potentially sensitive (rename or move if wrongly flagged): token_conservation.json, token_policy.json\n[graphify extract] AST extraction on 1302 code files...\n  AST extraction: 44/44 uncached files (100%) [10 workers]\n[graphify] Deduplicated 1 node(s) (1 fuzzy).\n[graphify] backed up curated graph (5 files) -> 2026-08-06/\n[graphify extract] wrote /Users/yhlai0911/volpred-research/graphify-out/graph.json: 24514 nodes, 62428 edges, 1016 communities\n[graphify extract] wrote /Users/yhlai0911/volpred-research/graphify-out/.graphify_analysis.json\n[graphify extract] next: run `graphify cluster-only /Users/yhlai0911/volpred-research` to generate GRAPH_REPORT.md and name communities\n",
+      "stderr_tail": "  warning: 39 source file(s) produced zero nodes and are absent from the graph: settings.json, hooks.json, article_series.json, bare_nonfinite_results_baseline.json, ci_test_repo_dependencies.json (+34 more). A re-run will retry them (empties are no longer cached); if it persists, please report the file(s) (#1666).\n"
     },
     {
       "graph_id": "root",
@@ -24,8 +24,8 @@
         "--no-label"
       ],
       "returncode": 0,
-      "stdout_tail": "Loading existing graph...\nGraph: 23764 nodes, 60723 edges\nRe-clustering...\n[graphify] backed up curated graph (5 files) -> 2026-08-05/\nDone - 978 communities. GRAPH_REPORT.md and graph.json updated (--no-viz; graph.html removed).\n",
-      "stderr_tail": "[graphify] community set changed since labeling (1065 saved labels, 978 communities now; renamed 967 community(ies) by their hub). Run `graphify label` to refresh names with the LLM.\n"
+      "stdout_tail": "Loading existing graph...\nGraph: 24514 nodes, 62428 edges\nRe-clustering...\n[graphify] backed up curated graph (5 files) -> 2026-08-06/\nDone - 1018 communities. GRAPH_REPORT.md and graph.json updated (--no-viz; graph.html removed).\n",
+      "stderr_tail": "[graphify] community set changed since labeling (1108 saved labels, 1018 communities now; renamed 1011 community(ies) by their hub). Run `graphify label` to refresh names with the LLM.\n"
     },
     {
       "graph_id": "active_frontend",
@@ -35,8 +35,8 @@
         "."
       ],
       "returncode": 0,
-      "stdout_tail": "Re-extracting code files in . (no LLM needed)...\n  AST extraction: 100/334 uncached files (29%) [10 workers]\n  AST extraction: 200/334 uncached files (59%) [10 workers]\n  AST extraction: 300/334 uncached files (89%) [10 workers]\n  AST extraction: 334/334 uncached files (100%) [10 workers]\n[graphify watch] No code-graph topology changes detected; outputs left untouched.\nCode graph updated. For doc/paper/image changes run /graphify --update in your AI assistant.\nTip: set GEMINI_API_KEY or GOOGLE_API_KEY to use Gemini for semantic extraction.\n",
-      "stderr_tail": "  warning: 7 source file(s) produced zero nodes and are absent from the graph: context.json, frontend-release.json, research_metrics.json, strategy_metrics.json, thinking_journal.json (+2 more). A re-run will retry them (empties are no longer cached); if it persists, please report the file(s) (#1666).\n"
+      "stdout_tail": "Re-extracting code files in . (no LLM needed)...\n  AST extraction: 100/340 uncached files (29%) [10 workers]\n  AST extraction: 200/340 uncached files (58%) [10 workers]\n  AST extraction: 300/340 uncached files (88%) [10 workers]\n  AST extraction: 340/340 uncached files (100%) [10 workers]\n[graphify] backed up curated graph (4 files) -> 2026-08-06/\n[graphify watch] Rebuilt: 2529 nodes, 5179 edges, 184 communities\n[graphify watch] graph.json, graph.html and GRAPH_REPORT.md updated in graphify-out\nCode graph updated. For doc/paper/image changes run /graphify --update in your AI assistant.\nTip: set GEMINI_API_KEY or GOOGLE_API_KEY to use Gemini for semantic extraction.\n",
+      "stderr_tail": "  warning: 8 source file(s) produced zero nodes and are absent from the graph: context.json, frontend-release.json, research_metrics.json, strategy_metrics.json, portfolio-checkup.json (+3 more). A re-run will retry them (empties are no longer cached); if it persists, please report the file(s) (#1666).\n[graphify watch] community set changed since labeling (185 saved labels, 184 communities now; renamed 70 community(ies) by their hub). Run `graphify label` to refresh names with the LLM.\n"
     }
   ],
   "graphs": [
@@ -44,17 +44,17 @@
       "graph_id": "root",
       "graph_exists": true,
       "report_exists": true,
-      "built_from_commit": "1c8749ba",
-      "head": "1c8749ba8d0a5d2584a7f8613832e36c0865644c",
+      "built_from_commit": "989b9f9d",
+      "head": "989b9f9d8e615b32a91a6e0c5171e9e9b756f965",
       "fresh": true
     },
     {
       "graph_id": "active_frontend",
       "graph_exists": true,
       "report_exists": true,
-      "built_from_commit": "2b6bc57d",
-      "head": "9b32196847d206b357aabfa597433d713aaa1a43",
-      "fresh": false
+      "built_from_commit": "785ca704",
+      "head": "785ca704c26eb5506c2f457ee544e81f582f8dc3",
+      "fresh": true
     }
   ]
 }
