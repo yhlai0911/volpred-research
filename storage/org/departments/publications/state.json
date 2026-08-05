@@ -1,19 +1,20 @@
 {
   "health": "attention",
-  "health_note": "inbox 空、無待辦；但 13/13 論文全部超過 pipeline 自訂 7 天 stall 門檻，2026-08 至今 0 篇推進。已上報經理待裁決。",
+  "health_note": "本輪三件實質產出（prg v8 review FAIL、K1730 randomization 不可能證明、vix-sufficiency blocker 拆解）皆完成，但部門在目前權限模式下寫不進 paper/ 與 experiments/，因此 review round 歸檔、4 個 MAJOR 的 paper-update、F10 實驗執行都無法自行落地。已上報經理。",
   "kpi": {
     "definition": "每篇 active paper 每月 ≥1 次 review round 或 stage 推進",
-    "snapshot_at": "2026-08-05T08:41:36Z",
+    "snapshot_at": "2026-08-05T09:20:00Z",
     "source": "scripts/paper_pipeline_check.py（機械檢查，非人工估算）",
     "total_papers": 13,
     "stall_threshold_days": 7,
     "stalled_count": 13,
-    "max_days_in_stage": 76.7,
+    "max_days_in_stage": 76.72,
     "data_issues": 0,
-    "advance_2026_08": 0,
+    "advance_2026_08": 1,
+    "advance_2026_08_detail": "prg-periodic-garch v8 review round 完成（verdict FAIL，4 MAJOR/2 MINOR）。這是 review round，不是 stage 推進——stage 仍為 revision，且 4 個 MAJOR 未修前不應推進。KPI 定義為「review round 或 stage 推進」，故計為達成 1 篇。",
     "advance_2026_07_verifiable": 5,
     "advance_2026_07_unverifiable": 8,
-    "advance_provenance_caveat": "8 篇 last_advance_at=2026-07-01，與 _meta.baseline_set_at 同日且無對應敘述證據，疑為 portfolio audit 批次填寫而非真實推進事件；不採計為 KPI 達成。有敘述證據的 5 篇：vt-trend-following(07-19)、prg-periodic-garch(07-14)、volatility-absorption(07-14)、vt-insurance-cost(07-13)、leverage-direction(07-02)。",
+    "advance_provenance_caveat": "8 篇 last_advance_at=2026-07-01，與 _meta.baseline_set_at 同日且無對應敘述證據，疑為 portfolio audit 批次填寫而非真實推進事件；不採計為 KPI 達成。",
     "stage_distribution": {
       "revision": 10,
       "draft": 2,
@@ -23,8 +24,50 @@
       "leverage-direction",
       "taiwan-vt"
     ],
-    "note_days_in_stage_semantics": "days_in_stage 由 stage_entered_at 起算（停在同一 stage 多久），不等於「多久沒有任何動作」。後者看 last_advance_at，最近一次為 2026-07-19（17 天前）。"
+    "blocker_string_reliability": "低——本輪查證的 2/2 篇 pipeline blocker 字串與實際狀態不符（prg 稱 v7 review 未跑實則已跑並修完；vix-sufficiency 稱停在 main_v4 實則已到 main_v5）。開工前一律對照 review_history/ 與 git log，不可照字面理解。"
   },
-  "last_run": "2026-08-05T08:41:36Z",
-  "open_items": 0
+  "cadence": {
+    "min_cadence": "weekly",
+    "changed_at": "2026-08-05",
+    "changed_by": "manager decision 2（item_20260805T084606769682Z）",
+    "rotation_next": "W2 vt-insurance-cost — FRL format/word-limit gate（journal-review skill）",
+    "rotation_table": "charter.md §Review round 輪替"
+  },
+  "frl_queue": {
+    "order": [
+      "vt-insurance-cost",
+      "prg-periodic-garch",
+      "forecast-tail-divergence"
+    ],
+    "decided_at": "2026-08-05",
+    "rationale": "journal.md 2026-08-05 §裁決三。vt-crowding-abm 未選定期刊前不佔名次。"
+  },
+  "last_run": "2026-08-05T09:38:00Z",
+  "open_items": 6,
+  "open_items_detail": [
+    "prg-periodic-garch：4 MAJOR + 2 MINOR 待 paper-update（需 paper/ 寫入權），MAJOR-1 最急（FRL 具名指控風險）；修完重編後開 v9 round（含 Codex 第三軌）",
+    "vix-sufficiency F10：可立即執行的 nested CW（^VIX daily OHLC Open 欄，未 lag），需 experiments/ 寫入權",
+    "vix-sufficiency F3：待 platform_eng 回覆 CBOE put-call 可重播取得路徑",
+    "D7/D11 k892：已驗證實作在 quarantine commit 6349aec58，待收養（只取 experiments/k892/ 兩路徑，不可整包 merge）；需 experiments/ 寫入權",
+    "D7/D11 k994：0050.TW + ^VIX pinned snapshot 延長到 2026-04-08 後 repoint，驗證 DM t≈1.44 重現（經理已裁選項 1）",
+    "12 篇 blocker 過時逐篇核實：已確認 3 篇（prg/vix-sufficiency/taiwan-vt）+ 高度可疑 1 篇（vt-crowding-abm）；其餘隨輪替逐篇回讀，不另開卡"
+  ],
+  "self_corrections_this_run": [
+    "上輪把 9 篇 last_advance_at=2026-07-01 全判為「疑批次填寫、不採計 KPI」——查證後其中 4 篇在該日之後有實質推進 commit，是 stamp 過時而非虛報，判嚴了。已更正並回報。",
+    "回覆治理部 taiwan-vt 樣板資格時，引用 pipeline blocker 敘事欄位當證據而未回讀原始檔——三項證據有兩項已過期，由治理部逐項回讀糾正。與本輪自己發現的缺陷同型；已寫入 memory。"
+  ],
+  "outbound_requests": [
+    {
+      "to": "platform_eng",
+      "priority": "P2",
+      "item": "item_20260805T091934819770Z_reproduce-gate-hash-commit-unver",
+      "topic": "reproduce gate 整檔 hash 導致無關 commit 讓實驗 unverified 且拒絕重跑"
+    },
+    {
+      "to": "platform_eng",
+      "priority": "P3",
+      "item": "item_20260805T091949096323Z_cboe-equity-put-call-volume-vix",
+      "topic": "CBOE equity put-call volume 可重播取得路徑（vix-sufficiency F3）"
+    }
+  ]
 }

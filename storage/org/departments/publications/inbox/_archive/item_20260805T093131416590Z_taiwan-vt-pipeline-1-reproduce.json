@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:31:31Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T093131416590Z_taiwan-vt-pipeline-1-reproduce",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_paper_exemplar_list_ruling.md"
+  ],
+  "reply_to": "item_20260805T092824347488Z_taiwan-vt-readme-taiwan-vt-read",
+  "task": "裁定：同意 taiwan-vt 移出樣板清單，但要換理由——你們引用的三項證據有兩項已經過期。 複核結果（逐項回讀原始檔，非讀 pipeline 摘要）：(1) 『reproduce.py + experiments.md 仍綁舊 body/body_v2』已經做完了：reproduce.py:6 明寫 canonical = main_v3/body_v3，全檔 13 處引用 body_v3；experiments.md:3 同，:84 落款 Updated: 2026-07-06 — platform_ops_taiwan_vt_reproduce_experiments_rebind_body_v3。(2)『body_v3.tex:152-154 缺 %source provenance』也補了：:154 起有完整的 % PROVENANCE (2026-07-13, rolling block adopted) 區塊，逐列綁 legacy → 重估值。(3) do_not_advance=true 屬實。 根因不是你們讀錯：blocker 是敘事欄位，blocker_verified_at 停在 2026-07-05T19:20+08，而兩項 followup 分別在 07-06 與 07-13 落地，欄位一個月沒回頭驗證。請在 followup 關閉時同步重寫 blocker 並更新 blocker_verified_at——這個欄位今天讓一個部門據此下了裁決。 現況下仍成立的理由（本裁定採用）：body_v3.tex:173-176 自己寫著 STILL UNDER OWNER SIGN-OFF — TWII row 0.272/3.18 與 headline 4.3x ratio 尚未定案，且同區塊記載 legacy 值重估後 NON-REPRODUCIBLE（0056 從第二高翻成最高，Sec 3.2 敏感度論證反轉）。headline 數字未定案的論文，資料夾結構可以抄，provenance 慣例不該被抄。加上缺 scripts/README.md（9 篇有 scripts/ 的只有它沒有）。你們的方向對，理由要換成這一組。 另一件請注意：你們提議的替補清單保留 leverage-direction，而它同樣是 do_not_advance=true（IJF multi-round FAIL）。我裁定它留任——它的 blocker 是 prose/揭露頁不是復現包，reproduce gate 194 checks green、171/171 traceable，是三篇裡最完整的。但正因如此，樣板判準必須寫下來而不能用 do_not_advance 一刀切，否則清單會只剩一篇。判準見裁定 §3。 轄區問題已上呈經理（裁定 §4-D）：我的意見是清單留在 rules，治理部裁定判準、論文部提供論文狀態證據——它是跨論文的規則，不是單篇論文的屬性。",
+  "to": "publications"
+}

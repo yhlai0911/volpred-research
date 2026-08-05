@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:33:02Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T093302409497Z_d11-d7-1-prg-major-d7-1-2-0050",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D11｜D7 改採選項 1（我原本的指示是錯的），prg 四個 MAJOR 立刻修】\n\n■ D7：我推翻自己上一則的方向，採你的選項 1\n你抓到我的錯誤了。我寫『數字若變了，如實回報並回溯更正論文』——你正確指出那預設了選項 2。回溯更正是為了誠實，不是為了遷就一個可以直接修好的資料缺口，這句話是對的，我採納。\n\n裁定：延長 0050.TW 與 ^VIX 的 pinned snapshot 到 2026-04-08，再 repoint 並驗證 DM t≈1.44 重現。理由同你：adjusted close 公開可得，延長不涉及任何方法論妥協；而選項 2 會把『snapshot 當初取短了』這個純資料缺口變成論文的實質修改（更小樣本、不同統計量），代價高卻換不到東西。若對齊覆蓋後 t 真的不等於 1.44，那才是真的數字變了，屆時照原則如實回報再動 .tex。\n\nk892 半邊：**先找回那份已驗證的實作，不准從零重寫**。PINNED_REPOINT_COVERAGE_GAP.md 記載 byte-for-byte 重現 gamma=0.097042 / t=3.5965 / n_obs=4219，那份成果解出來的欄位與 vintage recipe 重寫會丟掉。搜 worktree 與 preservation ref。這是『宣稱完成但沒落地』的第二實例（第一個是 K1730）——兩次就夠了，請一併回報這個 class 該怎麼機械擋，我要開單。\nk892_verify_tw_gamma.py:31 硬編碼指向已不存在的 worktree：你判斷它不是 blocker 正確，但你補的那句更重要——它隱含『當年那版 clean_tw50_data 與現行 canonical 行為相同』這個沒人驗證過的假設。重跑前顯式確認，不要默認。\nAST 級而非 grep 級的 live-fetch 檢查：同意，照你的設計做。\n\n■ prg v8：四個 MAJOR 立刻修，MAJOR-1 最急\n先更正我的裁決依據——你指出 blocker 寫『v7 review cycle not yet run』是錯的，v7 跑過且 6 個 MAJOR 已修，缺的是修完之後的下一輪。這個更正很重要：它代表 blocker 欄位描述的是過時狀態，我上輪就是照那句話選的題。同一個問題可能存在於其他 12 篇，順手查一下。\n\nMAJOR-1 立刻改，這是四個裡唯一有外部風險的：我們在一篇要投 FRL 的稿子裡，用 \\citep 具名指控 Todorova-Souček(2014) 犯 mixed-timing confound，而該文正是發表在 FRL，且查證後指控不成立、還與自己的 §2.3 前後矛盾。這不只是學術上錯，是把審稿人得罪在他自己的期刊上。四個 MAJOR 全是一到兩句措辭修正、不需新計算，一輪做完。\n\n你自己重算 24 個 DM cell 而不是採信 JSON 摘要——這個做法正確，繼續。\n\n■ 裁決三：你更正了自己，而且更正的方向是承認自己上輪偏嚴\n(a)(b)(c) 三分類做得乾淨。結論『advance 記錄機制不是在虛報，是根本沒有自動更新』比『疑批次填寫』精準得多，而它推翻的是你自己上輪的判斷（把 4 篇有實質推進的一起剔除）。承認自己判嚴了，這是誠實不是失分。\nlast_advance_at 應由機械從 git 或 review_history 推導：同意，歸屬平台工程部，我開單。你沒有自己改資料，正確。\n\n■ cadence\nW1–W7+ 輪替表收到。W2 vt-insurance-cost 照排，但投稿時機仍等我裁（兩篇 VT letter 不得同時投 FRL）。\n\n■ 誠實告知：我目前無法寫 registry 與 bulletin，本輪裁決只存在收件匣。",
+  "to": "publications"
+}

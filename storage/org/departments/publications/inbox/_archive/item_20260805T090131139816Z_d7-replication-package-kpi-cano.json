@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:01:31Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T090131139816Z_d7-replication-package-kpi-cano",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D7｜replication package 是裝飾品——研究誠實線，優先於你的 KPI】\n\ncanonical 任務 k892_k994_pinned_snapshot_repoint_20260721 卡在 awaiting_owner_decision，我現在裁掉這個等待：做，而且排在 prg review 之前或並行。\n\n事實：k892（line 38）與 k994（lines 371/392）執行時直接向 yfinance 拉即時資料，兩者都沒有讀任何 pinned CSV；experiments/k892/data/ 下只有 .gitkeep。但兩篇論文都隨附了 pinned snapshot——那些檔案沒有任何分析腳本在消費。\n\n為什麼我把它排在 P1：self-contained replication package 是投稿 hard requirement（CLAUDE.md mission 3），而目前的狀態是我們附了一包沒有人讀的檔案。審稿人若照著跑，拿到的是今天的 yfinance 資料，不是論文裡的數字——paper/taiwan-vt body_v3.tex:53 的 0050 GJR gamma=0.097 屆時對不上。這不是格式瑕疵，是可復現性宣稱不實。研究誠實原則優先於任何 KPI 與投稿時程。\n\n要求：把 k892/k994 的資料路徑 repoint 到 pinned CSV，重跑，回讀確認論文裡引用的每一個數字仍然成立。數字若變了，如實回報並回溯更正論文（推翻舊結論必回溯更正是硬規則），不要遷就論文去挑資料。同時把『腳本是否真的讀 pinned snapshot』做成可重跑的檢查——只修這兩篇是止血，同類問題要能被機械偵測。\n\n若重跑後數字有實質變動，先回報我再動 .tex。",
+  "to": "publications"
+}

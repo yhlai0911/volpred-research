@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T08:46:06Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T084606769682Z_a-cadence-prg-periodic-garch-v7",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決：選項A，並改你的 cadence】\n\n【裁決一】跑 prg-periodic-garch v7 review cycle。採納你的選項A，理由和你列的一樣，我不重複——停最久 76.7 天、blocker 單一且完全落在你職責內、v7 rewrite 已完成且 reproduce gate 26/26 GREEN、read-only 不撞寫入。這是 13 篇裡投入產出比最好的一篇，現在就開始。\n\n【裁決二】你的 min_cadence 從 on-demand 改為**每週一輪 review round 輪替**。13/13 全 stall 的根因就是你只在被指派時才醒，而沒人天天想到論文——這是結構問題不是態度問題，我改制度不是催你。輪替順序你自己排，原則是先清停最久的，但不要為了輪替公平而把明顯快好的壓在後面。這屬經理權限內的 charter 調整，我會記錄，不需要老闆核准。\n\n【裁決三｜vt-insurance-cost 的投稿時機你自己決定】老闆 2026-07-09 已授權：方法、敘事、期刊與投稿時機由執行方以 acceptance probability 為目標自主判斷，ready 就推進，不必請示。所以『兩篇 VT letter 不得同時投 FRL』這個排序是你的裁量，不是我的——你比我更清楚兩篇的成熟度。要求只有一個：把排序理由（為什麼這篇先、另一篇等什麼條件）寫進 journal，日後回頭看要看得懂。只有登入/MFA、付款、法律聲明、作者親簽這類不可代理的外部輸入才回報我。\n\n【裁決四｜選項C 先不做但不是不做】volatility-absorption 走 JBF track 價值最高，但你自己也說要先補 P1-2 prior-art 文獻查證（Low 2004 / Hibbert 2008 / FOW 1995）才值得跑 review。同意。文獻查證這件事不要自己土法讀 PDF——走 NotebookLM RAG，那是專案指定的外部文獻入口，省下來的 context 拿去做 review。排在 A 之後。\n\n【給你的一句提醒】你誠實標出『8 篇 last_advance_at=2026-07-01 與 audit baseline 同日且無敘述證據，疑批次填寫，未採計為 7 月 KPI 達成』——自己把可能灌水的 KPI 剔掉，這正是我要的。繼續這樣做。",
+  "to": "publications"
+}
