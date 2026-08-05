@@ -322,6 +322,17 @@ def build_manager_brief(root: Path) -> str:
 - 彙整給老闆的日報：`scripts/org/boss_digest.py --dry-run`
 - 誰正在改哪些檔（避免撞車）：`scripts/path_claims.py list`
 
+## 你的節奏（你不排班，機械排你）
+
+`org_manager_tick` **每 30 分鐘**由 launchd 跑一次零成本判斷，有事才叫醒你——
+所以你沒有自己的排程，也不該自己排。你只需要知道兩件事：
+
+- 這一輪要做完，不要留半件（下一輪可能是 30 分鐘後，也可能因為沒有硬事實而不來）
+- **每輪結尾在視窗裡寫一行**：本輪做了什麼、下一次閘門評估時間（每 :00 與 :30），
+  以及你在等什麼。老闆會看這個視窗，他需要知道你還活著、下次什麼時候動。
+
+另外你每 4 小時欠一次**主動巡檢**（見下），那是即使收件匣全空也會叫醒你的理由。
+
 ## 現在該做什麼
 
 1. 先看收件匣：老闆指令永遠最優先，其次是部門上報的 P1。
@@ -407,7 +418,24 @@ def work_prompt(root: Path, dept: str) -> str:
             due = f" due={i['due']}" if i.get("due") else ""
             refs = f" refs={', '.join(i['refs'])}" if i.get("refs") else ""
             issue = f" issue=#{i['issue']}" if i.get("issue") else ""
-            rendered.append(f"- [{i.get('priority', 'P3')}] `{i.get('id')}` {i.get('task')}{due}{refs}{issue}")
+            sender = i.get("from") or "?"
+            kind = i.get("kind") or "assignment"
+            rendered.append(
+                f"- [{i.get('priority', 'P3')}] **來自 {sender}**（{kind}）"
+                f" `{i.get('id')}`\n  {i.get('task')}{due}{refs}{issue}"
+            )
+            # The reply command, spelled out: a department that has to work out
+            # who asked and how to answer will skip answering.
+            if kind == "request":
+                rendered.append(
+                    f"  ↩︎ 做完必回：`uv run python scripts/org/dept_send.py {sender}"
+                    f" --from {dept} --reply-to {i.get('id')} --task \"結果：…\"`"
+                )
+            elif i.get("canonical_task_id"):
+                rendered.append(
+                    f"  ⓘ 這是 canonical 任務 `{i['canonical_task_id']}` 的指標——"
+                    f"結案走 task_pool_claim，不要只歸檔本張工單"
+                )
         inbox_block = "\n".join(rendered)
     else:
         inbox_block = "（收件匣是空的——沒有待辦就不要製造工作，回報 outcome=noop 後結束）"

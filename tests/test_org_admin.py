@@ -518,3 +518,100 @@ def test_queue_dispatch_is_idempotent(org_root: Path, tmp_path: Path, monkeypatc
 
     assert result["by_dept"] == {}, "a task already pointed at must not be dispatched twice"
     assert result["already_dispatched"] == 1
+
+
+def test_work_items_carry_their_sender_and_a_reply_command(org_root: Path) -> None:
+    """A department that must work out who asked will simply not answer."""
+    for d in ("research", "content"):
+        assert run_tool("org_admin.py", "create", d, root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "research", "--from", "content",
+                    "--task", "請幫我確認數字", "--no-wake", root=org_root).returncode == 0
+
+    work = _core.work_prompt(org_root, "research")
+
+    assert "來自 content" in work
+    assert "--reply-to" in work and "--from research" in work
+    assert "dept_send.py content" in work, "the reply must be addressed to the asker"
+
+
+def test_canonical_pointers_say_how_to_settle(org_root: Path) -> None:
+    assert run_tool("org_admin.py", "create", "research", root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "research", "--from", "manager", "--task", "【canonical】K1",
+                    "--canonical-task-id", "K1", "--no-wake", root=org_root).returncode == 0
+
+    work = _core.work_prompt(org_root, "research")
+
+    assert "task_pool_claim" in work, "settling only the org item would strand the canonical task"
+    assert "K1" in work
+
+
+def test_manager_knows_its_own_cadence(org_root: Path) -> None:
+    brief = _core.build_manager_brief(org_root)
+
+    assert "每 30 分鐘" in brief
+    assert "你沒有自己的排程" in brief
+    assert "下一次閘門評估時間" in brief, "the boss watches this pane and needs the next tick"
+
+
+def test_idle_department_with_due_work_is_woken(org_root: Path, monkeypatch) -> None:
+    """Depending on the coordinator to nudge turns one missed round into starvation."""
+    tick = _tick()
+    assert run_tool("org_admin.py", "create", "research", root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "research", "--from", "manager", "--task", "做這個",
+                    "--no-wake", root=org_root).returncode == 0
+    _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
+    import subprocess
+    sent = []
+
+    class _Get:
+        returncode = 0
+        stdout = json.dumps({"result": {"agent": {"agent_status": "idle"}}})
+        stderr = ""
+
+    class _Ok:
+        returncode = 0
+        stdout = "{}"
+        stderr = ""
+
+    def _run(cmd, **k):
+        if "prompt" in cmd:
+            sent.append(cmd)
+            return _Ok()
+        return _Get()
+
+    monkeypatch.setattr(subprocess, "run", _run)
+
+    result = tick.wake_departments(org_root)
+
+    assert result[0]["dept"] == "research" and result[0]["woken"] is True
+    assert sent, "an idle department holding due work must actually be prompted"
+
+
+def test_busy_department_is_not_interrupted_by_delivery(org_root: Path, monkeypatch) -> None:
+    tick = _tick()
+    assert run_tool("org_admin.py", "create", "research", root=org_root).returncode == 0
+    assert run_tool("dept_send.py", "research", "--from", "manager", "--task", "做這個",
+                    "--no-wake", root=org_root).returncode == 0
+    _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
+    import subprocess
+
+    class _R:
+        returncode = 0
+        stdout = json.dumps({"result": {"agent": {"agent_status": "working"}}})
+        stderr = ""
+
+    calls = []
+    monkeypatch.setattr(subprocess, "run", lambda cmd, **k: (calls.append(cmd), _R())[1])
+
+    result = tick.wake_departments(org_root)
+
+    assert result[0]["woken"] is False and "不打斷" in result[0]["reason"]
+    assert not any("prompt" in c for c in calls)
+
+
+def test_department_with_an_empty_inbox_is_left_alone(org_root: Path) -> None:
+    tick = _tick()
+    assert run_tool("org_admin.py", "create", "research", root=org_root).returncode == 0
+    _core.write_lease(org_root, "research", {"runner": "herdr", "pane_id": "w1:p9"})
+
+    assert tick.wake_departments(org_root) == [], "no work means no wake, cockpit or not"

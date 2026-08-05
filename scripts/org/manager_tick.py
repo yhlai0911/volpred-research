@@ -49,7 +49,7 @@ def _inbox_items(inbox: Path) -> list[dict]:
     for path in sorted(inbox.glob("*.json")):
         try:
             items.append(json.loads(path.read_text(encoding="utf-8")))
-        except (json.JSONDecodeError, OSError):
+        except (json.JSONDecodeError, OSError):  # silent-ok: malformed items are surfaced by the inbox reader
             items.append({"id": path.name, "corrupt": True})
     return items
 
@@ -151,7 +151,7 @@ def _unanswered_requests(root: Path, registry: dict) -> list[str]:
             for path in folder.glob("*.json"):
                 try:
                     item = json.loads(path.read_text(encoding="utf-8"))
-                except (json.JSONDecodeError, OSError):  # silent-ok: malformed items surface via the inbox reader
+                except (json.JSONDecodeError, OSError):  # silent-ok: malformed items are surfaced by the inbox reader
                     continue
                 if item.get("reply_to"):
                     replied.add(str(item["reply_to"]))
@@ -242,6 +242,54 @@ def _github_dept_labels() -> list[str]:
         return [f"github check unavailable ({type(exc).__name__}) — treated as no-signal"]
 
 
+def wake_departments(root: Path) -> list[dict]:
+    """Deliver: wake any department sitting idle on work it already owns.
+
+    This does not bypass the chain of command — the decision was made when the
+    item was placed in that inbox. A department idling with an assignment is
+    pure waste, and making it depend on the coordinator remembering to nudge it
+    turns one missed round into starvation.
+    """
+    import subprocess
+
+    out: list[dict] = []
+    try:
+        registry = load_registry(root)
+    except FileNotFoundError:
+        return out
+    now = datetime.now(timezone.utc)
+
+    for dept, meta in sorted(registry.get("departments", {}).items()):
+        if meta.get("status") != "active":
+            continue
+        due = [i for i in _inbox_items(dept_dir(root, dept) / "inbox") if _is_due(i, now)]
+        if not due:
+            continue
+        lease = read_lease(root, dept)
+        if not lease or lease.get("runner") != "herdr":
+            out.append({"dept": dept, "woken": False, "reason": "無 cockpit pane（headless 部門執行尚未接線）"})
+            continue
+        try:
+            got = subprocess.run([HERDR, "agent", "get", dept],
+                                 capture_output=True, text=True, timeout=20)
+            status = (json.loads(got.stdout)["result"]["agent"]["agent_status"]
+                      if got.returncode == 0 else None)
+        except (OSError, subprocess.SubprocessError, ValueError, KeyError) as exc:  # silent-ok: not silent — reported in the returned receipt
+            out.append({"dept": dept, "woken": False, "reason": f"狀態讀不到（{type(exc).__name__}）"})
+            continue
+        if status in BUSY_STATES or status is None:
+            out.append({"dept": dept, "woken": False, "reason": f"pane is {status} — 不打斷"})
+            continue
+        text = (f"收件匣有 {len(due)} 件到期工作（最高 {due[0].get('priority', 'P3')}）。"
+                f"依優先序處理，結束前務必執行 Session 收尾契約。")
+        sent = subprocess.run([HERDR, "agent", "prompt", dept, text],
+                              capture_output=True, text=True, timeout=60)
+        out.append({"dept": dept, "woken": sent.returncode == 0,
+                    "reason": f"{len(due)} 件到期" if sent.returncode == 0
+                              else f"prompt 失敗：{sent.stderr.strip()[:60]}"})
+    return out
+
+
 def wake_manager(root: Path, reasons: list[str]) -> dict:
     """Wake the coordinator: prefer its live cockpit pane, else run headless.
 
@@ -313,7 +361,17 @@ def main() -> int:
     if decision["fire"] and not args.shadow:
         result = wake_manager(args.root, decision["reasons"])
         write_receipt(args.root, "manager_wake", result)
-        print(f"[manager_tick] wake: {json.dumps(result, ensure_ascii=False)}")
+        print(f"[manager_tick] wake manager: {json.dumps(result, ensure_ascii=False)}")
+
+    if not args.shadow:
+        # Delivery runs regardless of the manager gate: a department holding due
+        # work must not wait for the coordinator to have a reason of its own.
+        dept_result = wake_departments(args.root)
+        if dept_result:
+            write_receipt(args.root, "dept_wake", {"departments": dept_result})
+            woken = [d["dept"] for d in dept_result if d["woken"]]
+            print(f"[manager_tick] wake depts: 喚醒 {len(woken)}/{len(dept_result)}"
+                  + (f" → {', '.join(woken)}" if woken else ""))
     return 0
 
 
