@@ -1,12 +1,12 @@
 {
-  "last_seen_run_id": 31010965336,
+  "last_seen_run_id": 31014717744,
   "last_seen_conclusion": "cancelled",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-30983363179",
   "last_push_remediation": {
     "attempted": true,
-    "ahead": 1,
-    "head_sha": "b9bb2cb317b3cdf53cb65a5592ad122f03c7134d",
+    "ahead": 2,
+    "head_sha": "c2fde3bae889e9bfc51c9fa6bd8ab0b4690bd605",
     "pushed": true,
     "rc": 0,
     "outcome": "pushed",
@@ -14,36 +14,33 @@
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "31011777502:1",
-    "run_id": 31011777502,
+    "key": "31015132341:1",
+    "run_id": 31015132341,
     "attempt": 1,
     "status": "in_progress",
     "conclusion": "",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31011777502",
-    "head_sha": "b9bb2cb317b3cdf53cb65a5592ad122f03c7134d",
-    "created_at": "2026-08-05T13:45:45Z",
-    "started_at": "2026-08-05T13:45:45Z",
-    "updated_at": "2026-08-05T13:46:07Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31015132341",
+    "head_sha": "c2fde3bae889e9bfc51c9fa6bd8ab0b4690bd605",
+    "created_at": "2026-08-05T14:25:41Z",
+    "started_at": "2026-08-05T14:25:41Z",
+    "updated_at": "2026-08-05T14:26:02Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "31010965336:1",
-    "run_id": 31010965336,
+    "key": "31014717744:1",
+    "run_id": 31014717744,
     "attempt": 1,
     "status": "completed",
     "conclusion": "cancelled",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31010965336",
-    "head_sha": "cea03edd93cdda778cdba4dc24031f039efc2241",
-    "created_at": "2026-08-05T13:35:49Z",
-    "started_at": "2026-08-05T13:35:49Z",
-    "updated_at": "2026-08-05T13:46:05Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31014717744",
+    "head_sha": "c50121f3556b6c693ca7bb2c42bf18bfbbf8ff3b",
+    "created_at": "2026-08-05T14:20:46Z",
+    "started_at": "2026-08-05T14:20:46Z",
+    "updated_at": "2026-08-05T14:25:59Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-05T13:50:34.625760+00:00",
+  "updated_at": "2026-08-05T14:40:38.929397+00:00",
   "processed_run_keys": [
-    "29887298395:1",
-    "29889904641:1",
-    "29892552634:1",
     "29895407001:1",
     "29898634525:1",
     "29902303096:1",
@@ -540,7 +537,10 @@
     "31004128498:1",
     "31008594609:1",
     "31008970747:1",
-    "31010965336:1"
+    "31010965336:1",
+    "31011777502:1",
+    "31013015939:1",
+    "31014717744:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -759,7 +759,7 @@
       "updated_at": "2026-08-05T07:19:19Z",
       "attempt_history_complete": true
     },
-    "root_cause": "2026-08-05T13:30:26.1424661Z E AssertionError: org_manager missing topology",
+    "root_cause": "2026-08-05T14:16:42.1510748Z E AssertionError: CLAUDE.md / AGENTS.md drifted from config/governance_shared.md. Edit the canonical file, then run: uv run python scripts/sync_governance.py --apply",
     "root_cause_status": "complete",
     "failure_run_keys": [
       "30983363179:1",
@@ -773,7 +773,8 @@
       "30999714397:1",
       "31001400879:1",
       "31004128498:1",
-      "31008970747:1"
+      "31008970747:1",
+      "31013015939:1"
     ],
     "repair_task_ids": [
       "ci-red-30983363179"
@@ -810,8 +811,9 @@
         "sent_at": "2026-08-05T08:20:38.806320+00:00"
       }
     },
-    "root_cause_run_key": "31008970747:1",
+    "root_cause_run_key": "31013015939:1",
     "declared_output_paths": [
+      "config/governance_shared.md",
       "scripts/daily_update.py",
       "scripts/dis..._agy.py",
       "scripts/dis..._job.py",
@@ -824,39 +826,38 @@
       "scripts/run_agent_job.py",
       "scripts/scan_trending_agy.py",
       "scripts/sync_cron_wrappers.py",
+      "scripts/sync_governance.py",
       "scripts/tests/test_agentic_cli_timeout_killpg.py",
       "scripts/tests/test_cron_wrapper_manifest.py",
       "scripts/tests/test_git_writer_lock.py",
       "scripts/tests/test_scheduled_writer_commit_policy.py",
       "scripts/token_usage_report.py",
-      "src/volpred/charts/article_charts.py",
-      "src/volpred/evaluation/statistical_tests.py",
       "src/volpred/ops/execution_brief.py",
       "src/volpred/ops/questions.py",
       "src/volpred/publisher/prepublish_audit.py",
       "tests/test_append_work_log.py",
       "tests/test_cpi_t0_official_release_dates.py",
       "tests/test_daily_update_tw_staleness.py",
-      "tests/test_evaluation_metrics.py",
+      "tests/test_governance_sync.py",
       "tests/test_model_router_topology.py",
+      "tests/test_org_routing.py",
       "tests/test_provider_spawn_audit.py",
       "tests/test_refresh_paper_snapshots_concurrent_append.py",
-      "tests/test_rollback.py",
       "tests/test_shared_lock.py",
       "tests/test_write_claim_guard.py"
     ],
-    "declared_output_paths_run_key": "31008970747:1",
+    "declared_output_paths_run_key": "31013015939:1",
     "latest_failure": {
-      "key": "31008970747:1",
-      "run_id": 31008970747,
+      "key": "31013015939:1",
+      "run_id": 31013015939,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31008970747",
-      "head_sha": "44e44f92da2669e8bf4b4bbd8f363c821f59d36e",
-      "created_at": "2026-08-05T13:10:36Z",
-      "started_at": "2026-08-05T13:10:36Z",
-      "updated_at": "2026-08-05T13:30:41Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31013015939",
+      "head_sha": "5e6f97ca4627d1e5e2ebc5df4dee24b55dbbcfe1",
+      "created_at": "2026-08-05T14:00:46Z",
+      "started_at": "2026-08-05T14:00:46Z",
+      "updated_at": "2026-08-05T14:17:00Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
@@ -871,9 +872,10 @@
       "2d83e2c6739817613d34894fd0f48c3be535c055",
       "6b55c9ae52ce37c87f68f36e6a21b2b57ca0f793",
       "34f03c74fbbb494b91bf356c3a07677179160150",
-      "44e44f92da2669e8bf4b4bbd8f363c821f59d36e"
+      "44e44f92da2669e8bf4b4bbd8f363c821f59d36e",
+      "5e6f97ca4627d1e5e2ebc5df4dee24b55dbbcfe1"
     ],
-    "failure_cycles": 12,
+    "failure_cycles": 13,
     "repair_admission": {
       "status": "admitted",
       "task_id": "ci-red-30983363179",
@@ -882,24 +884,24 @@
     "repair_task_statuses": {
       "ci-red-30983363179": "pending"
     },
-    "dispatch_request_count": 37,
-    "last_dispatch_request_at": "2026-08-05T13:45:34.424906+00:00",
+    "dispatch_request_count": 39,
+    "last_dispatch_request_at": "2026-08-05T14:25:29.900729+00:00",
     "push_intent": {
-      "head_sha": "b9bb2cb317b3cdf53cb65a5592ad122f03c7134d",
-      "run_key": "31008970747:1",
-      "recorded_at": "2026-08-05T13:45:34.424906+00:00"
+      "head_sha": "c2fde3bae889e9bfc51c9fa6bd8ab0b4690bd605",
+      "run_key": "31013015939:1",
+      "recorded_at": "2026-08-05T14:25:29.900729+00:00"
     },
     "last_push_remediation": {
       "attempted": true,
-      "ahead": 1,
-      "head_sha": "b9bb2cb317b3cdf53cb65a5592ad122f03c7134d",
+      "ahead": 2,
+      "head_sha": "c2fde3bae889e9bfc51c9fa6bd8ab0b4690bd605",
       "pushed": true,
       "rc": 0,
       "outcome": "pushed",
       "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-08-05T13:45:34.424906+00:00",
-    "last_verified_push_head": "b9bb2cb317b3cdf53cb65a5592ad122f03c7134d",
+    "last_push_remediation_at": "2026-08-05T14:25:29.900729+00:00",
+    "last_verified_push_head": "c2fde3bae889e9bfc51c9fa6bd8ab0b4690bd605",
     "remediation_poll_keys": [
       "2026-08-05T07",
       "2026-08-05T08",
@@ -907,9 +909,10 @@
       "2026-08-05T10",
       "2026-08-05T11",
       "2026-08-05T12",
-      "2026-08-05T13"
+      "2026-08-05T13",
+      "2026-08-05T14"
     ],
-    "remediation_checks": 7,
-    "escalation_reason": "ci_failed_more_than_two_cycles: 12"
+    "remediation_checks": 8,
+    "escalation_reason": "ci_failed_more_than_two_cycles: 13"
   }
 }
