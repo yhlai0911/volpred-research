@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import sys
 import time
@@ -502,6 +503,28 @@ def make_plots(
 # Main
 # ----------------------------------------------------------------------
 
+def _json_safe(value: object) -> object:
+    """Replace non-finite floats with None so the output is standard JSON.
+
+    ``json.dumps`` writes bare ``NaN`` / ``Infinity`` by default. Those are
+    valid Python but not valid JSON, and a strict reader refuses the entire
+    file — one trivial-MCS regime is enough to make every other number in the
+    results unreadable to downstream tooling.
+    """
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {k: _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, np.floating):
+        f = float(value)
+        return f if math.isfinite(f) else None
+    if isinstance(value, np.integer):
+        return int(value)
+    return value
+
+
 def main() -> int:
     started_at = time.time()
     rng = np.random.default_rng(SEED)  # global anchor (not strictly needed)
@@ -635,6 +658,13 @@ def main() -> int:
             "Tie-breaking in 'top-1' uses min mean QLIKE within tied MCS p-values, which biases the winner toward low-mean models; alternative tie-breaks (e.g. mean rank) would shift the timeline marginally.",
         ],
     }
+
+    # Python's json module happily emits bare NaN, which is not JSON. The
+    # repository's strict readers (scripts/reproduce_check.py) reject the file
+    # outright, so a single trivial-MCS regime -- where every p-value is NaN by
+    # design -- was enough to make the whole result unreadable downstream.
+    # Non-finite floats become null, which is what they mean here: no value.
+    out = _json_safe(out)
 
     # Results and reproduce_spec are written together so that code_trace and
     # spec.entrypoint describe the same bytes by construction (K1708 lesson: a
