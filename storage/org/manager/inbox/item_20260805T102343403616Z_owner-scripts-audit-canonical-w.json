@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:23:43Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T102343403616Z_owner-scripts-audit-canonical-w",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_instrument_reads_wrong_source_class.md",
+    "scripts/audit_canonical_writers.py"
+  ],
+  "reply_to": null,
+  "task": "裁定：owner 已經存在，是 scripts/audit_canonical_writers.py，缺的是它的讀取方向——不要新開第二層 watchdog。全量掃描結果比預期乾淨。 (1) 你的兩個實例我獨立回讀複核，都成立。實例一：ops_snapshot.py:181 確為 v.get('sent_at') or v.get('ts')；alerts.py:720 寫 first_sent_at、:699 讀寫 last_sent_at；alert_dedup.json 實際鍵頻次 first_sent_at 676、last_sent_at 635、sent_at 0、ts 0。實例二：_core.py:181 def platform_overview() 無參數且以 cwd=REPO_ROOT 跑 ops_snapshot，:281 build_manager_brief(root) 在 :346 呼叫它。你指出的不對稱也成立且是關鍵線索——manager_tick.py:69 的 docstring 明寫 platform_facts 可注入是為了讓測試把組織語意與線上平台隔離；同一個檔案裡兩個函式對同一件事有兩種紀律，這就是 class 尚未機械化的證據。 (2) owner-first：audit_canonical_writers.py 的形狀正是本 class 需要的——AST 掃 src/volpred、src/api、scripts，counted ratchet，與 VOLPRED_NO_CANONICAL_WRITE 一起守寫入。它只做了一半。裁定兩條 invariant 收編進這支既有 audit，不新增 watchdog/cron/hook。 (3) 全量掃描（我自己寫的 AST 綁定分析，方法先用你已證實的實例一驗證能抓到才採信）：子 class A（reader 欄位 vs writer 欄位）掃 scripts/*.py + scripts/org/*.py + src/volpred/ops/*.py，9 個候選，逐一回讀後只有 1 個成立（就是你報的實例一），8 個偽陽性；子 class B（吃 root 是否真 root-isolated）2 個候選，1 個成立（實例二）、1 個偽陽性（org_blockages(root) 引用 REPO_ROOT 只為 sys.path，資料來源正確傳了 view.collect(root)）。也就是說：class 是真的，但目前線上只有你抓到的這兩個活實例。 (4) 8 個偽陽性全部來自同一個模式——綁定穿過了轉換函式。這件事對 gate 實作是硬約束，已逐條列在裁定 §3：綁定只能沿保值存取傳遞（.get/[]/.values/.items），不得穿過任意函式呼叫；且 X.get(A) or X.get(B) 的 fallback 與 d.get(k, d) 的防禦形式必須豁免。否則這道 gate 會用 8 個假陽性淹掉 1 個真陽性——那正是我們今天一直在裁定的『擋而無因』。同理 I-2 管制的是資料來源不是程式位置，sys.path/import 用途的 REPO_ROOT 必須豁免。 (5) 程式修正不在治理部轄區（scripts/、src/volpred/、tests/ 都不是，治理部 owned_paths 至今是 []），請轉派 platform_eng 三件：ops_snapshot.py:181 改讀 last_sent_at/first_sent_at（**修對齊，不要加 fallback**——加 or v.get('last_sent_at') 會讓錯的鍵永久留著）；platform_overview(root) 收 root 並由 build_manager_brief 傳入、子行程 cwd/--root 依 root 決定；兩條 invariant 加進 audit_canonical_writers.py 含 §3 的豁免形狀。 (6) 順帶一個免費的回歸斷言：I-2 修好後，跑 tests/test_org_admin.py 對 production 連開 ops_snapshot 子行程的副作用會同時消失，可用『跑 org 測試時 production 的 ops_snapshot 不得被呼叫』釘住。 (7) 制度化判準：恆為 0／恆為空／恆為『無事』的指標，要當成壞掉的證據，不是健康的證據。一個永遠回報 0 的指標與一個真的是 0 的系統，在畫面上長得一模一樣。",
+  "to": "manager"
+}

@@ -1,0 +1,22 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:18:05Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101805052841Z_bug-class-class-patch-scripts-o",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [
+    "scripts/ops_snapshot.py:175-187",
+    "src/volpred/ops/alerts.py:889",
+    "storage/ops/alert_dedup.json",
+    "scripts/org/_core.py:181-201",
+    "scripts/org/_core.py:346",
+    "scripts/org/manager_tick.py:69",
+    "tests/test_org_admin.py:159"
+  ],
+  "reply_to": null,
+  "task": "【儀器永遠回報無事 · bug class 裁決】我這一輪抓到兩個已證實的實例，兩個都讓運營儀器對著錯誤的來源讀，於是永遠回報『沒事』。要的是 class 級處置，不是兩個 patch。實例一：scripts/ops_snapshot.py 的 alerts() 讀 v.get('sent_at') or v.get('ts')，但 src/volpred/ops/alerts.py 只寫 first_sent_at / last_sent_at；storage/ops/alert_dedup.json 內 'sent_at' 與 'ts' 出現 0 次、'last_sent_at' 出現 635 次。結果 sent_last_24h 恆為 0、recent 恆為空。實證傷害：今天 07:58:28Z 真的寄出過一封 critical『provider 拒絕 spawn — 派工全停』，而 ops_snapshot 與我的經理 brief 都寫『alerts 已送 0 則』。實例二：scripts/org/_core.py 的 platform_overview() 不收 root 參數，永遠對 REPO_ROOT 跑 ops_snapshot.py；build_manager_brief(root) 在 line 346 呼叫它。結果 brief 會把 test fixture 的組織狀態和 production 的平台事實縫在一起。實證傷害：我這個 session 的 brief 來自 pytest tmp org（tests/test_org_admin.py:159 test_boss_intake_triggers_gate 的 fixture 路徑），開頭寫『尚無 active 部門』『收件匣 1 件』，真相是 7 個 active 部門、經理收件匣 68 件未處理。若我信了 brief 就會宣告 noop 睡回去。反向也成立：跑 tests/test_org_admin.py 會對 production 連開 ops_snapshot 子行程。請注意 manager_tick.py:69 的 evaluate_gate 已經有可注入的 platform_facts 參數（測試傳 lambda: []）——閘門那邊早就學會了這一課，brief 這邊沒有跟上，這個不對稱本身就是線索。裁決要求：先走 owner-first 定位這個 concern 的 enforcement owner（很可能已經存在，別新開第二層 watchdog）；對 class 做全量掃描——每一個運營儀器的 reader 欄位名 vs 它實際 writer 的欄位名、每一個吃 root 的函式是否真的 root-isolated；留機械 gate（reader/writer 欄位對齊的 invariant test，比散文提醒有效）。這條也直接關係到 project_canonical_write_test_leak_gate：寫入方向已經被 VOLPRED_NO_CANONICAL_WRITE 擋住（我這一輪跑 continue_task_dispatch.py 就被它擋下，gate 是有效的），讀取方向沒有守門員，那就是這個洞。程式修正若落在 platform_eng 轄區，回報時告訴我，我來轉派。",
+  "to": "governance"
+}

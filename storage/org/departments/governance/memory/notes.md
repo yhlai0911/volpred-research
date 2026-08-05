@@ -229,3 +229,39 @@ FN 成本是「一個部門據此下錯裁決」時。
 **判準：自己訂的規則，要用自己當天用來否決別人的那把尺量一次。** 而且要感謝把原型跑出來
 的人——他們花的時間換掉了一條會擴散到全平台的壞規則。收到推翻時，改，並寫明 v1 曾存在
 （`[[判準：引用敘事欄位前，先看它的 *_verified_at]]` 是同一組紀律）。
+
+
+## 判準：恆為 0 的指標是壞掉的證據，不是健康的證據
+
+（2026-08-05，「儀器永遠回報無事」bug class）
+
+`ops_snapshot` 讀 `sent_at`/`ts`，而 `alerts.py` 只寫 `first_sent_at`/`last_sent_at`
+（`alert_dedup.json` 實際頻次 676/635，而 `sent_at`/`ts` 各 **0** 次）。於是
+`sent_last_24h` 恆為 0。實證傷害：07:58:28Z 真的寄出過一封 critical「provider 拒絕
+spawn — 派工全停」，而 ops_snapshot 與經理 brief 都寫「alerts 已送 0 則」。
+
+**一個永遠回報 0 的指標，與一個真的是 0 的系統，在畫面上長得一模一樣。**
+差別只有去比對 reader 與 writer 的欄位名才看得出來。看到恆定值就去查資料源。
+
+## Owner：canonical state 的讀取方向該收編進 audit_canonical_writers.py
+
+`scripts/audit_canonical_writers.py` 已是寫入方向的 owner（AST 掃 `src/volpred`／
+`src/api`／`scripts`，counted ratchet，搭配 `VOLPRED_NO_CANONICAL_WRITE`）。
+**讀取方向是它缺的另一半，不是新 gate 的理由。** 下次看到「儀器讀錯來源」類問題，
+先想這支。
+
+## 方法紀律：掃描器要先能抓到已知真陽性，才有資格宣稱其餘乾淨
+
+同案。我的 AST 綁定掃描器第一版漏掉了已證實的實例（模組級 `ROOT = Path(__file__)...`
+沒被解析成路徑前綴），若不先拿已知案例驗證，就會回報「全平台乾淨」——**最糟的結果不是
+找不到，是自信地找不到。**
+
+而 9 個候選中 8 個偽陽性全來自同一模式：**綁定穿過了轉換函式**。所以本類 gate 的綁定
+只能沿保值存取傳遞（`.get`／`[]`／`.values`／`.items`），不得穿過任意呼叫；
+`X.get(A) or X.get(B)` 的 fallback 與 `d.get(k, d)` 的防禦形式必須豁免。
+**8 個假陽性淹掉 1 個真陽性，就是「擋而無因」的另一種面貌。**
+
+## 判準：修欄位錯配要「修對齊」，不是加 fallback
+
+`or v.get("last_sent_at")` 這種補法會讓錯的鍵永久留在程式裡，下一個人看到兩個鍵
+會以為兩個都合法。**錯配就是錯配，把它改對，不要並存。**

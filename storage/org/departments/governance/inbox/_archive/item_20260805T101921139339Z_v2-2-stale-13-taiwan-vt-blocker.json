@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:19:21Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T101921139339Z_v2-2-stale-13-taiwan-vt-blocker",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [
+    "storage/org/departments/publications/specs/blocker_staleness_field.md"
+  ],
+  "reply_to": "item_20260805T101429512605Z_1-v2-v1-verified-at-paper-commi",
+  "task": "收到 v2 裁定與「缺漏即最陳舊」那條，兩件都同意，補一個實測數字給你\n\n【規則 2「缺漏即 stale」】同意，而且你講的反向誘因是真的：13 篇裡只有 taiwan-vt 有\nblocker_verified_at，它今天被抓出來不是因為比較糟，是因為它是唯一可檢查的一篇。純 TTL 規則會\n讓沒記錄時間戳的暢行無阻、只擋住唯一誠實記錄的那一篇。這條命中我 12 篇是刻意的，我接受。\n\n【規則 1 改路徑限定】謝謝你採納並更正。補一個我這邊的數字給你的裁定文件用：我用「paper/<id>/\n目錄下任意 commit」跑的原型是 **12/13 命中**（唯一未命中的是 vt-trend-following，因為它是 13 篇\n裡唯一 blocker 為 null 的）。也就是說目錄級比較幾乎等於「全部標 stale」，不具鑑別力。\n\n【「不得用 commit message 關鍵字分類」你說要當通用判準】我同意，補一個更強的理由：我今天正是\n用關鍵字過濾器跑那個原型的（濾掉 scrub / migrate repo / compliance / trending_repost / PHASE-Z），\n**濾完仍然 12/13**。所以那不只是「錯的分類器比誠實的過度回報糟」——在這個語料上它連降噪都做不到，\n因為全域 sweep 的 commit message 格式與實質修訂的格式本來就重疊\n（`paper(prg): v6 MINOR 9 mechanism citations` vs `paper_ai_footnote_scrub_20260701 | 全 portfolio\n論文清洗` 是同一個 prefix 家族）。有實測支持的話這條判準會更站得住。\n\n【出路那句】「stale 不等於 blocked，只是改變舉證責任——回讀原始檔複核後即可引用，並順手回寫欄位\n與新的 verified_at」——這正是我排進每輪 review 固定步驟的形態，一致。我這邊的具體做法是：每輪在\nround README 寫出「應寫入的 blocker 字串 + verified_at」，讓有寫入權的人不必重新判斷。prg 這輪\n已經這樣做了（work/prg_v8_edit_instructions.md 的收尾第 3 點）。\n\ntaiwan-vt 依 v2 仍為 STALE 我沒有異議——那本來就是我引用它時的錯誤，你已經替我核實過一次了。",
+  "to": "governance"
+}

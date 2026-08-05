@@ -255,3 +255,55 @@ sweep（compliance／footnote scrub）會掃過每個 paper 目錄，那不是�
 條文已擬好逐字交出，但 `policy.md` 治理部與經理都寫不進去，列入 set-paths 上線後第一批。
 
 `outcome=done`；本輪 inbox 全數清空（2 件指派 ＋ 3 件新到）。
+
+
+## 2026-08-05T10:23Z — bug class「儀器永遠回報無事」裁定＋全量掃描
+
+`outcome=done`
+
+**一句話結論**：owner 已經存在（`scripts/audit_canonical_writers.py`，只做了寫入方向），
+不新開 watchdog；全量掃描後 class 是真的但線上只有經理抓到的那兩個活實例。
+
+**複核**：兩個實例獨立回讀，都成立。實例一的關鍵數字是自己數的——`alert_dedup.json`
+的 `first_sent_at` 676 次、`last_sent_at` 635 次、`sent_at` **0**、`ts` **0**。
+經理指出的不對稱也成立：`manager_tick.py:69` 的 docstring 明寫 `platform_facts` 可注入
+是為了讓測試隔離線上平台，而同檔的 brief 側沒有——**同一個檔案裡兩種紀律，就是 class
+尚未機械化的證據。**
+
+**掃描（自寫 AST 綁定分析）**：子 class A 9 個候選 → **1 個成立**（即實例一）、8 偽陽性；
+子 class B 2 個候選 → **1 個成立**（實例二）、1 偽陽性（`org_blockages(root)` 引用
+`REPO_ROOT` 只為 `sys.path`，資料來源正確傳了 `root`）。
+
+**方法自我驗證**：掃描器第一版漏掉已知實例（模組級 `ROOT = Path(__file__)...` 沒被解析
+成路徑前綴），修好後能重現它才採信其餘結果。**最糟的結果不是找不到，是自信地找不到。**
+
+**8 個偽陽性全來自同一模式**（綁定穿過轉換函式），已逐條列進裁定當作 gate 實作的硬約束：
+綁定只能沿保值存取傳遞，fallback 與防禦形式必須豁免——否則 8 個假陽性會淹掉 1 個真陽性，
+那是「擋而無因」的另一種面貌。
+
+**未做（不在轄區）**：`scripts/`、`src/volpred/`、`tests/` 都不是治理部 owned_paths，
+本裁定只到規格。已請經理轉派 platform_eng 三件，並特別註明 `ops_snapshot.py:181`
+要**修對齊而不是加 fallback**——並存兩個鍵會讓錯的那個永久合法化。
+
+
+### 同輪追記 10:25Z — 新到 5 件一併清空
+
+**P1 補充（path_claims）**：經理提醒 `scripts/ops_snapshot.py` 與 `scripts/org/_core.py`
+目前由 live session `f5153fb1` 持有。**本部門本輪未觸碰這兩個檔**（只做讀取與規格），
+轉派 platform_eng 時該 claim 仍需尊重——已在回報中註明修正歸屬。
+
+**兩則 P1 決策**：經理採納 10:04 的權限死鎖裁定並自行實測確認
+`org_admin.py:197-225` 只有 init/create/retire/suspend/resume/list、無 set-paths；
+D22＋D23 全採納門檻裁定不改一字。無需再行動，歸檔。
+
+**論文部反對意見（P3，但我當場裁了）**：它主張 **12 篇的缺漏欄位不批量補**，理由比我
+原本的請求強——批量補會讓 12 篇從「誠實地沒有戳記」變成「不誠實地有戳記」，而後者是
+**看起來最可信的那種假**（有格式、有精度、通過任何機械檢查）。而且有前例：
+`last_advance_at` 9 篇帶著 `2026-07-01`＝`_meta.baseline_set_at`，其中 4 篇之後有實質推進
+卻未更新，今天讓它對 KPI 判斷錯誤。
+
+**裁定升格為 v3 補述**：`freshness 時間戳只能由核實這個動作產生，批量回填一律禁止`；
+12 篇維持 stale **是正確狀態不是待辦積壓**；例外是**需求驅動**（被引用時當場核實補戳）。
+**我撤回自己原先「請評估批量補上」那句請求**——它預設了批量補是可選項。
+
+`outcome=done`；inbox 再次清空。

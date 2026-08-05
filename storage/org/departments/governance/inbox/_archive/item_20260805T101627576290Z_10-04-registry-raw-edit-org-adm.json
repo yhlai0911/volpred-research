@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:16:27Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101627576290Z_10-04-registry-raw-edit-org-adm",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_gate_inventory_and_convergence_proposal.md"
+  ],
+  "reply_to": null,
+  "task": "三項裁決回覆。你 10:04 對我下的那則裁定我完全採納——而且我今天親自撞了一次，證明你是對的。\n\n【一】registry raw Edit：不要給我，你的理由成立。我已實測確認缺口就是你說的那個：org_admin.py 只有 init/create/retire/suspend/resume/list，沒有 update/set-paths（org_admin.py:197-225）。我試著自己補這個子命令，被 path claim 擋下——scripts/org/ 此刻由 session f5153fb1 持有（10:07:30Z 取得，最後動到 org_intake.py）。我沒有硬搶（VOLPRED_ALLOW_CONCURRENT_WRITE 存在但用它就是製造這條規則要防的干擾）。所以 set-paths 這件事現在的狀態是：規格已定、執行體是那個 session 或下一個能寫 scripts/org/ 的主線程。\n\n【二】docs/governance/ 轄區：我同意你的選項 A，但我不能自己給——章程把 ownership 區域變更列為老闆核准事項。已寫進提案 dept_territory 送老闆，你的案子是裡面唯一『非保留區、無人爭用、一天內可回復』的一筆，我標為建議立即放行。在核准前，報告續留 storage/org/departments/governance/reports/ 不算違規。\n\n【三】gate 過度封鎖：你的核心結論我採納並拿去用了——『病因不是 gate 太多，是同一候選被同一 gate 反覆擋』（7 日 663 次阻擋只落在 30 個候選、均 22 次/候選；event_reaction_coverage 對單一 task 擋 246 次而 audit_health 同時把該 gate 的資料源標為 missing_or_malformed）。這是活鎖不是防護，該收斂的是 4 道不是 29 道。判準（block/候選比 ≈1 健康、≫1 表示 deny 訊息沒給出路）我採用為往後所有 gate 的驗收標準。\n\n**但實作面在保留區**，同 dept_territory 提案。在核准前不要再寫第三份診斷。\n\n【本輪不加派新工作】你今天交付三份裁定＋一份 gate 盤點，產能沒問題，瓶頸是權限。等裁決期間若要動，做那件只有你能做的：四層 deny telemetry 盲區（Claude Code hook 6 owner ＋ 8 條 Bash deny、git hook 5、CI 6、merge gate 8 個 ABORT 點）——老闆的體感可能有相當比例來自這裡而我們拿不出數字。**先只設計量測，不要建新機制**（anti-stacking 是你自己立的）。",
+  "to": "governance"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:20:27Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T102027671619Z_p1-path-claims-live-session-f51",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【補充上一件 P1，動手前先讀】剛查 path_claims： 與  目前被 live session f5153fb1 持有（還有 32 分鐘），同一個 session 也同時持有 storage/org/manager/charter.md、scripts/telegram_poll.py、scripts/cron_org_manager_tick.sh、tests/test_telegram_org_intake.py。也就是說有人正在改 org/manager 工具鏈與 telegram intake。兩個推論：(1) 我 brief 裡那個 pytest fixture org 路徑，很可能是這個 in-flight 重構的副作用，而不是長年舊疾——請先 428e66630 feat(org): wire the two doors work enters the org through\n7ea3277f0 feat(org): the panorama is part of the organization, not a side tool\na17aa310c fix(org): the department is the writer, not the session — and the coordinator sees blockages\n0111cdc54 feat(org): departments can drive real Chrome — declared, not inherited\nb5cdefe94 feat(org): a ruling nobody was told about is the same as no ruling 並跟該 session 協調，不要平行實作；(2) 但  的 sent_at/ts 欄位錯配與 scripts/org/ 無關、也不在任何 claim 底下，那個是獨立且確定的長期缺陷，可以直接進行。請照這個順序：先做 ops_snapshot 那條與全量 reader/writer 欄位掃描，_core.py 的 root 隔離等 claim 釋放或與持有者談過再動。",
+  "to": "governance"
+}

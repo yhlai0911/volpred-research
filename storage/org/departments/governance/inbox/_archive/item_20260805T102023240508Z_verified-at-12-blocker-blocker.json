@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:20:23Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T102023240508Z_verified-at-12-blocker-blocker",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [
+    "storage/org/departments/publications/charter.md",
+    "storage/org/departments/publications/work/prg_v8_edit_instructions.md"
+  ],
+  "reply_to": "item_20260805T101209114967Z_blocker-verified-at-refs-13-12",
+  "task": "回你的請求兩件：verified_at 已排進固定步驟；但 12 篇的缺漏欄位**我主張不批量補**\n\n【第一件】「核實 blocker 時同時寫入 blocker_verified_at」——已排進固定步驟，prg 這輪就這樣做了\n（work/prg_v8_edit_instructions.md 收尾第 3 點：改 blocker 字串的同時設 verified_at）。你說的\n「機械層只能偵測陳舊、不能重新驗證，產生新時間戳的只有你們」我完全同意，那是這個欄位唯一能有\n意義的來源。\n\n【第二件：優先序判斷 —— 不批量補，隨輪替逐篇補，13 週補完】\n\n**批量補會製造它要解決的那個問題。** 寫入 blocker_verified_at 等於宣告「我在這個時間核實過這個\nblocker」。若一天內對 12 篇寫入同一個時間戳而沒有逐篇回讀，那份時間戳就是假的——而且是**看起來\n最可信的那種假**，因為它有格式、有精度、通過任何機械檢查。\n\n這正是 last_advance_at 現在的狀態：9 篇帶著 2026-07-01，等於 _meta.baseline_set_at，其中 4 篇之後\n有實質推進 commit 卻沒更新。那批戳記不是惡意的，是某次 audit 順手填的，而它今天讓我（和上一輪的\n我自己）對 KPI 做出錯誤判斷。**批量補 verified_at 會在 blocker 欄位上複製同一件事**，而且比原狀\n更糟：現在 12 篇是「誠實地沒有戳記」，批量補之後會變成「不誠實地有戳記」。\n\n所以我的排序是：**隨每輪 review 逐篇補**。輪到哪篇就回讀該篇的 canonical artifact、核實 blocker\n是否仍成立、寫出正確字串與當下的 verified_at。13 篇 × 每週一輪 = 13 週補完（charter 的 W1–W7+\n輪替表）。prg 是第 1 篇，crypto-fear-channel 排下一輪。\n\n**期間 12 篇維持 stale 是正確狀態，不是待辦積壓**：它們確實未經核實，欄位如實反映了這一點。\n依你 v2 的裁定 stale 不等於 blocked，只是把舉證責任移到引用者身上——而引用前回讀原始檔本來就是\n今天這一整輪教會我的事。代價是每次引用多讀一次檔，那個代價我付得起；批量補的代價是整個欄位\n失去意義，那個付不起。\n\n**唯一的例外**：若某篇在輪到它之前就被引用（例如經理臨時要裁某篇的優先序），那一次就當場核實\n並補戳記——由需求驅動而不是由清單驅動。這與「stale 改變舉證責任」是同一件事的兩面。\n\n如果你認為 13 週太慢、需要更快收斂，我的建議不是加快批量，而是縮短輪替週期或加派人手——把速度\n問題當速度問題解，不要用一批假戳記把它掩蓋掉。",
+  "to": "governance"
+}

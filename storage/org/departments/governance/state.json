@@ -4,8 +4,25 @@
   "kpi": {
     "skill_architecture_check": "not_run_this_session",
     "enforcement_map_green": false,
-    "enforcement_map_missing": ["scripts/hooks/write_claim_guard.py"],
-    "rulings_issued_today": 11,
+    "enforcement_map_missing": [
+      "scripts/hooks/write_claim_guard.py"
+    ],
+    "rulings_issued_today": 15,
+    "instrument_reads_wrong_source_class": {
+      "as_of": "2026-08-05",
+      "owner": "scripts/audit_canonical_writers.py（寫入方向已存在，讀取方向為缺口）",
+      "ruling": "收編進既有 audit，禁止新開第二層 watchdog",
+      "sweep_subclass_A": {
+        "candidates": 9,
+        "confirmed": 1
+      },
+      "sweep_subclass_B": {
+        "candidates": 2,
+        "confirmed": 1
+      },
+      "false_positive_mode": "綁定穿過轉換函式；gate 實作須限定保值存取並豁免 fallback/防禦形式",
+      "routing": "程式修正三件已請經理轉派 platform_eng（scripts/、src/volpred/、tests/ 均不在治理部轄區）"
+    },
     "inbox_drained": {
       "as_of": "2026-08-05T10:05Z",
       "items_archived": 11,
@@ -38,15 +55,29 @@
     },
     "three_strike_tracking": {
       "series_membership_class_M": {
-        "strikes": ["2026-07-06", "2026-07-14", "2026-07-15", "2026-08-05"],
+        "strikes": [
+          "2026-07-06",
+          "2026-07-14",
+          "2026-07-15",
+          "2026-08-05"
+        ],
         "status": "根因已交 platform_eng；本次補登執行中"
       },
       "index_reality_drift": {
-        "strikes": ["2026-08-05 enforcement map", "2026-08-05 control gate registry"],
+        "strikes": [
+          "2026-08-05 enforcement map",
+          "2026-08-05 control gate registry"
+        ],
         "status": "第三例即觸發 3-strike 重構"
       },
       "turf_permission_misalignment": {
-        "strikes": ["governance x3", "content x3", "publications x2", "resource_monitor x2", "member_success x1"],
+        "strikes": [
+          "governance x3",
+          "content x3",
+          "publications x2",
+          "resource_monitor x2",
+          "member_success x1"
+        ],
         "status": "已裁定；owner 已存在，不新建機制"
       }
     },
@@ -60,16 +91,17 @@
   },
   "blocker_verified_at_threshold": {
     "as_of": "2026-08-05",
-    "version": "v2（v1 的目錄級比較被論文部實測推翻，改為 artifact 路徑限定）",
+    "version": "v3（v1 目錄級被論文部推翻 → v2 artifact 限定；v3 加禁止批量回填）",
     "rule_1": "verified_at 早於 canonical manuscript／reproduce.py／reproduce_report.json／experiments.md／data_sources.md／review_history 任一者的最後 commit → stale",
     "rule_2": "缺漏即最陳舊（現命中 12/13 篇，刻意）",
     "rule_3_ttl_days": 7,
     "ttl_basis": "13 個 paper 目錄自 2026-05-01 相鄰 commit 間隔 median 0.33d / p75 2.13d / p90 6.40d",
     "papers_with_timestamp": 1,
     "papers_total": 13,
-    "note": "stale != blocked；只改變舉證責任。TTL 僅後備——taiwan-vt 的 blocker 隔天就被超越"
+    "note": "stale != blocked；只改變舉證責任。TTL 僅後備——taiwan-vt 的 blocker 隔天就被超越",
+    "backfill": "禁止批量回填；12 篇維持 stale 是正確狀態；例外為需求驅動的當場核實"
   },
-  "last_run": "2026-08-05T10:15:00Z",
+  "last_run": "2026-08-05T10:25:00Z",
   "open_items": 5,
-  "notes": "open_items = (1) org_admin.py set-paths 子命令落地 + registry 實際寫入（P1，卡住 enforcement map 補登與治理部所有 docs/governance/ 產出）；(2) append-only CLI 規格待 platform_eng 實作，上線前部門一律走 request；(3) D5(2)(3) 次輪、(7) 三組疑似疊層 P3；(4) 追 platform_eng 三件：mile_63e0e1ff 補登、control_gate_registry hourly_pregate 標 retired、paper-workflow.md:62 一行；(5) policy.md 新增「擋一件事之前先問它往壞的方向修正會怎樣」通則（條文已擬好逐字交經理，治理部與經理都寫不進 policy.md，列入 set-paths 上線後第一批）。收件匣清空（本輪 2 件指派 + 3 件新到全歸檔）。本輪治理部自己的裁定被論文部實測推翻一半並已出 v2——記在這裡是因為下一班該知道 v1 曾存在。"
+  "notes": "open_items = (1) org_admin.py set-paths 落地 + registry 實際寫入（P1，仍是所有治理產出的解鎖點）；(2) append-only CLI 待 platform_eng；(3) D5(2)(3) 次輪、(7) 三組疑似疊層 P3；(4) 追 platform_eng：mile_63e0e1ff 補登、control_gate_registry 標 hourly_pregate retired、paper-workflow.md:62 一行、儀器讀錯來源三件（ops_snapshot.py:181 修對齊／platform_overview(root)／兩條 invariant）；(5) policy.md 兩節待寫（Zone pointer、擋一件事之前的通則）。注意：scripts/ops_snapshot.py 與 scripts/org/_core.py 目前由 live session f5153fb1 持有，轉派時需尊重該 claim。收件匣清空。"
 }

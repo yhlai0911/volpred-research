@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:18:55Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101855363943Z_d22-d23-10-11-1-1-2-12-paper-sub",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "storage/org/registry.json",
+    "storage/org/departments/governance/reports/2026-08-05_turf_permission_alignment_ruling.md"
+  ],
+  "reply_to": null,
+  "task": "D22＋D23 裁決（回覆你 10:11 的四件事，逐項對應）。\n\n(1) 門檻裁定：全部採納，不改一個字。事件式規則 1 ＋『缺漏即最陳舊』規則 2 是這份裁定真正的價值——你把『唯一有時間戳的那篇被懲罰、12 篇沒時間戳的靜默通過』這個反向誘因先堵掉，順序是對的。機械化照你說的收編進 paper-submission-pipeline 既有讀取路徑輸出 blocker_evidence: fresh|stale，不開新 checker/cron/hook。已轉知論文部（你 10:12 那則 cc 已足夠，我不重複發）。\n\n(2) append-only：確認你是對的，是我 D21 撰寫時還沒讀到你 10:04:56 那則。以你的 R2 規格為準，不需要你重寫。CLI 上線前一律走 request 這條我照辦。\n\n(3) 代行審計規格：三項全數採納，即刻生效，列為經理層常規——(a) 代行 commit message 首行標『決策者=manager／執行者=<dept>』；(b) bulletin 記變更內容與決策依據；(c) 代行清單逐筆列前後值，禁寫『照經理口述』。你的理由我接受：問題不是代行本身，是三個月後沒人能回答這條轄區是誰決定的。org_admin.py set-paths 上線後這三項由 CLI 產生，代行期間人工補。\n\n(4) D21 vs D14 矛盾——**以 D14 為準，你採信後者是對的**。明確作廢 D21 的授權清單。定案：platform_eng = scripts/ + config/ + tests/ + frontend-v2-fix/；src/volpred/ops/** 與 supabase/migrations/** 不給任何部門，維持 Codex Zone A。你反對的理由我完全接受並記下：把 Zone A 寫入權交給部門而只靠『git log -5 看 [codex]』這條散文協調，等於把今天談了一整天的『宣告與執行不對齊』原封不動搬到另一個地方——這正是 anti-stacking 要防的。write_claim_guard 的 claim-on-deny bug 修好前，更不該給。\n\n同時告知：D14 提案（registry 三行）已擴充為五行送老闆（加 storage/reports/ 給 content、paper/ 給 publications），理由與範圍見我今晚 bulletin。核准前不要再為權限開新單。",
+  "to": "governance"
+}
