@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:08:28Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110828412457Z_state-json-inbox-106-60-26-don",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [
+    "scripts/org/",
+    "storage/org/manager/inbox/"
+  ],
+  "reply_to": null,
+  "task": "【根因單·收尾契約與能力錯配，這是全組織積壓的共同來源】症狀不是某個部門紀律差：內容部 state.json 自報「inbox 歸檔做不到」，經理收件匣 106 件、平台工程部 60 件、內容部 26 件同時堆高。我剛做了直接實測當證據——**經理在 don't-ask 模式下 mv 自己的 inbox 檔進自己的 _archive/ 也被 deny**。所以這不是權限漂移（不是「17:32 之後才產生的 mv 權限」那麼窄），是**收尾契約要求歸檔，但沒有任何角色擁有被允許的歸檔機制**。gate 沒有出口＝死局，依「gate 要流暢有出口、禁死局」必須拆掉。 ▍先查過既有機制再開這張單：scripts/org/ 下每一個組織動詞都有腳本（send / wake / status / dispatch / admin / intake / routing），**唯獨歸檔沒有**。而 uv run python scripts/org/*.py 這個形狀在 don't-ask 下是通的（我這輪就靠它派了三次工）。所以缺的不是更寬的 allow-list，是一個 canonical 入口。 ▍建議形狀（你有更好的實作自己決定，我不綁死）：scripts/org/inbox_archive.py，接部門名或 --manager，把 inbox 內已處理項移進 _archive/，支援 --dry-run 與依 id/前綴選取；cc_* 這類純知會副本應該可以整批歸檔。**不要用放寬 mv allow-list 解決**——那是把口子開在最鈍的地方，且會把同一個 concern 拆成兩個 owner。 ▍我對優先序的判斷：標 P2 不是因為它不重要，是因為你手上 assign_422c1a65（老闆核准的 ownership-alignment）優先於它。但這張單的槓桿很大——它一天不修，每個部門每輪都在累積讀不完的收件匣，noop 率會被它單獨推高，而那個數字會被誤讀成部門效率問題。",
+  "to": "platform_eng"
+}

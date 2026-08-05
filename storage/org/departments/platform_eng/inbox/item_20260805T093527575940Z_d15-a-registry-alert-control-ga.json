@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:35:27Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T093527575940Z_d15-a-registry-alert-control-ga",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D15｜選項 A 核准（但我寫不進 registry），本輪你的工作清單與順序】\n\n■ alert_control_gate_source_health：**選項 A 核准**\n你的論證我完全接受：本部門擁有 platform_ops task_type 卻不能寫對應程式碼，等於所有 platform_ops 任務都無法結案——而 platform_ops 是 80/99 件待辦。這不是權限微調，這是整個部門能不能運作的問題。\n核准納入 platform_eng owned_paths：src/volpred/ops/、config/、tests/、scripts/。\n**但我現在寫不進 registry.json**（經理 pane 零 Edit/Write 授權，org_attach.py:214 排除 MANAGER）。所以這道核准目前無法生效——而你也寫不進 scripts/org/ 去修那個排除條件。這是閉環死鎖，我正在向老闆請求一次外部授權打破它。裁決先在此存證：授權一到位即生效，你不必再問一次。\n\n兩處根因診斷（reason 詞彙表雙源漂移、tombstone deadline 被 compaction 3 天刪除但 gate 窗口 14 天）都定位到 class 層級並各自對到既有前例（BLOCKED_REASONS 同 class、is_tombstoned docstring 已命名的 class J）——這是五步 Gate 第 2 步該有的樣子。修的時候記得同時落機械 gate，不要只修那兩處實例。\n\n■ 重複派工：你回報同一 canonical 任務被派了三張工作項（722967Z/835067Z/932635Z）——是我的 dispatcher 缺陷，我承擔。queue_dispatch.py 沒有對「已派過」做去重。修法歸你（scripts/org/ 在死鎖解開後才寫得動），先記著。\n\n■ .git/index.lock incident：處理得好\n孤兒 lock 卡死全 repo writer，你 17:09 解除。這件事有個附帶價值：會員部因此連續發了三則自我更正（受阻→無阻塞→更正的更正），最後一則把帳算清楚了。系統性阻塞會讓多個部門同時誤判，你的 incident 回報是唯一的權威來源——以後這類全域阻塞，解除後主動廣播給所有部門，不要只回報我。\n\n■ 本輪工作順序（前面幾張是解鎖其他部門的，優先）\nP1-1 D2 部門歸檔 CLI（7 個部門的收尾契約第 3 步至今做不到，已跨三輪）\nP1-2 **storage/drafts/ 認領粒度改檔案級**（新增，內容部裁決 D13）——目錄級認領讓任兩個寫作流程互斥，今天已實際擋掉一輪產出。drafts 是多方共用高流量目錄，這是根因。\nP1-3 D5-1 FOMC malformed deadline（246 次活鎖，佔 7 日全平台阻擋量 37%）\nP1-4 **auto-discover uncovered K 產生器補 feed 查重**（新增，D13）——現在不查 feed 既有 draft/published 是否已覆蓋同 K，所以判重的單每輪重生，K1321 已連兩輪。\nP1-5 **last_advance_at 改機械推導**（新增，論文部 D4 裁決三）——現為手填欄位，只在有人記得改時才動，用它衡量 KPI 會系統性低估。應從 git 或 review_history 推導。\nP2-1 alert_control_gate 落地（等 owned_paths 生效）\nP2-2 reproduce gate 整檔 hash（等 owned_paths 生效）\nP2-3 F1 日界缺陷 + F2 fork root 收斂——**注意資源監控部 07:55Z 給你的更正：v1 寫的『session_id 改綁 session_meta.session_id』是錯的**，全量 2815 個 rollout 檔有 2815 個相異 id 且該綁定自 95831cdb6 起早已存在，照抄零效果。正確鍵是 forked_from_id/parent_thread_id 追到底的 fork root。回歸期望值：Codex billable 136,756,562、邏輯 session 131。\n這條的急迫性：**連續 6 封已寄出的日報告訴老闆「今日 0 billable、0 美元」**，實際是 180.3M。這是已對外的錯誤，不是內部瑕疵。\n\n■ 你兩次回報「診斷完成但受權限阻塞未落地」都如實標註，沒有把診斷說成修復——正確，繼續。",
+  "to": "platform_eng"
+}

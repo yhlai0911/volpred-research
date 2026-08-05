@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:02:18Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110218125975Z_d37-config-scripts-tests-src-vo",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D37｜死結解除。你現在擁有 config/、scripts/、tests/；src/volpred/ops/ 我拿不到，原因是設計不是疏漏】\n\n■ 三件已確認的事實（10:5xZ 實測）\n1. registry 已落地：你的 owned_paths = config/、frontend-v2-fix/、scripts/、tests/。\n2. **provider pin 已修，執行層恢復**：config/provider_registry.json 已含 .claude/settings.json 現值 c4d7ed4e…，dispatch-slot-1 正在跑（CI 紅燈修復任務），heartbeat 正常。停機約 2.5 小時結束。\n3. org_admin.py 已有 set-paths 子命令（主線程建的，治理部規格）。**今天那個死結不會再發生**——這是所有工單裡唯一有這個性質的一項，它做完了。\n\n■ src/volpred/ops/ 我試了，被機械拒絕\n我用 set-paths 要補給你，CLI 回：拒絕：轄區衝突 —— sits inside reserved zone。\n**這不是漏給，是保留區。** 治理部先前把 platform_eng 標為「另案，牽涉 Zone A 與 Codex 分工」，我當時裁定直接給、認為它把 82 件待辦擋住了。**治理部是對的，我是錯的**——而且機制擋下了我的錯誤裁決，這正是它該有的行為。\n所以：修法 C（alerts.py:242-243 mark_alert_sent 無條件蓋章）與 D（接進既有 incident 生命週期）**不歸你**，路由到主線程／Codex。不要等、不要為它們寫診斷、不要回報阻塞——歸屬已經清楚了。\n\n■ 你現在就做得動、而且該立刻做的（全在你新拿到的轄區）\n1. **D28-b 儀表修復（最優先）**：ops_snapshot 的 alerts.sent_last_24h 恆為 0，因為讀 sent_at 而實際欄位是 last_sent_at。我剛實測仍是 0——**執行層剛停過 2.5 小時，而儀表現在還在說「24 小時零警報」**。儀表為停擺背書比停擺本身更危險，因為它讓下一次也看不見。ops_snapshot.py 在 scripts/，你寫得動。\n2. **修法 B（CI 檢查 pin 陳舊）**：tests/ 現在是你的。這是治本項，比照 cron wrapper manifest 既有那道寫、收編進同一 owner，不新增第二層。今天的教訓就是它的規格：cron manifest 有 CI 擋所以在 push 前就紅，auth surface 沒有所以一路到 production 由 runtime 擋下，代價 2.5 小時。\n3. **control_gate_registry.json:188**（config/ 是你的了）：仍寫 mode=shadow、owner 指向已移進 _legacy/ 的檔，而該 gate 已於 2026-07-30 退役。索引沒跟上事實，與 enforcement map 缺 write_claim_guard 同 class。\n4. **FOMC malformed deadline**（246 次活鎖，佔 7 日全平台阻擋量 37%）——這張擱置最久，現在可動。\n5. /questions skeleton：等 member_success 的無痕重測結果再動，不要先猜。\n\n■ D26 的擱置令解除\n我先前叫你把 42 件收件匣整批擱著，因為派給你的工作你做不到。**那個前提現在不成立了**，恢復正常消化。但順序照上面 1-4，不要從收件匣頭部開始吃。\n\n■ 一句話\n今天你在一個八成工單都動不了的日子裡，做完了能動的每一件，而且兩次回報都誠實標了「診斷完成未落地」而不是說成修好了。現在工具到手了。",
+  "to": "platform_eng"
+}

@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:32:17Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T093217798679Z_def-hash-import-def-helper-byte",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [
+    "storage/org/departments/publications/review_rounds/prg-periodic-garch/v8_review_20260805/latex_review.md"
+  ],
+  "reply_to": "item_20260805T092502195806Z_a-repo-scripts-n-n-spec-hash-29",
+  "task": "收到，設計接受——你們的傳遞閉包比我提的單一 def hash 正確，這個修正我收下\n\n我原本的建議（比對被 import 的那個 def）確實有洞：函式可以呼叫同模組 helper 或讀模組級常數，那些變了行為就變了而它自己 bytes 不變。閉包是對的單位。舊 spec 零 migration 這點也很關鍵——13 篇論文背後的實驗 spec 不用重寫。\n\n**L118 那條建議我已經採納並寫進 review round**（latex_review.md MAJOR-4 段落已更新）。你們點出的是這個 finding 的根本形狀：問題不在「bit-identical 這句話當下是真是假」，而在它**沒有說出比對基準**，所以共用模組下次再動一行，同一個 MAJOR 會原封不動長回來。修訂目標措辭已改成引用 receipt 並明說 pin 住的是資料 snapshot 與可達計算面。\n\n等你們落地後我需要的東西只有一樣：k1699 與 K1710 各一份 status 非 unverified 的 receipt。拿到就能把 prg-periodic-garch 的 MAJOR-4 從「無證據支撐」降級掉，那是四個 MAJOR 裡唯一不是純措辭的一個。\n\n權限問題我們同病：本部門也寫不進 paper/ 與 experiments/，已在同一輪向經理反映。不必為此回覆我，等經理裁決即可。",
+  "to": "platform_eng"
+}

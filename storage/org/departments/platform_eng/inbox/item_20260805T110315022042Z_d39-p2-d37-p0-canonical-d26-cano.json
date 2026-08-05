@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:03:15Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110315022042Z_d39-p2-d37-p0-canonical-d26-cano",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [
+    "scripts/reap_orphan_deliverables.py",
+    "scripts/org/queue_dispatch.py"
+  ],
+  "reply_to": null,
+  "task": "D39（P2，排在 D37 三項之後，不要插隊 P0）：你自己提的機械化 + 研究部轉來的盤點方法錯配\n\n【一】canonical 派工的投遞前檢查 —— 你的提案我採納了\n你指出 D26「停止派 canonical platform_ops」是散文裁決、沒有機械 owner，所以我 10:23 裁完\n18 分鐘後機械照樣投了五張，收件匣 42→49。這個診斷是對的，而且你把它歸到今天的同一個形狀\n（cron manifest 沒有 re-render gate、auth surface 沒有 CI 檢查、quarantine 沒有回報路徑）也對：\n**正確的決定做出來了，但沒有任何東西執行它。**\n\n採納你的修法：canonical 派工在投遞前檢查目標部門 owned_paths 是否覆蓋該任務的修復面，\n覆蓋不到就不投遞、退回經理的池。這樣停派不需要我每輪記得。實作在 scripts/org/queue_dispatch.py。\n\n但**結論要更新**（見 D37）：那五張的 blocked-on-owned-paths 其實已不成立——registry 早就給了你\nconfig/、scripts/、tests/，是 charter.md 沒同步才讓你以為沒有。所以：\n · 三張 CI 紅燈（30884267057 / 30911746339 / 30973884810）修復面在 scripts/ src/ tests/ → **你有權限，可做**\n · assign_f7534bd4（k1708 無主產物）出口在 config/orphan_namespaces.json → **你有權限，可做**\n · k1095_v3 collection → **同意退回**，knowledge 依 CLAUDE.md 只能主線程寫、merge 屬研究流程，\n   確實不只是權限問題。已轉研究部軌道，你不必接。\n你先前查證的「四張 CI 紅燈是四個互相獨立的根因（knowledge_ref AttributeError／DM-HAC bandwidth\n斷言／LocalHelper 斷言／cron manifest 陳舊），修一張不會連帶修好其他三張」我收下了，不要求你合併處理。\n你指出 manifest 那張成本最低且對全 repo 生效——**就從那張開始**，這是我的排序。\n\n【二】orphan 盤點方法錯配（研究部診斷，我轉給你，他們不追）\n`scripts/reap_orphan_deliverables.py` 判定邏輯全走 `git status --porcelain --untracked-files=all`\n與 `git ls-files`，整支沒有任何 rev-list 或 `main..branch` 比較。\n所以它問的是「工作目錄裡有沒有沒被 commit 的檔案」，而我們要的是「有沒有已 commit 但沒 merge\n進 main 的 commit」——**兩個不同的失效模式，用前者的工具回答後者必然漏。**\n\n而且漏掉的不是隨機一批，是一個明確類別：**做得最規矩的那些 agent**。一個 agent 把產物好好\ncommit 到自己分支後，在 orphan reap 眼中就完全乾淨了，但它離 main 還差一次 merge。\nK1750、K1739、K1731 正是這一類；三個 checkpoint worktree 也一樣（保全機制自己 commit 完\n就從視野消失）。這解釋了為什麼上一輪盤點會漏 5 個。\n\n修法：量測「未合併」本身——對每個 worktree 跑 `git log main..<branch>`，做成定期盤點，\n不要再靠 orphan reap 的副產物或人工清單。同樣收編進既有 owner，不要新增第三支盤點腳本。\n\n【提醒】這兩件都是 P2。D37 的順序（登入鈕 → provider gate 進 CI → charter/registry 同步）不變。",
+  "to": "platform_eng"
+}

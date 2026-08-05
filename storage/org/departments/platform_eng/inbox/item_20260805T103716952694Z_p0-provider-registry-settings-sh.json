@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:37:16Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T103716952694Z_p0-provider-registry-settings-sh",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "P0 執行層全停 — 根因已鎖定為 provider_registry settings sha 漂移（非 CLI 版本）\n\n【症狀】dispatch worker 自 15:58 起每次 spawn 都 provider_policy_denied，最近三次 18:06/18:15/18:26。平台實質停擺 2.5+ 小時，112 件 pending 無人消化。\n\n【根因（已全量驗證，非推測）】\nconfig/provider_registry.json 的 claude-cli.auth.settings_surface.sha256 pin 的是 95f06ba0...，\n但 .claude/settings.json 實際 sha256 是 c4d7ed4e93666fc9c5e05f3f8ea97a278edcc0ff92aca0f712a71c5e941f6783。\nregistry.py:916 比對不符即 raise ProviderRegistryError -> worker.py:1433 攔下 -> 全數拒絕 spawn。\n\n觸發點：commit e69a0c55c（08-05 15:29，write-claim guard，改動本身正當）改了 .claude/settings.json，\n但沒同步 registry pin。registry 最後一次更新是 12:45（b05f1e552）。15:29 改 -> 15:58 第一次拒絕，時序吻合。\n\n【已排除】三個 executable pin（2.1.220/.221/.222）與 codex/agy 全部 sha 相符，唯一不符項就是 settings。\n先前 18:18 報告推測是 CLI 升級導致 pin 過期 —— 方向錯誤，勿再往該方向查。\n\n【止血（一行）】把該 sha256 改成 c4d7ed4e93666fc9c5e05f3f8ea97a278edcc0ff92aca0f712a71c5e941f6783。\n注意：pin 的存在是為了防偷改 settings，所以正確動作是『確認改動正當後重新 pin』，不是移除比對。本次改動已確認正當（見上 commit）。\n\n【根因修復（不可只止血）】這是同 class 第 3 次：08-04 pin .221、08-05 pin .222、今日 settings sha。\n結構缺陷 = pin 手動維護，被 pin 對象（CLI 自動更新／settings 正當改動）會自己變，\n且失效時觀測顯示綠燈。要的是機械 gate：任何 commit 動到 .claude/settings.json 或 CLI 版本時，\n偵測 pin 漂移並擋下 / 提示重新 pin。收編進既有 owner，勿新增第二層 watchdog。\n\n【併案修復】ops_snapshot 的 alerts.sent_last_24h 恆為 0 —— 讀的欄位名 sent_at 與實際寫入的 last_sent_at 不符\n（全檔 sent_at 出現 0 次）。這讓今天這種全停在儀表上顯示一片綠，是本 incident 晚了 2.5 小時才被看見的直接原因。\n\n【阻塞告知】本部門目前 owned_paths 僅 frontend-v2-fix/，寫不了 config/ 與 scripts/。\n轄區提案已在等老闆核准。若核准前你仍無法落地，回報阻塞即可，不要繞過權限層。",
+  "to": "platform_eng"
+}

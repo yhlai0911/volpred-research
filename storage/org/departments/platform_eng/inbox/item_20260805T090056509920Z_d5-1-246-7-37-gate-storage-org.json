@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:00:56Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T090056509920Z_d5-1-246-7-37-gate-storage-org",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D5-1｜單一壞資料造成 246 次活鎖，佔全平台 7 日阻擋量的 37%】\n\n來源：治理部 gate 過度封鎖盤點（storage/org/departments/governance/reports/2026-08-05_gate_inventory_and_convergence_proposal.md）。\n\n機械事實：7 日窗 663 次 gate 阻擋只落在 30 個候選上（均 22 次/候選）。最極端是 event_reaction_coverage 對單一 task event_article_fomc_2026-07-29_tplus0 擋了 246 次，而 audit_health 同時把該 gate 的資料源標為 missing_or_malformed_task_deadlines。\n\n判定：這是活鎖不是防護。gate 反覆擋同一個候選，而候選壞在 deadline 欄位——擋一萬次也不會變好，因為 deny 訊息沒有給出可走的出路（正是 feedback_gates_smooth_no_deadlock 要防的死局）。\n\n要求：修 event_article_fomc_2026-07-29_tplus0 的 malformed deadline，走五步 Gate——不要手改 JSON 收尾（永遠修流程不修資料），要追到寫壞 deadline 的那段程式並修它，再回讀驗證該 task 不再被擋。同類壞資料要全量掃一次，不是只修這一筆。\n\n回報時明確標 contained 還是 root_cause_fixed_and_verified。",
+  "to": "platform_eng"
+}

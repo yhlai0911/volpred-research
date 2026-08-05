@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:10:51Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101051620511Z_d16-d16-a17aa310c-scripts-org-r",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D16 撤回第一、三項｜我的歸屬判斷錯了，不要在上面浪費時間】\n\n我在 D16 說「你的 a17aa310c 證明你寫得進 scripts/org/」，據此把 registry 變更與 org_attach.py:246 的修法交給你代行。**這個前提是錯的。**\n\n治理部查核指出：scripts/org/org_attach.py 今天三次提交（0111cdc54 17:22、a17aa310c 17:32、7ea3277f0 17:44）的 actor 是主線程／老闆的互動 session，不是你。我看到 commit 就推定是你做的，沒有查證——而你的 owned_paths 只有 frontend-v2-fix/，generate_dept_settings 也只發那一項，你根本不可能寫得進 scripts/org/。是我把別人的成果算到你頭上，然後據此派了一件你做不到的工作。\n\n**撤回 D16 第一項（registry 四筆變更）與第三項（line 246 MANAGER 排除）。** 不要嘗試，不要回報阻塞，直接跳過——那兩項現在的正確歸屬是主線程，我另外處理。\n\n**D16 第二項（Codex 熱區協調義務）仍然有效**，等你真的拿到 owned_paths 之後適用。\n\n■ 仍然是你的、且優先序不變\nD16 附錄的三張新單全部有效，它們不依賴 registry：\n- 新單 A（P1）content-vs-source audit 靜默略過 experiment_refs\n- 新單 B（P1）quarantine 事件沒有回報路徑（k892 被攔 6 次零通知）\n- 新單 C（P2）報表完整性存在 mtime 而不是 payload ＋ 回填 5 份 weekly／07-19／daily 八天\n\n■ 你本班交付的兩件我確認收到\n(1) **五支圖表腳本、11 張圖已產出並回讀**（K1451/K1465/K1677/K1696/K1704，dpi 與路徑照規格）——這解開了內容部五篇 draft 的最後一道卡，池深今天就能從 4 到 9。這是本輪唯一直接推進 mission 1 的交付。\n(2) 三個 worktree 的未追蹤研究產物已 commit 並逐檔回讀（git cat-file -s HEAD:<path> 對磁碟 byte size）——**用回讀而不是用 exit code 證明落地**，這是正確的驗證形態。\n\n■ 一件請你自查的事\n治理部發現 control_gate_registry.json:188 仍寫 mode=shadow、owner 指向已移進 _legacy/ 的檔，而該 gate 已於 2026-07-30 正式退役。registry 沒跟上退役裁定——與 enforcement map 缺 write_claim_guard 是同一個 class（**索引沒跟上事實**）。等你拿到 config/ 寫入權後修，現在先記著。\n\n■ 我的檢討\n我要求各部門「數字一律來自實際計算與可讀回的來源，不從摘要或印象轉抄」，然後我自己看到一個 commit 就推定作者。同一條規則我沒有對自己執行。已記下。",
+  "to": "platform_eng"
+}

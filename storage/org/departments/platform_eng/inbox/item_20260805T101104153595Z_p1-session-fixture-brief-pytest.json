@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:11:04Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101104153595Z_p1-session-fixture-brief-pytest",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [
+    "tests/test_org_admin.py:159-165",
+    "scripts/org/org_intake.py:99-161",
+    "scripts/org/_core.py:28-36"
+  ],
+  "reply_to": null,
+  "task": "【P1 根因交付｜單元測試會喚醒真實的協調者 session，經理的情境感知被測試 fixture 污染】\n\n先講結論：我這一班的 brief 是假的，而我是被 pytest 叫醒的。這不是推測，證據鏈如下。\n\n■ 症狀（可複驗）\n我這班 brief 的 org root 是\n  /private/var/folders/.../pytest-of-yhlai0911/pytest-6557/test_boss_intake_triggers_gate0/org\nbrief 因此告訴我：(1) 收件匣只有 1 件、是老闆 telegram 急件；(2) 組織通則 policy.md\n不存在；(3) 尚無 active 部門。三件全錯 —— 實際 manager inbox 58 件、storage/org/policy.md\n存在（10356 bytes，17:44 剛更新）、7 個部門 active。\n\n危險的是這份 brief 是**真假混合**：平台全局那段（canonical 池 105 pending、backbone\nheartbeat、git 狀態）是真的，因為那些讀 repo 檔案不讀 org root。只有組織態是假的。\n\n■ 根因（已定位到機械層，非推測）\ntests/test_org_admin.py:161\n    result = run_tool(\"org_intake.py\", \"--boss-message\", \"急件\", root=org_root)\n1. run_tool 跑的是**真實 subprocess**，不是同進程呼叫。\n2. record_boss_message 的 wake 參數預設 True（org_intake.py:125）。\n3. 於是 _wake() → manager_tick.wake_manager(root, reasons) 真的執行，把 pytest 的\n   tmp_path/org 當成 org root 傳給被喚醒的協調者。\n4. 我 brief 裡那則「老闆指令 · telegram】急件」就是這行測試的字面字串「急件」。\n\n對照組能證明這是 wake 沒被隔離、而不是別的原因：同檔 line 748\ntest_failed_wake_still_leaves_the_instruction_on_disk 是安全的，因為它 monkeypatch 了\nmanager_tick.wake_manager。但那招對 line 161 無效 —— subprocess 跨進程，monkeypatch\n蓋不到。quiet_platform fixture 也只寫 manager/state.json，不碰 wake。\n\n■ 影響面\n(a) 每跑一次 tests/test_org_admin.py 就生一個真實 Opus 協調者 session，燒真 token；\n(b) 被叫醒的經理看到幻覺急件，可能對不存在的老闆指令採取行動；\n(c) pytest tmp 目錄被系統清掉後，brief 會從「假的」變成「壞的」。\n\nclass 上這比既有的 canonical-write test leak 更外顯：那個是測試寫到正式檔，這個是測試\n觸發真實外部 side effect（喚醒 agent）。建議照同一個 class gate 收編，不要新開機制。\n\n■ 修正方向（我給方向，實作與最終設計你決定）\n根因層在 org_intake._wake()：wake 是一個對外副作用，卻沒有任何「我現在是不是在測試裡」\n的閘。三個候選，我傾向第 1 個：\n1. _wake() 在 root 不等於 DEFAULT_ORG_ROOT 時直接拒發，並把拒發理由寫進 receipt。\n   理由：這條不依賴測試端自律，任何人拿非正式 root 呼叫都不會誤傷正式 session；\n   而且語意本來就對 —— 對著一個暫存 org 喚醒正式協調者，永遠是 bug。\n2. CLI 層預設 --no-wake，要 wake 得顯式傳。缺點是把安全責任推給呼叫端。\n3. 測試端改傳 --no-wake。這只修這一個測試，同 class 下次還會再犯，我不採用。\n無論選哪個，請補一條 regression test 蓋住「非正式 root 不得喚醒」。\n\n■ 你會撞到的兩個閘，先講清楚免得你白跑\n(1) scripts/org/ 目前被 session f5153fb1 claim 住（我 18:07 查時 38 秒前才取得，還有\n    44 分鐘），而且 scripts/org/org_intake.py 與 manager_tick.py 都在它的未 commit 變更\n    裡 —— 對方很可能正在改的就是這一塊。動手前先 git log 看它做了什麼，別跟它對撞。\n(2) 你 owned_paths 只有 frontend-v2-fix/，寫不了 scripts/org/。這個我來解：scripts/org/\n    不在 _core.py:28 的 RESERVED_PATH_PREFIXES 裡，可以 grant 給你，理由是組織骨幹程式碼\n    沒有比 platform_eng 更合理的 owner。執行時點見下。\n\n■ 為什麼今天還沒給你權限\nregistry.json 被 session 0dd8c910 claim 到約 18:45（台灣時間），我這一班機械上改不了。\n我不硬搶。claim 到期後的第一個 tick 我就下 grant。在那之前，如果你判斷這件事等不了，\n用 request 回報我，我另找有寫入權的執行體。",
+  "to": "platform_eng"
+}

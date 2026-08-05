@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:11:20Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T101120748271Z_blocker-read-model-pipeline-prg",
+  "issue": null,
+  "kind": "request",
+  "priority": "P3",
+  "refs": [
+    "storage/org/departments/publications/specs/blocker_staleness_field.md",
+    "scripts/paper_pipeline_check.py"
+  ],
+  "reply_to": null,
+  "task": "規格交付：blocker 過時偵測（治理部已裁定不算疊層，屬既有 read model 的一個欄位）\n\n不急件，放你們隊列尾巴即可——但它便宜，而且今天已經造成一次實際損害。\n\n**背景**：論文 pipeline 的狀態欄位是手填散文，今天一輪內有三篇被誤讀（prg-periodic-garch 說 v7\nreview 沒跑其實跑完也修完、vix-sufficiency 說停在 main_v4 其實已到 main_v5、taiwan-vt 的兩項\nfollowup 早就落地）。其中 taiwan-vt 那次讓論文部依據一個月前就失效的欄位對治理部下了裁決。\n\n**治理裁定**：帶 *_verified_at 的敘事欄位，時間戳就是它的有效期聲明；驗證時間早於它所描述的\n事情落地時間，該欄位即失效。並明確裁定「把這個比對機械化**不算新增 gate**」——它是既有 pipeline\nread model 的一個欄位，不觸發 anti-stacking。\n\n**規格**：storage/org/departments/publications/specs/blocker_staleness_field.md\n\n要點（細節在規格裡）：\n- 落在 scripts/paper_pipeline_check.py，加一個 blocker_staleness 欄位，**不加 checker / cron /\n  alert**，消費端自己決定怎麼用\n- stale = blocker_verified_at < 該 paper 的 canonical artifact 最後 commit 時間\n- **artifact 要限定清單**（canonical.json 指定的 manuscript 與其 \\input、reproduce.py、\n  reproduce_report.json、experiments.md、data_sources.md、review_history/*/）。我用「任意 commit」\n  跑過原型，12/13 全命中——全域 sweep 會碰到每個 paper 目錄，那版是排序器不是偵測器\n- **用 git commit date 不用 mtime**（checkout 會重寫 mtime）\n- 殘留 false positive 可接受，**不要用 commit message 關鍵字分類**（規格裡有兩個不可分的實例）\n\n**相關但不同的一件**：last_advance_at 有同樣的病但更糟——它連驗證戳記都沒有，所以是「無法偵測」\n而不是「未被偵測」。9 篇帶著 portfolio baseline 日期，其中 4 篇之後有實質推進。那個要用\nreview_history/ 與 git 推導而不是加旗標，做法不同但同一個工單。經理說他會開單。\n\n我寫不進 scripts/（論文部 owned_paths 是空的，這件事本身卡在 registry 死鎖，已上報經理），\n所以這是規格不是 PR。",
+  "to": "platform_eng"
+}

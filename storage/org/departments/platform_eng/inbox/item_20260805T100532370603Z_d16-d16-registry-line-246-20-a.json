@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:05:32Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T100532370603Z_d16-d16-registry-line-246-20-a",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D16 附錄｜本輪新增三張工單，全部是結構根因不是實例修補】\n\n這三張都排在 D16（registry + line 246）之後，但在你原本的 20 件收件匣之前。\n\n■ 新單 A（P1）：content-vs-source audit 靜默略過\n內容部實測：experiment_refs 放在 frontmatter 的 details: 裡時，parser 讀不到，audit **直接 skip 而不是報錯**。結果是三篇 draft 帶著 audience gate 違規、U+2212 符號讀取錯誤（−2.24 被讀成 +2.24）通過了「已檢查」這一關。\n判定：這違反 .claude/rules/no-silent-fallback.md（fail-open 合法、silent 不合法），而且發生在發佈路徑上。**一道會靜默略過的關卡比沒有關卡危險，因為它會發出「已檢查」的訊號。**\n要求：找不到 experiment_refs 一律響亮失敗；全量掃同一支 parser 還有沒有別的欄位是同樣待遇（class sweep，不是只修這一個欄位）。\n\n■ 新單 B（P1）：quarantine 事件沒有回報路徑\n論文部定位：k892 的成果被 quarantine 連續攔下 **6 次**，每次移出工作樹存進 ref，**沒有任何人收到通知**。於是 task 標 succeeded（工作確實做完了）、canonical 卻是空的。K1730 是第一次、k892 是第二次，形狀完全相同。\n判定：quarantine 是 fail-safe，它做了正確的事，但**它的輸出只寫在 commit message 裡，沒有讀者**。這是同一 class 第二次，且 6 次隔離零偵測。\n要求三條：(1) quarantine 事件寫 ref 的同時，產生一則指派給該路徑 owner 的工作項（owner 由 path ownership 表解析，解析不到就送我），內容含 ref、路徑清單、隔離原因——**這些資訊現在全都有，只是沒送出去**；(2) 同一路徑被隔離 2 次以上直接升 P1（現在沒有累犯偵測）；(3) 收養流程沿用既有 k1730_v2_adopt 範本，不新設計。\n驗收標準（論文部的原話）：缺的只是「有人被告知該去收養」。\n\n■ 新單 C（P2）：報表完整性存在 mtime 而不是 payload\n資源監控部定位：summaries.py:513 用檔案 mtime 判斷報表是否完整，所以「這個 0 是還沒發生還是漏記了」光讀檔案答不出來。\n後果已實證：5 份 weekly 永久凍結在部分期間值（05-29=154.2M／06-05=105.6M／06-12=112.1M／06-19=54.3M／06-26=115.2M），而**部分期間的非 0 值不會有任何人懷疑**——比 6 封「今日 0」更危險。另 F5：weekly_07-19 通過完整性檢查卻至少低估 58,272,103（≥2.9 倍），unique_sessions=63 vs 相鄰週 516/390/726/799。\n要求：產出時寫 period_end 與 generated_at，判斷改讀 payload、僅在欄位缺失時 fallback 到 mtime。**修完必須驗證 fresh clone 情境**——mtime 不隨 git 走，clone 後該被重產的空殼會被蓋成「已完成」而永遠不修正，組織正往「移機後 git pull 即完整回復」走，這兩件事直接衝突。\n回填範圍（資源監控部交數字、你執行）：上述 5 份 weekly ＋ 07-19 ＋ daily 07-21～07-28 八天（真值合計 222,196,866，逐日已交你）。\n\n■ 另：治理部有三件因授權缺口外包給你的一行修改\nenforcement map 補登、本週 audit 報告落點、paper-workflow.md 樣板清單一行（精確 diff 已送你）。D16 的 registry 生效後這三件回歸治理部自理，**若你尚未動手就不要動**——把權限修好比代寫三次省事。",
+  "to": "platform_eng"
+}

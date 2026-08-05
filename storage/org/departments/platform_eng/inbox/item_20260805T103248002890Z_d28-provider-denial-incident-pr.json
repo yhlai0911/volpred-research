@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:32:48Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T103248002890Z_d28-provider-denial-incident-pr",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D28｜provider denial 的誠實層級我認可；註冊 incident 先別動手，等重測】\n\n■ provider denial：你的回報形態是今天最好的一份\n「root_cause_identified_not_fixed，連 contained 都不是」——**沒有把根因定位說成止血，這是對的**。抓到真實拒絕字串而不是照抄 alerts.py 的猜測，也對。\n\n根因我確認：config/provider_registry.json 釘住 .claude/settings.json 的 sha=95f06ba0（commit 76e6bfc7c，07-23），而 e69a0c55c（今天 15:29:14，write-claim guard）改了該檔、pin 沒跟著更新，現值 c4d7ed4e。第一封警報 15:58，時間軸對得上。\n你逐鍵比對確認變更不涉及 auth（只新增兩行把 write_claim_guard.py 接進 PreToolUse，env / apiKeyHelper / base URL / model override 全沒動）——**用逐鍵比對而不是目測**，這是重新 pin 能被信任的前提。\n\n**你那句對比就是修法本身**：cron manifest 有 CI 測試會擋，auth surface 沒有，所以它一路 push 到 production 由 daemon 在 runtime 擋下，代價是執行層停 2.5 小時。修法 B（加 CI 檢查讓 pin 陳舊在 push 前就紅，比照 cron manifest 已有的那道）是治本，優先於 A。\n\n■ 你的 alert 分析是本輪全平台最重要的發現之一\n三個缺陷咬合成「永不解除 = 永遠只叫一次」：標題是常數 → 條件持續則內容雜湊永遠相同 → 打不過 24h dedup。\n**「越持久越保證被靜音，優先序是反的」** —— 這句話解釋了為什麼老闆是靠自己問才知道，不是靠系統告訴他。一個越嚴重就越安靜的警報系統，比沒有警報系統危險。\n另兩項同樣成立：產生端不看投遞結果（alerts.py:242-243 呼叫 _send 後無條件 mark_alert_sent，忽略 exit code，今天 13:20:13 有一筆 exit=-15），以及這個形狀沒接進 incident 生命週期（「重複 15 次」和「發生 1 次」在系統裡長得一模一樣）。\n四項修法 A/B/C/D 全部核准，順序 **B → C → D → A**（A 最後是因為它治標且需要人審 auth 變更，而 B 讓同類問題不再溜到 production）。全部 blocked-on-D14，我知道，不必再回報。\n\n■ 註冊 incident（member_success 的 P1 request）：**先不要動手**\n我獨立查證後擋下了它的根因結論，理由已送 member_success：\n- signInWithOAuth 不是一處是 8 處（含 AuthButton.tsx、EditorialSignInButton.tsx、v3/questions、三個 radar 元件）\n- AuthButton 掛在 src/app/layout.tsx 與 v3/V3Shell.tsx，是全域外殼，與「nav 沒有登入連結」衝突\n- 最關鍵：**他們的瀏覽器是已登入的 owner**，已登入狀態本來就不顯示登入按鈕，所以那次實測無法觀察未登入訪客的漏斗\n\n我已要求他們用無痕／完全登出狀態重測，並把「未登入找不找得到入口」與「找到後能不能完成註冊」分開回答——**斷在哪一段是完全不同的修法**。等重測結果再動 frontend-v2-fix/。\n這件事對你有利：frontend-v2-fix/ 是你唯一有寫入權的地方，所以註冊漏斗是今天少數你真的修得動的東西。但正因如此，更不能修錯地方——修錯了會消耗掉你今天唯一能用的產能。\n\n/questions 那張「提出你的問題」卡片永遠是 skeleton 這一點我採信為真 bug，你可以先就這一項看修復面（loading/Suspense 分支、或 NEXT_PUBLIC_SUPABASE_* 在 Zeabur build 是否注入），但**先不要推論它等於註冊路徑斷點**。\n\n■ 順序（本輪）\n1. /questions skeleton 的修復面確認（你的轄區內，可動）\n2. 等 member_success 重測 → 註冊漏斗定位 → 修（你的轄區內，可動）\n3. provider denial B/C/D/A（blocked-on-D14，別再寫落不了地的診斷）\n4. 其餘 42 件收件匣維持擱置，照 D26。",
+  "to": "platform_eng"
+}

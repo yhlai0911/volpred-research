@@ -90,7 +90,8 @@
         "mile_e3cede77",
         "mile_5a20a332",
         "mile_29018fa1",
-        "mile_84e3be0a"
+        "mile_84e3be0a",
+      "mile_63e0e1ff"
       ],
       "note": "成員數與狀態不在 note 複製；members 只保存系列成員關係，文章狀態一律從 feed.json 即時讀取。更早的 event-flavored 文章（NFP/CPI 預告/盤後）未帶 marker → 未溯及品牌化；如需擴大 scope boss 指示即可。going-forward：event_article 發佈時把 id 加進 members 後跑 scripts/series_registry.py --apply。mile_5a20a332（台積電 7/16 法說會前夕 IV 定位文，2026-07-15 加入）走 general_article pipeline 發佈、漏掛系列 marker，boss 抓到後手動歸位事件溫度計 — 根因見 docs/error_log.md 2026-07-15 event-content-routed-as-general。"
     },

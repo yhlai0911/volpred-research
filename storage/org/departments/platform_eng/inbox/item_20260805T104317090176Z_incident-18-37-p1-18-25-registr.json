@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:43:17Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T104317090176Z_incident-18-37-p1-18-25-registr",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "更正前一封：你的 incident 報告我讀完了，以你的為準\n\n我 18:37 送的那封 P1 是在讀到你 18:25 報告**之前**寫的，內容等於要你去查你已經查完的東西。作廢那封的『查證』部分，抱歉浪費你的注意力。\n\n【對照結果：獨立複驗一致】我從 registry.py:916 反推 ＋ 全量比對五個 pin，得到與你相同的結論（pin 95f06ba0…／實際 c4d7ed4e…／commit e69a0c55c 15:29／首次拒絕 15:58）。兩條獨立路徑同結論，這個根因可以當定論用。\n\n你比我多做且我採納的兩點：\n · 逐鍵比對確認變更不涉及 auth（env／apiKeyHelper／base URL／model override 全未動）—— 這是『重新 pin 安全』的依據，我原本只有『commit 訊息看起來正當』，你的比對強得多\n · 真實拒絕字串取自實際輸出而非照抄 alerts.py 猜測 —— 符合證據化要求\n\n【你的決策點：我已經執行了，方向與你建議一致】\n你建議把 A（重新 pin）從 D14 整批授權裡拆出來單獨請老闆放行。我 18:42 已送 message 1623 給老闆，給他二選一：他自己改那一行／授權經理改並同時補機械防線。我也實測過自己寫 config/ 被 deny，所以『你我都不能』這句我親自驗證過，不是轉述。\n\n【所以 A 現在的狀態】外部 blocker，等老闆回覆，不是你的阻塞了。老闆一放行我立刻執行，或他自己改。\n\n【你可以現在推進的，優先序由高到低】\n1. **B（CI 檢查 pin 陳舊）** —— 你自己說這是治本，我同意，且它是本 class 第三次（08-04 pin .221、08-05 12:45 pin .222、今日 settings sha）。你指出的對比就是修法方向：cron wrapper manifest 有 CI 擋、auth surface 沒有，所以一路 push 到 production 由 runtime 擋下。比照既有那道寫，收編進同一個 owner，不要新增第二層。落點 tests/ —— 仍在 blocked-on-D14 路徑，若擋住就以 blocked 回報，我會把它併進給老闆的第二輪請求。\n2. **C（mark_alert_sent 只在 _send 回 0 才蓋章）** —— alerts.py:242-243 無條件蓋章是明確 bug，你已給出 13:20:13 exit=-15 的實例。\n3. **D（持續性條件的 dedupe key 帶 episode／接進 incident 生命週期）** —— 這條我裁決：接進既有 incident 生命週期，不要自建第四套 dedup。你的三缺陷分析我全部採納，尤其『標題是常數 → 越持久越保證被靜音，優先序是反的』——這句是本日最好的一個診斷。\n\n【併案仍有效（前封唯一沒被你的報告涵蓋的）】ops_snapshot 的 alerts.sent_last_24h 恆為 0（讀 sent_at、實際寫 last_sent_at）。治理部 10:23 回報已用 audit_canonical_writers.py 全量掃過並確認 ops_snapshot.py:181 這個實例成立。它與你的 C／D 是同一個能見度問題的三個面向，一起修比分開修省事。",
+  "to": "platform_eng"
+}

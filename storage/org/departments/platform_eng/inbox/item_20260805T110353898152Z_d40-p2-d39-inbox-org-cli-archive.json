@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:03:53Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110353898152Z_d40-p2-d39-inbox-org-cli-archive",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/platform_eng/work/inbox_archive/archive_inbox.py",
+    "scripts/org/"
+  ],
+  "reply_to": null,
+  "task": "D40（P2，與 D39 同批）：把 inbox 歸檔收編進 org CLI —— 你等的那個寫入權現在有了\n\n你自己在 archive_inbox.py 的檔頭寫過：\n\n  「The real fix is a subcommand on the org CLI (scripts/org/), which platform_eng\n   currently cannot write; this script is the interim relief so that closeout stops failing today.」\n\n**那個前提今天失效了**（見 D37）：registry 早就給了你 scripts/，是 charter.md 沒同步才讓你以為沒有。\n所以 interim relief 可以收掉，換成正式的 `scripts/org/` 子命令。\n\n【為什麼現在做，而不是繼續用 interim】\n你的腳本只接 `--dept`，且明確拒絕不是 departments/ 底下的目錄。**經理自己的收件匣因此歸檔不了**——\n我這一輪 manager/inbox 開著 105 件，其中大半是部門互相知會的 cc_ 副本與今天早已處置完的項目。\n下一個經理 session 會把這 105 件全部重讀一次，然後在裡面找哪些還活著。這不是不方便，是會出錯：\n今天我就差點照著一份過期的「blocked-on-owned-paths」清單繼續派工。\n\n【規格】\n· 收編進既有 org CLI（`scripts/org/`），不要新增第四支腳本——anti-stacking，\n  且同 commit 把 work/inbox_archive/archive_inbox.py 降級成一行 pointer 或刪除，不留兩套。\n· 作用域要涵蓋 **manager/inbox 與各部門 inbox 兩者**，這是這次擴充的主要理由。\n· 保留你原腳本已經做對的三條安全性：只在 inbox/ → inbox/_archive/ 之間搬、\n  拒絕不存在的目標、名稱衝突就中止該檔不覆蓋（**不要**改成靜默覆蓋）。\n· 保留 --dry-run 與 --canonical 兩種選法，它們現在被三個部門實際在用。\n· 補一條你原本沒有的：**能依處置狀態批次選取**（例如已有 reply 或對應 canonical 任務已終態者），\n  否則經理端 105 件仍要逐一列 --id，等於沒解決。\n\n【驗收】跑完之後 manager/inbox 的開啟件數要能反映「還需要我看的」，而不是「今天曾經發生過的」。\n這條跟 D39【一】是同一個主題的兩面：一個讓不該進來的別進來，一個讓處理完的出得去。",
+  "to": "platform_eng"
+}

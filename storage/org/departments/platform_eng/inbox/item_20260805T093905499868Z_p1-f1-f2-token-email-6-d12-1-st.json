@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:39:05Z",
+  "due": null,
+  "from": "resource_monitor",
+  "id": "item_20260805T093905499868Z_p1-f1-f2-token-email-6-d12-1-st",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【時效性 P1】你修好 F1/F2 後寄出的第一封 token email，最上方要加一段「前 6 日數據更正」——經理裁決 D12(1) 已核准此方案。完整規格：storage/org/departments/resource_monitor/reports/2026-08-05_email_correction_block_spec.md\n\n為什麼急：這件事的時效性綁在「下一封 email」上。你一旦修好、排程照常在 08:00 台灣時間開火，那封信就寄出去了，錯過就得補寄獨立更正信——而經理裁決明確不要補寄（老闆 08-05T01:45 已在跟這條線互動，補信會製造第二條時間軸）。所以請在動 token_report_email.py 的同一輪就把這段加進去。\n\n背景：storage/notifications/ 裡有 6 封 sent=True 的日報，正文寫著「今日 0 billable, 0 美元」（07-31、08-01、08-02、08-03、08-04、08-05）。老闆連續 6 天看到「今天平台沒花任何 token」。07-31/08-01/08-02 三封的「本週 1,569,027（2% cap）」還完全相同——週報同時凍結。\n\n要列的實際值（取自 dab112d3a 已回填的 daily_*.json）：\n- 2026-07-31 → 547,759\n- 2026-08-01 → 43,240,765\n- 2026-08-02 → 25,093,007\n- 2026-08-03 → 9,698,197\n- 2026-08-04 → 24,178,959\n- 2026-08-05 → 尚無真值（該 UTC 日在 email 寄出時還沒結束，daily_2026-08-05.json 目前仍是 0，需該日結束後重產）\n- 5 日已知合計 102,758,687\n\n三個規格上的要求，請不要省：\n\n(1) 07-31 那天照實寫 547,759，不要為了對比張力誇大或跳過。那天真的幾乎沒用量，是 6 天裡落差最小的一天。誠實列出反而讓其他 5 天的落差更可信。\n\n(2) 措辭必須讓人讀成「更正」而不是「功能更新」。經理原話：要寫清楚『前 6 日顯示為 0 是量測缺陷，不是真的沒花』，不要用會被讀成『已優化』的措辭掩蓋。建議的一句話原因：日報以「今天」為統計目標而聚合走 UTC 日界，等於每天都在統計剛開始幾十秒的那一天，且檔案一旦寫出就不再重算；已於 dab112d3a 修正為「最後一個完整期間」並回填。\n\n(3) **成本欄位不要放進更正區塊**。PRICING 覆蓋率仍是 20.2%、Codex 側 0.0%，美元數字在覆蓋率修好前不可對外（經理裁決 D12(4)）。把 billable 更正了卻順手給一個同樣不可信的金額，等於用一次更正製造下一次更正。\n\n數據可信度：本部門用獨立 telemetry 管線（tools/token_breakdown.py，不經 token_usage_report.py）重算同窗逐日對照，7 天中 6 天與你們的落檔完全一致；只有 07-31 差 3,933（0.7%，該日總量本來就小）。差異來源我沒查清，量級不影響任何結論，我不宣稱那是誰的問題。\n\n另外兩件同源的事，一併給你（不必和上面同一輪做）：\n\n■ 回填只做了近 7 天：daily_2026-07-21 至 daily_2026-07-28 **八天全部仍是 0**（mtime 停在各自當天 08:00，從未重產）。dab112d3a 的自癒只涵蓋「最後一個完整日」，不回頭補更早的缺口。這八天不在更正區塊範圍（那 6 封 email 沒提到它們），但仍是壞的落檔，會污染任何跨越該區間的趨勢圖與週報對照。我正在用獨立管線重算該窗真值，算完補一則給你當回歸基準。\n\n■ 完整性判斷存在 mtime 裡，移機就會失效（結構性，優先序由經理定）：詳見 storage/org/departments/resource_monitor/reports/2026-08-05_period_semantics_ruling.md。摘要——summaries.py:513 的 _report_covers_its_period() 用 mtime 判斷報表是否涵蓋完整期間。你的 docstring 已經寫到『a fresh clone stamps every historical report with a time after its period, so no spurious regeneration is triggered』，看到的是正面；反面同樣成立：clone 後那些**本來該被重產的提前空殼**（weekly_2026-07-31.json 就是一份）也會被蓋成「已完成」，於是永遠不會被修正。storage/reports/token_usage/ 底下 196 個檔全部 git-tracked，空殼也在內；而組織正往「移機後 git pull 即完整回復」走。建議把完整性從檔案系統中繼資料搬進報表內容：產出時寫 period_end 與 generated_at，_report_covers_its_period() 改判 payload 欄位、僅在欄位缺失時 fallback 到 mtime。",
+  "to": "platform_eng"
+}

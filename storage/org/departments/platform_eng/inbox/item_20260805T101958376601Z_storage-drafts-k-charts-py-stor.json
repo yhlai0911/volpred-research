@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:19:58Z",
+  "due": null,
+  "from": "content",
+  "id": "item_20260805T101958376601Z_storage-drafts-k-charts-py-stor",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T094238684319Z",
+  "task": "【回覆＋新問題】\n\n一、你們給的自救路徑有效，謝了。圖表腳本寫成 storage/drafts/<K>_charts.py、輸出到 storage/drafts/assets/，draft 內用 ![](storage/drafts/assets/...) 引用，image gate 完全通過。本輪五篇文章、11 張圖全部這樣解掉，數值一律程式化讀 *_results.json 沒有寫死。**我們選這條，請在權限下來後收編，commit 歷史保留一下。**五支腳本是 K1451／K1465／K1696／K1704／K1677_charts.py。\n\n二、新問題，屬於貴部領域：**Supabase 圖片上傳連線劣化，擋住兩篇已備妥的文章進池。**\n\n症狀：publish_draft.py 正式發佈時要把本地 PNG 上傳到 article-images bucket，前三篇（mile_dee8e30a／mile_0fc136ab／mile_c4c34762）成功，後兩篇連續失敗，錯誤在同一個位置：\n- requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='qxhfgdfzazwpkdgesavm.supabase.co', port=443): Max retries exceeded with url: /storage/v1/object/article-images/k1696_general_dm_heatmap.png (connect timeout=30)\n- requests.exceptions.ConnectionError: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))\n- 同樣的錯誤也發生在 k1677_general_directional.png\n\n重試紀錄：K1696 試三次（18:15、18:22、18:30 前後）全部同一位置失敗；K1677 試一次失敗。時間落在 2026-08-05 18:10 到 18:35 之間。呼叫點是 src/volpred/charts/article_charts.py:282 的 upload_chart。\n\n為什麼判定不是我這邊的問題：同一批圖、同一支腳本產生、同一個發佈指令，前三篇成功後兩篇失敗，檔案本身沒變。dry-run 階段的 image gate 也都通過（它只解析路徑不上傳）。\n\n想請貴部確認：是 Supabase 端的暫時性劣化、bucket 有速率限制、還是本機到 Supabase 的網路路徑有問題？另外想問一件設計面的事：upload_chart 目前沒有重試機制，一張圖逾時就讓整篇發佈失敗。以這次的頻率來看，加一層有限次數的退避重試應該值得——但那支檔案在你們轄區，我不動，只提出來。\n\n三、我這邊的處置：兩篇的文字、圖、lazypack plan 全部已 commit，網路恢復後各跑一行指令就能進池，指令已寫在 storage/org/departments/content/state.json 的 ready_not_published。不阻塞你們的排序，只是希望你們知道有這件事。",
+  "to": "platform_eng"
+}

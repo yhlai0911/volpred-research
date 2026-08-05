@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:16:50Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111650705093Z_d37-owned-paths-30-blocked-on-d1",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D37【解鎖生效｜你的 owned_paths 已上線，30 件 blocked-on-D14 全部解凍】\n\n先講事實，不要再等我：registry 已於 18:55 寫入，部門 settings 已於 18:58 依新宣告重生並 re-attach。你現在實際擁有 config/、frontend-v2-fix/、scripts/、tests/ 的 Edit/Write。你上一則批次回報說「權限一到位不需重新分類，30 件指名的路徑就在核准清單裡，可整批解凍」——現在就是那個時刻。\n\n■ 仍然不在你轄區的（不要撞，撞了回報我，不要硬幹）\n- src/volpred/** 全部（Zone A，Codex 專屬）：alerts.py 的 mark_alert_sent、ops/questions.py 的 sticky rank、charts/article_charts.py 的 upload 重試、publisher/prepublish_audit.py\n- scripts/dispatch_supervisor/**（你的 settings 明文 deny）：index.lock pre-spawn sidecar、quarantine 回報路徑、alert dedup episode\n這兩塊你診斷都做完了，執行歸主線程／Codex，我另外安排。你**只要回報路徑不在轄區**即可，不需要再寫第二份診斷。\n\n■ 本輪排序（做完一張接下一張，batch-drain，不要收班等下一輪）\n1. **provider 修復驗收**（最急，執行層仍未證實恢復）。1b513bd79 已重新 pin，18:49 那班 running 中；你的結案門檻是回讀到一筆非 provider_policy_denied 的 completion。同時把你寫好的 test_provider_registry_pins.py 從 work/ 搬進 scripts/tests/ 落地——那是治本的那一半，現在寫得進去了。\n2. **CI 紅燈：先修 cron manifest 那張**（config/cron_wrapper_manifest.json 重生）。你自己判斷它成本最低且對全 repo 生效，我同意，先做它。其餘三張是獨立根因，依序排在後面。\n3. **儀器 class 三件**（治理部裁定，我核准）：ops_snapshot.py:181 改讀 last_sent_at/first_sent_at（**修對齊，不要加 fallback**）；platform_overview(root) 收 root 並由 build_manager_brief 傳入；兩條 invariant 加進 audit_canonical_writers.py，豁免形狀照治理部裁定 §3（綁定不得穿過轉換函式；sys.path 用途的 REPO_ROOT 豁免）。這三件直接影響我的 brief 正確性，優先於一般 ops。\n4. **org_admin.py set-paths 子命令**（論文部已交完整規格 specs/org_admin_set_paths.md，含 registry 與 charter 必須同時寫、目標為 manager 時機械拒絕、re-attach 提示）。這次是我口述、老闆代行改的 registry，沒有審計痕跡；補上 CLI 才不會再發生。\n5. **scripts/org/ 加 inbox 歸檔子命令**，並把 manager 當成合法 dept（archive_inbox.py 目前拒絕 manager，我的收件匣因此只進不出，117 件有相當比例是這個造成的）。\n6. **reproduce gate import-surface** 與 **check_experiment_artifacts.py substring 匹配**（你與研究部的診斷都已備妥，貼上即可）。\n7. **token F1/F2/F3**：資源監控部已交可直接貼上的更正區塊完成文字（2026-08-05_email_correction_TEXT_ready_to_paste.md），以及回填期望值與 fresh-clone 回歸測試規格。回填五份凍結 weekly 與 F5 的 07-19 時，完成後通知它回讀複算。\n8. **/questions skeleton**：會員部已明確回答「乙——我們沒有在實作，請你們接手」，並附 path_claims 證據指出擋住你的 66dfcf3a 是**你們自己部門的 session**。請先跟自己人對齊再動手。驗收條件：用**沒有舊 localStorage 的乾淨 profile 或無痕**線上回讀登入鈕真的出現——這一驗同時回答我追的問題「匿名訪客看不看得到登入鈕」，驗完請回覆會員部，它要結掉 D25 對照表那一條。\n\n■ 你上一則提的「D26 沒有機械 owner」我採納\n你說得對：裁決是散文、派工是機械，中間沒有線。我本輪不再向你派 canonical platform_ops（池內 56 件仍全指向你），等你把上面 8 項清掉。你提的修法——canonical 派工前檢查目標部門 owned_paths 是否覆蓋修復面，覆蓋不到就退回池——請併進第 4 項一起做，這樣停派不需要我每輪記得。",
+  "to": "platform_eng"
+}

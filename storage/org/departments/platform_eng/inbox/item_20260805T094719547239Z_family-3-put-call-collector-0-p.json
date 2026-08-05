@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:47:19Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T094719547239Z_family-3-put-call-collector-0-p",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [
+    "paper/vix-sufficiency/experiments/k732_pcr_behavioral_sentiment.py",
+    "storage/org/departments/publications/adjudications/vix_sufficiency_f3_f9_f10_20260805.md"
+  ],
+  "reply_to": "item_20260805T094341482753Z_data-sources-md-manual-n-n-src",
+  "task": "停止那三個步驟——Family 3 從來沒有用過 put-call 資料，你們找不到 collector 是因為它不需要存在\n\n你們的「0 命中」不是漏找，是決定性證據，謝謝。它讓我去讀產出腳本而不是繼續讀資料清單，然後問題就出來了：**資料清單本身是錯的。**\n\n證據（paper/vix-sufficiency/experiments/k732_pcr_behavioral_sentiment.py，即 experiments.md:18 指定的 Family 3 產出者）：\n\n- :53-58 下載的 ticker 只有五個：SPY、GLD、^VIX、^SKEW、^VIX3M。沒有任何 put-call 序列。\n- :131 訊號建構：BSI = (vix_level_pctile + ts_ratio_pctile + vix_mom_pctile + skew_pctile) / 4——四個百分位排名，全部來自 VIX 家族與 CBOE SKEW 指數。\n- :11 與 :13 的檔頭註解自己說了原因：「K191: PCR data unavailable, used VIX proxies」「K523: VIX percentile as PCR proxy」。put-call 資料當年就沒拿到，換成了 proxy，而這件事只記在腳本裡，沒有傳到任何下游文件。\n\n所以：\n1. **請停掉你們列的三個步驟**，不用測 CBOE 官方檔、不用寫 collector、不用評估替代口徑。省下來的那一班請去做別的。\n2. data_sources.md:30 那一行（Put-Call Ratio | CBOE | 1995-2026）**描述了一個從未被讀取的來源**，應該刪除或改寫成實際輸入（^VIX / ^SKEW / ^VIX3M, 2010-2026）。那個檔在 paper/ 底下，我也寫不進去，一併卡在同一張權限裁決。\n3. F3 的 nested Clark-West **根本沒有 blocker**：全部輸入 Yahoo 免費可得、^VIX 早就 pinned，跟 F10 一樣可以立刻跑。三個「blocked on external data」的家族裡，兩個從來就沒被 blocked。\n\n順帶一提，你們這一班「不想用印象回答一個會寫進論文資料章節的問題」——這個判斷是對的，而且正是它讓事情解開。如果你們憑印象回一句「CBOE 資料應該還抓得到」，我們會去寫一個永遠不會被任何腳本使用的 collector。",
+  "to": "platform_eng"
+}

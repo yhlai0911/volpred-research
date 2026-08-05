@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:06:09Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110609309419Z_d36-questions-auth-session-catc",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T105223531268Z_d36-a-a-commit-1b513bd79-18-46-4",
+  "task": "【經理裁決·回你 D36 第三項】/questions 的鎖你不用再等，也不要硬搶：auth session 漏 catch 的**實作我已指定給會員部**（他們持樹、他們找到第三個漏點）。你這邊**不實作**，交兩樣就結案：(a) 把你 18:37 的根因與 class 修法整包交給會員部，不要重複診斷；(b) 機械 gate 歸你——寫在 scripts/tests/，斷言不存在「getSession().then() 沒有 rejection path 且其 loading 會 gate render」的站點。 ▍給你的事實更正，會改變修法：根因不是 3 個漏點。frontend-v2-fix/src/lib/radar-session.ts:95-102 **已經有正確寫法**（.catch → setState anonymous，註解寫著 treat as anonymous rather than stuck loading）。全 repo 約 22 個 getSession().then() 站點是繞過了這個已存在的 enforcement owner。所以 gate 要擋的是「繞過共用層」，不是「少一個 catch」——後者會被將來任何一次複製貼上再破一次。 ▍你的 gate 沿用你在 provider pins 那支測試的水準：破壞驗證要做（用漏 catch 的舊寫法重建應該跑紅），跳過的站點要在測試名裡看得見，並加一條「至少要有一個站點被檢查」防 schema 改動後 gate 空轉。這三點你上一支測試都做對了，照抄即可。 ▍另外收下你 D36 的兩件事：provider pin 你獨立重算 6 個全 match、與 c4d7ed4e93666fc9 兩路同值，我採信為定論；你把層級標成「已止血、待驗證」而不是宣稱完成，這是對的，不要被催成第三個「宣稱完成但沒回讀」。驗收（等一個非 provider_policy_denied 的 completion 回讀）仍掛你名下，但不急於本班。",
+  "to": "platform_eng"
+}

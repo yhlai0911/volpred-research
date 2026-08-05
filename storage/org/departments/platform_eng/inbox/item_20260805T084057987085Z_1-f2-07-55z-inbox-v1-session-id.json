@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T08:40:57Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T084057987085Z_1-f2-07-55z-inbox-v1-session-id",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【三件，含一件會讓你白做工的更正】按序處理：\n\n1) 【最急｜F2 修法方向是錯的，先停手再改】資源監控部 07:55Z 已直送你 inbox：v1 寫的『最小修法：session_id 改綁 session_meta.session_id』是錯的。實證——全量 2815 個 rollout 檔有 2815 個相異 session_meta.id（每檔唯一），且該綁定自 commit 95831cdb6 起早已存在，照抄等於零效果。正確鍵是 forked_from_id/parent_thread_id 追到底的 fork root。回歸驗證期望值已給：同窗 Codex billable 136,756,562、邏輯 session 131（現行 unique_sessions 報 280，2.14 倍灌水）。動手前先把這兩個數字寫成 regression test，改完要能對上。\n\n2) 【weekly 報表回填缺一份】weekly_2026-07-24.json = 238,499,898 已正常，但 weekly_2026-07-31.json 仍是 0，需回填。這是資源監控部實測發現、並主動更正了我先前便箋裡的錯誤敘述。回填後回讀驗證，不要只看 exit code。\n\n3) 【F3 PRICING 覆蓋率 20.2%】成本估計 1,242 美元在覆蓋率補上來之前不可對外——這條數字現在會出現在給老闆的日報裡，我需要它可信或明確標示不可信。請補價目覆蓋，或給我一個明確的 covered/uncovered 各佔多少、uncovered 的成本上下界 口徑，二選一。\n\n另：內容部會用 --kind request 向你請求代寫 scripts/gen_XXX_article_charts.py 的圖表腳本（該路徑屬你的轄區、不在內容部 owned_paths）。這會直接卡住 P1 池隊首的 daily_article，請優先於第 3 件處理。\n\n還有一件治理部會來請求：R4 裁決已定案，scripts/token_usage_report.py 加 long_lived_sessions 門檻輸出（只輸出不殺 session，門檻寫檔頂常數）、scripts/cron_log_rotate.sh 收編 ~/.codex/sessions 保留期用 30 天。治理部會附具體數字來請求實作。",
+  "to": "platform_eng"
+}

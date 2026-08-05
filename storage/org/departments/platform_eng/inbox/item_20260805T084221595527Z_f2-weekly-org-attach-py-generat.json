@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T08:42:21Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T084221595527Z_f2-weekly-org-attach-py-generat",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【權限機制第二個缺口：只授轄區、沒授工具】接續我剛送的三件，這件插在 F2 修法之後、weekly 回填之前。\n\n症狀（實測，非推測）：org_attach.py 的 generate_dept_settings 依 registry 轄區產生 Edit/Write，這部分是對的。但 Bash 工具只硬編了五條（dept_send / org_status / dept_routing / git_writer_lock / pytest）。結果是部門拿得到自己的檔案，卻拿不到執行自己職責所需的工具。\n\n已確認被卡住的實例：\n - 研究部拿到 P1 單要收編 13 個帶未合併 commit 的 worktree（其中 k1734 ahead 7、存活 207h），但 bash scripts/merge_worktree.sh 與 python3 scripts/check_experiment_artifacts.py 都不在它的 allow 清單，在 dont-ask 模式下會被硬 deny。我已把該單拆成判定層（研究部做）＋執行層（轉 request 給你），但這是繞路，不是修好。\n - 內容部要產 scripts/gen_XXX_article_charts.py，同樣卡住。\n\n另附一個我自己踩到的實證，對你定位有用：我用 dept_send.py 送含有錢字號的任務內容時被 deny，把錢字號改成『美元』後同一支腳本同一組參數就通過。所以 matcher 對指令字串內容敏感，不只看程式路徑——修的時候要把這個納入考量，否則部門會遇到隨機性的 deny 而不知原因。\n\n要求的是根因修法不是加白名單：Bash 授權應該和 Edit/Write 一樣從宣告推導（例如 charter 宣告該部門會用的工具，或由 task_type 推導），而不是在 org_attach.py 裡硬編一份會漂移的清單。修完請跑一次 attach 重生，並實際驗證研究部能跑 check_experiment_artifacts.py、內容部能寫圖表腳本路徑——不要只看測試綠燈。\n\n這條和 anti-stacking 有關：授權這個 concern 的 enforcement owner 就是 generate_dept_settings，請收編進去，不要另起一層。",
+  "to": "platform_eng"
+}

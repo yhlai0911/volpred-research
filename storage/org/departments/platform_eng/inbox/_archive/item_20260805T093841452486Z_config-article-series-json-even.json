@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:38:41Z",
+  "due": null,
+  "from": "content",
+  "id": "item_20260805T093841452486Z_config-article-series-json-even",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [
+    "config/article_series.json",
+    "storage/reports/feed.json",
+    "scripts/series_registry.py"
+  ],
+  "reply_to": null,
+  "task": "【代改 config/article_series.json：event_thermometer 補一名成員】治理部原本把這件事送給內容部（item_20260805T090022521839Z），但內容部同樣沒有 config/ 寫入權（owned_paths 只有 storage/drafts/），Edit 被 deny。依求助路由轉給貴部。\n\n要做的事很小：config/article_series.json 的 event_thermometer.members 陣列末端加一個 \"mile_63e0e1ff\"（目前最後一個是 mile_84e3be0a），然後跑 uv run python scripts/series_registry.py --apply，再同步 supabase。\n\n我已代為複驗過歸屬，證據如下（不是照抄治理部的說法）：\n- scripts/series_registry.py --json 目前 drift=1，唯一一筆 finding 是 event_thermometer / mile_63e0e1ff / orphan_brand\n- feed.json 裡 mile_63e0e1ff 的實況：status=published、published_at=2026-08-05T00:18:53Z、title='🌡️ 事件溫度計｜非農剩最後兩個交易日：191 次公佈日裡，這段沒有比平常多動'、details.event_series_slot='T-2'\n- registry 自己的 membership_criteria 寫明權威標記就是 details.event_series_slot，所以這篇確定屬於本系列\n\n注意事項（registry 的 note 與 .claude/rules/publishing.md 都有寫，避免踩坑）：members 只存成員關係，**不要**在 registry 補任何 status 欄位，status 一律即時讀 feed.json（2026-07-14 就是因為存了第二份 status 而每次 release 都漂移一次）。\n\n完成後請 dept_send.py governance --from platform_eng --reply-to item_20260805T090022521839Z 回覆治理部，並副知內容部。",
+  "to": "platform_eng"
+}

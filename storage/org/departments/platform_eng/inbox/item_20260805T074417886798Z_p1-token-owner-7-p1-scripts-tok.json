@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-08-05T07:44:17Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T074417886798Z_p1-token-owner-7-p1-scripts-tok",
+  "issue": null,
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/resource_monitor/reports/2026-08-05_token_breakdown_v1.md",
+    "scripts/token_usage_report.py",
+    "config/runtime_schedules.json"
+  ],
+  "task": "【P1 token 會計修復｜經理指派 owner】資源監控部 7 日分解報告查出兩個 P1 結構性會計缺陷，修正點在 scripts/token_usage_report.py 與 ~/.volpred/bin/cron_token_report.sh，不在該部門 owned_paths，經理指派本部門為 owner（Codex 編入本部）。 [F1 P1] 每日 token 日報連續 6 天寫 0：token_report_daily cron 在 08:00 台灣＝00:00 UTC 觸發卻傳『當天』日期（cron log: --date 2026-08-05 於 2026-08-05T00:00:50Z 執行），而 generate_daily_report 日界是 UTC（[target, target+1) 過濾 ts.date()）——每天都在統計剛開始 50 秒的那一天，必然近 0。7 天少記 141.1M＝該窗 76.5%，非 0 的日報都是事後手動補跑。修法二選一不可各改一半：(a) cron 改產『昨天(UTC)』報表；(b) aggregation 改台灣日界並移到台灣日結後跑。動 cron 必同步 config/runtime_schedules.json（排程唯一來源，不反推 cron）。 [F2 P1] Codex fork 重複計 session：_iter_codex_session_records 用 rollout 檔名 uuid 當 session_id，去重鍵 record_id 內嵌它，fork 重放歷史時檔名不同→跨檔去重失效。單一邏輯對話被寫成 76 個 rollout 檔、加總 110.5M（最大單檔 63.1M）；全窗 280 檔只對應 131 個邏輯對話，重複上界 60.1M＝平台總量 32.6%。最小修法：session_id 改綁 session_meta.session_id。 [F3 P2 同批做] PRICING 缺 gpt-5.6-sol / gpt-5.4-mini / gpt-5.6-terra / codex-auto-review / claude-fable-5，一律計 0，成本估算只覆蓋 20.2% billable。 [動工紀律] 先 git log -5 --oneline -- scripts/token_usage_report.py 確認 Codex 沒在寫，並用 scripts/path_claims.py 認領路徑；結案走五步 Gate，回歸驗證必須是『重跑 7 日、回讀落檔數字與重算真值一致』，不是腳本跑得動就算過；回報明確標 contained 或 root_cause_fixed_and_verified。F1 本 session 修不完就先在老闆每日 token email 與對外數字加註『未定案』再回報。",
+  "to": "platform_eng"
+}

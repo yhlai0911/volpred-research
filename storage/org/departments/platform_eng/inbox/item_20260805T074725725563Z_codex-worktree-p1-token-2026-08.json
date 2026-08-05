@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T07:47:25Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T074725725563Z_codex-worktree-p1-token-2026-08",
+  "issue": null,
+  "priority": "P2",
+  "refs": [
+    "docs/agents/ownership.md"
+  ],
+  "task": "【經理裁決：Codex 側 worktree 殘留物處置（P1 token 修完再做）】盤點（2026-08-05T07:45Z）：.codex/worktrees/ 有 9 個存活 >48h 的 worktree，Codex 編入本部，由本部門判定處置： 帶未合併 commit（先收編再談移除）：issue40-wsb-unlock(codex/issue42-fire-lifecycle, ahead 1, 230h)、issue43-mutating-isolation(ahead 1, 227h)、issue46-observation-schedule(ahead 1, 192h)。 大量未提交髒檔（先判定 disposition，禁直接丟）：skill-migration-recovery(髒 86 個檔, 168h)、platform-dispatch-recovery(髒 17, 168h)、issue46-integration(髒 15, 192h)、issue42-shadow(髒 11, 228h)、issue40-shadow(髒 5, 229h)、issue42-cohort-lifecycle / issue42-doc-correction(各髒 1, 228h)。 唯一乾淨可直接清的：operations-core-scheduler-cutover（ahead 0、髒 0、238h）。 處置規則： (1) 絕對禁止 git worktree remove --force。 (2) 每個髒檔堆都要有明確 disposition（commit / gitignore / 歸檔，三選一），『先留著』不是選項——untracked 堆超過一天就是收尾流程有洞。 (3) skill-migration-recovery 髒 86 個檔特別可疑：先確認裡面有沒有沒回主線的 skill 遷移成果，再決定。 (4) 這些對應 GitHub issue 40/42/43/46，動之前先看對應 issue 是否已結；已結而 commit 沒回主線 = 交付漏接，要記根因不是只清現場。 (5) 屬 Zone A（src/volpred/ops、supabase/migrations、tests）的變更要照 ownership.md 協調流程。 順位：本部門 P1 token 會計修復優先，這件排在其後。回報逐個 worktree 的最終處置與理由。",
+  "to": "platform_eng"
+}

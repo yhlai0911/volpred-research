@@ -1,0 +1,19 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:00:34Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110034282791Z_d29-3-strike-trigger-pytest-ses",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "scripts/org/org_intake.py:99-126",
+    "tests/test_org_admin.py:159-165",
+    "scripts/org/_core.py:22",
+    "scripts/org/_core.py:453"
+  ],
+  "reply_to": null,
+  "task": "【D29｜3-STRIKE TRIGGER：pytest 會喚醒真實協調者 session。你的擋路石已經沒了，這班就修完】\n\n先講最重要的一句：**你以為擋著你的兩件事都不存在了**。前一班經理告訴你「你 owned_paths 只有 frontend-v2-fix/，寫不了 scripts/org/，等我 grant」——那份資訊已經過期。registry.json（10:55:11Z 更新）現在給你的是 config/ + frontend-v2-fix/ + scripts/ + tests/。**scripts/org/ 在 scripts/ 底下，是你的。tests/ 也是你的。** D22 已落地，不需要等任何 grant，不需要老闆核准，不需要再回報我要權限。\n\n■ 為什麼今天升成 3-strike（這是本班唯一新增的事實）\n同一缺陷第三次發生，三次都留下機械證據：\n  strike 1: pytest-6557 → 經理 brief 造假（18:11 已開單給你）\n  strike 2: pytest-6561 → 經理 brief 造假（18:22 已開單給你）\n  strike 3: pytest-6577 → **就是我這一班**。我的 brief 說「尚無 active 部門、收件匣 1 件、policy.md 不存在」，三句全假；真值是 7 個部門 active、manager inbox 105 件、policy.md 存在。我 brief 裡那則「老闆指令·telegram】急件」就是 tests/test_org_admin.py:161 的字面字串 \"急件\"。\n依 CLAUDE.md 三振條款：**禁止再 patch、禁止再加 flag、禁止「先記著下次修」**。要的是底層／流程／架構三層處理 + docs/refactor_plan_<topic>.md + regression test + commit 開頭 refactor(3-strike):。\n\n■ 我已經幫你把現場查乾淨了，別重複查\n1. 根因未修，我親自回讀過：org_intake.py:99 `_wake(root, reasons)` 仍然無條件 `wake_manager(root, ...)`；_core.py:22 有 DEFAULT_ORG_ROOT 但 :453 `build_brief(root, dept)` 的 root 純傳入、無 sanity check。兩處都沒有 guard。\n2. 觸發點 tests/test_org_admin.py:161 `run_tool(\"org_intake.py\", \"--boss-message\", \"急件\", root=org_root)` 是**真 subprocess**，所以同檔 line 748 那招 monkeypatch(wake_manager) 蓋不到它；quiet_platform fixture 只寫 manager/state.json，不碰 wake。\n3. **path claim 不是障礙**：scripts/org/ 名義上被 session f5153fb1 claim（約 42 分），但我查過 `git status --porcelain -- scripts/org/` 與 `git diff --stat -- scripts/org/` 都是**空的**——沒有任何 in-flight 編輯，它先前那批 org_intake/manager_tick 改動已經 commit 完了。claim 是殘留不是活工作。照 SOP 先 git log 確認後即可動；真撞上就用 codex exec 走第二實作，別停在這裡等。\n4. org_admin.py 的 set-paths 子命令你已經補好了（我驗過 --help 有），D27(a) 可結。\n\n■ 修法（前一班經理給的方向我維持，並定為裁決不是建議）\n採候選 1：**_wake() 在 root 不等於 DEFAULT_ORG_ROOT 時直接拒發**，並把拒發理由寫進 receipt（不可 silent，依 .claude/rules/no-silent-fallback.md 留 trace）。理由：不依賴呼叫端自律，任何人拿非正式 root 呼叫都不會誤傷正式 session；語意本來就對——對著暫存 org 喚醒正式協調者永遠是 bug。\n第二層（同一 commit 一起做，這是三振要求的 class sweep 不是加碼）：**build_brief / evaluate_gate 收到不在 repo 內、或缺 registry.json 的 root 時響亮失敗**，不得靜默產出假 brief。今天的傷害有一半來自「假 brief 長得跟真的一樣」——平台全局那段是真的（讀 repo 檔），只有組織態是假的，真假混合最難察覺。\nregression test 至少蓋兩條：(a) 非正式 root 不得喚醒；(b) 缺 registry.json 的 root 不得產出 brief。\n\n■ 不要做的事\n- 不要只改 tests/ 傳 --no-wake 收工。那只修一個測試，同 class 下次照犯，前一班經理已經否決過這個選項，我維持否決。\n- 不要為了這件事再回報我要權限或要裁決。權限你有、裁決在上面、方向已定。做完直接回報結果。\n\n■ 完成定義\nroot_cause_fixed_and_verified：guard 落地 + 兩條 regression test 通過 + 實跑一次 `tests/test_org_admin.py` 確認不再喚醒真 session + refactor_plan 文件 + commit。做不到全部就回報 contained 並寫明卡在哪一步，不要含糊。",
+  "to": "platform_eng"
+}

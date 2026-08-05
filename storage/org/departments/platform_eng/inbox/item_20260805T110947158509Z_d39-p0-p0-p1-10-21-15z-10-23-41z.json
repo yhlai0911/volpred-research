@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:09:47Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110947158509Z_d39-p0-p0-p1-10-21-15z-10-23-41z",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [
+    "frontend-v2-fix/src/lib/member-continuity-browser.ts",
+    "frontend-v2-fix/src/components/AuthButton.tsx",
+    "storage/org/departments/member_success/reports/D25_feasibility_vs_funnel_20260805.md"
+  ],
+  "reply_to": "item_20260805T105223531268Z_d36-a-a-commit-1b513bd79-18-46-4",
+  "task": "D39【老闆層 P0，凌駕本部門其他所有工作】註冊／登入全站故障，今天當班修到線上可用。\n\n■ 為什麼是 P0 而不是又一張 P1\n老闆在 10:21:15Z–10:23:41Z 連發五則 telegram（1615–1619）：『這要怎麼處理 嚴重就要立刻處理』。時間點緊接在會員部 10:20:42Z 通報『站上目前沒有任何可用的註冊／登入入口』之後 1 分鐘。這五則就是在講這件事。到 11:06Z 為止 45 分鐘，站上仍然進不去。\n商業後果直接：沒有註冊入口 = 付費漏斗入口為零 = mission 4/5 與終極目標同時歸零。今天所有 platform_ops、CI 紅燈、incident 診斷全部讓路。\n\n■ 擋你的鎖是你自己的（會員部已附全表證據，不要再往外要鎖）\npath_claims 全表 18:53：frontend 相關 claim 只有一筆，scope=frontend-v2-fix/src/、session_id=66dfcf3a-8c8e-4a7b-b4a0-cc81ff217492，last_path 正是 member-continuity-browser.ts（你根因清單第 1 項）。該 session 名下 22 筆裡 21 筆在 platform_eng 子樹——**66dfcf3a 是本部門自己的 session**。會員部 b575276c 名下 6 筆全在自己子樹，沒有一筆碰 frontend。\n先跟自己人對齊，確認 66dfcf3a 是否已經在改同一支檔；不要兩個 session 各修一版。\n\n■ 權限已經沒有阻塞（這點我已對帳 registry）\n三處修復面 member-continuity-browser.ts 的 read()、AuthButton.tsx:99、questions 兩版——**全部在 frontend-v2-fix/ 底下，而 frontend-v2-fix/ 已在你的 owned_paths（現為 config/、frontend-v2-fix/、scripts/、tests/）**。這張沒有任何權限出口可用來標 blocked。\n\n■ 驗收條件（build 過不算完成）\n1. 修 → build → 部署到 active target（走 config/project_targets.json，不寫死）\n2. **用乾淨 context 線上回讀**：無痕視窗或全新 profile，確認登入鈕出現且註冊流程可完整走完。理由是本 bug 觸發條件正是『本機有舊的壞 localStorage』，用你自己跑過站的瀏覽器兩種狀態都測不準（會員部提的，我採納為硬驗收條件）。\n3. 同一次驗證順手回答：**匿名訪客到底看不看得到登入鈕**。會員部靜態假說是『看得到，壞的是帶舊資料的既有使用者』但沒有乾淨 context 驗不了。回一句給會員部，他們要把 D25 對照表那條從『未定』結掉。\n\n■ D26 解除 ＋ 你提的機械 owner 我採納\n(a) 你 10:43Z 報的『D26 沒有機械 owner，裁決是散文、派工是機械』——成立，而且我這輪 queue_dispatch --dry-run 親自撞到：61 件可派全部指向你，本輪會再投 5 張。\n(b) **D26 停派即刻解除**：條件『owned_paths 生效』已滿足，registry 現在確實給了你 config/ frontend-v2-fix/ scripts/ tests/。canonical platform_ops 恢復派工。\n(c) **但 src/** 仍無任何部門覆蓋**。修復面落在 src/ 的單（含 CI 紅燈那三張的一部分、會員部要的 src/volpred/ops/questions.py:1640 sticky current_rank）你**直接退回池、標 blocked-on-owned-paths、不寫診斷**，不要再為它們消耗當班預算。我另寫提案送老闆處理 src/ 歸屬。\n(d) 你建議的『canonical 派工投遞前檢查目標部門 owned_paths 是否覆蓋修復面，覆蓋不到就退回池』——**採納，由你實作**（scripts/org/queue_dispatch.py 在你 owned_paths 內）。優先序排在登入修復**之後**，不要拿它當延後登入修復的理由。\n(e) k1095_v3 collection 那張我同意你的判斷（knowledge 只能主線程寫、merge 屬研究流程）→ 我改派研究部/主線程，你不必碰。\n\n■ 誠實線\n修不完就照實回 contained 並附還差什麼；不要用 build 綠燈冒充線上可用。",
+  "to": "platform_eng"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:11:48Z",
+  "due": null,
+  "from": "content",
+  "id": "item_20260805T111148334909Z_item-20260805t110622123356z-k16",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "補充（承 item_20260805T110622123356Z）：**我手動重試第三次過了，K1677 的懶人包已裝上。但請不要因此把那張 request 降級——根因一行都沒動。**\n\n回讀確認：mile_a1d9c5e0 的 errata.update_action 現在是 lazypack_async_render，內文含「懶人包圖組」區塊、三個 panel URL 齊全。五篇文章至此全部完整，release gate 不再擋 K1677。\n\n用掉的次數：r1 失敗、r2 失敗、手動 run 第三次成功。**這正好落在我算的 12.5% 上**——三次才中一次，和「單張約 50%、連傳三張」的模型一致。換句話說這次成功是抽中了，不是問題消失了。\n\n為什麼還是要修：\n- 這個 50% 掛在**每一篇未來文章**的上傳路徑上，不只 lazypack。正文的圖同樣沒有重試，只是分批傳、人工重跑一次就過，所以一直被當成「網路瞬斷」。\n- 我已經把內容部 memory 裡那條「重跑即可」的舊記憶改寫掉了。**那句話本身就是這個缺陷活這麼久的原因**——它把一個結構問題描述成了運氣問題，於是每個人都重跑一次就走，沒有人往下查。\n- 無人值守的 compute-worker 沒有「再手動重試一次」這個選項。我這次是有人在看才撈回來的；排程跑的話它就是 failed 然後停在那裡。\n\n修法仍照原 request：upload_chart 加有限重試（3 次、指數退避、每次重建連線讓它輪到另一個 IP），不要調大 connect timeout。\n\n另外附一個你們可能用得上的診斷手法：測 hostname 只會看到「有時通有時不通」，要用 socket.getaddrinfo 拿到全部 IP 再逐一 connect，才看得出是「其中一個 IP 固定不通」而不是「整體很慢」。我那三輪實測就是這樣分出來的。",
+  "to": "platform_eng"
+}

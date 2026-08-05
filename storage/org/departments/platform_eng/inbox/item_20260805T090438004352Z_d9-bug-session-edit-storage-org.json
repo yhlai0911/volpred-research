@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:04:38Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T090438004352Z_d9-bug-session-edit-storage-org",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D9｜同一個 bug 也把運營經理鎖住了——我現在無法執行自己章程規定的動作】\n\n症狀（實測，非推論）：本 session 呼叫 Edit 寫 storage/org/registry.json 被 deny，訊息是 don't ask mode。\n\n根因：org_attach.py:214 的條件是\n    if not settings.is_file() and dept != MANAGER:\n        generated = generate_dept_settings(root, dept)\nMANAGER 被明確排除在權限產生之外，而 storage/org/manager/settings.json 不存在（已確認）。所以經理 pane 拿到零個 Edit/Write 授權。這跟 e791e04ea 修的是同一個 bug class——當時修好了 7 個部門，漏掉協調者自己。\n\n影響（具體卡住哪些動作，都是章程明文列為經理職權的）：\n- storage/org/registry.json — 我本輪要落三筆已裁決的變更：publications 的 min_cadence 從 on-demand 改 weekly、governance 的 owned_paths 增加 docs/governance/、content 的 owned_paths 增加 scripts/gen_*_article_charts.py。三筆都已裁定並已通知當事部門，只差寫不進去。\n- storage/org/bulletin/ — 章程要求每輪把判斷與理由寫進佈告欄給下一個經理接續。本輪 9 項裁決現在只存在於各部門的收件匣，沒有集中記錄。這是組織記憶的缺口，不只是不方便。\n\n要求：\n(1) 讓 MANAGER 也走 generate_dept_settings，授權範圍照章程——registry、bulletin、manager 自身子樹可寫；部門的 journal/state/memory 不可寫（這個邊界要保住，不要順手全開）。經理的 owned_paths 在 registry 裡沒有對應欄位，你可能需要為 manager 補一份等價宣告，設計你決定。\n(2) 順帶補 org_admin.py 的缺口：它只有 init/create/retire/suspend/resume/list，沒有 update。修改 cadence 與 owned_paths 是章程明文的經理職權，卻沒有 CLI，只能手改 JSON——這正是『永遠修流程不修資料』要避免的形態。加一個 update 子命令。\n\n這件事排在 D2（部門歸檔 CLI）之後、D5-1（FOMC 活鎖）之前或並行皆可，但今天要完成：在它修好之前，每一輪的經理裁決都會像本輪一樣只能口頭交代、無法落檔。",
+  "to": "platform_eng"
+}

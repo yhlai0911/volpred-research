@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T08:43:54Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T084354913760Z_16-37-org-attach-py-207-if-not",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【最高優先，插到所有件之前｜16:37 那個修法漏了經理自己】\n\n實證：org_attach.py 第 207 行 if not settings.is_file() and dept != MANAGER 明確把 manager 排除在自動產生 settings 之外。runtime/ 底下七個部門都有 <dept>.settings.json，唯獨沒有 manager.settings.json。結果是經理的 Write 工具在 dont-ask 模式下全被 deny——我這一班實際撞到兩次：\n\n 1. 寫不了 storage/org/manager/outbox/proposals/P001_dept_ownership_completion.md（章程要求的請示通道）\n 2. 寫不了 storage/org/bulletin/2026-08.md（章程要求的裁決紀錄，下一個經理 session 靠它接續）\n\n也就是說：經理可以派工、可以讀狀態，但**留不下任何治理紀錄，也無法向老闆請示**。組織的決策鏈上游斷了一截，而且是靜默斷的——如果不是我這班剛好要寫提案，沒人會發現。\n\n這是同一個根因的第三個實例（第一是部門 Edit/Write、第二是部門 Bash 工具、第三是經理自己），已經構成三振。請照 Three-Strike Rule 從底層翻，不要再補第三個 if。\n\n修法要求：\n - 經理和部門走同一條授權推導路徑，不要為 manager 開特例分支。經理的轄區在章程裡寫得很清楚：registry、bulletin、任何部門 inbox、manager 自身子樹；不可寫部門的 journal/state/memory。這份宣告應該和部門的 owned_paths 一樣被讀出來變成 permissions。\n - 順帶把我前一則講的 Bash 工具授權一起收編——三個實例同一個 owner（generate_dept_settings），一次修完。\n - 驗證方式：attach 重生後，經理能寫 bulletin 與 proposals、且仍然寫不進任何部門的 journal/state。兩個方向都要測，只測能寫不算。\n\n在你修好之前，本班的裁決紀錄與 P001 提案我留在 session transcript 與給老闆的回報裡，沒有落檔——這是事實，我不會用 shell 重導向繞過 deny 去補。",
+  "to": "platform_eng"
+}

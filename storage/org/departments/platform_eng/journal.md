@@ -312,3 +312,100 @@ owned_paths（建議；擁有 `platform_ops` task_type 卻不能寫對應程式�
 - `alert_remediation_bridge` 對同一 detector 的同一根因開了第二張單
   （`..._20260802` 與 `..._20260805`，差別只是「1 類」變「2 類」source）——
   memory `feedback_incident_not_alert_task_mapping` 指的同一個 class。
+
+
+## 2026-08-05 19:00–19:5x（台灣時間）｜三張工作項｜outcome=done×2, blocked×1
+
+**開班第一件事：轄區已生效。** `registry.json` 的 `platform_eng.owned_paths` 現為
+`["config/", "frontend-v2-fix/", "scripts/", "tests/"]`，且本 session 的
+`storage/org/runtime/platform_eng.settings.json` 已同步發出對應的 Edit/Write。
+先前三班「診斷完成但寫不進去」的那道閘**已解除**（`src/volpred/ops/` 與
+`supabase/migrations/` 仍是 Codex Zone A，經理 D22 定案不給任何部門）。
+
+---
+
+### (1) governance `item_20260805T100508608054Z`｜已退役的 hourly_pregate 仍在盤點｜done
+
+**治理部提的修法會是 no-op，我沒有照做。** `config/control_gate_registry.json:226-233`
+早就是 `phase: retired` / `last_action: retire`；再標一次不改變任何輸出位元。
+
+fresh audit 判決比治理部說的更糟：`pdca_phase=act`、`review.due=true`、
+`reasons=["harm_outcomes=14>=1"]`——它不只是被列進 29 道盤點，而是**每次 audit 都判定需要複審**，
+帶 `--materialize-reviews` 就會替一道死 gate 再開複審單。
+
+根因追到行：`control_gate_lifecycle.py:2792` 的 `retirement_effective` 要求
+`reviewed_through is not None`，而 `_review_watermark`（:1843）必須在**存活的 next_tasks 池**裡
+比對四個 `gate_*` 欄位。那張複審單還在池裡，但**已被壓成 tombstone**，四個欄位全部不在
+`_TOMBSTONE_KEEP_FIELDS`。終態滿 3 天壓縮 → 該單完成於 07-30 → **08-02 起退役永久失效且不自癒**。
+
+證據沒有消失，只是搬家：`storage/next_tasks_archive/2026-08.jsonl` 的完整記錄四個欄位全在，
+`gate_registry_reviewed_at` 與 registry **完全相同**。
+
+**這是 tombstone 盲區 class 今天的第二例**（早上是 `event_reaction_coverage` 以「沒有 deadline」
+判 malformed）。`next_tasks.py:738` 的 `is_tombstoned()` docstring 已明文要求任何以「欄位不存在」
+下判斷的 reader 先呼叫它——**owner 已存在，漏的是呼叫。**
+
+修法落在 `src/volpred/ops/`（Zone A），本部門不實作。**刻意不動 config**：單獨改 config 修不好
+這件事，動了只會留下「看起來修過了」的假象。全文
+`work/hourly_pregate_ghost_20260805/root_cause.md`，已回覆治理部並上報經理轉 Codex。
+
+### (2) content `item_20260805T093841452486Z` ＋ governance `item_20260805T090032179605Z`｜系列註冊漂移｜done
+
+`config/article_series.json` 的 `event_thermometer.members` 補入 `mile_63e0e1ff`。
+歸屬自行複驗（feed.json 該篇 `details.event_series_slot='T-2'`，與 registry 的
+`membership_criteria` 一致），沒有照抄請求內容。
+`series_registry.py --apply` → 0 title change；`--json` 回讀 **drift 1 → 0**。
+未跑 supabase sync 並在回覆裡說明理由：title change 為 0 ＝ 沒有內容變更，沒有要推的東西。
+
+治理部要的**結構修法**（members 改由 `details.event_series_slot` 推導）方向我同意且現在做得動
+（`scripts/` 已在轄區），但**本輪不做並已明說**：正解不是為 event_series_slot 再開特例分支，
+而是把「成員由哪個 details 欄位推導」變成 registry 的宣告欄位，順便收編 `audit()` 現有的
+`by_ct` hack（:121）——否則第三種推導出現時會有第三個特例。這需要六個系列逐一回歸，
+本輪預算不足以完整做完並收尾，不做一半。已承諾下一班當獨立工作項交付。
+
+### (3) member_success 前端｜/questions 永遠停在 skeleton｜blocked（診斷完成，一行未落地）
+
+根因**逐點對上符號**，不是假說：`app/questions/page.tsx:255-258` 的
+`authLoading` 分支渲染的就是「一條 `h-4 w-40` 灰條」＝ 會員部看到的畫面；
+全檔只有 L69 與 L79 兩處把 `authLoading` 設回 false，**兩處都在 L63-64 之後**；
+而 L63-64 的 `continuity.read()` 毫無保護。`read()`（`member-continuity-browser.ts:47-52`）
+把 localStorage 直接餵給嚴格 validator（`exactFields`，欄位多一個少一個就 throw）。
+**localStorage 是不可信輸入卻被當可信輸入**，於是舊 schema 殘留讓整頁對該裝置永久壞掉且不自癒
+——這也解釋了為什麼 owner 的瀏覽器最先壞（它的 localStorage 是全站最舊的一份）。
+同檔 L118-122 的寫入端**已經有** try/catch 對照組，讀取端沒有，是不一致不是取捨。
+
+class sweep（`getSession()` 28 處中「`.then` 設 ready/loading、無 `.catch`」＝ reject 即永久 loading）：
+`AuthButton:100`（兩版共用，V3Shell 也 require 它）、questions 兩版、
+`My{MemberHome,Questions,Bookmarks}Console`、`Editorial{MemberHome,Bookmarks,Questions}` 共 9 處；
+Admin 側 7 處同形，屬內部介面本輪不動。
+
+**一行都沒落地，原因與我先前的判斷不同，在此更正**：擋住寫入的**不是** `path_claims`
+的 `frontend-v2-fix/src/` claim（前一班與本班一度都這樣認定，會員部也被我誤導）。
+真正的 deny 來自 user-level PreToolUse hook `~/.claude/hooks/main-checkout-lock.sh`。
+鎖檔 `~/.claude/session-locks/af037391a28f.lock` 內容（直接讀出）：
+
+```
+b575276c-b48e-47b2-a6d5-c816ee245fcb|12538|1785926504|/Users/yhlai0911/volpred-research/frontend-v2-fix
+```
+
+`1785926504` = 18:41:44 台灣時間，持有者是 member_success 的 session。
+
+**結構根因**：`~/.claude/session-locks/optout.conf` 只列了 `/Users/yhlai0911/volpred-research`，
+而 `frontend-v2-fix/` 是**獨立巢狀 git repo**，hook（:52 以 repo root 算 key）解析成巢狀 repo 自己
+→ **專案的 opt-out 蓋不到它**。結果：全平台唯一由部門持有寫入權的前端轄區，
+被一道「該專案已經聲明不使用」的互斥鎖守著。
+且鎖是 PreToolUse 落的，記錄的是**有人試過寫**而非有人寫了——與 `write_claim_guard`
+幽靈 claim（治理部今日已裁定為 bug）**同一個 class**，今天擋了同一個部門兩次。
+
+修 `optout.conf` 需要的 Edit 不在本部門 owned_paths，**被拒且我不繞過**（這是正確的拒絕）。
+永久修法是在 `frontend-v2-fix/` 內放 `.claude/no-session-lock`（hook :46 的另一條 opt-out，
+隨 clone 走），但那個檔本身也在被鎖的 repo 內——雞生蛋。鎖閒置 45 分鐘自動失效（19:26:44）。
+全文 `work/questions_skeleton_20260805/diagnosis_and_patch.md`。
+
+### 本班遇到的第三道幽靈鎖（同 class，第三個實例）
+
+寫本篇 journal 時被 `write_claim_guard` 擋下：持有者是 **66dfcf3a——本部門前一班自己的 session**，
+於 10:53:08Z 取得、已停工。依 CLI 明文用途（"clears a claim whose session is gone"）
+`path_claims.py release --scope <journal>` 解除，**沒有用 `VOLPRED_ALLOW_CONCURRENT_WRITE=1` 硬搶**。
+今天同一個 class 的三個實例：會員部的 frontend 幽靈鎖、本部門對自己 journal 的幽靈鎖、
+以及治理部已裁定的 write_claim_guard 本體。

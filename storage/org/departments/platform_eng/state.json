@@ -1,67 +1,56 @@
 {
-  "health": "blocked",
+  "health": "degraded",
   "kpi": {
     "control_gate_evidence_sources_unhealthy": 2,
+    "series_registry_drift": 0,
     "reproduce_gate_false_positive_experiments": ["k1699", "K1710"],
     "worktree_artifacts_preserved_commits": ["d18fee80b", "3ca7e6685", "8876b7334"],
     "diagnoses_complete_awaiting_write_access": 4,
     "incidents_contained_this_session": 2,
     "article_charts_delivered": 11,
     "article_charts_experiments": ["k1451", "k1465", "K1677-rev", "K1696", "k1704"],
-    "last_fresh_detector_run": "2026-08-05T09:00:00Z"
+    "last_fresh_detector_run": "2026-08-05T11:07:40Z"
   },
-  "last_run": "2026-08-05T10:53:00Z",
-  "open_items": 44,
-  "d36_prep": {
-    "A_repin": "已由他人落地（commit 1b513bd79）；本部門獨立重算 6/6 pin 全 match；worker 已恢復 running，但尚無非拒絕 completion → 已止血待驗證",
-    "B_ci_check": "work/provider_denial_20260805/test_provider_registry_pins.py，現況綠 + 舊 pin 在臨時樹跑紅（破壞驗證過），可直接搬 scripts/tests/",
-    "C_D": "未寫，都在 scripts/dispatch_supervisor/；D 不得自建第四套 dedup",
-    "questions_fix": "卡互斥鎖（會員部持有 frontend-v2-fix），已要求明確歸屬，未硬搶"
+  "last_run": "2026-08-05T11:25:00Z",
+  "open_items": 42,
+  "owned_paths_now_effective": {
+    "paths": ["config/", "frontend-v2-fix/", "scripts/", "tests/"],
+    "note": "registry 已更新且 runtime/platform_eng.settings.json 已同步發出 Edit/Write；先前三班的 owned_paths 阻塞已解除。src/volpred/ops/ 與 supabase/migrations/ 維持 Codex Zone A（經理 D22），本部門不寫。",
+    "codex_coordination_duty": "動 scripts/ 前先 git log -5 --oneline -- <path>，最近有 [codex] 先協調（D16 第二項仍有效）"
   },
-  "d26_enforcement_gap": "經理 10:23:42Z 裁定停派 canonical platform_ops，10:41:14Z 仍進來五張；裁決無機械 owner，已建議在投遞前比對 owned_paths 與修復面",
-  "inbox_surface_audit": {
-    "items": 46,
-    "writable_today": 0,
-    "blocked_on_owned_paths": 30,
-    "no_path_named": 16,
-    "blocked_roots": "scripts/26 src/17 storage/17 .claude/11 config/8 paper/4 docs/3 supabase/2",
-    "note": "D26 一次性批次判定，不再重複回報同一阻塞"
+  "this_session": {
+    "done": [
+      "governance item_20260805T100508608054Z — hourly_pregate 幽靈 gate 根因（治理部提的修法是 no-op，已更正）",
+      "content item_20260805T093841452486Z + governance item_20260805T090032179605Z — 系列註冊 drift 1→0"
+    ],
+    "blocked": [
+      "member_success /questions skeleton — 根因與 class sweep 完成，一行未落地（user-level 主 checkout 互斥鎖）"
+    ]
   },
-  "handed_off": {
-    "questions_login_incident": "根因已交會員部（他們正握 frontend-v2-fix 寫入鎖）；未搶鎖，等他們回覆是否由本部門接手實作"
+  "frontend_lock_blocker": {
+    "what": "~/.claude/hooks/main-checkout-lock.sh 對 frontend-v2-fix 落鎖，持有者 b575276c（member_success），18:41:44 台灣時間",
+    "root_cause": "~/.claude/session-locks/optout.conf 只列外層 repo；frontend-v2-fix 是獨立巢狀 git repo，hook 以 repo root 算 key，專案的 opt-out 蓋不到它",
+    "class": "與 write_claim_guard 幽靈 claim 同 class（鎖記錄『試過寫』而非『寫了』）；今日第三個實例",
+    "permanent_fix": "在 frontend-v2-fix/ 內放 .claude/no-session-lock（hook:46 的 opt-out，隨 clone 走）；該檔本身也在被鎖的 repo 內，需鎖解除後第一件事做",
+    "external_action": "optout.conf 不在本部門 owned_paths，Edit 被拒且未繞過；老闆可執行 rm ~/.claude/session-locks/af037391a28f.lock 立即解鎖",
+    "expires_at": "2026-08-05T11:26:44Z（閒置 45 分鐘）",
+    "patch_ready": "work/questions_skeleton_20260805/diagnosis_and_patch.md（三處修正 + 9 處 class sweep 清單）"
   },
+  "handed_to_codex_zone_a": [
+    "control_gate_lifecycle._review_watermark 未問 is_tombstoned — 退役 gate 每輪重開複審單（work/hourly_pregate_ghost_20260805/root_cause.md）",
+    "src/volpred/charts/article_charts.py::upload_chart 無退避重試 — Supabase 圖片逾時擋住內容部兩篇進池",
+    "src/volpred/ops/questions.py:1640 rerank 不清 archived 列的 current_rank（會員部已定位）"
+  ],
+  "next_card_commitments": [
+    "series_registry 結構修法：把『成員由哪個 details 欄位推導』變成 registry 宣告欄位，收編 audit() 的 by_ct hack，六系列回歸 + 機械測試",
+    "D2 org 歸檔 CLI：scripts/org/ 已在轄區，但 11:12Z 起被 session f5153fb1 認領中，本輪未動"
+  ],
   "active_incident": {
     "what": "provider 拒絕 worker spawn — 執行層全停",
     "root_cause": "config/provider_registry.json 的 settings_surface pin 停在 76e6bfc7c（07-23），commit e69a0c55c 於 08-05 15:29 改了 .claude/settings.json 未同步 re-pin",
     "not_the_cause": "CLI 升級 sha（executable identity 檢查已通過）",
-    "level": "root_cause_identified_not_fixed（尚未 contained，執行層仍停）",
-    "blocked_on": "修法 A/B/C/D 全在 config/ 與 scripts/",
+    "level": "A 已由他人落地（1b513bd79）；B/C/D 未寫",
+    "next": "B（CI 擋 pin 陳舊）落點 tests/ 現已可寫，是下一班第一順位",
     "report": "work/provider_denial_20260805/incident.md"
-  },
-  "pool_scope_audit": {
-    "pending_platform_ops": 88,
-    "workable_with_current_scope": 1,
-    "workable_item": "deploy_verify_v3_digest_route_20260717（純 Chrome 視覺審查，零 repo 寫入）",
-    "blocked_named_out_of_scope_paths": 72,
-    "report": "work/pool_classification/platform_ops_scope_20260805.md"
-  },
-  "d14_status": "遵辦：(a)(b) 已停載，(c) 出口規格已寫，(d) 分類已回報；等老闆對 registry 的裁決",
-  "blocked_on": {
-    "reason": "owned_paths 只有 frontend-v2-fix/，無法寫 src/、scripts/、config/、tests/；D9 遞迴性：經理自己也寫不了 registry.json，而 owned_paths 就住在裡面",
-    "escalated_to": "manager",
-    "escalation_items": [
-      "item_20260805T090132643067Z_alert-control-gate-source-healt",
-      "item_20260805T092519977832Z_owned-paths-reproduce-gate-hash",
-      "item_20260805T094421479468Z_20-3-1-n-n-p1-worktree-commit-g"
-    ],
-    "patches_ready": [
-      "work/alert_control_gate_source_health_20260802/diagnosis_and_patch.md",
-      "work/reproduce_gate_import_surface/diagnosis_and_patch.md",
-      "work/sidecarless_index_lock/forensics.md"
-    ],
-    "interim_relief_shipped": [
-      "work/inbox_archive/archive_inbox.py（七部門可直接跑，解 D2）",
-      "work/content_charts/gen_*_article_charts.py（圖已交付；腳本待權限下來搬進 scripts/，無需改碼）"
-    ]
   }
 }
