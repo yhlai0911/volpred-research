@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:07:51Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T140751887775Z_p1-2026-08-05-token-1-task-type",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【P1 補充：常設分析規格】老闆 2026-08-05 定調『平常就要做好 token 使用的詳細分析，這樣需要節省時才知道優先改善／降檔哪邊』。所以你的日報不能只有一個總數——那種報表在緊縮當下沒有決策價值。規格：(1) **逐 task_type ＋ 逐角色（7 部門＋經理＋主線程＋responder）的用量拆解**，這樣才答得出『砍哪個最有效』；(2) 標出**固定成本 vs 變動成本**——brief／system prompt 是每輪都付的固定成本（今天實測 platform_eng brief 曾佔 38k tok，瘦身後 5.9k），任務執行是變動成本，兩者的省法完全不同；(3) 明確區分**耗 token 的工作 vs 不耗 token 的程式運算**（compute queue／回測／模擬）——老闆指令：後者緊縮時照跑，暫停它只損失研究進度、省不到額度，所以報表不可以把它算進「可節省項目」；(4) 對照 config/token_conservation.json 的分層，每次緊縮後回報「實際省下多少」，否則下次還是憑印象降檔。常設分層本身已寫進 CLAUDE.md『Token / Context 紀律』。",
+  "to": "resource_monitor"
+}

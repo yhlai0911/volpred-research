@@ -237,3 +237,31 @@
   **我沒有 owned_paths，本班未修任何程式碼，也不宣稱修了。**
 - 產出：`reports/2026-08-05_daily_zero_root_cause.md`、`tools/verify_selfheal.py`、
   charter 新增三節（儀表分工／事故定義／開班儀表巡檢）。
+
+## 2026-08-05 22:16 台灣時間 — P1 常設 token 分析規格 v1
+
+工作項 `item_20260805T140751887775Z`（P1, manager）
+**outcome=done** — 常設工具 `tools/usage_breakdown.py` 上線並產出今日首份報表。
+**但做這件事的第一個發現是我自己的量測錯了 10 倍**，見下。
+
+- **自我更正（重大）**：`_billable_total()` 讀正規化鍵 `cache_create_tokens`，raw turn 用的是
+  API 原始鍵 `cache_creation_input_tokens`；平台每一處都先呼叫 `_usage_breakdown()`，
+  **我的四支工具全部跳過**，整個 cache creation 被算成 0。
+  決定性對照 08-04：canonical **24,178,959** vs 我原本 **2,360,848**（低估 9.8 倍）。
+  修完重算 08-04 得 23,655,800，與 canonical 差 2%（UTC vs 台灣日界）——兩條路徑對得上。
+  四支工具（usage_breakdown／today_burn／hourly_baseline／token_breakdown）已全部改成先正規化，
+  **用平台既有函式，不寫第二套**。
+- **今日真值 46,951,901**（原報 4,734,619）。並行倍數同步更正：每活躍小時 **4.19x**（原 2.14x）、
+  尖峰 **6.62x**（原 3.77x）；結論方向不變（倍數來自 session 數不是單價），量級是原本的 1.8 倍。
+- **首份報表的頭條**：**88.2% 是脈絡成本（fixed），只有 11.8% 在做事（variable）**。
+  降檔模型／少做任務動的是 11.8%，瘦 brief 動的是 88.2%——同樣努力差 7.5 倍。
+  每個角色的固定成本佔比都在 74-97%；subagent 是 97%（緊縮期「拆成多個 subagent 平行做」最貴）。
+  brief 實體大小可直接量：**manager 271,493B ≈ 90.5k tok**，是第二名 platform_eng 的 2.3 倍，
+  而經理喚醒最頻繁——瘦身單位效益最高的是它。
+- 不耗 token 的運算（今日 15 件 compute job，billable 0）**結構上獨立成區塊**，
+  不可能被算進可節省項；節流分層對照 `config/token_conservation.json` 逐項列出。
+- **逐角色是推斷不是量測**（telemetry 無角色欄位，身分走 --append-system-prompt 不入 transcript）。
+  歸屬品質 exact 22／strong 15／weak 44／unknown 14，`unattributed` 佔 29.9%。
+  最小修法（org_attach 把 session_id 寫進 lease）已送 platform_eng。
+- 過程中踩到第二個「看起來合理的錯值」：第一版用部門名字詞計數當 fallback，
+  `research` 命中 repo 路徑 `volpred-research`，研究部被算成 65.6%。已改成只認 `departments/<x>`。

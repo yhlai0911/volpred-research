@@ -1,6 +1,7 @@
 {
   "health": "ok",
   "kpi": {
+    "CORRECTION_all_earlier_today_numbers": "本部門今日稍早所有 billable 數字低估 9.8 倍（工具跳過 _usage_breakdown 正規化）；已修四支工具並重算，以 2026-08-05_standing_usage_spec_v1.md 為準",
     "alerts_sent_last_24h_defect": "structurally always 0: reader sent_at/ts vs writer last_sent_at; 0/678 entries have sent_at",
     "allowance_gap_measured": "email 76% vs /usage 89% (13pp under-report); two repo caps 77.7M vs 213.3M = 2.75x",
     "allowance_gauge": "/usage All-models weekly pct (ONLY); billable is cost attribution, never remaining quota",
@@ -34,12 +35,15 @@
     "email_correction_deliverable": "reports/2026-08-05_email_correction_TEXT_ready_to_paste.md (finished text, snippet self-tested, one-shot; 5-day total 102,758,687; 08-05 intentionally unfilled)",
     "external_channel_sole": "daily 08:00 Asia/Taipei token report email (scripts/token_report_email.py)",
     "external_incorrect_sends_pending_correction": 6,
+    "fixed_context_cost_share_pct": 88.2,
+    "manager_brief_bytes": 271493,
     "mission_output_share_pct_upstream_NOT_KPI": 4.5,
+    "non_token_compute_jobs_today": 15,
     "noop_text_only_share_pct_upper_bound_claude": 2.68,
     "note": "D43 定案：停擺窗非空轉；部門制成本隨部門數線性（每 pane ≈ +5 萬 billable/活躍小時）；今日 Codex telemetry 零記錄，平台總量反而降到 08-02 的 11%。判準已升級為 skills/report-trust-judgment。",
     "org_parallel_max_concurrent_sessions": 28,
-    "org_parallel_multiple_peak_hour": 3.77,
-    "org_parallel_multiple_per_active_hour": 2.14,
+    "org_parallel_multiple_peak_hour": 6.62,
+    "org_parallel_multiple_per_active_hour": 4.19,
     "outage_window_billable_share_pct": 52.1,
     "outage_window_effectful_share_pct_lower_bound": 46.7,
     "pe_inbox_blocking_awaiting_boss": 1,
@@ -57,6 +61,7 @@
     "reports_lacking_self_describing_fields": "all sampled (generated_at/period_end/period_complete absent)",
     "reports_total_scanned": 98,
     "reports_written_before_period_end": 47,
+    "role_attribution_quality": "exact 22 / strong 15 / weak 44 / unknown 14; unattributed 29.9%",
     "session_longevity_hours_lower_bound": 103.76,
     "structural_defects_closed": [
       "F1_daily_report_utc_boundary(commit dab112d3a)",
@@ -71,10 +76,11 @@
       "daily_2026-07-21..07-28_never_backfilled",
       "report_completeness_stored_in_mtime_not_payload(does_not_survive_git_clone)"
     ],
-    "today_2026_08_05_claude_billable": 4734619,
+    "today_2026_08_05_claude_billable": 46951901,
     "today_2026_08_05_codex_billable": 0,
     "top_root_concentration_pct": 59.0,
     "top_root_concentration_pct_session_id_level_UNDERESTIMATE": 34.2,
+    "variable_work_share_pct": 11.8,
     "verification_plan": "reports/2026-08-05_verification_plan_v2.md (A:6 + B:backfill + C:fresh-clone)",
     "weekly_permanently_frozen_partial": [
       "weekly_2026-05-29=154173260",
@@ -88,11 +94,12 @@
     ],
     "window": "2026-07-29..2026-08-04 (UTC, 7d)"
   },
-  "last_run": "2026-08-05T14:03:57Z",
+  "last_run": "2026-08-05T14:16:38Z",
   "open_items": [
-    "明早 08:00 後回讀 daily_2026-08-05.json 是否已自癒為非 0（不人工補）",
-    "等 platform_eng 處理 item_20260805T140214140944Z（sent_last_24h 讀寫欄位、cap 錨點漂移）",
-    "等 platform_eng 回填 F1/F2/F3/五份凍結 weekly/F5，之後回讀複算"
+    "停擺窗佔比用修好的工具重做（舊值 52.1% 已作廢）",
+    "查 Codex 側 _iter_codex_session_records 是否同樣需要正規化（歷史金額待複驗）",
+    "明早 08:00 後回讀 daily_2026-08-05.json 是否自癒（不人工補）",
+    "等 platform_eng：sent_last_24h 讀寫欄位、cap 錨點漂移、lease 寫 session_id"
   ],
   "open_items_detail": [
     "R3 session 壽命的 fork-root 層級尚未重算（目前只有下界 103.76h）",

@@ -1,0 +1,645 @@
+{
+  "date_local": "2026-08-05",
+  "generated_at": "2026-08-05T22:13:34.182965+08:00",
+  "by_role": {
+    "unattributed": {
+      "billable": 14030563,
+      "turns": 1086,
+      "fixed_first_load": 13224593,
+      "standing_repaid": 424400170,
+      "variable": 805970,
+      "output": 803947
+    },
+    "platform_eng": {
+      "billable": 7854087,
+      "turns": 1347,
+      "fixed_first_load": 6864534,
+      "standing_repaid": 307518585,
+      "variable": 989553,
+      "output": 986863
+    },
+    "content": {
+      "billable": 5639101,
+      "turns": 1157,
+      "fixed_first_load": 4816431,
+      "standing_repaid": 253239231,
+      "variable": 822670,
+      "output": 819710
+    },
+    "research": {
+      "billable": 4502955,
+      "turns": 679,
+      "fixed_first_load": 3913331,
+      "standing_repaid": 162528624,
+      "variable": 589624,
+      "output": 588302
+    },
+    "resource_monitor": {
+      "billable": 3063106,
+      "turns": 577,
+      "fixed_first_load": 2571552,
+      "standing_repaid": 79436189,
+      "variable": 491554,
+      "output": 490134
+    },
+    "governance": {
+      "billable": 2963844,
+      "turns": 673,
+      "fixed_first_load": 2445612,
+      "standing_repaid": 111170860,
+      "variable": 518232,
+      "output": 516937
+    },
+    "_retired": {
+      "billable": 2692525,
+      "turns": 487,
+      "fixed_first_load": 2287513,
+      "standing_repaid": 185903195,
+      "variable": 405012,
+      "output": 404050
+    },
+    "member_success": {
+      "billable": 1835305,
+      "turns": 365,
+      "fixed_first_load": 1601790,
+      "standing_repaid": 58503294,
+      "variable": 233515,
+      "output": 232856
+    },
+    "publications": {
+      "billable": 1830748,
+      "turns": 379,
+      "fixed_first_load": 1461565,
+      "standing_repaid": 91749481,
+      "variable": 369183,
+      "output": 367828
+    },
+    "main_checkout:subagent": {
+      "billable": 1023884,
+      "turns": 122,
+      "fixed_first_load": 997035,
+      "standing_repaid": 12092805,
+      "variable": 26849,
+      "output": 22605
+    },
+    "dispatch_worker": {
+      "billable": 970575,
+      "turns": 344,
+      "fixed_first_load": 721857,
+      "standing_repaid": 33432142,
+      "variable": 248718,
+      "output": 248089
+    },
+    "dispatch_worker:subagent": {
+      "billable": 545208,
+      "turns": 117,
+      "fixed_first_load": 528161,
+      "standing_repaid": 10227934,
+      "variable": 17047,
+      "output": 16833
+    }
+  },
+  "by_dir_class": {
+    "dispatch_worker": {
+      "billable": 1515783,
+      "turns": 461,
+      "fixed_first_load": 1250018,
+      "standing_repaid": 43660076,
+      "variable": 265765,
+      "output": 264922
+    },
+    "main_checkout": {
+      "billable": 45436118,
+      "turns": 6872,
+      "fixed_first_load": 40183956,
+      "standing_repaid": 1686542434,
+      "variable": 5252162,
+      "output": 5233232
+    }
+  },
+  "by_model": {
+    "claude-opus-5": {
+      "billable": 38335545,
+      "turns": 6338,
+      "fixed_first_load": 33498543,
+      "standing_repaid": 1473498979,
+      "variable": 4837002,
+      "output": 4823034
+    },
+    "claude-fable-5": {
+      "billable": 6174297,
+      "turns": 491,
+      "fixed_first_load": 5785619,
+      "standing_repaid": 201228678,
+      "variable": 388678,
+      "output": 387722
+    },
+    "claude-sonnet-5": {
+      "billable": 2246305,
+      "turns": 418,
+      "fixed_first_load": 1984519,
+      "standing_repaid": 54208152,
+      "variable": 261786,
+      "output": 257421
+    },
+    "claude-opus-4-8": {
+      "billable": 137262,
+      "turns": 11,
+      "fixed_first_load": 107271,
+      "standing_repaid": 1144362,
+      "variable": 29991,
+      "output": 29973
+    },
+    "claude-haiku-4-5-20251001": {
+      "billable": 58492,
+      "turns": 4,
+      "fixed_first_load": 58022,
+      "standing_repaid": 122339,
+      "variable": 470,
+      "output": 4
+    },
+    "<synthetic>": {
+      "billable": 0,
+      "turns": 71,
+      "fixed_first_load": 0,
+      "standing_repaid": 0,
+      "variable": 0,
+      "output": 0
+    }
+  },
+  "by_session": {
+    "553594d7-ebcb-4356-8fd7-239d51fcad19": {
+      "billable": 4651309,
+      "turns": 183,
+      "fixed_first_load": 4520535,
+      "standing_repaid": 133700191,
+      "variable": 130774,
+      "output": 130432,
+      "role": "unattributed",
+      "quality": "unknown",
+      "dir_class": "main_checkout"
+    },
+    "47bce991-2c91-48d5-b252-be85ea48197f": {
+      "billable": 3822312,
+      "turns": 173,
+      "fixed_first_load": 3716199,
+      "standing_repaid": 100810633,
+      "variable": 106113,
+      "output": 105794,
+      "role": "unattributed",
+      "quality": "unknown",
+      "dir_class": "main_checkout"
+    },
+    "66dfcf3a-8c8e-4a7b-b4a0-cc81ff217492": {
+      "billable": 3359873,
+      "turns": 432,
+      "fixed_first_load": 3088490,
+      "standing_repaid": 131846636,
+      "variable": 271383,
+      "output": 270568,
+      "role": "platform_eng",
+      "quality": "strong",
+      "dir_class": "main_checkout"
+    },
+    "7cdc5dc3-2f38-4e28-b9ba-f0199042d601": {
+      "billable": 2692525,
+      "turns": 487,
+      "fixed_first_load": 2287513,
+      "standing_repaid": 185903195,
+      "variable": 405012,
+      "output": 404050,
+      "role": "_retired",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "f5153fb1-ad06-418d-a31e-76373199af07": {
+      "billable": 2387404,
+      "turns": 281,
+      "fixed_first_load": 2138541,
+      "standing_repaid": 83482245,
+      "variable": 248863,
+      "output": 247508,
+      "role": "content",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "7e813e78-98dc-455a-8209-60ef8423bb69": {
+      "billable": 2067952,
+      "turns": 360,
+      "fixed_first_load": 1849856,
+      "standing_repaid": 119729009,
+      "variable": 218096,
+      "output": 217441,
+      "role": "platform_eng",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "c4ef4804-4fe0-4950-af7c-8f22d3f398ce": {
+      "billable": 1967930,
+      "turns": 181,
+      "fixed_first_load": 1826011,
+      "standing_repaid": 67149242,
+      "variable": 141919,
+      "output": 141585,
+      "role": "unattributed",
+      "quality": "unknown",
+      "dir_class": "main_checkout"
+    },
+    "4df45983-81db-4825-9965-123b205d55d1": {
+      "billable": 1866519,
+      "turns": 279,
+      "fixed_first_load": 1623476,
+      "standing_repaid": 93109271,
+      "variable": 243043,
+      "output": 242530,
+      "role": "research",
+      "quality": "strong",
+      "dir_class": "main_checkout"
+    },
+    "8de7199c-a879-4142-8305-4f7bdbd99610": {
+      "billable": 1819393,
+      "turns": 115,
+      "fixed_first_load": 1752278,
+      "standing_repaid": 50490411,
+      "variable": 67115,
+      "output": 66902,
+      "role": "unattributed",
+      "quality": "unknown",
+      "dir_class": "main_checkout"
+    },
+    "e41ed794-ada8-41ab-a55f-9eabb12bcb76": {
+      "billable": 1240310,
+      "turns": 360,
+      "fixed_first_load": 1027861,
+      "standing_repaid": 93493518,
+      "variable": 212449,
+      "output": 211769,
+      "role": "content",
+      "quality": "strong",
+      "dir_class": "main_checkout"
+    },
+    "fdbcc872-42f5-482c-95c1-e8e373413a2a": {
+      "billable": 1215400,
+      "turns": 263,
+      "fixed_first_load": 1036158,
+      "standing_repaid": 53482124,
+      "variable": 179242,
+      "output": 178745,
+      "role": "governance",
+      "quality": "strong",
+      "dir_class": "main_checkout"
+    },
+    "b575276c-b48e-47b2-a6d5-c816ee245fcb": {
+      "billable": 1078618,
+      "turns": 188,
+      "fixed_first_load": 952536,
+      "standing_repaid": 33407090,
+      "variable": 126082,
+      "output": 125731,
+      "role": "member_success",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "0946be3c-c40e-4f9e-9360-0d6005af8d14": {
+      "billable": 1057902,
+      "turns": 241,
+      "fixed_first_load": 806245,
+      "standing_repaid": 70684956,
+      "variable": 251657,
+      "output": 250586,
+      "role": "publications",
+      "quality": "strong",
+      "dir_class": "main_checkout"
+    },
+    "3c8bb1f1-5385-40a9-936c-203e829f5463": {
+      "billable": 1000125,
+      "turns": 124,
+      "fixed_first_load": 887161,
+      "standing_repaid": 22137353,
+      "variable": 112964,
+      "output": 112752,
+      "role": "resource_monitor",
+      "quality": "strong",
+      "dir_class": "main_checkout"
+    },
+    "a91f469b-23dd-48d9-90d2-838aadfb2e6b": {
+      "billable": 794369,
+      "turns": 121,
+      "fixed_first_load": 700853,
+      "standing_repaid": 19694467,
+      "variable": 93516,
+      "output": 93315,
+      "role": "research",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "935419ca-1e5c-4104-be89-53862c4717e4": {
+      "billable": 700830,
+      "turns": 175,
+      "fixed_first_load": 584856,
+      "standing_repaid": 27136426,
+      "variable": 115974,
+      "output": 115668,
+      "role": "governance",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "cc471bf7-f609-4d5e-8cfb-07efe97ea4eb": {
+      "billable": 661763,
+      "turns": 202,
+      "fixed_first_load": 517010,
+      "standing_repaid": 40266069,
+      "variable": 144753,
+      "output": 144398,
+      "role": "content",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "bb5b4d09-06ee-443b-8bb8-469378c8af1e": {
+      "billable": 641383,
+      "turns": 156,
+      "fixed_first_load": 548533,
+      "standing_repaid": 23457971,
+      "variable": 92850,
+      "output": 92579,
+      "role": "member_success",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "96a080fa-4e61-4d8d-a243-7473a62f8db2": {
+      "billable": 613174,
+      "turns": 125,
+      "fixed_first_load": 497347,
+      "standing_repaid": 27335397,
+      "variable": 115827,
+      "output": 115596,
+      "role": "research",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "d36323dc-e7bf-4068-ba35-f85469f00c62": {
+      "billable": 552144,
+      "turns": 140,
+      "fixed_first_load": 419883,
+      "standing_repaid": 32699777,
+      "variable": 132261,
+      "output": 132001,
+      "role": "unattributed",
+      "quality": "unknown",
+      "dir_class": "main_checkout"
+    },
+    "5c117fd6-a04f-464a-8534-d4da19ae50e1": {
+      "billable": 547995,
+      "turns": 113,
+      "fixed_first_load": 452067,
+      "standing_repaid": 18720225,
+      "variable": 95928,
+      "output": 95724,
+      "role": "publications",
+      "quality": "strong",
+      "dir_class": "main_checkout"
+    },
+    "d055e3d9-3409-448b-b7d6-0c44fa52fae2": {
+      "billable": 538545,
+      "turns": 58,
+      "fixed_first_load": 486994,
+      "standing_repaid": 11811985,
+      "variable": 51551,
+      "output": 51454,
+      "role": "research",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "dd2c8bcc-5dcd-4b94-aabb-1875018afb0a": {
+      "billable": 525407,
+      "turns": 134,
+      "fixed_first_load": 404856,
+      "standing_repaid": 25363258,
+      "variable": 120551,
+      "output": 120285,
+      "role": "unattributed",
+      "quality": "unknown",
+      "dir_class": "main_checkout"
+    },
+    "95bcff51-1bcf-4a6b-9d8d-09d18d64cf1f": {
+      "billable": 501323,
+      "turns": 137,
+      "fixed_first_load": 385863,
+      "standing_repaid": 22057463,
+      "variable": 115460,
+      "output": 115203,
+      "role": "resource_monitor",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    },
+    "0dd8c910-4fa0-4a72-b420-06f669db0a69": {
+      "billable": 459043,
+      "turns": 114,
+      "fixed_first_load": 349199,
+      "standing_repaid": 19603188,
+      "variable": 109844,
+      "output": 109637,
+      "role": "governance",
+      "quality": "weak",
+      "dir_class": "main_checkout"
+    }
+  },
+  "role_attribution_quality": {
+    "exact": 22,
+    "strong": 15,
+    "weak": 44,
+    "unknown": 14
+  },
+  "total": {
+    "billable": 46951901,
+    "turns": 7333,
+    "fixed_first_load": 41433974,
+    "standing_repaid": 1730202510,
+    "variable": 5517927,
+    "output": 5498154
+  },
+  "fixed_cost_briefs": {
+    "manager": {
+      "bytes": 271493,
+      "approx_tokens": 90498,
+      "mtime": "2026-08-05T19:04:41.358205+08:00"
+    },
+    "platform_eng": {
+      "bytes": 118169,
+      "approx_tokens": 39390,
+      "mtime": "2026-08-05T18:58:28.429812+08:00"
+    },
+    "content": {
+      "bytes": 66717,
+      "approx_tokens": 22239,
+      "mtime": "2026-08-05T18:58:17.321505+08:00"
+    },
+    "governance": {
+      "bytes": 34138,
+      "approx_tokens": 11379,
+      "mtime": "2026-08-05T18:58:22.217949+08:00"
+    },
+    "resource_monitor": {
+      "bytes": 31230,
+      "approx_tokens": 10410,
+      "mtime": "2026-08-05T18:58:38.004565+08:00"
+    },
+    "research": {
+      "bytes": 25250,
+      "approx_tokens": 8417,
+      "mtime": "2026-08-05T21:27:23.043077+08:00"
+    },
+    "publications": {
+      "bytes": 25249,
+      "approx_tokens": 8416,
+      "mtime": "2026-08-05T18:58:31.745960+08:00"
+    },
+    "member_success": {
+      "bytes": 22237,
+      "approx_tokens": 7412,
+      "mtime": "2026-08-05T18:58:25.321185+08:00"
+    }
+  },
+  "non_token_compute": {
+    "policy": "老闆 2026-08-05：緊縮時照跑。暫停它只損失研究進度，省不到額度。",
+    "jobs_today": 15,
+    "billable_tokens": 0,
+    "note": "這些 job 不經 LLM，token 帳上為 0；只有『需要 LLM 判讀結果』那一段才受 tier 規則管。",
+    "sample": [
+      {
+        "job": "lazypack-mile_d9bf7b73",
+        "finished": "2026-08-05T21:18:21.439896+08:00",
+        "stdout_bytes": 635
+      },
+      {
+        "job": "lazypack-mile_f9a81b80",
+        "finished": "2026-08-05T21:17:22.406995+08:00",
+        "stdout_bytes": 768
+      },
+      {
+        "job": "lazypack-mile_a1d9c5e0-r2",
+        "finished": "2026-08-05T19:02:28.361212+08:00",
+        "stdout_bytes": 917
+      },
+      {
+        "job": "lazypack-mile_cea5a8b3",
+        "finished": "2026-08-05T18:36:39.519216+08:00",
+        "stdout_bytes": 1048
+      },
+      {
+        "job": "lazypack-mile_6d6b3a8f",
+        "finished": "2026-08-05T18:36:26.674920+08:00",
+        "stdout_bytes": 636
+      },
+      {
+        "job": "lazypack-mile_a1d9c5e0",
+        "finished": "2026-08-05T18:31:52.092927+08:00",
+        "stdout_bytes": 908
+      },
+      {
+        "job": "lazypack-mile_c4c34762",
+        "finished": "2026-08-05T18:21:05.517186+08:00",
+        "stdout_bytes": 635
+      },
+      {
+        "job": "lazypack-mile_dee8e30a",
+        "finished": "2026-08-05T18:20:36.431230+08:00",
+        "stdout_bytes": 1048
+      },
+      {
+        "job": "lazypack-mile_0fc136ab",
+        "finished": "2026-08-05T18:19:35.566239+08:00",
+        "stdout_bytes": 1049
+      },
+      {
+        "job": "lazypack-mile_2aa9e661",
+        "finished": "2026-08-05T17:02:40.807420+08:00",
+        "stdout_bytes": 772
+      }
+    ]
+  },
+  "conservation": {
+    "active": true,
+    "expires_at": "2026-08-09T08:00:00Z",
+    "reason": "weekly allowance 89% at 2026-08-05T13:50Z; resets Sun 16:00 台北",
+    "exempt_task_types": [
+      "daily_article",
+      "daily_digest",
+      "event_article",
+      "trending_repost",
+      "member_qa",
+      "email_reply",
+      "telegram_reply"
+    ],
+    "downgraded_task_types": {
+      "platform_ops": [
+        "sonnet",
+        "low"
+      ],
+      "governance": [
+        "sonnet",
+        "low"
+      ],
+      "code_review": [
+        "sonnet",
+        "medium"
+      ],
+      "resource_audit": [
+        "sonnet",
+        "medium"
+      ],
+      "lookup": [
+        "sonnet",
+        "low"
+      ],
+      "verify": [
+        "sonnet",
+        "low"
+      ],
+      "classification": [
+        "sonnet",
+        "low"
+      ],
+      "org_manager": [
+        "sonnet",
+        "medium"
+      ],
+      "experiment": [
+        "opus",
+        "high"
+      ],
+      "strategy_lifecycle": [
+        "opus",
+        "high"
+      ],
+      "paper_body": [
+        "sonnet",
+        "low"
+      ],
+      "paper_review": [
+        "sonnet",
+        "low"
+      ],
+      "paper_decision": [
+        "sonnet",
+        "low"
+      ]
+    },
+    "deferred_departments": [
+      "publications"
+    ],
+    "signal_of_record": "Claude Code /usage（All models 週用量 %）——billable 不可用來回答還剩多少"
+  },
+  "measurement_notes": {
+    "exact": [
+      "fixed_first_load / standing_repaid / variable（telemetry usage 欄位）",
+      "dir_class（Claude Code 以 cwd 決定 project 目錄）",
+      "brief bytes",
+      "compute job 計數",
+      "conservation 分層"
+    ],
+    "inferred": [
+      "部門身分（telemetry 無角色欄位，身分經 --append-system-prompt 傳入且不寫進 transcript）——見 role_attribution_quality"
+    ]
+  }
+}

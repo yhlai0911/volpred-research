@@ -18,7 +18,7 @@ REPO_ROOT = Path("/Users/yhlai0911/volpred-research")
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "storage/org/departments/resource_monitor/tools"))
 
-from token_usage_report import _billable_total  # noqa: E402
+from token_usage_report import _billable_total, _usage_breakdown  # noqa: E402
 import token_breakdown as tb  # noqa: E402
 
 TPE = timezone(timedelta(hours=8))
@@ -84,7 +84,7 @@ def main() -> int:
         dt = parse_ts(turn)
         if dt is None or dt.date() != TODAY:
             continue
-        bill = _billable_total(turn.get("usage") or {})
+        bill = _billable_total(_usage_breakdown(turn.get("usage") or {}))
         if bill <= 0 and not (turn.get("content")):
             continue
         eff = tb._turn_effect(turn)
@@ -125,7 +125,7 @@ def main() -> int:
         if dt is None:
             continue
         prov = "codex" if turn.get("provider") == "codex" else "claude"
-        bill = _billable_total(turn.get("usage") or {})
+        bill = _billable_total(_usage_breakdown(turn.get("usage") or {}))
         daily[f"{dt.date().isoformat()}|{prov}"] += bill
         daily_sessions[f"{dt.date().isoformat()}|{prov}"].add(turn.get("session_id"))
 

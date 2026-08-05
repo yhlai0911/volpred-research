@@ -289,7 +289,7 @@ def audit_codex_duplicates(date_start: date, date_end: date) -> dict:
 
     for record in _iter_codex_session_records(date_start, date_end):
         usage = _usage_breakdown(record["usage"])
-        billable = _billable_total(usage)
+        billable = _billable_total(_usage_breakdown(usage))
         sid = str(record["session_id"]).split("/", 1)[-1]
         root = root_of.get(sid, sid)
         rid = str(record.get("record_id") or "")
@@ -420,7 +420,7 @@ def analyze(date_start: date, date_end: date, top: int) -> dict:
 
     for turn in iter_attributed_turns(date_start, date_end):
         usage = _usage_breakdown(turn["usage"])
-        billable = _billable_total(usage)
+        billable = _billable_total(_usage_breakdown(usage))
         model = turn["model"]
         category = _primary_category(turn["categories"], turn.get("is_subagent", False))
         cost = compute_cost_usd(usage, model)

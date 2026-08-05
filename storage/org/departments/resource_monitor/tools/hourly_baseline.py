@@ -9,6 +9,7 @@ R = Path("/Users/yhlai0911/volpred-research")
 sys.path.insert(0, str(R / "scripts"))
 from token_usage_report import (  # noqa: E402
     _billable_total, _scan_jsonl, _deduplicated_turns, discover_claude_project_dirs,
+    _usage_breakdown,
 )
 
 TPE = timezone(timedelta(hours=8))
@@ -36,7 +37,7 @@ for pd_ in discover_claude_project_dirs():
                 continue
             dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00")).astimezone(TPE)
             k = (dt.date().isoformat(), dt.strftime("%H"))
-            per[k] += _billable_total(t.get("usage") or {})
+            per[k] += _billable_total(_usage_breakdown(t.get("usage") or {}))
             sess[k].add(sid)
 
 byday = defaultdict(list)
