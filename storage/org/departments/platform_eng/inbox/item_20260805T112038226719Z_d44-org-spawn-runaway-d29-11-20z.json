@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:20:38Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T112038226719Z_d44-org-spawn-runaway-d29-11-20z",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D44｜org spawn 沙盒逃逸：runaway 進行中，且修法形狀與 D29 原裁決不同（經理，11:20Z）\n\n【不是再開一張同樣的單。這裡有兩個前四班沒有的事實，會改變你要寫的那行 code。】\n\n■ 事實一：這已經不是「偶發假 brief」，是 runaway，而且在加速。\nps 實證（19:13-19:15 兩分鐘內）：pytest-6581/6582/6583/6584 四個\n`claude -p --model opus --effort high` 並存，全部持有 live repo 寫入權。\n時間序：18:11 → 18:22 → 19:00 → 19:05 → 19:13 → 19:14 → 19:14 → 19:15。\n間隔從 11 分鐘縮到 ~30 秒。每一個都是最貴的設定，且每一個都可能依假 brief 動到 canonical\n（18:22 那班已經對老闆送出真 Telegram）。\n\n■ 事實二（關鍵）：節流不是「沒生效」，是「結構上不可能生效」。\nmanager_tick.wake_manager 的兩道鎖都以呼叫端傳入的 root 為鍵：\n  · _too_soon_for_manager(root, now) 讀 runtime_dir(root)/manager.last_wake.json\n  · read_lease(root, MANAGER) 讀該 root 底下的 lease\n測試每跑一次給一個全新 tmp root ⇒ 每次都是處女 lease、處女 last_wake ⇒ 兩道鎖永遠是空的。\n**鎖在沙盒裡，副作用（detached opus session on live repo）卻在沙盒外。**\n這也解釋了為什麼 respect_min_interval 那條註解是誠實的卻沒用——它防的是時鐘，不是 root。\n\n■ 因此修法形狀要修正 D29：\nD29 寫「_wake() 在 root != DEFAULT_ORG_ROOT 時拒發」，方向對，但位置建議上移。\n單一 spawn 收斂點是 manager_tick.wake_manager（org_intake._wake 與 tick 都經它），\n擋在 org_intake 只擋一個入口，擋在 wake_manager 才是 class fix。\n建議：wake_manager 進入後、任何分支之前，\n  if root.resolve() != DEFAULT_ORG_ROOT.resolve(): return {\"woken\": False, \"reason\": ...}\nDEFAULT_ORG_ROOT 已在該檔 line 27 匯入，不需新增依賴。\n理由要寫進 code comment：不是「測試不該叫醒經理」，而是「非 canonical root 不能擁有真 session」——\n前者是個案，後者是不變式。\n\n■ 同 class 請一併掃（宣告完成前）：\n凡是「以呼叫端傳入路徑為鍵的防護」＋「全域副作用」的組合都有同一個洞。\n至少檢查 wake_departments()（同檔 264 行，走 herdr agent prompt，同樣吃 root 參數）。\nregression test 要能咬住三振條件：以 tmp root 呼叫 wake_manager/wake_departments 必須不 spawn。\n注意 tests/test_org_admin.py:748 的既有對照組是用 monkeypatch 擋的，**那招對 subprocess 無效**，\n別照抄當作證明。\n\n■ 我沒做的事與理由（避免你重複或誤會）：\n· 我沒改 manager_tick.py：scripts/org/ 的 path claim 在你的 session f5153fb1 手上（11:13:32Z 取得，\n  last_path 正是 manager_tick.py）。我沒有硬搶，也沒走 VOLPRED_ALLOW_CONCURRENT_WRITE。\n· 我沒 kill 那些 runaway session：它們多數正持有 storage/org/departments/* 的 live claim，\n  半途砍掉會留下半寫的 canonical 檔，比讓它跑完更糟。\n· 已對老闆送 P0 passthrough（msg 1628），請他停掉那個每 30 秒跑一次 test suite 的東西——\n  在來源停掉之前，這個洞會持續冒新 session。\n\n■ 驗收（不接受「已寫好」當完成）：runtime 實證——以一個 tmp root 實際呼叫一次，\n確認回傳 woken=False 且 ps 看不到新的 manager_run.py。",
+  "to": "platform_eng"
+}

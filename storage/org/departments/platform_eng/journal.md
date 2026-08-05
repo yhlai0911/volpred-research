@@ -411,6 +411,63 @@ b575276c-b48e-47b2-a6d5-c816ee245fcb|12538|1785926504|/Users/yhlai0911/volpred-r
 預定斷言形狀：**任何在 `.then()` 內設 loading/ready 旗標而無 rejection path 的 auth bootstrap 一律 FAIL；
 已收編進 `radar-session.ts` 共用層的不算。**
 
+---
+
+## 2026-08-05 21:0x（台灣時間）｜續班三張｜outcome=done×2, blocked×1
+
+### (4) D45 老闆日報整條斷鏈｜blocked（根因定位並量化，程式被活躍認領擋住）
+
+**經理的假說對了一半，另一半會導向錯的修法**——這是本張最重要的產出。
+
+- **症狀 1（經理子樹 Write 全 deny）已經修好了**：commit `407a367e9`（19:02:27）讓
+  `generate_dept_settings` 對 MANAGER 發 `owned_paths=["storage/org/"]`（:170-179），
+  `runtime/manager.settings.json` 確實存在（19:04、862 bytes）。經理要的不是改程式，
+  是**重新 attach**——它現在跑的 session 是該 commit 之前拿到設定的。
+- **症狀 3 不是「digest 只吃 cc」**：`render()`（:36-51）把 `manager/inbox` 全部非 boss 項
+  照檔名（＝時間戳）列出，**無 kind 過濾、無優先序、無上限、無截斷**。11:22Z 全量解析：
+  **1931 行、122 則 bullet，P1=54／P2=24／P3=44，含知會 41 則**。
+  **54 則 P1 全都在信裡**，只是排在 41 則 cc 之後——因為 cc 到得早。
+  經理看到的「26 則全是 P3 cc」是讀了 1931 行輸出的開頭。
+  **照原假說去補「被漏掉的 report/decision」會發現沒東西可補，而信一樣沒用。**
+- 三個缺陷（都在 `render()`）：不排序、不過濾 cc、不截斷。定稿 patch 與回歸判準寫在
+  `work/d45_boss_digest_20260805/diagnosis_and_patch.md`。
+- **未落地且沒有硬搶**：`scripts/org/` 由 session f5153fb1 於 11:22:18Z 取得、
+  `last_path` 是它新建的 `scripts/org/inbox_archive.py`——**活的，不是幽靈**。
+  沒有 release、沒有用 `VOLPRED_ALLOW_CONCURRENT_WRITE`。`boss_digest.py` 它沒動過，
+  對方一收尾即可直接套。已把 20:30 那班趕不趕得上的**時間邊界誠實回報**（D45(d) 要求）。
+
+順帶：本部門的 interim `archive_inbox.py` 在本班中途**被 f5153fb1 的正規 CLI 取代**
+（`scripts/org/inbox_archive.py`），舊腳本自動退役並指向新入口。新 CLI 還做了一件對的事：
+它擋下「請求／裁決還沒回覆就歸檔」，本班就被它擋了一次（論文部那則），逼我先回覆再歸檔。
+
+### (5) 論文部三件更正｜done
+
+`path_claims release` 可用（本班實際用過兩次，都是「session 已停工」才解）；
+【缺口 2】的「部門無法自救」半部同意撤下。
+**【缺口 1】mv allow 規則不匹配的根因找到了：一個字面星號。**
+`org_attach.py:219` 發的是 `Bash(mv <dept>/inbox/*:*)`，而 Bash 權限規則是**前綴比對**，
+規則裡的 `*` 被當字面字元，真實指令（`mv .../inbox/item_x.json .../inbox/_archive/`）
+永遠不含星號 → 永不匹配。修法是把星號拿掉、前綴收到 `inbox/` 為止。
+同一支檔在 f5153fb1 手上且它正在改，**不動**，已請經理併進它那輪。
+CBOE 撤回：本部門今天稍早**早已歸檔**，不需再處理。
+
+### (6) provider denial 修法 B — CI 擋 pin 陳舊｜**done（root_cause_fixed_and_verified）**
+
+`scripts/tests/test_provider_registry_pins.py` 已落地（`tests/` 在轄區、`scripts/tests/`
+無人認領、工作樹乾淨、最近三筆提交無 `[codex]`——D16 協調義務已履行）。
+
+- `uv run pytest scripts/tests/test_provider_registry_pins.py` → **2 passed**
+- **非空轉的獨立驗證**（不只看 exit code）：自行重算
+  `.claude/settings.json` 的 sha256 = `c4d7ed4e…6783`，與 registry pin 逐字元相同；
+  再用**溫度目錄裡的變造副本**（真 registry 一個 byte 都沒碰）證明 FAIL 路徑確實會拒絕。
+- **CI 確實會跑它**：`.github/workflows/pytest.yml:221` 註明
+  `testpaths = ["tests", "scripts/tests"]`，所以 pin 陳舊會在 **push 時紅燈**，
+  而不是像 08-05 那樣在 runtime 悄悄停掉執行層 2.5 小時。
+
+這把同 class 第 3 次（08-04 pin .221、08-05 12:45 pin .222、08-05 settings sha）的
+失敗時點**從 runtime 移到 push 時**，對照組是既有的 `test_cron_wrapper_manifest.py`
+——那正是為什麼 wrapper manifest 過期會紅燈而不是靜默停排程。
+
 ### 本班遇到的第三道幽靈鎖（同 class，第三個實例）
 
 寫本篇 journal 時被 `write_claim_guard` 擋下：持有者是 **66dfcf3a——本部門前一班自己的 session**，

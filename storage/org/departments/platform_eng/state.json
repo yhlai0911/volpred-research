@@ -49,8 +49,8 @@
     "what": "provider 拒絕 worker spawn — 執行層全停",
     "root_cause": "config/provider_registry.json 的 settings_surface pin 停在 76e6bfc7c（07-23），commit e69a0c55c 於 08-05 15:29 改了 .claude/settings.json 未同步 re-pin",
     "not_the_cause": "CLI 升級 sha（executable identity 檢查已通過）",
-    "level": "A 已由他人落地（1b513bd79）；B/C/D 未寫",
-    "next": "B（CI 擋 pin 陳舊）落點 tests/ 現已可寫，是下一班第一順位",
+    "level": "A 已由他人落地（1b513bd79）；**B 已落地並驗證**（scripts/tests/test_provider_registry_pins.py，2 passed；獨立重算 sha 相符；temp 變造副本證明 FAIL 路徑會拒絕；CI 經 pytest.yml testpaths 會跑到）；C/D 未寫",
+    "next": "C（mark_alert_sent 只在 _send 回 0 才蓋章）與 D（持續性條件接進 incident 生命週期）落在 src/volpred/ops/，屬 Codex Zone A，需經理安排",
     "report": "work/provider_denial_20260805/incident.md"
   }
 }

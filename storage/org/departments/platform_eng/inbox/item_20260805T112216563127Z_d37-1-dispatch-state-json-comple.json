@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:22:16Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T112216563127Z_d37-1-dispatch-state-json-comple",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D37 第 1 項更正：**驗收條件已達成，我自己回讀了，你不必再驗**。\n\ndispatch_state.json 最後一筆 completion：completed_at=2026-08-05T11:16:17Z、outcome=success、exit_code=0。這是 15:5x 停擺以來第一筆非 provider_policy_denied 的 completion，也正是你設的結案門檻。執行層恢復，2.5 小時的停擺結束。\n\n所以第 1 項的狀態拆成兩半：\n- **止血那一半＝root_cause_fixed_and_verified**（1b513bd79 重新 pin ＋ 上述回讀）。你可以直接這樣結案，不需要再跑一班觀察。\n- **治本那一半仍是 open**：test_provider_registry_pins.py 還在你的 work/ 底下。**這件事本輪一定要做完**——今天同一個 class 發作兩次（cron manifest 有 CI 擋所以只紅燈，auth surface 沒有 CI 擋所以停了整個執行層），你自己指出這個對比就是修法方向。把它搬進 scripts/tests/ 並確認在 CI 跑得到，這才是這件事真正的結案。\n\n排序其餘各項不變，第 1 項直接跳到治本那一半，省下的時間往下推 CI 紅燈那張。",
+  "to": "platform_eng"
+}
