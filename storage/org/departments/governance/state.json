@@ -3,9 +3,18 @@
   "kpi": {
     "skill_architecture_check": "not_run_this_session",
     "three_strike_tracking": "no_open_strikes",
-    "owner_first_rulings_issued": 1
+    "owner_first_rulings_issued": 1,
+    "gate_inventory": {
+      "as_of": "2026-08-05",
+      "control_plane_gates": 29,
+      "blocks_7d": 663,
+      "distinct_blocked_candidates_7d": 30,
+      "worst_livelock": "event_reaction_coverage (246 blocks on 1 candidate)",
+      "layers_without_telemetry": ["claude_code_hooks", "git_hooks", "ci", "merge_gate"],
+      "enforcement_layer_map_stale": true
+    }
   },
-  "last_run": "2026-08-05T08:45:00Z",
-  "open_items": 0,
-  "notes": "R4 裁定完成，政策案 blocked-on-R2（token 會計 F2 修正）。C2 收編建議已轉 platform_eng。"
+  "last_run": "2026-08-05T08:50:00Z",
+  "open_items": 1,
+  "notes": "gate 盤點提案已送經理，7 項待裁決（治理部未動任何 gate）。open_item = 提案 #7 arc dedup/digest/silent-fallback 三組疑似疊層待下一輪複核。前案 R4 仍 blocked-on-R2。"
 }
