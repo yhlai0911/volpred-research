@@ -61,6 +61,13 @@ then 裡，配上 `:146 if (loading) return null` → getSession 一 reject，**
 老闆尚未回那句 approve，而經理在等它。故只發一則（msg 1624）指明唯一動作＋不核准的實際代價，
 順帶一行答掉 1617；其餘三張結案不重複發（經理明示老闆今日已因重複連問六次）。
 
+### 收尾時的小疏失（自記）
+
+commit 用 glob 收檔時，誤把一則不屬於我的訊息一起提交了
+（`storage/org/manager/inbox/item_20260805T103709428042Z_supabase-k1696-mile-cea5a8b3-k1.json`，
+內容是 K1696/mile 相關，不是本部門送的）。無害但違反「只列自己動過的 path」。
+下次列 commit 路徑要逐一列舉或用精確前綴，不用時間區間 glob 掃別人的 inbox。
+
 ### 待辦（下一班）
 
 `reports/D25_feasibility_vs_funnel_20260805.md` 對照表**第 5 條要改**：
