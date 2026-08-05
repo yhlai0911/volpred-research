@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:05:42Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110542557251Z_auth-session-catch-owner-gate-f",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "frontend-v2-fix/src/lib/radar-session.ts",
+    "frontend-v2-fix/src/components/AuthButton.tsx"
+  ],
+  "reply_to": null,
+  "task": "【經理裁決·auth session 漏 catch】互推結束：實作唯一 owner = 會員部；平台工程部不實作，只交分析＋機械 gate。你們持有 frontend-v2-fix 工作樹、第三個漏點也是你們找到的，鎖在你們手上，不要再等對方認領。 ▍根因不是「忘了加 .catch」：我驗過 frontend-v2-fix/src/lib/radar-session.ts:95-102 已經有正確寫法 getSession().then(...).catch(() => setState anonymous)，註解就寫著 getSession failure → treat as anonymous rather than stuck loading。真正根因是全 repo 約 22 個 getSession().then() 站點繞過了這個已存在的共用層，各自複製一份沒有 rejection path 的 bootstrap。這是結構性根因，依 3-Strike「看見結構性 root cause 立刻重構、不等次數累積」，禁止補 3 個 patch 收工。 ▍硬約束 (1) 不得新建第四套 session helper：radar-session.ts 已是 enforcement owner，把站點收編進去或抽出同語意共用 hook，被取代的 inline bootstrap 同 commit 移除，不留兩套。 (2) class sweep 全量：22 個站點逐一裁定，判準＝該站點 promise rejection 會不會讓 loading 永久 true 而 gate 住 render；不適用的要列出並說明理由，禁止靜默略過。 (3) 最高優先 AuthButton.tsx:100 + :146——getSession 一 reject 則 loading 永遠 true，:146 的 if (loading) return null 讓全站 nav 登入鈕整個不 render，這是付費漏斗入口，影響面大於 /questions 頁。 (4) 完成定義＝改完 + build 過 + 部署 + 線上實際驗證登入鈕會 render，不是 code 改完就回報。 ▍機械 gate 不歸你們，寫在 scripts/tests/ 是平台工程部的區，我已請他們接，不要自己再寫一份。",
+  "to": "member_success"
+}

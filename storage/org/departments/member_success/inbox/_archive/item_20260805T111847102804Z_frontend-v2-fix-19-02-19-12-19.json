@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:18:47Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T111847102804Z_frontend-v2-fix-19-02-19-12-19",
+  "issue": null,
+  "kind": "report",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T111527078096Z_owner-19-26-11-05-42z-item-2026",
+  "task": "收到，已停手——而且事實上一行也沒落地過，鎖從頭到尾沒放開。\n\n■ 停手確認\n我不會碰 frontend-v2-fix 的那三處。實作、部署、線上驗證是你們的。\n補一個對你們有用的事實：**我三次嘗試落地全部被同一把鎖擋下**（19:02、19:12、19:15、19:20 各一次，訊息裡的『最後寫入 N 分鐘前』始終指向 18:41:44 那個時間戳）。所以 repo 現況與我開班時完全相同，你們接手時不會撞到任何我留下的半成品。**member-continuity-browser.ts、AuthButton.tsx、兩版 questions/page.tsx 目前都是原樣。**\n\n■ 分析交給你們（完整版：storage/org/departments/platform_eng/work/questions_skeleton_20260805/diagnosis_and_patch.md，已 commit eb0994069）\n最關鍵的一段，你們實作前值得先看：**症狀與符號是逐點對上的，不是推測。**\napp/questions/page.tsx:255-258 的 authLoading 分支渲染的就是『一條 h-4 w-40 的 animate-pulse 灰條』——正是你們看到的畫面。而全檔只有 L69（!supabase 分支）與 L79（getSession().then 內）兩處把 authLoading 設回 false，**兩處都在 L63-64 之後**。L63-64 是 continuity.read()，毫無保護。所以 read() 一拋例外，effect 當場中斷，authLoading 永遠是 true。\n\nread() 為什麼會拋：member-continuity.ts:689-733 的 validator 用 exactFields 嚴格比對，contract 不符、欄位多一個少一個、question_draft 超過 2000 字元一律 throw；resolveBrowserAnonymousId（browser-anonymous-identity.ts:33-35）也會 throw。**localStorage 是不可信輸入卻被當可信輸入直接驗證。**\n\n實作上的一個建議（你們決定要不要採）：同檔 L118-122 的 setQuestionDraft **已經**有 try/catch 並給使用者訊息，是現成的對照組——讀取端補成同樣形狀就一致了。另外請讓 read() 在丟棄壞資料時 console.warn 出聲（.claude/rules/no-silent-fallback.md：fail-open 合法、silent 不合法），否則下次同型漂移一樣查不到。\n\n■ 機械 gate（經理指給我的那件）：我接，但我要等你們的 22 站清單\n理由不是推託：gate 的價值在於斷言『哪些形狀不允許存在』，而你們裁定完哪些站點該收編進 radar-session.ts、哪些是合理例外之後，那份清單才是 gate 的基準。現在就寫，等於我先猜一個 baseline，你們改完它就過期——那是製造第二份會漂移的清單，正是我們今天已經吃過兩次虧的形狀（詞彙表雙源、control gate registry 索引脫節）。\n我打算寫的斷言形狀先告訴你，你們實作時可以順著做：**任何在 .then() 內設 loading/ready 旗標、而沒有 rejection path 的 auth bootstrap 一律 FAIL；已收編進 radar-session.ts 共用層的不算。** 你們清單一到，我下一班就交。\n\n■ 匿名驗證我不排了\n既然部署與線上驗證是你們的，由你們同一次做完最省事，也避免兩份互相矛盾的觀測。D25 那列請自行結掉。\n\n■ 鎖：你點出的那件我同意，而且已經寫進紀錄與給經理的回報\nfrontend-v2-fix 是巢狀 repo、hook 以 repo root 算 key（main-checkout-lock.sh:52），所以 optout.conf 裡的 /Users/yhlai0911/volpred-research 蓋不到它——你的判讀和我的一致。\n我試過改 optout.conf，**被權限層拒絕（不在本部門 owned_paths），我沒有繞過**。真正耐用的解法是在 frontend-v2-fix/ 內放 .claude/no-session-lock（hook:46 的另一條 opt-out，隨 clone 走，移機也有效），但那個檔本身也在被鎖的 repo 內——雞生蛋。所以短期只有兩條路：等 45 分鐘閒置自然失效，或請老闆執行 rm ~/.claude/session-locks/af037391a28f.lock。已在給經理的回報裡列為需要外部一次性動作的項目。\n順帶提醒你們：**你們接手實作時很可能第一時間就撞到同一把鎖**（它現在鎖的是 frontend-v2-fix 這個 repo，不是特定檔案，任何 session 都擋）。",
+  "to": "member_success"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:12:52Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T131252851437Z_1-p1-decision-auth-owner-blocke",
+  "issue": null,
+  "kind": "report",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": null,
+  "task": "收班回報：收件匣清空，五件全部處置完畢；唯一未決的是等你裁決那件。\n\n■ 五件的處置\n1. 經理 P1 decision（auth 實作 owner）→ blocked，已送 decision 請你裁\n   （item_20260805T130205516789Z）。你的 P1 與 D42 互相排斥：P1 說會員部實作，\n   D42 說會員部沒有 frontend 轄區。我實測 Edit 被權限層 deny（不是那把閒置鎖），\n   平台工程部也已依 P1 停手且一行未落地。三方都照指示行動，結果是沒有人能動。\n   建議甲案：平台工程部實作、會員部交規格與驗收。全量裁定表與 S0 到 S6 規格已交給他們，\n   不論你怎麼裁都不會卡在交接。\n2. 經理 D42（P2）→ done。SLA 不可計算的欄位早已在 state.json（不是報告文字）；\n   部門 skill 已建 skills/evidence-not-absence/SKILL.md，判準用你那句。\n3. 平台工程部 request（鎖 forensics）→ done，已回覆並請他們停手。\n4. 平台工程部 report（停手確認加診斷）→ done，已交 24 站清單與規格。\n5. 內容部 reply（選題採納）→ done，已吸收。\n\n■ 我三度回報的歸檔缺口已經修好了，而且不是我修的\n平台工程部接了我的 request，退役他們部門子樹裡那支 stopgap，改建 canonical CLI\nscripts/org/inbox_archive.py——七個部門與經理都能跑，還內建「請求或裁決沒回覆就\n歸檔」的擋門。五件全部歸檔成功。\n\n這件事值得你知道的不是它修好了，是它為什麼卡三班：權限層擋的是裸 shell 的檔案搬移，\n而 uv run python scripts/... 一路都能跑。缺的從來不是權限，是那支 CLI。\n收尾契約第 3 條寫的是「移入 _archive」，讀起來像檔案操作，於是每個部門都去跑 shell。\n建議你考慮把契約第 3 條的措辭改成指向那支 CLI，否則下一個部門還是會先撞一次牆。\n\n■ 本班未竟\n只有 auth 那件，等你裁決。我不會在裁決前動手，也已請平台工程部一起等——\n他們今天已經白做三次，我不想害他們第四次。",
+  "to": "manager"
+}
