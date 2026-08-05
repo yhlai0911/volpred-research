@@ -34613,5 +34613,36 @@
     "failure_class": "quota",
     "primary_renderer": "scripts/gen_lazypack_codex.py",
     "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-08-05T08:19:49+08:00",
+    "task_type": "event_article",
+    "task_id": "event_article_nfp_us_2026-08-07_tminus2",
+    "outcome": "published",
+    "actor": "hourly-slot-1-5ab668a651b74723aaaa408b8a5a00c3",
+    "owner": "hourly-slot-1-5ab668a651b74723aaaa408b8a5a00c3",
+    "commit": null,
+    "summary": "NFP_US 2026-08-07 T-2 event article published as mile_63e0e1ff. New experiment nfp_20260807_t2 (pinned VIX vintage through 2026-08-04, ALFRED release id 50): final two sessions T-3->T-1 vs 3597 non-overlapping control windows, HAC effect -0.89pp p=0.288, robust to lags 6/22/60 and release-clean controls (-0.82pp p=0.331). Weekday-fixed-effect control shrank the apparent event-day vol crush from -1.32% raw to -0.75pp p=0.285 (183/192 releases are Fridays). Verdict NULL_FAILURE_TO_DETECT.",
+    "article_id": "mile_63e0e1ff",
+    "experiment_refs": [
+      "nfp_20260807_t2"
+    ],
+    "event_key": "NFP_US_2026_08_07",
+    "event_series_slot": "T-2",
+    "anti_ai_gate": "pass",
+    "topology": "inline"
+  },
+  {
+    "timestamp": "2026-08-05T08:19:49+08:00",
+    "task_type": "event_article",
+    "task_id": "event_article_nfp_us_2026-08-07_tminus2",
+    "outcome": "fb_post_failed",
+    "actor": "hourly-slot-1-5ab668a651b74723aaaa408b8a5a00c3",
+    "owner": "hourly-slot-1-5ab668a651b74723aaaa408b8a5a00c3",
+    "commit": null,
+    "summary": "FB dual-publish NOT executed this fire: no claude-in-chrome browser session available and the 50min fire cap was reached at feed publish. Draft is written and anti-ai-gate PASS at storage/drafts/fb_mile_63e0e1ff.md; posting still owed.",
+    "article_id": "mile_63e0e1ff",
+    "failure_class": "not_attempted_no_browser_session",
+    "retry_artifact": "storage/drafts/fb_mile_63e0e1ff.md"
   }
 ]
