@@ -640,9 +640,34 @@ S0 是它們的前置。context 不足以完整做完並收尾，不做一半。
 驗證：7 passed；`test_org_admin.py` 71 passed 無回歸；以真 registry 重算七部門 pattern 皆正常。
 併帶論文部的提醒回報經理：**解鎖是兩步——改生成端後執行中的 pane 必須 re-attach 才生效。**
 
+### (15) D57｜第四個維度：`owned_paths` 沒定義過自己存的是什麼｜**done**｜commit `1a0d4b274`
+
+經理照 D55 的判準實跑重授 `storage/org/policy.md`，回讀得到
+`Edit(.../storage/org/policy.md/**)`——**檔案本身仍沒被命中**。我的 `d3212484d` 沒錯，
+**被打敗在上游**：`org_admin.py:202` 在寫進 registry **之前**就把每個宣告
+`rstrip("/") + "/"` 成目錄，所以產生器永遠看不到它曾經是一個檔案。
+
+**前三次的歸因因此都不完整**：一直被當成 `org_attach` 的 bug，實際上這條鏈**有兩個地方在
+拼字串**，修其中一個不會贏。根因不在任一端，在資料型別——`owned_paths` 從來沒說過它存的是
+目錄還是路徑。
+
+修法：定義只寫一次（`_core.declares_a_file` / `normalize_owned_path`），**寫入端與讀取端
+共用**；`org_attach` 那份重複判斷刪掉，不留兩套。
+
+**經理指名的那一列已補，而且它是唯一會紅的那一列**：端到端（經 `set-paths` 寫入 → 再經
+`turf_patterns` 產出）。破壞驗證——舊正規化下 policy.md **拿不到自己的 pattern**，
+反而拿到三條指向 `policy.md/` 底下的空 pattern。
+先前那 7 條是產生器單元測試，**全綠而真實情境仍壞**，這正是單測會漏掉的形狀。
+回歸：org 相關 80 passed。
+
+**不在轄區**：`docs/error_log.md` 的 3-STRIKE 登記與 `docs/refactor_plan_*.md` 都在 `docs/`，
+本部門一律不含 `docs/`。已回報經理並附一句判斷：治理部原本反對另開計劃書是對的，
+而那個方向**已經實現在程式裡**——「知道目錄／檔案／隱藏目錄的建構器」就是
+`declares_a_file` + `turf_patterns`，「並自我驗證」就是那 8 條表格測試。
+
 ---
 
-**本班合計 13 張完成**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
+**本班合計 14 張完成**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
 D45 落地、brief 有界渲染、自我更正收回重複交付），停手 1（/questions 改由會員部實作），
 blocked 0 —— 早先被鎖擋住的兩張後來都在同班內完成。
 

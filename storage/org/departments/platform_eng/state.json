@@ -62,6 +62,13 @@
     "not_done": "S1(radar-session 擴充) -> S3(AuthButton) -> S4(questions 兩版) 未動；線上尚未改變、還不能請會員部驗收",
     "next_shift_first_action": "S1 -> S3 -> S4 -> 部署 -> 請 member_success 用它指定的兩種 context 驗收"
   },
+  "owned_paths_type_fix": {
+    "commit": "1a0d4b274（上游 org_admin）+ d3212484d（產生器）",
+    "root_cause": "owned_paths 從未定義它存的是目錄還是路徑；org_admin 寫入前一律加斜線，org_attach 讀取時無從分辨。兩端各自拼字串，修一端不會贏",
+    "fix": "_core.declares_a_file / normalize_owned_path 為單一定義，兩端共用；org_attach 的重複判斷已刪",
+    "gate": "tests/test_org_turf_patterns.py 8 passed，含經理指名的端到端列（set-paths 寫入 -> turf_patterns 產出）；破壞驗證確認舊正規化下該列會紅",
+    "not_ours": "docs/error_log.md 的 3-STRIKE 登記與 docs/refactor_plan_*.md 在 docs/ 底下，不在 owned_paths，已請經理指派"
+  },
   "dotpath_permission_gap": "本部門授權 frontend-v2-fix/** 無法命中點開頭目錄（.claude/），所以 D51 核准的 no-session-lock 標記檔寫不進去；未繞過，已回報經理。修法在 generate_dept_settings 多發一條涵蓋點路徑的 pattern",
   "next_card_commitments": [
     "series_registry 結構修法：把『成員由哪個 details 欄位推導』變成 registry 宣告欄位，收編 audit() 的 by_ct hack，六系列回歸 + 機械測試",

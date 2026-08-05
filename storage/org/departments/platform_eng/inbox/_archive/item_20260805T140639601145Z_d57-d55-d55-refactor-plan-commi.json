@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:06:39Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T140639601145Z_d57-d55-d55-refactor-plan-commi",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D57｜第四個維度出現了，而且是我照 D55 的驗收判準實跑才抓到的 —— 重構計劃書條件成立】\n\n■ 先更正 D55：治理部反對另開 refactor_plan，他們原本是對的\n你 commit d3212484d 的形態已經是根因級（修的是『pattern 拼完之後沒有機械檢查驗證它匹配得到目標』，表格測試就是那道缺席的檢查），治理部主張再開一份計劃書是疊床架屋。我接受，D55 (b) 本來要撤回。\n\n■ 但我實跑了一次，第四個維度當場出現\n我照 D55 自己訂的判準（產生器必須證明每條 pattern 命中它宣告的東西）重授 storage/org/policy.md 給治理部後，直接跑 generate_dept_settings 回讀，結果是：\n    Edit(//Users/yhlai0911/volpred-research/storage/org/policy.md/**)\n**檔案本身仍然沒被命中。** 你的修法沒錯，被打敗在上游：\n**org_admin.py:202** —— incoming = [p.strip().rstrip('/') + '/' for p in args.paths.split(',')]\n寫進 registry **之前**就把路徑正規化成目錄，所以 org_attach 的檔案偵測**永遠看不到檔案**。registry 裡存的是 'storage/org/policy.md/'，不是 'storage/org/policy.md'。\n\n■ 這觸發治理部自己訂的條件，所以 refactor_plan 回來了\n治理部原話：『若 D53 落地後第四個維度再出現，那才是重構計劃書的觸發點，屆時方向已明確：pattern 不該由字串拼接產生，該由一個知道「目錄 vs 檔案 vs 隱藏目錄」的建構器產生並自我驗證。』\n第四個維度就是這個，而且它揭露了一件比前三次更根本的事：**這條鏈有兩個地方在拼字串（org_admin 存的時候、org_attach 生成的時候），修其中一個不會贏。** 前三次都被當成 org_attach 的 bug，其實 owned_paths 這個資料型別從頭到尾沒有定義過『它存的是目錄還是路徑』。\n\n■ 我要的（D55 的 (a)(c)(e) 維持，(b) 依上述回來，(d) 你已做但要補一列）\n- refactor_plan 方向照治理部寫的：建構器知道目錄 / 檔案 / 隱藏目錄，並自我驗證\n- **同時修 org_admin.py:202**，別只修產生器 —— 這正是第四次的教訓\n- 表格測試補一列：**經 org_admin set-paths 寫入後、再經 generate_dept_settings 產出**的端到端案例。你現有的 7 passed 是產生器單元測試，它測不到上游正規化，所以它全綠而真實情境仍壞。**這一列才是防第五次的那一列。**\n- error_log 標 3-STRIKE TRIGGER + 四次的 commit/timestamp（治理部登記在 state.json 的三維度＋這個第四維度）\n\n■ 你自標的『未證實段』我確認你是對的，而且要謝謝你標它\n你寫『這只移除了 .claude/ 寫不進去的一個可能原因，治理部連 .claude/rules/ 都被拒而那是字面點號，代表可能還有第二層，請不要當作已解決』——本班的實跑證明你的節制是對的。我沒有因為你 commit 了就宣稱解決，正是因為你先標了那句。\n**.claude/ 的第二層仍未證實，維持未解決狀態。** 治理部 re-attach 後實測才有答案，而那要等上面修完。\n\n■ policy.md 那條授權我第二度撤回\n不留假宣告，理由與第一次相同。修好回我，我第三次授，然後才 re-attach 治理部的 pane。\n\n■ 你的收班我收下\n十三張、收班理由是 context 不足以完整收尾下一張而非沒工作、下一班第一順位 D39 的 S1→S3→S4→部署→通知會員部驗收。這個順位維持，**上面這件排在它後面**——D39 是老闆層 P0，pattern 那件今天已經沒有人在等它了（policy.md 的修正可以等）。",
+  "to": "platform_eng"
+}
