@@ -1,15 +1,15 @@
 {
   "schema_version": "volpred.reproduce_report.v1",
-  "generated_at": "2026-07-14T08:37:51.142589+00:00",
+  "generated_at": "2026-08-05T17:44:37.718489+00:00",
   "experiment_id": "K1710",
   "engine": {
     "name": "scripts/reproduce_check.py",
     "schema": "volpred.reproduce_report.v1",
     "path": "scripts/reproduce_check.py",
-    "sha256": "16115a2d3ffb42a92caf092295dd0eec42c57cadd4dba3ba9b4f34eda83198b5",
+    "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
     "committed_at_repo_head": true
   },
-  "repo_head": "d8e3392b64b700d214a1b9a40b3832246bd6c150",
+  "repo_head": "104410b373edb5b23f093d1330169f05a2207349",
   "methodology_references": [
     {
       "citation": "Peng (2011), Reproducible Research in Computational Science",
@@ -56,8 +56,8 @@
       },
       {
         "path": "experiments/K1710/reproduce_spec.json",
-        "sha256": "9eaeccf154fea29562fd9a80a4945f86ef957b6b570b6fa2044a7582a0c99383",
-        "size": 3106
+        "sha256": "dda2c6020580d7a8a0b9906fb5f1601c2a4150f9cef6830b9bd9cf377fcaff4c",
+        "size": 4562
       },
       {
         "path": "experiments/k1544_prg_fair_info_gjr/k1544_prg_fair_info_gjr.py",
@@ -126,73 +126,25 @@
       },
       {
         "path": "scripts/reproduce_check.py",
-        "sha256": "16115a2d3ffb42a92caf092295dd0eec42c57cadd4dba3ba9b4f34eda83198b5",
-        "size": 62014
+        "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+        "size": 65995
       },
       {
         "path": "src/volpred/stats/model_evaluation.py",
-        "sha256": "29c6f80d1d39f72dfff1984622db599069076c895e174fb564d1e891ae5d59c8",
-        "size": 20107
+        "sha256": "c33b4617cf92e92696d2cb15d4eafa39316e1422332f7ef154cce7195a8493ca",
+        "size": 20257
       }
     ],
     "entrypoint": "experiments/K1710/K1710.py",
     "canonical_result": "experiments/K1710/K1710_results.json",
-    "spec_sha256": "9eaeccf154fea29562fd9a80a4945f86ef957b6b570b6fa2044a7582a0c99383",
-    "subject_sha256": "587b7ced75bda3fba39de9fa03221d0059db71962810a55d004c6610e3d014a2"
+    "spec_sha256": "dda2c6020580d7a8a0b9906fb5f1601c2a4150f9cef6830b9bd9cf377fcaff4c",
+    "subject_sha256": "e8ecf06b4ffe811ccbf0cc702f49f26495ca5bb8c7d8b58eebf1e66cf44a0d44"
   },
-  "execution": {
-    "command": [
-      "/Users/yhlai0911/volpred-research/.venv/bin/python3",
-      "experiments/K1710/K1710.py"
-    ],
-    "backend": "macos_sandbox_exec",
-    "network": "deny",
-    "exit_code": 0,
-    "timeout_seconds": 300,
-    "duration_seconds": 73.246,
-    "stdout_sha256": "4c4db04d5c0eb98a46c08b4600ab9ed98741f395dcaabc7bd5983d99f6695886",
-    "stderr_sha256": "cace1071573ef725e762e8856427937617c8c67e5d0784c45c0e854e56a803a8",
-    "stdout_tail": "========================================================================\nK1710: open-convention + mixed-timing anchor on the K1699 pinned vintage\n========================================================================\nSnapshots synced + SHA256-verified against K1699 (7 files)\nWarming up numba JIT...\n  Numba JIT warm-up complete.\nWarming up numba JIT...\n  Numba JIT warm-up complete.\n\n### PASS 1 ###\n\n[SPY] n=6601, IS=4778, OOS=1823\n[SPY] PRG canonical + open-known...\n[SPY] Fair GJR-X (current overnight)...\n[SPY] GJR close-to-close baseline...\n\n[QQQ] n=6601, IS=4620, OOS=1981\n[QQQ] PRG canonical + open-known...\n[QQQ] Fair GJR-X (current overnight)...\n[QQQ] GJR close-to-close baseline...\n\n[GLD] n=5375, IS=3762, OOS=1613\n[GLD] PRG canonical + open-known...\n[GLD] Fair GJR-X (current overnight)...\n[GLD] GJR close-to-close baseline...\n\n[EEM] n=5778, IS=4044, OOS=1734\n[EEM] PRG canonical + open-known...\n[EEM] Fair GJR-X (current overnight)...\n[EEM] GJR close-to-close baseline...\n\n[0050.TW] n=4217, IS=2951, OOS=1266\n[0050.TW] PRG canonical + open-known...\n[0050.TW] Fair GJR-X (current overnight)...\n[0050.TW] GJR close-to-close baseline...\n\n[TAIFEX] loading pinned session/daily snapshots...\n[TAIFEX] Fair GJR-X (current overnight)...\n[TAIFEX] GJR close-to-close baseline...\n\n### PASS 2 (determinism check) ###\n\n[SPY] n=6601, IS=4778, OOS=1823\n[SPY] PRG canonical + open-known...\n[SPY] Fair GJR-X (current overnight)...\n[SPY] GJR close-to-close baseline...\n\n[QQQ] n=6601, IS=4620, OOS=1981\n[QQQ] PRG canonical + open-known...\n[QQQ] Fair GJR-X (current overnight)...\n[QQQ] GJR close-to-close baseline...\n\n[GLD] n=5375, IS=3762, OOS=1613\n[GLD] PRG canonical + open-known...\n[GLD] Fair GJR-X (current overnight)...\n[GLD] GJR close-to-close baseline...\n\n[EEM] n=5778, IS=4044, OOS=1734\n[EEM] PRG canonical + open-known...\n[EEM] Fair GJR-X (current overnight)...\n[EEM] GJR close-to-close baseline...\n\n[0050.TW] n=4217, IS=2951, OOS=1266\n[0050.TW] PRG canonical + open-known...\n[0050.TW] Fair GJR-X (current overnight)...\n[0050.TW] GJR close-to-close baseline...\n\n[TAIFEX] loading pinned session/daily snapshots...\n[TAIFEX] Fair GJR-X (current overnight)...\n[TAIFEX] GJR close-to-close baseline...\n\nDeterminism check PASSED: two passes produce bit-identical numeric core.\n\nSummary table:\n| Market | N | ON share | PRG open-known | Fair GJR-X | PRG canonical | GJR | DM t open (PRG vs FairGJRX) | DM t mixed (PRG vs GJR) |\n|---|---:|---:|---:|---:|---:|---:|---:|---:|\n| SPY | 1823 | 0.4481 | 0.669737 | 0.726691 | 0.746933 | 0.853368 | -3.557 | -5.827 |\n| QQQ | 1981 | 0.3855 | 0.709635 | 0.742310 | 0.759845 | 0.830479 | -1.563 | -4.781 |\n| GLD | 1613 | 0.6094 | 0.553532 | 0.587197 | 0.820410 | 0.902084 | -3.643 | -6.106 |\n| EEM | 1734 | 0.7065 | 0.438539 | 0.527366 | 0.666351 | 0.790491 | -10.137 | -6.405 |\n| 0050.TW | 1251 | 0.6349 | 0.568406 | 0.625625 | 0.791331 | 0.975338 | -3.670 | -5.194 |\n| TAIFEX | 843 | 0.6890 | 0.039291 | 0.058561 | 0.120932 | 0.255001 | -5.503 | -4.328 |\n\n\nAnchor validation (open panel, K1544 orientation flip):\n  SPY: K1710 open t=-3.557 (=> K1544-orient +3.557, K1544 anchor +2.115); mixed t=-5.827\n  QQQ: K1710 open t=-1.563 (=> K1544-orient +1.563, K1544 anchor +2.967); mixed t=-4.781\n  GLD: K1710 open t=-3.643 (=> K1544-orient +3.643, K1544 anchor +3.625); mixed t=-6.106\n  EEM: K1710 open t=-10.137 (=> K1544-orient +10.137, K1544 anchor +10.130); mixed t=-6.405\n  0050.TW: K1710 open t=-3.670 (=> K1544-orient +3.670, K1544 anchor +3.870); mixed t=-5.194\n  TAIFEX: K1710 open t=-5.503 (=> K1544-orient +5.503, K1544 anchor +5.607); mixed t=-4.328\n\nSaved results to /private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-jz3_o5xa/repo/experiments/K1710\n",
-    "stderr_tail": "Matplotlib is building the font cache; this may take a moment.\n",
-    "clean_snapshot": true,
-    "sandbox_removed_after_run": true
-  },
-  "comparison": {
-    "rtol": 1e-09,
-    "atol": 1e-12,
-    "ignore_pointers": [
-      "/created_at",
-      "/runtime_seconds"
-    ],
-    "archived_scalar_count": 485,
-    "rerun_scalar_count": 485,
-    "numeric_compared": 177,
-    "matched_scalars": 485,
-    "mismatch_count": 0,
-    "mismatches_truncated": false,
-    "mismatches": [],
-    "ignore_reasons": {
-      "/created_at": "Execution timestamp metadata generated after all scientific results are computed.",
-      "/runtime_seconds": "Wall-clock performance metadata; it is not an input to any estimate or verdict."
-    }
-  },
-  "integrity": {
-    "canonical_unchanged": true,
-    "changed_paths": []
-  },
-  "canonical_results": [
-    {
-      "archived_result": "experiments/K1710/K1710_results.json",
-      "archived_sha256": "7e5f4b5c38372b0d5e2d745f95be05b06a91a651f8974a822dce6457380c6da9",
-      "rerun_sha256": "32ee92c8f4ef7db88f81daad86a38dd4092d999b99b31d019618cc1fd4d60d1e",
-      "bit_identical": false
-    }
-  ],
   "environment": {
     "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
-    "platform": "macOS-26.5.1-arm64-arm-64bit",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
     "machine": "arm64",
-    "uv_lock_sha256": "9ba4727375c810be0241c907e77ad7e28c8d2860c3acc8b383230827430bc472",
+    "uv_lock_sha256": "340b8dc87c7b1e0f1fc852bab3f62e2d084582c77831cee59a3729064706edf0",
     "pythonhashseed": "0",
     "package_versions": {
       "numpy": "2.4.3",
@@ -233,22 +185,22 @@
       "paper/prg-periodic-garch/experiments/k886_prg_0050tw.py:700: rng = np.random.RandomState(42)",
       "paper/prg-periodic-garch/experiments/k886_prg_0050tw.py:879: rng = np.random.RandomState(42)",
       "paper/prg-periodic-garch/experiments/k886_prg_0050tw.py:923: rng = np.random.RandomState(42)",
-      "scripts/reproduce_check.py:68: SEED_RE = re.compile(r\"\\b(seed|random_state|default_rng|RandomState)\\b\", re.IGNORECASE)",
-      "scripts/reproduce_check.py:319: raise ValueError(\"declared randomness requires at least one seed\")",
-      "scripts/reproduce_check.py:320: for index, seed in enumerate(seeds):",
-      "scripts/reproduce_check.py:321: if not isinstance(seed, dict) or not isinstance(seed.get(\"library\"), str):",
-      "scripts/reproduce_check.py:323: value = seed.get(\"value\")",
-      "scripts/reproduce_check.py:823: # An empty list reads as \"this experiment sets no seed\" — a real audit verdict.",
-      "scripts/reproduce_check.py:824: warn(\"reproduce_check\", \"seed scan could not read entrypoint\", path=str(entrypoint), err=str(exc))",
-      "scripts/reproduce_check.py:1110: seed[\"value\"]",
-      "scripts/reproduce_check.py:1111: for seed in randomness[\"seeds\"]",
-      "scripts/reproduce_check.py:1112: if str(seed[\"value\"]) not in \"\\n\".join(seed_evidence)",
-      "scripts/reproduce_check.py:1121: summary=f\"declared seed values lack code evidence: {missing_seed_values}\",",
-      "src/volpred/stats/model_evaluation.py:273: seed: int = 42,",
-      "src/volpred/stats/model_evaluation.py:278: result = mcs_proper(losses_dict, alpha=alpha, B=n_boot, seed=seed)",
-      "src/volpred/stats/model_evaluation.py:287: return _simple_mcs(losses_dict, alpha, n_boot, seed)",
-      "src/volpred/stats/model_evaluation.py:290: def _simple_mcs(losses_dict, alpha, n_boot, seed):",
-      "src/volpred/stats/model_evaluation.py:292: np.random.seed(seed)"
+      "scripts/reproduce_check.py:76: SEED_RE = re.compile(r\"\\b(seed|random_state|default_rng|RandomState)\\b\", re.IGNORECASE)",
+      "scripts/reproduce_check.py:360: raise ValueError(\"declared randomness requires at least one seed\")",
+      "scripts/reproduce_check.py:361: for index, seed in enumerate(seeds):",
+      "scripts/reproduce_check.py:362: if not isinstance(seed, dict) or not isinstance(seed.get(\"library\"), str):",
+      "scripts/reproduce_check.py:364: value = seed.get(\"value\")",
+      "scripts/reproduce_check.py:886: # An empty list reads as \"this experiment sets no seed\" — a real audit verdict.",
+      "scripts/reproduce_check.py:887: warn(\"reproduce_check\", \"seed scan could not read entrypoint\", path=str(entrypoint), err=str(exc))",
+      "scripts/reproduce_check.py:1197: seed[\"value\"]",
+      "scripts/reproduce_check.py:1198: for seed in randomness[\"seeds\"]",
+      "scripts/reproduce_check.py:1199: if str(seed[\"value\"]) not in \"\\n\".join(seed_evidence)",
+      "scripts/reproduce_check.py:1208: summary=f\"declared seed values lack code evidence: {missing_seed_values}\",",
+      "src/volpred/stats/model_evaluation.py:276: seed: int = 42,",
+      "src/volpred/stats/model_evaluation.py:281: result = mcs_proper(losses_dict, alpha=alpha, B=n_boot, seed=seed)",
+      "src/volpred/stats/model_evaluation.py:290: return _simple_mcs(losses_dict, alpha, n_boot, seed)",
+      "src/volpred/stats/model_evaluation.py:293: def _simple_mcs(losses_dict, alpha, n_boot, seed):",
+      "src/volpred/stats/model_evaluation.py:295: np.random.seed(seed)"
     ],
     "declared_randomness": {
       "status": "declared",
@@ -264,6 +216,58 @@
       ]
     }
   },
+  "execution": {
+    "command": [
+      "/Users/yhlai0911/volpred-research/.venv/bin/python3",
+      "experiments/K1710/K1710.py"
+    ],
+    "backend": "macos_sandbox_exec",
+    "network": "deny",
+    "exit_code": 0,
+    "timeout_seconds": 300,
+    "duration_seconds": 72.325,
+    "stdout_sha256": "08a57cf35fd46cbd5c4bf81ce61d15366c56a20b8ad0e0ccabdd59eacbe03224",
+    "stderr_sha256": "cace1071573ef725e762e8856427937617c8c67e5d0784c45c0e854e56a803a8",
+    "stdout_tail": "========================================================================\nK1710: open-convention + mixed-timing anchor on the K1699 pinned vintage\n========================================================================\nSnapshots synced + SHA256-verified against K1699 (7 files)\nWarming up numba JIT...\n  Numba JIT warm-up complete.\nWarming up numba JIT...\n  Numba JIT warm-up complete.\n\n### PASS 1 ###\n\n[SPY] n=6601, IS=4778, OOS=1823\n[SPY] PRG canonical + open-known...\n[SPY] Fair GJR-X (current overnight)...\n[SPY] GJR close-to-close baseline...\n\n[QQQ] n=6601, IS=4620, OOS=1981\n[QQQ] PRG canonical + open-known...\n[QQQ] Fair GJR-X (current overnight)...\n[QQQ] GJR close-to-close baseline...\n\n[GLD] n=5375, IS=3762, OOS=1613\n[GLD] PRG canonical + open-known...\n[GLD] Fair GJR-X (current overnight)...\n[GLD] GJR close-to-close baseline...\n\n[EEM] n=5778, IS=4044, OOS=1734\n[EEM] PRG canonical + open-known...\n[EEM] Fair GJR-X (current overnight)...\n[EEM] GJR close-to-close baseline...\n\n[0050.TW] n=4217, IS=2951, OOS=1266\n[0050.TW] PRG canonical + open-known...\n[0050.TW] Fair GJR-X (current overnight)...\n[0050.TW] GJR close-to-close baseline...\n\n[TAIFEX] loading pinned session/daily snapshots...\n[TAIFEX] Fair GJR-X (current overnight)...\n[TAIFEX] GJR close-to-close baseline...\n\n### PASS 2 (determinism check) ###\n\n[SPY] n=6601, IS=4778, OOS=1823\n[SPY] PRG canonical + open-known...\n[SPY] Fair GJR-X (current overnight)...\n[SPY] GJR close-to-close baseline...\n\n[QQQ] n=6601, IS=4620, OOS=1981\n[QQQ] PRG canonical + open-known...\n[QQQ] Fair GJR-X (current overnight)...\n[QQQ] GJR close-to-close baseline...\n\n[GLD] n=5375, IS=3762, OOS=1613\n[GLD] PRG canonical + open-known...\n[GLD] Fair GJR-X (current overnight)...\n[GLD] GJR close-to-close baseline...\n\n[EEM] n=5778, IS=4044, OOS=1734\n[EEM] PRG canonical + open-known...\n[EEM] Fair GJR-X (current overnight)...\n[EEM] GJR close-to-close baseline...\n\n[0050.TW] n=4217, IS=2951, OOS=1266\n[0050.TW] PRG canonical + open-known...\n[0050.TW] Fair GJR-X (current overnight)...\n[0050.TW] GJR close-to-close baseline...\n\n[TAIFEX] loading pinned session/daily snapshots...\n[TAIFEX] Fair GJR-X (current overnight)...\n[TAIFEX] GJR close-to-close baseline...\n\nDeterminism check PASSED: two passes produce bit-identical numeric core.\n\nSummary table:\n| Market | N | ON share | PRG open-known | Fair GJR-X | PRG canonical | GJR | DM t open (PRG vs FairGJRX) | DM t mixed (PRG vs GJR) |\n|---|---:|---:|---:|---:|---:|---:|---:|---:|\n| SPY | 1823 | 0.4481 | 0.669737 | 0.726691 | 0.746933 | 0.853368 | -3.557 | -5.827 |\n| QQQ | 1981 | 0.3855 | 0.709635 | 0.742310 | 0.759845 | 0.830479 | -1.563 | -4.781 |\n| GLD | 1613 | 0.6094 | 0.553532 | 0.587197 | 0.820410 | 0.902084 | -3.643 | -6.106 |\n| EEM | 1734 | 0.7065 | 0.438539 | 0.527366 | 0.666351 | 0.790491 | -10.137 | -6.405 |\n| 0050.TW | 1251 | 0.6349 | 0.568406 | 0.625625 | 0.791331 | 0.975338 | -3.670 | -5.194 |\n| TAIFEX | 843 | 0.6890 | 0.039291 | 0.058561 | 0.120932 | 0.255001 | -5.503 | -4.328 |\n\n\nAnchor validation (open panel, K1544 orientation flip):\n  SPY: K1710 open t=-3.557 (=> K1544-orient +3.557, K1544 anchor +2.115); mixed t=-5.827\n  QQQ: K1710 open t=-1.563 (=> K1544-orient +1.563, K1544 anchor +2.967); mixed t=-4.781\n  GLD: K1710 open t=-3.643 (=> K1544-orient +3.643, K1544 anchor +3.625); mixed t=-6.106\n  EEM: K1710 open t=-10.137 (=> K1544-orient +10.137, K1544 anchor +10.130); mixed t=-6.405\n  0050.TW: K1710 open t=-3.670 (=> K1544-orient +3.670, K1544 anchor +3.870); mixed t=-5.194\n  TAIFEX: K1710 open t=-5.503 (=> K1544-orient +5.503, K1544 anchor +5.607); mixed t=-4.328\n\nSaved results to /private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-saq77lms/repo/experiments/K1710\n",
+    "stderr_tail": "Matplotlib is building the font cache; this may take a moment.\n",
+    "clean_snapshot": true,
+    "sandbox_removed_after_run": true
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/run_utc",
+      "/runtime_env",
+      "/runtime_seconds"
+    ],
+    "archived_scalar_count": 485,
+    "rerun_scalar_count": 485,
+    "numeric_compared": 177,
+    "matched_scalars": 485,
+    "mismatch_count": 0,
+    "mismatches_truncated": false,
+    "mismatches": [],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "integrity": {
+    "canonical_unchanged": true,
+    "changed_paths": []
+  },
+  "canonical_results": [
+    {
+      "archived_result": "experiments/K1710/K1710_results.json",
+      "archived_sha256": "7e5f4b5c38372b0d5e2d745f95be05b06a91a651f8974a822dce6457380c6da9",
+      "rerun_sha256": "23e1eebc647c98148a46e2d105e7c19f25c9bcca3b01e1d413d7a789222fa0cf",
+      "bit_identical": false
+    }
+  ],
   "outcome": {
     "status": "pass_tolerated",
     "reason_code": "WITHIN_PREDECLARED_TOLERANCE",
