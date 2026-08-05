@@ -13,11 +13,16 @@ The identical t-stat (2.20) with different gamma is suspicious.
 This experiment re-estimates GJR-GARCH(1,1) via MLE for all assets
 under multiple window/sample configurations to find the correct values.
 
-Data source: yfinance (0050.TW, ^TWII, 2330.TW, SPY)
+Data source: 0050.TW reads the taiwan-vt pinned snapshot
+  (paper/taiwan-vt/data/0050_tw_..._2008-2026.csv, 0050_tw_adj_close) so the
+  paper-cited full_sample gamma=0.097042 / t=3.5965 / n_obs=4219 reproduces
+  deterministically; ^TWII / 2330.TW / SPY (cross-checks, not paper inputs) and
+  the K892_USE_PINNED=0 fallback still pull live yfinance.
 Reference: Glosten, Jagannathan, Runkle (1993)
 """
 
 import json
+import os
 import warnings
 import sys
 from datetime import datetime, timezone
@@ -27,14 +32,56 @@ import pandas as pd
 import yfinance as yf
 from arch import arch_model
 
-# MUST use clean_tw50_data for 0050.TW
-sys.path.insert(0, '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-adc7e97d')
+# clean_tw50_data ships with the installed volpred package; the legacy worktree
+# path is only prepended if it still exists (harmless when it does not).
+_LEGACY_UTILS = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-adc7e97d'
+if os.path.isdir(_LEGACY_UTILS):
+    sys.path.insert(0, _LEGACY_UTILS)
 from volpred.utils import clean_tw50_data
 
 warnings.filterwarnings('ignore')
 
+# --- Pinned snapshot inputs (reproducibility) --------------------------------
+# The taiwan-vt paper ships a pinned CSV snapshot so referees reproduce the exact
+# analysis data instead of re-pulling live yfinance (whose adjusted values drift
+# with each new dividend). 0050.TW's paper-cited full_sample gamma=0.097042 /
+# t=3.5965 / n_obs=4219 reproduces byte-for-byte from the pinned adjusted-close
+# column (verified 2026-07-27). yfinance auto_adjust makes df['Close'] an adjusted
+# series, so the pinned *_adj_close column is the matching input. Set
+# K892_USE_PINNED=0 to force a live yfinance pull (explicit fallback).
+PINNED_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))), 'paper', 'taiwan-vt', 'data')
+PINNED_SOURCES = {
+    # ticker: (csv filename, adjusted-close column)
+    '0050.TW': ('0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv',
+                '0050_tw_adj_close'),
+}
+USE_PINNED = os.environ.get('K892_USE_PINNED', '1') != '0'
+
+
+def _load_pinned(ticker, end):
+    """Load adjusted-close prices/returns for a ticker from the pinned snapshot."""
+    fname, col = PINNED_SOURCES[ticker]
+    df = pd.read_csv(os.path.join(PINNED_DIR, fname), parse_dates=['date']).set_index('date')
+    prices = df[col].dropna()
+    if end is not None:
+        # yfinance's end is exclusive; match the original run's window boundary.
+        prices = prices[prices.index < pd.Timestamp(end)]
+    returns = prices.pct_change().dropna()
+    return prices, returns
+
+
 def download_data(ticker, start='2000-01-01', end='2026-04-05'):
-    """Download and prepare return data."""
+    """Return (prices, returns) for a ticker.
+
+    For tickers with a pinned snapshot (see PINNED_SOURCES) the analysis input is
+    the paper's pinned CSV (adjusted close, matching yfinance auto_adjust), making
+    the paper-cited number byte-for-byte reproducible. Live yfinance remains the
+    explicit fallback (other tickers, or K892_USE_PINNED=0).
+    """
+    if USE_PINNED and ticker in PINNED_SOURCES:
+        return _load_pinned(ticker, end)
+
     df = yf.download(ticker, start=start, end=end, progress=False)
     if df.empty:
         raise ValueError(f"No data for {ticker}")
@@ -555,8 +602,10 @@ def main():
         if 'error' not in fs:
             print(f"  {ticker:<15} {fs['omega']:>10.6f} {fs['alpha']:>10.6f} {fs['gamma']:>10.6f} {fs['beta']:>10.6f} {fs['persistence']:>10.6f} {fs['gamma_t']:>10.3f} {fs['n_obs']:>8}")
 
-    # Save results
-    output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-adc7e97d/experiments/k892_verify_tw_gamma_results.json'
+    # Save results next to this script (self-contained; was a dead worktree path)
+    output_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'k892_verify_tw_gamma_results.json')
 
     # Convert any remaining numpy types
     def convert_numpy(obj):
