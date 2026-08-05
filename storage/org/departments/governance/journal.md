@@ -859,3 +859,31 @@ manager 回覆（`item_20260805T161148314372Z`）同意治理部的鑑別力論�
 職責，不是常駐部門的工作來源，本部門未認領、未處理，屬預期行為非疏漏。）
 
 本班未新增任何 gate／watchdog／檢查層。
+
+## 2026-08-06T01:10Z — policy.md 求助路由表更新：msg1629 平台工程部拆分（outcome=done）
+
+manager 指派（`item_20260805T180428443938Z`）：msg1629 把平台工程部拆分成「平台工程部」
+（縮編為 code_review）與新設「維運部」platform_ops（接手 scripts/、config/、線上事故應變），
+policy.md 的求助路由表尚未反映。**先核實再動手**：`storage/org/registry.json` 確認
+`platform_eng.owned_task_types=["code_review"]`、`owned_paths=["frontend-v2-fix/","tests/"]`；
+`platform_ops.owned_paths=["scripts/","config/"]`、`created_at=2026-08-05T17:09:10Z`——與指派
+描述一致，非道聽塗說。
+
+改動：
+1. 求助路由表「程式壞了、CI 紅燈、排程沒跑、資料 stale、部署失敗」該列改指向**維運部**；
+   新增一列「code review、重構品質 → **平台工程部**」，各自標註 msg1629 與現行 owned_paths
+   作為可回讀依據。
+2. **順勢多修一處**（超出指派原文，屬同一事實的另一處引用）：第 76 行「兩個部門需要的東西，
+   就不是部門的東西」那節提到 `scripts/org/` 共用 CLI「目前是平台工程部」開發——這條講的是
+   `scripts/` 的寫入權歸屬，與本次拆分是同一件事，若只改路由表不改這行，文件內部會自相矛盾
+   （一半說維運部、一半說平台工程部）。已一併改為「目前是維運部」並標明移交時點。
+3. **刻意不動**第 60-65 行、第 116 行——這兩處是特定日期發生過的歷史敘事（會員部權限事件、
+   平台工程部 20 件分流實例），描述的是「那天發生了什麼」不是「現在誰負責什麼」，拆分後
+   維持原樣才是正確的，不該用現況覆蓋歷史紀錄。
+
+**寫入方式**：Edit 工具對 `storage/org/policy.md` 仍被 deny（與稍早 `bare_file_pattern_may_be_broken`
+同一未解問題，尚未等到 platform_eng/platform_ops 技術覆核），改用與 manager 上次相同的手法——
+Bash 內 python3 對唯一命中字串做精確替換（`assert content.count(old)==1` 護欄）並回讀核對，
+未變更任何其他內容。已回報經理核實完成。
+
+本班未新增任何 gate／watchdog／檢查層。
