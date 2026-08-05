@@ -341,6 +341,21 @@
      "at": "2026-08-05T20:55:24.265474+00:00",
      "instance_key": "31044790125:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-05T21:25:46.534030+00:00",
+     "instance_key": "31047135756:1",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-05T21:50:22.951503+00:00",
+     "instance_key": "31048608778:1",
+     "transition": "opened"
+    },
+    {
+     "at": "2026-08-05T22:30:32.814442+00:00",
+     "instance_key": "31051710662:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -493,14 +508,32 @@
      "first_seen_at": "2026-08-05T20:55:24.265474+00:00",
      "key": "31044790125:1",
      "last_seen_at": "2026-08-05T20:55:24.265474+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-05T21:25:46.534030+00:00",
+     "key": "31047135756:1",
+     "last_seen_at": "2026-08-05T21:25:46.534030+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-05T21:50:22.951503+00:00",
+     "key": "31048608778:1",
+     "last_seen_at": "2026-08-05T21:50:22.951503+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-05T22:30:32.814442+00:00",
+     "key": "31051710662:1",
+     "last_seen_at": "2026-08-05T22:30:32.814442+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-05T20:54:07.7755375Z E AssertionError: CLAUDE.md / AGENTS.md drifted from config/governance_shared.md. Edit the canonical file, then run: uv run python scripts/sync_governance.py --apply",
-   "last_seen_at": "2026-08-05T20:55:24.265474+00:00",
+   "last_breach_detail": "2026-08-05T22:25:22.9598524Z E AssertionError: CLAUDE.md / AGENTS.md drifted from config/governance_shared.md. Edit the canonical file, then run: uv run python scripts/sync_governance.py --apply",
+   "last_seen_at": "2026-08-05T22:30:32.814442+00:00",
    "notified_at": null,
-   "occurrence_count": 25,
+   "occurrence_count": 28,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2303,7 +2336,7 @@
    "clean_streak_started_at": null,
    "control_gate_id": "dispatch_worker_ownership",
    "current_task_id": null,
-   "episode_count": 1568,
+   "episode_count": 1687,
    "episode_failures": [
     {
      "at": "2026-08-04T04:16:20.228925+00:00",
@@ -2313,7 +2346,7 @@
      "task_id": "inc_792a94b0ecf4_e1"
     }
    ],
-   "episode_opened_at": "2026-08-05T21:18:12.902653+00:00",
+   "episode_opened_at": "2026-08-05T22:27:32.363519+00:00",
    "escalation": {
     "at": "2026-08-04T04:16:20.270924+00:00",
     "notification_id": "effect_owned_email_5b3a5d4b722faea245a48bbb9ca01d93",
@@ -3295,7 +3328,7 @@
      },
      "first_seen_at": "2026-08-04T06:55:40.479741+00:00",
      "key": "dispatch-slot-1-3175c52f",
-     "last_seen_at": "2026-08-05T21:17:36.694873+00:00"
+     "last_seen_at": "2026-08-05T22:26:46.065088+00:00"
     },
     {
      "cleared_at": null,
@@ -3309,7 +3342,7 @@
      },
      "first_seen_at": "2026-08-04T07:21:54.991363+00:00",
      "key": "dispatch-slot-1-1675be8d",
-     "last_seen_at": "2026-08-05T21:17:45.272691+00:00"
+     "last_seen_at": "2026-08-05T22:26:56.977268+00:00"
     },
     {
      "cleared_at": null,
@@ -3323,7 +3356,7 @@
      },
      "first_seen_at": "2026-08-04T07:46:21.551654+00:00",
      "key": "dispatch-slot-1-592ef34e",
-     "last_seen_at": "2026-08-05T21:17:53.087695+00:00"
+     "last_seen_at": "2026-08-05T22:27:10.085530+00:00"
     },
     {
      "cleared_at": null,
@@ -3393,7 +3426,7 @@
      },
      "first_seen_at": "2026-08-05T05:28:01.199569+00:00",
      "key": "dispatch-slot-1-12eda1cf",
-     "last_seen_at": "2026-08-05T21:18:04.749938+00:00"
+     "last_seen_at": "2026-08-05T22:27:22.780245+00:00"
     },
     {
      "cleared_at": null,
@@ -3421,7 +3454,7 @@
      },
      "first_seen_at": "2026-08-05T15:40:28.863409+00:00",
      "key": "dispatch-slot-1-29018b66",
-     "last_seen_at": "2026-08-05T21:18:12.902653+00:00"
+     "last_seen_at": "2026-08-05T22:27:32.363519+00:00"
     },
     {
      "cleared_at": null,
@@ -3429,13 +3462,13 @@
       "base_sha": "989b9f9d8e615b32a91a6e0c5171e9e9b756f965",
       "branch": "worktree-dispatch-slot-1-de54b3f5",
       "checkpoint_commit": "",
-      "detail_tail": "fire ended with outcome=settlement_recovery; dirty=True unique_commits=0",
-      "reason": "worker_settlement_recovery",
+      "detail_tail": "fire ended with outcome=superseded_generation; dirty=True unique_commits=0",
+      "reason": "worker_superseded_generation",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-de54b3f5"
      },
      "first_seen_at": "2026-08-05T19:27:40.691281+00:00",
      "key": "dispatch-slot-1-de54b3f5",
-     "last_seen_at": "2026-08-05T21:08:07.369733+00:00"
+     "last_seen_at": "2026-08-05T22:09:09.108322+00:00"
     },
     {
      "cleared_at": null,
@@ -3455,72 +3488,72 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-29018b66 unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-05T21:18:12.902653+00:00",
+   "last_seen_at": "2026-08-05T22:27:32.363519+00:00",
    "notified_at": null,
-   "occurrence_count": 11872,
+   "occurrence_count": 11991,
    "resolution": {
-    "at": "2026-08-05T21:18:12.902653+00:00",
+    "at": "2026-08-05T22:27:32.363519+00:00",
     "by": "inc_792a94b0ecf4_rootcause_e2",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
     {
-     "at": "2026-08-05T21:05:46.553152+00:00",
+     "at": "2026-08-05T22:06:47.540075+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:07:31.612201+00:00",
+     "at": "2026-08-05T22:08:33.065833+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:07:38.241859+00:00",
+     "at": "2026-08-05T22:08:39.685376+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:07:44.858490+00:00",
+     "at": "2026-08-05T22:08:46.439681+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:07:54.332895+00:00",
+     "at": "2026-08-05T22:08:55.962772+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:08:00.855298+00:00",
+     "at": "2026-08-05T22:09:02.577917+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:08:07.369733+00:00",
+     "at": "2026-08-05T22:09:09.108322+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:17:36.694873+00:00",
+     "at": "2026-08-05T22:26:46.065088+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:17:45.272691+00:00",
+     "at": "2026-08-05T22:26:56.977268+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:17:53.087695+00:00",
+     "at": "2026-08-05T22:27:10.085530+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:18:04.749938+00:00",
+     "at": "2026-08-05T22:27:22.780245+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-05T21:18:12.902653+00:00",
+     "at": "2026-08-05T22:27:32.363519+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     }
@@ -5761,6 +5794,6 @@
    }
   }
  },
- "updated_at": "2026-08-05T21:18:12.947607+00:00",
+ "updated_at": "2026-08-05T22:30:32.815596+00:00",
  "version": 1
 }

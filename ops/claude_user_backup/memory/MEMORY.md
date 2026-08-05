@@ -7,6 +7,7 @@
 - 模型與 CLI 環境：[cache TTL 依 tier](reference_anthropic_cache_ttl.md)｜[advisor=fable 撞 CC #76199](reference_advisor_fable_bug.md)｜[Codex/Gemini 認證可用性](reference_dual_cli_availability.md)｜[agy CLI 取代 gemini-cli](reference_antigravity_cli.md)
 - [reference_notebooklm_rag_workflow.md](reference_notebooklm_rag_workflow.md) — 外部文獻 RAG 走 NotebookLM 的觸發時機
 - [reference_shell_utf8_locale_required.md](reference_shell_utf8_locale_required.md) — 非互動 shell 要 export LANG/LC_ALL，否則中文 argv 壞掉
+- [reference_bsd_tr_multibyte_utf8.md](reference_bsd_tr_multibyte_utf8.md) — macOS BSD tr 拆散多位元組字元成亂碼，別誤判成字型缺字
 - [reference_publisher_strict_audit_tag_rules.md](reference_publisher_strict_audit_tag_rules.md) — K-id 自動移到 metadata；tag ≤8 禁統計術語
 - 派工與算力：[SUPERSEDED — 派工改 dispatch-supervisor daemon](reference_hourly_dispatch_via_os_cron.md)｜[heavy compute 進 queue，~75% token 節省](reference_compute_queue_token_split.md)｜[worktree 內 enqueue worker 看不到](reference_enqueue_from_worktree_is_invisible.md)
 - [reference_knowledge_wiki_and_context_economy.md](reference_knowledge_wiki_and_context_economy.md) — 編譯式知識庫 + context 經濟
@@ -37,6 +38,7 @@
 - [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — 策略持續增減走既有 gate
 - [project_cloud_agent_git_divergence.md](project_cloud_agent_git_divergence.md) — 雲端 agent 與本機 git 分岔史
 - [project_canonical_write_test_leak_gate.md](project_canonical_write_test_leak_gate.md) — 「測試寫 canonical storage」的 class gate
+- [project_test_spawn_leak_sandbox_escape.md](project_test_spawn_leak_sandbox_escape.md) — 測試會 spawn 真 opus session；tree-clean gate 對 out-of-process 副作用失明
 
 ## Feedback — 研究與論文
 - [feedback_research_rigor.md](feedback_research_rigor.md) — 樣本 ≥500、跨 3 期間驗證
@@ -88,6 +90,7 @@
 - [feedback_task_end_summary_format.md](feedback_task_end_summary_format.md) — 任務結束 4 項摘要格式
 - [feedback_refactor_independent_execution.md](feedback_refactor_independent_execution.md) — 重構走獨立軌（main_thread lane），不進一般派工
 - [feedback_gates_smooth_no_deadlock.md](feedback_gates_smooth_no_deadlock.md) — gate 要流暢有出口，block 必附修復/寬限/裁決三選一，禁死局
+- [feedback_verify_org_brief_against_canonical.md](feedback_verify_org_brief_against_canonical.md) — 經理 brief 的組織態可能整段是假的，開班先對帳 org_status.py
 
 ## Feedback — 工程紀律
 - [feedback_five_step_closure_gate.md](feedback_five_step_closure_gate.md) — 結案五步鐵律；contained vs root_cause_fixed_and_verified 二態
