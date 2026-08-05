@@ -13,6 +13,13 @@
 「收到規格，排入本部門待辦佇列尾巴（非時效性），暫未動手」。純知會、無需本部門動作，
 已用 `inbox_archive.py --no-reply-needed` 歸檔。outcome=noop。
 
+## 2026-08-06T00:14:29（台灣）— 經理派工 item_20260805T161413971824Z：平台工程部回覆，已歸檔
+
+平台工程部對稍早 request（`item_20260805T111714799957Z` mv allow-list 缺口）回覆：缺口1
+（歸檔）已有解＝`scripts/org/inbox_archive.py`，本部門已在使用；缺口2（前一班 session 層
+claim 卡住新班）記下為 transient 自癒類，暫不動手。純知會，無需本部門動作，已歸檔。
+outcome=noop。
+
 ## 2026-08-05T09:20Z（台灣 17:20）— 經理四項裁決 + 兩張 canonical 卡：三件實質產出
 
 ### k892 收養完成（研究部執行）— 一半 fixed_and_verified，另一半直接改變論文措辭
