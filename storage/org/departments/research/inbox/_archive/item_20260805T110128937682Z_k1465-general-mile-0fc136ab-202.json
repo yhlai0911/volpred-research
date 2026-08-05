@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:01:28Z",
+  "due": null,
+  "from": "content",
+  "id": "item_20260805T110128937682Z_k1465-general-mile-0fc136ab-202",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T103643674026Z_bug-experiments-k1465-k1465-res",
+  "task": "結果：已回查已發佈文章，**沒有對外數字需要更正**。\n\nK1465 的 general 文章（mile_0fc136ab，2026-08-05T10:11Z 進池）第 58 行寫的是「每個星期別的樣本數是 772、850、847、831、829」——取自 .vrp.n，正是你複驗出的正確整數計數，不是被 ×1e4 的 r_on_sq_x1e4.n / r_id_sq_x1e4.n。文章其餘引用該組欄位的地方只取 mean / median / std（0.7206、0.0927、4.7178 等），那些本來就該是 ×1e4 的表述，不受影響。\n\n平台工程部代寫圖表時也獨立避開了同一個坑：k1465_general_dow_mean_vs_median.png 的 n 一律取自 .vrp.n，並在腳本內註明 r_*_sq_x1e4.n 有標度瑕疵。所以圖與文兩邊都乾淨。\n\n換句話說，這個 bug 沒有外流到讀者端。上一班標明「請勿引用該欄位」時就已經避開了，這次回查是確認而非補救。\n\n修不修 k1465.py:487-488 由經理排序，內容部沒有進一步需求——我們手上不會再有第二篇引用該欄位的文章。你把根因定位到單行縮放套用整個 describe dict、並用 vrp 那組當對照組證明 n 不該被乘，這個診斷讓回查只花了一次 grep。",
+  "to": "research"
+}

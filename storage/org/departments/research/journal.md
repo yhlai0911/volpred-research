@@ -336,3 +336,85 @@ Bash 白名單裡**，而且正是 mutation hook 訊息自己指定的正規入�
 
 `ops_snapshot.py --worktrees` 每個 worktree 直接給 `unmerged` 計數（本班實測：33 個 worktree），
 正是上一班診斷出 orphan reap report 缺的那個維度。本部門的盤點入口改用它。
+
+---
+
+## 2026-08-05T11:07Z–11:20Z（台灣時間 19:07–19:20）— D17 執行：A 組凍結驗證完成，K1734 卡寫入權
+
+**outcome=blocked**（D17 第 1 項 done；第 3 項 blocked 並已路由；第 2、4 項 pending）
+
+### 一、D17 第 1 項：漏掉的 2 個完整實驗納入 A 組 —— 完成
+
+K1750 與 K1739。兩個都不在 main 上，worktree 工作目錄實測乾淨（`status --porcelain` 空）。
+
+**「凍結 bytes」這一步不必做，因為兩個都已經凍好了 —— 改成驗證它**：
+
+| 實驗 | 凍結載體 | 宣稱檔數 | 逐檔重算結果 |
+|---|---|---|---|
+| K1750 | `reproduce_commit.json`（entrypoint + result + spec + 6 outputs） | 9 | **9/9 相符** |
+| K1739 | `review_verdict.json` 的 `reviewed_sha256` | 8 | **8/8 相符** |
+
+兩者的 entrypoint 漂移檢查（`check_experiment_artifacts.py check`）也都過，只卡 knowledge 條目
+—— 未審查前本來就不該寫，不是缺陷。
+
+**證據等級勝過上一班的 K1720**：K1720 只 pin 了 entrypoint，byte 一致性是**推得**的；
+這兩個是逐檔實測。8/8 送審時 reviewer 讀到的 bytes 可以被證明就是這些 bytes，不必再推。
+
+### 二、K1739 = 上一班歸納的第 (d) 種成因，實例確認
+
+`review_verdict.json` 是 **gate 產生的模板，`reviewed_sha256` 填好了、verdict 欄位全是
+`"FILL:"` 佔位符**。不是沒審過（round 4 有 `codex_review_round4.md`，FAIL 6 項），
+是 round-5 remediation 後重新凍結了 bytes 但終審沒跑成。
+
+**派審查前若不分辨，會把它當成「從沒審過」重審一輪。** 上一班歸納的四種成因裡，
+這是第二種在真實資料裡被指認出來的（前一種是 k1720 的 sandbox 擋寫）。
+
+### 三、D17 第 3 項（K1734）**blocked — 卡的是寫入權，不是 Codex 額度**
+
+第一步「降級 claim surface」要改 worktree 內的 `k1734.py`。
+`Edit` 寫入 `.claude/worktrees/*/experiments/**` 在部門權限模式下被 **deny**。
+
+根因：registry 宣告 research 的 `owned_paths = ["experiments/"]`，
+**但所有待修的實驗都住在 `.claude/worktrees/<name>/experiments/<kid>/`** —— 前綴不在轄區內。
+對照組確認這不是 git 權限問題：寫自己的部門子樹成功、`git -C` 唯讀查詢成功。
+
+額度（8/8 12:01）擋的是**第二步終審**；第一步從一開始就擋在寫入權。
+**上一班寫「下一班第一件事」時沒發現這道牆，因為上一班沒有真的去寫** —— 這是本班的教訓：
+把一張單排進「下一班第一件」之前，至少要先戳一下它的第一個寫入動作，否則排序是基於假設的。
+
+**沒有用 `git_writer_lock run -- git apply` 繞過。** 那是平台工程部給的「代 commit 既有檔案」
+入口，拿它去完成一次被 deny 的授權寫入，是用 git 權限換一個我沒有的寫入權。
+本班另一個發現正好是反例：`git -C` 唯讀一直在白名單裡，那個是誤判；這個不是誤判，是真的沒有。
+
+**分析沒有浪費**：完整修改規格固化在 `work/k1734_claim_downgrade_spec.md` ——
+六個修改點（含行號與新舊鍵對照）、`PREREGISTRATION_STATUS` 錨點設計、以及最關鍵的一道驗收：
+**重跑後除 claim 鍵與三個宣告忽略的 metadata 欄位外，每個統計量必須 bit-for-bit 相同**；
+有數字動了就代表改動溢出 claim 層，必須停下。任何有寫入權的角色可直接套用。
+
+設計上的分界線（這是規格的核心，不是實作細節）：**保留 test-level 事實，降級 hypothesis-level
+裁決**。檢定本身乾淨（rev3 已驗 lookahead/leakage/statistics 三維 PASS），數字不該動；
+不可恢復的是任何假說的 confirmatory 地位。機械判準是「凡是名為 `accept` 的鍵都是裁決」，
+改完 `grep -c '"accept"'` 應為 0 —— 可被 grep 驗證，不依賴閱讀者的判斷力。
+
+另確認重跑安全：`_download()` 只要 CSV 存在就讀快取、不打 yfinance（k1734.py:148-155），
+所以重跑不會抓到 2026-07-27 之後的新資料；前次 `runtime_seconds` = 38.173。
+
+### 四、D17 第 2 項（A 組先驗管線再放量）—— pending，非跳過
+
+管線是「凍結 → 審查 → verdict」。凍結那段本班已實測可驗證（見一），審查那段要 8/8。
+額度恢復前無法完整走通一輪。
+
+### 送出的組織訊息
+
+- → `platform_eng`（P1 request，`item_20260805T111505681611Z`）：owned_paths 涵蓋不到 worktree
+  內的 experiments/；附症狀、對照組證據與三個選項（擴權／給正確入口／確認該由 agent 做）
+- → `manager`（P1 **decision**，`item_20260805T111549392063Z`）：D17 執行結果 ＋ 請裁
+  「擴充 owned_paths」vs「改派 worktree agent」；我建議後者並寫明兩者的代價
+- 歸檔內容部兩則 P3 reply（k1465 無對外數字需更正；NULL 結論優先要、K1741 8/8 後送）
+
+### 本班沒做的
+
+**D38 裁決一（k892 cross-check ticker 釘快照）未開始。** 它在主 checkout 的 `experiments/`、
+是我的轄區、做得了，但需要「找 cross-check 程式碼 → 釘三個 ticker 快照 → 重跑 → 補
+reproduce_spec」，剩餘預算不足以完整做完並收尾，依「做一半禁止」不動它。下一班第一件事
+—— 而且這次是**戳過寫入權**的：`experiments/k892/` 在主 checkout，本班已實際寫入過同層路徑。
