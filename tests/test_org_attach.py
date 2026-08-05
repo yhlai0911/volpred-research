@@ -462,3 +462,31 @@ def test_unknown_capability_grants_nothing(org_root: Path) -> None:
     allow = json.loads(attach.generate_dept_settings(org_root, "content").read_text())["permissions"]["allow"]
 
     assert not any("fb_" in r for r in allow), "an unrecognised capability must not widen anything"
+
+
+def test_gh_allowlist_is_read_only(org_root: Path) -> None:
+    """Manager decision 2026-08-05 (item_20260805T170529986174Z): read-only `gh`
+    subcommands only, granted to every department -- not gated by owned_paths or
+    capabilities, since a department reading its own CI status is not turf."""
+    attach = _load_attach()
+    assert run_tool("org_admin.py", "create", "content", root=org_root).returncode == 0
+
+    allow = json.loads(attach.generate_dept_settings(org_root, "content").read_text())["permissions"]["allow"]
+
+    for readonly in (
+        "Bash(gh pr view:*)",
+        "Bash(gh issue view:*)",
+        "Bash(gh run view:*)",
+        "Bash(gh pr checks:*)",
+        "Bash(gh issue list:*)",
+        "Bash(gh pr list:*)",
+        "Bash(gh run list:*)",
+        "Bash(gh search:*)",
+        "Bash(gh auth status:*)",
+    ):
+        assert readonly in allow, readonly
+
+    mutating = ("merge", "close", "edit", "comment", "create", "delete", "reopen")
+    assert not any(
+        r.startswith("Bash(gh") and any(m in r for m in mutating) for r in allow
+    ), "a state-mutating gh subcommand must never reach the department allowlist"

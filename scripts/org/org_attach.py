@@ -267,6 +267,22 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
         "Bash(uv run python scripts/git_writer_lock.py:*)",
         "Bash(uv run pytest:*)",
     ]
+    # Manager decision 2026-08-05 (item_20260805T170529986174Z, replying to
+    # platform_eng's gh-blocked escalation from the ci-red-30983363179 fix
+    # attempt): read-only `gh` subcommands only. Anything that mutates GitHub
+    # state (merge/close/edit/comment/create/delete/...) stays off this list by
+    # design -- that work still routes through a request or the main thread.
+    allow += [
+        "Bash(gh pr view:*)",
+        "Bash(gh issue view:*)",
+        "Bash(gh run view:*)",
+        "Bash(gh pr checks:*)",
+        "Bash(gh issue list:*)",
+        "Bash(gh pr list:*)",
+        "Bash(gh run list:*)",
+        "Bash(gh search:*)",
+        "Bash(gh auth status:*)",
+    ]
     # Holes in the turf. A department may own a parent of a reserved zone
     # (`scripts/` while the supervisor stays reserved, `paper/` while `.tex`
     # authorship stays main-thread), so the grant is real and the exception is
