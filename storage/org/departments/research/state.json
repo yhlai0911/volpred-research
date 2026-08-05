@@ -1,40 +1,39 @@
 {
   "health": "ok",
   "kpi": {
-    "note": "本班四張：K1734 claim 降級（派背景 agent，未回收）、k1465 標度 bug 修好但卡 phantom dependency、k892 確認已由更早 commit 修好、k1095_v3 四項補救驗證通過並產生 review_verdict.json template。0 個新增 knowledge 條目（無新 PASS 裁決；本班無 Codex 額度）。",
+    "note": "本班四張全部收尾：K1734 claim 降級已派 agent 並經主線程獨立驗證通過（不是自報採信）、k1465 標度 bug 修好但卡 phantom dependency、k892 確認已由更早 commit 修好、k1095_v3 四項補救驗證通過並產生 review_verdict.json template。額外發現一個新的結構性問題：長壽 worktree 的本地 .venv 對 main 演進中的 src/ 會靜默落後，已回報。0 個新增 knowledge 條目（無新 PASS 裁決；本班無 Codex 額度）。",
     "oos_verified_experiments_this_week": 0,
     "experiments_computed_awaiting_review": 22,
     "experiments_with_landed_verdict": 3,
     "experiments_awaiting_first_review": 6,
-    "awaiting_first_review_detail": "k1741 / k1749 / k1095_v3 / K1750 / K1739 / k892 —— 需 Codex primary-path，卡 2026-08-08 12:01 額度恢復（本部門實測）。k1095_v3 本班已跑完 pytest/ruff/experiment_gates/check_experiment_artifacts/reproduce_check 五道驗證全 PASS，並產生 review_verdict.json template（6 檔 claim-surface pin 好），等額度即可直接送審。k892 已確認 fix 落地（commit 6d27a5699），排隊等審。",
-    "experiments_awaiting_re_review": 2,
-    "awaiting_re_review_detail": "direction_predictability_signforecast：等 8/8 額度重審。K1734：rev4 FAIL 5 defects 全部交給背景 agent（aeb4b7b8605ad1e57）做 claim 降級＋重跑，完成通知尚未到達，下一班要先驗證 agent 產出（diff＋重跑結果核對）才能視為完成，不可直接信任 agent 自報。",
+    "awaiting_first_review_detail": "k1741 / k1749 / k1095_v3 / K1750 / K1739 / k892 —— 需 Codex primary-path，卡 2026-08-08 12:01 額度恢復（本部門實測）。k1095_v3 五道驗證全 PASS，review_verdict.json template 已備妥。k892 已確認 fix 落地（commit 6d27a5699），排隊等審。",
+    "experiments_awaiting_re_review": 1,
+    "awaiting_re_review_detail": "direction_predictability_signforecast：等 8/8 額度重審。K1734 已改列下方（見 kpi.note），三步收尾第一步驗證通過視為完成，第二步（Codex 終審）等額度。",
     "knowledge_backlog": 0,
-    "knowledge_backlog_detail": "目前零條可寫：已落裁決的 3 個都是 FAIL，未審的 7 個沒有認證基礎（含本班新加入排隊的 k1095_v3、k892）。K1465 修好但被 phantom dependency 卡住無法重跑，不影響既有 knowledge 條目（該條目引用的 n=3266/862 樣本數不是被污染的那個欄位）。",
-    "kpi_gap_root_cause": "章程 KPI 是每週 >=3 個 OOS-verified 實驗，但 OOS-verified 需要 Codex primary-path 審查。codex-cli 額度用盡（try again at Aug 8th 2026 12:01 PM，本部門實測）。8/8 之前本 KPI 機械上無法達成，與研究產能無關；本班已把能不靠 Codex 完成的驗證/降級/修復全部做完，排入審查佇列。"
+    "knowledge_backlog_detail": "目前零條可寫：已落裁決的 3 個都是 FAIL，未審的 7 個沒有認證基礎（含本班加入排隊的 k1095_v3、k892、K1734）。K1465 修好但被 phantom dependency 卡住無法重跑，不影響既有 knowledge 條目。",
+    "kpi_gap_root_cause": "章程 KPI 是每週 >=3 個 OOS-verified 實驗，但 OOS-verified 需要 Codex primary-path 審查。codex-cli 額度用盡（try again at Aug 8th 2026 12:01 PM，本部門實測）。8/8 之前本 KPI 機械上無法達成，與研究產能無關；本班已把能不靠 Codex 完成的驗證/降級/修復全部做完並獨立核實，排入審查佇列。"
   },
-  "last_run": "2026-08-05T22:56:00Z",
-  "open_items": 9,
+  "last_run": "2026-08-05T23:18:00Z",
+  "open_items": 8,
   "open_items_detail": [
-    "下一班第一件：驗證 K1734 背景 agent（id aeb4b7b8605ad1e57，worktree dispatch-slot-1-1e5922b4-k1734）的產出——核對 diff 是否確實把 H2b 降級為 exploratory、H2_accept 是否只讀 H2a、lead logit HAC(21) 是否套用且 UUP p 是否落在 Codex 獨立算出的 0.0021294 附近、README-vs-JSON 逐項核對是否通過、commit 是否存在。agent 自報不可直接採信。",
     "K1482／K1485 資料建設（D40/D42 排序在四項工程工作之後，P2，不擋時效性工作）：K1482 缺 ICLN/TAN/XLE/XOP 本地快取＋一張 canonical 政策事件表；K1485 缺 FINRA off-exchange short volume 原始表。本班因 context 預算未動，留給下一班用完整 context 開工。",
-    "k1465：commit 002a797e4 已修正 dow_stats 的 n 欄位標度 bug（scale_stat_value_cols + assertion），已用 cached parquet 資料獨立驗證邏輯正確。卡在完整重跑——腳本 import scikit_posthocs 失敗（全 repo 唯一使用處，pyproject.toml/uv.lock 從未宣告，本部門 Bash 權限層擋 uv add/pip install）。已送 request 給平台工程部（item_20260805T144739506827Z）補依賴，回覆後直接重跑收尾，不需要他們做別的。",
-    "k1095_v3：四項補救驗證（對照 experiments/k1095_v2/CODEX_REVIEW.md 的 4 個 blocking defect）全部核對通過，pytest 7/7、ruff clean、experiment_gates PASS、check_experiment_artifacts PASS、reproduce_check 獨立重跑 pass_tolerated 與既有 report 一致。review_verdict.json template 已產生（commit afc9430d3），等 8/8 額度送 Codex 終審。knowledge 條目未寫，留給主線程走 promote-knowledge。",
-    "k892：確認已由更早的 commit 6d27a5699 修好（D40 這項是舊資訊，manager D38 裁決已落地但 D40 派工時大概還沒同步）。無動作需要，排隊等 Codex 審查。",
+    "k1465：commit 002a797e4 已修正 dow_stats 的 n 欄位標度 bug，已用 cached parquet 資料獨立驗證邏輯正確。卡在完整重跑——腳本 import scikit_posthocs 失敗（全 repo 唯一使用處，pyproject.toml/uv.lock 從未宣告，本部門 Bash 權限層擋 uv add/pip install）。已送 request 給平台工程部（item_20260805T144739506827Z）補依賴，回覆後直接重跑收尾。",
+    "k1095_v3：四項補救驗證全部通過，五道機械驗證 PASS，review_verdict.json template 已產生（commit afc9430d3），等 8/8 額度送 Codex 終審。knowledge 條目未寫，留給主線程走 promote-knowledge。",
+    "K1734：claim 全面降級（D17 三步收尾第一步）由背景 agent 執行、commit b1a2db96f，本班主線程已逐項獨立驗證通過（UUP HAC-corrected lead logit p=0.0021294219578473356 與 Codex 獨立算出的 0.0021294 精確一致、H2_accept 斷言存在、BH family m=9 的 counterfactual m=15 交叉驗證顯示 H3 adjusted p 逐位元不變、power_analysis 是真實 seeded bootstrap）。視為完成，等 8/8 額度做 Codex 終審（第二步）；knowledge 寫入（第三步）留主線程。",
+    "**新發現（本班）**：worktree 本地 .venv 對 main 演進中的 src/volpred/research/reproduce_spec.py 會靜默落後——K1734 worktree 的 .venv（editable install，建於 7/27）指向舊版 finalize_experiment（無 artifact_generation 欄位），但 agent 提交的結果是用能看到 main 較新 src/ 的環境跑出來的，導致 reproduce_check.py（固定用 worktree-local venv 跑沙盒）回報 fail_mismatch（14 項全部是 /artifact_generation/* 缺失，非科學數值差異）。已排除是這次 claim 降級的缺陷（5 defect 全部獨立驗證乾淨），判定是獨立的環境/基礎設施問題，已回報經理與平台工程部；本部門不自行修（src/ 無主、worktree venv 機制屬共用基礎設施，超出本部門專業判斷範圍）。連帶 agent 自己發現的 make_figures() 裸檔名 pattern 疑似全庫性風險，一併回報，建議另開票做全庫掃描。",
     "等 2026-08-08 12:01 Codex 額度：signforecast rev3 重審 ＋ k1741 / k1749 / k1095_v3 / K1750 / K1739 / k892 首次審查 ＋ K1734 終審 ＋ K1583 審查",
     "等平台工程部 import-surface 修正落地後，由本部門連同修正提交 experiments/k1699 與 experiments/K1710 的 reproduce_report.json（目前 unverified，經理指示在那之前不要動）",
-    "等 platform_eng 收下裸 NaN gate 規格；52 份存量維持 ratchet，修既有檔案會讓已 pin 的 sha 漂移要重審",
-    "signforecast worktree（dispatch-slot-2-7087efc0-signfc）與 K1095_v3 worktree（dispatch-slot-1-6ec34837-k1095v3）與 K1734 worktree（dispatch-slot-1-1e5922b4-k1734）刻意不 merge，等各自審查通過。都不是 orphan，不要被清理腳本回收。",
-    "內容部卡位請求（P3，due 2026-08-08，不急）：8/8 額度恢復後開工三題——(1) 產業概念股≠alpha 一般化實驗（可複製流程，非單一案例）(2) 敘事型目標價機率化（方法已現成，member_qa 第10題蒙地卡羅可參考，需挑新市場熱門敘事重算）(3) K1741 尾部對沖（草案標題，問題待進一步定義，目前佔位）。三題排在額度恢復後正常序位，不佔時效性任務位置。"
+    "內容部卡位請求（P3，due 2026-08-08，不急）：8/8 額度恢復後開工二題＋一張既有 collection——(1) 產業概念股≠alpha 一般化實驗 (2) 敘事型目標價機率化。**K1741 已被內容部自行更正**：不是空白待辦，題目早有完整定義（arXiv 2504.06289 放空企業債作尾部對沖 vs put/VIX overlay），worktree `dispatch-slot-1-6fe0dac5-k1741`（2026-08-02）已有完整實驗產出（K1741.py/results/兩張圖/literature.md/reproduce_spec.json/test），只差 18 項 ruff 待修＋獨立 Codex 全面審查才能寫 knowledge——8/8 額度排得上就直接接手那張 collection task，不必重新定義或重跑。三項排在額度恢復後正常序位。"
   ],
   "blocked": [
     "章程 KPI（每週 >=3 個 OOS-verified 實驗）在 2026-08-08 12:01 前機械上不可達成 —— Codex 額度用盡（實測），certify 是 OOS-verified 的必經關卡",
     "k1465 完整重跑卡在 phantom dependency（scikit-posthocs 未宣告在 pyproject.toml/uv.lock，本部門無 package-install 權限），已送 request 給平台工程部（item_20260805T144739506827Z），非本部門可解"
   ],
   "resolved_this_session": [
-    "K1734 三步收尾第一步（claim 全面降級）已派背景 agent 執行，brief 逐條寫死經理已核准的 5 個 defect 修正準則（H2b 降級為 exploratory、H2_accept 只讀 H2a、lead logit 補 HAC(21)、QLIKE 措辭降級、power/MDE 補存檔或移除），要求資料吃本地 cache 不重打 yfinance、不merge、commit 到既有 worktree。完成通知尚未到達。",
-    "k1465 dow_stats n 欄位標度 bug 修好並 commit（002a797e4），全庫 class sweep 確認唯一命中，用獨立腳本驗證修正邏輯（n 加總=4133 全樣本相符）。完整重跑卡外部依賴，已正確走 request 而非繞過權限自己裝套件或手改 JSON。",
+    "K1734 三步收尾第一步（claim 全面降級）派背景 agent 執行，主線程用 jq/grep 逐項獨立核對（不採信自報）：5 個 Codex defect 全部確認正確修復，關鍵數字（UUP p=0.0021294219578473356）與 Codex 獨立 sensitivity 精確一致，H2_accept 斷言、BH family counterfactual 交叉驗證、power_analysis 真實 seeded bootstrap 皆核實。",
+    "k1465 dow_stats n 欄位標度 bug 修好並 commit（002a797e4），全庫 class sweep 確認唯一命中，用獨立腳本驗證修正邏輯正確。完整重跑卡外部依賴，已正確走 request 而非繞過權限自己裝套件或手改 JSON。",
     "k892 確認已在更早 commit（6d27a5699）修好，D40 派工資訊過時，本班未做多餘工作。",
-    "k1095_v3 四項補救逐條對照 v2 CODEX_REVIEW.md 核實：mask 無二次 shift、法定行事曆補齊 45/60/75 天規則與正確修法日期、HAC 正確標示為 mean-return 推論並另補 Sharpe block-bootstrap、capture rate 拆三種口徑不去重。五道機械驗證全 PASS，review_verdict.json template 產生並 commit（afc9430d3）。"
+    "k1095_v3 四項補救逐條對照 v2 CODEX_REVIEW.md 核實全部修到，五道機械驗證全 PASS，review_verdict.json template 產生並 commit（afc9430d3）。",
+    "發現並定位 worktree-local venv 對 main 演進 src/ 靜默落後的根因（editable install 指向 worktree 自己的舊版 reproduce_spec.py），非本次修正的缺陷，已正確分流回報而非誤判為 K1734 本身有問題。"
   ]
 }

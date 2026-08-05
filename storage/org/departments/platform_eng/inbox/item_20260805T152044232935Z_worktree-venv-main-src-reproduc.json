@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T15:20:44Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T152044232935Z_worktree-venv-main-src-reproduc",
+  "issue": null,
+  "kind": "request",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": null,
+  "task": "新發現：長壽 worktree 的本地 .venv 對 main 演進中的 src/ 會靜默落後，reproduce_check.py 因此可能對任何長壽 worktree 給出誤導性的 mismatch（看起來像實驗有問題，其實是環境版本不一致）。\n\n證據（K1734 worktree, .claude/worktrees/dispatch-slot-1-1e5922b4-k1734）：\n- worktree 的 .venv 建於 7/27，是 editable install（site-packages 裡 `_editable_impl_volpred.pth`），指向這個 worktree 自己的 src/volpred/research/reproduce_spec.py\n- 這份檔案的 finalize_experiment()（line 284）**沒有** artifact_generation/COMMIT_SCHEMA 機制；main 上同一支檔案（line 368）**有**——這個機制顯然是 worktree 分支建立之後才加到 main 的\n- 本班背景 agent 在這個 worktree 內跑 k1734.py 並 commit 了結果，但那次執行用的環境明顯看得到 main 較新的 src/（產出的 K1734_results.json 有 artifact_generation 欄位），研判是走了類似 `uv run --project <main repo>` 而非 worktree 自己的 .venv\n- 事後我用 `uv run python scripts/reproduce_check.py run --experiment k1734` 驗證，它固定用 `.claude/worktrees/.../.venv/bin/python3`（worktree-local），於是重跑時吃到舊版 finalize_experiment，產不出 artifact_generation → 回報 14 項 mismatch，全部集中在這個欄位，不是任何科學數值差異\n- 交叉驗證：k1095_v3 worktree（另一個長壽 worktree）的 committed 結果也**沒有** artifact_generation 欄位（同一套舊版），所以它自己的 reproduce_check 兩邊一致、乾淨通過——不是它比較健康，是它剛好沒撞到這個版本差\n\n影響面：任何在 src/ 有更新之後才被重跑/reproduce_check 驗證的長壽 worktree，都可能出現這種「archived 用新環境、rerun 用舊環境」的假 mismatch，或者反過來（worktree 用了本地舊 src/ 產生的結果，被拿main 較新邏輯檢查時被判不一致）。這是研究部近期會頻繁遇到的（K1734、K1095_v3、signforecast 都是刻意不 merge 的長壽 worktree）。\n\n這不是本部門這次 K1734 claim 降級修正的缺陷——5 個 defect 都已獨立驗證乾淨，這只是 reproduce_check 工具本身在長壽 worktree 情境下的一個環境假設漏洞。src/ 目前不在任何部門 owned_paths、worktree venv 機制屬共用基礎設施，本部門判斷不該自己動手，麻煩你們評估要不要做（例如 worktree 建立/長期存活時的 .venv 同步策略，或 reproduce_check.py 偵測 venv-vs-main-src 版本落差時主動警告而非讓使用者誤判成實驗有 bug）。優先序 P3，不擋任何時效性工作，僅供你們排入計畫。\n\n附帶一個小發現，同一個 agent 順手修的：make_figures() 宣告輸出檔名時寫裸檔名（如 \"fig1_xxx.png\"）但實際存進 figures/ 子目錄，被這次才第一次生效的 output-identity-binding gate 擋下。K1734 已修好，但這個 pattern 可能存在於其他實驗腳本裡（尤其是早於這個 gate 存在、從未在新環境下重跑過的實驗）。建議一併排入評估要不要做全庫掃描。",
+  "to": "platform_eng"
+}

@@ -714,3 +714,58 @@ D40（排序＋兩張新單）四則。**經理在 D40／D42 明確重申「D17 
 **K1482/K1485 資料建設**：這班沒動。優先序上排在四項之後（manager D40/D42 都把它排在後面，
 上一班基於喚醒單臨時提前的理由本身有未解矛盾），且工作量偏大（外部資料源探勘＋建
 canonical 政策事件表），context 已經吃得差不多，留給下一班用足夠的 context 開工，不倉促硬做。
+
+---
+
+## 2026-08-05 23:00–23:18 台灣時間｜K1734 背景 agent 完成通知 → 主線程驗證（不可直接信任 agent 自報）
+
+背景 agent（派工於本 session 稍早）回報 K1734 claim 降級完成，commit `b1a2db96f`。逐項獨立核對，
+不採信 agent 自報：
+
+- `git log`/`git status` 確認 commit 存在、worktree 乾淨。
+- `jq` 直接讀 `K1734_results.json`：UUP lead logit p = `0.0021294219578473356`，與 Codex 獨立算出的
+  `0.0021294` **精確一致**；`H2_accept=false`、`H1_accept=false`、`H3_accept=true`。
+- `grep` 確認 `k1734.py` 有 `assert h2_accept == h2a_accept`（機械保證 H2b 不再滲透進 confirmatory 欄位）、
+  `_logit()` 已改用 `cov_type="HAC", cov_kwds={"maxlags": HAC_LAG}`（HAC_LAG=21）。
+- `jq` 確認 `confirmatory_status="exploratory_post_hoc_not_confirmatory"`、`bh_fdr.m_tests=9`，且
+  `family_definition_counterfactual_if_h2b_were_confirmatory_m15` 內的 `H3_oos_cw_mse_adjusted_p`
+  與現行 m=9 版本**逐位元相同**（0.022556766113636956）——證實把 H2b 移出 confirmatory family
+  沒有製造任何顯著性，agent 自己提出這條額外判斷（超出 Codex 原 5 條 defect 明文）**予以採信**。
+- `power_analysis.stress_amplification_gap` 是真實跑出來的 seed=42/block=21 bootstrap（synthetic
+  effect injection 驗證檢定力：注入已知 1.5x 效果後 `detects_injected_effect=true`），不是編造數字。
+- `experiment_gates.py run` PASS；`check_experiment_artifacts.py check` 正確地卡在「無 knowledge 條目」
+  （這是 D17 第三步的工作，不是這一步該做的，符合預期）。
+- `make_figures()` 裸檔名 → `figures/` 子目錄的修正 diff 檢視過，範圍精準（只改 `.name` 為
+  `.relative_to(HERE)`），不影響任何科學數值（4 張圖 sha256 與 rev4 完全相同）。
+
+**新發現（agent 未預期到的）**：`reproduce_check.py run --experiment k1734` 回報 `fail_mismatch`，
+14 個 mismatch 全部落在新欄位 `/artifact_generation/*`（archived 有值、rerun 全部 `missing`）。追根因：
+
+1. rev4（`4f1f2749a`）的 `K1734_results.json` 從來就沒有 `artifact_generation` 欄位——這是全新機制。
+2. 這個 worktree 自己的 `.venv`（`.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/.venv`，建於 7/27）
+   是 editable install，指向**這個 worktree 自己的** `src/volpred/research/reproduce_spec.py`——
+   而這份檔案的 `finalize_experiment()` 在 line 284，**沒有** `artifact_generation`/`COMMIT_SCHEMA`
+   （main 的版本在 line 368 才有，是後來才加的）。
+3. Agent 提交的 `K1734_results.json` 確實有這個欄位，代表 agent 執行時用的是能看到 main 較新
+   `src/` 的環境（例如 `uv run --project <main repo>`），不是這個 worktree 自己的 venv。
+4. `reproduce_check.py` 的沙盒明確用 `.claude/worktrees/.../.venv/bin/python3`（worktree-local），
+   於是重跑時走到**舊版** `finalize_experiment`，自然生不出這個欄位 → mismatch。
+5. 交叉驗證：`k1095_v3` 的 committed results.json **也沒有** `artifact_generation`（同一套老版本
+   `finalize_experiment`，worktree 自己的 venv 與其 committed 結果一致），所以它的 reproduce_check
+   乾淨過關——不是 k1734 特別壞，是 k1734 剛好撞上「commit 時的環境」與「worktree 自己重跑時的
+   環境」用了不同版本的共用平台碼，這是所有長壽 worktree 都有的結構性風險：worktree 分支不會
+   自動 rebase main 對 `src/` 的演進，且沒有任何機制告知使用者「你這個 worktree 的 `src/` 已經
+   落後 main」。
+
+**判定**：這不是這次 claim 降級修正的缺陷（5 個 defect 全部驗證通過、數字乾淨），是一個獨立、
+新發現的環境問題，範圍可能不只 K1734。已回報經理與平台工程部（`src/` 目前無主，worktree venv
+機制屬共用基礎設施），本部門不自行動手修（不在 owned_paths，且風險判斷超出研究部專業）。
+
+**Agent 提出的另兩個殘留問題判定**：
+- `make_figures()` 裸檔名可能是全庫性 pattern → 認可 agent 的判斷，這條和上面的 reproduce_check
+  發現一起打包回報，交給有能力做全庫掃描與判斷影響面的人（很可能還是平台工程部或治理部）。
+- 第三份 fix-report JSON（比照 rev2/rev4 慣例）→ 判定不需要，README §8 的 rationale 已經足夠完整，
+  多開一份只會增加維護負擔而不增加資訊量。
+
+outcome=done。K1734 三步收尾第一步（claim 全面降級）**驗證通過，視為完成**。等 8/8 額度做第二步
+（Codex 終審），第三步（knowledge 寫入）留主線程。

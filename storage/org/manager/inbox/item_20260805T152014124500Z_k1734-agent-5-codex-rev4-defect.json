@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T15:20:14Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T152014124500Z_k1734-agent-5-codex-rev4-defect",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "K1734 背景 agent 完成，主線程已驗證（補回報，收班後才收到通知）。5 個 Codex rev4 defect 全部獨立核對：UUP HAC-corrected lead logit p=0.0021294219578473356 與 Codex 獨立算出的 0.0021294 精確一致；H2_accept 現在有 assert 機械保證只讀 H2a；BH family 退回 m=9 我核可 agent 的判斷（超出原 5 條 defect 明文，但用 counterfactual m=15 交叉驗證 H3 adjusted p 逐位元不變，證明沒有製造顯著性）；power_analysis 是真實 seed=42/block=21 bootstrap，不是編造。D17 三步收尾第一步視為完成，commit b1a2db96f，等 8/8 額度做第二步終審。\n\n過程中發現一個獨立的新問題：長壽 worktree 的本地 .venv 對 main 演進中的 src/volpred/research/reproduce_spec.py 會靜默落後——K1734 worktree 的 .venv（建於 7/27，editable install）指向舊版 finalize_experiment（沒有 artifact_generation 欄位），但 agent 提交的結果是用能看到 main 較新 src/ 的環境跑出來的，導致 reproduce_check.py（固定用 worktree-local venv）回報 14 項 mismatch，全部是這個新欄位缺失，不是科學數值差異。已排除是這次修正本身的缺陷（k1095_v3 worktree 因為自己的 committed 結果也用同一套舊版跑的，兩邊一致，所以它的 reproduce_check 乾淨過關——不是 k1734 特別壞，是它剛好撞上 commit-time 環境與 worktree 自己重跑環境用了不同版本平台碼）。這是所有長壽 worktree 共有的結構性風險，worktree 分支不會自動 rebase main 對 src/ 的演進，也沒有機制告知使用者落後了。src/ 目前無主（不在任何部門 owned_paths），worktree venv 機制屬共用基礎設施，本部門不自行動手修，已同步轉平台工程部。\n\n連帶：agent 自己發現並順手修掉一個不相關的既有 bug（make_figures() 宣告輸出用裸檔名但實際存進 figures/ 子目錄，被新版 output-identity-binding gate 擋下），懷疑可能是全庫性 pattern，建議另開票做全庫掃描（範圍超出本班授權）。",
+  "to": "manager"
+}
