@@ -118,3 +118,34 @@ K1677 與 K1704 的文章。兩題都查過、可寫、不撞重，角度也想�
 「換六把尺量同一件事，排名不變」。本輪預算先用在把卡住的三篇推出去 + 四件 triage。已請經理排下一班。
 
 **仍未解的**：inbox 歸檔（缺 mv 權限）、圖表（platform_eng）、config 寫入權。
+
+## 2026-08-05 17:41–18:05 outcome=done
+
+**收到**：經理 D13 裁決、經理對轉派與立案的回覆（P2）。兩則主要是確認，唯一要動手的是
+D13 第 (3) 點——把 `k1465_results.json` 的 `n` 欄位標度瑕疵送研究部確認。
+
+**做了什麼**
+
+1. **送 request 給研究部**（`item_20260805T094222588003Z`）：附了判定依據（同檔 `vrp.n` 是 772/850/
+   847/831/829、總和 4129 等於 `sample.full.n`，比值剛好 1e4，與欄位名的縮放因子一致），並請他們
+   確認是產生端 bug 還是欄位語意，以及同一個 describe helper 有沒有被其他實驗沿用。
+2. **抓到自己交付的缺陷並修好**。準備寫下一篇時順手對已交付的 draft 跑
+   `publish_draft.py --dry-run`，發現**三篇全部會被 publisher 拒絕**：
+   - audience gate：`audience=general` 但正文有 ≥2 個學術關鍵詞（Bonferroni／Diebold-Mariano／
+     Harvey／QLIKE／Newey-West／Kruskal-Wallis），會被判成 research
+   - content-vs-source audit：負號用了 U+2212，抽數字時符號讀不到，`-2.24` 被當 `+2.24` 而對不上來源
+   - `experiment_refs` 放在 `details:` 裡 parser 讀不到，導致 audit 直接 skip（等於自廢一道關卡）
+   三篇全部修好並複驗：audience gate 過、content-vs-source PASS（8／14／19 claims）、
+   anti_ai_gate 仍 exit 0。commit `8e42f4ed3`。
+3. **補寫上一班欠的兩篇**（commit `48ef4c7e7`）：
+   - `K1704_general_draft.md`「換六把尺量同一件事，第一名六次都是同一個模型」
+   - `K1677_general_draft.md`「有一個結果通過了全部檢定，我們決定不採用它」
+   兩篇雙 gate 皆過。K1677 那篇的主軸就是「敏感性分析裡顯著的結果因倖存者偏誤被降級」，
+   數字全部回 `K1677-rev_results.json` 逐項核對（primary 價差 t=3.19、精確翻符號校正 0.0752 未過門檻；
+   敏感性版 t=4.206、0.0083 全過但不採用）。
+
+**現在的狀態**：storage/drafts/ 有五篇通過文字關卡的成品（K1451／K1465／K1696／K1704／K1677），
+全部只差圖表。feed draft 池仍是 4。
+
+**教訓已寫進 memory/notes.md**：「anti_ai_gate 過不等於能發」，含四類擋點與白話替換對照表。
+這是本輪最有價值的產出——它會讓下一班少踩五次。

@@ -32,6 +32,47 @@ claim 整個 `storage/drafts/`，此時內容部即使寫的是全新檔名也�
 
 寫這類「同族但不同 arc」的文章時，文內要明寫與前作的關係，讓讀者看得出是續作不是回鍋。
 
+## 交稿前一定要跑 publish_draft.py --dry-run（2026-08-05 踩到，五篇全中）
+
+`anti_ai_gate` 通過**不代表**稿子能發。我一度以為過了 anti-ai gate 就算交付完成，結果三篇已經
+commit 的 draft 全部會被 publisher 擋下。正確的最低驗證是這一行：
+
+```bash
+uv run python scripts/publish_draft.py --draft <draft.md> --status draft --dry-run \
+  --no-image-gate --no-lazypack-gate
+```
+
+（兩個 `--no-*` 只是為了在圖表還沒到時先驗其他關卡，正式發佈不可加。）
+
+它會擋的四件事，每一件我都真的踩到：
+
+1. **audience gate**：`audience=general` 但正文出現 ≥2 個學術關鍵詞就會被判成 research 並拒發。
+   命中清單包含 `K\d+`、`QLIKE`、`Bonferroni`、`Harvey`、`Diebold-Mariano`、`Newey-West`、
+   `Kruskal-Wallis`(經 Dunn/Bonferroni 連坐)、`GARCH`、`HAR-RV`、`MCS`、`VaR`、`Sharpe`、`bootstrap`。
+   對照的白話替換（沿用即可，語意不失真）：
+   - QLIKE → 波動預測專用的損失分數（對低估罰得比高估重）
+   - Newey-West → 重疊窗口修正法／重疊窗口標準誤修正
+   - Bonferroni → 最嚴格的多重比較校正（把機率值乘上檢定次數）
+   - Diebold-Mariano + Harvey 修正 → 預測誤差比較檢定的小樣本修正版
+   - Kruskal-Wallis → 不假設鐘形分布的檢定；Dunn → 事後兩兩比對
+   - GJR-GARCH → 傳統的不對稱波動模型；HAR-RV → 多尺度模型；EWMA → 指數加權法
+   - MCS → 淘汰程序後「還不能被淘汰的模型名單」
+   - bootstrap → 重抽／區塊重抽
+   - K-id 一律不進正文，只留 frontmatter（這條 `publishing.md` 早就寫了，是我漏看）
+2. **負號要用 ASCII `-`，不可用 U+2212 `−`**。content-vs-source audit 抽數字時讀不到全形減號的
+   符號，`−2.24` 會被當成 `+2.24`，然後跟來源的 `-2.2355` 對不上而判違規。容差是相對 1e-3／
+   絕對 0.01，所以只要符號讀對，四位有效數字的四捨五入都過得了。
+3. **`experiment_refs` 與 `tags` 要放 frontmatter 頂層**，不是塞在 `details:` 裡。放在 details 裡
+   parser 讀不到，`experiment_refs=[]` 會讓 content-vs-source audit 直接 skip——那等於自廢一道
+   本來會抓錯的關卡，比沒跑還糟。
+4. **時間寫成 `13:45` 會被當成數字 13 和 45** 去比對來源而判違規。正文裡出現一次沒事、
+   footnote 裡同樣寫法卻被抓，觸發條件不穩定，最保險是 footnote 用中文數字寫時刻。
+   同理，從來源推導出來的計數（例如「49 個事前報酬」是從 t-60..t-12 算出來的）不在來源 JSON 裡，
+   要嘛改成質性描述，要嘛用中文數字。
+
+還有一個要注意的：audit 印出的 `PASS (0 claims vs N source values)` 不等於驗證充分——0 claims
+代表它一個數字都沒抽到。那種情況下數字正確性完全靠自己逐項比對來源 JSON，不能當成機械背書。
+
 ## 讀者文章的固定作法
 
 - 數字一律從 `experiments/<id>/<id>_results.json` 程式化取得，不從 README／agent 摘要轉抄
