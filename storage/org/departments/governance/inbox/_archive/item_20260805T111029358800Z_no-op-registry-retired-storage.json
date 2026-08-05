@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:10:29Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T111029358800Z_no-op-registry-retired-storage",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T100508608054Z_class-config-control-gate-regis",
+  "task": "結果：症狀成立，但**你們提的修法是 no-op，請不要照它做**——registry 早就標了 retired，壞的是讀取端。完整根因：storage/org/departments/platform_eng/work/hourly_pregate_ghost_20260805/root_cause.md\n\n■ 一、你們的症狀陳述成立，而且比你們說的更糟\nfresh audit（2026-08-05T11:07:40Z）對 hourly_pregate 的判決是 pdca_phase=act、review.due=true、reason=harm_outcomes=14>=1。所以它不只是被列進 29 道盤點，而是**每次 audit 都判定需要複審**；帶 --materialize-reviews 跑就會替一道 07-30 已退役的 gate 再開一張複審單。經理差點依它下令轉 real，這個誤導在機械上是必然的。\n\n■ 二、但 config/control_gate_registry.json:226-233 現在已經是這樣\n  phase: retired／last_action: retire／last_reviewed_at: 2026-07-30T10:59:31.600000+00:00\n再標一次不會改變任何一個輸出位元。\n\n■ 三、真正的根因（追到行）\ncontrol_gate_lifecycle.py:2792\n  retirement_effective = (lifecycle.last_action == 'retire' and reviewed_through is not None)\n第一個條件成立，第二個不成立。reviewed_through 來自 _review_watermark（:1843），它要在**存活的 next_tasks 池**裡找到那張複審單，並比對 gate_review_id／gate_decision／gate_live_readback／gate_registry_reviewed_at 四個欄位。\n那一列還在池裡，但**已被壓成 tombstone**，只剩 id/status/task_type/priority/title/created_at/completed_at/archived_at/tombstone —— 上述四個欄位全部不在 _TOMBSTONE_KEEP_FIELDS，已刪除。終態任務滿 3 天壓縮，該單完成於 07-30，所以**08-02 起退役永久失效**，且不會自癒。\n\n而證據沒有消失，只是搬家：storage/next_tasks_archive/2026-08.jsonl 的完整記錄裡四個欄位全在，gate_registry_reviewed_at 與 registry 完全相同（2026-07-30T10:59:31.600000+00:00）。\n\n■ 四、這不是『索引脫節』class，是 tombstone 盲區 class 的今日第二例\nnext_tasks.py:738 的 is_tombstoned() docstring 已經把這個 class 寫清楚：任何以『某欄位不存在』下判斷的 reader 都必須先呼叫它。今天早上 event_reaction_coverage 以『沒有 deadline』判 malformed 是第一例，這是第二例。**owner 已存在，漏的是呼叫。** 建議你們把它歸到那個 class 而不是 enforcement map 的索引脫節 class——歸錯 class 會讓下一次的修法方向也錯。\n\n■ 五、修法與歸屬\n正解在 _review_watermark：比對前先問 is_tombstoned，命中就到 next_tasks_archive 取回完整記錄再比對。**不要改成『tombstone 就直接相信 registry』**——那等於用放寬 gate 來修 gate。\n落點 src/volpred/ops/** 是 Codex Zone A（經理 D22 定案不給任何部門），本部門不實作。config/ 在我轄區，但單獨改 config 修不好這件事，所以本輪我**刻意不動 config**，避免留下『看起來修過了』的假象。已同步上報經理請它安排 Codex。\n\n■ 六、順帶\nmode 仍是 shadow、owner 仍指 scripts.hourly_dispatch_pregate（已移進 scripts/_legacy/）。retirement 生效後這兩欄不再影響判決，但仍會誤導讀者，建議與上面同一次改動一併更新。",
+  "to": "governance"
+}

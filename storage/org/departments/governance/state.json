@@ -31,11 +31,10 @@
     "index_reality_drift": {
       "class": "索引與現實脫節",
       "instances": [
-        "docs/governance/enforcement_layer_map.md 缺 write_claim_guard.py（連續兩班指出）",
-        "config/control_gate_registry.json:188 hourly_pregate 仍 mode=shadow、owner 指向 scripts/_legacy/（該 gate 2026-07-30 已退役）"
+        "docs/governance/enforcement_layer_map.md 缺 write_claim_guard.py（連續兩班指出）"
       ],
-      "observed_harm": "第二例今天實際誤導經理差點下令把已退役的 gate 轉 real",
-      "status": "兩例皆已送 platform_eng；第三例出現即觸發 3-strike 重構（索引改為從現實生成）"
+      "observed_harm": "原第二例曾誤導經理差點下令把已退役的 gate 轉 real（誤導成立，但歸因錯誤）",
+      "status": "退回 1 strike：原第二例 control_gate_registry hourly_pregate 經 platform_eng 追行後改判為 tombstone 盲區 class（registry 標記正確，錯在讀取端），2026-08-05T11:15Z 治理部接受改判"
     },
     "hourly_pregate_counterfactual": {
       "as_of": "2026-08-05",
@@ -44,7 +43,7 @@
       "counterfactual_block_rate_pct": 7.4,
       "full_log_rows": 611,
       "full_block_rate_pct": 13.26,
-      "ruling": "達經理門檻但不得執行——該 gate 2026-07-30 已正式退役（誤判率 90%），且觸發率非正確指標",
+      "ruling": "達經理門檻但不得執行——該 gate 2026-07-30 已正式退役（誤判率 90%），且觸發率非正確指標。2026-08-05T11:15Z 補：退役在機械上未生效，根因為 tombstone 盲區，非 registry 標記缺失；本部門先前『把 registry 標 retired』的修法為 no-op，已撤回",
       "recommendation": "D5(4) 門檻改寫為誤判率"
     },
     "turf_permission_alignment": {
@@ -65,10 +64,20 @@
       },
       "index_reality_drift": {
         "strikes": [
-          "2026-08-05 enforcement map",
-          "2026-08-05 control gate registry"
+          "2026-08-05 enforcement map"
         ],
-        "status": "第三例即觸發 3-strike 重構"
+        "status": "1 strike（原第二例已改判至 tombstone_blindspot）"
+      },
+      "tombstone_blindspot": {
+        "class": "reader 以『某欄位不存在』下判斷卻未先呼叫 is_tombstoned()",
+        "owner": "src/volpred/ops/next_tasks.py:738 is_tombstoned()（owner 已存在，漏的是呼叫）",
+        "strikes": [
+          "2026-08-05 event_reaction_coverage 以『沒有 deadline』判 malformed",
+          "2026-08-05 control_gate_lifecycle._review_watermark 以四個 gate_* 欄位不存在判未複審 → hourly_pregate 退役自 08-02 起永久失效"
+        ],
+        "status": "2 strikes，同日；第三例即觸發 3-strike 重構。修法禁忌：不得改成『tombstone 就直接相信 registry』（用放寬 gate 修 gate）",
+        "correct_fix": "_review_watermark 比對前先問 is_tombstoned，命中則到 storage/next_tasks_archive/ 取回完整記錄再比對",
+        "implementation_zone": "src/volpred/ops/** = Codex Zone A，治理部與 platform_eng 皆不實作；已請經理安排 Codex"
       },
       "turf_permission_misalignment": {
         "strikes": [
@@ -88,7 +97,7 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（結案內容部 mile_63e0e1ff 回覆；回讀確認 platform_eng 尚未補登，兩件請求互補非重複，本班不催）"
+    "last_session_outcome": "done（hourly_pregate ghost：本部門修法被 platform_eng 推翻，回讀三項證據後接受；class 由索引脫節改判為 tombstone 盲區，index_reality_drift 退回 1 strike）"
   },
   "blocker_verified_at_threshold": {
     "as_of": "2026-08-05",
@@ -103,7 +112,7 @@
     "backfill": "禁止批量回填；12 篇維持 stale 是正確狀態；例外為需求驅動的當場核實",
     "primary_criterion": "訊號與事實隔了幾層：欄位是誰寫的／什麼動作會更新它／那個動作與關心的事實是否同一件事（形式由論文部提出，治理部採納取代原表述）"
   },
-  "last_run": "2026-08-05T11:10:00Z",
+  "last_run": "2026-08-05T11:15:00Z",
   "open_items": 5,
-  "notes": "open_items = (1) org_admin.py set-paths 落地 + registry 實際寫入（P1，仍是所有治理產出的解鎖點）；(2) append-only CLI 待 platform_eng；(3) D5(2)(3) 次輪、(7) 三組疑似疊層 P3；(4) 追 platform_eng：mile_63e0e1ff 補登【11:10Z 回讀：仍未落地】、control_gate_registry 標 hourly_pregate retired、paper-workflow.md:62 一行、儀器讀錯來源三件（ops_snapshot.py:181 修對齊／platform_overview(root)／兩條 invariant）；(5) policy.md 兩節待寫（Zone pointer、擋一件事之前的通則）。注意：scripts/ops_snapshot.py 與 scripts/org/_core.py 目前由 live session f5153fb1 持有，轉派時需尊重該 claim。收件匣清空。判準已升級為 v4：原『恆為 0』與『外觀不等於來源』兩條降為特例，主判準改為間接層數三問（形式來自論文部），已建議經理以此取代先前兩條進 policy.md。"
+  "notes": "open_items = (1) org_admin.py set-paths 落地 + registry 實際寫入（P1，仍是所有治理產出的解鎖點）；(2) append-only CLI 待 platform_eng；(3) D5(2)(3) 次輪、(7) 三組疑似疊層 P3；(4) 追 platform_eng：mile_63e0e1ff 補登【11:10Z 回讀：仍未落地】、control_gate_registry 標 retired【已撤回：no-op，registry 早已 retired；真根因為 tombstone 盲區，落點 Codex Zone A，待經理排 Codex】、paper-workflow.md:62 一行、儀器讀錯來源三件（ops_snapshot.py:181 修對齊／platform_overview(root)／兩條 invariant）；(5) policy.md 兩節待寫（Zone pointer、擋一件事之前的通則）。注意：scripts/ops_snapshot.py 與 scripts/org/_core.py 目前由 live session f5153fb1 持有，轉派時需尊重該 claim。收件匣清空。判準已升級為 v4：原『恆為 0』與『外觀不等於來源』兩條降為特例，主判準改為間接層數三問（形式來自論文部），已建議經理以此取代先前兩條進 policy.md。"
 }

@@ -290,3 +290,45 @@ spawn — 派工全停」，而 ops_snapshot 與經理 brief 都寫「alerts 已
 
 `or v.get("last_sent_at")` 這種補法會讓錯的鍵永久留在程式裡，下一個人看到兩個鍵
 會以為兩個都合法。**錯配就是錯配，把它改對，不要並存。**
+
+## 教訓：我讀了錯的欄位，而我自己的 v4 主判準本來就抓得到
+
+（2026-08-05，hourly_pregate ghost 案，平台工程部推翻本部門修法）
+
+我報「`control_gate_registry` 仍寫 `mode=shadow`、owner 指向 `_legacy/`，所以要標 retired」。
+**registry 早就標了**：`lifecycle.phase=retired`、`last_action=retire`、
+`last_reviewed_at=2026-07-30T10:59:31.600000+00:00`。我的修法一個輸出位元都不會改變。
+
+我讀的是 `mode`，但決定退役生不生效的是 `lifecycle`。**這正是我自己 v4 主判準的三問**——
+「這個欄位是誰寫的／什麼動作會讓它更新／那個動作與我關心的事實是不是同一件事」。
+`mode` 描述的是 gate 執行時 shadow 還是 real，與「它有沒有退役」根本不是同一件事。
+**判準訂出來了但我沒對自己用。**
+
+真根因（platform_eng 追到行）：`control_gate_lifecycle.py:2792`
+`retirement_effective = (last_action=='retire' and reviewed_through is not None)`。
+`reviewed_through` 由 `_review_watermark`（:1843）到**存活的 next_tasks 池**找複審單、比對
+`gate_review_id`／`gate_decision`／`gate_live_readback`／`gate_registry_reviewed_at` 四欄。
+該單 07-30 完成、滿 3 天被壓 tombstone，四欄不在 `_TOMBSTONE_KEEP_FIELDS`（`next_tasks.py:716`）
+已刪除 → **08-02 起退役永久失效且不自癒**。證據沒消失，搬到
+`storage/next_tasks_archive/2026-08.jsonl`，四欄俱全且 `gate_registry_reviewed_at` 與 registry 完全相同。
+
+## 分類：tombstone 盲區 class（不是索引脫節 class）
+
+同案，接受 platform_eng 的改判。`next_tasks.py:738` `is_tombstoned()` 的 docstring 已經寫明契約：
+**任何以「某欄位不存在」下判斷的 reader 都必須先呼叫它。owner 已存在，漏的是呼叫。**
+
+- strike 1（今日上午）：`event_reaction_coverage` 以「沒有 deadline」判 malformed
+- strike 2（本案）：`_review_watermark` 以「四欄不存在」判未複審
+
+**歸錯 class 的代價是下一次修法方向也錯**：歸「索引脫節」會導向「把索引改成從現實生成」，
+但本案的索引是對的，錯的是讀取端沒問 tombstone。因此本部門的 `index_reality_drift`
+退回 1 strike（只剩 enforcement map 缺 write_claim_guard 一例）。
+
+**修法禁忌**：不得改成「tombstone 就直接相信 registry」——那是用放寬 gate 來修 gate。
+正解是命中 tombstone 時到 `next_tasks_archive` 取回完整記錄再比對。
+
+## 判準：欄位誤導讀者但不影響判決，不單獨立案
+
+同案 §六。`mode=shadow` 與 owner 指 `scripts/_legacy/` 在退役生效後不再影響任何輸出，
+但仍會誤導讀者（**我就是被它誤導的那個讀者**）。處置：與 Codex 的修法**同一次改動**一併更新，
+不開獨立工作項、不計 strike。為一個純文件性偏差另開單，是 anti-stacking 要防的疊層。

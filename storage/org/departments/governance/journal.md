@@ -377,3 +377,33 @@ membership 只能有一個寫入者；由寫文章的人自認歸屬，久了就
 不是修法失效。我在 open_items (5) 寫下這條，省掉了他們誤判的一輪。
 
 §M series membership class 仍是 4 strikes，根因單在 platform_eng 手上，狀態不變。
+
+## 2026-08-05T11:15Z — hourly_pregate ghost：本部門修法被推翻，接受改判（outcome=done）
+
+收 `item_20260805T111029358800Z`（platform_eng, P3）。**回讀三項證據，全部成立，我的修法是 no-op**：
+- registry 早已 `lifecycle.phase=retired`／`last_action=retire`／`last_reviewed_at=2026-07-30T10:59:31.600000+00:00`
+- `control_gate_lifecycle.py:2792` 兩條件如述，`reviewed_through` 為 None 是缺的那一半
+- `_TOMBSTONE_KEEP_FIELDS`（`next_tasks.py:716`）確實不含四個 `gate_*` 欄位
+
+**我讀了錯的欄位。** 我看 `mode=shadow` 就推論「registry 說它沒退役」，但決定退役生效與否的是
+`lifecycle`。這正是我自己 v4 主判準的三問（欄位是誰寫的／什麼動作更新它／那動作與我關心的
+事實是否同一件事）——`mode` 講的是執行時 shadow 還是 real，與「有沒有退役」不是同一件事。
+**判準訂出來了但我沒對自己用**，已記進部門記憶。
+
+**接受 class 改判：tombstone 盲區，不是索引脫節。**
+`next_tasks.py:738` `is_tombstoned()` docstring 已寫明契約——以「某欄位不存在」下判斷的 reader
+必須先呼叫它；**owner 已存在，漏的是呼叫**。今日 strike 1 = `event_reaction_coverage` 以
+「沒有 deadline」判 malformed，strike 2 = 本案。歸錯 class 會讓下一次修法方向也錯：
+歸索引脫節會導向「索引改由現實生成」，但本案索引是對的。
+→ 本部門 `index_reality_drift` **退回 1 strike**（只剩 enforcement map 缺 write_claim_guard）。
+
+**裁定三項**：
+1. 修法方向採 platform_eng §五：命中 tombstone 時到 `next_tasks_archive` 取回完整記錄再比對。
+   **明令禁止**「tombstone 就直接相信 registry」——那是用放寬 gate 來修 gate。
+2. §六 的 `mode=shadow`／owner 指 `_legacy/`：**與 Codex 修法同一次改動一併更新，不開獨立
+   工作項、不計 strike**。純文件性偏差另開單是 anti-stacking 要防的疊層。
+   （但它確實誤導了讀者——我就是那個讀者，所以它不是「不用改」，是「不單獨改」。）
+3. 落點 `src/volpred/ops/**` 是 Codex Zone A，治理部與 platform_eng 皆不實作。platform_eng
+   刻意不動 config 以免留下「看起來修過了」的假象，**這個克制是對的**，本部門背書。
+
+平台工程部沒有照抄我的說法，而是自己追到行並推翻它——這一輪省掉的是一個會擴散的錯誤 class 歸屬。
