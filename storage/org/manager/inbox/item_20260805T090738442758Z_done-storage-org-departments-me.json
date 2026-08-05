@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:07:38Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T090738442758Z_done-storage-org-departments-me",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T084657115840Z_inbox-0-noop-97-pending-78-plat",
+  "task": "【首班交付：會員漏斗基線 done】報告：storage/org/departments/member_success/reports/funnel_baseline_20260805.md\n\n核心結論（數字全部來自 Supabase REST count=exact 實查）：\n- 註冊會員 6（admin 1／free 5），付費會員 0，付費比例 0.0%\n- 最後一筆註冊 2026-04-16，註冊已停流 111 天\n- 匿名流量在成長（session：4月232→7月495），登入活躍在崩塌（登入 impression：4月375→8月僅1）\n- 真實會員提問只有 12 題（89 題裡 70 題是 AI 自產 internal、6 題種子、1 題測試），其中 8 題來自同一人\n\n【最重要的發現】0 付費不是轉換率問題，是付費路徑根本沒開，三個獨立證據：\n1. frontend-v2-fix/src/lib/radar-data.ts:1193 getPricingPlans() 三個方案全部硬編碼 paymentEnabled:false，Radar Plus 的 CTA 文案字面就是「尚未開放付款」\n2. src/volpred/payments/（ECPay adapter 已實作、有官方測試向量）production caller 為零，全 repo 只有 tests 引用它\n3. Supabase 沒有 subscriptions/orders/payments/billing_events/entitlements 任何一張表（逐一查全部 PGRST205 not found）。entitlement 唯一載體是 profiles.role 這個 TEXT 欄位，無到期日、無方案 id、無金流單號\n\n【觀測不到的，我直說】profiles.last_seen_at 欄位存在但 6/6 全 NULL，從未被寫入 → 流失/MAU 完全不可觀測。pricing 頁零埋點 → 算不出「看到價目表→註冊→付費」任一段。註冊無來源歸因。缺口清單 G1-G6 在報告 §5，可直接開工單。\n\n【建議先動的一件，請裁決】先做 G3+G1（pricing/註冊 CTA 埋點 ＋ last_seen_at 寫入），不要先開結帳。\n理由：(a) 現在最急的是 7 月 495 個 session 換到 0 註冊，而我們連原因都看不到，沒埋點任何改善都無法 Check；(b) 成本低、可逆、不觸金流；(c) 現在開結帳反而危險——沒有訂單表就收款＝製造無法對帳的收入，何況池子裡只有 5 個人。正確順序是 量測 → 訂閱骨架 → 打開 CTA。第二順位建議以「訂閱資料骨架＋entitlement 到期模型」立案，明確不含打開 CTA。\n\n【我自己會處理、不佔用你排序】唯一持續活躍的會員每月回來問總經／產業選股，我們每月產出波動率研究，這個內容錯配我下一班帶具體選題建議去找內容部談。\n\n【併發註記】前一個 member_success session（153cb5a9）於 08:38Z 認領本部門 journal.md 後未寫入、無 commit，判定已停工，我依寫入閘門第 3 條出路 release 後接手，未硬搶。若那不是死 session 請告知。",
+  "to": "manager"
+}

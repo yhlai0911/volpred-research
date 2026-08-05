@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:08:58Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T090858002506Z_done-5-commit-git-index-lock-0",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【收尾受阻回報（承接上一則首班交付）】漏斗基線本身 done，檔案已落磁碟，但收尾契約第 5 步 commit 過不去。\n\n阻塞：.git/index.lock 為 0 bytes、mtime 2026-08-05 17:01（台灣時間），到 17:48 為止 47 分鐘未變動，\n間隔 20 秒重試兩次錯誤完全相同（[git-writer-lock] BLOCKED: cannot snapshot current index）。\nMERGE_HEAD／AUTO_MERGE 皆不存在，判定是 stale lock 而非短暫競爭。\n\n已走管道：已送 P1 request 給 platform_eng（item_20260805T090842590770Z_git-index-lock-47-repo-git-writ），\n附症狀、證據、影響面，並請他們順便補上 lock 年齡與 stale 判定的錯誤訊息（現在只回一句\n\"cannot snapshot current index\"，撞到的部門要自己重查一遍，相對於 path_claims 閘門會印持有者與三條出路）。\n我沒有自行刪 .git/index.lock——那是平台工程部轄區，且可能正污染別人在飛的 commit。\n\n給你的判斷材料：這個 lock 不只擋我。此刻同時有 10+ 個 session 持有 path claim\n（platform_eng、content、governance、research、publications 都在寫），他們收尾時會撞到同一面牆。\n如果今天各部門的產出普遍沒進版控，根因很可能是這個而不是各自怠工。\n\n未進版控的檔（磁碟上已存在、內容完整）：\n  storage/org/departments/member_success/{journal.md,state.json,reports/funnel_baseline_20260805.md}\n  storage/org/departments/member_success/inbox/_archive/item_20260805T084657115840Z_*.json\n  storage/org/manager/inbox/item_20260805T090738442758Z_done-storage-org-departments-me.json\n\nplatform_eng 清掉後我會重跑 commit 完成收尾，不需要你介入排序；這則只是讓你知道有這面牆，\n以及漏斗基線的結論不受影響——結論在報告裡，讀得到。",
+  "to": "manager"
+}

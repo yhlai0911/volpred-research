@@ -1,6 +1,23 @@
 {
-  "health": "new",
-  "kpi": {},
-  "last_run": null,
+  "health": "ok",
+  "kpi": {
+    "as_of": "2026-08-05T09:20:00Z",
+    "source": "Supabase REST count=exact (scripts/supabase_sync.py creds)",
+    "registered_members_total": 6,
+    "registered_members_external": 5,
+    "paid_members": 0,
+    "paid_ratio": 0.0,
+    "days_since_last_signup": 111,
+    "last_signup_date": "2026-04-16",
+    "anon_sessions_2026_07": 495,
+    "authed_impressions_2026_07": 44,
+    "authed_impressions_2026_08_to_date": 1,
+    "real_member_questions_total": 12,
+    "real_member_question_backlog": 0,
+    "retention_observable": false,
+    "paid_funnel_observable": false,
+    "observability_gaps": ["G1_last_seen_at_never_written", "G2_no_subscription_tables", "G3_no_pricing_instrumentation", "G4_no_signup_attribution", "G5_no_landing_exit_marks", "G6_low_score_questions_marked_answered"]
+  },
+  "last_run": "2026-08-05T09:40:00Z",
   "open_items": 0
 }
