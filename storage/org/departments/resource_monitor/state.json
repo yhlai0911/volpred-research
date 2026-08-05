@@ -35,6 +35,15 @@
     "org_parallel_multiple_per_active_hour": 2.14,
     "outage_window_billable_share_pct": 52.1,
     "outage_window_effectful_share_pct_lower_bound": 46.7,
+    "pe_inbox_blocking_awaiting_boss": 1,
+    "pe_inbox_blocking_unblocked": 48,
+    "pe_inbox_blocking_zone_a_manual": 3,
+    "pe_inbox_oldest_age_days": 0.2,
+    "pe_inbox_triage_already_done": 5,
+    "pe_inbox_triage_obsolete": 9,
+    "pe_inbox_triage_still_actionable": 52,
+    "pe_inbox_triage_superseded": 16,
+    "pe_inbox_triage_total": 82,
     "per_session_hourly_rate_vs_baseline": "≈1.0x（倍數來自 session 數，非單價）",
     "platform_billable_total_reported": 184380508,
     "platform_billable_total_settled": 180312894,
@@ -72,11 +81,10 @@
     ],
     "window": "2026-07-29..2026-08-04 (UTC, 7d)"
   },
-  "last_run": "2026-08-05T13:03:30Z",
+  "last_run": "2026-08-05T13:14:03Z",
   "open_items": [
     "等 platform_eng 回填 F1/F2/F3/五份凍結 weekly/F5，之後回讀複算（不主動動）",
-    "platform_eng request item_20260805T112311829955Z：部門 skills/ 尚未被 identity_prompt 載入",
-    "D43(P1) platform_eng 收件匣 74 件 read-only 分流盤點（進行中）"
+    "已交經理裁決：D39(P0 登入) 與會員部 11:05:42Z 裁決的 owner 衝突，我不代判"
   ],
   "open_items_detail": [
     "R3 session 壽命的 fork-root 層級尚未重算（目前只有下界 103.76h）",

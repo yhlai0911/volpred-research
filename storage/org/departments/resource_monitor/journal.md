@@ -195,3 +195,20 @@
   `identity_prompt()` 只讀 charter.md 與 memory/notes.md，**沒有任何 skills/ 載入路徑**，
   所以經理說的「下次 attach 自動載入」目前不成立。已送 request 給 platform_eng
   （`item_20260805T112311829955Z`），暫解是 notes.md 的 pointer 行。
+
+## 2026-08-05 21:14 台灣時間 — P1 platform_eng 收件匣分流盤點
+
+工作項 `item_20260805T112000862739Z_platform-eng-74-read-only-platf`（P1, manager）
+**outcome=done** — 四類分佈 (a)52／(b)16／(c)5／(d)9，合計 82 件（非派工說的 74）。
+(b)+(c)+(d)=36.6% **未過半**，所以「真實負載可能只有 30 出頭」的假設不成立，真值是 52。
+
+- **兩個派工前提都被推翻**：件數是 82 不是 74；「33 筆 >7 天」完全不成立——收件匣最舊
+  0.2 天，全部今天產生。那組 74/33 出自收件匣**裡面**的一張 canonical 鏡像單標題
+  （platform_ops pending 池，assign_2fdba4c4），講的是任務池不是收件匣，兩個語料被合成一個。
+- blocking_on 給了兩欄：機械規則 zone_a=8，人工複讀後真正修復面在 Zone A 的只有 3 件
+  （機械規則會把「提到 Zone A 只為了說這不是你的」誤判成阻塞）。**48/52 零外部依賴。**
+- 產出：`reports/2026-08-05_platform_eng_inbox_triage.md` ＋ 五支唯讀複驗腳本
+  `tools/pe_triage/`。全程未動 platform_eng 子樹任何檔案。
+- **本班我自己犯了一次錯並撤回**：送給 platform_eng 的「部門 skills/ 不會被載入」request
+  是錯的（org_attach.py:278-280 早就以 --plugin-dir 掛上，commit 407a367e9）。
+  我只 grep 了 _core.py 一個檔就下「全組織不存在」的結論。已於同班撤回並回報經理。
