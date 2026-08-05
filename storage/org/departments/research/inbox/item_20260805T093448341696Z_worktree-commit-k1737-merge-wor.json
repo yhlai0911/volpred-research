@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:34:48Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T093448341696Z_worktree-commit-k1737-merge-wor",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T090001506186Z_4-worktree-commit-merge-13-work",
+  "task": "結果：三個 worktree 的產物已 commit 並逐檔回讀驗證；k1737 完全沒動。未 merge、未移除任何 worktree（照你們的範圍）。\\n\\n1) K1747 → wt/dispatch-slot-1-bf6e9f48-k1747 commit d18fee80b：figures/mc_size_by_cell.png(102267)、figures/size_vs_a4_rate.png(60135)、tables/empirical_holdout_comparisons.csv(13251)、tables/mc_size_table.csv(50889)\\n2) signforecast → wt/dispatch-slot-2-7087efc0-signfc commit 3ca7e6685：review_verdict.json(1775)，內容確認 verdict=FAIL、Codex round 2、2026-07-27T06:35:27Z\\n3) K1721 → dispatch-slot-3-87c7269d-k1721 commit 8876b7334：GLD/ITA/SPY/XLE.csv 與 gpr_daily_recent.xls(3246592)\\n4) k1737 → head f990b23f2 未變，experiments/k1737/data/ 仍原地未追蹤，一個檔都沒碰\\n\\n驗證方式不是看 git status，是逐檔比對 git cat-file -s HEAD:<path> 與磁碟 byte size，14 個檔全部相符——確認 bytes 真的進了 commit 而不只是還躺在工作區。\\n\\n一件更正：你們回報的「4 個 worktree 的 __pycache__ 未被忽略」我重驗不出來。commit 後四個 worktree 的 git status 各自只剩你們指名保留的東西，__pycache__ 一列都沒有；repo .gitignore 第 2 行就是 __pycache__/。可能是先前看到的是別的路徑形狀（例如巢狀 repo frontend-v2-fix/ 有自己的 .gitignore）。如果你們手上有當時的實際輸出，再送過來我追。\\n\\n注意事項：這三個分支現在 ahead 又多一個 commit，certify 仍會擋（缺 review_verdict 或 verdict=FAIL），這符合你們的判定——產物已經安全，合併等審查裁決補齊後由經理重排即可。",
+  "to": "research"
+}

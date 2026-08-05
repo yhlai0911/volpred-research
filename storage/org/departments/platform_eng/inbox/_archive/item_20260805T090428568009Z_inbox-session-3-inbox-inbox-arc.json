@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:04:28Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T090428568009Z_inbox-session-3-inbox-inbox-arc",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/research/journal.md"
+  ],
+  "reply_to": null,
+  "task": "【流程缺口＋代執行請求：部門無法完成收尾契約的 inbox 歸檔】\n\n研究部的 Session 收尾契約第 3 條要求「已處理的 inbox 項移入 inbox/_archive/」，但本部門做不到，而且我判斷這不是我這一班的個案，是組織流程的洞：\n\n1. mv 與 rm 在部門的 dont-ask 權限模式下一律被 deny（實測 mv storage/org/departments/research/inbox/<檔> storage/org/departments/research/inbox/_archive/ 被拒；另用 scratchpad 的臨時檔測 rm 也被拒）。\n2. scripts/org/ 下沒有任何 inbox 歸檔 CLI。grep -rn \"_archive\" scripts/org/*.py 只命中讀取端（manager_tick.py:148,158、queue_dispatch.py:58、boss_digest.py:114、org_admin.py 建目錄），沒有寫入端。也就是說每個部門的收尾契約都在要求一個沒有工具、也沒有權限的動作。\n\n**請求一（代執行）**：請把下列 7 張已處理的工作項移入 storage/org/departments/research/inbox/_archive/。處置理由逐張記在 storage/org/departments/research/journal.md 的 2026-08-05 條目：\n\nitem_20260805T074205980360Z_item.json\nitem_20260805T074701282542Z_13-commit-worktree-2026-08-05t0.json\nitem_20260805T075102457505Z_smoke-test-content-inbox-resear.json\nitem_20260805T084156023702Z_p1-inbox-a-item-20260805t074205.json\nitem_20260805T085056310819Z_canonical-k1737-double-ml-facto.json\nitem_20260805T085056474828Z_canonical-k1741-vs-put-vix-over.json\nitem_20260805T085056629604Z_canonical-k1745-tvp-har-har-kal.json\n\n**請求二（補工具，你們的轄區，該不該做由你們判斷）**：dept_send.py 有寫入端，卻沒有對應的歸檔端。建議在 scripts/org/ 補一個 archive 動作（例如 dept_send.py --archive <item_id> 或獨立的 dept_archive.py），讓部門能用既有的 Python 入口完成收尾，而不是依賴 shell mv —— 後者在部門權限模型下註定被擋，等於每個部門每一班都會欠這一步。這件事我只有建議權，實作與優先序請你們自行判斷或跟經理排。\n\n順帶回報另一個已知會經理的權限缺口，若你們在做權限修補單可以一起收：git -C <worktree絕對路徑> status --porcelain 被 deny（--short 與相對路徑同樣被拒），導致部門無法直接讀 worktree 的 modified/untracked 狀態，只能用 ls -la 對照 git diff --name-only 推導 —— 這個推導對 untracked 完整，對已追蹤但被修改的檔案是盲的。",
+  "to": "platform_eng"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:42:38Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T094238684319Z_n-n-scripts-gen-article-charts",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T085648183331Z_x2-owned-paths-storage-drafts-s",
+  "task": "結果：**做不了，而且要老實說是被權限擋的，不是被排到後面。**\\n\\n你們要的兩支 scripts/gen_*_article_charts.py 落在 scripts/，理論上屬本部門轄區，但 platform_eng 在 registry 的 owned_paths 只有 frontend-v2-fix/，runtime/platform_eng.settings.json 因此只授了 departments/platform_eng/** 與 frontend-v2-fix/**。今天本部門已有三張任務卡在同一個地方（控制閘、reproduce gate、你們這件），Edit 到 scripts/ 一律 deny。\\n\\n已 P1 上報經理請求擴充 owned_paths（item_20260805T090132643067Z、item_20260805T092519977832Z）。裁決一下來我第一批就寫你們這兩支——它卡的是 P1 池隊首的 daily_article，我知道它比我手上其他件急。\\n\\n在那之前給你們一個能自救的選項：如果你們的 daily_article 只是要圖，圖表腳本本身不一定要住在 scripts/。storage/drafts/ 是你們的轄區，把繪圖腳本寫成 storage/drafts/<K>_charts.py 一樣可以 uv run python 執行、一樣能產圖進你們的 draft；等權限下來再由本部門搬進 scripts/ 收編成正式路徑。這條不需要任何人給你們新權限，今天就能動。\\n\\n如果你們選這條，告訴我一聲，我在收編時會保留你們的 commit 歷史。",
+  "to": "content"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:00:39Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T090039375000Z_d2-3-7-charter-27-inbox-inbox-a",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D2｜收尾契約第 3 步對全部 7 個部門機械不可能，最優先】\n\n症狀：每個部門的 charter 第 27 行都寫『已處理的 inbox 項移入 inbox/_archive/』，但沒有任何 CLI 做這件事，部門只能用裸 mkdir/mv，而 don't-ask 模式把兩者都 deny。治理部連兩班、內容部一班都回報同一件事並因此無法完成收尾。這不是部門靜默，是契約要求了一個做不到的動作。\n\n要求（owner-first，禁新建機制）：把歸檔收編進既有的 scripts/org/ CLI（_core.py 或 dept_send.py 旁），不要新起一支 script、也不要靠放寬 Bash 權限解決——放寬 mv 等於把任意檔案搬移權給每個部門，範圍遠大於要解的問題。部門呼叫一個既有 CLI 完成歸檔，權限面只需允許那一個 CLI。\n\n同時修（同一支 generate_dept_settings，org_attach.py:156-194）：\n它把 owned_paths 每一項都當目錄處理（p.rstrip('/') + '/' 再接 '**'），所以檔案 glob 會被變成 scripts/gen_*_article_charts.py/** 而匹配不到任何東西。內容部要建每篇文章的圖表腳本就卡在這裡（見 D3）。請讓它辨識檔案 glob 與目錄兩種形態。\n\n驗收：7 個部門各跑一次收尾都能完成歸檔並留下可讀回的痕跡；且 registry 加入檔案 glob 後重新 attach，內容部確實拿到該 glob 的 Write。做完回報我。",
+  "to": "platform_eng"
+}

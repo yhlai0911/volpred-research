@@ -1,5 +1,47 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-05 17:30–17:45（台灣時間）｜20 件收件匣批次｜outcome=done(3)+contained(1)+blocked(rest)
+
+**完成**
+
+1. **研究部 P1 產物保全**：三個 worktree 的未追蹤研究產物已 commit——
+   K1747 圖表/表格 `d18fee80b`、signforecast 的 Codex round-2 FAIL 裁決 `3ca7e6685`、
+   K1721 外部資料快照 `8876b7334`。k1737 依指示完全沒動。
+   驗證用 `git cat-file -s HEAD:<path>` 對磁碟 byte size 逐檔比對（14/14 相符），
+   不是看 `git status`——要證明 bytes 真的進了 commit，不是還躺在工作區。
+   **關鍵發現**：worktree 的 git 操作在部門權限下走
+   `git_writer_lock.py run --actor <x> -- git -C <wt> ...` 是通的，
+   而且這正是 hook 訊息指定的正規入口（裸 `git -C` 會被 deny）。
+2. **weekly_2026-07-31 回填**：34,585 bytes、billable_total 126,428,721。
+   但回報時已註明 `unique_sessions=436` 正是 F2 要修的灌水指標、
+   `estimated_cost_usd` 建立在 F3 的 20.2% 覆蓋上——回填完成 ≠ 數字可用。
+3. **裁決 D2 的當下解**：寫了 `work/inbox_archive/archive_inbox.py`，
+   七個部門都能跑（只需 `uv run python`，不需對該路徑有寫入權），
+   解掉「收尾契約第 3 步機械不可能」。已回覆研究部、治理部、經理。
+
+**調查完成（contained）— canonical `assign_3e73a554` 無 sidecar index.lock**
+
+用 scratchpad 臨時 repo 做實驗（不在本 repo 上做破壞測試）：
+SIGPIPE 中斷 `git status` 洩漏 **0/40 → 排除**；SIGKILL 打斷 `git add` 洩漏 **5/10
+且正是 0-byte lock**。成因確立＝「正在寫 index 的 git 子行程被 SIGKILL」。
+兩顆 lock 在 `writer_log.jsonl` 都查無對應交易。唯一時間吻合的 phase_z
+orphan-half probe timeout，讀碼後確認它殺的是 clone 裡的 pytest，
+**不能解釋主 repo 的 index.lock，沒有拿它當結論**。個案創建者未鎖定。
+報告與修法規格：`work/sidecarless_index_lock/forensics.md`。
+
+**第一人稱佐證治理部的 gate 缺陷**：`path_claims.py list` 顯示 `src/volpred/ops/`
+由本 session 持有，而本 session 對它的 Edit 是**被 deny 的**、一個 byte 都沒寫。
+更嚴重的推論已回報：沒有寫入權的部門會系統性地生產幽靈鎖——它一定被 deny，
+所以一定留下 claim，鎖住的正是它永遠寫不了、只有別人能寫的路徑。
+
+**其餘全部卡在同一根因**：F1/F2/F3 token 會計、內容部兩支圖表腳本、
+治理部 R4、path claim 修法、org_attach settings 生成（含 D5-1/D9）、
+三張 canonical——修改面全在 `scripts/`、`src/`、`config/`、`tests/`。
+已向經理指出 **D9 的遞迴性**：經理自己也寫不了 `registry.json`，
+而 `owned_paths` 就住在裡面——這個死結組織內部無人能解，需要老闆授權一次。
+未動的三張 canonical 沒有假裝處理，也沒有歸檔。
+
+
 ## 2026-08-05 17:19–17:27（台灣時間）｜reproduce gate 整檔 hash｜outcome=blocked
 
 **工作項**：`item_20260805T091934819770Z_reproduce-gate-hash-commit-unver`

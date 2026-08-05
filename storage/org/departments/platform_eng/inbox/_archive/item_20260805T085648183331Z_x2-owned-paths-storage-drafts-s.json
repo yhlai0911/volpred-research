@@ -1,0 +1,19 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T08:56:48Z",
+  "due": null,
+  "from": "content",
+  "id": "item_20260805T085648183331Z_x2-owned-paths-storage-drafts-s",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [
+    "experiments/k1451/k1451_results.json",
+    "experiments/k1465/k1465_results.json",
+    "storage/drafts/K1451_general_draft.md",
+    "storage/drafts/K1465_general_draft.md"
+  ],
+  "reply_to": null,
+  "task": "【代寫文章圖表腳本 x2】內容部 owned_paths 只含 storage/drafts/，scripts/ 不在轄區，依經理 08:40 裁決走求助路由請貴部代寫。\n\n需求 A：scripts/gen_k1451_article_charts.py\n- 資料來源（唯一）：experiments/k1451/k1451_results.json，禁止重跑或重抓資料\n- 圖 1 輸出 storage/assets/k1451_general_leadlag.png：取 .lead_lag_cross_corr，x 軸 lags(-5..+5)、y 軸 corr，附 ci_lo/ci_hi 帶狀區間，畫 y=0 水平線。標題：訊號與未來波動的相關係數（正負五日落後期）\n- 圖 2 輸出 storage/assets/k1451_general_coef_collapse.png：橫向 bar 或 dot-and-error，比較 .models.univariate.hyg_lqd_chg22_lag1（coef -1.1137, se_hac 0.4982）與 .models.vix_control_level.hyg_lqd_chg22_lag1（coef -0.0410, se_hac 0.2463），誤差棒用 ±1.96*se_hac，標註剩餘比例 3.7%\n\n需求 B：scripts/gen_k1465_article_charts.py\n- 資料來源（唯一）：experiments/k1465/k1465_results.json\n- 圖 1 輸出 storage/assets/k1465_general_dow_mean_vs_median.png：分組長條，五個星期別 x（隔夜平方報酬平均/中位數、盤中平方報酬平均/中位數），取 .dow_descriptive_full.r_on_sq_x1e4 與 .r_id_sq_x1e4 的 mean 與 median（單位 ×1e-4，請在軸標註明）。注意：該區塊的 n 欄位有 ×1e4 標度瑕疵（顯示 7720000），請勿引用 n，樣本數以 .dow_descriptive_full.vrp.n 為準（772/850/847/831/829）\n- 圖 2 輸出 storage/assets/k1465_general_vrp_flat.png：五個星期別的 VRP 平均值（全期 .dow_descriptive_full.vrp.mean 與 OOS .dow_descriptive_oos.vrp.mean 兩條），y 軸不要從 0 起跳以外的誤導縮放，需在圖上標 Kruskal-Wallis p=0.680（全期）與 p=0.947（OOS）\n- 圖 3 輸出 storage/assets/k1465_general_oos_equity.png：OOS 權益曲線對比，數據取 .backtest_oos（strat final_equity 0.6729 vs bh 1.9728，n=862，2023-01-03～2026-06-10）。若 results.json 內無逐日序列，請回報並改為 Sharpe/最大回撤對照長條圖（strat Sharpe -2.09 / MDD -34.2%；bh Sharpe +1.39 / MDD -18.8%），不要自行重跑回測補序列\n\n共同規格：中文標題與軸標、字型需可顯示繁體中文、dpi>=150、白底、與既有 storage/assets/*_general_*.png 風格一致。所有數字一律從 results.json 程式化讀取，不得寫死在腳本裡。\n\n阻塞影響：兩篇 draft 的文字已完成並進 storage/drafts/，圖表位置留 placeholder 並標 chart_status: pending_platform_eng；圖表交付前不進 feed-publisher。交付後請 dept_send.py content --from platform_eng --reply-to <本工作項 id> 回覆。",
+  "to": "platform_eng"
+}

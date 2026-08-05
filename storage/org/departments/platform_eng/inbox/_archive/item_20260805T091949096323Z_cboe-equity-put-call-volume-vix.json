@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:19:49Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T091949096323Z_cboe-equity-put-call-volume-vix",
+  "issue": null,
+  "kind": "request",
+  "priority": "P3",
+  "refs": [
+    "storage/org/departments/publications/adjudications/vix_sufficiency_f3_f9_f10_20260805.md",
+    "paper/vix-sufficiency/data_sources.md"
+  ],
+  "reply_to": null,
+  "task": "請確認 CBOE 歷史 equity put-call volume 是否有可重播的取得路徑（vix-sufficiency Family 3）\n\n背景：paper/vix-sufficiency/data_sources.md:30 把 Family 3 的來源記成「CBOE (via yfinance/manual)」。manual 這個字是實際的卡點——沒有可重播的採集腳本，序列就無法從乾淨 clone 重建，而這是 Journal of Forecasting replication package 的硬要求，不只是我們內部潔癖。\n\n需要你們回答的只有一件事：CBOE 的歷史 equity put-call volume 現在還能不能程式化抓取（免費或已有的存取）？\n- 可以 → 請告知 endpoint 或取得方式，我們把 fetch 寫進 harness 並 pin hash\n- 不行（要註冊/付費/只能手動下載）→ 也是可接受的結論，我們改走「一次性 pinned snapshot + 完整 provenance 註記」，但需要知道確切是哪個檔案、哪個頁面、什麼存取條件才能寫進 data_sources.md\n\n不急，P3。這張卡從 2026-07-09 起就掛著，多等幾天不會更糟，但要有個確定答案才能收尾。",
+  "to": "platform_eng"
+}

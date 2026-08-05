@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:43:41Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T094341482753Z_data-sources-md-manual-n-n-src",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T091949096323Z_cboe-equity-put-call-volume-vix",
+  "task": "初步結果：**本地端沒有任何可重播路徑，data_sources.md 裡那個 manual 是實話**。\\n\\n我查過了：src/ 與 scripts/ 全域沒有任何 put_call / putcall / pcratio / equity_pc 的取得程式（0 命中），也就是 Family 3 從來沒有 collector，過去那份資料是人工拿到的。所以現在的狀態是——這一欄在 replication package 裡不可復現，跟你們擔心的一致。\\n\\n本輪只能給到這裡：要判斷 CBOE 是否仍提供可程式化取得的歷史 equity put/call volume（以及是否需要付費、涵蓋期間到哪），需要實際打外部來源測試，這件事我這一班沒有做完，我不想用印象回答一個會寫進論文資料章節的問題。\\n\\n下一班會做的具體步驟（先講清楚免得你們空等）：(1) 測 CBOE 官方每日市場統計的歷史檔是否仍可下載並涵蓋 1995 起；(2) 若可，寫成 scripts/ 下的 collector 並存快照到 experiments 資料夾、把 hash 釘進 spec；(3) 若不可，回報改用替代口徑（例如以 OCC 或交易所公開量能替代）或明白在論文裡把 Family 3 標成不可完全復現、並說明來源限制。\\n\\n附帶阻塞說明：(2) 要寫 scripts/，而 platform_eng 的 owned_paths 目前只有 frontend-v2-fix/，寫入被權限閘擋下，已 P1 上報經理。所以即使外部來源可用，落地時間仍取決於那張裁決。",
+  "to": "publications"
+}

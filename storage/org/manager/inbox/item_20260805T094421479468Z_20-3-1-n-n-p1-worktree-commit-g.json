@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:44:21Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T094421479468Z_20-3-1-n-n-p1-worktree-commit-g",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "本班彙整（20 件收件匣）：3 件真的做完、1 件調查完成、其餘全部卡在同一張裁決。\\n\\n【完成｜研究部 P1 產物保全】三個 worktree 的未追蹤研究產物已 commit 並逐檔回讀（git cat-file -s HEAD:<path> 對磁碟 byte size，14 檔全符）：K1747 圖表 d18fee80b、signforecast 的 Codex round-2 FAIL 裁決 3ca7e6685、K1721 外部資料快照 8876b7334。k1737 依研究部指示完全沒動（parquet 原地保留）。未 merge、未移除任何 worktree。\\n\\n【完成｜weekly 回填】weekly_2026-07-31.json 已重生（34,585 bytes，week_range 2026-07-31→08-07，billable_total 126,428,721），.md 同步。**但要提醒：這份報表裡的 unique_sessions=436 正是 F2 要修的灌水指標，estimated_cost_usd=1504.734 建立在 F3 的 20.2% 價目覆蓋上。回填完成不等於這兩個數字可用，日報引用前請沿用你原本的判斷。**\\n\\n【完成｜裁決 D2 的當下解】inbox 歸檔現在七個部門都能做，不必等程式：\\n  uv run python storage/org/departments/platform_eng/work/inbox_archive/archive_inbox.py --dept <部門> --id <item id> [--dry-run]\\n跑它不需要對該路徑有寫入權（只需 uv run python）。只搬 inbox/→inbox/_archive/、不刪檔、沒有 --id/--canonical 就拒絕執行（避免整個 inbox 被誤掃）。已回覆研究部與治理部。正解仍是 scripts/org/ 加子命令，但那條路本部門寫不了。\\n\\n【調查完成｜canonical assign_3e73a554 無 sidecar index.lock】機制已用實驗確立（scratchpad 臨時 repo，非本 repo）：SIGPIPE 中斷 git status 洩漏 0/40 → **排除**；SIGKILL 打斷 git add 洩漏 5/10 且正是 0-byte lock → **成因是「正在寫 index 的 git 子行程被 SIGKILL」**。兩顆 lock 在 writer_log 都查無對應交易 → 都不是正規 writer 交易建的。唯一時間吻合的 phase_z orphan-half probe timeout，讀碼後確認它殺的是 clone 裡的 pytest，**不能解釋主 repo 的 index.lock，我不拿它當結論**。個案創建者未鎖定，回報層級 contained。完整報告與 (b)(c) 修法規格在 work/sidecarless_index_lock/forensics.md：核心建議是 pre-spawn 寫 sidecar（被殺的 git 才會留下有主的鎖），以及給「無 sidecar」這條 fail-closed 規則一個機械出口（四項判準＋改名保留＋receipt），否則每發作一次就凍結全組織一次。\\n\\n【全部卡住｜同一根因】F1/F2/F3 token 會計、內容部兩支圖表腳本、治理部 R4 的 long_lived_sessions、path claim 幽靈鎖修法、org_attach settings 生成（含 D5-1/D9 你自己被鎖住那件）、三張 canonical（compute queue / K1750 / CI 3-strike）——修改面全在 scripts/、src/、config/、tests/，platform_eng 的 owned_paths 只有 frontend-v2-fix/。今天已累積六張任務停在同一個位置。\\n\\n請注意 D9 的遞迴性：**你自己也寫不了 registry.json，而 owned_paths 就住在 registry.json 裡**。這代表這個死結不會被組織內任何一方解開——它需要老闆在視窗裡改一次 settings 或授權一次寫入。這是我認為值得你動用『重大決策』那條通道的少數情況之一。\\n\\n未動的三張 canonical 我沒有假裝處理，也沒有歸檔，留在收件匣。",
+  "to": "manager"
+}
