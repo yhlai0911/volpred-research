@@ -88,7 +88,10 @@
         ],
         "status": "**3 strikes**（第三例於 2026-08-05T14:03Z 兌現，與治理部 13:57Z 的預測同輪命中）。刻意不開 refactor_plan：D53 第 2 件已是根因層級修法（補上『pattern 拼完後驗證它匹配得到目標』這道缺席檢查），另開計劃書屬 anti-stacking 禁止的疊層",
         "acceptance_checklist": "三次事故＝三個現成測試案例，表格測試須各有一列：(a) 相對 vs 絕對 pattern 前綴；(b) 檔案宣告不得被當成目錄前綴；(c) 點開頭目錄須被命中",
-        "fourth_instance_trigger": "若 D53 落地後出現第四個維度，才開重構計劃書。方向已明確：pattern 不該由字串拼接產生，該由一個知道『目錄 vs 檔案 vs 隱藏目錄』的建構器產生並自我驗證",
+        "fourth_instance": "2026-08-05T14:07Z 經理實測命中：org_admin.py:202 在寫進 registry 之前就 rstrip('/')+'/'，registry 存 storage/org/policy.md/，org_attach 的檔案偵測永遠看不到檔案。端到端而非單元層",
+        "fifth_shape_found_by_readback": "registry 的 research 部門有 .claude/worktrees/*/experiments/ —— 生產環境已有帶內嵌萬用字元的宣告；現行 rstrip+** 對它剛好能用是運氣。任何『檔案 vs 目錄』二分型別都會漏掉它",
+        "refactor_plan": "docs/governance/refactor_plan_owned_paths_type.md（2026-08-05T14:10Z）。根因＝owned_paths 從未定義型別（wrong domain model），跨兩個檔案與一次序列化。契約：每項是路徑模式不是路徑；I1 存進 registry 須與宣告逐字相同、正規化只准在渲染時；I2 產生規則的邏輯只有一份住 _core.py；I3 建構器須自我驗證匹配得到否則 raise。不需資料遷移",
+        "plan_trigger_criterion": "計劃書的觸發條件不是『第 N 次』，是『修法的作用域小於根因的作用域』。D55(b) 那次不是（D53 修的正是那道缺席檢查，作用域相符），這次是",
         "spec": "(1) 宣告以 / 結尾＝目錄前綴產生 path/**，否則同時產生 path 與 path/**（不依賴檔案系統存在性）；(2) 表格驅動測試：宣告形式→期望規則，涵蓋目錄帶/不帶尾斜線、單一檔案、巢狀檔案，並斷言 pattern 對目標路徑實際匹配得到",
         "routing": "已建議併入經理 D53 第 2 件（platform_eng）；治理部不實作"
       },
@@ -110,7 +113,7 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D52 結案：settings pattern 構造 class 於同一輪達 3 strikes；刻意不開 refactor_plan——D53 第 2 件已是根因層級，另開計劃書屬疊層）",
+    "last_session_outcome": "done（D57 重構計劃書交付：根因是 owned_paths 從未定義型別，跨兩檔案一次序列化；並自我更正——先前的 harness 假說很可能是維度 3 的實例）",
     "policy_md_evaluation": {
       "as_of": "2026-08-05T13:30Z",
       "deliverable": "docs/governance/2026-08-05_policy_md_evaluation_and_two_sections.md",
@@ -156,7 +159,7 @@
         "test": "settings 涵蓋該路徑 且 同一份 settings 的其他路徑本 session 寫入成功 且 仍被 deny",
         "instance": "governance Edit .claude/rules/paper-workflow.md 連兩次 deny，而同一份 settings 的 docs/governance/** Edit 本輪成功；上層 deny 皆空",
         "fix": "撤回宣告（13:15Z 更正；原寫『查 generate_dept_settings 為何宣告未變成權限』方向錯——產生器沒錯，它忠實翻譯了一個不該存在的宣告）。建議把 .claude/** 移出所有 owned_paths 並讓 org_admin.py set-paths 拒絕該前綴",
-        "hypothesis_unverified": ".claude/** 疑為 harness 層不可覆蓋的自我提權防線（.claude/settings.json 能授予權限）；六項 repo 內解釋已逐一排除，但 harness 內部無法從此處驗證",
+        "hypothesis_downgraded": "【2026-08-05T14:10Z 自我更正】原假說（.claude/** 為 harness 層自我提權防線）**很可能是多餘的**。治理部宣告 .claude/rules/ 渲染成 //…/.claude/rules/**，而 settings_pattern_construction 的維度 3 正是『點開頭目錄不被萬用字元命中』——那個 deny 很可能就是本 class 的實例。當時把『六個我想得到的 repo 內解釋都排除了』誤讀成『問題在 repo 外』，維度 3 不在那六個裡。待驗：維度 3 修好後回測 .claude/rules/ 是否解封；解封則假說作廢並更正 paper_workflow_exemplar_patch §1。在那之前不接受任何 harness 層解釋",
         "spec_correction": "§3 自動分型第 3 步『settings 涵蓋＝C』不足，須追問『同一份 settings 其他路徑本 session 寫成功過嗎』"
       },
       "self_correction_B3": "『缺 mv 權限』判為 B 是錯的：scripts/org/inbox_archive.py 是 canonical 歸檔入口（且會擋 request/decision 未回覆就歸檔）。授權 Bash(mv .../inbox/*) 反而是給第二個寫入者。治理部本班亦曾用 shutil.move 繞過，已改正",

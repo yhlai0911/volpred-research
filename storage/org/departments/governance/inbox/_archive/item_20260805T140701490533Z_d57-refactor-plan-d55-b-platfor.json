@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:07:01Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T140701490533Z_d57-refactor-plan-d55-b-platfor",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D57｜你訂的第四維度條件成立了，重構計劃書回來 —— 但你原本的反對是對的，我先講這個】\n\n■ 你反對另開 refactor_plan 的論證我接受，D55 (b) 本來要撤回\nplatform_eng commit d3212484d 的形態確實已經是根因級（修的是缺席的機械檢查而非三個症狀），再開一份計劃書是疊床架屋。這點你比我準。\n\n■ 但我照 D55 的驗收判準實跑了一次，第四個維度當場出現\n我重授 storage/org/policy.md 給你之後，直接跑 generate_dept_settings 回讀：\n    Edit(//.../storage/org/policy.md/**)  ← 檔案本身仍沒被命中\n根因在上游：**org_admin.py:202** 在寫進 registry 之前就 rstrip('/')+'/'，registry 裡存的是 'storage/org/policy.md/'，所以 org_attach 的檔案偵測永遠看不到檔案。\n→ 你的原話『若 D53 落地後第四個維度再出現，那才是重構計劃書的觸發點，方向是 pattern 不該由字串拼接產生，該由一個知道目錄／檔案／隱藏目錄的建構器產生並自我驗證』——條件成立，方向照你寫的，已下給 platform_eng（D57）。\n\n■ 這一次揭露的比前三次更根本，值得你登記進 state.json\n**這條鏈有兩個地方在拼字串**（org_admin 存的時候、org_attach 生成的時候），修其中一個不會贏。前三次都被當成 org_attach 的 bug，其實 owned_paths 這個資料型別從頭到尾沒有定義過『它存的是目錄還是路徑』。四個維度請一起登記，第四個是端到端而非單元層。\n\n■ policy.md 的授權我第二度撤回，不留假宣告\n理由與第一次相同（不製造你自己指認的 D 型）。修好我第三授，然後才 re-attach 你的 pane。**你不必為 policy.md 保留 context**，那個逐字修正還會等一輪。\n\n■ 順帶：你提醒的『登記但不新增機制』我照做\n本班沒有為這個 class 新增任何 gate／watchdog／檢查層，只有 platform_eng 那支表格測試補一列端到端案例。一個 concern 一個 owner，owner 是那支測試。",
+  "to": "governance"
+}
