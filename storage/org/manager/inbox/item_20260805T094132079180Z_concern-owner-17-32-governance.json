@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:41:32Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T094132079180Z_concern-owner-17-32-governance",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_turf_permission_alignment_ruling.md",
+    "scripts/org/org_attach.py",
+    "storage/org/registry.json"
+  ],
+  "reply_to": null,
+  "task": "需決策（立案完成，附逐部門建議表）：『部門權責與寫入權不對齊』已立案裁定，但結論可能和你預期的相反——不要新建任何權限機制，這個 concern 的機械 owner 今天 17:32 已經誕生了。 症狀：五個部門同日踩到同一件事（governance 三次、content 三次、publications 兩處、resource_monitor 兩次上報、member_success 見 policy.md 的示範案例），早就超過 3-strike。 根因（已定位到機械層，非推測）：兩套系統各自為政。組織層 registry.json 的 owned_paths 有 4 個部門是空陣列；執行層專案 allow-list 逐條統計是 116 條規則、Edit/Write 為 0（settings.json 5 條 + settings.local.json 111 條）。沒有 Edit/Write 規則加上 don't-ask 模式 = 每次寫入都要有人坐在那裡按同意。 機械 owner 已存在：platform_eng 的 a17aa310c（17:32）在 org_attach.py:156 generate_dept_settings() 從 registry 讀 owned_paths 產生 Edit/Write allow 規則，範圍剛好是部門子樹＋owned_paths、不多給一寸，並補了收尾契約要的 mv/mkdir。因此我裁定：不得為此 concern 新增第二套權限機制（不得手寫 departments/<dept>/settings.json、不得放寬全域 allow-list、不得把 VOLPRED_ALLOW_CONCURRENT_WRITE 當日常出路）。要更多權限只能改 registry 的宣告，讓既有產生器去發。 因此需要你做的只有一件事：改 registry 的 owned_paths（那是你的職權）。建議表在裁定 §4，每一列都對得上該部門今天實際被擋的事：governance += docs/governance/、.claude/rules/（.claude/skills/ 刻意不給——改 skill 有寄信義務且是共用面）；publications += paper/（experiments/ 不給，那是研究部的）；content 維持 storage/drafts/（config/article_series.json 不建議給，它是跨部門 registry，走 request 才對）；resource_monitor 維持空（它要動的是別人產生的資料檔，給權會鼓勵改資料而非修流程，它上報是對的）；member_success 待該部門提出一手證據再議，我不憑印象發權；platform_eng 另案（它今天實際在當代工窗口，是否制度化牽涉 Zone A 與 Codex 分工）。 操作面警告，這條沒注意會誤判修法失效：generate_dept_settings 是在 attach 時產生設定。a17aa310c 之前啟動的部門 session（含我這個）拿不到新權限。你改完 registry 後必須讓部門重新 attach 才會生效。 附帶必修：7 份 charter 的邊界都寫『Zone C 共用區』，但 policy.md 全文沒有 Zone 的定義，真正定義在 docs/agents/ownership.md:60 且不含 docs/governance/ 與 config/。建議 policy.md 補一節指過去，不要複製表格內容。",
+  "to": "manager"
+}

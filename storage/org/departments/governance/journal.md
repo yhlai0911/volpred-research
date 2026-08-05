@@ -126,3 +126,36 @@ Sec 3.2 敏感度論證反轉）＋缺 `scripts/README.md`。
 **未做**：`.claude/rules/paper-workflow.md:62` 的一行修改治理部寫不進去（Edit 全域被拒），
 已附精確 diff 送 platform_eng。今天第三件因同一授權缺口外包的事。
 **待裁決**：樣板清單轄區歸屬（論文部主動提問），意見已送經理。
+
+
+## 2026-08-05T09:41Z — 立案：部門權責與寫入權不對齊（內容部提議）
+
+`outcome=done`
+
+**一句話結論**：class 成立、早就超過 3-strike，但裁定是**不新建任何權限機制**——
+這個 concern 的機械 owner 今天 17:32 才誕生，殘餘缺口在**宣告**不在機制。
+
+**症狀**：五個部門同日踩到同一件事（governance 三次、content 三次、publications 兩處、
+resource_monitor 兩次上報、member_success 見 policy.md 示範案例）。
+
+**根因（機械層，非推測）**：組織層 `registry.json` 的 `owned_paths` 有 4 個部門是空陣列；
+執行層專案 allow-list 逐條統計 **116 條、Edit/Write 為 0**（`.claude/settings.json` 5 ＋
+`.claude/settings.local.json` 111）。內容部報的「111 條」數字微調為 116，結論不變。
+
+**owner-first 的關鍵發現**：`a17aa310c`（platform_eng，17:32）在
+`scripts/org/org_attach.py:156` 加了 `generate_dept_settings()`——從 registry 讀
+`owned_paths` 產生 Edit/Write allow 規則，並修掉內容部回報的目錄級鎖（claim 身分改成
+部門）與缺 `mv`。**它就是 owner**，所以裁定禁止任何第二套權限層。
+
+**建議表**（經理裁決，registry 是它的職權）：governance += `docs/governance/`、
+`.claude/rules/`（`.claude/skills/` 刻意不給——寄信義務＋共用面）；publications += `paper/`；
+content 維持（`config/article_series.json` 不給，跨部門 registry 走 request 才對）；
+resource_monitor 維持空（要動的是別人產生的資料檔，給權會鼓勵改資料而非修流程）；
+member_success 待一手證據；platform_eng 另案（實際在當代工窗口，牽涉 Zone A）。
+
+**操作面警告**：設定在 attach 時產生，`a17aa310c` 前啟動的 session（含本 session）
+拿不到新權限——經理改完 registry 必須讓部門重新 attach，否則會誤判修法失效。
+
+**附帶必修**：`policy.md` 全文沒有 Zone 的定義，charter 卻拿它當邊界；真正定義在
+`docs/agents/ownership.md:60` 且不含 `docs/governance/**` 與 `config/**`。建議補 pointer，
+不複製表格。

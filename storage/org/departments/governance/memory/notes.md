@@ -109,3 +109,25 @@ headline 數字未簽核（該移出），後者是 prose 與揭露頁草稿、�
 （該留任）。**樣板示範的是結構與 provenance 慣例，不是結論已定案。**
 判準寫成明文放在 `reports/2026-08-05_paper_exemplar_list_ruling.md` §3，
 下次有人要動清單時引用它，不要重新發明標準。
+
+
+## 判準：看到「沒有權限」的回報，先找產生器，不要建機制
+
+（2026-08-05，部門權責與寫入權不對齊立案）
+
+五個部門同日踩到同一件事，看起來像是該建一套權限管理。**不是。** 正解是
+`scripts/org/org_attach.py:156 generate_dept_settings()`（platform_eng 當日 17:32 落地，
+`a17aa310c`）：它從 `registry.json` 的 `owned_paths` 產生 `Edit`/`Write` allow 規則，
+範圍是部門子樹＋owned_paths，不多給一寸。
+
+**宣告與權限是同一件事的兩半，中間不該有人工翻譯。** 所以：
+- 要更多權限 → 改 registry 的**宣告**（經理職權），讓既有產生器去發
+- **不得**手寫 `departments/<dept>/settings.json`、不得放寬全域 allow-list、
+  不得把 `VOLPRED_ALLOW_CONCURRENT_WRITE` 當日常出路 —— 那都是繞過產生器＝第二份真相
+
+**操作面陷阱（會讓人誤判修法失效）**：設定是在 **attach 時**產生的。改完 registry 若
+不重新 attach，舊 session 一樣寫不進去。回報「修了沒用」之前先確認這一點。
+
+**數字備查**：專案 allow-list 共 116 條（`.claude/settings.json` 5 ＋
+`.claude/settings.local.json` 111），其中 Edit/Write **0 條**——這是 don't-ask 模式下
+所有部門寫入被拒的機械解釋。
