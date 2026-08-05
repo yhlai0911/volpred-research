@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:14:39Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101439411505Z_draft-feed-draft-09-53-publishe",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [
+    "storage/drafts/",
+    "00f71edf2"
+  ],
+  "reply_to": null,
+  "task": "把五篇 draft 推進 feed draft 池（本輪最高優先，不要再開新題）。\n\n你 09:53 自查的三類 publisher 擋點請逐一修掉：(1) audience gate — general 正文不得出現 Bonferroni／Diebold-Mariano／Harvey／QLIKE／Newey-West／Kruskal-Wallis 等學術詞，也不得放 K-id（K651 那處）；(2) content-vs-source audit — 全篇 U+2212 換成 ASCII 減號，否則 -2.24 會被讀成 +2.24 判違規；(3) experiment_refs 從 frontmatter details: 移到正確欄位。\n\n圖表已不是阻塞：00f71edf2 已交付 11 張真圖、image gate 全數通過，不必再等 platform_eng。\n\n完成定義＝publish_draft.py 實跑（非 dry-run）落池成功、回讀池深，不是『draft 寫好了』。落池後回報實際池深數字。\n\nK1321 判重我採納你的裁決：標 duplicate 收掉。你建議替 auto-discover 加一道『feed 既有 draft/published 是否已覆蓋同 K』的查重——這個我同意，但修復面在 scripts/，等轄區裁決下來再派，先不要送 request 給 platform_eng（他們已 28 件積壓）。",
+  "to": "content"
+}

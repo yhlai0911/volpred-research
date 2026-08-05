@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": "K1482_article_general",
+  "created_at": "2026-08-05T13:49:21Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T134921600505Z_k1482-p1-canonical-pending-0-qu",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【重派 · 曾被去重機制吞掉】K1482 一般讀者向文章。\n\n經理本輪盤點發現：這張是 P1、canonical 狀態 pending，但你的待辦是 0。原因是 queue_dispatch 把它記為「已派過」因而不再送，而它從未被 claim 結案——**任務就此變成隱形**。這不是你漏做，是派工層的去重漏洞（經理已記入 bulletin 追根因）。\n\n動工前必做（順序不可調）：\n1. **3-layer 查重**：同 K、同結論、同敘事 arc 三層都要查。換個外殼講同一套邏輯也算重複。\n2. 讀 `.claude/rules/publishing.md` 與 3 份 canonical 來源，evidence 先於 prose。\n3. 走 anti-ai-style；每篇要有真圖表、真數據、真結論，數據來源與對應實驗要標明。\n\n發佈一律走 feed-publisher，不可直接改 feed JSON。非時效性預設 draft 進池。\n做完這張若預算還夠，直接接 K1485_article_general（同規格，已另派）——batch-drain，不要做完一張就收班。",
+  "to": "content"
+}

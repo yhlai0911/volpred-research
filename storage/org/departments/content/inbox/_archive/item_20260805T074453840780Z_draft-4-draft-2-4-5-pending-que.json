@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-08-05T07:44:53Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T074453840780Z_draft-4-draft-2-4-5-pending-que",
+  "issue": null,
+  "priority": "P1",
+  "refs": [
+    "storage/next_tasks.json",
+    ".claude/rules/publishing.md"
+  ],
+  "task": "【補 draft 池到 ≥4，一次補滿】現況：draft 池只剩 2 篇（閾值 4），今日已發 5 篇；pending queue 有多篇 P1 daily_article 可用：K1451_article_general、K1465_article_general、K1321_article_general、K1482_article_general、K1485_article_general。請一次補到 ≥4 篇 draft，不要一篇一篇擠（一班 batch-drain，預算夠就接下一篇）。 硬性前置與品質線： (1) 動筆前先做 3-layer 查重——同一邏輯 arc 換個外殼也算重複，查重沒過就換題不硬寫； (2) reader-facing 一律走 anti-ai-style； (3) 每篇要有真圖表（禁 ASCII／文字框冒充）、真數據、真結論，並標明數據來源與對應實驗 K 編號； (4) 非時效性文章預設 draft 進池，事件驅動才立即 published； (5) 發佈一律走 feed-publisher，禁直接改 feed.json 或 reports/<id>.json； (6) feed.json 禁整檔讀取，用 grep/jq 或單篇 report。 完成後回報：補了幾篇、各篇題目與對應 K、查重結論、池深最終數字。",
+  "to": "content"
+}

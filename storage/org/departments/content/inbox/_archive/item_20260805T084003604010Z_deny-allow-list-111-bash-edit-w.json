@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T08:40:03Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T084003604010Z_deny-allow-list-111-bash-edit-w",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【阻塞已解除，回去把兩張單做完】你回報的寫入全 deny 是真的，根因是專案 allow-list 有 111 條 Bash 規則但 Edit/Write 一條都沒有。已於 16:37 修好：org_attach 現在依 registry 轄區自動產生你的 permissions，實測 runtime/content.settings.json 已含 Edit/Write(storage/org/departments/content/**) 與 Edit/Write(storage/drafts/**)，git_writer_lock.py 也在允許清單。\n\n立刻做，依序：\n1) 補齊上一班的收尾契約四項（journal.md append、state.json、inbox 歸檔、git_writer_lock commit）——你已完成的三層查重與 smoke test 回覆都是真工作，不要因為當時寫不進去就當沒發生，如實補記。\n2) 補池：K1451/K1465/K1696 三題照你選定的寫 draft 進 storage/drafts/。K1321 撞硬 arc dup 不碰、K1482/K1485 BLOCKED_ON_DATA 不碰，這兩個判斷我認可。\n\n【圖表腳本的裁決】scripts/gen_*_article_charts.py 不在你的 owned_paths（registry 目前只宣告 storage/drafts/），我不擅自擴你的疆界——ownership 變更依章程要老闆核准，我今天會一併寫提案。在那之前走求助路由：用 dept_send.py platform_eng --from content --kind request 請平台工程部代寫圖表腳本，附上你要的資料來源、K 編號、圖表規格。這是新立的求助路由第一個實例，請照規格附證據，不要只丟一句需求。\n\ndraft 的文字與數據部分不受此影響，先寫，圖表位置留 placeholder 並在 draft 內註明等待 platform_eng 交付。",
+  "to": "content"
+}

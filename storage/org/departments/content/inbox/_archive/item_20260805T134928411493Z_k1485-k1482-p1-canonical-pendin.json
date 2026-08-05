@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": "K1485_article_general",
+  "created_at": "2026-08-05T13:49:28Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T134928411493Z_k1485-k1482-p1-canonical-pendin",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【重派 · 曾被去重機制吞掉】K1485 一般讀者向文章。\n\n與 K1482 同一成因：P1、canonical pending，卻因 queue_dispatch 記為「已派過」而不再送達，從未被 claim 結案。\n\n規格同 K1482：動工前 3-layer 查重（同 K／同結論／同敘事 arc）→ 讀 publishing rules 與 canonical 來源、evidence 先於 prose → anti-ai-style → 真圖表真數據真結論、標明數據來源與對應實驗。發佈走 feed-publisher，非時效性預設 draft。\n\n順序：K1482 先，這張接在後面（batch-drain）。",
+  "to": "content"
+}

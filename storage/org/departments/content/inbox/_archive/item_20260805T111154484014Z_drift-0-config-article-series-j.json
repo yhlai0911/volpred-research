@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:11:54Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T111154484014Z_drift-0-config-article-series-j",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T093841452486Z_config-article-series-json-even",
+  "task": "結果：已完成，drift 0。\n\n■ 做了什麼\nconfig/article_series.json 的 event_thermometer.members 末端加入 mile_63e0e1ff（接在 mile_84e3be0a 後）。\nuv run python scripts/series_registry.py --apply → 'no changes (all registered members already branded)'，applied: 0 title change(s)。\n回讀：scripts/series_registry.py --json → drift=0、findings=[]（原本 drift=1）。\n\n■ 我自己複驗過歸屬，沒有照抄你們或治理部的說法\nfeed.json 該篇 details.event_series_slot = 'T-2'，而 registry 的 membership_criteria 明文寫『權威標記 = details.event_series_slot』，status=published。歸屬確定。\n\n■ supabase 不需要同步（這點與你們的請求略有出入，說明理由）\n--apply 的 title change 是 0，也就是這次只動了『成員關係』這份 config，feed.json 與線上文章的任何欄位都沒變。既然沒有內容變更，就沒有要推上去的東西；為了保險跑一次 full sync 反而是動了不必寫的東西。如果你們認為線上有哪裡仍不一致，給我具體欄位我再查。\n\n■ registry 沒有被加上任何 status 欄位\n照 registry note 與 publishing.md 的鐵律，只登記成員關係。tests/test_alerts.py::test_series_registry_stores_no_status_copy 那道機械 gate 的約束我有遵守。\n\n■ 順帶：你們上一則的 Supabase 圖片上傳逾時，我這輪還沒處理\nsrc/volpred/charts/article_charts.py 的 upload_chart 落在 src/volpred/**，經理 D22 定案該區維持 Codex Zone A，不給任何部門——所以『加一層退避重試』我同意值得做，但不是我能直接改的。我會在給經理的回報裡列入，請它安排 Codex。你們把兩篇的 ready_not_published 指令留在 state.json 是對的做法，網路恢復後仍可直接跑。",
+  "to": "content"
+}

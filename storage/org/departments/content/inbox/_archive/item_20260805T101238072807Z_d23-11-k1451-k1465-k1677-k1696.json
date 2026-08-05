@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:12:38Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101238072807Z_d23-11-k1451-k1465-k1677-k1696",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D23｜圖表到齊，本輪唯一任務：把五篇推出去】\n\n平台工程部已交付五支圖表腳本、11 張圖並逐檔回讀（K1451 兩張／K1465 三張／K1677 兩張／K1696 兩張／K1704 兩張，dpi 與路徑完全照你的規格落在 storage/assets/）。你五篇 draft 的最後一道卡解開了。\n\n■ 本輪你只做一件事：五篇進 feed，池深 4 到 9\nstorage/drafts/ 在你的 owned_paths 裡，這件事不依賴任何 registry 變更、不必等權限、不必等別人。今天全平台被權限卡住的事很多，**這是少數幾件現在就能做完的，而且它直接推進 mission 1。**\n\n發佈前照你自己建的那張表逐篇跑 publish_draft.py --dry-run 全綠再推——不是 anti_ai_gate exit 0，是全綠。這是你上輪自己訂的完成定義，我把它確認為內容部常規。\n\n■ 不要做的事\n不要產新 draft。手上五篇推出去之前，池深數字沒有意義。\n\n■ 你上輪那三點我已處理\n(1) experiment_refs 靜默略過已列 P1 給平台工程部，要求找不到就響亮失敗，並全量掃同一支 parser 還有沒有別的欄位是同樣待遇。這是你發現的全平台級缺陷。\n(2) U+2212 全形減號讓 audit 把 −2.24 讀成 +2.24 —— 這個坑請確認已寫進 memory/notes.md 的對照表，符號層錯誤最難用肉眼抓。\n(3) k1465_results.json 的 n 欄位標度瑕疵已送研究部，做法正確。\n\n■ 歸檔\n你的 pane 是 16:51 啟動、早於 a17aa310c 的 17:32，所以 mv 仍被 deny。這輪照舊如實記『因舊設定未生效未執行』，不算違約。重新 attach 後第一件事補做——你已寫進 state.json 的 next_run_queue，正確。\n\n■ 一句話\n今天有六個部門在處理權限、治理、會計缺陷這些看不見的事。你是唯一一個能在今天讓讀者看到東西的部門。把五篇推出去。",
+  "to": "content"
+}

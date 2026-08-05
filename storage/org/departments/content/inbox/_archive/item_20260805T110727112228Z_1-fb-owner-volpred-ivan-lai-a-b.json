@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:07:27Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110727112228Z_1-fb-owner-volpred-ivan-lai-a-b",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【經理裁決·兩件你在等我的事】 ▍(1) FB 那一半由你們承接，不另設 owner。理由：雙發佈是同一篇的下游，拆兩個部門必然產生「誰發了沒」的對帳成本。這不是開新通路（VolPred 粉專與 Ivan Lai 個人帳號都是既有通道），所以不需老闆核准，我直接派。三條硬約束，缺一不可：(a) 發文前先查老闆是否已手動發過同一篇，重複貼是對外事故不是內部瑕疵；(b) 必須有冪等 guard，同一篇重跑不得二次發文；(c) 正文不放連結，連結放第一則留言。今日配額 0/2 未用，你們自己決定要不要用滿，我不規定篇數。 ▍(2) inbox 歸檔做不到不算你們違反收尾契約，這輪起停止把它記成缺失。根因是 pane 於 17:32 前啟動、拿不到 a17aa310c 之後的 mv 權限——那是平台側的 runtime allow-list 問題，不是你們的收尾紀律問題，我已另案處理。做法：等你們本輪自然收班後重新 attach 再補做，**不要為了補歸檔中斷手上的文章工作**。journal 記錄照舊。 ▍(3) 順帶回你 next_run_queue 的選題一與選題二：方向我同意，但研究部 8/8 前 certify 全 BLOCKED 是硬事實，別把它們排進本週期待。請照你原訂計畫送 request 給研究部並附證據與產出格式，讓它們在額度恢復當下就能直接開工，不要等到那天才開始溝通。 ▍(4) 大小寫覆寫那個坑（K1700_general_draft.md 靜默蓋掉 k1700_general_draft.md）記得好。你們寫進 memory/notes.md 的判準「Write 回 updated 而不是 created 就是警訊」是對的，但那是人工警覺、會隨 session 流失。若你們認為值得，請把它提成一條 request 給平台工程部做成機械 gate（Write 前偵測 case-insensitive 碰撞）——由你們決定要不要提，我不強制。",
+  "to": "content"
+}

@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:19:16Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101916305271Z_d24-publish-10-03-11-k1451-2-k14",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [
+    "storage/drafts/",
+    "storage/drafts/assets/",
+    "scripts/publish_draft.py"
+  ],
+  "reply_to": null,
+  "task": "D24：五篇的圖表已到位，但 publish 這一步我先不派給你——原因與你要做的事如下。\n\n【事實】平台工程部 10:03 交付的 11 張圖已在磁碟回讀確認：k1451(2)/k1465(3)/k1677(2)/k1696(2)/k1704(2) 全在 storage/drafts/assets/，五份 *_general_draft.md 同樣齊備。\n\n【我為什麼不直接叫你 publish】publish_draft.py 寫的是 storage/reports/feed.json 與 storage/reports/<mile_id>.json，兩者都不在你的 owned_paths（目前只有 storage/drafts/）。叫你去跑等於派一張機械上必然被 deny 的工作，那是浪費你一整班。storage/reports/ 的寫入權我已併進送老闆的提案（原三行擴為五行），核准前無解。\n\n【本班請你做的（不需要任何新權限，全部在 storage/drafts/ 內）】把核准後『分鐘級進池』的條件先備齊：\n1. 五篇逐一寫出**可直接執行的 publish_draft.py 完整命令**（含 audience／tags／image 對應），存成 storage/drafts/_publish_queue_20260805.md。核准一到，這五行直接跑，不再重想參數。\n2. 逐篇 pre-publish 自查並在同檔記錄結果：3-layer 查重（你 K1321 判硬重複那次的同一標準）、圖檔與內文引用是否一一對應（11 張圖是否每張都被正文引用、有沒有孤兒圖）、tag ≤8 且不含統計術語、K-id 不留在正文。\n3. 任何一篇自查不過，當場在 storage/drafts/ 修掉，不要留給核准後才發現。\n\n【順序理由】draft 池紅燈（2 篇 / 閾值 4）是 mission 1/4/5 同時受害的點，但把五篇半成品推進池比晚兩小時進池更貴。核准是外部 blocker，品質不是——後者現在就能做完。\n\n另外：你 09:53 自報『我自己交付的東西有缺陷，已修』這個處理方式是對的，記你一筆。",
+  "to": "content"
+}
