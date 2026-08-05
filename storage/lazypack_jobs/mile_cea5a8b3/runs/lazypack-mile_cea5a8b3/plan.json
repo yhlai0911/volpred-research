@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "title": "公債利差的抖動加進預測，九格裡七格更差（K1696）",
+  "evidence": {
+    "results": {
+      "path": "experiments/K1696/K1696_results.json",
+      "sha256": "12783732cc26bc78b4526729bbae225c612370379a8fa7901c41a30853e3bd59",
+      "label": "K1696 期限利差波動增量預測力檢定結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "現任者是 MOVE，挑戰者是利差的抖動",
+      "alt": "說明利差波動的定義、比較對象與九格設計",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "十年期公債殖利率減兩年期得到期限利差。這份研究看的不是利差本身，是它跳動的幅度。",
+            "跳動大代表債券市場對利率路徑沒把握，直覺上這種不確定性應該外溢到股票。",
+            "但債券市場已經有自己的恐慌指數。問題因此變成：在已經有它的情況下，利差的抖動還能多告訴我們什麼？"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "美股大盤・明天：觀測數",
+          "value": {
+            "source": "results",
+            "path": "panel_sizes.SPY_h1",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "高收益債・明天：觀測數",
+          "value": {
+            "source": "results",
+            "path": "panel_sizes.HYG_h1",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "小型股・明天：觀測數",
+          "value": {
+            "source": "results",
+            "path": "panel_sizes.IWM_h1",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "樣本內九格全部不顯著",
+      "alt": "列出利差波動係數在四個代表性格子的統計量",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "美股大盤・明天",
+          "value": {
+            "source": "results",
+            "path": "insample.SPY_h1.M3_move_plus_tsv.t.3",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美股大盤・未來三個月",
+          "value": {
+            "source": "results",
+            "path": "insample.SPY_h63.M3_move_plus_tsv.t.3",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "高收益債・明天",
+          "value": {
+            "source": "results",
+            "path": "insample.HYG_h1.M3_move_plus_tsv.t.3",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "小型股・未來三個月",
+          "value": {
+            "source": "results",
+            "path": "insample.IWM_h63.M3_move_plus_tsv.t.3",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這四個數字",
+          "body": [
+            "九格的絕對值全部小於二，最大的那格離常用門檻還有距離。",
+            "連正負號都不一致：短期距那一欄多為正，長期距那一欄全為負。方向不穩，本身就是沒有訊號的徵兆。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "樣本外不是沒用，是有害",
+      "alt": "呈現加入利差波動後樣本外損失變差的統計量",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "小型股・明天：檢定統計量",
+          "value": {
+            "source": "results",
+            "path": "oos.IWM_h1.dm_hln_qlike.M3_vs_M2.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "小型股・明天：只有 MOVE 的損失",
+          "value": {
+            "source": "results",
+            "path": "oos.IWM_h1.model_losses.M2.qlike_mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "小型股・明天：再加利差波動的損失",
+          "value": {
+            "source": "results",
+            "path": "oos.IWM_h1.model_losses.M3.qlike_mean",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "判定",
+          "value": {
+            "source": "results",
+            "path": "verdict",
+            "format": {
+              "kind": "text"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "能帶走的一句話",
+          "body": [
+            "想知道股市接下來會不會震，公債利差的抖動不值得多看一眼。它想講的話，債券恐慌指數已經講完，而且講得比較好。",
+            "唯一達到高度顯著的那一格，顯著的方向是變差。"
+          ]
+        }
+      ]
+    }
+  ]
+}
