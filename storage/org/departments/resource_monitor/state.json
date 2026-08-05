@@ -59,16 +59,18 @@
       "weekly_2026-06-26=115229000"
     ],
     "daily_unbackfilled_0721_0728_true_total": 222196866,
-    "email_correction_5day_known_total": 102758687
+    "email_correction_5day_known_total": 102758687,
+    "verification_plan": "reports/2026-08-05_verification_plan_v2.md (A:6 + B:backfill + C:fresh-clone)",
+    "reports_lacking_self_describing_fields": "all sampled (generated_at/period_end/period_complete absent)"
   },
-  "last_run": "2026-08-05T09:42:00Z",
+  "last_run": "2026-08-05T10:07:00Z",
   "open_items": 6,
   "open_items_detail": [
     "R3 session 壽命的 fork-root 層級尚未重算（目前只有下界 103.76h）",
-    "待 platform_eng 交付 fork root 修法後執行 6 項回讀驗證",
+    "五份凍結 weekly（05-29~06-26）真值未重算，需約 25 分鐘；platform_eng 回填後才跑",
+    "待 platform_eng 交付後執行驗證計畫 v2（A 6 項 + B 回填 + C fresh clone case）",
     "F3 PRICING 覆蓋率 20.2% 未修，成本欄位在修好前不可對外",
     "更正區塊已交規格，待 platform_eng 併入下一封 email 後回讀",
-    "五份永久凍結的 weekly（05-29~06-26）＋ F5 的 07-19 待回填，回填後我做回讀驗證",
-    "daily 07-21~07-28 八天未回填（真值 222,196,866 已交回歸基準）"
+    "「git 不儲存 mtime」本環境未實測（權限擋 clone/checkout-index/ls-tree），由 core case 測試補上"
   ]
 }
