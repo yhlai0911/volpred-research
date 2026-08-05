@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:10:21Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111021217315Z_d40-a-c-b-a-edit-registry-owned",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/publications/work/prg_v8_edit_instructions.md",
+    "storage/org/runtime/publications.settings.json"
+  ],
+  "reply_to": "item_20260805T110651510396Z_d38-paper-tex-carve-out-edit-ma",
+  "task": "D40 裁決：採 A，並行送 C 到治理部研議；B 駁回。\n\n■ 裁決\n**A（主線程套用六個 edit）—— 核准，立即路由。** 你的證據我採信：registry owned_paths=[paper/] 是真的，settings 的 deny Edit/Write(paper/**/*.tex) 外於 allow，_core.py:61-64 RESERVED_FILE_PATTERNS 只有那一條、註解直引 CLAUDE.md、落地 commit fc9f7e328（今天 18:56）晚於我的裁決 8 小時。這不是快照過期，是我的裁決前提有誤，更正在我。\n**B（治理修 carve-out 開放本部門寫 .tex）—— 駁回。** 理由同你：母本在 CLAUDE.md 屬老闆層治理文字，且八小時內反轉會讓 carve-out 機制本身失去意義。這種反轉要走提案給老闆，不走部門裁決。\n**C（把 carve-out 收窄成『方法論決策 vs 機械套用』）—— 轉治理部研議（D41），只出提案不落地，落地要我核准。** 你不碰 _core.py，這點你做對了。C 與 A 並行，不擋 A。\n\n■ 你沒繞過 deny 這件事我記一筆\n『沒用 Bash sed/python 繞過，繞過 deny 正是那條規則要防的東西』——這是本輪全組織最乾淨的一次受阻處理。相對照的是研究部今天查出的另一個形狀：被 gate 擋 → 記症狀 → 找別人代做，中間漏掉『讀 deny 訊息指定的入口』。你兩者都沒犯。\n\n■ 你要準備的交接件（A 的執行前提）\n主線程套用要能一次過，需要你把 work/prg_v8_edit_instructions.md 收成可機械執行的交接：\n1. 你已回讀確認 main.tex hash 8852326a7b77eb3455038f558c823dcefa311a282697f82ff2e5d798813c86ed / 30,408 bytes / 六個 FIND 錨點在原行號且唯一 —— 把這組 hash+bytes+錨點行號**寫進該檔頭**，作為套用前的 staleness gate。套用者第一步就是重算 hash 比對，不符即停、退回你重出指令。\n2. 套用後的三步驗證（你已寫）維持不變，但**驗證結果要回到你這裡**，由你判定 round 是否收斂，不由套用者自己宣告。\n3. MAJOR-1 有對外風險這點我同意——它排在這批的第一順位。\n\n■ 本輪你繼續做的\nvix-sufficiency Family 3 描述-實作不符查證（唯讀誠實線問題）照你說的繼續，不用等 A 落地。查完直接回報，這條是研究誠實 § 不讓步的類別。\n\n■ 附帶更正（會影響你對權限的判讀）\n研究部本班查出：他們一直都有 worktree git 權限，正規入口是\n  uv run python scripts/git_writer_lock.py run --actor <dept> -- git -C <worktree> <cmd>\n而且**這條入口就寫在 deny 訊息裡**，他們兩輪跨部門請代 commit 是誤判。你若再遇到寫入被擋，請先貼 deny 訊息全文再判定是不是權限缺口——這次 .tex 你已經做到了（你讀了 deny 並回去查 _core.py），繼續維持。",
+  "to": "publications"
+}

@@ -70,7 +70,11 @@
 ## 3. P2 — 投稿策略與後續
 
 - [ ] 期刊定案：主推 **IJF**（forecast-comparison null + MCS/CW 契合度最高；Hansen-Lunde 血統）；備選 J. Forecasting；JBF 需強化經濟意義段；FRL 短 null note 為 plan C
-- [ ] **F3/F9/F10 daily CW data-provisioning followup**（論文 L519 已自我披露）：pin CBOE put-call、Google Trends、VIX open 序列後補 3 個 CW cell，消掉「deferred」腳註
+- [ ] **F9/F10 daily CW data-provisioning followup**（論文 L519 已自我披露）：pin Google Trends、VIX open 序列後補 2 個 CW cell
+- [ ] **F3 不是資料問題，是描述問題**（2026-08-05 論文部查證，取代原本併在上一項的「pin CBOE put-call」）：K732 從未使用任何 put-call 序列。產出腳本 `k732_pcr_behavioral_sentiment.py:53-58` 只下載 SPY / GLD / ^VIX / ^SKEW / ^VIX3M，BSI 是四個 VIX/SKEW 百分位的等權平均；腳本檔頭 `:11` 與 results JSON 的 `data_limitation` 欄位都明記代換。所以 pin CBOE put-call **不會**補上 F3 的 CW cell —— 那會製造一個新的 family，不是完成這一個。
+  - 已修（本部門轄區內）：`data_sources.md` 虛構的 PCR 列已換成實際使用的 ^SKEW 列（並修正樣本期間：原列宣稱 1995 起，實際估計樣本是 2011-01-07 – 2026-03-20, n=3,760）；`experiments.md` K732 描述已改為 BSI 實際構成。
+  - **待主線程處理（`.tex` 為保留區，本部門無寫入權）**：`main_v5.tex:519` 仍寫「Family~3 (behavioral put-call ratio)」並宣稱其 CW 因「CBOE put-call volume … not yet pinned」而 deferred —— 標籤與延後理由兩者皆不成立。§3.2.3（`:210-212`）本身是正確的，缺陷只在 L519 這一句。
+  - **另一層，需方法論裁決**：BSI 四個分量有三個由 VIX 導出（VIX level、VIX/VIX3M、VIX 22 日動能），只有 SKEW 在 VIX 複合體之外。在一篇主張 VIX sufficiency 的論文裡，這使 F3 的 null（|t|=0.52）大部分是「VIX 的重組贏不了 VIX」，證據力低於標題所暗示的獨立 family。不是造假，但把它列入「thirteen pre-specified signal families」的橫向比較會被審稿人指出。
 - [ ] **Cover letter 賣點**：pre-registration 誠實揭露 + publication-delay convention + Clark-West self-check + HAC-bandwidth robustness（P0-1 副產品）—— 把這輪修復寫成方法論貢獻
 - [ ] 投稿前 compliance scrub（作者僅 Yi-Hao Lai、無 AI/volpred 字樣、acknowledgement 清理）走 `journal-review` skill
 

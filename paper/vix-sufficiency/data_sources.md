@@ -1,6 +1,6 @@
 # Paper 4: Data Sources
 
-**Paper**: Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Eleven Signal Families for Equity Volatility Forecasting and Volatility Timing
+**Paper**: Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Thirteen Signal Families for Equity Volatility Forecasting and Volatility Timing
 
 ---
 
@@ -27,8 +27,8 @@
 | STLFSI4 | FRED | STLFSI4 | 1993-01-01 – 2026-04-17 | Weekly (Fri) | St. Louis Fed Financial Stress Index v4; K504/K1116 |
 | WLEMU | FRED | WLEMUINDXD | 2000-01-01 – 2026-04-17 | Daily | World Uncertainty Index (Europe); K1116/K1117 |
 | Google Trends | pytrends (Google) | 5 fear terms | 2004-01-01 – 2026-04-17 | Weekly | "stock market crash", "recession", etc.; Family 9 (K750) |
-| Put-Call Ratio | CBOE (via yfinance/manual) | PCR | 1995-01-01 – 2026-04-17 | Daily | Behavioral sentiment Family 3 |
-| 10Y–2Y yield spread | FRED | GS10, GS2 | 1993-01-01 – 2026-04-17 | Daily | Yield curve Family 10 (K749) |
+| SKEW | Yahoo Finance (yfinance) | ^SKEW | 2011-01-07 – 2026-03-20 | Daily | CBOE SKEW index; one of the four Behavioral Sentiment Index components of Family 3 (K732). The other three (VIX level, VIX/VIX3M ratio, VIX 22-day momentum) are built from the ^VIX and ^VIX3M rows above. **No put-call series is used**: CBOE `^CPCE` is not retrievable through yfinance, and K732 substituted these VIX/SKEW proxies — see the `k732_pcr_behavioral_sentiment.py` header and the `data_limitation` field of its results JSON |
+| 10Y–2Y yield spread | FRED | GS10, GS2 | 1993-01-01 – 2026-04-17 | Daily | Yield curve Family 8 (K749) |
 
 ---
 

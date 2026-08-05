@@ -4,10 +4,47 @@
 writing and methodology decisions stay in the main thread; this department produces the
 evidence-backed instructions, the main thread applies them).
 
+**Routing**: 經理裁決 D40（2026-08-05T11:10Z）核准選項 A —— 主線程套用這六個 edit。論文部無
+`.tex` 寫入權（`paper/**/*.tex` 是 `_core.py:61-64` 的保留區，deny 外於 allow），本檔即交接件。
+
+---
+
+## 套用前的 staleness gate（第一步就做，不符即停）
+
 **Target file**: `paper/prg-periodic-garch/main.tex`
-**Verified against sha256**: `8852326a7b77eb3455038f558c823dcefa311a282697f82ff2e5d798813c86ed`
-(30,408 bytes). If the file no longer hashes to this, stop — the round is stale and every
-instruction below must be re-checked before use.
+
+```bash
+python3 -c "import hashlib;b=open('paper/prg-periodic-garch/main.tex','rb').read();print(hashlib.sha256(b).hexdigest(),len(b))"
+```
+
+必須輸出：
+
+| 項目 | 期望值 |
+|---|---|
+| sha256 | `8852326a7b77eb3455038f558c823dcefa311a282697f82ff2e5d798813c86ed` |
+| bytes | `30408` |
+
+**不符即停**：round 已 stale，六筆指令全部作廢。**退回論文部重出，不要自行調整 FIND 字串去湊。**
+
+六個 FIND 錨點於 2026-08-05T11:0xZ 由論文部逐一回讀確認：存在、在下列行號、且全檔唯一。
+
+| Edit | 行號 | 內容 | 順位 |
+|---|---|---|---|
+| 1 | `:207` | MAJOR-1，FRL 具名指控 | **第一順位（唯一有對外風險者）** |
+| 2 | `:198` | MAJOR-2，robustness 假斷言 | 2 |
+| 3 | `:39` | MAJOR-3，abstract 未限定 | 3 |
+| 4 | `:118` | MAJOR-4，bit-identical 超出證據 | 4 |
+| 5 | `:111` | MINOR-1，多重檢定家族事後定義 | 5 |
+| 6 | `:195` | MINOR-2，高佔比組漏列 0050.TW | 6 |
+
+Edit 1–4 彼此獨立。行號若有位移但 FIND 字串仍唯一命中，以字串為準（hash gate 已保證全檔未變，
+位移只可能來自本批前序 edit 造成的行數變化——本批六筆都是等行數替換，不應發生）。
+
+## 套用後：驗證結果回論文部，不由套用者宣告收斂
+
+第三節「After applying」的三步驗證維持不變，但**輸出交回論文部判定 round 是否收斂**
+（經理裁決 D40 §2）。特別是第 2 步：`reproduce.py` 若未維持 28/28，**停下來回報，不要調整
+散文去滿足 gate**。
 
 **Round evidence**: `../review_rounds/prg-periodic-garch/v8_review_20260805/`
 (`latex_review.md`, `citation_report.md`, `reproducibility_manifest.md`, `README.md`).

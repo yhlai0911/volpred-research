@@ -15,9 +15,9 @@ These experiments underpin the original VIX sufficiency claim across SPY 1993–
 |---|----------------|-------------|------|
 | K730 | `k730_cross_asset_vol_momentum.py` | Family 1: cross-asset vol momentum (bonds/oil/USD/gold/credit); NULL | `paper/vix-sufficiency/experiments/` |
 | K731 | `k731_vix_term_structure.py` | Family 2: VIX term structure (VIX3M/VIX9D slope); NULL | `paper/vix-sufficiency/experiments/` |
-| K732 | `k732_pcr_behavioral_sentiment.py` | Family 3: behavioral sentiment (PCR, put-call ratio); NULL | `paper/vix-sufficiency/experiments/` |
+| K732 | `k732_pcr_behavioral_sentiment.py` | Family 3: behavioral sentiment index (BSI = equal-weighted percentile ranks of SKEW, VIX/VIX3M, VIX 22-day momentum, VIX level; **no put-call series** — `^CPCE` unavailable via yfinance, see script header and JSON `data_limitation`); NULL | `paper/vix-sufficiency/experiments/` |
 | K734 | `k734_vrp_trading_results.json` | Family 4: variance risk premium as predictor; NULL | `paper/vix-sufficiency/experiments/` |
-| K736 | `k736_calendar_anomaly_vt_results.json` | Family 8: calendar anomalies; NULL | `paper/vix-sufficiency/experiments/` |
+| K736 | `k736_calendar_anomaly_vt_results.json` | Family 11: calendar anomalies; NULL | `paper/vix-sufficiency/experiments/` |
 | K738 | `k738_vt_insurance_cost_benefit_results.json` | VT insurance cost-benefit: 12/VIX drag = 3.49%/yr; CRRA γ≥4.5 welfare-improving | `paper/vix-sufficiency/experiments/` |
 | K742 | `k742_crowding_simulation_results.json` | Family crowding simulation; NULL for crowding premium | `paper/vix-sufficiency/experiments/` |
 | K745 | `k745_pilot_har_rv_results.json` | HAR-RV pilot for realized-vol family; partial context | `paper/vix-sufficiency/experiments/` |
@@ -25,9 +25,9 @@ These experiments underpin the original VIX sufficiency claim across SPY 1993–
 | K746b | `k746b_bitcoin_vix_fixed_results.json` | K746 bug-fix; confirmed NULL | `paper/vix-sufficiency/experiments/` |
 | K747 | `k747_equal_risk_contribution_results.json` | Family 6: equal risk contribution portfolio; NULL for VT improvement | `paper/vix-sufficiency/experiments/` |
 | K748 | `k748_simplicity_premium_results.json` | Simplicity premium analysis; supports parsimony conclusion | `paper/vix-sufficiency/experiments/` |
-| K749 | `k749_yield_curve_vol_results.json` | Family 10: yield curve slope; NULL | `paper/vix-sufficiency/experiments/` |
+| K749 | `k749_yield_curve_vol_results.json` | Family 8: yield curve slope; NULL | `paper/vix-sufficiency/experiments/` |
 | K750 | `k750_google_trends_fear_results.json` | Family 9: Google Trends fear proxies; NULL (OOS DM t=0.669, Harvey FAIL) | `paper/vix-sufficiency/experiments/` |
-| K751 | `k751_overnight_vix_news_results.json` | Family 11: overnight VIX changes; NULL | `paper/vix-sufficiency/experiments/` |
+| K751 | `k751_overnight_vix_news_results.json` | Family 10: overnight VIX changes; NULL | `paper/vix-sufficiency/experiments/` |
 | K752 | `k752_vix_sufficiency_eras.py` | Era stability: VIX–RV R² across 5 eras (CV=0.33); supports time-invariance claim | `paper/vix-sufficiency/experiments/` |
 | K778 | `k778_mem_r2_native.py` | MEM baseline R² comparison | `paper/vix-sufficiency/experiments/` |
 | K780 | `k780_tail_first_es.py` | Tail risk / ES analysis | `paper/vix-sufficiency/experiments/` |

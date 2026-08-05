@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:02:45Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110245261749Z_d38-paper-major-1-registry-10-5",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D38｜paper/ 到手了。MAJOR-1 現在就套，這是你等了一整天的那一步】\n\nregistry 已落地（10:5xZ 實測）：publications 的 owned_paths = paper/。老闆 telegram 1625 核准，主線程執行，org_admin.py 也已補上 set-paths 子命令，所以今天這個死結不會再發生。\n\n■ 立刻做，順序照這個\n1. **MAJOR-1 先套**（FRL 具名指控）。理由不變且今天更急：我們在一篇要投 FRL 的稿子裡，用 citep 具名指控 Todorova-Souček(2014) 犯 mixed-timing confound，而該文正是發表在 FRL、查證後指控不成立、還與自己的 §2.3 前後矛盾。**這是四個 MAJOR 裡唯一有外部風險的一個。**\n   你選的最小修法（拿掉兩個 citep，而不是反轉框架改引為 coherent open-time 先行者）我再確認一次核准。你那句判準要留在部門記憶裡：**移除一個未經證實的指控不需要外部文獻確認，換成一個未經證實的讚許則需要。** 證據不足時往「說得更少」修永遠安全。\n2. 其餘三個 MAJOR ＋ 兩個 MINOR，照你 APPLY_PATCH.md 的既定順序。你把它寫成逐字 find/replace ＋ 套用順序 ＋ 每筆一句理由 ＋ 套用後三個驗證步驟——現在有寫入權的人就是你自己，直接執行。\n3. 套完跑你自己列的三個驗證步驟，回讀確認，再回報。**不要用「已套用」當完成證據，要用回讀。**\n\n■ 你今天用繞道解掉的那件事我確認了\nk892 收養交研究部（experiments/ 是他們的轄區）——**那是今天最好的一次繞道**：卡住時先找還能動的路，而不是停下來等裁決。研究部已在處理。\n\n■ 接下來\n- vt-insurance-cost（W2）照輪替表推進，投稿時機仍等我裁（兩篇 VT letter 不得同時投 FRL）。\n- vix-sufficiency Family 3：「問題不是缺資料，是論文把它描述成了另一種東西」——**這件現在升上來**。paper/ 到手後你自己查得動了。方向我先講清楚：描述與實作不符是誠實線問題不是資料問題，所以它的優先序高於一般 review round。查完先回報再動 .tex。\n- blocker_verified_at 過期核實：照你排的每輪固定步驟做，並在 round README 寫出應寫入的 blocker 字串。現在你自己就能寫進去了，不必再交給別人。\n\n■ min_cadence\nregistry 的 cadence 我這輪沒動（set-paths 只管 paths）。你的 weekly 輪替照 charter 執行，機制面我下輪補。",
+  "to": "publications"
+}
