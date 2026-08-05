@@ -312,7 +312,8 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 ## 自動化與控制面
 
 
-**核心 dispatch 規則（inline 保留；2026-07-21 lane 重構後）**：
+**核心 dispatch 規則**（2026-08-05 起：「誰派工」看上面的組織層那節；這裡是**任務池本身**
+的規則，對經理的 `queue_dispatch` 與 supervisor lane 同樣成立）：
 - **選擇順序機械化**（唯一 owner = `task_urgency` + `continue_task_dispatch` lane 排序）：老闆急件（boss 來源）FIFO 永遠第一 → 時效性任務（看 task_type 不看數字）→ 其餘 P2/P3 + 餓死保護 + 輪替。餓死保護只在剩餘 slots 運作，不可能逐出 lane head。
 - **系統來源禁自封 P1**：入池 gateway 機械夾到 P2（`clamp_machine_priority_inflation`）。P1 只屬於老闆急件與時效任務；手動建時效任務仍寫 `priority: 1`（時效性 / 即時性研究與發文一律 P1，老闆 2026-07-12）。
 - **一班 batch-drain 多任務**（老闆 2026-07-21 硬性指令）：完成一張後預算 ≥12 分鐘就接下一張，收班條件僅「無任務」或「不足以完整收尾一張」；批次單位是完整任務，做一半丟下一班照樣禁止。
@@ -340,26 +341,38 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 - **交易策略研究**：設計階段（backtest/檢定）=`experiment`；上架階段（registry/metrics）=`strategy_lifecycle`
 - **一般文章**（`daily_article`）：**所有非事件驅動**文章都算，包含 research/general/methodology/market-analysis/回顧，不只「補池」
 
-### 組織層：運營經理 ＋ 常駐部門（2026-08-05 起，與既有 dispatch 並行遷移中）
+### 組織層：運營經理 ＋ 常駐部門（2026-08-05 cutover 完成，這就是現行派工模型）
 
-平台正在從「單一引擎按 task_type 派工」改組為「運營經理下轄部門」。組織態全在
-`storage/org/`（git 管理）：部門＝目錄（charter／私有記憶／inbox／journal／state），
-所以重開機、移機後 `git pull` 即完整回復；執行 session 是 ephemeral 的，靠
-`_core.build_brief()` 從磁碟 rehydrate 成該部門。
+**平台由運營經理下轄 7 個部門運作，不再是「單一引擎按 task_type 派工」。**
+舊引擎 `agent_dispatch_tick` 已停用（`config/runtime_schedules.json` 的 `paused_jobs`，
+程式碼未動，搬回 `active_jobs` 即一鍵回滾）。
 
-**現況是並行期，不是切換完成**：舊 dispatch 與 58 個排程 job 全部照跑，未經 parity
-驗證前一個都不關。遷移階段與各階段出口條件見計劃書
-`~/.claude/plans/agents-herdr-agent-ticklish-chipmunk.md`。
+canonical 任務池仍是 `storage/next_tasks.json`（唯一真相），**唯一派工者**是經理跑的
+`scripts/org/queue_dispatch.py`：依 task_type 歸屬把待辦派給擁有它的部門，部門收到的是
+**指標不是副本**，結案一律走 `task_pool_claim`。組織態全在 `storage/org/`（git 管理）：
+部門＝目錄（charter／私有記憶／inbox／journal／state／skills），所以重開機、移機後
+`git pull` 即完整回復；執行 session 是 ephemeral 的，靠 `_core.build_brief()` rehydrate。
 
-- 誰在做什麼：`uv run python scripts/org/org_status.py`、`org_attach.py status`
+**尚未收乾淨的一條**：`dispatch-supervisor` daemon 自帶 croniter（每小時 `:07`），
+與部門從同一個池 claim。互斥靠 task_pool_claim 先到先得，不會雙做，但選工策略有兩套。
+收編中，追蹤 GitHub issue #46 / #9。
+
+- 誰在做什麼：`org_status.py`、`org_attach.py status`；全景 JSON `curl -s localhost:8787/api/org`
 - 派工（**只有經理能指派**；部門之間只能 `--kind request` 且自動知會經理）：
   `scripts/org/dept_send.py <dept> --from manager --priority P1 --task "..."`
-- 開／裁部門（純檔案操作，不改程式碼；屬重大變更需先寫提案給老闆）：`scripts/org/org_admin.py`
+- 歸檔已處理項（**唯一支援方式**，裸 `mv` 會被權限層擋）：`scripts/org/inbox_archive.py <角色> --id <id>`
+- 轄區授權（**不可手改 registry**，會跳過衝突檢查與 bulletin）：`org_admin.py set-paths`
+- 開／裁部門（純檔案操作；屬重大變更需先寫提案給老闆）：`scripts/org/org_admin.py`
 - model／effort **不落地成設定**：部門擁有 task_type，`scripts/model_router.py` 擁有
-  對照，`scripts/org/dept_routing.py` 執行時投影（session 取所屬 task_type 的 effort 天花板）
-- Herdr 駕駛艙（選配觀察層，非骨幹）：`org_attach.py attach` 每角色一個 pane；
-  重開機後一鍵復原 `org_attach.py restore`
+  對照，`scripts/org/dept_routing.py` 執行時投影
+- **時鐘與判斷分離**：`org_manager_tick`（每 10 分，launchd）只跑零成本硬事實閘門；
+  部門投遞每次都跑，經理自帶 30 分鐘下限。老闆訊息不受此限（`org_intake.py` 直達喚醒）
+- **部門做完一張直接接下一張**（batch-drain），收班條件只有「無到期工作」或
+  「context／預算不夠完整收尾下一張」——閘門是地板不是節拍器
 - 部門忙碌（老闆可能正在該視窗協作）時，派工只入 inbox **不打斷**
+- **兩個部門都需要的工具 → `scripts/org/` 的共用 CLI**，不是各自複製；只有自己用的程序
+  → `departments/<dept>/skills/`（自主新增，attach 時以 `--plugin-dir` 載入）
+- 組織通則（部門與經理共讀的行為規範）唯一母本：`storage/org/policy.md`
 
 ### Subagent / Agent Team 使用準則
 
