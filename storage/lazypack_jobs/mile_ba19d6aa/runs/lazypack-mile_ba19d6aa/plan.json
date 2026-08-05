@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "title": "穩定年化七%，三十年真的做得到嗎",
+  "evidence": {
+    "results": {
+      "path": "experiments/member_qa_3e258ba2/member_qa_3e258ba2_results.json",
+      "sha256": "46c4365de7ffb8949600b824401d554cfb093282437d4dd35f1c9802b5ddb412",
+      "label": "美股 152 年滾動 30 年報酬與退休提領路徑模擬結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "回頭看歷史，目標達成過幾次",
+      "alt": "說明樣本期間、觀測月數與滾動三十年視窗數",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "把美股一百多年的含息月資料，每一個月都當成起點，往後推三十年，看看有沒有做到目標報酬。",
+            "同一組視窗再把物價上漲的影響扣掉，看達標比例會不會不一樣。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本期間",
+          "value": {
+            "source": "results",
+            "path": "data.shiller.period",
+            "format": {
+              "kind": "text"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "觀測月數",
+          "value": {
+            "source": "results",
+            "path": "data.shiller.n_months",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個月"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "滾動三十年視窗數",
+          "value": {
+            "source": "results",
+            "path": "component2_rolling_30yr.shiller_nominal.n_windows",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "把通膨算進去，達標率少了將近一半",
+      "alt": "對照名目與實質達標率，以及史上最好最差的三十年",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "名目達標率",
+          "value": {
+            "source": "results",
+            "path": "component2_rolling_30yr.shiller_nominal.fraction_ge_7pct",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "扣通膨後達標率",
+          "value": {
+            "source": "results",
+            "path": "component2_rolling_30yr.shiller_real.fraction_ge_7pct",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "史上最差的三十年",
+          "value": {
+            "source": "results",
+            "path": "component2_rolling_30yr.shiller_nominal.min",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "史上最好的三十年",
+          "value": {
+            "source": "results",
+            "path": "component2_rolling_30yr.shiller_nominal.max",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這四個數字",
+          "body": [
+            "同一批歷史區間，只是把通膨算進去，達標的比例就掉了將近一半。",
+            "出生的年份是運氣，最好和最差的一段年化報酬差了一大截。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "同樣放三十年，結果可能差十幾倍",
+      "alt": "呈現模擬路徑在偏差與偏好兩端的年化報酬與超過目標的比例",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "表現偏差路徑年化",
+          "value": {
+            "source": "results",
+            "path": "component3_sequence_of_returns.block_bootstrap.lump_cagr_p10",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "中位數路徑年化",
+          "value": {
+            "source": "results",
+            "path": "component3_sequence_of_returns.block_bootstrap.lump_cagr_p50",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "表現偏好路徑年化",
+          "value": {
+            "source": "results",
+            "path": "component3_sequence_of_returns.block_bootstrap.lump_cagr_p90",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "路徑超過目標比例",
+          "value": {
+            "source": "results",
+            "path": "component3_sequence_of_returns.block_bootstrap.lump_frac_beat_7pct",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "能帶走的一句話",
+          "body": [
+            "同一套市場、同樣的起手式，你實際走到的那條路徑，落點可能天差地遠。",
+            "規劃退休金的時候，別只看那條最常見的路徑，要準備的是表現偏差的那一端。"
+          ]
+        }
+      ]
+    }
+  ]
+}

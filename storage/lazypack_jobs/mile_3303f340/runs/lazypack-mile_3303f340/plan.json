@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "title": "係數對了，預測卻沒進步：一個測量誤差修正的誠實踩空",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1600/k1600_results.json",
+      "sha256": "b0d3570f5a9be440da0ffe016bb7cc6d471985bc1dc733bdd301befae2d67024",
+      "label": "測量誤差修正模型的低頻代理版檢定結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "這個修正法在修什麼",
+      "alt": "說明基準模型的弱點、修正法的想法，以及本次改用日頻資料代理的限制",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "常用的波動預測模型把「昨天的波動」當成一個固定可信的數字。但那個數字本身是估出來的——有時候乾淨，有時候被少數幾筆離譜跳動污染。",
+            "學界的修正法是：偵測昨天那個讀數的雜訊有多大，雜訊大就自動少信它一點。原始論文用的是日內逐筆資料。",
+            "我們手上只有日收盤價，所以做的是它的低頻代理版。**這一步就決定了結論的邊界**：代理版沒效，不代表原版沒效。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "美股大盤的日報酬筆數",
+          "value": {
+            "source": "results",
+            "path": "assets_results.0.n_returns",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "測試格數",
+          "value": {
+            "source": "results",
+            "path": "verdict_detail.n_cells",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "指紋出現了，準確度沒有",
+      "alt": "對照三項計數：預測改善顯著的格數、修正項係數顯著的格數、兩者同時成立的格數",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "三個數字要一起看",
+          "body": [
+            "第一個數字問：加了修正之後，預測有沒有真的變準？第二個問：修正項本身在資料裡看得見嗎？第三個問：有沒有哪一格是兩件事同時成立？",
+            "判準沿用文獻的嚴格門檻，並非常見的寬鬆標準。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "預測顯著變準的格數",
+          "value": {
+            "source": "results",
+            "path": "verdict_detail.n_dm_harvey_sig",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "修正項係數顯著的格數",
+          "value": {
+            "source": "results",
+            "path": "verdict_detail.n_beta1Q_harvey_sig",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "兩者同時成立的格數",
+          "value": {
+            "source": "results",
+            "path": "verdict_detail.n_joint_support",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "帶走的一句話",
+      "alt": "說明係數顯著與預測改善是兩件事，以及代理版失敗不足以否定原版",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "係數看得見，不等於預測會變好",
+          "body": [
+            "修正項的指紋確實出現在模型裡——它在資料裡不是幻覺。但同一格的預測誤差沒有跟著降下來。",
+            "這兩件事本來就可以分開發生：一個變數在樣本內解釋得動，不保證它在樣本外預測得動。把前者當成後者的證據，是實證研究最常見的過度宣稱。",
+            "還有一句要說清楚：失敗的是**日頻代理版**。原始論文用的是日內逐筆資料，本研究沒有資格評論那個版本的效力。資料撐不起方法時，該退的是宣稱強度，不是把門檻放寬。"
+          ]
+        }
+      ]
+    }
+  ]
+}
