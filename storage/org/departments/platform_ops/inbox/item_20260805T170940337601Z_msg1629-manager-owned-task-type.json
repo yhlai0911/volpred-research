@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T17:09:40Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T170940337601Z_msg1629-manager-owned-task-type",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "維運部剛成立（老闆 msg1629 核准，執行方=manager）。你的轄區：owned_task_types=[platform_ops]，owned_paths=[scripts/, config/]。使命：線上出事的都找你——CI 紅燈、故障、排程、部署、組織骨幹程式（含 scripts/org/ 這套 org 工具本身）。canonical 任務池的 platform_ops 型別現在派給你（已測試 queue_dispatch 正確路由）。platform_eng 會把他們收件匣裡屬於你轄區的項目轉交過來，先處理那批，另外主動查一下 main branch 是否還在紅燈（ci-red-30983363179，15 連續失敗，流程治理 sync drift，README 提過修法是改 config/governance_shared.md 再跑 sync_governance.py --apply）。",
+  "to": "platform_ops"
+}

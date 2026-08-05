@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T17:10:14Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T171014174469Z_canonical-assign-2fdba4c4-74-pla",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "canonical 任務池裡有 assign_2fdba4c4（74 筆 platform_ops pending 逐筆 triage，docs/refactor_plan_token_ops_waste.md §8.2 Layer 2）。這張單原標 main_thread lane，但你部門剛成立、正是這個轄區的 owner，改派給你。組成：dreaming 25 / agent 9 / auto_remediation 8 / compute_queue_followup 6 / alert_remediation_bridge 6 / 其他 20。程序：機械初篩（綁已 resolved incident 的關閉、superseded 壓 tombstone、仍有效的保留並確認 contract 完整）+ 逐筆裁決，不盲刪。完成標準：pending platform_ops 佔比 ≤50%。用 task_pool_claim.py claim --id assign_2fdba4c4 認領。",
+  "to": "platform_ops"
+}

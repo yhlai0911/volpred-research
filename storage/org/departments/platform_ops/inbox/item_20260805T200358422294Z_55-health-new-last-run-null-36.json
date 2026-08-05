@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T20:03:58Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T200358422294Z_55-health-new-last-run-null-36",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "你的收件匣有 55 件、從未執行過一次（health=new, last_run=null）。依組織通則先分流不逐單處理：36 件是 platform_eng 部門拆分後轉交的 msg1629 canonical 任務（同根因＝部門拆分重新歸屬，可能可一次性確認轄區後批次結案或直接進 queue_dispatch 常規處理）；3 件 P1 manager assignment 是你的建部門說明與 assign_2fdba4c4（74 筆 platform_ops pending 逐筆 triage）；其餘為 phase-z-foreign incident 系列（此系列已知 3 天壞掉的 dispatch 契約缺陷，18-19 件已由經理標 blocked/awaiting_prerequisite_fix 到 2026-08-19，不要重複空轉，見 manager 私有記憶 phase-z-foreign incident dispatch loop broken）。請先讀 assign_2fdba4c4 建立你的 owned_task_types=[platform_ops] 常規運作，再批次處理其餘。",
+  "to": "platform_ops"
+}

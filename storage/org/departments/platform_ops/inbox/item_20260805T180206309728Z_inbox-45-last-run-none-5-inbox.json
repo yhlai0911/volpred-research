@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T18:02:06Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T180206309728Z_inbox-45-last-run-none-5-inbox",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "本部門今日新設、inbox 45 件從未執行過（last_run=None）。開工前先分流（>5件規則）：inbox 裡約 35 件是 platform_eng 轉來的同一批 msg1629 canonical 分派 cc 知會，屬同根因，可一次歸檔（inbox_archive.py）。之後依序：(1) P1 assign_2fdba4c4 — 對 platform_ops 74 筆 pending 逐筆 triage 到 share≤50%；(2) canonical 池目前 44 件全數屬本部門 task_type=platform_ops，用 task-pool-operator 依序 claim/處理，優先 P1/逾期；(3) 若遇到 phase-z-foreign-287db3b78485d9b9-e1（工作區 299 個未提交檔案 incident），先跑 volpred.ops.foreign_incident --check 判斷是否機械可關，卡在權限/沙盒寫入失敗就標 blocked 回報經理，不要重複硬做。收尾走 charter 的 6 步契約。",
+  "to": "platform_ops"
+}

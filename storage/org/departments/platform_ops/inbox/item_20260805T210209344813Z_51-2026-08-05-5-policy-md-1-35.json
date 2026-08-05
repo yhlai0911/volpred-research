@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T21:02:09Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T210209344813Z_51-2026-08-05-5-policy-md-1-35",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "本部門首次啟動：收件匣 51 件從未處理過（部門 2026-08-05 才由平台工程部拆分成立）。5 件以上先分流（policy.md 規則），不要逐件做：(1) 35 件 msg1629-canonical-platform-ops 是拆分交接的 canonical 任務指標，同批次可批次認領；(2) 5 件 release_deadlock_repair_202607xx/2026080x 疑似同根因（release 卡死），先查是否同一修法可一次解掉多件；(3) 其餘 assign_/P1 項按到期與優先序排。已知：phase-z-foreign 系列共 23 件已被經理標 blocked(awaiting_prerequisite_fix，until 2026-08-19，根因在 src/volpred/ops/ 需 Zone A 主線程修法)，若收件匣又冒出新的同系列項目直接歸檔不要做。做完先寫 journal 記錄分流判準，再開始清件。",
+  "to": "platform_ops"
+}
