@@ -1,0 +1,18 @@
+{
+  "schema_version": "volpred.gate_history.v1",
+  "entries": [
+    {
+      "sha256": "97a21197a109655fe7172a0b5ca190510b6b1b03e215ccfa024c4d2b18db8ffe",
+      "size_bytes": 28302,
+      "source": "nfp_20260807_t2.py",
+      "blob": "97a21197__nfp_20260807_t2.py",
+      "reason": "Bytes that produced the archived nfp_20260807_t2_results.json (entrypoint sha 97a21197a109). Preserved before ab9b6b18b replaced the local holm_adjust copy with volpred.stats.inference.holm_step_down, which the canonical-stat-helper ratchet requires. The replacement is numerically inert -- every hac_p_holm was recomputed from the archived raw p-values to 0.0 error -- so the results were NOT re-run; this blob exists so a reviewer can diff the gate that produced them against the one on disk.",
+      "preserved_at": "2026-08-05T04:52:46Z"
+    }
+  ],
+  "_readme": [
+    "Pre-change bytes of gate-bearing experiment scripts, preserved BEFORE the edit.",
+    "Written by scripts/preserve_gate_blob.py. Never edit a blob: it is evidence,",
+    "and an edited original is a reconstruction, which is what K1708 was rejected for."
+  ]
+}
