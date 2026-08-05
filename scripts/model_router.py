@@ -114,6 +114,7 @@ TASK_TYPE_TO_TOPOLOGY: dict[str, str] = {
     "platform_ops":       "subagent",   # Claude/Codex claim 制
     "governance":         "subagent",
     "resource_audit":     "subagent",   # 長分析、大量 log 掃描 — 隔離 context
+    "org_manager":        "subagent",  # headless coordinator round：scripts/org/manager_run.py 以獨立 claude -p 進程執行，非主線程 inline
     "lookup":             "inline",
     "verify":             "inline",
     "classification":     "inline",
