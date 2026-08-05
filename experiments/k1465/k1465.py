@@ -149,6 +149,21 @@ def dow_stats(df: pd.DataFrame, col: str) -> pd.DataFrame:
     }).reindex(range(5))
 
 
+def scale_stat_value_cols(stats_df: pd.DataFrame, factor: float) -> pd.DataFrame:
+    """Scale the numeric statistic columns of a dow_stats() table for display
+    (e.g. x1e4 so squared-return magnitudes are readable), while leaving the
+    sample-count column ("n") untouched. dow_stats() bundles "n" together with
+    the value columns in one DataFrame; a blanket `df * factor` on that table
+    corrupts "n" into a meaningless scaled count (K1465 remediation, D40)."""
+    out = stats_df.copy()
+    value_cols = [c for c in out.columns if c != "n"]
+    out[value_cols] = out[value_cols] * factor
+    assert out["n"].equals(stats_df["n"]), (
+        "scale_stat_value_cols must not alter the 'n' (sample count) column"
+    )
+    return out
+
+
 def kw_and_dunn(df: pd.DataFrame, col: str) -> dict:
     groups = [df.loc[df["dow"] == d, col].dropna().values for d in range(5)]
     h, p = stats.kruskal(*groups)
@@ -484,8 +499,8 @@ def main():
         "data_source": "yfinance SPY + ^VIX (auto_adjust=False, split-adj via AdjClose/Close ratio)",
         "sample": desc,
         "dow_descriptive_full": {
-            "r_on_sq_x1e4": (stats_full_on * 1e4).round(4).to_dict(),
-            "r_id_sq_x1e4": (stats_full_id * 1e4).round(4).to_dict(),
+            "r_on_sq_x1e4": scale_stat_value_cols(stats_full_on, 1e4).round(4).to_dict(),
+            "r_id_sq_x1e4": scale_stat_value_cols(stats_full_id, 1e4).round(4).to_dict(),
             "vrp":          stats_full_vrp.round(5).to_dict(),
         },
         "dow_descriptive_oos": {
