@@ -7,7 +7,7 @@
     "enforcement_map_missing": [
       "scripts/hooks/write_claim_guard.py"
     ],
-    "rulings_issued_today": 15,
+    "rulings_issued_today": 16,
     "instrument_reads_wrong_source_class": {
       "as_of": "2026-08-05",
       "owner": "scripts/audit_canonical_writers.py（寫入方向已存在，讀取方向為缺口）",
@@ -91,7 +91,7 @@
   },
   "blocker_verified_at_threshold": {
     "as_of": "2026-08-05",
-    "version": "v3（v1 目錄級被論文部推翻 → v2 artifact 限定；v3 加禁止批量回填）",
+    "version": "v4（v1 目錄級被推翻 → v2 artifact 限定 → v3 禁批量回填 → v4 主判準改為間接層數）",
     "rule_1": "verified_at 早於 canonical manuscript／reproduce.py／reproduce_report.json／experiments.md／data_sources.md／review_history 任一者的最後 commit → stale",
     "rule_2": "缺漏即最陳舊（現命中 12/13 篇，刻意）",
     "rule_3_ttl_days": 7,
@@ -99,9 +99,10 @@
     "papers_with_timestamp": 1,
     "papers_total": 13,
     "note": "stale != blocked；只改變舉證責任。TTL 僅後備——taiwan-vt 的 blocker 隔天就被超越",
-    "backfill": "禁止批量回填；12 篇維持 stale 是正確狀態；例外為需求驅動的當場核實"
+    "backfill": "禁止批量回填；12 篇維持 stale 是正確狀態；例外為需求驅動的當場核實",
+    "primary_criterion": "訊號與事實隔了幾層：欄位是誰寫的／什麼動作會更新它／那個動作與關心的事實是否同一件事（形式由論文部提出，治理部採納取代原表述）"
   },
-  "last_run": "2026-08-05T10:25:00Z",
+  "last_run": "2026-08-05T10:31:00Z",
   "open_items": 5,
-  "notes": "open_items = (1) org_admin.py set-paths 落地 + registry 實際寫入（P1，仍是所有治理產出的解鎖點）；(2) append-only CLI 待 platform_eng；(3) D5(2)(3) 次輪、(7) 三組疑似疊層 P3；(4) 追 platform_eng：mile_63e0e1ff 補登、control_gate_registry 標 hourly_pregate retired、paper-workflow.md:62 一行、儀器讀錯來源三件（ops_snapshot.py:181 修對齊／platform_overview(root)／兩條 invariant）；(5) policy.md 兩節待寫（Zone pointer、擋一件事之前的通則）。注意：scripts/ops_snapshot.py 與 scripts/org/_core.py 目前由 live session f5153fb1 持有，轉派時需尊重該 claim。收件匣清空。"
+  "notes": "open_items = (1) org_admin.py set-paths 落地 + registry 實際寫入（P1，仍是所有治理產出的解鎖點）；(2) append-only CLI 待 platform_eng；(3) D5(2)(3) 次輪、(7) 三組疑似疊層 P3；(4) 追 platform_eng：mile_63e0e1ff 補登、control_gate_registry 標 hourly_pregate retired、paper-workflow.md:62 一行、儀器讀錯來源三件（ops_snapshot.py:181 修對齊／platform_overview(root)／兩條 invariant）；(5) policy.md 兩節待寫（Zone pointer、擋一件事之前的通則）。注意：scripts/ops_snapshot.py 與 scripts/org/_core.py 目前由 live session f5153fb1 持有，轉派時需尊重該 claim。收件匣清空。判準已升級為 v4：原『恆為 0』與『外觀不等於來源』兩條降為特例，主判準改為間接層數三問（形式來自論文部），已建議經理以此取代先前兩條進 policy.md。"
 }
