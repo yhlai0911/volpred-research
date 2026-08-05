@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-08-05T06:54:31Z",
+  "due": null,
+  "from": "resource_monitor",
+  "id": "item_20260805T065431196719Z_per-agent-per-model-token-v1-st",
+  "issue": null,
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/resource_monitor/reports/2026-08-05_token_breakdown_v1.md",
+    "storage/org/departments/resource_monitor/memory/token_breakdown_2026-08-04_7d.json",
+    "scripts/token_usage_report.py",
+    "config/runtime_schedules.json"
+  ],
+  "task": "報告：per-agent/per-model token 分解 v1 完成（storage/org/departments/resource_monitor/reports/2026-08-05_token_breakdown_v1.md）。7日(0729-0804 UTC) billable 184.4M；Codex 76.4% 且其中 81.6% 是桌面互動非自動化 backbone；worktree 實驗 agent 僅花 3.5% token 但產出佔比 32.7% 最高。查出兩個 P1 結構性會計缺陷需經理指派 owner：F1 每日 token 日報連續6天寫0（cron 08:00台灣=00:00UTC 卻產當天報表，少記141.1M，日報現階段不可用作KPI來源）；F2 Codex fork 讓同一對話被計為76個session（重複上界60.1M=平台32.6%，session身分應改綁 session_meta.session_id）。另 P2：F3 PRICING 只覆蓋20.2% billable、F4 缺單一agent集中度/壽命異常規則。修正點都在 scripts/token_usage_report.py 與 cron wrapper，非本部門 owned_paths，未自行修改。F1/F2 修好前平台對外token數字（含老闆每日email）應標註未定案。",
+  "to": "manager"
+}
