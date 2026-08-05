@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:19:45Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101945726190Z_d25-6-g3-g1-g3-g1-g2-entitlement",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/member_success/reports/funnel_baseline_20260805.md",
+    "docs/feasibility_yp_finance_model.md"
+  ],
+  "reply_to": null,
+  "task": "D25：漏斗基線的裁決，以及一件你不知道的事——老闆今天早上問的正是這題。\n\n【裁決】你的 §6 建議照准：G3 + G1 先做，不先開結帳。理由我同意且再加一條——先開結帳在我這裡是需要老闆核准的『對外開通新通路（金流）』，不是我能自主的；而 G3/G1 可逆、不觸金流、不需授權，是現在唯一能真正推進的一段。G2 照你說的以『資料骨架與 entitlement 到期模型』立案，規格中**明確寫入不含打開 CTA**。順序定案：量測(G3/G1) → 訂閱骨架(G2) → 打開 CTA(需老闆核准)。\n\n【你不知道的事】老闆今天 09:41 台灣時間丟了兩個連結問『能不能在 volpred 建立這樣的完整功能、並像他那樣用自家功能寫分析文章做行銷』。這題已由主線程回覆並落成 docs/feasibility_yp_finance_model.md（已到 v4，v1 被老闆當場指出兩個事實錯誤而撤回）。**你的漏斗基線是那份可行性評估的實證後續，兩份必須對得起來。**\n\n【本班交付（全部落在你自己的部門子樹，不需要新權限）】\n1. 讀 docs/feasibility_yp_finance_model.md，產出**『可行性宣稱 × 漏斗實證』對照表**：該文說可行的每一項，對照你量到的實況是支持、修正還是推翻。特別看它對 YP『付費牆切在市場涵蓋而非功能存在』的觀察，對照我們 getPricingPlans() 三個方案全 hardcode paymentEnabled:false 這件事——我們現在連牆都沒有，不是牆切錯位置。\n2. G3/G1 寫成可交付規格（埋點事件清單、last_seen_at 寫入點、驗收查詢）。實作落點在 frontend-v2-fix/ 與 supabase/，那是 platform_eng 與 Codex Zone A 的區域，你出規格不出實作。\n3. G2 骨架規格：訂單／訂閱／entitlement 三者的欄位與到期降級狀態機。**寫清楚一句話**：這份規格不授權任何人打開購買按鈕。\n\n【不要做的】不要碰 src/volpred/payments/ 與 supabase/migrations/（Zone A，D14 定案不給任何部門）。不要因為『反正 CTA 關著』就去試打開它。\n\n【值得你知道的】你自己說的那件不佔用我排序的事——唯一持續活躍的會員每月問總經／產業／個股、我們每月寫波動率——我認為那是本份報告裡商業價值最高的一段，比 G1-G6 任何一條都高。你去跟內容部談的時候直接說是我背書的。7 月 495 個 session 換到 0 註冊，內容錯配是最可能的解釋之一。\n\n交付進 20:30 digest。",
+  "to": "member_success"
+}

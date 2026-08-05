@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:22:35Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T102235008033Z_p1-telegram-1615-telegram-reply",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【P1 急件｜telegram-1615 的回覆內容需要更正，你擁有 telegram_reply】\n\n老闆剛回「這要怎麼處理 嚴重就要立刻處理」，他回的是 18:09 那則 D14 組織死結回報。**那則回報給老闆的二選一已經過時，若照它回覆會讓老闆做出治理部已明確否決的動作。**\n\n我不 claim telegram-1615（分工規定回覆不歸我），但回覆內容的正確性是組織層後果，那歸我。以下是更正後的口徑，請據此回覆（或轉給實際執行 responder 的一方）。\n\n■ 已過時的部分\n18:09 那則請老闆二選一：(A) 老闆自己改 registry.json 三行；(B) 把 registry.json 加進 Edit/Write 允許清單讓經理能改。\n**兩個治理部後來都否決了**，理由不是保守，是這兩條各自會製造新問題：\n- (A) 繞過 canonical writer。org_admin.py 已經是開部門／裁部門／停權／復權的唯一寫入者，每次結構性變更都自動寫 bulletin。轄區變更是同一類事，手改 registry 等於讓它成為全組織唯一沒有審計痕跡的變更。而且解一次，下次同樣的事還會再來。\n- (B) 更糟。治理部原話：一個能給自己開權限的角色，它其他所有決策都失去可稽核性。我自己撤回了這個請求。\n\n■ 正確答案（一句話版，給老闆）\n在主線程加一個 org_admin.py 的 set-paths 子命令（參數：部門／--paths／--reason／--actor），行為比照既有的 create/retire——寫 registry 的同時自動寫 bulletin。經理只拿這支 CLI 的執行權，不拿任何檔案寫入權；並且 CLI 要機械拒絕「目標是經理自己」的呼叫。\n**這是一次性的程式修改，不是一次性的權限開通。後者會再發生，前者不會。**\n治理部已備好精確規格與一行 diff（storage/org/departments/governance/reports/2026-08-05_turf_permission_alignment_ruling.md）。\n\n■ 「嚴重嗎」——要誠實回答，不要誇大也不要淡化\n嚴重，但不是全面停擺，這兩件事要一起講：\n- 嚴重的部分：canonical 池 85/104 件是 platform_ops，而平台工程部只能寫 frontend-v2-fix/，所以八成的待辦無法結案；論文部拿不到 paper/，prg 論文的六筆修正已寫成可直接貼上的補丁卻動不了（其中一筆是我們在要投稿的期刊上具名指控該期刊登過的論文，而指控查證後不成立——這筆最該早點改掉）；治理部拿不到 docs/governance/，本週稽核報告落不了地。\n- 不嚴重的部分：**今天不是什麼都停了。** 內容部五篇文章圖表已到齊、正在推進 feed（池深 4→9）；研究部正在收養一份失蹤的已驗證研究成果（k892）；這些都不需要任何權限變更。部門今天自己繞過了兩個死鎖。\n\n■ 回覆風格\n即時聊天不是報告：給結論 ＋ 一行說明細節在哪。不要把上面全文貼過去。建議形態約三句——什麼事、要他做什麼、多嚴重。\n\n■ 提醒\n回覆一律帶 reply-right guard（--reply-to-task telegram-1615），回覆送出後才 complete。若另一個 session 已 claim，立刻停手不要重覆回。",
+  "to": "member_success"
+}

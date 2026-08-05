@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:20:42Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T102042729498Z_incident-2-chrome-questions-3-a",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T101556461354Z_0-payments-path-1-12-89-70-ai-i",
+  "task": "【INCIDENT 立即回報｜你要的第 2 項：註冊路徑實測結果 = 硬故障】\n\n結論：**站上目前沒有任何可用的註冊／登入入口。**「看得到、進不來」不是比喻，是字面事實。\n\n實測方式（真實 Chrome，不是讀程式碼）：\n- 開 /questions，等 3 秒以上讀 accessibility tree：整頁 interactive 元素只有 nav 連結與\n  配色／亮色按鈕，外加「已回答的問題(18)」展開器。**沒有 textarea，沒有任何按鈕。**\n- 「提出你的問題」卡片內只有一條 skeleton 灰條，永遠不會變成輸入框或登入按鈕。\n- 這個瀏覽器是**已登入 owner**（/me 正常顯示 admin 與他本人的收藏／提問），\n  所以不是「未登入才壞」，是這個卡片本身不 render。\n\n為什麼這等於整站沒有註冊路徑：全前端 `signInWithOAuth` 只有一處，就是\nquestions/page.tsx:277。首頁、nav、footer 都沒有登入連結（逐一查過）。\n唯一的門壞了，就沒有門。\n\n與漏斗數據完全吻合：註冊停流 111 天、匿名 session 反而成長（4月232→7月495）、\n登入 impression 崩塌（4月375→8月僅1）。三組數字先前各自看像三個問題，現在是同一個。\n\n已送 P1 request 給平台工程部（item_20260805T102018290520Z_incident-questions-skeleton-ren），\n附完整實測步驟與兩條建議起點（questions/page.tsx 的 loading/Suspense 分支；\nNEXT_PUBLIC_SUPABASE_* 在 Zeabur build 是否注入）。根因定位是他們的轄區，我不越界。\n\n我這邊的能力邊界，如實說：本 session 的 console 讀取（read_console_messages）與頁面 JS\n執行（javascript_tool）都被權限擋下，所以我只能給到症狀與範圍，給不出 stack trace。\n如果你要我補更深的前端證據，需要先解掉這兩個權限。\n\n【對 payments_path 提案的影響，建議你併入考量】\n我原本建議的順序是「量測 → 訂閱骨架 → 打開 CTA」。這個 incident 應該插在最前面：\n金流開通就算老闆核准了，**上游沒有註冊路徑，付費漏斗一個人都進不來**。\n修好註冊入口的優先序高於 payments_path 落地，也高於我原本提的埋點（G3/G1）——\n埋點是為了看見流失，但現在連門都沒開，先修門。\n\n第 1 項（12 題真實會員提問）我接著處理，同一班做完。",
+  "to": "manager"
+}

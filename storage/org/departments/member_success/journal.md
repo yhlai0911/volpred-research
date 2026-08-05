@@ -1,5 +1,62 @@
 # member_success 工作日誌（append-only）
 
+## 2026-08-05 18:16–19:0x（台灣時間）— 第二班：註冊路徑 incident、12 題稽核、D25、telegram-1615
+
+四件工作項全部處理完並歸檔，outcome=**done**。
+
+### 1. 註冊路徑實測 → INCIDENT（P1，manager 指定「實測不要只讀程式碼」）
+
+**站上沒有任何可用的註冊／登入入口。** 實測真實 Chrome：
+`/questions` 的「提出你的問題」卡片永久停在 skeleton，等 3 秒後讀 accessibility tree，
+整頁 interactive 元素只有 nav 連結與配色／亮色按鈕——沒有 textarea、沒有任何按鈕。
+全前端唯一的 `signInWithOAuth` 就在該卡片內（`questions/page.tsx:277`），
+首頁／nav／footer 皆無登入連結。**瀏覽器當時是已登入 owner 狀態，所以不是「未登入才壞」。**
+
+這把漏斗基線裡三組原本看似獨立的數字接成同一個故障：註冊停流 111 天、
+匿名 session 成長（4月232→7月495）、登入 impression 崩塌（4月375→8月1）。
+已送 platform_eng（`item_20260805T102018290520Z`）與經理（`item_20260805T102042729498Z`）。
+
+能力邊界如實記：本 session 的 `read_console_messages` 與 `javascript_tool` 皆被權限 deny，
+所以只能給症狀與範圍，給不出 stack trace。
+
+### 2. 12 題真實會員提問逐題稽核 → 產出 `reports/member_qa_review_20260805.md`
+
+**結論與指派的預期不同，如實回報了**：12 題在我開工前**早已全部回答且答得不差**，
+指向的 3 篇文章實測全部 HTTP 200，backlog=0。沒有東西可以補答，硬重答會是造工作。
+改成逐題稽核，查到 5/12 有資料完整性缺口（新編 G7–G11）：
+- `answered_at` = NULL 但 status='answered'（2 題）→ **本部門 KPI「會員提問 SLA」目前算不出來**
+- `score` = NULL 但已回答（1 題）；答案欄只放文章指標不放結論（2 題，48 字與 74 字）
+- 12 題中 6 題 score ≤ 9 卻全部被實際做成研究並回答 → score 是個沒有消費者的數字
+
+另查到線上可見缺陷：問答頁「目前排名」唯一那一列是 `testtewtrwqetwqtewqtqwet`
+（archived 測試字串，掛了 4 個多月）。根因是 sticky `current_rank`——排程正常
+（今天 18:00:22 exit 0，回報 `pending_questions: 0` 而 skip），但
+`src/volpred/ops/questions.py:1640` 的 rerank 只重寫 active 列，archived 列名次永不清。
+屬流程不屬資料，已送 platform_eng，未自行改那一列。
+
+### 3. D25 → 產出 `reports/D25_feasibility_vs_funnel_20260805.md`
+
+對照 `docs/feasibility_yp_finance_model.md` v4，10 條宣稱 × 漏斗實證：
+**該文對「該做什麼」的判斷一條都沒推翻**，要修正的全部集中在「我們現在站在哪裡」——
+會員系統有 schema 沒有人、金流有簽章沒有帳、登入牆有設計討論沒有入口。
+經理特別點的付費牆那條，結論比預期更硬：我們不是牆切錯位置，是連牆都沒有、
+而牆前那道門也打不開。建議順序改為 修門 → 量測(G3/G1) → 骨架(G2) → 立牆(需老闆核准)。
+另交付 G3/G1 規格（5 個埋點事件 + last_seen_at 寫入點 + 驗收查詢）與 G2 骨架規格
+（orders/subscriptions/entitlement 推導 + 到期降級狀態機 + 四項不需打開 CTA 的驗收）。
+「不授權任何人打開購買按鈕」已在文件開頭與結尾各聲明一次。未碰 Zone A。
+
+### 4. telegram-1615（P1 急件，telegram_reply 是本部門 task_type）
+
+claim → start → 回覆（msg 1620）→ complete 全程走完，回覆帶 `--reply-to-task` guard。
+採經理的更正口徑：正解是主線程幫 `org_admin.py` 加 `set-paths` 子命令
+（一次性程式修改，非一次性開權限），不採 18:09 那則已被治理部否決的二選一；
+並如實分嚴重面與未停面，未誇大也未淡化。
+
+### 本班方法紀律
+
+所有數字來自 Supabase 實查與真實瀏覽器實測；時間戳皆取自實際 `date`（上一班的教訓）。
+KPI「會員提問 SLA」因 `answered_at` 可為 NULL 而標為不可計算，**沒有編數字**。
+
 ## 2026-08-05 16:57–17:40（台灣時間）— 首班：會員漏斗基線
 
 - 工作項：`item_20260805T084657115840Z_inbox-0-noop-97-pending-78-plat`（manager, P2）

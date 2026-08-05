@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:30:15Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T103015237128Z_d25-storage-org-departments-mem",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T101945726190Z_d25-6-g3-g1-g3-g1-g2-entitlement",
+  "task": "【D25 交付完成】storage/org/departments/member_success/reports/D25_feasibility_vs_funnel_20260805.md\n三項要求全數交付，趕得上 20:30 digest。\n\n■ 1. 可行性宣稱 × 漏斗實證對照表（10 條）\n讀完 feasibility_yp_finance_model.md v4 後，先講最重要的一句：\n**該文對「該做什麼」的判斷，我一條都沒有要推翻。** 人話化、切範圍不切功能、\n六個工具走 YP 算不出來的風險面——漏斗數據都不反對。\n要修正的全部集中在「我們現在站在哪裡」：該文反覆用「已有」「已建好」「只要」，\n而實證是——會員系統有 schema 沒有人、金流有簽章沒有帳、登入牆有設計討論沒有入口。\n這不是它寫錯，是它成文時沒人量過漏斗，那正是本部門今天補上的。\n\n你特別點的那條（YP 付費牆切在市場涵蓋而非功能存在），結論比你預期的更硬：\n**我們的問題不在牆切在哪裡——我們連牆都沒有，而且牆前面那道門也打不開。**\n所以定案順序我建議再插一段：修門(incident) → 量測(G3/G1) → 訂閱骨架(G2) → 立牆(CTA，需老闆核准)。\nA0（風險預報改人話）可與「修門」並行，它不動引擎也不需要任何權限。\n\n需要你知道的三條實質修正（都會影響你送老闆的提案）：\n- §7.3「金流已建好，關著是老闆 7/04 的指示」→ 只有一半真。簽章 adapter 在，但\n  production caller 為零、Supabase 無 orders/subscriptions/entitlements 任何一表、\n  role 無到期概念。「關著」≠「開了就能收錢」，中間缺整個落地與對帳層。\n- §6 B1「會員系統已有」→ schema 意義上有，運作意義上等於沒有（6 人、停流 111 天、3 人註冊後從未讀過文章）。\n- §4.5「A0 做完就能看出有沒有差別」「還是沒人回訪就別做了」→ **目前兩者都不可觀測**\n  （last_seen_at 6/6 NULL、零埋點）。A0 現在是不可證偽的，這正是 G3/G1 要先做的理由。\n\n■ 2. G3/G1 規格\nG1 寫入點、節流、失敗不阻塞渲染 + 可直接跑的驗收查詢。\nG3 五個事件（pricing_viewed / plan_cta_clicked / signup_prompt_shown / signup_started / signup_completed）。\n其中 signup_prompt_shown 我要特別說明它為什麼值得單獨一條：**今天這個 incident 的症狀\n正是「入口從未 render」，而我們是靠人工開瀏覽器才發現的。** 有這個事件，同類故障會在\n數據上自己現形（連續數日為 0 = 入口壞了），不必再等下一次有人剛好去點。\n也附了依賴聲明：這三個事件在門修好前埋了也不會有資料，G3 與 incident 修復要同一批驗收，\n不可分開宣告完成。\n\n■ 3. G2 骨架規格\norders（append-only，provider_trade_no 唯一 = 冪等機械保證）／subscriptions（週期與到期真相）／\nentitlement 改為由 subscriptions 推導（profiles.role 降級為身分，不再表達付費權利），\n含到期降級狀態機與四項驗收——**四項全部不需要打開 CTA 就能驗完**。\n「這份規格不授權任何人打開購買按鈕」在文件開頭與「明確不做」各聲明一次，如你要求。\n未碰 src/volpred/payments/ 與 supabase/migrations/（Zone A）。\n\n■ 內容部那件，我已經去談了，也照你說的講明是你背書的\n送出時我還沒收到你這則，所以背書那句沒帶到，我會在下一次往來補上。\n談的方式是：不建議他們改題材，而是複製已經成功的接法——第 11、12 題「30 年年化 15%／7%」\n用近百年美股 17,199 個滾動視窗回答，既是會員要的框架又落在我們的量化強項，score=82 是最高分。\n附了三個具體選題建議（產業概念股≠alpha 的一般化檢定／敘事型目標價機率化／「我該問什麼問題」系列）。\n查重我沒替他們做，那是他們的職權。\n\n■ 另外本班已完成、你可能還沒收到的兩件\n- telegram-1615 已用你的更正口徑回覆老闆（msg 1620），claim→start→回覆→complete 全程走完\n- 12 題真實提問稽核完成：全部早已回答且答得不差、3 個文章連結實測全活、backlog=0；\n  但 5/12 有資料完整性缺口（G7-G11），其中 answered_at 可為 NULL 導致\n  **本部門 KPI「會員提問 SLA」目前算不出來**，我不會編一個數字給你",
+  "to": "manager"
+}

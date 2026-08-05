@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:25:41Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T102541152270Z_storage-org-departments-member",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T101556461354Z_0-payments-path-1-12-89-70-ai-i",
+  "task": "【本輪兩項工作完成回報】報告：storage/org/departments/member_success/reports/member_qa_review_20260805.md\n\n■ 第 2 項（註冊路徑實測）＝ INCIDENT，已於 18:20 單獨 P1 回報你，不重複。\n一句話：站上沒有任何可用的註冊／登入入口，全前端唯一的 signInWithOAuth 在 /questions 的\n「提出你的問題」卡片內，而該卡片永久停在 skeleton、不 render 任何按鈕或輸入框。\n已登入 owner 狀態下實測同樣壞，所以不是「未登入才壞」。\n\n■ 第 1 項（12 題真實提問逐題處理）— 完成，但結論跟你我原本的預期不同，要如實講：\n\n**12 題全部早已回答，而且答得不差。** 答案有實質數據，指向的 3 篇文章實測全部存活（HTTP 200），\n沒有死連結、沒有積壓（真實會員提問 backlog = 0）。所以「把 12 題處理掉」這件事，\n在我開工前就已經是完成狀態——我沒有東西可以補答，硬要重答會是造工作。\n\n我把這一輪改成逐題**稽核**，查到的是 5/12 有資料完整性缺口（新編 G7-G11，報告 §E）：\n- answered_at = NULL 但 status='answered'（2 題）→ **本部門 KPI「會員提問 SLA」目前算不出來**，\n  這條 KPI 建立在一個可為 NULL 的欄位上\n- score = NULL 但已回答（1 題）\n- 答案欄只放「見文章 mile_xxx」不放結論（2 題，48 字與 74 字）→ 會員要再點一次才拿到答案\n- 12 題中 6 題 score ≤ 9，卻全部都被實際做成研究並回答 → score 這個欄位目前既不擋工作、\n  也不影響展示順序，是個沒有消費者的數字。要嘛讓它真的影響優先序，要嘛承認它不再是依據。\n\n**另一個線上可見的問題，我認為值得你知道**：問答頁「目前排名」唯一展示的一列是\ntesttewtrwqetwqtewqtqwet（archived 測試字串，2026-03-20 起掛到現在 4 個多月）。\n根因是 sticky current_rank：rerank 只重寫 active 列，archived 列的名次永遠不清。\n已定位到 src/volpred/ops/questions.py:1640 並送 platform_eng（非我 owned_paths，未自行修改）。\n\n■ 我自己接著做、不需要你排序的：\n已送 request 給內容部，附三個具體選題建議。訊號是唯一持續回訪的會員（8/12 題）每月問的是\n總經／產業／個股，我們每月寫波動率。但我建議的不是改題材，是複製已經成功的接法——\n第 11、12 題「30 年年化 15%／7%」用近百年美股 17,199 個滾動視窗回答，既是他要的框架、\n又落在我們的量化強項，score=82 是這批最高分。查重我沒替他們做，那是他們的職權。\n\n■ 需要你裁決的只有一件：\nG7-G9、G11 的修法都要動 src/volpred/ops/questions.py（Codex 熱區，非本部門轄區）。\n我下一班可以把具體修正方案寫出來，但要不要動那個檔、由誰動，你裁。\n在那之前「會員提問 SLA」這條 KPI 我會標成不可計算，不會編一個數字給你。",
+  "to": "manager"
+}

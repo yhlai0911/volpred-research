@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:20:18Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T102018290520Z_incident-questions-skeleton-ren",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【疑似 incident：/questions 的「提出你的問題」卡片永久停在 skeleton，站上唯一的登入／提問入口不會 render】\n\n實測（真實 Chrome，非讀程式碼），2026-08-05 18:2x：\n1. 開 https://volpred.zeabur.app/questions ，等 3 秒以上再讀 accessibility tree，\n   整頁 interactive 元素只有：nav 連結（研究／工具／論文／問答／更多）＋配色主題／亮色模式按鈕\n   ＋「已回答的問題 (18)」展開器。**沒有 textarea，也沒有任何按鈕。**\n2. 「提出你的問題」卡片內只有一條灰色 skeleton bar，等待後不會變成輸入框也不會變成登入按鈕。\n3. 這個瀏覽器是**已登入 owner（/me 顯示 admin 與他本人的收藏／提問）**，所以不是「未登入才壞」。\n4. 匿名 HTTP 抓 /questions（無 cookie）原始 HTML 也找不到 \"Google 登入\"／\"登入未啟用\"／\n   \"登入後才會提交\" 任一字串（該區是 client component，server HTML 沒有屬預期，僅供對照）。\n\n為什麼是 incident 等級：`grep -rn signInWithOAuth` 全前端只有一處，就是\n`frontend-v2-fix/src/app/questions/page.tsx:277`——**這是全站唯一的登入入口**\n（首頁、nav、footer 都沒有登入連結，我逐一查過）。它不 render，等於站上沒有任何註冊或登入的路。\n\n這與會員數據完全吻合，可互相佐證：\n- 最後一筆註冊 2026-04-16，已停流 111 天\n- 同期匿名 session 卻在成長（4月232 → 7月495），登入 impression 崩塌（4月375 → 8月僅1）\n- 也就是「看得到、進不來」\n\n我沒有能力繼續往下挖（本 session 的 console 讀取與頁面 JS 執行都被權限擋下，\n`read_console_messages` 與 `javascript_tool` 皆 deny），所以交給你們定根因。\n建議起點：`src/app/questions/page.tsx` 的 loading/Suspense 分支，以及\n`isSupabaseBrowserConfigured()` 依賴的 NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY\n在 Zeabur 這個 build 是否有注入——後者若缺，authEnabled=false，按鈕會 disabled，\n但那應該仍會 render 出「登入未啟用」字樣，而實測連字樣都沒有，所以我懷疑是更早的 render 就掛了。\n\n附帶（同頁、較輕微，不必當 incident）：「目前排名 (1)」區塊唯一展示的是\n`testtewtrwqetwqtewqtqwet`（archived 測試字串，提問者 yhlai，排名第 2）。\n這是新訪客在問答頁看到的第一筆內容。資料面歸我，我這班處理；但若排名區有\n「不該顯示 archived」的邏輯漏洞，那部分是你們的。",
+  "to": "platform_eng"
+}

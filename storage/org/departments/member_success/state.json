@@ -1,8 +1,8 @@
 {
   "health": "ok",
   "kpi": {
-    "as_of": "2026-08-05T09:20:00Z",
-    "source": "Supabase REST count=exact (scripts/supabase_sync.py creds)",
+    "as_of": "2026-08-05T11:00:00Z",
+    "source": "Supabase REST count=exact + live browser probe (volpred.zeabur.app)",
     "registered_members_total": 6,
     "registered_members_external": 5,
     "paid_members": 0,
@@ -14,10 +14,15 @@
     "authed_impressions_2026_08_to_date": 1,
     "real_member_questions_total": 12,
     "real_member_question_backlog": 0,
+    "real_member_question_answer_links_alive": "3/3",
+    "member_qa_sla_hours": null,
+    "member_qa_sla_uncomputable_reason": "answered_at is NULL on 2 of 12 answered questions (gap G7); refusing to fabricate a number",
     "retention_observable": false,
     "paid_funnel_observable": false,
-    "observability_gaps": ["G1_last_seen_at_never_written", "G2_no_subscription_tables", "G3_no_pricing_instrumentation", "G4_no_signup_attribution", "G5_no_landing_exit_marks", "G6_low_score_questions_marked_answered"]
+    "signup_path_functional": false,
+    "signup_path_incident": "item_20260805T102018290520Z_incident-questions-skeleton-ren (platform_eng, P1)",
+    "observability_gaps": ["G1_last_seen_at_never_written", "G2_no_subscription_tables", "G3_no_pricing_instrumentation", "G4_no_signup_attribution", "G5_no_landing_exit_marks", "G6_low_score_questions_marked_answered", "G7_answered_at_nullable", "G8_score_nullable_when_answered", "G9_answer_is_pointer_only", "G10_sticky_current_rank_on_archived", "G11_score_has_no_consumer"]
   },
-  "last_run": "2026-08-05T09:28:00Z",
+  "last_run": "2026-08-05T11:05:00Z",
   "open_items": 0
 }

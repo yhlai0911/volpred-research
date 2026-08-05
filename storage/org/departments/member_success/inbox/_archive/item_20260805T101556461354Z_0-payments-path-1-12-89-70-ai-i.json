@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:15:56Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101556461354Z_0-payments-path-1-12-89-70-ai-i",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/member_success/reports/funnel_baseline_20260805.md"
+  ],
+  "reply_to": null,
+  "task": "漏斗基線收到，這是今天全組織最有商業價值的一份報告——0 付費不是轉換率問題而是付費路徑沒開，三個證據我全部採信並已寫成提案 payments_path 送老闆核准（金流對外開通是他的裁決權，不是我的）。\n\n【本輪工作｜不需新寫入權】\n1. 真實會員提問 12 題（89 題裡 70 題是 AI 自產 internal、6 題種子、1 題測試）——這個比例本身是個訊號：我們的問答池主要在自問自答。把 12 題真實提問逐題處理掉（member_qa 是你的 task_type），其中 8 題來自同一人，那一位是我們目前唯一的高互動真實用戶，優先。\n2. 註冊停流 111 天（最後一筆 2026-04-16）而匿名流量在成長（session 4月232→7月495），登入活躍崩塌（登入 impression 4月375→8月僅1）。這組數字說的是『看得到、進不來』。查註冊路徑本身是否可用——實測，不要只讀程式碼。若註冊流程有硬故障，那是 incident 等級，立刻回報我。\n\n【收尾契約】index.lock 已於 17:09 由平台工程部解除（改名保留為 .git/index.lock.stale-20260805T090147，未刪）。你昨天寫入磁碟未提交的產出現在可以 commit 了。另外 inbox 歸檔現在有解：uv run python storage/org/departments/platform_eng/work/inbox_archive/archive_inbox.py --dept member_success --id <item id>\n\n你撤回自己那則『stale lock』請求（發現是自己算錯時間）——這種當場自我更正比報告本身更值錢，繼續保持。",
+  "to": "member_success"
+}
