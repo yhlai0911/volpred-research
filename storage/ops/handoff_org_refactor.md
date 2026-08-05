@@ -53,11 +53,21 @@ curl -s localhost:8787/api/org | jq .               # 組織全景（含 blocker
 
 ## 未完成（按建議順序）
 
-1. **老闆 Telegram 訊息即時喚醒經理** — 現在進 manager inbox 但要等下一班 tick
-   （最多 30 分）。`scripts/org/org_intake.py` 有明講「未接線」的樁。
-   老闆定過的規矩是急件直達，這條該補。
-2. **GitHub Issues 入池** — `org_intake.py --github` 是 no-op。工作登記處是 Issues，
-   但經理讀不到。
+1. ~~**老闆 Telegram 訊息即時喚醒經理**~~ — **完成 2026-08-05 18:10**。
+   `telegram_poll._handle_update` 收到訊息當下 detached 呼叫 `org_intake.py`：
+   先寫 manager/inbox（id `boss_telegram_<msgid>`，daemon replay 冪等），再走
+   `manager_tick.wake_manager` —— 與 tick 同一條喚醒路徑，不是第二套。
+   **分工明寫在那件收件匣裡**：聊天回覆歸 responder 的 canonical 任務
+   （reply-right guard 擋第二次回覆），經理只處理組織層後果。
+   喚醒失敗只賠延遲不賠訊息（item 先落地、tick 兜底），原因寫進 receipt。
+2. ~~**GitHub Issues 入池**~~ — **完成 2026-08-05 18:10**。
+   `org_intake.py --github --apply` 掛在 `org_manager_tick` wrapper 最前面。
+   `dept:<name>` label = 入池 opt-in（7 個 label 已建），任務 id `gh-<number>`、
+   source `github_issue`、回寫一則 issue comment。**只入 canonical 池，不建第二個
+   佇列**，之後照常由 `queue_dispatch` 派成指標。歸屬一律查 registry 不猜：
+   多 task_type 的部門需要 `[task_type]` 標題前綴；路由不了的變成一件會自己消失的
+   P3 裁決請示，不是永遠 fire 的 gate。首件實測 #54 → `gh-54` → platform_eng。
+   剩下 25 件開啟中的 issue 沒有 dept 標籤 = 仍是純規劃層，要不要變 runtime 由經理裁。
 3. **部門 headless 執行** — 部門目前只能在 cockpit pane 工作。關掉 Herdr 後經理仍
    headless 運作，部門不會。真正 24/7 無人值守目前只有經理那一層。
 4. **部門派 subagent** — 目前無授權。建議走 capability 宣告（同 computer_use），

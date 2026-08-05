@@ -33,6 +33,14 @@ runtime task links the two with optional canonical `issue_ref="#<number>"`:
 
 - create through `uv run volpred ops assign --issue-ref '#37' ...` or the
   `volpred.ops.next_tasks` canonical ingress;
+- or label the issue `dept:<name>` and let `scripts/org/org_intake.py --github
+  --apply` register it (it runs at the head of every `org_manager_tick`).  The
+  label is the opt-in: an unlabelled issue stays purely planning work.  Task id
+  is `gh-<number>`, source `github_issue`, and the mirror comments the task id
+  back onto the issue once.  Ownership comes from the org registry, never from a
+  guess — a department owning several `task_types` needs a `[task_type]` title
+  prefix, and an issue that cannot be routed becomes one self-terminating P3
+  ruling request in the manager's inbox instead of a gate that fires forever;
 - a successful local claim best-effort adds the current GitHub user as assignee;
   malformed refs or unavailable `gh` are reported but never roll back the local
   claim;

@@ -61,5 +61,9 @@
 
 - 可寫：registry、bulletin、任何部門 inbox、manager 自身子樹
 - 不可寫：部門的 journal / state / memory（那是部門自己的收尾契約義務）
-- boss I/O 傳輸層沿用既有 telegram/gmail 通道；boss 訊息不等 tick，走既有
-  request_fire 即時喚醒
+- boss I/O 傳輸層沿用既有 telegram/gmail 通道；boss 訊息**不等 tick**：
+  `telegram_poll` 收到訊息當下就把它寫進你的收件匣並立刻喚醒你（`org_intake.py`
+  → `wake_manager`，與 tick 同一條喚醒路徑）。
+- **老闆訊息的分工**：聊天回覆歸既有 responder（收件匣那件會寫出對應的 canonical
+  任務 id），**你不要在 Telegram 上再回一次**。你的職責是那則指令的組織層後果：
+  優先序、派工、推翻既有裁決、開新工作。沒有組織層後果就記一行歸檔。

@@ -125,7 +125,7 @@ def evaluate_gate(root: Path, *, check_github: bool = False,
             reasons.append("manager state.json unreadable")
 
     if check_github:
-        reasons.extend(_github_dept_labels())
+        reasons.extend(_github_dept_labels(root))
 
     reasons.extend(_unanswered_requests(root, registry))
     reasons.extend((platform_facts or _platform_facts)())
@@ -229,21 +229,20 @@ def _patrol_due(root: Path, now: datetime) -> list[str]:
     return []
 
 
-def _github_dept_labels() -> list[str]:
-    import subprocess
+def _github_dept_labels(root: Path) -> list[str]:
+    """Only the tracker work the org has not absorbed yet.
 
-    gh = "/opt/homebrew/bin/gh"
+    The first version reported every open `dept:*` issue, which would have kept
+    the gate firing forever: an issue stays open long after its runtime task is
+    done (`issue_disposition=contained` is the default). Intake owns the
+    issue→pool mapping, so it is also the only thing that can say what is still
+    outstanding — asking it beats keeping a second copy of that judgement here.
+    """
     try:
-        out = subprocess.run(
-            [gh, "issue", "list", "--state", "open", "--json", "number,labels", "--limit", "100"],
-            capture_output=True, text=True, timeout=30, check=True,
-        ).stdout
-        hits = [
-            str(i["number"]) for i in json.loads(out)
-            if any(lbl["name"].startswith("dept:") for lbl in i.get("labels", []))
-        ]
-        return [f"github issues with dept:* labels: {', '.join(hits)}"] if hits else []
-    except Exception as exc:  # gh missing/offline must not break the gate
+        from org_intake import unmirrored_github_issues  # noqa: PLC0415 — avoids an import cycle
+
+        return unmirrored_github_issues(root)
+    except Exception as exc:  # noqa: BLE001 — gh missing/offline must not break the gate
         return [f"github check unavailable ({type(exc).__name__}) — treated as no-signal"]
 
 

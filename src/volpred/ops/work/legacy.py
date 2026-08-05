@@ -89,6 +89,11 @@ _NEXT_TASK_SOURCE = {
     "reap_orphan_deliverables_held_ttl": "schedule",
     "compute_queue_followup": "schedule",
     "question_ops_maintain": "schedule",
+    # Issue-tracker ingress (scripts/org/org_intake.py --github, 2026-08-05).
+    # A `dept:*` label is a human planning act, but the materialization is
+    # mechanical, so this is agent ingress and not user urgency: an issue must
+    # not inherit boss-級 P1 just by being labelled.
+    "github_issue": "agent",
     # Reviewed production ingress labels captured by the owner-bound v4
     # shadow ledger on 2026-07-27.  Keep exact values: prefixes would let an
     # unreviewed producer inherit queue authority.

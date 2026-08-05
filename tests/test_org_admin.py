@@ -664,3 +664,298 @@ def test_everyone_is_told_where_the_org_panorama_is(org_root: Path) -> None:
         assert "localhost:8787" in text
     assert "api/org" in dept, "agents must be pointed at the JSON, not the HTML"
     assert "不要當作沒有阻塞" in dept, "a dead dashboard must not read as an all-clear"
+
+
+# --- intake: the boss's door ----------------------------------------------
+
+@pytest.fixture()
+def captured_wake(monkeypatch):
+    """Record wake calls instead of spawning a coordinator."""
+    import manager_tick
+
+    calls: list[tuple] = []
+
+    def _fake(root, reasons):
+        calls.append((root, reasons))
+        return {"woken": True, "via": "test"}
+
+    monkeypatch.setattr(manager_tick, "wake_manager", _fake)
+    return calls
+
+
+def test_boss_message_wakes_the_manager_immediately(org_root: Path, captured_wake) -> None:
+    """急件直達: the boss does not queue behind a 30-minute tick."""
+    import org_intake
+
+    result = org_intake.record_boss_message(org_root, "研究部先停，把 draft 池補起來",
+                                            msg_id="1701", canonical_task_id="telegram-1701")
+
+    assert result["created"] is True
+    assert result["wake"]["woken"] is True, "the boss's instruction must not wait for the tick"
+    assert len(captured_wake) == 1
+    assert (org_root / "manager" / "inbox" / "boss_telegram_1701.json").exists()
+
+
+def test_boss_item_names_the_reply_owner(org_root: Path, captured_wake) -> None:
+    """Two handlers, one message: the split has to be stated, not assumed."""
+    import org_intake
+
+    org_intake.record_boss_message(org_root, "進度如何", msg_id="1702",
+                                   canonical_task_id="telegram-1702")
+    item = json.loads((org_root / "manager" / "inbox" / "boss_telegram_1702.json").read_text())
+
+    assert "telegram-1702" in item["task"], "the coordinator must know which task owns the reply"
+    assert "不歸你" in item["task"] and "claim" in item["task"], (
+        "without an explicit split the coordinator answers the boss a second time"
+    )
+    assert item["priority"] == "P1" and item["from"] == "boss"
+
+
+def test_boss_message_without_an_owner_puts_the_reply_on_the_manager(org_root, captured_wake):
+    """A hand-filed instruction has no responder behind it — say so."""
+    import org_intake
+
+    org_intake.record_boss_message(org_root, "手動轉述的指令", msg_id="1703")
+    item = json.loads((org_root / "manager" / "inbox" / "boss_telegram_1703.json").read_text())
+
+    assert "回覆責任在你" in item["task"]
+
+
+def test_replayed_boss_message_does_not_wake_twice(org_root: Path, captured_wake) -> None:
+    """The daemon replays consumed updates after a restart; intake must not re-fire."""
+    import org_intake
+
+    first = org_intake.record_boss_message(org_root, "同一則", msg_id="1704")
+    second = org_intake.record_boss_message(org_root, "同一則", msg_id="1704")
+
+    assert first["created"] is True and second["created"] is False
+    assert len(captured_wake) == 1, "a restart storm must not wake the coordinator once per message"
+
+
+def test_archived_boss_message_does_not_come_back(org_root: Path, captured_wake) -> None:
+    import org_intake
+
+    org_intake.record_boss_message(org_root, "已處理", msg_id="1705")
+    inbox = org_root / "manager" / "inbox"
+    (inbox / "_archive").mkdir(exist_ok=True)
+    (inbox / "boss_telegram_1705.json").rename(inbox / "_archive" / "boss_telegram_1705.json")
+
+    again = org_intake.record_boss_message(org_root, "已處理", msg_id="1705")
+
+    assert again["created"] is False, "an item already handled must not be re-raised"
+
+
+def test_failed_wake_still_leaves_the_instruction_on_disk(org_root, monkeypatch, quiet_platform):
+    """A broken wake costs latency, never the message."""
+    import manager_tick
+    import org_intake
+
+    quiet_platform(org_root)
+    monkeypatch.setattr(manager_tick, "wake_manager",
+                        lambda *a, **k: (_ for _ in ()).throw(OSError("herdr gone")))
+
+    result = org_intake.record_boss_message(org_root, "急件", msg_id="1706")
+
+    assert result["created"] is True
+    assert result["wake"]["woken"] is False
+    assert "下一班 tick 兜底" in result["wake"]["reason"], "a swallowed wake failure must be legible"
+    gate = evaluate_gate(org_root, platform_facts=lambda: [])
+    assert gate["fire"] is True, "the tick is the fallback — it must still see the item"
+
+
+# --- intake: the issue tracker's door -------------------------------------
+
+def _issue(number: int, title: str, *labels: str) -> dict:
+    return {"number": number, "title": title,
+            "labels": [{"name": lbl} for lbl in labels],
+            "url": f"https://github.com/x/y/issues/{number}"}
+
+
+@pytest.fixture()
+def github_root(org_root: Path, tmp_path: Path, monkeypatch):
+    """An org with departments, a private pool, and a stubbed tracker."""
+    import org_intake
+
+    assert run_tool("org_admin.py", "create", "governance", "--task-types", "governance",
+                    root=org_root).returncode == 0
+    assert run_tool("org_admin.py", "create", "content", "--task-types",
+                    "daily_article,daily_digest", root=org_root).returncode == 0
+
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(org_intake, "NEXT_TASKS", pool)
+    monkeypatch.setattr(org_intake, "_gh", lambda: "/bin/true")
+    return org_root, pool
+
+
+def test_single_owner_department_needs_no_prefix(github_root, monkeypatch) -> None:
+    import org_intake
+    root, _pool = github_root
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(7, "把 gate 盤點清楚", "dept:governance")])
+
+    plan = org_intake.plan_github(root)
+
+    assert [r["number"] for r in plan["routable"]] == [7]
+    assert plan["routable"][0]["task_type"] == "governance"
+
+
+def test_ambiguous_ownership_is_never_guessed(github_root, monkeypatch) -> None:
+    """Picking one of a department's task_types for it mis-routes silently."""
+    import org_intake
+    root, _pool = github_root
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(8, "寫一篇東西", "dept:content")])
+
+    plan = org_intake.plan_github(root)
+
+    assert plan["routable"] == []
+    assert plan["unroutable"][0]["number"] == 8
+    assert "daily_article" in plan["unroutable"][0]["why_not"], "say what the options were"
+
+
+def test_title_prefix_selects_the_task_type(github_root, monkeypatch) -> None:
+    import org_intake
+    root, _pool = github_root
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(9, "[daily_digest] 本週導讀", "dept:content")])
+
+    plan = org_intake.plan_github(root)
+
+    assert plan["routable"][0]["task_type"] == "daily_digest"
+
+
+def test_prefix_that_the_department_does_not_own_is_refused(github_root, monkeypatch) -> None:
+    import org_intake
+    root, _pool = github_root
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(10, "[experiment] 跑個實驗", "dept:content")])
+
+    plan = org_intake.plan_github(root)
+
+    assert plan["routable"] == []
+    assert "不擁有" in plan["unroutable"][0]["why_not"]
+
+
+def test_unlabelled_issues_stay_in_the_planning_layer(github_root, monkeypatch) -> None:
+    """GitHub is the planning layer; only an explicit dept:* label opts in."""
+    import org_intake
+    root, _pool = github_root
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(11, "[Plan T40] 大計劃", "ready-for-agent")])
+
+    plan = org_intake.plan_github(root)
+
+    assert plan["routable"] == [] and plan["unroutable"] == []
+    assert plan["unlabelled"] == 1
+
+
+def test_priority_label_is_honoured(github_root, monkeypatch) -> None:
+    import org_intake
+    root, _pool = github_root
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(12, "急", "dept:governance", "P1")])
+
+    assert org_intake.plan_github(root)["routable"][0]["priority"] == 1
+
+
+def test_mirroring_creates_one_canonical_task(github_root, monkeypatch) -> None:
+    """入池 means the canonical queue — not a second pool in a department inbox."""
+    import org_intake
+    root, pool = github_root
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(13, "盤點 gate", "dept:governance")])
+    monkeypatch.setattr(org_intake.subprocess, "run",
+                        lambda *a, **k: subprocess.CompletedProcess(a[0], 0, "", ""))
+
+    result = org_intake.mirror_github(root, apply=True)
+
+    tasks = json.loads(pool.read_text())
+    assert [t["id"] for t in tasks] == ["gh-13"]
+    assert tasks[0]["issue_ref"] == "#13" and tasks[0]["task_type"] == "governance"
+    assert tasks[0]["status"] == "pending"
+    assert result["applied"][0]["comment"] == "ok"
+    assert "不等於可以關 issue" in tasks[0]["description"], (
+        "task completion is not issue closure (docs/agents/issue-tracker.md)"
+    )
+
+
+def test_a_finished_slice_does_not_requeue_its_open_issue(github_root, monkeypatch) -> None:
+    """`contained` is the default disposition: the issue stays open on purpose."""
+    import org_intake
+    root, pool = github_root
+    pool.write_text(json.dumps([{"id": "gh-14", "status": "succeeded",
+                                 "task_type": "governance", "priority": 2,
+                                 "issue_ref": "#14"}]), encoding="utf-8")
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(14, "長跑 issue", "dept:governance")])
+
+    plan = org_intake.plan_github(root)
+
+    assert plan["routable"] == []
+    assert plan["mirrored"] == [{"number": 14, "task_id": "gh-14"}]
+
+
+def test_unroutable_issue_becomes_one_self_terminating_ruling_request(github_root, monkeypatch):
+    """A gate that fires forever on an unfixable fact trains everyone to ignore it."""
+    import org_intake
+    root, _pool = github_root
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(15, "含糊的工作", "dept:content")])
+
+    org_intake.mirror_github(root, apply=True)
+    org_intake.mirror_github(root, apply=True)
+
+    items = list((root / "manager" / "inbox").glob("gh_unroutable_*.json"))
+    assert len(items) == 1, "the same unroutable issue must not re-file every round"
+    item = json.loads(items[0].read_text())
+    assert item["kind"] == "decision" and item["issue"] == 15
+
+
+def test_gate_reports_only_work_the_org_has_not_absorbed(github_root, monkeypatch) -> None:
+    """An open issue whose task exists is not a reason to wake anyone."""
+    import org_intake
+    root, pool = github_root
+    pool.write_text(json.dumps([{"id": "gh-16", "status": "pending",
+                                 "task_type": "governance", "priority": 2,
+                                 "issue_ref": "#16"}]), encoding="utf-8")
+    monkeypatch.setattr(org_intake, "_open_issues",
+                        lambda gh: [_issue(16, "已入池", "dept:governance"),
+                                    _issue(17, "還沒入池", "dept:governance")])
+
+    reasons = org_intake.unmirrored_github_issues(root)
+
+    assert len(reasons) == 1 and "#17" in reasons[0] and "#16" not in reasons[0]
+
+
+def test_unreachable_tracker_is_a_no_signal_not_a_crash(github_root, monkeypatch) -> None:
+    import org_intake
+    root, _pool = github_root
+    monkeypatch.setattr(org_intake, "_gh", lambda: None)
+
+    reasons = org_intake.unmirrored_github_issues(root)
+
+    assert len(reasons) == 1 and "unavailable" in reasons[0]
+    gate = evaluate_gate(root, check_github=True, platform_facts=lambda: [])
+    assert isinstance(gate["reasons"], list), "a missing gh must never break the gate"
+
+
+def test_intake_source_is_registered_for_the_canonical_queue() -> None:
+    """The tmp-pool tests above cannot catch this, and that is the point.
+
+    Provenance is enforced only when the write targets the canonical queue, so
+    every test that writes to a tmp pool passes while production fails closed —
+    which is exactly what happened on 2026-08-05: the mirror was green in tests
+    and raised `_LegacyMappingError` on its first real run. Assert the
+    registration directly, reading the source from the code so the two cannot
+    drift apart.
+    """
+    import org_intake
+    from volpred.ops.work.legacy import classify_next_task_source
+
+    _label, ingress, _evidence = classify_next_task_source(org_intake.INTAKE_SOURCE)
+
+    assert ingress == "agent", (
+        "issue ingress is mechanical: classifying it as user ingress would exempt "
+        "it from the machine-P1 clamp and let a label buy boss-level urgency"
+    )

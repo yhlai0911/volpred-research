@@ -206,6 +206,48 @@ def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -
     return task_id
 
 
+def _mirror_to_org(text: str, msg_id: int, task_id: str) -> bool:
+    """Put the boss's instruction in front of the coordinator, now.
+
+    The responder answers the chat; it does not run the platform. Before this
+    existed, an instruction like "研究部先停，把 draft 池補起來" was answered in
+    the chat and then evaporated: the org's only coordinator never learned the
+    boss had spoken, and any organizational consequence waited for whichever
+    30-minute tick happened to notice something downstream. 急件直達 is a
+    standing rule (`feedback_urgent_bypasses_scheduler_by_design`), and a
+    coordinator that learns about the boss's orders on a half-hour delay is a
+    scheduler in the path of an urgent message.
+
+    Detached on purpose: waking the coordinator can mean prompting a live pane
+    or spawning a headless round, and the poll loop must not sit behind either.
+    Ordering is what makes that safe — intake writes the inbox item before it
+    wakes anyone, so the instruction is durable even if the wake never lands
+    (the next tick then collects it). The two halves stay disjoint: the chat
+    reply belongs to ``task_id`` and its reply-right guard, which the inbox item
+    states explicitly so the coordinator does not answer a second time.
+    """
+    import subprocess
+
+    tool = ROOT / "scripts" / "org" / "org_intake.py"
+    try:
+        subprocess.Popen(
+            [sys.executable, str(tool), "--boss-message", text,
+             "--channel", "telegram", "--msg-id", str(msg_id),
+             "--canonical-task-id", task_id],
+            cwd=str(ROOT), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+        _log(f"org intake spawned (msg {msg_id} → manager inbox + immediate wake)")
+        return True
+    except Exception as exc:  # noqa: BLE001 — the org must never break the reply path
+        warn(
+            "telegram_org_intake",
+            "org intake spawn failed; manager will only see this at the next tick",
+            err=str(exc), msg_id=msg_id, task_id=task_id,
+        )
+        return False
+
+
 def _load_deadletter() -> list[dict]:
     if not DEADLETTER.is_file():
         return []
@@ -345,6 +387,7 @@ def _handle_update(update: dict) -> None:
             f"收到（已排 P1：{task_id}）。即時處理器暫時忙碌，兩分鐘內自動重派，不用等排程。",
             disable_notification=True,
         )
+    _mirror_to_org(text, msg.get("message_id", 0), task_id)
 
 
 def _pick_model(text: str) -> str:
