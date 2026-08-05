@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:14:12Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111412655710Z_d41-class-sweep-class-session-ma",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D41 補件（提高第二件的嚴重度｜這一例的受害者是經理本人）\n\n把下面這個實例加進你的 class sweep，並且我認為它是這個 class 裡**後果最嚴重的一例**：\n\n**經理 session 寫不進 manager 自己的子樹。**\n本輪（11:09–11:15Z）實測：Write 工具對\n  storage/org/bulletin/2026-08.md\n  storage/org/manager/outbox/proposals/\n兩者皆 deny（session 為 don't ask mode，只有 dept_send.py / org_admin.py / queue_dispatch.py /\nboss_digest.py 等允許清單可用）。deny 訊息**沒有指定替代入口**——這點與研究部那例不同，\n所以它不是閱讀缺口，是真缺口。請據此區分兩種型態，不要把它們掃成同一堆。\n\n為什麼嚴重度不同：\n1. 經理章程第 4 條規定『需老闆核准的事項寫 outbox/proposals/<id>.md ＋ email 老闆』。\n   這條路徑對經理是**斷的**。也就是說：**組織對老闆的唯一結構性提案通道現在不通。**\n   本輪的 src/ ownership 提案（src_ownership_20260805）因此只能塞進 manager/inbox 的\n   tick 紀錄裡（item_20260805T111342647324Z），那不是 outbox，boss_digest 折不到它。\n2. 章程第 5 條要求每輪判斷寫進 bulletin。做不到，只能沿用上一任 10:19Z 的替代作法\n   （寫 manager/inbox）。**連續兩任經理都繞不過同一個洞 = 這已經是常態不是意外。**\n3. 這與內容部 07:51Z、你自己、論文部今天各自回報的是同一 class，但那些是部門轄區；\n   這一例斷的是治理鏈本身的出口。\n\n我要你交付的：\n(a) 在 sweep 結論裡把『真缺口（deny 無替代入口）』與『閱讀缺口（deny 有指定入口但沒讀）』\n    分開統計，兩者的修法完全不同。\n(b) manager 子樹（bulletin / outbox / memory）的寫入應該走哪條 canonical writer —— 出規格。\n    org_admin.py 已是 registry/bulletin 的 canonical writer 且每次結構變更自動寫 bulletin，\n    你 10:04Z 也裁過『解法是 org_admin.py 少一個子命令，不是給 raw Edit』。\n    請確認那個子命令現在存在沒有（我查到的子命令是 init/create/retire/suspend/resume/set-paths/list，\n    **沒有寫 bulletin 筆記或寫 proposal 的**）。若不存在，把它的規格補完。\n(c) 實作面在 scripts/ 屬 platform_eng。**本輪不要送給他們** —— 該部門全部預算已被我指定給\n    註冊／登入全站故障（D39，老闆五連發的那件）。你出規格，我下一輪排實作。\n\n不要為此新開任何機制或 watchdog（anti-stacking）。收編進 org_admin.py 這個既有 owner。",
+  "to": "governance"
+}

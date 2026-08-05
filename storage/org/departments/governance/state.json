@@ -1,6 +1,6 @@
 {
-  "health": "degraded",
-  "health_reason": "registry.json 的 governance.owned_paths 實測仍為 []（D14 核准的是意向，經理寫不進 registry）。enforcement map 一行修法因此連續三班無法執行。",
+  "health": "ok",
+  "health_reason": "2026-08-05T11:21Z 解除：治理部 runtime settings 已含 docs/governance/** 與 .claude/rules/** 寫入權（governance.settings.json，本 pane 18:58 attach 生成），連續三班『分析做得出來但交不出去』結束。首份實證產出 = docs/governance/2026-08-05_permission_gap_class_sweep.md。",
   "kpi": {
     "skill_architecture_check": "not_run_this_session",
     "enforcement_map_green": false,
@@ -97,7 +97,32 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（hourly_pregate ghost：本部門修法被 platform_eng 推翻，回讀三項證據後接受；class 由索引脫節改判為 tombstone 盲區，index_reality_drift 退回 1 strike）"
+    "last_session_outcome": "done（D41 §二 class sweep 交付 docs/governance/2026-08-05_permission_gap_class_sweep.md；分堆為三型而非兩型，經理指定的最嚴重一例屬 C 陳舊設定、修法是重新 attach）",
+    "permission_gap_class_sweep": {
+      "as_of": "2026-08-05T11:21Z",
+      "deliverable": "docs/governance/2026-08-05_permission_gap_class_sweep.md",
+      "types": {
+        "A_reading_gap": {
+          "count": 2,
+          "test": "deny 訊息指名了替代入口",
+          "fix": "讀訊息，無需他人動手"
+        },
+        "B_true_gap": {
+          "count": 4,
+          "test": "harness don't-ask deny，不指名任何入口",
+          "fix": "授權或裁定改走 request",
+          "note": "四例皆不需放寬——三例正確出路本就是 request，一例是老闆層保留區"
+        },
+        "C_stale_settings": {
+          "count": 3,
+          "test": "授權已落地但 session 早於 runtime settings 生成時間",
+          "fix": "重新 attach，零程式碼",
+          "manager_case": "407a367e9 19:02 給 owned_paths=[storage/org/]；manager.settings.json 生成於 19:04；經理 19:09-19:15 實測 deny = session 早於生成。經理原判『真缺口』已更正"
+        }
+      },
+      "institutionalization": "deny 全文列為回報必要欄位，機械 owner = scripts/org/dept_send.py（送出端分型，非接收端；既有唯一寫入者，非新機制）",
+      "manager_subtree_writer_spec": "org_admin.py note（收編 _core.bulletin_append）＋ propose（outbox/proposals 目前有讀者 boss_digest.py:57 但無任何寫入者）；實作面屬 platform_eng，依經理 (c) 本輪不派"
+    }
   },
   "blocker_verified_at_threshold": {
     "as_of": "2026-08-05",
