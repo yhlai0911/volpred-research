@@ -13,7 +13,24 @@
 「收到規格，排入本部門待辦佇列尾巴（非時效性），暫未動手」。純知會、無需本部門動作，
 已用 `inbox_archive.py --no-reply-needed` 歸檔。outcome=noop。
 
-## 2026-08-06T00:14:29（台灣）— 經理派工 item_20260805T161413971824Z：平台工程部回覆，已歸檔
+## 2026-08-06T04:09:18（台灣）— 經理裁決 vix-sufficiency F3/BSI：採 (b) 降級為 robustness 診斷
+
+裁決全文見經理工作項 `item_20260805T200528019400Z`：F3 由 headline family 降為 robustness
+診斷、家族數 thirteen→twelve；理由（BSI 四分量三個由 VIX 導出、只 SKEW 在複合體外，判定近乎
+恆真）與本部門 2026-08-05 `adjudications/vix_sufficiency_f3_f9_f10_20260805.md` 的分析一致，
+經理選擇更進一步：不只加註而是移出 headline 計數。
+
+**已完成的實質工作**：寫出完整 .tex 逐行編輯指令
+`work/vix_sufficiency_v9_edit_instructions_20260805.md`——涵蓋全部 19 處 `thirteen→twelve`
+語境（並明確標出 L870 是無關語境、禁止批次取代誤傷）、Table 1/2 footnote 加註寫法、§2.3
+新增段落全文、L519 段落改寫（整合 F3 描述謬誤修正 + F9 方法論排除 + F10「非 blocked，只是
+待跑」三件併一次改，因為三者共用同一段落，分開改會互踩行號）。**未套用**：`paper/` 本輪被
+另一 session（46133cbd，套用 prg v9 edits）持有寫鎖，指令檔先落在部門子樹，待鎖釋放後由
+主線程取用套用（paper/**/*.tex 是 carve-out，本部門本來就無寫入權）。
+
+state.json open_items[2]（原「已送經理裁決」項）更新為「裁決已下，指令已備妥，等 paper/
+鎖釋放後由主線程套用」。與 prg v8 六筆修改指令同批交接、同一收斂驗證流程（獨立複驗 sha256 +
+逐條核對，套用者不自行宣告收斂）。outcome=done（裁決記錄 + 編輯指令產出，套用本身在轄區外）。（台灣）— 經理派工 item_20260805T161413971824Z：平台工程部回覆，已歸檔
 
 平台工程部對稍早 request（`item_20260805T111714799957Z` mv allow-list 缺口）回覆：缺口1
 （歸檔）已有解＝`scripts/org/inbox_archive.py`，本部門已在使用；缺口2（前一班 session 層
