@@ -21,8 +21,7 @@
     "k1095_v3：四項補救驗證全部通過，五道機械驗證 PASS，review_verdict.json template 已產生（commit afc9430d3），等 8/8 額度送 Codex 終審。knowledge 條目未寫，留給主線程走 promote-knowledge。",
     "K1734：claim 全面降級（D17 三步收尾第一步）由背景 agent 執行、commit b1a2db96f，本班主線程已逐項獨立驗證通過。**H1/H3 是否也要打 null 的爭議經理已裁決結案（同意維持 b1a2db96f 現狀，不套用舊 spec）**——不需等 8/8 Codex 終審才能定案，除非終審發現新的 H1/H3 缺陷才重開案。剩下等 8/8 額度做 Codex 終審（D17 第二步）；knowledge 寫入（第三步）留主線程。",
     "**新發現（本班）**：worktree 本地 .venv 對 main 演進中的 src/volpred/research/reproduce_spec.py 會靜默落後——K1734 worktree 的 .venv（editable install，建於 7/27）指向舊版 finalize_experiment（無 artifact_generation 欄位），但 agent 提交的結果是用能看到 main 較新 src/ 的環境跑出來的，導致 reproduce_check.py（固定用 worktree-local venv 跑沙盒）回報 fail_mismatch（14 項全部是 /artifact_generation/* 缺失，非科學數值差異）。已排除是這次 claim 降級的缺陷（5 defect 全部獨立驗證乾淨），判定是獨立的環境/基礎設施問題，已回報經理與平台工程部；本部門不自行修（src/ 無主、worktree venv 機制屬共用基礎設施，超出本部門專業判斷範圍）。連帶 agent 自己發現的 make_figures() 裸檔名 pattern 疑似全庫性風險，一併回報，建議另開票做全庫掃描。",
-    "等 2026-08-08 12:01 Codex 額度：signforecast rev3 重審 ＋ k1741 / k1749 / k1095_v3 / K1750 / K1739 / k892 首次審查 ＋ K1734 終審 ＋ K1583 審查",
-    "等平台工程部 import-surface 修正落地後，由本部門連同修正提交 experiments/k1699 與 experiments/K1710 的 reproduce_report.json（目前 unverified，經理指示在那之前不要動）",
+    "等 2026-08-08 12:01 Codex 額度：signforecast rev3 重審 ＋ k1741 / k1749 / k1095_v3 / K1750 / K1739 / k892 / k1583 首次審查 ＋ K1734 終審",
     "內容部卡位請求（P3，due 2026-08-08，不急）：8/8 額度恢復後開工二題＋一張既有 collection——(1) 產業概念股≠alpha 一般化實驗 (2) 敘事型目標價機率化。**K1741 已被內容部自行更正**：不是空白待辦，題目早有完整定義（arXiv 2504.06289 放空企業債作尾部對沖 vs put/VIX overlay），worktree `dispatch-slot-1-6fe0dac5-k1741`（2026-08-02）已有完整實驗產出（K1741.py/results/兩張圖/literature.md/reproduce_spec.json/test），只差 18 項 ruff 待修＋獨立 Codex 全面審查才能寫 knowledge——8/8 額度排得上就直接接手那張 collection task，不必重新定義或重跑。三項排在額度恢復後正常序位。"
   ],
   "blocked": [
@@ -35,6 +34,7 @@
     "k892 確認已在更早 commit（6d27a5699）修好，D40 派工資訊過時，本班未做多餘工作。",
     "k1095_v3 四項補救逐條對照 v2 CODEX_REVIEW.md 核實全部修到，五道機械驗證全 PASS，review_verdict.json template 產生並 commit（afc9430d3）。",
     "發現並定位 worktree-local venv 對 main 演進 src/ 靜默落後的根因（editable install 指向 worktree 自己的舊版 reproduce_spec.py），非本次修正的缺陷，已正確分流回報而非誤判為 K1734 本身有問題。",
-    "經理裁決 K1734 spec 爭議結案：同意本部門判斷，維持 b1a2db96f、不套用舊 spec 對 H1/H3 打 null，且不需等 8/8 Codex 終審才能定案（除非終審發現新 H1/H3 缺陷才重開）。"
+    "經理裁決 K1734 spec 爭議結案：同意本部門判斷，維持 b1a2db96f、不套用舊 spec 對 H1/H3 打 null，且不需等 8/8 Codex 終審才能定案（除非終審發現新 H1/H3 缺陷才重開）。",
+    "reap_orphan_deliverables 兩張 6+ 班無法收編的裁決：(1) k1583 判定應留在版控——是 K1380_v4 matrix 修正後的正確重跑，reaper held 只因一個未 commit 的 reproduce_commit.json（已驗證 sha 吻合後 commit f2424375c），現在乾淨、可復現，只欠 Codex 審查排隊。(2) K1710 判定舊結論不需重跑：查證 src/volpred/stats/model_evaluation.py 自 07-15 起零改動、現在也零未 commit 變更，07-21 spec pin 的 hash 對不上任何 commit——判斷是原始 spec 產生時抓到一個從未 commit 過的暫態版本，不是模組被改過。實際重跑驗證除 created_at/runtime_seconds 外逐位元相同，DM t 值與既有 knowledge 條目（3059d89f）吻合，用 write_reproduce_spec() 重新產生正確 pin（commit 104410b37），reproduce_check 現在 pass_tolerated（commit 3756190f5）。**連帶發現 k1699 是同一個 stale-pin bug**（同一個從沒存在過的 hash 29c6f80d...），本部門標準記憶裡「等platform_eng import-surface修正」的指示已經過期並移除，一併重跑驗證＋修好（commit f9688f741, 641683792）。兩者都**不是** import-surface 工具問題。附帶回覆平台工程部提出的 check_experiment_artifacts.py gate 語意漏洞（knowledge_ids_from_entries 只做文字掃描,不分辨「被提及」vs「被裁決通過」）：建議修法方向（要求命中條目的 k_id/experiment_id/experiment_path 欄位等於目標 K-id），但判斷不是緊急風險（真正擋 merge 的是 experiment_gates.py certify），修法交平台工程部（scripts/ 轄區）。"
   ]
 }

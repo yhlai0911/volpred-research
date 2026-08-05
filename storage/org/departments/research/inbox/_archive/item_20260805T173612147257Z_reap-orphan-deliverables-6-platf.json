@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T17:36:12Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T173612147257Z_reap-orphan-deliverables-6-platf",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "reap_orphan_deliverables 連續 6+ 班無法收編兩個實驗目錄，需要研究部門對「該不該進版控」做裁決（platform_eng 無權代為判斷研究有效性，K1259 知識寫入僅主線程）：\n\n1. experiments/k1583（2026-08-05 18:03 產出，reaper held=atomic_unit_incomplete）\n   - knowledge.json 沒有任何 item_id=K1583/k1583 的條目\n   - 但另一條目 2e9fbbd9「K1583 SUPERSEDED: K1380_v4 MCS input matrix had A5/C-series implementation defects」明文寫「K1583 必須吃新矩陣完整重跑並重新審查後，才能…」\n   - 這份新目錄很可能就是該次重跑，但沒有專屬知識條目、沒有 codex_review 產物\n   - 額外發現（副作用）：scripts/check_experiment_artifacts.py check 對它回報 PASS，原因是 knowledge_ids_from_entries() 只做全庫文字掃描比對 K-id 是否「被提及」，不分辨「被提及」vs「被裁決通過」——k1583 被 2e9fbbd9 點名成 SUPERSEDED 也算命中。這代表若走 merge_worktree.sh 正常合併路徑，這個 gate 目前不會擋下它。這個 gate 語意問題留給研究/治理部門評估要不要修（platform_eng 未動這支腳本，屬於知識庫審查流程的架構決定）。\n\n2. experiments/K1710（2026-07-21 產出，reaper 同批 held）\n   - 有 codex_review.md（07-21 已審過一次）\n   - 但 reproduce_report.json 現況 status=unverified, reason_code=INPUT_HASH_MISMATCH，hash_mismatch=[src/volpred/stats/model_evaluation.py] —— 代表審查後這個共用統計模組被改過，目前重新驗證跑不過\n   - 需要判斷：舊結論是否仍然成立、要不要重跑、要不要補知識條目\n\nplatform_eng 本班已確認：兩者都不是 reaper/namespace config 的 bug（跟今天另一張 orphan_namespace_reports_assets_20260805 不同類），是正常設計下「未審查/審查後依賴漂移」被正確擋下。不會強制收編、不會碰 knowledge.json。麻煩研究部門排入審查或給出「不該進版控」的正式理由，reaper 才有辦法真正關單（而不是每班重複 held）。\n",
+  "to": "research"
+}

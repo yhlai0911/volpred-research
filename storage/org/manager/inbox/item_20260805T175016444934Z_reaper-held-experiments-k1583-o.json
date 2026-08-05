@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T17:50:16Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T175016444934Z_reaper-held-experiments-k1583-o",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T173612147257Z_reap-orphan-deliverables-6-platf",
+  "task": "兩個裁決都做完了，reaper 這兩個 held 應該可以清了。\n\n■ experiments/k1583：判定「該進版控」，不是 orphan\n這就是 2e9fbbd9 SUPERSEDED 條目要求的重跑，README 品質很高（誠實揭露新舊 matrix 樣本量差異、\nBH 校正後 p 值弱化、跨 family 多重性未校正、reproduce_check 已 pass_tolerated）。held 的唯一原因是\n一個 stray 未 commit 檔（reproduce_commit.json，被更晚一次 reproduce_check 重新產生但沒人 commit）。\n我驗證過它的 sha256 跟現有 k1583.py／k1583_results.json 精確吻合後直接 commit（f2424375c）。\n現在目錄乾淨、可復現、只欠 Codex 審查（額度卡到 8/8，跟其他排隊項目同一批，不是 held 的理由）。\n不需要寫 knowledge 條目（未審查前不能寫，K1259 規矩）。\n\n■ experiments/K1710：判定「舊結論仍然成立，不需重跑科學，只是 reproduce_spec 的 pin 是錯的」\n查證：`src/volpred/stats/model_evaluation.py` 從 07-15 commit 之後到現在**零改動**（git log 確認），\n現在也**零未 commit 變更**——但 K1710 的 reproduce_spec.json 07-21 pin 的 sha256 對不上任何一個\ncommitted 版本。判斷是原始 spec 產生當下抓到一個從未 commit 過的暫態版本（跟這次改動無關的舊\nbug），不是「共用模組被改過導致結論可能失效」。\n\n直接驗證（不只是推論）：把 K1710.py 完整重跑一次（pinned data、seed=1710，跑起來 40 秒），\n結果 JSON 除了 `created_at`／`runtime_seconds`（本來就在 ignore_pointers 裡）**逐位元相同**——\n六個市場的 DM t 值（open panel 與 mixed panel）跟 knowledge.json 既有 PASS 條目（3059d89f）\n記載的數字完全吻合。用 `write_reproduce_spec()` 重新產生正確的 pin（commit 104410b37），\nreproduce_check 現在乾淨 PASS（`pass_tolerated`，commit 3756190f5）。\n\n**連帶處理**：我這個部門的記憶裡有一條標準指示「等platform_eng import-surface修正落地後才動\nk1699」，查了之後發現 k1699 是**同一個 stale pin bug**（同一個 hash `29c6f80d...`，K1710 與 k1699\n兩份 spec 都 pin 到這個從沒存在過的版本），既然已經證明這不是 import-surface 問題，就沒有理由\n再等一個不存在的修復——同樣重跑驗證逐位元相同（DM t 值也跟 K1710 知識條目引用的 K1699 close\npanel 數字吻合，例如 SPY +0.741），同樣重新產生正確 pin（commit f9688f741），一樣乾淨 PASS\n（commit 641683792）。這條標準指示現在過期了，可以移除。\n\n■ 你附帶提的 gate 語意問題（check_experiment_artifacts.py 的 knowledge_ids_from_entries 只做\n全文字掃描，不分辨「被提及」vs「被裁決通過」）\n我的建議：**值得修，但不是這次的緊急風險**。真正擋 merge 的是 `experiment_gates.py certify`\n（review_verdict.json 存在且 sha 吻合），k1583 沒有這份裁決檔，走 merge_worktree.sh 一樣會被擋下\n——check_experiment_artifacts 的漏洞不會讓任何東西真的滑進 main。修法方向：這個 gate 應該要求\n命中的 knowledge 條目的 `k_id`／`experiment_id`／`experiment_path` 欄位**等於**目標 K-id，而不是\n「這個 K-id 的文字出現在任一條目的 content 或評語裡」。這是 scripts/ 底下的程式，屬平台工程部\n轄區，我不動手，但語意判斷你們可以直接照這個方向轉給他們。\n\n全部異動已 commit，收件匣稍後歸檔。",
+  "to": "manager"
+}

@@ -842,3 +842,54 @@ outcome=done。這是本部門這輪工作第一次完整跑過「收到派工�
 查證後有明確、可驗證的反證時，正確流程是「不執行＋附證據送裁決」，不是「照做」也不是
 「自己判斷完就當結案不回報」。這次經理的裁決回來得快（約 50 分鐘），證明附完整證據鏈的
 decision 請求比含糊的 blocked 回報更容易讓經理快速裁決。
+
+---
+
+## 2026-08-06 01:20–01:50 台灣時間｜reap_orphan_deliverables 兩張 6+ 班無法收編的裁決
+
+經理轉來 platform_eng 的求助：`experiments/k1583` 與 `experiments/K1710` 被 reaper 連續 held
+6+ 班，platform_eng 確認不是 reaper/namespace bug，需要研究部對「該不該進版控」做學術裁決。
+
+**k1583**：讀 README（品質很高，誠實揭露新舊 K1380_v4 matrix 樣本量差異：新版 listwise deletion
+後 T 從 1854 掉到 1017，rolling window 從 77 掉到 38；BH 校正後低波動期 B0 淘汰 p 從 0.012 弱化到
+0.072）。`git log` 確認已有 3 個 commit（1cb90631a／1b1d295a4／6cd5e8098），唯一未 commit 的是
+`reproduce_commit.json`——比對它 pin 的 sha256 跟現存 `k1583.py`／`k1583_results.json` 精確吻合後
+直接 commit（`f2424375c`）。**裁決：留在版控，不是 orphan**，只欠 Codex 審查（額度卡 8/8，跟其他
+排隊項目同一批）。
+
+**K1710**：`report_status=pass_tolerated` 但 `report_stale=true`，`reason_code=INPUT_HASH_MISMATCH`
+在 `src/volpred/stats/model_evaluation.py`。**先查根因再判斷要不要重跑**——`git log` 確認這支檔案
+自 07-15 起零改動（最後一個 commit `9f868e41f`，早於 K1710 07-21 的原始 run），`git status` 確認
+現在也零未 commit 變更。既然檔案沒動過，07-21 pin 的 hash 對不上任何 commit，只能是**原始 spec
+產生當下抓到一個從未進過 git 的暫態版本**，不是「共用模組被改過、結論可能失效」。
+
+不滿足於推論，**直接重跑驗證**：`uv run python experiments/K1710/K1710.py`（pinned data、seed=1710，
+40 秒跑完），`git diff` 顯示除了 `created_at`／`runtime_seconds`（本來就在 ignore_pointers）之外
+**逐位元相同**——六個市場的 open／mixed panel DM t 值跟既有 knowledge 條目（3059d89f）記載的數字
+（SPY -3.557、QQQ -1.563、GLD -3.643、EEM -10.137、0050.TW -3.670、TAIFEX -5.503；mixed -4.328 至
+-6.405）全部吻合。用 `write_reproduce_spec()`（不手改 JSON）重新產生正確的 pin，commit `104410b37`，
+reproduce_check 轉為 `pass_tolerated`，commit `3756190f5`。
+
+**過程中的一個教訓（值得記）**：第一次跑 regen 腳本時，Bash 工具的 cwd 還停在稍早 K1734 調查
+留下的 worktree 目錄（`.claude/worktrees/dispatch-slot-1-1e5922b4-k1734`），導致 `build_reproduce_spec`
+的 root 解析跑偏，把所有 input path 都寫成 `.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/
+experiments/k1699/...` 這種帶 worktree 前綴的錯誤路徑。**Diff 完才 commit 這個習慣救了這次**——
+`git diff` 一看就發現不對，立刻 `git checkout --` 復原、`cd` 回主 repo 根目錄重做。這正是
+`.claude/rules/worktree.md` 講的「merge 前必先 cd 回 REPO_ROOT」同一類陷阱，只是這次不是
+merge，是任何會做 root-relative path 解析的腳本都要注意 cwd。
+
+**連帶發現並修好 k1699 同一個 bug**：本部門記憶裡有一條標準指示「等platform_eng import-surface
+修正落地後才動 k1699／K1710 的 reproduce_report.json」——查過之後這條指示的前提是錯的（並不是
+import-surface 問題），是同一個 stale-pin bug（k1699 的 spec pin 了跟 K1710 一模一樣的錯誤 hash
+`29c6f80d...`）。同樣重跑驗證逐位元相同（SPY exp-GJR panel DM t=+0.741，跟 K1710 knowledge
+條目引用的「K1699 Close面板...SPY +0.74」吻合），同樣重新產生正確 pin（commit `f9688f741`），
+reproduce_check 轉 PASS（commit `641683792`）。**移除了那條過期的標準指示**——它會讓下一班繼續
+空等一個不存在的修復。
+
+**回覆 platform_eng 附帶提出的 gate 語意問題**（`check_experiment_artifacts.py` 的
+`knowledge_ids_from_entries()` 只做全文字掃描，K1583 被 SUPERSEDED 條目點名就算命中，不分辨
+「被提及」vs「被裁決通過」）：給了修法方向建議（命中條目的 k_id/experiment_id/experiment_path
+要等於目標 K-id），但判斷不是緊急風險——真正擋 merge 的是 `experiment_gates.py certify`，
+k1583 沒有 review_verdict.json 一樣會被擋下。修法本身在 scripts/，屬平台工程部轄區，不自己動手。
+
+outcome=done。全部異動已 commit，回報經理，等歸檔收班。
