@@ -211,3 +211,46 @@ research 的回覆還沒回謝，下一班補。
 那個錯誤訊息是唯一線索。已用 `git show <commit>~1:<path>` 導出原稿還原，
 general 版改名 `K1700_reader_longterm_draft.md`。線上文章不受影響（feed.json 各有自己的副本）。
 教訓已寫進 memory/notes.md，含「Write 回 updated 而不是 created 就是警訊」這條判準。
+
+## 2026-08-05 18:58–19:20 outcome=done
+
+**開班先對帳，發現經理裁決的前提已被推翻**。D24（10:19Z）要我準備 `_publish_queue_20260805.md`
+待核准後再發，理由是 `storage/reports/` 不在 owned_paths。但回讀 canonical：**五篇在 10:09–10:30Z
+就已經全部落池、池深 9**，且本班 `content.settings.json` 確實含 `Write(storage/reports/**)`。
+兩個前提都不成立，所以沒寫那份 queue 檔，改做已落池文章的正確性回查。教訓已寫進 memory。
+
+**回查一：K1465 對外數字 → 無需更正。** 研究部確認 `k1465_results.json` 的 `r_*_sq_x1e4.n`
+被 ×1e4（根因 `k1465.py:487-488` 把縮放套到整個 describe dict）。已發佈的 `mile_0fc136ab`
+第 58 行寫的是 772、850、847、831、829，取自 `.vrp.n`，正確；其餘只引用 mean/median/std。
+**bug 沒有外流到讀者端。** 上一班標明「該欄位有瑕疵、請勿引用」的處置today 證明有回報。
+
+**回查二：platform_eng 交圖時主動訂正的兩處敘事 → draft 本來就沒寫錯。**
+K1696 寫的是「九格裡有七格變更差」並同時列兩個基準；K1677 是「方向對了、強度還在噪音裡」。圖文一致。
+
+**抓到並止血一個結構缺陷：Supabase 上傳沒有重試，而對端有一半的 IP 不通。**
+查 K1677 為何是五篇裡唯一沒裝懶人包的，挖到網路層——job 連掛兩次（r1 掛第 3 張、r2 掛第 1 張，
+**位置會變**是機率性失敗的線索）。實測（`getaddrinfo` 取全部 IP 後逐一 `connect`，連測三輪）：
+DNS 正常 0.01 秒，但兩個 Cloudflare IP **每輪都恰好有一個 timeout、哪個不通還會變**，
+對照組 api.github.com 0.05 秒。`upload_chart`（`article_charts.py:282`）是單次
+`requests.post` 無重試 → 單張失敗率約 1/2 → **懶人包連傳三張的全成功機率只有約 12.5%**。
+正文的圖分批傳、重跑一次就過，所以這缺陷一直被 memory 裡「重跑即可」那句掩蓋著——
+**那句話本身就是它活這麼久的原因**，把結構問題寫成了運氣問題。該條 memory 已改寫成正確診斷。
+
+處置：連掛兩次就停手送 P1 request 給 platform_eng（附三輪逐 IP 實測、呼叫鏈、建議修法），
+**沒有重試第三次去撞 3-strike**。之後手動 `run` 第三次抽中，K1677 懶人包已裝上並回讀確認
+（`errata.update_action=lazypack_async_render`、三個 panel URL 齊全），release gate 阻塞解除。
+已明確告知 platform_eng **不要因此降級那張單**：三次中一次正好落在 12.5% 上，是抽中不是修好，
+而且無人值守的 compute-worker 沒有「再手動重試一次」這個選項。commit `d8a73f7fe`。
+
+**下一班的工作已備好**：orphan 8 篇逐篇實查，**三篇**（k1706/k1600/K1609）圖表齊全且都實跑過
+`--dry-run`，**唯一擋點都是缺 `--lazypack-plan`**，照 K1451 樣板寫三個 plan 即可 9→12。
+K1710 查重也做完了：與已發佈的 K451 同主題但 arc 不同（描述性分解 vs 預測力比較），**可寫**。
+
+**回覆送出五則**：research ×2、member_success、platform_eng ×2、governance。詳見 state.json。
+
+**歸檔仍做不到，且上一班的診斷被本班證偽**：本班 `content.settings.json` 是 18:58 新產生的，
+**確實含** `Bash(mv .../content/inbox/*:*)` 與 `Bash(mkdir -p .../content/:*)`，但實測 mkdir 仍 deny。
+所以「重新 attach 就能歸檔」不成立。同檔另有缺陷：**Edit/Write 路徑是雙斜線** `Edit(//Users/...)`。
+另外 **path claim 仍是 session 級不是部門級**——journal/state/memory/drafts 全被上一班
+session `e41ed794` 持有，本班等它自然到期才寫得進來，全程沒硬搶也沒 release 別人的活 claim。
+兩項都附證據回報經理。

@@ -104,12 +104,100 @@ matplotlib 中文字型設定（沿用即可）：
 `plt.rcParams["font.sans-serif"] = ["PingFang TC", "PingFang HK", "Heiti TC", "Arial Unicode MS"]`
 搭配 `plt.rcParams["axes.unicode_minus"] = False`。
 
-## 發佈時 Supabase 圖片上傳會逾時，重跑即可
+## Supabase 圖片上傳會逾時 —— 但「重跑即可」是錯的診斷（2026-08-05 當天就被自己推翻）
 
-`publish_draft.py` 正式發佈時要把本地 PNG 上傳到 Supabase，2026-08-05 連續遇到
-`ConnectTimeout` 與 `Connection reset by peer`。這是網路瞬斷不是設定錯，同一道指令重跑就過。
-單篇發佈含上傳可能超過 120 秒，用 `run_in_background` 跑，不要當成掛掉。
+原本這條寫的是「網路瞬斷，同一道指令重跑就過」。**那句話掩蓋了一個結構缺陷，害這個坑一直沒被修。**
+
+實測到的真相：`qxhfgdfzazwpkdgesavm.supabase.co` 解析到兩個 Cloudflare IP，
+**每一輪都恰好有一個 TCP timeout，而且哪一個不通會變**（連測三輪；對照組 api.github.com 是 0.05 秒，
+DNS 本身只要 0.01 秒，所以問題在到 Cloudflare 邊緣的路徑丟包，不是 DNS 也不是 Supabase 掛掉）。
+`upload_chart`（`src/volpred/charts/article_charts.py:282`）是**單次 `requests.post`、沒有任何重試**，
+所以單張的失敗率就是約 1/2。
+
+於是：
+- **單張圖**（正文分批傳）→ 重跑一次通常就過 → 看起來像「瞬斷」→ 就是這個假象讓它被寫成上面那句
+- **懶人包三張連傳** → 全成功機率只有約 12.5% → 幾乎必掛（K1677 連掛兩次，r1 掛第 3 張、r2 掛第 1 張，
+  手動第三次才過——三次中一次，正好落在 12.5% 上）
+
+**掛的位置會變，就是機率性失敗而非確定性 bug 的診斷線索**——固定掛同一張才是程式錯。
+
+判準：連掛兩次就不要再重試第三次，那會撞 3-strike。送 request 給 platform_eng，
+附「逐 IP 分別建 TCP、連測三輪」的實測（用 `socket.getaddrinfo` 拿到全部 IP 後逐一 `connect`，
+不要只測 hostname——測 hostname 只會看到「有時通有時不通」，看不出是哪個 IP 壞）。
+**不要建議調大 connect timeout**：壞 IP 是完全不通不是慢，調大只會讓每次失敗多等，
+還會壓縮 job 在 1800 秒上限內能嘗試的次數。正解是有限重試 + 指數退避 + 每次重建連線。
+止血成功也不要讓對方降級那張單——無人值守的 compute-worker 沒有「再手動重試一次」這個選項。
+
+操作面仍然有效的兩條：單篇發佈含上傳可能超過 120 秒，要用 `run_in_background`，不要當成掛掉；
 **重跑前先查 feed 池**確認上一次是不是其實已經寫進去了，避免重複發佈。
+
+## 懶人包圖組是 release gate 的硬條件，發佈後要回讀確認它真的裝上了（2026-08-05）
+
+`publish_draft.py` 在 `status=draft` 階段**不要求**懶人包成品，但**要求 `--lazypack-plan`**
+（否則直接 DEFERRED LAZYPACK CONTRACT 擋下、不發佈）。圖組本身走非同步：正文發佈後另外
+`lazypack_async_render.py enqueue`，由 compute-worker 每 15 分鐘撿。
+而 **release gate 會拒絕把沒有該區塊的 general draft 翻成 published**
+（`src/volpred/ops/content.py` release audit gate）。所以 enqueue 或 render 失敗＝那篇永遠卡在池裡，
+而且**當下不會有任何錯誤浮到內容部這邊**，池深數字看起來還是漂亮的。
+
+回讀確認的方法（一行）：
+
+```bash
+jq -r 'if type=="array" then . else .articles end | map(select(.id=="<mile_id>"))|.[0]
+  | {errata:(.errata.update_action//"none"), has_lazypack:((.content//"")|test("懶人包圖組"))}' \
+  storage/reports/feed.json
+```
+
+`errata.update_action == "lazypack_async_render"` 且 `has_lazypack == true` 才算真的裝上。
+K1677（`mile_a1d9c5e0`）就是靠這個對照發現的——同批五篇裡只有它 errata 是 null。
+**同批發佈時把五篇的這兩個欄位並排看，缺的那篇會自己跳出來。**
+
+job 狀態查 `storage/ops/compute_queue/lazypack-<mile_id>{,-r2}.json` 的 `status` / `exit_code`，
+錯誤在 `storage/logs/compute/lazypack-<mile_id>.stderr`。面板 PNG 產好了但上傳失敗時，
+面板仍留在 `storage/lazypack_jobs/<mile_id>/runs/<job-id>/panels/`（sha256 在 stdout log 裡），
+**不必重畫，直接重跑 `run` 子命令**（`--out-dir` 給一個新目錄即可）。
+注意 `enqueue` 在既有 job 還是 `running` 時會 skip，要先確認前一輪已 `failed` 才排得進去。
+
+## orphan 草稿 triage 現況（2026-08-05 盤點，下一班可直接動手）
+
+`storage/ops/orphan_reap_report.json` 的 orphan_count 已從 10 降到 8。逐篇實查：
+
+| draft | 字數 | 圖 | 判定 |
+|---|---|---|---|
+| `k1706_general_draft.md` | 4,605 | 2 ✓ | **只差 lazypack plan** |
+| `K1597_general_draft.md` | 3,794 | 1 | 缺 1 張圖 |
+| `k1600_general_draft.md` | 3,108 | 2 ✓ | **只差 lazypack plan** |
+| `K1609_general_draft.md` | 2,835 | 2 ✓ | **只差 lazypack plan** |
+| `K1710_general_draft.md` | 2,497 | 1 | 缺 1 張圖；查重已做，見下 |
+| `K1658_general_draft.md` | 2,054 | 1 | 缺圖，且圖用相對路徑 |
+| `K1357_general_draft.md` | 1,824 | 1 | 缺圖 |
+| `K1419_general_draft.md` | 1,731 | 1 | 缺圖，且圖用相對路徑 |
+
+**圖表齊全的是三篇（k1706 / k1600 / K1609），不是先前記的兩篇。** 三篇都實跑過
+`publish_draft.py --dry-run`，**唯一擋點都是缺 `--lazypack-plan`**，其餘 gate 全過。
+照 `storage/drafts/K1451_lazypack_plan.json` 樣板寫三個 plan，池深就能 9→12。
+（k1600 另有一個非阻塞提示：tag 超過 8 被自動 evict 掉 `K1600` 與 `一般讀者`，是預期行為。）
+
+**圖片路徑要用 repo 相對根路徑**：`![...](storage/drafts/assets/<name>.png)`。
+K1658 與 K1419 寫的是 `![...](assets/...)`，補圖時要一併改掉。
+
+**K1710 查重結論：可寫，不算重複。** 它與已發佈的 `mile_f2e4c991`〈開盤那一刻，藏著最多的秘密〉
+（K451，2026-06-20）標題高度相似，但 arc 不同：
+- K451 是**描述性分解**——隔夜佔總波動 36.3%、危機期升到 56.4%，重點是「你無法交易的時段有多少風險」
+- K1710 是**預測力比較**——兩套資訊對等的方法在開盤當下各交一份預測，把隔夜明確用進去的那套六個市場全勝
+照既有判準（同族但不同 arc 可寫）過關，但**文內要明寫與 K451 那篇的關係**，讓讀者看得出是續作。
+另外 K1710 正文混用了半形逗號（「1,823 個交易日,樣本一點都不迷你」），
+數字千分位的 `,` 要留，句讀的要換成全形「，」。
+
+## 開班先回讀 canonical，不要照著工單直接動手（2026-08-05）
+
+經理 D24（10:19Z）要我先備好發佈命令等核准，理由是「storage/reports/ 不在你的 owned_paths」。
+但開班回讀發現：**五篇在 10:09–10:30Z 就已經全部落池**，而且本班的 `content.settings.json`
+確實含 `Write(storage/reports/**)`。**裁決的兩個前提在它發出後都被別的動作推翻了。**
+
+裁決是在某個時間點的世界狀態下做的，而這個組織有七個部門同時在動。
+照著過期的工單做，產出的東西沒有人需要。**開班第一件事是 `jq` 回讀 feed / state / 權限檔，
+拿當下的事實對一次工單，不一致就先講清楚再決定做什麼。**
 
 ## macOS 大小寫不敏感：`K1700_general_draft.md` 會覆寫 `k1700_general_draft.md`（2026-08-05 實際踩到）
 
