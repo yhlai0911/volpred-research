@@ -28,6 +28,7 @@ from _core import (  # noqa: E402
     load_registry,
     now_iso,
     read_lease,
+    record_session,
 )
 
 PRIORITIES = ("P1", "P2", "P3")
@@ -132,6 +133,12 @@ def main() -> int:
         print(f"只有運營經理能指派工作。部門之間請用 --kind request（可被婉拒），"
               f"或把需求送給經理排序：--to-manager --from {args.sender}", file=sys.stderr)
         return 2
+
+    # Bind this session id to the sending role while we are already here. Token
+    # telemetry has no role field, so without this the spend can only be guessed
+    # at (29.9% unattributable on 2026-08-05). Hanging it off a step every role
+    # already performs beats adding a step every role has to remember.
+    record_session(args.root, args.sender)
 
     slug = re.sub(r"[^a-z0-9]+", "-", args.task.lower())[:32].strip("-") or "item"
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")

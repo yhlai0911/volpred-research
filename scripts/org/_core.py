@@ -215,6 +215,49 @@ def inbox_overflow_note(total: int, shown: int, inbox_path: Path) -> str:
     )
 
 
+def record_session(root: Path, dept: str) -> Path | None:
+    """Bind this Claude session id to a role, so token spend can be attributed.
+
+    Token telemetry (``~/.claude/projects/**/*.jsonl``) carries no role field: a
+    department's identity arrives through ``--append-system-prompt``, and the
+    system prompt is not written into the transcript. So "which department spent
+    these 8M tokens" has been answered by heuristics — 95 sessions measured on
+    2026-08-05 came out exact 22 / strong 15 / weak 44 / unknown 14, leaving
+    29.9% of the spend unattributable. One line of ground truth replaces all of
+    it, and the transcript file is named after this same id.
+
+    A JSONL rather than a field on the lease: one pane runs many sessions over a
+    day, and a single field would quietly overwrite the earlier ones — exactly
+    the spend you most want to look back at.
+
+    Best-effort by design. This is bookkeeping attached to work that has its own
+    reason to succeed; it must never be the thing that fails a send.
+    """
+    session_id = os.environ.get("CLAUDE_CODE_SESSION_ID")
+    if not session_id:
+        return None
+    path = runtime_dir(root) / f"{dept}.sessions.jsonl"
+    try:
+        if path.exists():
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if f'"{session_id}"' in line:
+                    return path  # already bound; recording it twice tells nobody more
+        path.parent.mkdir(parents=True, exist_ok=True)
+        record = {
+            "session_id": session_id,
+            "dept": dept,
+            "started_at": now_iso(),
+            "pane_id": os.environ.get("HERDR_PANE_ID"),
+        }
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+        return path
+    except OSError as exc:
+        print(f"[org] WARN — could not record session binding for {dept}: "
+              f"{type(exc).__name__}: {exc}", file=sys.stderr)
+        return None
+
+
 def declares_a_file(path: str) -> bool:
     """True when an owned_paths entry names a file rather than a tree.
 

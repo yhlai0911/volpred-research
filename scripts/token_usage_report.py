@@ -276,6 +276,20 @@ def _usage_breakdown(usage):
 
 
 def _billable_total(usage_or_bucket):
+    """Sum billable tokens from a NORMALISED bucket — never from raw turn usage.
+
+    The input must have been through ``_usage_breakdown()``. Raw API usage spells
+    cache creation ``cache_creation_input_tokens``; the normalised key is
+    ``cache_create_tokens``. Feeding raw usage here therefore reads cache
+    creation as zero and returns a number that is quietly far too small — the
+    resource-monitoring department's own tooling skipped the normalisation step
+    and under-reported 2026-08-04 by 9.8x (2,360,848 against a true 24,178,959)
+    while looking perfectly plausible.
+
+    Every caller in this repo normalises first. This line exists because the next
+    one is the one at risk, and a wrong total that looks reasonable is worse than
+    a crash.
+    """
     return (
         (usage_or_bucket.get("input_tokens", 0) or 0)
         + (usage_or_bucket.get("output_tokens", 0) or 0)
