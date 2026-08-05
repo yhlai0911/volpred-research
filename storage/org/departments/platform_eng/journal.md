@@ -37,6 +37,20 @@
 owned_paths（建議；擁有 `platform_ops` task_type 卻不能寫對應程式碼 = 所有 platform_ops
 任務都無法結案）；(B) 指派有寫入權的執行體照 P1–P6 套用。
 
+**同輪處理的 incident（不在派工單上，但屬本部門轄區）**
+
+收尾 commit 時發現 `git_writer_lock` 一律回 `cannot snapshot current index`；
+治理部與會員部同時送 P1 request 來（全 repo 的 commit 都過不去）。
+`.git/index.lock` 判定為孤兒——0 bytes、滯留 483 秒、`lsof` 無持有者、全機無 git 行程，
+四項 fail-closed 檢查齊全才動手，依 2026-07-28 前例**改名**保留為
+`.git/index.lock.stale-20260805T090147`（不刪除，證據留存）。解除後 `git status` rc=0，
+本部門 commit `fdecaaea7` 落地，兩個部門已回覆可重試。
+
+這只是 **contained**：這是 error_log 記載的 index.lock class **第 5 次**。機械 owner
+`phase_z.reclaim_leaked_index_lock()` 只回收帶 owner sidecar 的鎖，git 原生操作留下的
+無 sidecar 鎖落在盲區（2026-08-04 13:49 已知，followup 仍在池中）。修復面在
+`scripts/dispatch_supervisor/`——同樣寫不了，卡在同一張 owned_paths 裁決。
+
 **順帶回報的兩個流程缺陷**
 - 同一 canonical 任務被派三張重複工作項。
 - `alert_remediation_bridge` 對同一 detector 的同一根因開了第二張單

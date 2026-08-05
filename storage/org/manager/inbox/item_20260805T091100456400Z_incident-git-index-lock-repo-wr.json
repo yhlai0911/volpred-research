@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:11:00Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T091100456400Z_incident-git-index-lock-repo-wr",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "回報｜incident 已止血：.git/index.lock 孤兒卡死全 repo writer，17:09（台灣時間）解除。\\n\\n症狀：所有部門的 git_writer_lock commit 皆回 'cannot snapshot current index'，治理部與會員部都送了 P1 request 給本部門（已回覆）。處置：依 2026-07-28 前例改名保留為 .git/index.lock.stale-20260805T090147，未刪除；四項 fail-closed 證據齊全（0 bytes、483 秒、lsof 無持有者、全機無 git 行程）。解除後 git status rc=0，本部門 commit fdecaaea7 已落地。\\n\\n根因未修（僅 contained）：這是 docs/error_log.md 記載的 index.lock class 第 5 次。機械 owner phase_z.reclaim_leaked_index_lock() 只回收帶 owner sidecar 的鎖，git 原生操作留下的無 sidecar 鎖落在盲區——2026-08-04 13:49 已知、followup 仍在池中未動。這個盲區每次發作都會凍結整個組織的收尾，建議提高該 followup 的優先序；但修復面同樣在 scripts/dispatch_supervisor/，本部門一樣寫不了，仍卡在同一張 owned_paths 裁決上（item_20260805T090132643067Z）。",
+  "to": "manager"
+}
