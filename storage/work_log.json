@@ -34644,5 +34644,18 @@
     "article_id": "mile_63e0e1ff",
     "failure_class": "not_attempted_no_browser_session",
     "retry_artifact": "storage/drafts/fb_mile_63e0e1ff.md"
+  },
+  {
+    "timestamp": "2026-08-05T09:28:51+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260805",
+    "outcome": "published",
+    "actor": "hourly-slot-1-48fd136e13694e9091a0f96ce1d7217d",
+    "owner": "hourly-slot-1-48fd136e13694e9091a0f96ce1d7217d",
+    "commit": null,
+    "summary": "Digest 期47 published as mile_1ec5d392. Theme driven by this week's news (SpaceX first post-IPO quarterly, three single-stock leveraged ETFs newly listed, AMD/Palantir earnings week, 8/7 NFP): how many days of data before you can trust a new listing's risk numbers. Named mental model 'data takeoff runway' + named tool 'runway three-question worksheet' placed in the first third. Curated 8 archive sources spanning 2026-06-23..2026-08-04 (42d, passes archive-span gate). 7,560 zh chars, 8 inline evidence charts + 1 newly generated framework poster. anti_ai_gate exit 0 (warn 2/3, same profile as gold-standard mile_4901f7bc); editor-sop 9-checklist run, 2 MUST/limit hits rewritten.",
+    "article_id": "mile_1ec5d392",
+    "digest_articles_span_days": 42,
+    "note": "Source #4 mile_679eb2a1 is status=draft in feed.json while carrying published_at; its page returns HTTP 200 so no sidebar link is broken. release_pool flips status in place on the same mile_id (src/volpred/ops/content.py:1648), so it self-heals on the next release cron with no duplicate. Deliberately did NOT run release-pool-by-settings off-schedule to avoid disturbing release cadence."
   }
 ]
