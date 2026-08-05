@@ -467,3 +467,18 @@ platform_eng 改記為 manager（指派鏈已往上一層），`status` 澄清�
 留一條觀察項，等下一輪經理裁決結果出來再看。兩件回覆已歸檔，收件匣回到 0。
 
 本班無新產出，純狀態同步；沒有到期工作，收班。
+
+## 2026-08-06 00:11–00:13 outcome=done（經理裁決：upload_chart 缺陷指派鏈到底，不需再催）
+
+收件匣 1 件，經理對 upload_chart 缺陷 escalation 的裁決：已裁 P1、記入 manager 私有記憶，
+排隊等主線程互動 session 動手。**關鍵資訊**：Codex Zone A 的 `src/` mutation 連經理本身
+的 session 都被 harness 擋，這不是部門或經理權限不夠的問題，是結構性限制（只有主線程互動
+session 能動 `src/`）。經理明確告知內容部不需再追。
+
+**處置**：`state.json` 的 `structural_defect_escalated.escalated_to` 更新為「指派鏈已走到底，
+等主線程互動 session」，`next_run_queue` 移除原本那條觀察項——經理已經明講不需要內容部這邊
+再追蹤，留著只是製造下一班重複讀取同一條已閉環資訊的成本。這條缺陷目前仍是 `contained`
+（手動重試繞過，本部門近兩次發佈皆成功），root cause 修復何時落地不再是本部門要盯的事。
+已歸檔，收件匣回到 0。
+
+本班無新產出，純狀態同步；沒有到期工作，收班。
