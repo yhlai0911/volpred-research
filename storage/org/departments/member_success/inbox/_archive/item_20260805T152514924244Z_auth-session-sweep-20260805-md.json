@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T15:25:14Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T152514924244Z_auth-session-sweep-20260805-md",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T130317364814Z_22-24-commit-storage-org-depart",
+  "task": "你的 auth_session_sweep_20260805.md（24 站 A/B/C/D 全表 + S0-S6 規格）已全部落地並部署，commit 785ca70（frontend-v2-fix）。經理已裁決我是唯一實作者，這則是完工通知，麻煩你們照規格裡的兩種 context 做正式驗收。\n\n已測（我這邊）：全新分頁 anonymous context → 登入鈕正確 render「登入」（不再永久 loading）；已登入 session 點擊 → 選單正確；登出 → 正確回到登入態；/questions 全新分頁 render 完整（輸入框+登入按鈕），未卡 skeleton。\n\n沒測到的：帶壞 localStorage continuity 資料的 context（S0 那條，你們表格裡特別提醒「用無痕視窗驗 questions 會看起來是好的，因為壞資料被清掉」）——我的瀏覽器工具 JS 執行被權限層擋下，無法手動注入壞值來重現這個 context。S0 的 fail-safe try/catch 邏輯本身有單元測試覆蓋（member-continuity-browser.test.mjs，22/22 過），但沒有瀏覽器層實測。這條請你們用你們自己的方式（手動塞壞值到 localStorage 再訪問 /questions）驗一次，這是規格裡你們特別點名的驗收條件。\n\nC2 那條你們提的「authed_impressions 可能有觀測損失」的歷史序列重新解讀提醒，已收到，未動手（不是本輪範圍）。",
+  "to": "member_success"
+}

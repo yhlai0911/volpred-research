@@ -1,5 +1,72 @@
 # member_success 工作日誌（append-only）
 
+## 2026-08-05 23:15–23:3x（台灣時間）— 第十班：驗收做了，通過的部分通過，漏的那站是我漏的
+
+收件匣 1 件（platform_eng 完工通知 P1，commit 785ca70 已部署）。outcome=**done**。
+產出：`reports/auth_fix_acceptance_result_20260805.md`。
+
+### 我改了上一班的立場，理由寫在這裡
+
+上一班我說「治理部裁決前不用 MCP 驗收」。本班改為執行，因為**經理 D57 已明文要我
+「在 cockpit pane 實測」——那就是我這件事的授權**；治理部要裁的是通則，不是這一次。
+通則仍未定，我在報告裡標了。
+
+### 也更正上一班一個判斷（只更正錯的部分，不撤回結論）
+
+上一班我寫「探測會毀掉被探測的對象」。**驗收 1 的失格條件是「帶著登入 session」，
+不是「造訪過」**——`sessionStorage` 是 per-tab，新分頁本來就是空的。導覽一台瀏覽器到
+本站不會讓它失去驗收 1 的資格。陷阱沒有我上一班說的那麼大。
+（結論不變的部分：乾淨匿名 context 仍需要一台沒有登入 session 的瀏覽器。）
+
+### 瀏覽器：這次是真的按下去了，不是推論
+
+| MCP 動作 | 結果 |
+|---|---|
+| `list_connected_browsers` | 可用（8 台） |
+| `tabs_context_mcp`（含建群組） | 可用 |
+| `tabs_close_mcp` | 可用（建的分頁已清掉） |
+| `select_browser` | **deny**（don't ask mode） |
+| `navigate` | **被 auto-mode classifier 擋下** |
+
+**開得了分頁，載不了頁面。** 這與 platform_eng 回報的「JS 執行被權限層擋下」
+是同一道牆的兩面——**實作方與驗收方被同一個權限層擋在瀏覽器外**，
+所以「請對方用自己的方式驗一次」在目前機制下對誰都不成立。已請經理裁。
+
+### 驗收結論
+
+- **驗收 3（class sweep 全量）通過**：A 類 12 站 inline bootstrap 全數消失、
+  B 類 5 站收編、C 類 7 站逐一到位、無第四套 helper、不留兩套、雙版逐行對應。
+  約束 3 特別確認：AuthButton 的 `useState(!getCachedUser())` 已改成
+  `status === 'loading'`，**sessionStorage 依賴整條移除**。
+- **驗收 2 模組層通過**：我讀的是**斷言不是 22/22**——舊 schema 重建成 v1、
+  `warnings.length >= 1`、壞 JSON 可存活、拒絕持久化的裝置仍拿到可用物件。
+  三個通過條件模組層全被涵蓋。
+- **驗收 1 未由驗收方驗證**：platform_eng 自測通過，但自驗不是驗收（D48 的分工本意）。
+  D25 第 5 條**不結**，改記「實作方自測通過，驗收方無執行能力」。
+
+### 比瀏覽器實測更有力的一項發現
+
+原失效鏈：`read()` throw → `useEffect` 當場中斷 → 同一 effect 後面的 `getSession()`
+根本沒被呼叫 → `authLoading` 永久 true。
+現在 `authLoading` 來自 `useRadarSession()` 的 status，**不再由任何 page-local effect
+決定**，而 `read()` 被移進只還原草稿的獨立 effect。
+**就算 `read()` 還會 throw，也卡不住 `authLoading` 了。** S0 與 S4 是兩道互相獨立的
+防線。所以缺瀏覽器實測的殘餘風險，比 platform_eng 通知裡描述的低——這是結構性證據，
+比單一次瀏覽器觀測更強。
+
+### 我自己漏的那一站（本班最該記的一件）
+
+`components/OpsConsole.tsx:363-380` 是 inline `getSession().then()` 無 catch +
+自帶 `onAuthStateChange`，**不在我交出去的 24 站裁定表裡**。
+platform_eng 把我給的 24 站全做完了，這站他們沒理由知道。**責任在規格方。**
+嚴重度低（不 gate render，但 reject 後 `hasCredential` 恆 false → 資料永不抓，
+C7 同型靜默失效，掛 `/admin/ops`）。補列 C8，不阻擋本輪完成定義。
+
+錯因：我當初寫「grep 命中 31 筆，扣掉註解與自身實作，**全量 27 站**」——
+**有母體卻沒有逐筆核對**，用一句概括帶過差額。這正是我自己那份
+`evidence-not-absence` skill 第 1 節寫的「窮舉才能說全部」反過來咬我。
+已寫進 skill（實例三 + 檢查清單第 1 節補一段：窮舉是逐筆核對，不是查詢範圍夠大）。
+
 ## 2026-08-05 22:45–22:5x（台灣時間）— 第九班：拿到了授權，但授權開的不是那道門
 
 收件匣 1 件（經理 D57 派工 P1，裁 (甲) 授予 computer_use）。outcome=**done**（回報＋兩則待裁已送）。
