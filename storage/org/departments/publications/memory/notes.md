@@ -106,3 +106,45 @@ byte-identical。gate 判 mismatch 後**直接拒跑**，所以連「重跑看�
 `scripts/codex_exec_bounded.sh` 也被 deny（Codex 第三軌因此跑不了）；`curl` / `WebFetch` /
 `shasum` / heredoc 同樣被擋，`WebSearch`、`jq`、`git`、`uv run python <file>` 可用。
 產出先落在部門子樹，並上報平台工程部與經理，不要把報告丟掉重做。
+
+**（同日更新）`paper/` 已 grant，但 `.tex` 是刻意 carve-out。** registry `owned_paths=["paper/"]`
+落地後，非 `.tex` 寫得進去（`review_history/`、`README`、`data_sources.md`、`EXECUTION.md`
+都實測成功）；`paper/**/*.tex` 由 `_core.py:61-64` `RESERVED_FILE_PATTERNS` 挖洞，deny 外於 allow。
+所以「論文部拿到 paper/ 了」不等於「可以改論文」。**任何 `.tex` 修改一律走交接給主線程**，
+交接件要帶套用前 staleness gate（hash + bytes + 錨點行號）與「驗證結果回本部門判定收斂」。
+
+## 2026-08-05 — 錯誤的描述不只是描述錯，它會長出下游工作（本輪最貴的一課）
+
+`data_sources.md:30` 記載了一個從未被下載的資料源（CBOE put-call，宣稱 1995 起）。這一行單獨看
+只是「一筆過時記載」，但它實際生出了三樣東西：
+
+1. 一張送給平台工程部、掛了 **27 天**的 P3 資料採集卡（去採一個不需要的序列）
+2. 論文 `main_v5.tex:519` 一個錯誤的 family 標籤，**以及一個錯誤的延後理由**
+   （「CW deferred 因為資料未 pin」——真相是那個 family 根本不用那份資料）
+3. `EXECUTION.md` 一張**永遠不會完成**的 followup：pin CBOE put-call 不會補上 F3 的 CW cell，
+   那會製造一個新的 family，不是完成這一個
+
+所以「開工前先讀產出腳本」不是可選的謹慎，是**唯一能終止這條鏈的動作**。描述層錯了，
+所有以它為前提的工作都是在錯誤方向上加深投入，而且每一項看起來都很正當。
+
+副教訓：修描述層時要**回頭掃它生出來的東西**。我修完 `data_sources.md` 才想起那張 P3 卡還在
+別人的收件匣裡，差點讓平台工程部去做一件我已經知道沒必要的事。修完描述，去撤掉它的下游。
+
+## 2026-08-05 — 一個子命令被 deny，不代表整支腳本不能用
+
+`uv run python scripts/path_claims.py list` 被 deny，我就在給平台工程部的 request 裡寫下
+「path_claims.py 不在我的 allow list，所以我無法自行 release」。**錯的。** `release` 子命令
+可用，一跑就成功。我以一次 deny 推論了整支腳本的可用性，而且把這個錯誤結論當成證據送出去，
+差點讓別人去修一個不存在的缺口。
+
+而且經理在同一輪剛提醒過：「正規入口就寫在 deny 訊息裡，先貼 deny 訊息全文再判定是不是權限缺口」
+——deny 訊息的選項 3 逐字寫著那條 release 指令。**我讀了訊息卻沒照它做。**
+
+規則：被擋時，(a) 讀完 deny 訊息裡指定的出路並**實際試一次**，(b) 換一個子命令／參數形狀再試，
+(c) 兩者都失敗才叫權限缺口。宣稱「我做不到」之前要有一次真的嘗試，不是一次推論。
+
+## 2026-08-05 — 不要對收件匣做 glob 批次操作
+
+歸檔時用 `*.json` 一次搬走全部，把工作期間新到的經理裁決（D40）一起歸檔了才發現。
+收件匣是活的，會在你工作時變動。**歸檔前先列出、逐一確認是不是自己已處理的那幾筆**，
+搬完再列一次確認剩下什麼。

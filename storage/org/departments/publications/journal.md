@@ -506,3 +506,67 @@ vt-insurance-cost 的投稿時機還牽涉「兩篇 VT letter 不得同時投 FR
 ### 下一步（等經理裁決）
 
 經理指派後即可開工；論文部不自行排班（min_cadence=on-demand）。
+
+---
+
+## 2026-08-05 19:03–19:2x — D38/D40：MAJOR-1 套不了（`.tex` carve-out）＋ F3 誠實線查證 — `outcome=blocked`（前）＋ `done`（後）
+
+工作項 `item_20260805T110245261749Z_d38-…`（經理 P1）與裁決回覆 `item_20260805T111021217315Z_d40-…`。
+
+### 一句話
+
+`paper/` 授權是真的，但 `.tex` 被**刻意** carve-out，六個 edit 全在 `main.tex`，一個都套不了；
+經理裁決 D40 改由主線程套用，本輪改為完成 vix-sufficiency Family 3 誠實線查證並修完其中所有
+非 `.tex` 的缺陷。commit `3e051572b`。
+
+### D38 前提為何不成立（機械證據，非推測）
+
+- `storage/org/runtime/publications.settings.json:16-19` 同時有 allow `Edit/Write(paper/**)`
+  與 deny `Edit/Write(paper/**/*.tex)`。deny 外於 allow。
+- `_core.py:61-64` `RESERVED_FILE_PATTERNS` 只有一條 `paper/**/*.tex`，註解直引 CLAUDE.md。
+- `org_attach.py:228-239` 註解把本情境逐字舉為例：「`paper/` while `.tex` authorship stays main-thread」。
+- 落地 commit `fc9f7e328`（今天 18:56）**比經理裁決晚 8 小時**——不是快照過期。
+
+**沒有用 Bash sed / python 繞過。** 經理 D40 已採信並更正裁決前提：A 核准（主線程套用）、
+B 駁回、C（把 carve-out 收窄成「方法論決策 vs 機械套用」）轉治理部 D41 研議。
+
+### 套用前已完成、不因阻塞而作廢的事
+
+`main.tex` 回讀仍 hash `8852326a…c86ed` / 30,408 bytes ＝ round 未 stale；六個 FIND 錨點
+逐一確認存在、在原行號（207/198/39/118/111/195）、且全檔唯一。Edit 2/3/6 要寫進論文的數字
+全部從 JSON 重新回讀，未從指示書轉抄：QQQ lag t=2.9523 / p=0.00319、QQQ exp t=2.2819 /
+p=0.0226、0050.TW exp t=−0.3175；overnight share EEM 70.65 > TAIFEX 68.90 > 0050.TW 63.49
+> GLD 60.94（確認 0050.TW 漏列為實）。依 D40 §1 已把 hash+bytes+錨點行號寫進
+`work/prg_v8_edit_instructions.md` 檔頭作為套用前 staleness gate，並註明驗證結果回本部門
+判定收斂，不由套用者自行宣告。
+
+### F3 誠實線：查證結論
+
+**K732 從未使用任何 put-call 序列。** 腳本 `:53-58` 只下載 SPY/GLD/^VIX/^SKEW/^VIX3M；
+BSI 是四個 VIX/SKEW 百分位的等權平均；檔頭 `:11` 與 results JSON 的 `data_limitation`
+都明記代換；repo 與 package 兩份 JSON 逐字相同。
+
+論文 §3.2.3（`main_v5.tex:210-212`）**是誠實的**。缺陷在 `main_v5.tex:519` 一句：把 F3 叫作
+「behavioral put-call ratio」，並宣稱其 Clark-West 因「CBOE put-call volume … not yet pinned」
+而 deferred——**標籤與延後理由皆不成立**。
+
+附帶挖出整套舊 family 編號留在 package（3-cycle：舊 8→新 11、舊 10→新 8、舊 11→新 10），
+以及 `data_sources.md:3` 還停在「Eleven Signal Families」。
+
+已修（全非 `.tex`，回讀驗證）：`data_sources.md:3/30/31`、`experiments.md:18/20/28/30`、
+`EXECUTION.md:73`。虛構的 PCR 列換成實際的 `^SKEW` 列，順帶修掉多報 16 年的樣本期間
+（宣稱 1995 起，實際 2011-01-07 – 2026-03-20, n=3,760）。完整記錄：
+`paper/vix-sufficiency/review_history/f3_description_audit_20260805/README.md`。
+
+### 需經理裁決（已送，我沒有自行決定）
+
+BSI 四個分量有三個由 VIX 導出，只有 SKEW 在 VIX 複合體外。在一篇主張 VIX sufficiency 的論文裡，
+F3 的 null 有四分之三權重落在「VIX 的重組贏不了 VIX」，接近恆真。不是造假（§3.2.3 誠實列了成分），
+但當成十三分之一的獨立 family 會被審稿人指出。三選項 (a) 加自我限定 /(b) 降級為 robustness 診斷、
+家族數改 twelve /(c) 取得 put-call 重做。建議 (b)，但動到標題與家族計數、牽涉投稿定位，不自行決定。
+
+### 未做什麼
+
+`main_v5.tex:519` 未動（無寫入權，已交主線程）。`reproduce.py` 未重跑（無 `uv run` 該腳本權限；
+本輪只動 `.md`，該 gate 驗 tex↔JSON 綁定，不受影響）。`scripts/README.md` 只索引 5/13 個腳本、
+K732/K736 抄錯格欠帳未清——已記在 round README，屬另案。
