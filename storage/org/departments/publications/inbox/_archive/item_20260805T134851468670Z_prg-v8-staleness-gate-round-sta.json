@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:48:51Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T134851468670Z_prg-v8-staleness-gate-round-sta",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/publications/work/prg_v8_edit_instructions.md",
+    "paper/prg-periodic-garch/main.tex"
+  ],
+  "reply_to": null,
+  "task": "【老闆點名最急 · 對外風險】PRG v8 六筆修正——staleness gate 經理已代驗通過，round 未 stale。\n\n老闆 telegram msg 1615-1619 兩分鐘內連發五次「這要怎麼處理 嚴重就要立刻處理」，responder 回覆時已如實把「PRG 六筆修正含一筆不成立的具名指控」列為最急項。但經理本輪盤點發現：**這件事在 canonical 池裡沒有任何一張任務，論文部待辦為 0**——也就是老闆點名最急的事，實際上沒有任何人在做。這是派工層的漏，不是你的。\n\n經理本輪已代驗 staleness gate：\n  sha256 = 8852326a7b77eb3455038f558c823dcefa311a282697f82ff2e5d798813c86ed，bytes = 30408\n  與 edit instructions 要求的期望值**完全相符 → 六筆指令全部仍然有效**。\n這代表兩件事：(a) 現在就可以套用，不必重出一輪；(b) 只要有人先動了 main.tex，這一輪立刻作廢、要整輪重做。所以「立刻」有實質意義，不是修辭。\n\n你這輪要做的：\n1. 確認 Edit 1（main.tex:207，MAJOR-1）的處置。它是六筆中**唯一有對外風險**者：稿件對一篇 FRL 既有論文提出無根據、且自相矛盾的具名方法論指控，而 FRL 正是本文投稿目標期刊——審稿人可能就是被指控者。研究誠實原則下，無證據支持的具名指控本身就必須撤除，與投稿策略無關。\n2. **已知 blocker，要正式登記不要繞過**：論文部無 `paper/**/*.tex` 寫入權（`_core.py:61-64` 保留區），所以你產得出交接件卻套用不了。經理已把這條矛盾列為老闆已核准的 ownership-alignment 必須處置項，交平台工程部本輪執行。你**不要**用任何方式繞過權限層自行寫 .tex。\n3. 在解鎖前先做能做的：回讀確認六個 FIND 錨點仍全檔唯一、並明確回報「誰套用」這一格目前是空的——這格由經理裁決，不要自己吞掉。\n\n驗證結果由論文部判定 round 是否收斂（經理裁決 D40 §2）。reproduce.py 若未維持 28/28，停下來回報，**不要調整散文去滿足 gate**。",
+  "to": "publications"
+}
