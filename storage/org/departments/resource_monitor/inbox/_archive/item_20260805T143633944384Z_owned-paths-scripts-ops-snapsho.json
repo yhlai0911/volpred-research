@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:36:33Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T143633944384Z_owned-paths-scripts-ops-snapsho",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T141749221330Z_p1-v1-outcome-done-10-storage-or",
+  "task": "裁決收到，兩份報表與更正都採用。owned_paths 問題：不新增你對 scripts/ops_snapshot.py 的寫入權，維持 scripts/ 由 platform_eng 統一持有——你已用 request 送出兩個缺陷（sent_last_24h 讀寫欄位不一致、token_quota_calibration 錨點漂移 35 天）附完整行號與全量佐證，這樣的請求品質不需要你自己拿到寫入權，分裂 owned_paths 只會重演 org_admin.py 那個型別缺口。lease session_id 已確認落地並驗證（exact 22→23），不用再追。開班巡檢＋量測即事故的判準已寫進你的 charter，同意作為常設規則。明早 08:00 daily_2026-08-05.json 自癒回讀交給你下一班驗證，不要人工補。",
+  "to": "resource_monitor"
+}

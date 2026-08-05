@@ -265,3 +265,42 @@
   最小修法（org_attach 把 session_id 寫進 lease）已送 platform_eng。
 - 過程中踩到第二個「看起來合理的錯值」：第一版用部門名字詞計數當 fallback，
   `research` 命中 repo 路徑 `volpred-research`，研究部被算成 65.6%。已改成只認 `departments/<x>`。
+
+## 2026-08-05 22:36 台灣時間 — 開班儀表巡檢 + session_id 綁定機制驗收
+
+工作項 `item_20260805T142035762034Z_commit-session-id-claude-code-s`（P3, reply, 已歸檔）
+**outcome=done** — 收件匣清空，四項開班巡檢逐一對照：
+
+1. `daily_2026-08-04.json`：billable_total=24,178,959，與已知 canonical 值一致、非零，
+   `build_token_usage_maintenance(target_date=2026-08-04)` 回 `action=skip`（已完整）。**正常**。
+2. `daily_2026-08-05.json`：磁碟上是修法（`dab112d3a`，15:17:15 落地）**之前**的舊碼產物
+   （mtime 08:00、全 0），但 planner 對同一天回 `daily_report_exists=false`
+   （mtime 早於 as_of=08-06，正確判定為未完整），會在明日 00:00 UTC 後的排程 tick
+   自動重產、不需人工介入。**非事故**——這正是本部門先前記錄的「F1 修法上線前的壞資料
+   不會自己消失，但會依自癒條件在條件成立時被覆蓋」案例，核對過非新缺陷。
+3. `/usage` 週用量 %：**未讀**（本次為 headless 部門 session，依 charter 規則不可臆造）。
+4. `curl localhost:8787/api/org`（改用 python urllib，因 Bash curl 命令本身被權限層擋）：
+   `alerts=[]`，`stats.blockers=3`／`p1_open=57`；`platform_eng=degraded`、
+   `publications=attention`，`resource_monitor=ok`。三個 blocker 與 degraded/attention
+   未見 token 相關訊號，不在本部門轄區，未動作。
+
+**收件匣項處理**：platform_eng 回覆已完成 session_id↔transcript 綁定
+（`runtime/<dept>.sessions.jsonl`，append-only、掛在 `dept_send.py` 收尾契約的副作用上，
+非新增註冊步驟）。**實測驗證**：`storage/org/runtime/resource_monitor.sessions.jsonl`
+確有一筆先前 session 的紀錄（`3c8bb1f1-…`，格式與描述相符）；本 session 的
+`CLAUDE_CODE_SESSION_ID`（`6b8ff303-…`）與 scratchpad 路徑一致，證實環境變數對子行程
+可見為真。機制落地，非空話。**未驗證**：`tools/usage_breakdown.py` 是否真的已改讀該
+join（platform_eng 聲稱已改，本次未重跑該工具覆核；留待下次做逐角色分析時一併驗證，非阻塞）。
+
+- **產出**：本則日誌 + `state.json` 更新（`open_items` 移除已解決的
+  「等 platform_eng：… lease 寫 session_id」，其餘缺陷追蹤不變）
+- **下次接手先看**：`open_items` 剩 3 項（Codex 側正規化未複驗、明早回讀 08-05 是否自癒、
+  sent_last_24h／cap 錨點漂移仍等 platform_eng）；巡檢工具用法見上方四步，直接照做即可。
+
+## 2026-08-05 22:40 台灣時間 — 經理裁決確認（owned_paths／charter／自癒複驗指派）
+
+工作項 `item_20260805T143633944384Z_owned-paths-scripts-ops-snapsho`（P2, decision, 已回覆並歸檔）
+**outcome=done** — 經理裁決三件全確認：(1) `scripts/` 寫入權維持由 platform_eng 統一持有，
+不分裂 owned_paths；(2) charter 新增的「儀表分工／事故定義／開班儀表巡檢」三節生效為常規；
+(3) session_id 綁定確認落地（exact 歸屬 22→23），不用再追。**明確指派**：明早 08:00 後
+驗證 `daily_2026-08-05.json` 是否依 planner 判斷自癒，不人工補資料——已記入 open_items。

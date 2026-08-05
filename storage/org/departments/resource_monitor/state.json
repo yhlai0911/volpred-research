@@ -94,12 +94,13 @@
     ],
     "window": "2026-07-29..2026-08-04 (UTC, 7d)"
   },
-  "last_run": "2026-08-05T14:16:38Z",
+  "last_run": "2026-08-05T14:36:00Z",
   "open_items": [
     "停擺窗佔比用修好的工具重做（舊值 52.1% 已作廢）",
     "查 Codex 側 _iter_codex_session_records 是否同樣需要正規化（歷史金額待複驗）",
     "明早 08:00 後回讀 daily_2026-08-05.json 是否自癒（不人工補）",
-    "等 platform_eng：sent_last_24h 讀寫欄位、cap 錨點漂移、lease 寫 session_id"
+    "等 platform_eng：sent_last_24h 讀寫欄位、cap 錨點漂移（session_id 綁定已於 14:20 交付並實測驗證，移出待辦）",
+    "tools/usage_breakdown.py 是否已真的 join runtime/*.sessions.jsonl，下次逐角色分析時覆核（platform_eng 聲稱已改，本班未重跑驗證）"
   ],
   "open_items_detail": [
     "R3 session 壽命的 fork-root 層級尚未重算（目前只有下界 103.76h）",
