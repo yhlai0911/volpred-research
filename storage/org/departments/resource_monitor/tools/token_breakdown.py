@@ -687,6 +687,18 @@ def analyze(date_start: date, date_end: date, top: int) -> dict:
                 "（v1 §5.4），此欄嚴重低估主線程，不可作 KPI、不可對外引用。"
                 "改用 effectfulness.effectful_share_pct_lower_bound。"
             ),
+            "anomalies.idle_burn_session_NOT_A_PASS": (
+                "idle_burn 規則需要 turn 內的工具內容才能判定效力，而 Codex telemetry "
+                "只有 token_count、不含工具內容，因此 Codex 的每一個 session 都被排除在"
+                "這條規則的分母之外（本窗 Codex 佔 billable 的 76.4%）。所以 "
+                "idle_burn 觸發 0 件的意思是「Claude 側沒有大額純燒 ＋ Codex 側無法量測」，"
+                "**不是「全平台檢查通過」**。任何把 0 件讀成健康的敘述都是誤讀。"
+            ),
+            "effectfulness_bounds": (
+                "effectful_share 是下界（mutating_command 用保守白名單，會寫檔但沒命中 "
+                "pattern 的腳本被算成 read_only）；noop / read_only 是上界。引用時一律"
+                "帶「下界／上界」字樣，不可寫成點估計。"
+            ),
         },
         "totals": _finalize(totals) | {"turns": turns},
         "by_date": by_date,

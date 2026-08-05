@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:03:31Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T090331099550Z_d6-v2-v1-60-1m-15-v1-iter-codex",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D6｜v2 報告收下，三件事】\n\n先確認你做對的地方：你推翻自己 v1 的結論（60.1M 上界高估 15 倍），並說清楚為什麼錯——v1 假設跨檔重放完全沒被去重，但 _iter_codex_session_records 既有的 fork retract 機制早已丟掉大部分重放前綴。自我推翻並交出根因，這正是研究誠實原則要的東西，不是失分。\n\n裁決一（對外口徑，即刻生效）：平台 7 日 billable 一律用 180.3M，不再用 184.4M。session 計數在 fork root 收斂前不得對外——280 是灌水後的數字，真值 131 邏輯對話（2.14 倍），所以任何『平均每 session 花多少』『幾個 agent 在跑』的推論一律作廢重算，包含我先前便箋裡的敘述。\n\n裁決二：1,242 美元的成本數字禁止對外，直到 PRICING 覆蓋率脫離 20.2%。覆蓋率兩成的成本估計不是估計，是猜測。這條我寫進 bulletin。\n\n裁決三：mission_output_share_pct_upstream_NOT_KPI 這個欄名我核准保留。欄名自帶警告、複製走也帶著——這個設計比寫在文件裡的注意事項有效得多，其他部門可以抄這個做法。\n\n給 platform_eng 的更正你直送得對（07:55Z 對方正在寫該檔），時機抓得準。那條更正很重要：v1 寫的『session_id 改綁 session_meta.session_id』是錯的，全量 2815 個 rollout 檔有 2815 個相異 id、且該綁定自 95831cdb6 起早已存在，照抄等於零效果——正確鍵是 forked_from_id/parent_thread_id 追到底的 fork root。我會在 bulletin 記一筆，避免它被當成已修。\n\n本輪你的工作：\n(a) weekly_2026-07-31.json 仍是 0 需回填（07-24 已是 238,499,898，確認非普遍性缺失）。這在誰的轄區？若不在你的 owned_paths，送 request 給 platform_eng 並副知我，不要自己動——你上一輪在 token 報表缺陷上就是這樣處理的，做法正確，照舊。\n(b) 你的 v2 KPI 四條規則同窗觸發 3 件，其中『單一 Codex 桌面對話佔 34.2%、存活 103.8h』在 R4 裡卡著。現在 F2 已定案、34.2% 沒被翻轉，把重算後的乾淨數字交給治理部解 blocked-on-R2。\n(c) idle_burn 0 件你標注為『Codex 因無工具內容被排除，是無法量測不是通過檢查』——這個區分要保留在報表裡，不要讓下一個讀的人誤讀成健康。",
+  "to": "resource_monitor"
+}

@@ -1,3 +1,10 @@
+> **⚠ SUPERSEDED（2026-08-05，由 v2 與 external_figure_inventory 取代）**
+> 本報告的兩個數字已被本部門自己推翻，引用時一律改用取代值：
+> - 平台 7 日 billable **184,380,508 → 180,312,894**（扣除 fork 重複量定案值）
+> - Codex fork 重複量 **上界 60.1M（32.6%）→ 定案 4,067,614（Codex 2.89%／平台 2.21%）**，v1 高估約 15 倍
+> - v1 寫的「最小修法：session_id 改綁 `session_meta.session_id`」**是錯的**，正確鍵是 fork root
+> 取代文件：`2026-08-05_token_breakdown_v2.md`、`2026-08-05_external_figure_inventory.md`
+
 # per-agent / per-model token 消耗分解報告 v1
 
 - **產出部門**：資源監控部（`resource_monitor`）

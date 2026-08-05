@@ -16,14 +16,20 @@
     "codex_sessions_counted_now": 280,
     "codex_share_pct": 76.4,
     "cost_coverage_pct": 20.2,
+    "cost_uncovered_billable": 147076060,
+    "cost_uncovered_share_pct": 79.8,
+    "cost_usd_extrapolated_reference_NOT_MEASURED": 6141,
     "cost_usd_priced_portion": 1242.43,
     "daily_report_usable": true,
     "effectful_share_pct_lower_bound_claude": 41.65,
+    "external_channel_sole": "daily 08:00 Asia/Taipei token report email (scripts/token_report_email.py)",
+    "external_incorrect_sends_pending_correction": 6,
     "mission_output_share_pct_upstream_NOT_KPI": 4.5,
     "noop_text_only_share_pct_upper_bound_claude": 2.68,
-    "note": "F2 已 turn-level 定案；F3 未修前成本數字仍不可對外",
+    "note": "F2 已 turn-level 定案；F3 未修前成本數字仍不可對外；集中度 34.2% 已更正為 fork-root 層級 59.0%；weekly_2026-07-31 回填需求已撤回（判讀錯誤）",
     "platform_billable_total_reported": 184380508,
     "platform_billable_total_settled": 180312894,
+    "session_longevity_hours_lower_bound": 103.76,
     "structural_defects_closed": [
       "F1_daily_report_utc_boundary(commit dab112d3a)",
       "F4_no_concentration_rule(v2 rules shipped)"
@@ -31,13 +37,22 @@
     "structural_defects_open": [
       "F3_pricing_coverage",
       "F2_fix_pending_platform_eng(session identity -> fork root)",
-      "weekly_2026-07-31_zero"
+      "6_sent_daily_emails_showing_zero_pending_manager_ruling"
     ],
+    "top_root_concentration_pct": 59.0,
+    "top_root_concentration_pct_session_id_level_UNDERESTIMATE": 34.2,
     "weekly_report_gap": [
-      "weekly_2026-07-31 billable=0"
+      "weekly_2026-07-31 是未來週(07-31->08-07)的提前空殼，非缺陷；dab112d3a 會在 08-07 後自動重產（2026-08-05 實測 weekly_due=false）"
     ],
     "window": "2026-07-29..2026-08-04 (UTC, 7d)"
   },
-  "last_run": "2026-08-05T08:03:01Z",
-  "open_items": 0
+  "last_run": "2026-08-05T09:10:00Z",
+  "open_items": 5,
+  "open_items_detail": [
+    "R3 session 壽命的 fork-root 層級尚未重算（目前只有下界 103.76h）",
+    "待 platform_eng 交付 fork root 修法後執行 6 項回讀驗證",
+    "F3 PRICING 覆蓋率 20.2% 未修，成本欄位在修好前不可對外",
+    "已對外的 6 封今日 0 日報，更正方式待經理裁決",
+    "weekly_2026-07-31.json 待 2026-08-07 後自動重產，屆時回讀確認（不需人工回填）"
+  ]
 }
