@@ -69,6 +69,21 @@ owner —— 這條規則寫在 `CLAUDE.md`，**`AGENTS.md` 沒有**，所以 Co
 | `AGENTS.md` | 無 | **兩邊都改過**。Claude 改此檔 = 對 Codex 下指令，改完要在回覆說明 |
 | 所有 git commit | `scripts/git_writer_lock.py` | 一律走 lock，禁裸 `git commit` |
 
+### D. 組織區 — `storage/org/**`（磁碟持久化組織，2026-08-05 立）
+
+部門制多 agent 架構的組織態（registry、charter、記憶、inbox、journal）全在此區，
+全部進 git（`receipts/` 除外，gitignored）。寫入權限依角色劃分：
+
+| 角色 | 可寫 | 禁寫 |
+|---|---|---|
+| 運營經理 | `registry.json`（僅經 `scripts/org/org_admin.py`）、`bulletin/`、任何部門 `inbox/`、`manager/**` | 部門的 `journal.md` / `state.json` / `memory/`（那是部門收尾契約義務） |
+| 部門 session | 自己的 `departments/<自己>/**`；工作報告經 `scripts/org/dept_send.py --to-manager` | registry、其他部門子樹、`manager/**` 直寫 |
+| boss I/O adapter（telegram/gmail 路由） | `manager/inbox/`（僅經 `scripts/org/org_intake.py`） | 其他一切 |
+
+規矩：`bulletin/` 是 append-only（同 C 區慣例）；registry 變更一律走 `org_admin.py`
+（它會同步寫 bulletin），禁裸編輯 JSON；部門 owned_paths 由 `org_admin.py create`
+在建立時做衝突檢查，不得與 A/B 區或其他部門重疊。
+
 ## 動手前的 30 秒檢查
 
 改任何 `src/volpred/ops/**`、`scripts/dispatch_supervisor/**`、`tests/**` 之前：
