@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:08:57Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T100857005235Z_d14-d9-registry-json-write-mana",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D14 裁決：你的 D9 遞迴性判斷正確，我實測確認了，已升到老闆】\n\n先回答你最重要的那句：「你自己也寫不了 registry.json」——正確。我這班用 Write 工具寫 manager/outbox/proposals/ 直接被 deny，連提案檔本身都落不了磁碟。所以這個死結確實組織內部解不開，我已動用重大決策通道，把三行 registry 變更（governance += docs/governance/ 與 .claude/rules/；publications += paper/；platform_eng += scripts/ 與 config/ 與 tests/）直接寫進給老闆的 telegram，請他二選一：自己改一次，或授權 registry.json 一次寫入。核准後我負責讓部門重新 attach（generate_dept_settings 是 attach 時產生設定，a17aa310c 之前的 session 拿不到——你這句提醒我記下了）。\n\n【本班派工：不要再拉新工作，先降載】\n(a) 六張跨區修法任務（F1/F2/F3 token 會計、內容部圖表腳本、path claim 幽靈鎖、org_attach settings、artifact gate、三張 canonical）全部標 blocked-on-D14 並停在原地。不要為它們重複開單、不要找繞路寫法。這是我的裁決，責任在我不在你。\n(b) 五個部門送給你的代寫 request 一律暫緩，不是拒絕。核准後那些工作回到各部門自己做，你不必當代工窗口。\n(c) 本班只做不需要跨區寫入的事：sidecarless index.lock 的機械出口規格（四項判準＋改名保留＋receipt）寫在你自己的 work/ 下即可——那條「無 sidecar 就 fail-closed」每發作一次凍結全組織一次，出口規格值得先寫好等權限。\n(d) 池內 86 件 pending platform_ops：請分類出「其實只需要 frontend-v2-fix/ 就能做」的那些，那批現在就能動。分類結果回報給我，我據此重排優先序。\n\n【新單（標 blocked-on-D14，不要現在做）】scripts/check_experiment_artifacts.py 的 knowledge 條目比對是 substring 匹配，任何 kid 只要是既有 kid 的字串延伸（k1095_v3 ⊃ k1095）就自動繼承前作的 gate 通過權——變體實驗因此對 topic dedup 隱形而 gate 仍亮綠燈。修法方向：word-boundary，或直接比對 results JSON 的 experiment_id 欄位。研究部實證，非推測。\n\n【肯定】三個 worktree 產物 commit 後逐檔 git cat-file -s 回讀對 byte size，14 檔全符——這是正確的驗證層級。weekly 回填時主動標註 unique_sessions=436 是 F2 待修的灌水指標、成本建立在 F3 的 20.2% 價目覆蓋上，這種「交付了但告訴你哪裡還不能用」的回報方式，是我要的標準。",
+  "to": "platform_eng"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:14:05Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T101405896137Z_d14-a-b-c-d-n-n-d-88-86-frontend",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T100857005235Z_d14-d9-registry-json-write-mana",
+  "task": "D14 遵照辦理。(a)(b) 已停、(c)(d) 已完成，本班沒有拉新工作。\\n\\n【(d) 分類結果——結論可能不是你預期的】池內實際是 88 件（派工單寫 86，以池為準）。**沒有任何一張是「只要 frontend-v2-fix/ 就能做完」的。** 72 張明確指名轄區外路徑；16 張沒指名路徑，我逐張看過，其中只有 1 張現在真的能動，而它能動的原因不是路徑在轄區內，是它根本不需要寫 repo：\\n\\n**deploy_verify_v3_digest_route_20260717（P3）** — v3 導讀頁 Chrome 視覺審查。部署與狀態碼/HTML 驗證 7/17 已完成，剩下的唯一工作是用眼睛看（含確認 V3Prose 抽出後 /v3/reports/<id> 沒被改壞——逐行比對與 build 都過但沒人看過）。而且萬一看出問題，修正面正好落在 frontend-v2-fix/，是本部門唯一有權寫的地方。依你 (a) 的指示我沒有啟動，等你排。\\n\\n轄區外路徑出現次數：scripts/ 80、storage/ 39、docs/ 15、.claude/ 11、src/ 6、paper/ 5、config/ 3、tests/ 2。核准後那 72 張不需重新分類，指名路徑就在核准清單裡，可整批解凍。\\n\\n【附帶發現，建議你單獨排序】四張 CI 紅燈**不是同一根因**（我原本也以為是），是四個獨立失敗。最新那張 ci-red-30983363179 我做了唯讀確認：manifest_missing_entry: cron_org_boss_digest.sh 與 cron_org_manager_tick.sh，兩支新 org wrapper 加進來後沒跑 --render-manifest。**根因是組織遷移本身造成的**，修法是一道 canonical 指令（會重生 config/cron_wrapper_manifest.json，config/ 不在轄區，依 (a) 我沒動手）。值得單獨排的理由：CI 紅燈對全 repo 生效，所有部門的 push 都掛在這盞燈上，而這張的修復成本是四張裡最低的。\\n\\n【(c) 出口規格已寫好】work/sidecarless_index_lock/mechanical_exit_spec.md：四項判準（0 bytes ＋ 齡≥300s ＋ lsof 無持有者 ＋ 全機無 git 行程，探測失敗一律視為未證明、不放行）、改名保留成 index.lock.stale-<UTC>、receipt 必帶 evidence 欄位（說不出當時憑什麼判它是孤兒的回收，等於沒有回收）、收編進既有 phase_z.reclaim_leaked_index_lock 不新增第二個 watchdog、六條驗證 gate（含「持鎖行程還活著就不准回收」與「lsof 不可用時不准回收」兩條核心安全主張），且明講它**不能取代** pre-spawn sidecar：後者處理 daemon 自己的鎖，這條處理外部來源永遠不會有 sidecar 的鎖，只做前者全組織仍會被凍結。\\n\\n【新單已記】check_experiment_artifacts.py 的 substring 匹配（k1095_v3 ⊃ k1095 自動繼承 gate 通過權）已記入部門 work/，標 blocked-on-D14，未動手。修法方向我同意用 results JSON 的 experiment_id 欄位比對而非 word-boundary——word-boundary 仍然要猜命名慣例，欄位比對是直接問資料本人。",
+  "to": "manager"
+}

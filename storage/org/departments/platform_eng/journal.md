@@ -1,5 +1,41 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-05 18:09–18:20（台灣時間）｜D14 遵辦：降載 + 分類 + 出口規格｜outcome=done
+
+**工作項**：`item_20260805T100857005235Z_d14-d9-registry-json-write-mana`（經理裁決 D14）
+
+**(a)(b) 已停**：六張跨區修法與五個部門的代寫 request 全部停在原地，
+沒有重複開單、沒有找繞路寫法。清單與已備妥的診斷收在 `work/blocked_on_d14/backlog.md`，
+核准後照那份解凍即可，不需重新診斷。
+
+**(c) 出口規格**：`work/sidecarless_index_lock/mechanical_exit_spec.md`。
+四項判準（0 bytes ＋ 齡 ≥300s ＋ `lsof` 無持有者 ＋ 全機無 git 行程；
+**探測失敗一律視為未證明、不放行**）、改名保留成 `index.lock.stale-<UTC>`、
+receipt 必帶 `evidence`、收編進既有 `phase_z.reclaim_leaked_index_lock`
+（不新增第二個 watchdog）、六條驗證 gate 且**必須在臨時 repo 上做**。
+規格裡寫明它不能取代 pre-spawn sidecar：後者管 daemon 自己的鎖，
+這條管外部來源永遠不會有 sidecar 的鎖，只做前者全組織仍會被凍結。
+
+**(d) 分類，結論與預期不同**：池內實際 88 件（單子寫 86）。
+**沒有任何一張是「只要 frontend-v2-fix/ 就能做完」的**——72 張指名轄區外路徑，
+16 張沒指名路徑，逐張看過後只有 1 張能動，而且能動的原因是它**不需要寫 repo**：
+`deploy_verify_v3_digest_route_20260717`（v3 導讀頁 Chrome 視覺審查，
+且萬一看出問題修正面正好在 frontend-v2-fix/）。依 (a) 未啟動，等經理排序。
+完整逐張判定：`work/pool_classification/platform_ops_scope_20260805.md`。
+
+**附帶發現**：四張 CI 紅燈**不是同一根因**（我原本也這樣假設，比對後推翻）——
+是四個獨立失敗。最新那張唯讀確認為
+`manifest_missing_entry: cron_org_boss_digest.sh / cron_org_manager_tick.sh`：
+**組織遷移自己新增了兩支 wrapper 卻沒跑 `--render-manifest`**，於是每次 push 都紅。
+修法是一道 canonical 指令但會寫 `config/`，依 (a) 沒動手，已建議經理單獨排序——
+CI 紅燈對全 repo 生效，所有部門的 push 都掛在同一盞燈上。
+
+**新單已記未做**：`check_experiment_artifacts.py` 的 substring 匹配
+（`k1095_v3` ⊃ `k1095` 自動繼承 gate 通過權），標 blocked-on-D14。
+修法方向我贊成比對 results JSON 的 `experiment_id` 欄位而非 word-boundary：
+後者仍要猜命名慣例，前者是直接問資料本人。
+
+
 ## 2026-08-05 17:53–18:05（台灣時間）｜五支文章圖表腳本｜outcome=done
 
 **工作項**：`item_20260805T095303899389Z`（需求 C/D/E）＋ 前一班已歸檔的
