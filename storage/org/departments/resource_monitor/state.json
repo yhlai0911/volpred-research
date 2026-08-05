@@ -26,7 +26,7 @@
     "external_incorrect_sends_pending_correction": 6,
     "mission_output_share_pct_upstream_NOT_KPI": 4.5,
     "noop_text_only_share_pct_upper_bound_claude": 2.68,
-    "note": "F2 已 turn-level 定案；F3 未修前成本數字仍不可對外；集中度 34.2% 已更正為 fork-root 層級 59.0%；weekly_2026-07-31 回填需求已撤回（判讀錯誤）",
+    "note": "判準定案：期間結束了沒 + 機制認不認為 due，不是內容是不是 0（三分支見 memory）。F2 已定案；F3 未修前成本不可對外；集中度真值 59.0%",
     "platform_billable_total_reported": 184380508,
     "platform_billable_total_settled": 180312894,
     "session_longevity_hours_lower_bound": 103.76,
@@ -37,22 +37,38 @@
     "structural_defects_open": [
       "F3_pricing_coverage",
       "F2_fix_pending_platform_eng(session identity -> fork root)",
-      "6_sent_daily_emails_showing_zero_pending_manager_ruling"
+      "6_sent_daily_emails_showing_zero(correction block spec delivered)",
+      "F5_weekly_2026-07-19_understates_by_>=58272103_despite_passing_completeness_check",
+      "5_weekly_permanently_frozen_at_partial_period_values(2026-05-29..06-26)",
+      "daily_2026-07-21..07-28_never_backfilled",
+      "report_completeness_stored_in_mtime_not_payload(does_not_survive_git_clone)"
     ],
     "top_root_concentration_pct": 59.0,
     "top_root_concentration_pct_session_id_level_UNDERESTIMATE": 34.2,
     "weekly_report_gap": [
-      "weekly_2026-07-31 是未來週(07-31->08-07)的提前空殼，非缺陷；dab112d3a 會在 08-07 後自動重產（2026-08-05 實測 weekly_due=false）"
+      "weekly_2026-07-31 期間未結束(07-31->08-07)；2026-08-05 17:37 被 8cc3a6afc 重產為 126,428,721，仍是 mid-period 中間態，非缺陷"
     ],
-    "window": "2026-07-29..2026-08-04 (UTC, 7d)"
+    "window": "2026-07-29..2026-08-04 (UTC, 7d)",
+    "reports_written_before_period_end": 47,
+    "reports_total_scanned": 98,
+    "weekly_permanently_frozen_partial": [
+      "weekly_2026-05-29=154173260",
+      "weekly_2026-06-05=105557436",
+      "weekly_2026-06-12=112091271",
+      "weekly_2026-06-19=54310215",
+      "weekly_2026-06-26=115229000"
+    ],
+    "daily_unbackfilled_0721_0728_true_total": 222196866,
+    "email_correction_5day_known_total": 102758687
   },
-  "last_run": "2026-08-05T09:10:00Z",
-  "open_items": 5,
+  "last_run": "2026-08-05T09:42:00Z",
+  "open_items": 6,
   "open_items_detail": [
     "R3 session 壽命的 fork-root 層級尚未重算（目前只有下界 103.76h）",
     "待 platform_eng 交付 fork root 修法後執行 6 項回讀驗證",
     "F3 PRICING 覆蓋率 20.2% 未修，成本欄位在修好前不可對外",
-    "已對外的 6 封今日 0 日報，更正方式待經理裁決",
-    "weekly_2026-07-31.json 待 2026-08-07 後自動重產，屆時回讀確認（不需人工回填）"
+    "更正區塊已交規格，待 platform_eng 併入下一封 email 後回讀",
+    "五份永久凍結的 weekly（05-29~06-26）＋ F5 的 07-19 待回填，回填後我做回讀驗證",
+    "daily 07-21~07-28 八天未回填（真值 222,196,866 已交回歸基準）"
   ]
 }
