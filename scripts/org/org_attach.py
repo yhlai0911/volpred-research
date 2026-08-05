@@ -31,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dept_routing import resolve_dept_routing  # noqa: E402
 from model_router import pick_model  # noqa: E402
 from _core import (  # noqa: E402
+    reserved_carveouts,
     DEFAULT_ORG_ROOT,
     REPO_ROOT,
     brief_path,
@@ -213,6 +214,18 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
         "Bash(uv run python scripts/git_writer_lock.py:*)",
         "Bash(uv run pytest:*)",
     ]
+    # Holes in the turf. A department may own a parent of a reserved zone
+    # (`scripts/` while the supervisor stays reserved, `paper/` while `.tex`
+    # authorship stays main-thread), so the grant is real and the exception is
+    # enforced here rather than by refusing the whole grant. deny outranks allow.
+    # A directory carve-out needs the `**` that makes it recursive; a file
+    # pattern (`paper/**/*.tex`) is already complete and appending `**` to it
+    # produces `*.tex**`, which matches nothing — a deny rule that silently
+    # protects nothing is worse than no rule, because it reads as protection.
+    carveouts = reserved_carveouts(list(meta.get("owned_paths") or []))
+    deny = [f"{tool}(/{REPO_ROOT}/{c + '**' if c.endswith('/') else c})"
+            for c in carveouts for tool in ("Edit", "Write")]
+
     path = runtime_dir(root) / f"{dept}.settings.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     # The department, not the session, is the writer identity. Successive panes
@@ -220,7 +233,7 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
     # session made a department block ITSELF: content could not land drafts
     # because an earlier content session still held storage/drafts/.
     path.write_text(json.dumps({
-        "permissions": {"allow": allow},
+        "permissions": {"allow": allow, "deny": deny},
         "env": {"VOLPRED_ORG_DEPT": dept},
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     return path

@@ -28,6 +28,7 @@ from _core import (  # noqa: E402
     atomic_write_json,
     bulletin_append,
     check_path_conflicts,
+    reserved_carveouts,
     dept_dir,
     load_registry,
     now_iso,
@@ -182,6 +183,48 @@ def _set_status(args: argparse.Namespace, status: str) -> int:
     return 0
 
 
+def cmd_set_paths(args: argparse.Namespace) -> int:
+    """Change a department's turf — the only supported way to grant write access.
+
+    Hand-editing the registry skips `check_path_conflicts`, which is the whole
+    reason the field exists: two departments owning overlapping turf is how you
+    get the concurrent-write damage the org was built to stop. It also skips the
+    bulletin record, and three months later nobody can answer who granted a path
+    or on whose authority.
+    """
+    registry = load_registry(args.root)
+    meta = registry["departments"].get(args.name)
+    if not meta or meta.get("status") == "retired":
+        print(f"department {args.name!r} not active", file=sys.stderr)
+        return 1
+
+    before = list(meta.get("owned_paths") or [])
+    incoming = [p.strip().rstrip("/") + "/" for p in args.paths.split(",") if p.strip()]
+    after = sorted(set(incoming if args.replace else before + incoming))
+
+    conflicts = check_path_conflicts(registry, after, exclude=args.name)
+    if conflicts:
+        print("拒絕：轄區衝突\n  " + "\n  ".join(conflicts), file=sys.stderr)
+        return 2
+
+    meta["owned_paths"] = after
+    save_registry(args.root, registry)
+
+    holes = reserved_carveouts(after)
+    bulletin_append(
+        args.root, args.actor,
+        f"owned_paths {args.name}: {before or '[]'} → {after}"
+        + (f"（保留區挖洞：{holes}）" if holes else "")
+        + f"　依據：{args.reason}",
+    )
+    print(f"{args.name}.owned_paths: {before or '[]'} → {after}")
+    if holes:
+        print(f"  保留區挖洞（生成的 settings 會 deny）：{', '.join(holes)}")
+    print("⚠️  已 attach 的 session 不會拿到新權限——必須 re-attach 才生效：")
+    print("    uv run python scripts/org/org_attach.py restore")
+    return 0
+
+
 def cmd_list(args: argparse.Namespace) -> int:
     registry = load_registry(args.root)
     print(json.dumps(registry, ensure_ascii=False, indent=2, sort_keys=True))
@@ -220,6 +263,13 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("resume", help="resume a suspended department")
     p.add_argument("name")
     p.set_defaults(func=lambda a: _set_status(a, "active"))
+
+    p = sub.add_parser("set-paths", help="grant/replace a department's owned_paths")
+    p.add_argument("name")
+    p.add_argument("--paths", required=True, help="comma-separated repo-relative dirs")
+    p.add_argument("--replace", action="store_true", help="replace instead of adding")
+    p.add_argument("--reason", required=True, help="who approved this and why (bulletin)")
+    p.set_defaults(func=cmd_set_paths)
 
     p = sub.add_parser("list", help="print registry JSON")
     p.set_defaults(func=cmd_list)

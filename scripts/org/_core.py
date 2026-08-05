@@ -25,14 +25,33 @@ DEPT_NAME_RE = re.compile(r"^[a-z][a-z0-9_]{1,31}$")
 
 # Paths no department may claim: Zone A (Codex-owned) and core Zone B
 # (main-thread-owned) prefixes from docs/agents/ownership.md.
+#
+# A department may own a PARENT of one of these (owning `scripts/` while
+# `scripts/dispatch_supervisor/` stays reserved). That is a carve-out, not a
+# conflict: the grant applies with a hole in it, and the hole is enforced by a
+# deny rule in the generated settings rather than by refusing the whole grant.
+# Refusing it was the older behaviour and it is why turf had to be declared as
+# lists of leaf directories that drift the moment someone adds a sibling.
 RESERVED_PATH_PREFIXES = (
     "src/volpred/ops/",
     "supabase/migrations/",
     "scripts/dispatch_supervisor/",
-    "paper/",
     ".claude/skills/",
     "storage/org/registry.json",
     "storage/org/manager/",
+)
+
+# Denied wherever they appear, including inside a department's own turf.
+#
+# `paper/` used to be reserved wholesale, which meant the publications
+# department could not touch the directory its entire charter points at. The
+# reservation was never really about the directory: CLAUDE.md forbids a
+# background agent writing paper prose, and that is about `.tex` authorship.
+# Naming the actual protected thing lets publications own its turf while the
+# rule it must not break stops being prose and starts being a permission.
+RESERVED_FILE_PATTERNS = (
+    # CLAUDE.md: 論文寫作與方法論決策在主線程完成，禁止 background agent 寫 .tex
+    "paper/**/*.tex",
 )
 
 REGISTRY_VERSION = 1
@@ -512,13 +531,36 @@ def validate_dept_name(name: str) -> None:
         )
 
 
+def reserved_carveouts(paths: list[str]) -> list[str]:
+    """Reserved subtrees that fall INSIDE the given turf.
+
+    These are the holes the generated settings must deny. A department owning
+    `scripts/` genuinely owns it — except the supervisor, which no department
+    may drive. Returning them here keeps one list of reserved zones doing both
+    jobs instead of a second hand-maintained deny list that drifts.
+    """
+    out = []
+    for p in paths:
+        base = p.rstrip("/") + "/"
+        out += [prefix for prefix in RESERVED_PATH_PREFIXES
+                if prefix.startswith(base) and prefix != base]
+        out += [pat for pat in RESERVED_FILE_PATTERNS if pat.startswith(base)]
+    return sorted(set(out))
+
+
 def check_path_conflicts(registry: dict, new_paths: list[str], *, exclude: str | None = None) -> list[str]:
-    """Return human-readable conflict descriptions (empty = OK)."""
+    """Return human-readable conflict descriptions (empty = OK).
+
+    Owning a parent of a reserved zone is a carve-out (see `reserved_carveouts`)
+    and is allowed; owning something INSIDE one is still refused, because that
+    is the case where the department would actually be driving reserved code.
+    """
     conflicts: list[str] = []
     for p in new_paths:
+        base = p.rstrip("/") + "/"
         for prefix in RESERVED_PATH_PREFIXES:
-            if p.startswith(prefix) or prefix.startswith(p):
-                conflicts.append(f"{p!r} overlaps reserved zone {prefix!r}")
+            if base.startswith(prefix):
+                conflicts.append(f"{p!r} sits inside reserved zone {prefix!r}")
     for dept, meta in registry.get("departments", {}).items():
         if dept == exclude or meta.get("status") == "retired":
             continue

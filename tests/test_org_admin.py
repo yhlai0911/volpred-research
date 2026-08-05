@@ -1013,3 +1013,74 @@ def test_the_wake_message_carries_the_drain_rule(org_root: Path, monkeypatch) ->
     prompts = [c[-1] for c in sent if len(c) > 2 and c[1:3] == ["agent", "prompt"]]
     assert prompts, "an idle department holding due work must be woken"
     assert "做完一張直接接下一張" in prompts[0]
+
+
+# --- turf carve-outs -------------------------------------------------------
+
+def test_owning_a_parent_of_a_reserved_zone_is_a_carveout_not_a_refusal(org_root: Path) -> None:
+    """platform_eng owns scripts/ — but never the supervisor inside it.
+
+    Refusing the whole grant was the old behaviour, and it forced turf to be
+    declared as lists of leaf directories that go stale the moment somebody adds
+    a sibling. config/provider_registry.json ended up owned by nobody that way,
+    and on 2026-08-05 a stale pin in it stopped every spawn for 2h45m with no
+    role empowered to fix it.
+    """
+    registry = json.loads((org_root / "registry.json").read_text())
+
+    assert _core.check_path_conflicts(registry, ["scripts/"]) == []
+    assert _core.reserved_carveouts(["scripts/"]) == ["scripts/dispatch_supervisor/"]
+
+
+def test_owning_something_inside_a_reserved_zone_is_still_refused(org_root: Path) -> None:
+    registry = json.loads((org_root / "registry.json").read_text())
+
+    conflicts = _core.check_path_conflicts(registry, ["scripts/dispatch_supervisor/worker/"])
+
+    assert conflicts and "reserved zone" in conflicts[0]
+
+
+def test_paper_prose_stays_main_thread_even_inside_owned_turf(org_root: Path) -> None:
+    """CLAUDE.md forbids a background agent writing paper .tex.
+
+    The directory used to be reserved wholesale, which left the publications
+    department locked out of the turf its entire charter points at. The rule was
+    never about the directory — naming the protected thing lets the department
+    own paper/ while the prohibition becomes a permission instead of prose.
+    """
+    registry = json.loads((org_root / "registry.json").read_text())
+
+    assert _core.check_path_conflicts(registry, ["paper/"]) == []
+    assert _core.reserved_carveouts(["paper/"]) == ["paper/**/*.tex"]
+
+
+def test_carveout_deny_rules_are_shaped_to_actually_match(org_root: Path, monkeypatch) -> None:
+    """A deny rule that matches nothing is worse than none — it reads as cover."""
+    import org_attach
+
+    assert run_tool("org_admin.py", "create", "pubs", "--task-types", "paper_review",
+                    root=org_root).returncode == 0
+    assert run_tool("org_admin.py", "set-paths", "pubs", "--paths", "paper/",
+                    "--reason", "test", root=org_root).returncode == 0
+
+    settings = json.loads(org_attach.generate_dept_settings(org_root, "pubs").read_text())
+    deny = settings["permissions"]["deny"]
+
+    assert deny, "an owned turf with a carve-out must emit deny rules"
+    assert all(d.endswith("*.tex)") for d in deny), f"file patterns must not gain a stray suffix: {deny}"
+    assert any(d.startswith("Write(") for d in deny)
+
+
+def test_set_paths_refuses_a_conflicting_grant(org_root: Path) -> None:
+    """Hand-editing the registry skips exactly this check."""
+    assert run_tool("org_admin.py", "create", "gov_a", "--task-types", "governance",
+                    root=org_root).returncode == 0
+    assert run_tool("org_admin.py", "set-paths", "gov_a", "--paths", "docs/governance/",
+                    "--reason", "t", root=org_root).returncode == 0
+    assert run_tool("org_admin.py", "create", "gov_b", "--task-types", "lookup",
+                    root=org_root).returncode == 0
+
+    result = run_tool("org_admin.py", "set-paths", "gov_b", "--paths", "docs/governance/",
+                      "--reason", "t", root=org_root)
+
+    assert result.returncode == 2 and "衝突" in result.stderr
