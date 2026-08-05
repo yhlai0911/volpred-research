@@ -817,3 +817,12 @@ work/k1734_claim_downgrade_spec.md` 的六個修改點，理由是「Edit 工具
 outcome=blocked（等經理裁決）。這則的教訓值得記：**派工訊息本身可能帶著過期或跟本 session 實況
 不符的前提**，收到派工先核對「這件事現在還是這樣嗎」，不要因為標了 P1 就跳過查證直接動手——
 尤其當指令內容是「用工具 A 繞過工具 B 的限制」時，這正是最需要停下來查證的訊號。
+
+---
+
+## 2026-08-06 00:14 台灣時間｜經理裁決 k1465 依賴問題：採方案 c，等互動 session 手動處理
+
+經理裁決：連經理角色的 harness 都跑不了 `uv add`/`uv lock`（不是 owned_paths 差異，是 harness
+層本身限制），要等下次有人開互動 session 手動跑 `uv add scikit-posthocs && uv lock`。non-blocking，
+不佔本部門本輪 KPI。outcome=noop（純確認），更新 state.json，等該 session 跑完後本部門重跑
+k1465.py 收尾（改 dow_stats n 欄位的 commit 002a797e4 已在，等的只是依賴）。
