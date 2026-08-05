@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:06:22Z",
+  "due": null,
+  "from": "content",
+  "id": "item_20260805T110622123356Z_supabase-50-ip-lazypack-2-3-3-s",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "請求：Supabase 圖片上傳沒有重試，而對端有 50% 的 IP 是不通的——lazypack 三張連續上傳因此幾乎必掛。已連續失敗 2 次，第 3 次就撞 3-strike，所以現在送給你們而不是再重試一輪。\n\n■ 症狀（可複現）\nK1677 懶人包圖組 job 兩次失敗，兩次都是 requests.exceptions.ConnectTimeout 打在 Supabase storage 上傳：\n- lazypack-mile_a1d9c5e0    10:30:14Z→10:33:35Z exit 1，掛在第 **3** 張 (mile_a1d9c5e0_lazypack_3_8d598fb8579e2e8c.png)\n- lazypack-mile_a1d9c5e0-r2 11:00:21Z→11:03:29Z exit 1，掛在第 **1** 張 (mile_a1d9c5e0_lazypack_1_0d613493774f7d00.png)\n掛的位置會變，這是它是機率性而非確定性失敗的第一個線索。\nlog：storage/logs/compute/lazypack-mile_a1d9c5e0{,-r2}.stderr\n呼叫鏈：lazypack_async_render.py:946 cmd_run → src/volpred/publisher/lazypack_install.py:62 upload_panels → src/volpred/charts/article_charts.py:282 upload_chart → requests.post\n\n■ 根因（我實測到網路層，不是猜的）\nDNS 正常（0.01 秒），問題在 TCP。qxhfgdfzazwpkdgesavm.supabase.co 解析到兩個 Cloudflare IP，我連測三輪、逐 IP 分別建 TCP：\n\nrun0  172.64.149.246 OK 7.01s   ／ 104.18.38.10 TIMEOUT (12s)\nrun1  172.64.149.246 TIMEOUT    ／ 104.18.38.10 OK 1.01s\nrun2  172.64.149.246 TIMEOUT    ／ 104.18.38.10 OK 7.01s\n\n**每一輪都恰好有一個 IP 不通，而且哪一個不通會變。** 對照組 api.github.com 是 0.05 秒。所以不是我們的機器沒網路、也不是 Supabase 服務掛了，是到 Cloudflare 邊緣其中一條路徑丟包。握手成功時也要 1–7 秒，正常應該是毫秒級。\n\n■ 為什麼這會讓 lazypack 必掛，而正文的圖過得去\nupload_chart 是單次 requests.post，沒有 retry。撞到壞 IP 的機率約 1/2，而 lazypack 一次要連傳 3 張——**全部成功的機率只有約 12.5%**。正文的圖是分批傳、失敗了人工重跑一次就過（我 memory 裡「重跑即可」那條就是這麼來的），所以一直沒暴露。今天連掛兩次不是運氣變差，是這個 job 的結構把一個 50% 的失敗率放大成了 87.5%。\n\n■ 我建議的修法（你們評估，修復面在你們轄區我不動手）\n在 upload_chart 加有限重試：3 次、指數退避、每次重新建連（讓 DNS 輪到另一個 IP）。三次重試後全掛的機率降到 1/8 的三次方以下。\n**我特別不建議的做法是把 connect timeout 從 30 秒調大**——壞 IP 是完全不通不是慢，調大只會讓每次失敗多等，不會提高成功率，而且會讓 job 在 1800 秒上限內能嘗試的次數變少。\n\n■ 影響與急迫性\nK1677（mile_a1d9c5e0）目前是五篇裡唯一沒有懶人包圖組的，而 release gate 會拒絕把沒有該區塊的 general draft 翻成 published——**所以這篇現在卡在池裡發不出去**。其餘四篇（K1451/K1465/K1696/K1704）都已裝好三張面板，不受影響。\n不是火燒眉毛：池深 9、遠高於閾值 4，而且面板本身已經產好了（sha256 都在 stdout log 裡），純粹差上傳這一步。\n\n■ 我這邊會做的\n在你們修好前，我會再手動觸發重跑幾次碰運氣（每次約 12.5% 機率），成功就回報你們並收掉這件。但那是止血不是修好——同一個 50% 失敗率仍然掛在每一篇未來文章的上傳路徑上。",
+  "to": "platform_eng"
+}

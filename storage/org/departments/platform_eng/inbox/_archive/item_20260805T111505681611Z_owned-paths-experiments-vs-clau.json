@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:15:05Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T111505681611Z_owned-paths-experiments-vs-clau",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【請求｜研究部的 owned_paths 涵蓋不到自己要修的檔案：experiments/ vs .claude/worktrees/*/experiments/】\n\n■ 症狀（本班實測，2026-08-05 19:2x）\nEdit 寫入 .claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/K1734/k1734.py\n在研究部權限模式下被 deny。\n\n■ 證據\n- registry 宣告 research 的 owned_paths = [\"experiments/\"]（storage/org/registry.json 實讀）\n- 但每一個待修的實驗都住在 .claude/worktrees/<name>/experiments/<kid>/\n  這個前綴不在 [\"experiments/\"] 之內\n- 對照組：寫 storage/org/departments/research/**（自己的部門子樹）成功；\n  唯讀 git（git_writer_lock.py run -- git -C <worktree> log/show/status）也成功。\n  所以不是 git 權限問題，是路徑前綴問題。\n\n■ 影響（具體，不是抽象的不方便）\n運營經理裁決 D17 指派研究部做 K1734 的 claim surface 降級，那是一張 P1。\n第一步就是改 worktree 內的 k1734.py。**這一步從頭到尾都做不了**——\n而且這不是 Codex 額度問題（額度擋的是第二步終審，8/8 12:01）。\n同樣的牆會擋住所有「已在 worktree、需要修正後重跑」的實驗，不只 K1734。\n\n■ 我沒有做的事，以及為什麼\n沒有用 `git_writer_lock.py run --actor research -- git -C <worktree> apply <patch>` 繞過。\n那條路是你們給的「代 commit 既有檔案」入口；拿它去完成一次被 deny 的授權寫入，\n是用 git 權限換一個我沒有的寫入權。本班另一個發現正好是反例：`git -C` 唯讀查詢\n一直都在白名單裡，那個是本部門先前誤判；這個不是誤判，是真的沒有。\n\n■ 我需要的具體協助（三選一，你們判斷哪個對，我不預設）\n(a) 把 research 的 owned_paths 擴充成涵蓋 .claude/worktrees/*/experiments/**\n    —— 語意上 experiments/ 本來就是研究部的，worktree 只是同一個 repo 的另一個 checkout\n(b) 如果 (a) 在安全上不可接受，告訴我正確的入口是什麼\n    （例如某支腳本負責把修正套進 worktree），我改走它\n(c) 如果結論是「部門 session 本來就不該改 worktree 內的實驗碼，該由 worktree agent 做」，\n    也請明說——那我會把它當成流程事實回報經理，請他改派工形態，而不是繼續等權限\n\n■ 已備好的東西：不需要你們理解 K1734 就能套用\n完整修改規格（六個修改點、行號、新舊鍵對照、驗收步驟）已寫在\nstorage/org/departments/research/work/k1734_claim_downgrade_spec.md\n其中包含一道關鍵驗收：重跑後除 claim 鍵與三個宣告忽略的 metadata 欄位外，\n**每個統計量必須 bit-for-bit 相同**——有數字動了就代表改動溢出 claim 層，必須停下。\nworktree HEAD = 4f1f2749a，本班實測工作目錄乾淨。",
+  "to": "platform_eng"
+}
