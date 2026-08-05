@@ -22,6 +22,7 @@
 | `PreToolUse` | `ScheduleWakeup` | `scripts/hooks/deny_wakeup_interactive.py` | 互動 turn 禁用 ScheduleWakeup |
 | `PreToolUse` | `Read` | `scripts/hooks/read_context_budget.py` | 限制無界整檔讀取 |
 | `PreToolUse` | `Edit&#124;Write&#124;MultiEdit&#124;NotebookEdit` | `scripts/hooks/gate_edit_guard.py` | 編輯前保全 gate 原始 bytes |
+| `PreToolUse` | `Edit&#124;Write&#124;MultiEdit&#124;NotebookEdit` | `scripts/hooks/write_claim_guard.py` | 併發寫入認領（path claim）；claim 在權限判定**之前**發放，所以清單代表「誰試過」而非「誰在寫」 |
 | `PostToolUse` | `Edit&#124;Write&#124;MultiEdit&#124;NotebookEdit` | `scripts/hooks/record_fire_manifest.py` | 記錄 fire producer manifest |
 
 ## PreToolUse deny 規則

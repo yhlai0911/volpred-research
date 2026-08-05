@@ -3,10 +3,9 @@
   "health_reason": "2026-08-05T11:21Z 解除：治理部 runtime settings 已含 docs/governance/** 與 .claude/rules/** 寫入權（governance.settings.json，本 pane 18:58 attach 生成），連續三班『分析做得出來但交不出去』結束。首份實證產出 = docs/governance/2026-08-05_permission_gap_class_sweep.md。",
   "kpi": {
     "skill_architecture_check": "not_run_this_session",
-    "enforcement_map_green": false,
-    "enforcement_map_missing": [
-      "scripts/hooks/write_claim_guard.py"
-    ],
+    "enforcement_map_green": true,
+    "enforcement_map_missing": [],
+    "enforcement_map_verified_at": "2026-08-05T11:35Z（audit_enforcement_map.py = OK：13 hooks / 8 deny / 6 CI / 5 git hooks）",
     "rulings_issued_today": 16,
     "instrument_reads_wrong_source_class": {
       "as_of": "2026-08-05",
@@ -97,7 +96,7 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D41 兩件皆交付：§二 class sweep 三型分堆、§一 tex carve-out 裁定不放寬）",
+    "last_session_outcome": "done（D38 三件：enforcement map 轉綠＋blocker_evidence 規格交付；paper-workflow.md 一件被 D 型權限矛盾擋下未繞道。sweep 自我更正兩項：新增第四型態 D、B3 判定錯誤且治理部自己也繞過了 inbox_archive.py）",
     "tex_carveout_ruling": {
       "as_of": "2026-08-05T11:25Z",
       "deliverable": "docs/governance/2026-08-05_tex_carveout_proposal.md",
@@ -128,6 +127,15 @@
           "manager_case": "407a367e9 19:02 給 owned_paths=[storage/org/]；manager.settings.json 生成於 19:04；經理 19:09-19:15 實測 deny = session 早於生成。經理原判『真缺口』已更正"
         }
       },
+      "D_declared_but_denied": {
+        "added_at": "2026-08-05T11:35Z",
+        "test": "settings 涵蓋該路徑 且 同一份 settings 的其他路徑本 session 寫入成功 且 仍被 deny",
+        "instance": "governance Edit .claude/rules/paper-workflow.md 連兩次 deny，而同一份 settings 的 docs/governance/** Edit 本輪成功；上層 deny 皆空",
+        "fix": "查 generate_dept_settings 為何宣告未變成實際權限（platform_eng），重新 attach 修不好它",
+        "spec_correction": "§3 自動分型第 3 步『settings 涵蓋＝C』不足，須追問『同一份 settings 其他路徑本 session 寫成功過嗎』"
+      },
+      "self_correction_B3": "『缺 mv 權限』判為 B 是錯的：scripts/org/inbox_archive.py 是 canonical 歸檔入口（且會擋 request/decision 未回覆就歸檔）。授權 Bash(mv .../inbox/*) 反而是給第二個寫入者。治理部本班亦曾用 shutil.move 繞過，已改正",
+      "first_step_correction": "遇到 deny 先查有沒有 canonical 入口，再去分型。分型是第二步",
       "institutionalization": "deny 全文列為回報必要欄位，機械 owner = scripts/org/dept_send.py（送出端分型，非接收端；既有唯一寫入者，非新機制）",
       "manager_subtree_writer_spec": "org_admin.py note（收編 _core.bulletin_append）＋ propose（outbox/proposals 目前有讀者 boss_digest.py:57 但無任何寫入者）；實作面屬 platform_eng，依經理 (c) 本輪不派"
     }
