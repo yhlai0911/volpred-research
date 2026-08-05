@@ -34657,5 +34657,21 @@
     "article_id": "mile_1ec5d392",
     "digest_articles_span_days": 42,
     "note": "Source #4 mile_679eb2a1 is status=draft in feed.json while carrying published_at; its page returns HTTP 200 so no sidebar link is broken. release_pool flips status in place on the same mile_id (src/volpred/ops/content.py:1648), so it self-heals on the next release cron with no duplicate. Deliberately did NOT run release-pool-by-settings off-schedule to avoid disturbing release cadence."
+  },
+  {
+    "timestamp": "2026-08-05T10:57:42+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_c7ca1c01",
+    "outcome": "adoption_unblocked",
+    "actor": "hourly-slot-1-353fc09c8276479fb2bf5b5e25002108",
+    "owner": "hourly-slot-1-353fc09c8276479fb2bf5b5e25002108",
+    "commit": null,
+    "summary": "nfp_20260807_t2 (12 files, untracked 4 fires) cleared for atomic adoption. The dispatch brief said the only gap was a missing README; running the experiment_ready_for_main gates directly showed the actual blocker was 'review-certification: uncertified: no review_verdict.json'. Both closed. (1) Added render_readme.py, which generates README.md from nfp_20260807_t2_results.json so no number is hand-transcribed; --check re-renders and fails on drift. (2) Two independent Opus 5 reviewers on separate lenses. Code lens PASS: reviewer reimplemented the analysis and matched archived results to ~15 sig figs, verified the T-3->T-1 indexing, exact-tight control exclusion (0/3597 overlap), date-sorted HAC, genuine per-lag refits, correct Holm step-down, and no look-ahead. Overclaim lens FAILed round 1 on two defects both in prose written this fire: a sentence claiming the early week-half 'did not pass the primary test' when that half was never tested at all, and an uncaveated figure whose tallest bar is the release-day raw weekday-confounded mean under a NULL verdict. Fixed over 4 rounds, PASS on the frozen bytes. review_verdict.json pins all 5 claim-surface files; experiment_gates certify -> PASS. Reaper now reports the unit collectable (12/12, held=NONE) once its 2h grace window on freshly-written files expires; no gate remains. (3) NFP 8/7 pipeline verified intact: slot ladder is T-7/T-2/T-0 (there is no T-1 slot); T-7 and T-2 articles already succeeded, T-0 is scheduled in config/runtime_schedules.json with not_before 2026-08-07T21:30+08:00, deadline 2026-08-09T09:30.",
+    "reviewers": [
+      "claude-opus-5/high code-correctness lens (agent ac90fefce0ec7a7f2) -> PASS",
+      "claude-opus-5/high overclaim lens (agent ac2542a5cab1c18fb) -> FAIL then PASS after 4 rounds"
+    ],
+    "review_artifact": "storage/ops/codex_reviews/nfp_20260807_t2_adoption_review.md",
+    "note": "Codex, the canonical reviewer for this gate, was unavailable for the whole fire: codex_exec_bounded returned 'You've hit your usage limit ... try again at Aug 8th, 2026 12:01 PM', and the quota probe independently reported unavailable/rc=-4. Credits reopen 2026-08-08, AFTER the 2026-08-07 release this package serves, so waiting would have expired the artifact's purpose. Substituted two independent Claude reviewers and recorded that in review_verdict.json rather than claiming a Codex review that did not happen -- reviewer independence here is weaker than the Codex baseline (same model family as the author). Residual risks accepted and NOT fixed, because fixing any would require a re-run and a new artifact identity: 21/3597 controls (0.58%) under-excluded via two guards at nfp_20260807_t2.py:200-204, direction toward the null; n_releases_matched labels 191 'matched' when 192 matched and one was dropped for short history. Open follow-up for whatever publish step consumes this: the figure's correction lives only in README.md, so syndicating nfp_20260807_t2_window.png without it loses the caveat -- the t7 sibling shows that pathway is live. Duplicate pending task nfp_20260807_t2_adoption_20260805 covers the same work and should be closed as superseded by whoever owns it (not claimable this fire)."
   }
 ]
