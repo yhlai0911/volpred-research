@@ -262,12 +262,57 @@ def build_manager_brief(root: Path) -> str:
 """
 
 
-def build_brief(root: Path, dept: str) -> str:
-    """The rehydration brief: how an ephemeral session becomes this department.
+def identity_prompt(root: Path, dept: str) -> str:
+    """The STABLE half of a department's identity: role, policy, charter.
 
-    Single source for both runners — a headless dispatch session and a Herdr
-    cockpit pane must be given the identical identity, or the two surfaces drift.
+    Belongs in the system prompt (`claude --append-system-prompt`), not in a
+    user message. A first message competes for attention as the conversation
+    grows and can be summarised away; a system prompt cannot, and it stays in
+    the prompt cache instead of being re-sent as fresh input every turn.
     """
+    ddir = dept_dir(root, dept)
+    registry = load_registry(root)
+    meta = registry.get("departments", {}).get(dept, {})
+    title = meta.get("title") or dept
+    charter = ddir / "charter.md"
+    memory = ddir / "memory" / "notes.md"
+
+    def _read(path: Path) -> str:
+        if not path.exists():
+            return "（無）"
+        return path.read_text(encoding="utf-8").strip() or "（無）"
+
+    return f"""你是 VolPred 平台的**{title}**（部門代號 `{dept}`）。
+
+這是一個常駐部門的身分；你這個 session 是它的執行體。身分、記憶與工作狀態都在磁碟上
+（`{ddir}`），session 結束不等於部門消失——下一個 session 會從同一份檔案接續。
+
+## 組織通則（全員共用）
+
+{org_policy(root)}
+
+## 你的章程（職責、KPI、邊界、收尾契約）
+
+{_read(charter)}
+
+## 你的私有記憶
+
+{_read(memory)}
+"""
+
+
+def build_brief(root: Path, dept: str) -> str:
+    """Identity + current work, for callers that deliver both in one message.
+
+    The headless path has no system-prompt hook, so it still needs the whole
+    thing; the cockpit splits it (identity → system prompt, work → message).
+    Composed from the same halves so the two surfaces cannot drift.
+    """
+    return identity_prompt(root, dept) + "\n" + work_prompt(root, dept)
+
+
+def work_prompt(root: Path, dept: str) -> str:
+    """The VOLATILE half: what this department should do right now."""
     ddir = dept_dir(root, dept)
     registry = load_registry(root)
     meta = registry.get("departments", {}).get(dept, {})
@@ -294,25 +339,7 @@ def build_brief(root: Path, dept: str) -> str:
     else:
         inbox_block = "（收件匣是空的——沒有待辦就不要製造工作，回報 outcome=noop 後結束）"
 
-    return f"""你現在是 VolPred 平台的**{title}**（部門代號 `{dept}`）。
-
-這是一個常駐部門的身分；你這個 session 是它的執行體。你的身分、記憶與工作狀態
-全部存在磁碟上（`{ddir}`），所以 session 結束不等於部門消失——下一個 session 會從
-同一份檔案接續。
-
-## 組織通則（全員共用）
-
-{org_policy(root)}
-
-## 你的章程（職責、KPI、邊界、收尾契約）
-
-{_read(ddir / "charter.md")}
-
-## 你的私有記憶
-
-{_read(ddir / "memory" / "notes.md")}
-
-## 最近工作日誌（最後 20 行）
+    return f"""## 最近工作日誌（最後 20 行）
 
 {_read(ddir / "journal.md", limit=20)}
 

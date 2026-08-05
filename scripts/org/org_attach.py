@@ -35,6 +35,9 @@ from _core import (  # noqa: E402
     brief_path,
     build_brief,
     build_manager_brief,
+    dept_dir,
+    identity_prompt,
+    work_prompt,
     clear_lease,
     inbox_items,
     load_registry,
@@ -120,6 +123,38 @@ def _split_largest(any_pane_in_tab: str, cwd: str) -> str:
     return pane_id
 
 
+def dept_session_args(root: Path, dept: str) -> list[str]:
+    """Per-department CLI config, opt-in by what exists on disk.
+
+    Departments are not distinguished by their skills today — every pane loads
+    the same repo-wide `.claude/skills/`. These hooks make differentiation
+    possible without a second config system: drop the file in the department's
+    directory and it takes effect on the next attach; leave it out and nothing
+    changes.
+
+      settings.json  → --settings        (permissions, hooks, env)
+      skills/        → --plugin-dir      (department-only skills)
+      tools.allow    → --allowed-tools   (one tool pattern per line)
+      tools.deny     → --disallowed-tools
+    """
+    ddir = dept_dir(root, dept) if dept != MANAGER else root / MANAGER
+    extra: list[str] = []
+    settings = ddir / "settings.json"
+    if settings.is_file():
+        extra += ["--settings", str(settings)]
+    skills = ddir / "skills"
+    if skills.is_dir():
+        extra += ["--plugin-dir", str(skills)]
+    for fname, flag in (("tools.allow", "--allowed-tools"), ("tools.deny", "--disallowed-tools")):
+        f = ddir / fname
+        if f.is_file():
+            patterns = [ln.strip() for ln in f.read_text(encoding="utf-8").splitlines()
+                        if ln.strip() and not ln.startswith("#")]
+            if patterns:
+                extra += [flag, " ".join(patterns)]
+    return extra
+
+
 def cmd_attach(args: argparse.Namespace) -> int:
     require_herdr()
     root: Path = args.root
@@ -185,8 +220,12 @@ def cmd_attach(args: argparse.Namespace) -> int:
             session = (routing.get(name) or {}).get("session") or {}
             model = session.get("model") or "opus"
             effort = args.effort or session.get("effort") or "medium"
+            identity = (build_manager_brief(root) if name == MANAGER
+                        else identity_prompt(root, name))
             herdr("agent", "start", name, "--kind", args.kind, "--pane", pane_id,
-                  "--", "--model", model, "--effort", effort, timeout=120)
+                  "--", "--model", model, "--effort", effort,
+                  "--append-system-prompt", identity,
+                  *dept_session_args(root, name), timeout=120)
             title = meta.get("title") or name
             herdr("pane", "rename", pane_id, f"{title} · {name}")
 
@@ -202,16 +241,15 @@ def cmd_attach(args: argparse.Namespace) -> int:
                 "effort_basis": "cli override" if args.effort else session.get("basis"),
             })
 
+            # Identity already rode in on the system prompt; the message carries
+            # only what changes between wakes.
             if name == MANAGER:
                 pending = len(list((root / "manager" / "inbox").glob("*.json")))
-                opening = (f"你是 VolPred 平台的運營經理（協調者），收件匣有 {pending} 件。"
-                           f"先完整讀 {bpath} 這份 brief 建立你的身分、組織現況與工具，"
-                           f"然後依優先序開始協調。")
+                opening = (f"開始協調。收件匣 {pending} 件；完整組織現況與工具清單見 {bpath}。"
+                           f"依優先序處理，判斷與理由記進 bulletin。")
             else:
                 pending = len(inbox_items(root, name))
-                opening = (f"你是 VolPred「{title}」部門（`{name}`），收件匣有 {pending} 件待辦。"
-                           f"先完整讀 {bpath} 這份 brief 建立你的身分與脈絡，然後依優先序開始工作。"
-                           f"結束前務必執行章程裡的 Session 收尾契約。")
+                opening = (f"開始工作。{work_prompt(root, name)}")
             if not args.no_prompt:
                 herdr("agent", "prompt", name, opening, timeout=90)
             attached.append((name, pane_id, pending))

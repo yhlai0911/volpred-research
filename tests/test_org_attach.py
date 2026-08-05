@@ -366,3 +366,35 @@ def test_restore_keeps_a_lease_whose_pane_survived(org_root: Path) -> None:
 
     assert reaped == []
     assert _core.read_lease(org_root, "research") is not None
+
+
+def test_identity_and_work_compose_without_drift(org_root: Path) -> None:
+    """Two surfaces, one source: headless gets both halves, the cockpit splits them."""
+    assert run_tool("dept_send.py", "research", "--from", "manager",
+                    "--task", "跑 K1 實驗", "--no-wake", root=org_root).returncode == 0
+
+    identity = _core.identity_prompt(org_root, "research")
+    work = _core.work_prompt(org_root, "research")
+
+    assert _core.build_brief(org_root, "research") == identity + "\n" + work
+    assert "研究部" in identity and "Session 收尾契約" in identity
+    assert "跑 K1 實驗" in work
+    assert "跑 K1 實驗" not in identity, "volatile work must not be baked into the system prompt"
+
+
+def test_per_department_config_is_opt_in_by_file(org_root: Path) -> None:
+    attach = _load_attach()
+
+    assert attach.dept_session_args(org_root, "research") == [], "no files → no flags"
+
+    ddir = _core.dept_dir(org_root, "research")
+    (ddir / "settings.json").write_text("{}", encoding="utf-8")
+    (ddir / "skills").mkdir()
+    (ddir / "tools.deny").write_text("# comment\nBash(git push *)\n\n", encoding="utf-8")
+
+    args = attach.dept_session_args(org_root, "research")
+
+    assert "--settings" in args and "--plugin-dir" in args
+    assert "--disallowed-tools" in args
+    assert "Bash(git push *)" in args[args.index("--disallowed-tools") + 1]
+    assert "# comment" not in " ".join(args)
