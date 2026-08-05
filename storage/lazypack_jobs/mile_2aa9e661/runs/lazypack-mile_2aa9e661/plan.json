@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "title": "颶風強度與再保險股波動：對照組把結論翻掉（K1589）",
+  "evidence": {
+    "results": {
+      "path": "experiments/K1589/k1589_results.json",
+      "sha256": "c3c071c14d37c0332aba460ddff4708a5687313b3bd5f17e3f76312be73b3bdf",
+      "label": "K1589 大西洋颶風登陸與再保險股波動實驗結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "颶風愈強，再保險股愈晃？",
+      "alt": "概念框架：以大西洋颶風登陸強度分級為自變數，估計登陸後波動率上升幅度的斜率，並用保險業 ETF 當對照組",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "再保險公司幫保險公司分擔巨災，颶風愈強，理賠壓力愈大，股價應該愈不安分。",
+            "颶風強度有分級，所以問題可以從「有沒有颱風」變成「每升一級，登陸後波動多加多少」。",
+            "四檔再保險股 RNR、EG、ACGL、AXS 對上保險業 ETF KIE；KIE 的巨災曝險低得多，斜坡本來不該一樣陡。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "納入事件數",
+          "value": {
+            "source": "results",
+            "path": "n_events_used",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次登陸"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "登陸前波動估計窗口",
+          "value": {
+            "source": "results",
+            "path": "regression.ACGL.n",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個事件觀測"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "防偷看未來",
+          "body": [
+            "登陸前的波動窗口必須在登陸日之前截止，不讓事後資訊漏進解釋變數。",
+            "控制變數用登陸前最後一個收盤的 VIX 與大盤前期波動。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "斜坡是真的：但對照組也有同一條斜坡",
+      "alt": "主要結果：巨災曝險最高的 ACGL 斜率顯著為正，但巨災曝險低得多的保險業 ETF KIE 也量到相近斜率",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "ACGL 每升一級的斜率",
+          "value": {
+            "source": "results",
+            "path": "regression.ACGL.beta_category",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "ACGL 訊號強度 t 值",
+          "value": {
+            "source": "results",
+            "path": "regression.ACGL.t_beta",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "ACGL 多重比較校正後 p 值",
+          "value": {
+            "source": "results",
+            "path": "regression.ACGL.p_beta_holm_reinsurer_scope",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "對照組 KIE 的斜率",
+          "value": {
+            "source": "results",
+            "path": "regression.KIE.beta_category",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "對照組 KIE 訊號強度 t 值",
+          "value": {
+            "source": "results",
+            "path": "regression.KIE.t_beta",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "把兩邊放進同一條迴歸，差距量不出來",
+      "alt": "併池檢定與研究邊界：再保險股相對保險業 ETF 的超額斜率接近零，訊號強度不到零點五，p 值遠高於任何門檻",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "再保險股減對照組的超額斜率",
+          "value": {
+            "source": "results",
+            "path": "kie_interaction_test.beta_reinsurer_minus_kie_category",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "超額斜率的訊號強度 t 值",
+          "value": {
+            "source": "results",
+            "path": "kie_interaction_test.t_reinsurer_minus_kie_category",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "超額斜率的 p 值",
+          "value": {
+            "source": "results",
+            "path": "kie_interaction_test.p_reinsurer_minus_kie_category",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "併池觀測數",
+          "value": {
+            "source": "results",
+            "path": "kie_interaction_test.n",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "這份結果該怎麼讀",
+          "body": [
+            "不是「颶風不影響再保險股」——四檔斜率方向一致為正，其中一檔扣完多重比較仍站得住。",
+            "而是「這份資料撐不起再保險股對颶風強度特別敏感」，因為同一條斜坡在巨災曝險低得多的保險業 ETF 上也量得到。",
+            "真正把再保險商跟同業分開的東西，例如理賠準備與再保條約結構，不會寫在事件後幾天的股價波動裡。"
+          ]
+        }
+      ]
+    }
+  ]
+}
