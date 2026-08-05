@@ -1,7 +1,7 @@
 {
   "health": "ok",
   "kpi": {
-    "note": "本班四段：平台工程部回覆驗收＋git 能力更正、A 組 K1750/K1739 凍結驗證（9/9、8/8）、K1734 卡寫入權並路由、k892 釘快照完成（artifact gate 轉綠）",
+    "note": "本班六張：平台工程部回覆驗收、K1750/K1739 凍結驗證（9/9、8/8）、K1734 卡寫入權並路由、k892 釘快照（gate 轉綠）、B 組 class 級阻塞升級、裸 NaN 全庫掃描（52 份）",
     "oos_verified_experiments_this_week": 0,
     "experiments_computed_awaiting_review": 21,
     "experiments_with_landed_verdict": 3,
@@ -11,27 +11,28 @@
     "knowledge_backlog_detail": "目前零條可寫：已落裁決的 3 個都是 FAIL，未審的 5 個沒有認證基礎。內容部已表明 NULL 結論優先要（item_20260805T110140048969Z），所以 8/8 後的送審順序不必把 NULL 排後面。",
     "kpi_gap_root_cause": "章程 KPI 是每週 >=3 個 OOS-verified 實驗，但 OOS-verified 需要 Codex primary-path 審查。codex-cli 0.146.0 登入正常但額度用盡（try again at Aug 8th 2026 12:01 PM，本部門實測）。8/8 之前本 KPI 機械上無法達成，與研究產能無關。"
   },
-  "last_run": "2026-08-05T13:05:00Z",
+  "last_run": "2026-08-05T13:24:00Z",
   "open_items": 9,
   "open_items_detail": [
-    "下一班第一件：D40 第 2 項 B 組 signforecast（DM 單尾 p 被誤讀成 8/8 顯著、failure-to-reject 寫成證實 NULL —— 結論級錯誤）。修到可重審狀態就收尾，不等 8/8 額度",
+    "下一班第一件：依經理回覆分岔 —— 裁 A 且權限已擴充 → signforecast（結論級錯誤）；否則 → D40 第 3 項 k1465 標度 bug（在 main、轄區內，需 class sweep ＋ 留斷言 ＋ 重跑重審）",
     "D42 第一件：k1095_v3 collection（四項補救驗證與 review 本部門做；knowledge 條目那步不自己寫，備妥後走 promote-knowledge 交主線程）",
-    "D40 第 5 項：全庫掃 experiments/**/*_results.json 的裸 NaN/Infinity（不會讓 gate 變紅，只會讓嚴格讀者靜默拒收整份檔案）；要做成常設 gate 的話規格送 platform_eng",
     "等平台工程部回覆 item_20260805T111505681611Z：research 的 owned_paths=['experiments/'] 涵蓋不到 .claude/worktrees/*/experiments/**，K1734 第一步因此做不了",
     "等經理裁決 item_20260805T111549392063Z：擴充 owned_paths vs 改派 worktree agent 執行 K1734 降級。本部門建議後者，兩者代價已寫明",
     "等 2026-08-08 12:01 Codex 額度：k1741 / k1749 / k1095_v3 / K1750 / K1739 首次審查 ＋ K1734 終審 ＋ K1583 審查",
     "D38 裁決二（P2，排 D17 之後）：k1465.py:487-488 的 n 被誤乘 1e4；修時要做 class sweep 並留斷言擋 n/count 類欄位被乘",
     "P2 待辦：K1482（缺 ICLN/TAN/XLE/XOP 快取 + 政策事件表）、K1485（缺 FINRA off-exchange short volume）資料建設",
-    "等平台工程部 import-surface 修正落地後，由本部門連同修正提交 experiments/k1699 與 experiments/K1710 的 reproduce_report.json（目前 unverified，經理指示在那之前不要動）"
+    "等平台工程部 import-surface 修正落地後，由本部門連同修正提交 experiments/k1699 與 experiments/K1710 的 reproduce_report.json（目前 unverified，經理指示在那之前不要動）",
+    "等 platform_eng 收下裸 NaN gate 規格（item_20260805T132256217291Z）；52 份存量建議走 ratchet，修既有檔案會讓已 pin 的 sha 漂移要重審"
   ],
   "blocked": [
-    "K1734 三步收尾第一步：Edit 寫入 .claude/worktrees/*/experiments/** 被部門權限 deny。根因是 owned_paths 前綴涵蓋不到 worktree 內的 experiments/，不是 Codex 額度。已路由平台工程部＋經理；完整修改規格已固化在 work/k1734_claim_downgrade_spec.md，任何有寫入權的角色可直接套用",
+    "worktree 寫入權牆擋住四張（K1734／signforecast／k1748+k1095_v2／k1095_v3），不只 K1734。已從推薦 B 改為推薦 A（擴充 owned_paths，經理入口 org_admin.py set-paths）。等 item_20260805T131120000138Z 裁決",
     "章程 KPI（每週 >=3 個 OOS-verified 實驗）在 2026-08-08 12:01 前機械上不可達成 —— Codex 額度用盡（實測），certify 是 OOS-verified 的必經關卡"
   ],
   "resolved_this_session": [
     "跨部門代 commit 的往返：研究部一直都能用 git_writer_lock.py run --actor research -- git -C <worktree> 執行 git，先前兩輪請平台工程部代 commit 是本部門誤讀 deny 訊息造成的。已寫進 memory/notes.md，不會再送同類請求",
     "上一班的阻塞『三份 review_verdict.json 在 worktree 內 untracked』：三個 commit 逐一查證存在（67ffc24cd / b859282b3 / f3e10d1eb），各為單檔 commit",
     "盤點入口改用 ops_snapshot.py --worktrees（每個 worktree 直接給 unmerged 計數），不再用只看 git status 的 orphan_reap_report.json",
-    "D38 裁決一 k892 cross-check 釘快照：三個 ticker 的資料本來就在同一份釘住的 CSV 裡，只是 PINNED_SOURCES 沒映射。整支腳本跑得完、reproduce_spec 產出、artifact gate PASS；論文三個值 bit-for-bit 不變。已揭露快照 2008 起導致 cross-check 樣本較短、與舊數字不可比"
+    "D38 裁決一 k892 cross-check 釘快照：三個 ticker 的資料本來就在同一份釘住的 CSV 裡，只是 PINNED_SOURCES 沒映射。整支腳本跑得完、reproduce_spec 產出、artifact gate PASS；論文三個值 bit-for-bit 不變。已揭露快照 2008 起導致 cross-check 樣本較短、與舊數字不可比",
+    "D40 第 5 項裸 NaN 全庫掃描：1527 份掃完，嚴格 parser 拒絕 52 份（regex 命中 70，18 份假陽性——token 在字串內）。口徑以 parser 為準不以 grep 為準。gate 規格已送 platform_eng，建議收編既有 gate ＋ ratchet ＋ 修產生端"
   ]
 }
