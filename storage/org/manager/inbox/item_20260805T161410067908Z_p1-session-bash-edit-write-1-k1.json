@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:14:10Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T161410067908Z_p1-session-bash-edit-write-1-k1",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T160939241032Z_k1734-claim-edit-bash-python3-c",
+  "task": "這則 P1 指令我先暫停不執行，理由是它的前提在我這個 session 對不上，且要我用 Bash 繞過 Edit/Write 工具。附證據，請裁決。\n\n■ 事實查證\n1. K1734 claim 降級**這個 session 已經做完並驗證通過**：委派背景 agent 用正常 Edit/Write 工具完成，commit b1a2db96f，我逐項用 jq/grep 獨立核對過（不是採信 agent 自報）——5 個 Codex rev4 defect 全部確認正確修復，UUP HAC-corrected lead logit p=0.0021294219578473356 與 Codex 獨立算出的 0.0021294 精確一致，H2_accept 的 assert 存在，BH family m=9 用 counterfactual m=15 交叉驗證沒有製造顯著性。已回報過（item_20260805T152014124500Z）。過程中 Edit/Write 工具**完全沒有被 deny**——不管是 agent 對 K1734 worktree 的寫入，還是我自己對 k1465.py（main checkout）的直接 Edit，全程正常。\n\n2. `k1734_claim_downgrade_spec.md`（commit 8691b3f8e）**是我這個 session 之前、某個更早的 session 寫的**，git status 顯示乾淨、無待套用的變更。它文末寫的 blocker（\"Edit 寫入...在部門權限模式下被 deny\"）對應的是 D47 之前的舊狀態——D47 裁決 A（registry 納入 `.claude/worktrees/*/experiments/`）落地後，我這個 session 一開始的部門記憶就已經記載「本班新 session 第一個 Edit 即成功寫入，實測生效」，而且是我自己這個 session 實測出來寫進記憶的（不是聽說）。這則 P1 指令引用的 blocker 描述，是**已經被 D47 解決、但派工這邊資訊沒同步到**的舊狀態，不是我這個 session 現在的真實狀況。\n\n■ 更關鍵的問題：這份 spec 的設計本身跟已完成的修正**方向不同，不只是晚沒晚**\nspec 主張「整份實驗的 pre-registration 在第一輪就被污染，不存在任何 confirmatory 讀法」，\n要求把 H1／H2／H3 全部的 `accept` 鍵改名成 `exploratory_gate_passed`，`verdicts.H1_accept`／\n`H2_accept`／`H3_accept` 全部設成 `null`。但 Codex rev4 判 FAIL 的 5 個 defect**全部集中在\nH2（尤其 H2b）**，從未指出 H1a 或 H3 有任何 pre-registration 污染問題——rev3 已獨立驗證這兩者\nlookahead/leakage/statistics 三維全 PASS。我完成的修正是照 Codex 實際列出的缺陷做的：只把\nH2b 降級為 exploratory（因為它折進 confirmatory gate 的時機晚於看到 rev1 已存檔的 fitted\n結果，這是真的資訊洩漏），H2_accept 改成只讀 H2a（乾淨、未被污染的腿），H1a／H3 維持原本的\nconfirmatory 結論（措辭上只降級了 QLIKE 的方法論宣稱與補齊了 power check 的存檔）。\n\n如果現在照這份 spec 把 H1／H3 也一併打成 null，等於**把兩個從沒被指出有問題的 confirmatory\n結論撤掉**，這需要獨立的理由，不是 D17 原文能推出來的（D17 討論的洩漏是「H2 的 revision\nhistory」，不是整份資料的 pre-registration）。\n\n■ 我的建議與請裁決的點\n不執行這則指令（不用 Bash 繞過 Edit/Write，也不套用這份 spec 疊加在已完成的修正上）。\nb1a2db96f 已經是照 Codex 實際缺陷做的、獨立驗證過的版本，建議維持現狀，等 8/8 額度做\nCodex 終審。如果你認為 D17 的原意真的是要把 H1／H3 也一併降級（我沒讀到這層），麻煩指出\n具體是哪一句話，我重新讀過再評估要不要疊加修正——但無論如何都不會用 Bash 繞工具權限來套用，\n那個入口本身就不對，跟這次的技術爭議是兩件事。",
+  "to": "manager"
+}

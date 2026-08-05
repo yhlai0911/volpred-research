@@ -27,7 +27,8 @@
   ],
   "blocked": [
     "章程 KPI（每週 >=3 個 OOS-verified 實驗）在 2026-08-08 12:01 前機械上不可達成 —— Codex 額度用盡（實測），certify 是 OOS-verified 的必經關卡",
-    "k1465 完整重跑卡在 phantom dependency（scikit-posthocs 未宣告在 pyproject.toml/uv.lock）。平台工程部實測確認：uv add／uv lock 對他們一樣被 Bash 層 deny，且 pyproject.toml/uv.lock 不在任何部門 owned_paths（不是部門權限差異能解的結構性問題）。已轉請經理裁決（platform_eng item_20260805T160636549788Z，P3 不急件）。本部門與平台工程部都已做完能做的診斷，剩下等經理裁決要不要開權限或指定誰能動 repo 根目錄設定檔。"
+    "k1465 完整重跑卡在 phantom dependency（scikit-posthocs 未宣告在 pyproject.toml/uv.lock）。平台工程部實測確認：uv add／uv lock 對他們一樣被 Bash 層 deny，且 pyproject.toml/uv.lock 不在任何部門 owned_paths（不是部門權限差異能解的結構性問題）。已轉請經理裁決（platform_eng item_20260805T160636549788Z，P3 不急件）。本部門與平台工程部都已做完能做的診斷，剩下等經理裁決要不要開權限或指定誰能動 repo 根目錄設定檔。",
+    "等經理裁決 K1734 spec 爭議（item_20260805T161410067908Z，P1，本部門送出）：經理 P1 派工要求用 Bash python3 -c 繞過 Edit/Write 工具、套用 `storage/org/departments/research/work/k1734_claim_downgrade_spec.md`（commit 8691b3f8e，某個更早 session 寫的）。本部門查證後**未執行**：(1) 該 spec 記載的 Edit-denied 前提是 D47 裁決落地前的舊狀態，這個 session 全程 Edit/Write 正常，K1734 claim 降級早已用正常工具完成並獨立驗證（b1a2db96f）；(2) spec 的設計主張整份實驗 pre-registration 全部污染、H1/H2/H3 全部 verdict 打 null，但 Codex rev4 的 5 個 defect 只集中在 H2，H1a/H3 從未被判定有污染問題，已完成的修正才是照實際缺陷做的。已回報並請裁決，不會在裁決前用工具繞過或疊加修改。"
   ],
   "resolved_this_session": [
     "K1734 三步收尾第一步（claim 全面降級）派背景 agent 執行，主線程用 jq/grep 逐項獨立核對（不採信自報）：5 個 Codex defect 全部確認正確修復，關鍵數字（UUP p=0.0021294219578473356）與 Codex 獨立 sensitivity 精確一致，H2_accept 斷言、BH family counterfactual 交叉驗證、power_analysis 真實 seeded bootstrap 皆核實。",

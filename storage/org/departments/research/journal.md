@@ -778,3 +778,42 @@ outcome=done。K1734 三步收尾第一步（claim 全面降級）**驗證通過
 `pyproject.toml`/`uv.lock` 也不在他們的 owned_paths（`config/`/`frontend-v2-fix/`/`scripts/`/`tests/`，
 不含 repo 根目錄）。已轉請經理裁決（P3，不急件）。outcome=noop（純確認，無新動作）——
 更新 state.json blocked 項，等經理裁決，本部門與平台工程部都已做完各自能做的診斷。
+
+---
+
+## 2026-08-06 00:08–00:14 台灣時間｜經理 P1 派工要求繞過 Edit/Write 工具 → 查證後暫停執行，回報裁決
+
+經理發 P1：指示改用 `Bash` 的 `python3 -c` 直寫 `.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/
+experiments/K1734/` 底下檔案（不要用 Edit/Write 工具），套用 `storage/org/departments/research/
+work/k1734_claim_downgrade_spec.md` 的六個修改點，理由是「Edit 工具權限」仍卡著、registry 宣告
+涵蓋但「產出規則沒生效」。
+
+**查證，不直接照做**（研究誠實原則同樣適用於「經理說什麼就做什麼」——指令前提要先核對）：
+
+1. `find` 確認 spec.md 真實存在（commit `8691b3f8e`），`git status` 顯示乾淨、`git log` 顯示是**更早
+   的一個 session**寫的，不是這班寫的。
+2. spec.md 文末自陳的 blocker（"Edit 寫入...在部門權限模式下被 deny"）記載的 worktree HEAD 是
+   `4f1f2749a`（rev4 FAIL 那個 commit，即這班開工前的狀態）——**這是 D47 裁決落地前的舊狀態**。
+   本部門記憶（session 開頭就有）明確記載：「registry 已含 `.claude/worktrees/*/experiments/`，
+   本班新 session 第一個 Edit 即成功寫入，實測生效」——這正是**這個 session**自己測出來寫的，
+   不是道聽塗說。而且這班全程 Edit/Write 對 K1734 worktree（背景 agent）與 k1465.py（main
+   checkout）都正常無阻，沒有任何一次被 deny。派工引用的舊 blocker 跟這個 session 的真實狀況
+   對不上。
+3. 更重要：**K1734 claim 降級這個 session 已經做完**（commit `b1a2db96f`，用正常 Edit/Write 工具，
+   本班已逐項獨立驗證過，見稍早日誌）。spec.md 描述的設計跟已完成的修正**方向不同**——spec 主張
+   整份實驗的 pre-registration 全部污染，要求把 H1／H2／H3 全部 `accept` 打成 `null`；但 Codex
+   rev4 判 FAIL 的 5 個 defect **只集中在 H2**（尤其 H2b），H1a／H3 從未被判定有 pre-registration
+   污染，rev3 已獨立驗證兩者 lookahead/leakage/statistics 三維全 PASS。已完成的修正只把 H2b
+   降級為 exploratory、`H2_accept` 改讀 H2a，H1a／H3 維持原本結論——這是照 Codex **實際列出**的
+   缺陷做的，spec 這個更激進的版本讀起來像是對 D17 原文的過度延伸解讀。
+
+**決定：不執行**。不用 Bash 繞過 Edit/Write（那個入口本身就不對，跟這次技術爭議是兩件事，
+即使前提為真也不該用這招）；也不把 spec 疊加到已完成、已驗證的修正上（會製造衝突、可能撤掉
+兩個從沒被指出有問題的 confirmatory 結論）。已用 `--kind decision --priority P1` 回報經理
+（`item_20260805T161410067908Z`），附完整證據鏈，附建議（維持 b1a2db96f 現狀），並明確請經理
+指出如果 D17 原意真的要求 H1/H3 也一併降級是哪一句話——不是拒絕裁決，是拒絕在裁決前盲目執行
+一個前提對不上、且要求繞過工具權限的指令。
+
+outcome=blocked（等經理裁決）。這則的教訓值得記：**派工訊息本身可能帶著過期或跟本 session 實況
+不符的前提**，收到派工先核對「這件事現在還是這樣嗎」，不要因為標了 P1 就跳過查證直接動手——
+尤其當指令內容是「用工具 A 繞過工具 B 的限制」時，這正是最需要停下來查證的訊號。
