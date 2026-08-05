@@ -67,6 +67,10 @@ LOG = logging.getLogger(__name__)
 # Default upstream constants (overridable via env for tests + ops)
 DEFAULT_TIMEOUT_S = 3000  # 50min — matches CLAUDE.md hourly cap
 GRACE_PERIOD_S = 10        # SIGTERM grace before SIGKILL
+#: Settle time after reaping orphans left behind by a cleanly-exited leader,
+#: before re-reading the cohort. _kill_pgid already spends its own SIGTERM
+#: grace; this only covers the kernel's reaping of the killed children.
+ORPHAN_REAP_SETTLE_S = 2.0
 RETRY_BACKOFF_S = 90        # between transient-failure attempts
 MAX_ATTEMPTS = 3
 
@@ -941,6 +945,42 @@ def _run_one_attempt(
         job_id=job_id,
         custody=producer_custody,
     )
+    if remaining_members:
+        # The leader returned on its own: the agent finished its work and wrote
+        # its final text. What survives is children it never reaped — MCP
+        # servers, background shells, a pytest that outlived its caller. The
+        # worker owns this process group; reaping them is its job.
+        #
+        # Until 2026-08-05 this branch only logged and gave up, so six fires in
+        # two days were thrown away *after* their agent had succeeded: the
+        # outcome became kill_failed_orphan, the task was re-pended, and the
+        # next fire redid work that was already done (2026-08-04 ci-root-
+        # 30875762101, ci-red-30884267057 x2, ci-red-30911746339 x2; 2026-08-05
+        # ci-red-30973884810). Killing on timeout but not after a clean exit
+        # was never a deliberate asymmetry — the same process-group semantics
+        # apply to both (.claude/rules, class A).
+        LOG.warning(
+            "worker attempt=%d leader exited cleanly but %d cohort member(s) "
+            "survive pgid=%d — reaping orphans: %s",
+            attempt, len(remaining_members), pgid, remaining_members,
+        )
+        _kill_pgid(
+            pgid, leader_pid=proc.pid, reason="orphan_reap_after_leader_exit",
+            job_id=job_id, attempt=attempt,
+            custody=producer_custody,
+            state_path=state_path,
+        )
+        time.sleep(ORPHAN_REAP_SETTLE_S)
+        remaining_members = procutil.producer_cohort_members_checked(
+            pgid,
+            job_id=job_id,
+            custody=producer_custody,
+        )
+        if not remaining_members:
+            LOG.info(
+                "worker attempt=%d orphan cohort reaped; the attempt's own "
+                "exit code stands", attempt,
+            )
     if remaining_members is None or remaining_members:
         LOG.error(
             "worker attempt=%d leader exited but producer pgid=%d is %s; "

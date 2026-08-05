@@ -14197,3 +14197,133 @@ def test_provider_denial_raises_a_critical_alert(tmp_path: Path, monkeypatch) ->
     assert "shasum -a 256" in body
     assert "不可照抄" in body
     assert "放寬 pin" in body
+
+
+def test_orphans_after_a_clean_leader_exit_are_reaped_not_fatal(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    """An agent that finished must not be failed for children it left behind.
+
+    Six fires in two days were discarded *after* their agent succeeded: the
+    leader exited 0, some child (MCP server, background shell) outlived it,
+    and this branch logged and gave up — outcome kill_failed_orphan, task
+    re-pended, next fire redoing finished work. The worker owns the process
+    group; reaping is its job, exactly as it already is on timeout.
+    """
+    _stub_worker_custody(monkeypatch)
+
+    class ExitedProc:
+        pid = 123
+
+        def wait(self, timeout=None):
+            return 0
+
+    monkeypatch.setattr(
+        worker,
+        "authorize_provider_spawn",
+        lambda **kwargs: SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-settings.json",
+            environment=lambda: {},
+        ),
+    )
+    monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
+    monkeypatch.setattr(worker, "_spawn", lambda **_kw: ExitedProc())
+    monkeypatch.setattr(
+        worker, "_wait_with_fatal_probe", lambda *_a, **_kw: ("exited", 0),
+    )
+    monkeypatch.setattr(worker, "ORPHAN_REAP_SETTLE_S", 0.0)
+    monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kw: object())
+    monkeypatch.setattr(worker.state, "attach_process", lambda **_kw: None)
+    monkeypatch.setattr(worker.state, "update_started_wall", lambda **_kw: None)
+    monkeypatch.setattr(worker.state, "mark_job_phase", lambda **_kw: True)
+    monkeypatch.setattr(
+        worker.procutil, "get_process_start_wall", lambda _pid: "start-id",
+    )
+    monkeypatch.setattr(worker.fire_manifest, "open_manifest", lambda *_a, **_kw: None)
+
+    # Orphans on the first look, gone once the reap has run.
+    cohort = iter([[555, 556], []])
+    monkeypatch.setattr(
+        worker.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: next(cohort, []),
+    )
+    killed: list[str] = []
+    monkeypatch.setattr(
+        worker,
+        "_kill_pgid",
+        lambda _pgid, **kw: killed.append(kw["reason"]) or True,
+    )
+
+    exit_code, _duration, _out = worker._run_one_attempt(
+        prompt_text="prompt",
+        model=worker.OPUS_MODEL,
+        timeout_s=10,
+        log_path=tmp_path / "worker.log",
+        attempt=1,
+        schedule_id="hourly_dispatch",
+        state_path=tmp_path / "state.json",
+        job_id="job-orphan-reap",
+        slot_id="slot-1",
+    )
+
+    assert killed == ["orphan_reap_after_leader_exit"]
+    # The agent's own exit code stands — the fire is a success, not an orphan
+    # casualty.
+    assert exit_code == 0
+    assert exit_code != worker.TIMEOUT_SURVIVED_SENTINEL
+
+
+def test_unreapable_orphans_still_fail_closed(tmp_path: Path, monkeypatch) -> None:
+    """Reaping is an attempt, not an assumption: survivors still fail closed."""
+    _stub_worker_custody(monkeypatch)
+
+    class ExitedProc:
+        pid = 123
+
+        def wait(self, timeout=None):
+            return 0
+
+    monkeypatch.setattr(
+        worker,
+        "authorize_provider_spawn",
+        lambda **kwargs: SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-settings.json",
+            environment=lambda: {},
+        ),
+    )
+    monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
+    monkeypatch.setattr(worker, "_spawn", lambda **_kw: ExitedProc())
+    monkeypatch.setattr(
+        worker, "_wait_with_fatal_probe", lambda *_a, **_kw: ("exited", 0),
+    )
+    monkeypatch.setattr(worker, "ORPHAN_REAP_SETTLE_S", 0.0)
+    monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kw: object())
+    monkeypatch.setattr(worker.state, "attach_process", lambda **_kw: None)
+    monkeypatch.setattr(worker.state, "update_started_wall", lambda **_kw: None)
+    monkeypatch.setattr(
+        worker.procutil, "get_process_start_wall", lambda _pid: "start-id",
+    )
+    monkeypatch.setattr(worker.fire_manifest, "open_manifest", lambda *_a, **_kw: None)
+    monkeypatch.setattr(
+        worker.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [555],  # never dies
+    )
+    monkeypatch.setattr(worker, "_kill_pgid", lambda _pgid, **_kw: True)
+
+    exit_code, _duration, _out = worker._run_one_attempt(
+        prompt_text="prompt",
+        model=worker.OPUS_MODEL,
+        timeout_s=10,
+        log_path=tmp_path / "worker.log",
+        attempt=1,
+        schedule_id="hourly_dispatch",
+        state_path=tmp_path / "state.json",
+        job_id="job-orphan-survives",
+        slot_id="slot-1",
+    )
+
+    assert exit_code == worker.TIMEOUT_SURVIVED_SENTINEL
