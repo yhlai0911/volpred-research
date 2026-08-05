@@ -174,3 +174,53 @@ def test_missing_policy_is_reported_not_hidden(org_root: Path) -> None:
     brief = _core.build_brief(org_root, "alpha")
 
     assert "policy.md 不存在" in brief, "a missing standing-rules file must be visible, not silent"
+
+
+def test_declared_cadence_actually_wakes_a_department(org_root: Path) -> None:
+    """A cadence the gate never reads is a decoration, not a schedule."""
+    assert run_tool("org_admin.py", "create", "infra", "--min-cadence", "daily",
+                    root=org_root).returncode == 0
+
+    gate = evaluate_gate(org_root)
+
+    assert gate["fire"] is True
+    assert any("never run" in r and "infra" in r for r in gate["reasons"])
+
+
+def test_cadence_is_satisfied_by_a_recent_run(org_root: Path) -> None:
+    from datetime import datetime, timezone
+    assert run_tool("org_admin.py", "create", "infra", "--min-cadence", "daily",
+                    root=org_root).returncode == 0
+    state = org_root / "departments" / "infra" / "state.json"
+    state.write_text(json.dumps({
+        "last_run": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }), encoding="utf-8")
+
+    gate = evaluate_gate(org_root)
+
+    assert not any("infra" in r for r in gate["reasons"]), gate
+
+
+def test_on_demand_department_is_not_woken_by_the_clock(org_root: Path) -> None:
+    assert run_tool("org_admin.py", "create", "ondemand", root=org_root).returncode == 0
+
+    gate = evaluate_gate(org_root)
+
+    assert gate["fire"] is False, "an idle on-demand dept must not burn a wake"
+
+
+def test_departments_are_told_they_have_no_schedule(org_root: Path) -> None:
+    """A department that thinks it has a dispatch slot reports phantom next-runs.
+
+    Observed 2026-08-05: the research pane printed "⏭ 下次任務 … hourly-dispatch"
+    because it read CLAUDE.md's orchestrator reporting protocol as its own.
+    """
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    import shutil
+    shutil.copy(REPO / "storage" / "org" / "policy.md", org_root / "policy.md")
+
+    identity = _core.identity_prompt(org_root, "alpha")
+
+    assert "部門沒有自己的排程" in identity
+    assert "hourly-dispatch" in identity, "the exact leaked instruction must be named"
+    assert "回報對象是經理" in identity

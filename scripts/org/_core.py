@@ -116,6 +116,11 @@ def brief_path(root: Path, dept: str) -> Path:
     return runtime_dir(root) / f"{dept}.brief.md"
 
 
+def identity_path(root: Path, dept: str) -> Path:
+    """Stable identity, passed as a file: a multi-KB argv is not a CLI argument."""
+    return runtime_dir(root) / f"{dept}.identity.md"
+
+
 def read_lease(root: Path, dept: str) -> dict | None:
     path = lease_path(root, dept)
     if not path.exists():

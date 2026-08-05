@@ -24,6 +24,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -36,6 +37,7 @@ from _core import (  # noqa: E402
     build_brief,
     build_manager_brief,
     dept_dir,
+    identity_path,
     identity_prompt,
     work_prompt,
     clear_lease,
@@ -123,6 +125,34 @@ def _split_largest(any_pane_in_tab: str, cwd: str) -> str:
     return pane_id
 
 
+def start_agent(name: str, kind: str, pane_id: str, extra: list[str]) -> None:
+    """Start an agent, waiting out a pane whose shell has not reached its prompt.
+
+    A freshly split pane needs a moment before it is an "available shell"; the
+    first attach lost every role to agent_pane_busy purely on timing.
+    """
+    last: HerdrError | None = None
+    for attempt in range(5):
+        try:
+            herdr("agent", "start", name, "--kind", kind, "--pane", pane_id, "--", *extra, timeout=120)
+            return
+        except HerdrError as exc:
+            if "agent_pane_busy" not in str(exc) and "not an available shell" not in str(exc):
+                raise
+            last = exc
+            time.sleep(1.5 * (attempt + 1))
+    raise last if last else HerdrError(f"could not start {name} in {pane_id}")
+
+
+def find_org_tab(label: str) -> str | None:
+    """Reuse the existing org tab so a partial attach cannot scatter roles."""
+    for ws in herdr("workspace", "list").get("workspaces", []):
+        for tab in herdr("tab", "list", "--workspace", ws["workspace_id"]).get("tabs", []):
+            if (tab.get("label") or "") == label:
+                return tab.get("tab_id")
+    return None
+
+
 def dept_session_args(root: Path, dept: str) -> list[str]:
     """Per-department CLI config, opt-in by what exists on disk.
 
@@ -205,12 +235,22 @@ def cmd_attach(args: argparse.Namespace) -> int:
         return 0
 
     cwd = str(REPO_ROOT)
-    tab = herdr("tab", "create", "--cwd", cwd, "--label", args.label, "--no-focus")
-    tab_id = tab.get("tab", {}).get("tab_id")
-    seed_pane = tab.get("root_pane", {}).get("pane_id")
-    if not seed_pane:
-        raise HerdrError(f"tab create returned no root pane: {tab}")
-    print(f"tab {tab_id} 建立（root pane {seed_pane}）")
+    tab_id = find_org_tab(args.label)
+    if tab_id:
+        panes = herdr("pane", "list", "--workspace", tab_id.split(":")[0]).get("panes", [])
+        in_tab = [p for p in panes if p.get("tab_id") == tab_id]
+        free = [p for p in in_tab if not p.get("agent")]
+        seed_pane = (free[0] if free else in_tab[0])["pane_id"]
+        print(f"沿用既有 tab {tab_id}（避免角色被拆到不同 tab）")
+        if not free:
+            seed_pane = _split_largest(seed_pane, cwd)
+    else:
+        tab = herdr("tab", "create", "--cwd", cwd, "--label", args.label, "--no-focus")
+        tab_id = tab.get("tab", {}).get("tab_id")
+        seed_pane = tab.get("root_pane", {}).get("pane_id")
+        if not seed_pane:
+            raise HerdrError(f"tab create returned no root pane: {tab}")
+        print(f"tab {tab_id} 建立（root pane {seed_pane}）")
 
     runtime_dir(root).mkdir(parents=True, exist_ok=True)
     attached, failed = [], []
@@ -220,12 +260,16 @@ def cmd_attach(args: argparse.Namespace) -> int:
             session = (routing.get(name) or {}).get("session") or {}
             model = session.get("model") or "opus"
             effort = args.effort or session.get("effort") or "medium"
-            identity = (build_manager_brief(root) if name == MANAGER
-                        else identity_prompt(root, name))
-            herdr("agent", "start", name, "--kind", args.kind, "--pane", pane_id,
-                  "--", "--model", model, "--effort", effort,
-                  "--append-system-prompt", identity,
-                  *dept_session_args(root, name), timeout=120)
+            ipath = identity_path(root, name)
+            ipath.parent.mkdir(parents=True, exist_ok=True)
+            ipath.write_text(
+                build_manager_brief(root) if name == MANAGER else identity_prompt(root, name),
+                encoding="utf-8",
+            )
+            start_agent(name, args.kind, pane_id,
+                        ["--model", model, "--effort", effort,
+                         "--append-system-prompt-file", str(ipath),
+                         *dept_session_args(root, name)])
             title = meta.get("title") or name
             herdr("pane", "rename", pane_id, f"{title} · {name}")
 
