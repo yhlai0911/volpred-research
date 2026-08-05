@@ -4077,6 +4077,60 @@ def _parse_telegram_reply_backlog_state(storage_dir: str, now: datetime) -> dict
             }
         )
 
+    # A message that never became a task is invisible to the loop above, and
+    # that is the shape that destroyed two owner messages on 2026-08-05: the
+    # poll handler raised, the offset advanced anyway, and there was no task for
+    # any probe to find. telegram_poll now parks such updates instead of
+    # dropping them, so the parked file is the missing half of this same
+    # question -- "did the owner's message get through?" -- and belongs to this
+    # probe rather than to a second watchdog.
+    #
+    # Read the file rather than relying on the daemon's warn() escalation: warn
+    # only persists to JSONL when VOLPRED_DIAGNOSTICS_PERSIST is set, and the
+    # telegram-poll LaunchAgent sets no environment at all. A signal that
+    # depends on an env var nobody set is the 13-day-invisible failure this repo
+    # already has on record.
+    deadletter_path = _storage_root(storage_dir) / "ops" / "telegram_failed_updates.jsonl"
+    try:
+        raw_rows = deadletter_path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        raw_rows = []
+    except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+        raw_rows = []
+        warn(
+            "telegram_reply_backlog",
+            "deadletter read failed",
+            path=_relative_repo_path(deadletter_path),
+            err=f"{type(exc).__name__}: {exc}",
+        )
+    for line in raw_rows:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            # An unparsable parked row is still a message that did not get
+            # through; count it rather than let a bad line hide it.
+            row = {}
+        parked_at = _parse_iso_datetime(row.get("first_failed_at"))
+        age_minutes = (
+            round((now - parked_at).total_seconds() / 60.0, 1)
+            if parked_at is not None
+            else TELEGRAM_REPLY_BACKLOG_CRITICAL_MINUTES + 1.0
+        )
+        update = row.get("update") if isinstance(row.get("update"), dict) else {}
+        message = update.get("message") if isinstance(update.get("message"), dict) else {}
+        stuck.append(
+            {
+                "id": f"parked-update-{update.get('update_id', 'unknown')}",
+                "status": f"never_queued (attempts={row.get('attempts', '?')})",
+                "created_at": row.get("first_failed_at"),
+                "age_minutes": age_minutes,
+                "text": str(message.get("text") or "")[:120],
+            }
+        )
+
     stuck.sort(key=lambda item: item["age_minutes"], reverse=True)
     oldest_minutes = stuck[0]["age_minutes"] if stuck else None
 

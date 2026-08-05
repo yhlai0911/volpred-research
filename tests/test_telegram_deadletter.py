@@ -152,3 +152,52 @@ def test_a_corrupt_row_never_evicts_its_neighbours(monkeypatch) -> None:
     assert [r.get("_raw") for r in remaining] == ["{not json"], (
         "the unparsable row is kept for a human; the good one drained"
     )
+
+
+# --- the parked queue must be visible to someone -------------------------
+
+
+def test_parked_updates_surface_in_the_owner_message_probe(tmp_path) -> None:
+    """A parked message nobody looks at is the same silence, one layer down.
+
+    The escalation inside telegram_poll goes through warn(), which only reaches
+    a JSONL that detectors read when VOLPRED_DIAGNOSTICS_PERSIST is set -- and
+    the telegram-poll LaunchAgent declares no environment at all. So the durable
+    signal has to be the parked file itself, read by the probe that already owns
+    the question "did the owner's message get through?".
+    """
+    import sys
+    from datetime import datetime, timedelta, timezone
+
+    sys.path.insert(0, str(ROOT / "src"))
+    from volpred.ops.alerts import _parse_telegram_reply_backlog_state
+
+    (tmp_path / "next_tasks.json").write_text("[]", encoding="utf-8")
+    now = datetime.now(timezone.utc)
+
+    clean = _parse_telegram_reply_backlog_state(str(tmp_path), now)
+    assert clean["breached"] is False, "an empty queue must not create noise"
+
+    ops = tmp_path / "ops"
+    ops.mkdir()
+    (ops / "telegram_failed_updates.jsonl").write_text(
+        json.dumps(
+            {
+                "update": {"update_id": 351935634, "message": {"text": "建立這樣的完整功能"}},
+                "attempts": 6,
+                "first_failed_at": (now - timedelta(hours=3)).isoformat(),
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    breached = _parse_telegram_reply_backlog_state(str(tmp_path), now)
+    assert breached["breached"] is True
+    assert breached["level"] == "critical"
+    assert "351935634" in breached["body"]
+    assert "never_queued" in breached["body"], (
+        "the alert must distinguish 'never became a task' from 'task not answered' — "
+        "they have different root causes"
+    )
