@@ -4,13 +4,8 @@
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-30973884810",
   "last_push_remediation": {
-    "attempted": true,
-    "ahead": 1,
-    "head_sha": "76c254bf09de9072975f8daca44af525f7658f4e",
-    "pushed": true,
-    "rc": 0,
-    "outcome": "pushed",
-    "ahead_after": 0
+    "attempted": false,
+    "reason": "nothing_unpushed"
   },
   "schema_version": 3,
   "latest_observed_run": {
@@ -39,7 +34,7 @@
     "updated_at": "2026-08-05T04:19:50Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-05T04:25:40.035217+00:00",
+  "updated_at": "2026-08-05T04:30:18.418637+00:00",
   "processed_run_keys": [
     "29715899562:1",
     "29718141674:1",
@@ -871,23 +866,18 @@
     "repair_task_statuses": {
       "ci-red-30973884810": "pending"
     },
-    "dispatch_request_count": 2,
-    "last_dispatch_request_at": "2026-08-05T04:25:40.035217+00:00",
+    "dispatch_request_count": 3,
+    "last_dispatch_request_at": "2026-08-05T04:30:18.418637+00:00",
     "push_intent": {
       "head_sha": "76c254bf09de9072975f8daca44af525f7658f4e",
       "run_key": "30973884810:1",
       "recorded_at": "2026-08-05T04:25:40.035217+00:00"
     },
     "last_push_remediation": {
-      "attempted": true,
-      "ahead": 1,
-      "head_sha": "76c254bf09de9072975f8daca44af525f7658f4e",
-      "pushed": true,
-      "rc": 0,
-      "outcome": "pushed",
-      "ahead_after": 0
+      "attempted": false,
+      "reason": "nothing_unpushed"
     },
-    "last_push_remediation_at": "2026-08-05T04:25:40.035217+00:00",
+    "last_push_remediation_at": "2026-08-05T04:30:18.418637+00:00",
     "last_verified_push_head": "76c254bf09de9072975f8daca44af525f7658f4e",
     "remediation_poll_keys": [
       "2026-08-05T04"
