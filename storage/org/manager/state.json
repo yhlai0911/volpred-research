@@ -1,5 +1,35 @@
 {
-  "last_tick": null,
-  "next_review_due": null,
-  "pending_proposals": []
+  "last_patrol": "2026-08-05T11:25:00Z",
+  "last_tick": "2026-08-05T11:25:00Z",
+  "next_review_due": "2026-08-12T11:25:00Z",
+  "pending_proposals": [],
+  "open_items": [
+    {
+      "id": "provider-denial-verification",
+      "what": "執行層 15:5x-18:46 停擺；1b513bd79 已重新 pin，但尚未回讀到非 provider_policy_denied 的 completion",
+      "state": "contained_not_verified",
+      "owner": "platform_eng",
+      "ref": "D37 第 1 項"
+    },
+    {
+      "id": "policy-md-two-sections",
+      "what": "policy.md 補『訊號與事實之間隔了幾層』與『擋一件事之前先問往壞修正』兩節；條文已由治理部與論文部擬定",
+      "state": "deferred_write_claim",
+      "owner": "manager",
+      "note": "session f5153fb1 持有 storage/org/policy.md 至 2026-08-05T11:25Z，未硬搶"
+    },
+    {
+      "id": "manager-inbox-has-no-archive-path",
+      "what": "archive_inbox.py 拒絕 manager，經理收件匣只進不出（117 件）",
+      "state": "assigned",
+      "owner": "platform_eng",
+      "ref": "D37 第 5 項"
+    },
+    {
+      "id": "queue-distribution-single-funnel",
+      "what": "canonical 池 56 件可派工作 100% 指向 platform_eng；分佈本身是平台重心壓在 ops 的訊號",
+      "state": "manager_to_propose",
+      "owner": "manager"
+    }
+  ]
 }

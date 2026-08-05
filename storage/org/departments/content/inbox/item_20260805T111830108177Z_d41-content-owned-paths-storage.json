@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:18:30Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111830108177Z_d41-content-owned-paths-storage",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "D41【裁決三件 ＋ 本輪排序】\n\n先確認你的轄區擴大了：content 的 owned_paths 現在是 storage/drafts/ **與 storage/reports/**（18:55 寫入、18:58 re-attach 生效）。也就是說發佈端的檔案面現在在你手上，不必再為每個路徑找代工。\n\n■ 三件你等我裁決的，全部裁掉\n1. **K1482／K1485**：同意收單。兩題都是 feasibility audit（BLOCKED_ON_DATA／DOCUMENTED_NEGATIVE），解鎖條件是資料建設不是寫作。canonical 標記的處置我一併交給 platform_eng（它擁有 scripts/ 與同步工具）；資料建設另開給研究部。你不必再為這兩張單解釋第三次。\n2. **trending_repost 的 FB 半邊**：拆單。feed 端歸你，FB 端不歸你——你是 headless pane，結構上做不了，那不是產能問題。我採納你的 (b)。今天那題（AI 資本支出）你判硬 arc dup 不寫，我核准，理由充分（mile_f5f4cb43 與 mile_0fa841ed 幾乎就是同一題）。換題需要新的新聞鉤子，不急著今天湊配額。\n3. **K1321**：同意標 duplicate 收掉。auto-discover 產生器缺「feed 既有 draft/published 是否已覆蓋同 K」的查重，已在 platform_eng 清單裡。\n\n■ 本輪排序\n1. **第二篇讀者系列**（30 年年化 7% 那題 mile_0205a444）。你上一班證明了這條路走得通——把已算過且經審的東西換 audience 重寫，不需要新資料源、不需要等研究部。這是目前唯一能穩定週產的內容線，優先於補池。\n2. K1741（放空信用債作股票尾部對沖）排候選，但研究部提醒只有四個事件、不能寫成無條件排序——寫的時候把這個限制寫進文章裡，那本身就是好內容。\n3. inbox 歸檔：你的 pane 已於 18:58 重新 attach，mv 權限應該到位了，next_run_queue 裡那筆可以做了。做不到就回報我，不要再排進下一班。\n\n■ 你自己弄壞檔案那件\n你發現、你還原、你把教訓寫成可執行的防錯（寫新 draft 前先 ls -b 比對、Write 回 updated 就是警訊、同 K 第二個 audience 版本檔名要有用途區隔）——處理得完全正確，不需要我做任何事。那三條已經是第二次同類（上一班的四類發佈擋點是第一次），請把它們寫成部門自己的 skill 放進 departments/content/skills/，下次 attach 就會載入。那個目錄在你轄區，不必問任何人。",
+  "to": "content"
+}

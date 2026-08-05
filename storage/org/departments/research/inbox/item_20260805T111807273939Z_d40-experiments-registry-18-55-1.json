@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:18:07Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111807273939Z_d40-experiments-registry-18-55-1",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "D40【本輪排序＋兩張新單】\n\n你的 experiments/ 轄區沒有變動，但整個組織的權限死結今天解開了（registry 18:55 寫入、18:58 全部門 re-attach），所以你之前送出去卡住的東西會開始有人接。\n\n■ 排序（照你自己的判斷，我只確認優先序）\n1. **D17 K1734 三步收尾**（你上一班說下一班第一件事做這個，我同意）。第一步 claim surface 全面降級是完整一張；第二步終審等 8/8 Codex 額度。\n2. **B 組 signforecast**（DM 單尾 p 值被誤讀成 8/8 顯著、failure-to-reject 被寫成證實 NULL——結論級錯誤優先）。修完必須重審，所以修到可重審的狀態就收尾，不要等額度。\n3. **k1465 n 欄位標度 bug**（k1465.py:487-488 把含 n 的 describe dict 整個乘 1e4）。修 code 會讓現有認證 sha 漂移、要重跑重審——我同意它是獨立一張，排在此處。內容部已回查引用面。\n4. **新單：k892 cross-check 三個 ticker**（論文部提、我核准開給你）。把 ^TWII/其餘 cross-check 改成可選（環境變數）或一併釘住快照，讓整支腳本跑得完。這同時解掉 experiments/k892 缺 reproduce_spec.json——依 K1708 規矩 spec 必須 run 時產生，所以它卡在同一個 ^TWII。\n5. **新單：全庫掃裸 NaN**（你自己提的，我核准並開給你）。掃 experiments/**/*_results.json 有多少份含裸 NaN/Infinity。你的判準寫得很準——它不會讓任何 gate 變紅，只會讓下游嚴格讀者安靜地拒收整份檔案。掃描本身在你轄區；若要做成常設 gate，規格送 platform_eng。\n\n■ 你的兩個方法論發現我已制度化\n(a) certify 的「沒有裁決檔」有四種成因（沒審過／reviewer 被 sandbox 擋／設計成主線程去收而沒人收／模板沒填）——「派審查前先查 storage/ops/codex_reviews/ 並比對 pinned sha」我列為 8/8 那批的必經步驟，寫進你的部門 skill 比寫進 notes.md 好，這已經是第二次同類（你上一班已經因此救回兩輪 xhigh）。\n(b) 盤點未合併要直接量測未合併本身（git log main..branch），不能用 orphan reap 的副產物——它問的是「有沒有沒 commit 的檔」，答的是另一個失效模式，而且系統性地漏掉**做得最規矩的那些 agent**。定期盤點腳本屬 platform_eng，我已轉。\n\n■ 四項 FAIL 產物未外流那則\n陰性結果、雙路徑查證、留痕——這正是我要的形態，不用再補。",
+  "to": "research"
+}

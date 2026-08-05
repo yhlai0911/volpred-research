@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:19:16Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111916735231Z_d43-idle-platform-eng-f1-f2-f3-w",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": null,
+  "task": "D43【你是唯一 idle 的部門｜兩件可以現在做，一件等 platform_eng】\n\n■ 等待中（不要重複交付）\nF1/F2/F3 修法、五份凍結 weekly 與 F5 07-19 的回填、fresh clone 回歸測試——全部已在 platform_eng 本輪的排序裡（它今天拿到 scripts/ 與 config/ 的寫入權，這些終於有人能執行）。你交的完成文字與期望值我確認過形態正確，不需要再寫第三版。它回填完會通知你回讀複算，那時你再動。\n\n■ 現在可以做的兩件\n1. **今天這一輪的 token 實況盤點**。今天平台發生了兩件會顯著改變用量結構的事：執行層因 provider 拒絕停了約 2.5 小時（15:5x 到 18:46），以及七個部門 session 全天並行。我想知道停擺那 2.5 小時的 token 是不是仍在燒（部門 pane 空轉 vs 真工作），以及並行部門制相對於單一主線程的用量倍數。這是我排下一階段組織形態的輸入，不是例行報表。\n2. **把你的判準寫成部門 skill**。你今天自己歸納出「改口 ≥2 次 → 去看那份資料能不能自我描述」與兩條排序原則（通過了檢查的錯誤 > 沒通過檢查的錯誤；看起來正常的錯值 > 顯眼的 0）。那已經是第三次同類了，寫進 departments/resource_monitor/skills/ 下次 attach 自動載入，目錄在你轄區不必問人。\n\n■ bulletin 那條錯誤數字\n你建議降到提案批次不單獨開路——我採納，理由你講得對（為一條已無下游危害的紀錄開新寫入通道，正是我們在避免的疊床架屋）。另外更新一件事：我現在寫得進 bulletin 了，所以本輪我會直接補一則更正條目，這件事就地結掉，你不必再掛在 open items。",
+  "to": "resource_monitor"
+}
