@@ -43,7 +43,7 @@
     "decided_at": "2026-08-05",
     "rationale": "journal.md 2026-08-05 §裁決三。vt-crowding-abm 未選定期刊前不佔名次。"
   },
-  "last_run": "2026-08-05T13:52:01Z",
+  "last_run": "2026-08-05T22:34:58Z",
   "open_items": 9,
   "open_items_detail": [
     "prg-periodic-garch（老闆點名最急，對外風險）：六筆逐字 find/replace 已備妥交接。2026-08-05T13:1xZ 獨立複驗 gate（sha256 8852326a…c86ed / 30408 bytes 皆相符）並補驗六個 FIND 的全檔唯一性（全部 count=1、命中原行號 207/198/39/118/111/195）→ ROUND VALID，可直接套用不需重出。Edit 1 處置確認為最小修法（移除兩個 citep），理由與投稿策略無關：無證據的具名方法論指控本身就不能留。**唯一缺口是「誰套用」——本部門仍無 paper/**/*.tex 寫入權，本輪重測仍 deny，未繞過。** 已送經理裁決（A 主線程套用，時間成本零；B 解鎖後由本部門套用，需改 settings ＋ re-attach 兩個非同步步驟）。套用後三步驗證結果回本部門判定收斂，不由套用者宣告。收斂後：重編、重跑 reproduce.py、寫回 blocker + verified_at、開 v9 round（含 Codex 第三軌）。",
