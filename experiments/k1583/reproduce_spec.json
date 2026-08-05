@@ -5,8 +5,8 @@
   "entrypoint": {
     "path": "k1583.py",
     "args": [],
-    "sha256": "73505b0de124b78e73f11ec4a5fa321239d4bb7b920e1156b7b7a1fe021f9b7b",
-    "size_bytes": 28602
+    "sha256": "23f5bce0c3a50d165fee19de8a752805844d7fcc174765280f459d750f3d0cab",
+    "size_bytes": 31242
   },
   "canonical_result": "k1583_results.json",
   "inputs": [
@@ -19,6 +19,11 @@
       "path": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
       "sha256": "43870c199d00c922ca607c674254edd66c5acca00209eb501a94c5c339449830",
       "size_bytes": 3179160
+    },
+    {
+      "path": "experiments/k1583/data/usrecd_snapshot.json",
+      "sha256": "8550855aff2f368fea603e58f35a6a9d06d1503b0cc0b97f2c9242b025270b95",
+      "size_bytes": 370064
     }
   ],
   "outputs": [
@@ -27,7 +32,7 @@
     "k1583_sequential_winner_timeline.png",
     "reproduce_commit.json"
   ],
-  "timeout_seconds": 103,
+  "timeout_seconds": 99,
   "network": "deny",
   "randomness": {
     "status": "declared",
@@ -43,8 +48,8 @@
     ]
   },
   "runtime": {
-    "runtime_seconds": 14.472,
-    "recorded_at": "2026-08-05T09:55:23Z"
+    "runtime_seconds": 13.282,
+    "recorded_at": "2026-08-05T09:58:33Z"
   },
   "environment": {
     "python": "3.12.10",
@@ -82,12 +87,12 @@
   },
   "canonical_result_identity": {
     "path": "k1583_results.json",
-    "sha256": "1c88ee72f29b2c409b9527942672f98abc8cb5fb6242adcfbead58b7f9df8f9e",
+    "sha256": "e612e621d5c2d3799f2650e99e5c6c542b668807b914fcf11affa2277a21f14a",
     "size_bytes": 35086
   },
   "artifact_generation": {
     "schema_version": "volpred.reproduce_commit.v1",
-    "generation_id": "3e2211f251061007f9e738e8515910ccbc7eda23f15ae05a59cb902872d1f112",
+    "generation_id": "d28ccb62f899e97de65c751e5d431455add28525e929ea181baef99642b0e2e3",
     "commit_file": "reproduce_commit.json",
     "output_identities": [
       {

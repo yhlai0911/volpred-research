@@ -44,7 +44,11 @@ References:
 ### Conditioning variables
 - VIX：`spy_vix_qqq_eem_fez_2000-2026.csv` `vix_close`（contemporaneous — 描述當日 regime，
   不是預測子）
-- Recession：FRED `USRECD` daily，ffill across non-trading days
+- Recession：**pinned snapshot** `data/usrecd_snapshot.json`（FRED `USRECD` daily，ffill across
+  non-trading days）。2026-08-05 改為釘住快照，原因有二：(a) `.env.local` 是未追蹤檔，clean clone
+  沒有 `FRED_API_KEY`，本實驗在自家的 `scripts/reproduce_check.py` 底下**直接跑不起來**；
+  (b) USRECD 編碼的是 NBER 認定，**會回溯修訂**，重抓可能悄悄改變哪些日子算衰退、連帶改變
+  conditional MCS 的樣本。刷新要顯式 `--refresh-usrecd` 並 commit，不會在一般執行時自動抓。
 - VIX thresholds：high ≥ 20、low < 15、mid 15-20
 
 ### Cross-asset pooling: DISABLED
@@ -146,6 +150,10 @@ MCS 需要所有 16 個 eligible spec 在同一天都有值（listwise deletion�
    VIX-low 的 B0 淘汰是唯一受此影響的結論。
 7. **與 superseded 版本無法做逐點數值對比**：舊 loss matrix（`storage/k1380_v4/spy_losses.npy`）
    已不存在於 repo，只能比對結論層級與已記錄的摘要數字。
+8. **本次重跑修掉的三個復現性缺陷**（都不影響科學結論，但影響任何人能否驗證它）：
+   結果 JSON 曾輸出裸 `NaN`（trivial regime 的 17 個 p 值）而被嚴格讀者整份拒收；
+   recession 資料靠未追蹤的 `.env.local` 金鑰現抓，clean clone 跑不起來；
+   `metadata.primary_inventory` 與 recession limitation 硬編舊數字，宣稱了未評估的樣本。
 
 ## Implication
 
@@ -161,8 +169,10 @@ noise 而非真正的模型優越性。未來比較 GARCH-X / MIDAS 變體的 K-
 
 ## Files
 
-- `k1583.py` — main script
+- `k1583.py` — main script（`--refresh-usrecd` 才會連 FRED）
 - `k1583_results.json` — full results JSON
+- `reproduce_spec.json` — run-time 產出的復現規格（entrypoint / inputs / seeds 的 sha256）
+- `data/usrecd_snapshot.json` — 釘住的 NBER 衰退指標輸入
 - `k1583_conditional_mcs_heatmap.png` — regime heatmap（unconditional + VIX high/mid/low + recession）
 - `k1583_sequential_winner_timeline.png` — top_model timeline + mcs_size annotation
 

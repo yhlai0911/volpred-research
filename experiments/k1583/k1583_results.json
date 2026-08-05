@@ -25,7 +25,7 @@
       "B=1000 for static MCS (task budget); B=500 for inner rolling loops to keep runtime bounded.",
       "MCS implementation reused from src/volpred/stats/mcs.py (HLN 2011 T_R variant, stationary bootstrap, HAC SE)."
     ],
-    "timestamp": "2026-08-05T09:55:23.772954+00:00"
+    "timestamp": "2026-08-05T09:58:33.210115+00:00"
   },
   "loss_inventory": [
     {
@@ -1514,12 +1514,12 @@
   ],
   "code_trace": {
     "path": "experiments/k1583/k1583.py",
-    "sha256": "73505b0de124b78e73f11ec4a5fa321239d4bb7b920e1156b7b7a1fe021f9b7b",
-    "size_bytes": 28602
+    "sha256": "23f5bce0c3a50d165fee19de8a752805844d7fcc174765280f459d750f3d0cab",
+    "size_bytes": 31242
   },
   "artifact_generation": {
     "schema_version": "volpred.reproduce_commit.v1",
-    "generation_id": "3e2211f251061007f9e738e8515910ccbc7eda23f15ae05a59cb902872d1f112",
+    "generation_id": "d28ccb62f899e97de65c751e5d431455add28525e929ea181baef99642b0e2e3",
     "output_identities": [
       {
         "path": "k1583_conditional_mcs_heatmap.png",
@@ -1533,7 +1533,7 @@
       }
     ]
   },
-  "runtime_seconds": 14.472,
+  "runtime_seconds": 13.282,
   "runtime_env": {
     "python": "3.12.10",
     "implementation": "CPython",

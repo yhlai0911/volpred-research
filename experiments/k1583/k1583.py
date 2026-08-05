@@ -81,6 +81,8 @@ ROLLING_STRIDE = 21         # ~monthly recalculation (cheaper, still dense)
 # K1380_v4 loss matrix
 K1380_DIR = PROJECT_ROOT / "experiments" / "K1380_v4"
 LOSS_MATRIX_PATH = K1380_DIR / "k1380_v4_losses_all.npy"
+# Committed input of record for the NBER recession conditioning variable.
+USRECD_SNAPSHOT = SCRIPT_DIR / "data" / "usrecd_snapshot.json"
 SPY_DATA_CSV = (
     PROJECT_ROOT / "paper" / "garch-x-vix" / "data"
     / "spy_vix_qqq_eem_fez_2000-2026.csv"
@@ -237,25 +239,29 @@ def load_vix_regime(oos_dates: pd.DatetimeIndex) -> pd.Series:
     return regime
 
 
-def load_recession_indicator(
-    oos_dates: pd.DatetimeIndex, fred_key: str
-) -> pd.Series:
-    """FRED USRECD daily 0/1 → label {recession, expansion}."""
-    log.info("Fetching FRED USRECD")
-    start = oos_dates[0].strftime("%Y-%m-%d")
-    end = oos_dates[-1].strftime("%Y-%m-%d")
-    url = (
-        f"https://api.stlouisfed.org/fred/series/observations"
-        f"?series_id=USRECD&api_key={fred_key}"
-        f"&file_type=json&observation_start={start}&observation_end={end}"
-    )
-    try:
-        raw = urllib.request.urlopen(url, timeout=30).read()
-    except Exception as e:
-        log.error("FRED fetch failed: %s", e)
-        raise
-    payload = json.loads(raw)
-    obs = payload["observations"]
+def load_recession_indicator(oos_dates: pd.DatetimeIndex) -> pd.Series:
+    """USRECD daily 0/1 → label {recession, expansion}, from the pinned snapshot.
+
+    The snapshot at :data:`USRECD_SNAPSHOT` is the input of record. It is fetched
+    from FRED once (see :func:`fetch_usrecd_snapshot`) and committed alongside the
+    experiment for two reasons:
+
+    * ``.env.local`` is untracked, so a clean clone has no ``FRED_API_KEY`` and the
+      run died at this line — the experiment was not reproducible by anyone,
+      including this repository's own ``scripts/reproduce_check.py``.
+    * USRECD encodes NBER dating, which is **revised retroactively**. Re-fetching
+      it later can silently change which days count as recession, and with them
+      the conditional MCS sample.
+    """
+    if not USRECD_SNAPSHOT.exists():
+        raise RuntimeError(
+            f"pinned USRECD snapshot missing: {USRECD_SNAPSHOT}. "
+            "Regenerate it with `--refresh-usrecd` (needs FRED_API_KEY) and commit it; "
+            "do not silently fall back to a live fetch, that is what made this "
+            "experiment unreproducible."
+        )
+    log.info("Loading pinned USRECD snapshot from %s", USRECD_SNAPSHOT.name)
+    obs = json.loads(USRECD_SNAPSHOT.read_text())["observations"]
     # Build a daily Series; FRED USRECD is daily 0/1
     rec_df = pd.DataFrame(obs)
     rec_df["date"] = pd.to_datetime(rec_df["date"])
@@ -283,6 +289,45 @@ def fred_api_key() -> str:
             if line.startswith("FRED_API_KEY="):
                 return line.split("=", 1)[1].strip()
     raise RuntimeError("FRED_API_KEY missing — cannot fetch USRECD")
+
+
+def fetch_usrecd_snapshot(oos_dates: pd.DatetimeIndex) -> None:
+    """Refresh the pinned USRECD snapshot from FRED. Explicit opt-in only.
+
+    Run with ``--refresh-usrecd`` and commit the result. Never called on a normal
+    run: a live fetch on every run would reintroduce both the missing-key failure
+    and the silent-revision problem the snapshot exists to prevent.
+    """
+    start = oos_dates[0].strftime("%Y-%m-%d")
+    end = oos_dates[-1].strftime("%Y-%m-%d")
+    url = (
+        f"https://api.stlouisfed.org/fred/series/observations"
+        f"?series_id=USRECD&api_key={fred_api_key()}"
+        f"&file_type=json&observation_start={start}&observation_end={end}"
+    )
+    log.info("Fetching FRED USRECD %s → %s", start, end)
+    raw = urllib.request.urlopen(url, timeout=30).read()
+    payload = json.loads(raw)
+    if "observations" not in payload:
+        raise RuntimeError(f"unexpected FRED payload keys: {sorted(payload)}")
+    snapshot = {
+        "series_id": "USRECD",
+        "source": "FRED (api.stlouisfed.org), series USRECD — NBER recession dating, daily",
+        "observation_start": start,
+        "observation_end": end,
+        "fetched_at_utc": datetime.now(timezone.utc).isoformat(),
+        "note": (
+            "Pinned because NBER dating is revised retroactively; re-fetching can "
+            "change which days count as recession and therefore the conditional MCS "
+            "sample. Refresh deliberately with --refresh-usrecd, never implicitly."
+        ),
+        "observations": payload["observations"],
+    }
+    USRECD_SNAPSHOT.parent.mkdir(parents=True, exist_ok=True)
+    USRECD_SNAPSHOT.write_text(
+        json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    log.info("Wrote %s (%d observations)", USRECD_SNAPSHOT.name, len(payload["observations"]))
 
 
 # ----------------------------------------------------------------------
@@ -537,7 +582,9 @@ def main() -> int:
 
     # ----- Step 2 -----
     vix_regime = load_vix_regime(losses_df.index)
-    recession = load_recession_indicator(losses_df.index, fred_api_key())
+    if "--refresh-usrecd" in sys.argv:
+        fetch_usrecd_snapshot(losses_df.index)
+    recession = load_recession_indicator(losses_df.index)
 
     # Align the loss matrix to non-NaN rows once for the unconditional run
     # (conditional runs handle their own intersection).
@@ -674,7 +721,7 @@ def main() -> int:
         entrypoint=__file__,
         canonical_result="k1583_results.json",
         exp_dir=SCRIPT_DIR,
-        inputs=[LOSS_MATRIX_PATH, SPY_DATA_CSV],
+        inputs=[LOSS_MATRIX_PATH, SPY_DATA_CSV, USRECD_SNAPSHOT],
         # declared outputs are resolved against exp_dir, so pass bare filenames —
         # plot_paths carries repo-relative paths for the results JSON's own use.
         outputs=sorted(
