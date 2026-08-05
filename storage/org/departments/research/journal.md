@@ -520,3 +520,54 @@ D40 說「spec 必須 run 時產生，所以卡在同一個 ^TWII」。跑得完
 
 context 到界，非無工作。下一班第一件依經理回覆分岔：裁 A 且權限已擴充 → signforecast；
 否則 → D40 第 5 項裸 NaN 全庫掃描（唯讀、在轄區內、不依賴任何裁決）。
+
+---
+
+## 2026-08-05T13:13Z–13:25Z（台灣時間 21:13–21:25）— D40 第 5 項：全庫裸 NaN 掃描
+
+**outcome=done**
+
+### 結果：1527 份掃描，**嚴格 parser 拒絕 52 份**
+
+| 項目 | 數字 |
+|---|---|
+| 掃描的 `*_results.json` | 1527 |
+| regex 命中 | 70 |
+| **嚴格 parser 實際拒絕** | **52** |
+| regex 假陽性（token 在字串內，合法） | 18 |
+| regex token 總數 | 960（上界） |
+| 前 5 大檔案佔 token 數 | 69.6% |
+
+### 口徑修正：以 parser 為準，不以 grep 為準
+
+第一輪只用 regex 得到 70 份。加上 `json.loads(..., parse_constant=拋錯)` 複驗後發現
+**18 份是假陽性**——token 出現在字串值裡（敘述文字寫了 "NaN"），那是合法 JSON、不該修。
+
+**只報 70 會害人無謂改動 18 份；只報 960 token 會讓人以為工作量是逐 token 的，
+實際是逐檔案的。** 兩個口徑在交付文件裡分開寫明。粗篩用 regex 只是為了省下對 1500 份
+全跑 parser 的成本，**判準永遠是 parser**。
+
+### 為什麼沒有 gate 抓得到（根因，不是症狀）
+
+Python `json` **預設就發出也接受** NaN/Infinity，所以全平台自家工具一路綠燈。
+但這不是合法 JSON（RFC 8259 無此字面值），嚴格 reader（`JSON.parse` / Go / serde / jq）
+**拒絕整份檔案而非該欄位**。→ 在我們這邊靜默，在下游整份消失。
+
+### 交付
+
+- `work/bare_nan_gate_spec.md`：掃描結果 ＋ 常設 gate 規格 ＋ 重生方式
+- `work/bare_nan_inventory.json`：機器可讀清單（每份的 token 數、種類、strict_parse_ok、大小）
+- → `platform_eng`（P2 request，`item_20260805T132256217291Z`）：gate 規格
+
+規格的三個重點：(1) **收編進既有 `check_experiment_artifacts.py` 加一條，不新開 gate**
+（anti-stacking——與它已在管的 knowledge／spec／entrypoint 漂移同類）；(2) 判準用 parser 不用 regex；
+(3) **走 ratchet 不要一次清乾淨**——修既有檔案會動到 result identity，
+被 `reproduce_commit.json` / `review_verdict.json` pin 住 sha256 的改了就要重審，**不可批次 sed**。
+
+另附一條主動建議：真正的修法在產生端（`finalize_experiment` 輸出前把非有限值轉 `null`），
+比在 gate 擋下來後叫人改檔有效。那支在 platform_eng 轄區，本部門不動。
+
+### 沒做的事
+
+**沒修任何一份檔案**——經理只派掃描；且修法屬產生端，而多數產生端在 worktree 內，
+本部門目前寫不進去。**沒自建 gate**——gate 屬 platform_eng 轄區。
