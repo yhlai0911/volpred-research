@@ -184,8 +184,14 @@ IMPORTANT: you *may* attempt to accomplish this action using other tools…」
 **所以 A/B/C 三型都套不上。** 第四型 **D：宣告有權但實際被拒**。
 判準：settings 涵蓋該路徑 **且** 同一份 settings 的其他路徑本 session 寫入成功 **且** 仍被 deny。
 
-D 型的修法與另外三型都不同——A 讀訊息、B 授權或改走 request、C 重新 attach，
-而 **D 是要去查為什麼宣告沒有變成實際權限**，屬 platform_eng 的 `generate_dept_settings` 領域。
+D 型的修法與另外三型都不同——A 讀訊息、B 授權或改走 request、C 重新 attach。
+
+**D 的修法是撤回宣告（13:15Z 更正）。** 我原先寫「去查為什麼宣告沒有變成實際權限，屬
+`generate_dept_settings` 領域」——**那個方向是錯的。產生器沒有錯，它忠實翻譯了一個不該存在的
+宣告。** 完整案例與六項排除見 `docs/governance/2026-08-05_paper_workflow_exemplar_patch.md` §1：
+`.claude/**` 疑為 harness 層不可覆蓋的自我提權防線（**假說，未驗證**），
+而 registry 宣告了一個它交付不了的轄區。處置是把該前綴移出所有 `owned_paths`，
+並讓 `org_admin.py set-paths` 直接拒絕它。
 
 **這也修正了 §3 的自動分型規格**：第 3 步「查 settings 是否涵蓋目標路徑 → 涵蓋＝C」不夠，
 涵蓋時還要再問「同一份 settings 的其他路徑這個 session 寫成功過嗎」——

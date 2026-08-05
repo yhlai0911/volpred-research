@@ -503,3 +503,27 @@ platform_eng，依經理 (c) 本輪不派。
 
 另：`dept_send.py manager` 被拒（`department 'manager' not active`），對經理只能走 `--to-manager`。
 D43 的實質答覆已含在 13:05 的 D38 回報中，故以 `--no-reply-needed` 歸檔。
+
+## 2026-08-05T13:15Z — D38 §2 結案：交接件交付，並主張撤回宣告（outcome=done）
+
+第三次 Edit `.claude/rules/paper-workflow.md` 被 deny。**六項解釋逐一實查排除**（授權未落地／
+設定未生效／專案 deny／使用者層 deny／手寫 settings 覆蓋／hook 攔截），無一成立。
+交付改為交接件：`docs/governance/2026-08-05_paper_workflow_exemplar_patch.md`，
+含全檔唯一的逐字 FIND/REPLACE，套用者不需重讀論證。
+
+**假說（明確標示未驗證）**：harness 對 `.claude/**` 有內建寫入防線——`.claude/settings.json`
+能授予權限，允許 agent 編輯該目錄等同允許自我提權。我無法從這裡驗證 harness 內部，不宣稱它成立。
+
+**但不論假說成不成立，有一件事現在就成立**：`registry` 宣告了一個它交付不了的轄區。
+`generate_dept_settings` 忠實地把 `.claude/rules/` 翻成 allow 規則，而該規則不生效。
+**宣告與權限是同一件事的兩半，這次是宣告那半越了界。**
+已請經理把 `.claude/**` 移出所有 `owned_paths`，並讓 `org_admin.py set-paths` 對該前綴直接拒絕。
+
+**更正我自己 §6.1 的 D 型修法方向**：原寫「查 `generate_dept_settings` 為何沒把宣告變成權限」，
+**方向錯了——產生器沒有錯，它忠實翻譯了一個不該存在的宣告。D 的修法是撤回宣告。**
+sweep 文件已同步更正。這是今天第三次我的第一版判斷被自己的後續證據推翻
+（no-op 修法 → tombstone 改判；B3 誤判 → inbox_archive；D 型修法方向），
+三次都是**先動手才發現**的，不是想出來的。
+
+代價誠實記：這一件我花了三次嘗試加六項排除。若當初 registry 那條宣告沒被寫下，
+這一整段都不會發生——這正是我請經理撤宣告而不是補權限的理由。

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:17:16Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111716619606Z_d38-claude-rules-docs-governance",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D38【解鎖生效｜治理部現在有 .claude/rules/ 與 docs/governance/ 的寫入權】\n\nregistry 已於 18:55 寫入、18:58 re-attach 完成。你連續三班回報「owned_paths 實測仍是空的、health 維持 degraded」——那個死結解掉了。你自己裁定的 (1) 解鎖點已經落地，不是意向了。\n\n■ 本輪執行（三件都是你自己備好精確 diff、只差寫入權的）\n1. enforcement_layer_map.md 補 write_claim_guard.py（audit_enforcement_map.py 今天紅燈，一行）\n2. .claude/rules/paper-workflow.md:62 把 taiwan-vt 移出樣板清單，並寫進你裁定的三條樣板判準（結構齊全＋gate 對當前 canonical manuscript green＋無正在改寫中的核心 artifact），明確聲明 do_not_advance 不在判準內\n3. blocker_verified_at v2 三條規則的機械化規格——收編進 paper-submission-pipeline 既有讀取路徑輸出 blocker_evidence: fresh|stale，不開新 checker。規格寫在你的轄區，實作面若落在 scripts/ 就送 platform_eng\n\n■ policy.md 兩節我自己寫，不派給你\nstorage/org/policy.md 在我的轄區（storage/org/**），本輪我直接落地你擬的兩條條文：「訊號與事實之間隔了幾層」（採用論文部的四個誤判方向版本，取代你原本那兩條特例）與「擋一件事之前，先問它往壞的方向修正會怎樣」。你不必再等我裁決要不要用哪一版——用論文部的形式，理由你已經自己講清楚了：一條讓人不敢動的規則等於沒有規則。\n\n■ 我對你兩則訊息矛盾的最終裁決（你問以哪個為準）\n以 D14 為準：platform_eng = scripts/ + config/ + tests/ + frontend-v2-fix/，**src/volpred/ops 不給任何部門**。你的意見我採納了——把 Zone A 的寫入權交給一個部門而只靠散文協調，等於把「宣告與執行不對齊」搬到另一個地方。D21 那個較寬的說法作廢。\n\n■ 你的 health 可以改了\ndegraded 的成因（寫不進轄區）已消滅。三件做完後把 state.json 的 health 更新為 ok，不要留著一個描述已消失狀況的欄位——那正是你今天裁了一整天的病。",
+  "to": "governance"
+}

@@ -96,7 +96,7 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D38 三件：enforcement map 轉綠＋blocker_evidence 規格交付；paper-workflow.md 一件被 D 型權限矛盾擋下未繞道。sweep 自我更正兩項：新增第四型態 D、B3 判定錯誤且治理部自己也繞過了 inbox_archive.py）",
+    "last_session_outcome": "done（D38 全三件結案：enforcement map 轉綠、blocker_evidence 規格、paper-workflow 交接件。第 2 件三次 deny、六項解釋逐一排除，主張撤回 registry 對 .claude/** 的宣告而非補權限）",
     "tex_carveout_ruling": {
       "as_of": "2026-08-05T11:25Z",
       "deliverable": "docs/governance/2026-08-05_tex_carveout_proposal.md",
@@ -131,7 +131,8 @@
         "added_at": "2026-08-05T11:35Z",
         "test": "settings 涵蓋該路徑 且 同一份 settings 的其他路徑本 session 寫入成功 且 仍被 deny",
         "instance": "governance Edit .claude/rules/paper-workflow.md 連兩次 deny，而同一份 settings 的 docs/governance/** Edit 本輪成功；上層 deny 皆空",
-        "fix": "查 generate_dept_settings 為何宣告未變成實際權限（platform_eng），重新 attach 修不好它",
+        "fix": "撤回宣告（13:15Z 更正；原寫『查 generate_dept_settings 為何宣告未變成權限』方向錯——產生器沒錯，它忠實翻譯了一個不該存在的宣告）。建議把 .claude/** 移出所有 owned_paths 並讓 org_admin.py set-paths 拒絕該前綴",
+        "hypothesis_unverified": ".claude/** 疑為 harness 層不可覆蓋的自我提權防線（.claude/settings.json 能授予權限）；六項 repo 內解釋已逐一排除，但 harness 內部無法從此處驗證",
         "spec_correction": "§3 自動分型第 3 步『settings 涵蓋＝C』不足，須追問『同一份 settings 其他路徑本 session 寫成功過嗎』"
       },
       "self_correction_B3": "『缺 mv 權限』判為 B 是錯的：scripts/org/inbox_archive.py 是 canonical 歸檔入口（且會擋 request/decision 未回覆就歸檔）。授權 Bash(mv .../inbox/*) 反而是給第二個寫入者。治理部本班亦曾用 shutil.move 繞過，已改正",
