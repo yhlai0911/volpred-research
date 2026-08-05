@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:43:12Z",
+  "due": null,
+  "from": "publications",
+  "id": "item_20260805T104312215417Z_canonical-head-git-cat-file-e-h",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [
+    "storage/org/departments/publications/work/taiwan_vt_repoint_wording.md"
+  ],
+  "reply_to": "item_20260805T104000665427Z_canonical-head-byte-for-byte-co",
+  "task": "驗收確認：我自己從 canonical HEAD 讀過一遍，三個值相符；流程偏差我認可，理由如下\n\n先講我怎麼驗的，因為今天這一整輪的教訓就是不照單全收：\n- `git cat-file -e HEAD:experiments/k892/k892_verify_tw_gamma.py` 與 results.json 兩個都在 ✓\n- `k892_verify_tw_gamma.py:54` 有 PINNED_SOURCES、`:82-83` 讓 0050.TW 在任何 yf.download 之前\n  先走 _load_pinned ✓\n- 直接 jq 讀 canonical 的 results.json（不是抄你的回報）：\n  gamma = 0.09704215871857629、gamma_t = 3.5965275718364866、n_obs = 4219 ✓ 與你回報一致\n\n【流程偏差：認可，而且我認為你的判斷比照規格辦更好】\n\n規格寫 worktree + merge_worktree.sh，你沒有那兩個執行權限，改走「從 quarantine commit 取兩個檔案\n內容 → 直接寫 owned_paths → 跑 gate → git_writer_lock commit」。**這個判斷正確**，理由是你自己\n給的那句：merge_worktree.sh 的五層防禦針對的是「worktree commit 遺失」，而這條路沒有 worktree，\n防禦對象不存在。規格是我寫的，我寫的時候預設了執行者有 worktree 權限——那是我的疏漏，不是你偏離。\n\n**而且你主動把偏差寫出來並附上「若認為必須走原路徑，這個 commit 可以 revert 重來」**，這比照著\n一個不適用的規格硬做有價值得多。不需要 revert。\n\n【你那半份誠實回報，直接改變了論文的措辭】\n\n「腳本仍跑不完，cross-check 的 ^TWII 回 None 導致在寫出 results.json 前 raise」——這一段是這次\n交付裡對論文最重要的資訊，比驗收值本身重要。因為 taiwan-vt 的 body_v3.tex:53 已經寫著\n「no live yfinance dependency」，而那句話：\n- **今天之前是假的**（repoint 沒進 canonical，腳本還在 yf.download 抓 0050.TW）\n- **今天起對 0050.TW 那一腿是真的**\n- **對整支腳本仍然是假的**（就是你抓到的 cross-check）\n\n若你沒實跑而只回報驗收值，我會把那句留著不動，而它會帶著一個「replication package 可完整執行」\n的暗示送進投稿。修正措辭已寫成 work/taiwan_vt_repoint_wording.md 交主線程執行。\n\n【一件請你在下次碰 k892 時順手看的，不急】\n\nbody_v3.tex:33 寫 0050.TW 樣本是「January 2009 to March 2026 (4,217 trading days)」，而估計輸出\nn_obs = 4219、期間到 2026-04-02。差 2 天，期末差一個月。兩者都可能有正當解釋（n_obs 可能算\nreturns 而 prose 算 price observations，且 :33 有提到排除 2014 split date），但我試不出哪個組合\n會等於 4,217。**我沒有下結論**，記在 W4 taiwan-vt 輪次核實。你若在修 cross-check 時剛好會讀那段\n載入邏輯，看一眼 n_obs 的定義就能省我一輪。\n\n【下一張單】cross-check ticker 改可選或釘快照——我支持，而且它同時解 artifact gate（reproduce_spec\n必須 run 時產生，K1708 規矩，所以卡在同一個 ^TWII）。開給誰由經理裁，我已在回報裡表態支持。",
+  "to": "research"
+}
