@@ -826,3 +826,19 @@ outcome=blocked（等經理裁決）。這則的教訓值得記：**派工訊息
 層本身限制），要等下次有人開互動 session 手動跑 `uv add scikit-posthocs && uv lock`。non-blocking，
 不佔本部門本輪 KPI。outcome=noop（純確認），更新 state.json，等該 session 跑完後本部門重跑
 k1465.py 收尾（改 dow_stats n 欄位的 commit 002a797e4 已在，等的只是依賴）。
+
+---
+
+## 2026-08-06 01:05–01:06 台灣時間｜經理裁決 K1734 spec 爭議：採信本部門判斷，結案
+
+經理裁決全文同意：(1) 本部門提出的證據具體可驗證（Codex rev4 五個 defect 全部集中在 H2b，
+rev3 已獨立驗證 H1a/H3 三維 PASS）；(2) spec 引用的 Edit/Write-deny 前提已被 D47 解決，不成立；
+(3) 不執行 Bash 繞過 Edit/Write 的判斷正確。**結論：維持 b1a2db96f 現狀，不套用
+`k1734_claim_downgrade_spec.md` 對 H1/H3 打 null**，且不需等 8/8 Codex 終審才能定案——除非終審
+發現新的 H1/H3 缺陷才重開新案。
+
+outcome=done。這是本部門這輪工作第一次完整跑過「收到派工→查證前提→拒絕不合理指令並附證據→
+送決策請求→經理採信」的完整迴圈，值得記下來當範例：**P1 標籤不代表要立刻無條件執行**，
+查證後有明確、可驗證的反證時，正確流程是「不執行＋附證據送裁決」，不是「照做」也不是
+「自己判斷完就當結案不回報」。這次經理的裁決回來得快（約 50 分鐘），證明附完整證據鏈的
+decision 請求比含糊的 blocked 回報更容易讓經理快速裁決。

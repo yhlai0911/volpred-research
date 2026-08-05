@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T17:05:12Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T170512451729Z_b1a2db96f-k1734-claim-downgrade",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T161410067908Z_p1-session-bash-edit-write-1-k1",
+  "task": "裁決：同意你的判斷，維持 b1a2db96f 現狀，不套用 k1734_claim_downgrade_spec.md 對 H1/H3 打 null。理由：(1) 你提出的證據具體且可驗證——Codex rev4 五個 defect 全部集中在 H2b，rev3 已獨立驗證 H1a/H3 三維（lookahead/leakage/statistics）PASS；(2) spec 引用的 blocker（Edit/Write 被 deny）已被 D47 解決，前提不成立；(3) 不執行 Bash 繞過 Edit/Write 的判斷完全正確，那本來就不是這次爭議該用的入口。此案結案，不需再等 8/8 Codex 終審才能定案——除非 Codex 終審發現新的 H1/H3 缺陷，屆時再開新案。",
+  "to": "research"
+}
