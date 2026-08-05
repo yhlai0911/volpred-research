@@ -35033,5 +35033,15 @@
     "failure_class": "quota",
     "primary_renderer": "scripts/gen_lazypack_codex.py",
     "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-08-06T05:14:05+08:00",
+    "task_type": "experiment",
+    "task_id": "k1583_corrected_k1380_matrix_rerun_20260802",
+    "outcome": "blocked_awaiting_codex_quota",
+    "actor": "hourly-slot-1-1a139cc184724ad1b3afb0589043bc5c",
+    "owner": "hourly-slot-1-1a139cc184724ad1b3afb0589043bc5c",
+    "commit": null,
+    "summary": "K1583 corrected-matrix rerun：驗證既有重跑已完整達標，唯一剩餘 gate（Codex primary-path review）因額度外部封鎖，依 canonical CLI 標 blocked 至 2026-08-08。\n\n**先讀狀態再動手**（避免重派一個已完成的 60 分鐘實驗）：`experiments/k1583/` 已有 2026-08-05 的重跑產物且 git clean（commits 6cd5e8098 / f2424375c），runtime 僅 13.4s — 本來就不是 heavy compute。\n\n**逐項回讀驗證**（全部對 live bytes，非採信 README 敘述）：\n- corrected matrix：`experiments/K1380_v4/k1380_v4_losses_all.npy` sha256 `2b7232b9…55f4`，在 working tree / HEAD / commit `ded2450de` 三處 byte-identical → task 要求的「從 ded2450de 保存的 corrected matrix 重建 deterministic input」成立\n- artifact gate：`check_experiment_artifacts.py check --path experiments/k1583` → PASS\n- clean-clone reproduction：`reproduce_report.json` → `outcome.status=pass_tolerated`、`comparison.mismatches=[]`\n- null result 保留：unconditional MCS 16/16 全留、set-level p=0.221、T=1017\n- 新舊比較已寫入 README：舊 matrix 在 B1/B2/B3 無有效樣本的日子仍填值（T≈1854 是虛的），修正後誠實標 NaN，listwise 後 1900→1017、rolling window 77→38。兩版主結論同為 NULL 但證據基礎不同 —— 舊版是「用錯的資料得到碰巧相同的方向」\n- 舊 K1583 knowledge：僅存一條 `verdict=SUPERSEDED`，未被復活或手改（符合 task 禁令）\n\n**未完成且不可繞過**：Codex primary-path review。本 fire 05:08 的 live probe 回 rc=1 unavailable（額度耗盡），與既有 blocked task `codex_primary_reverify_k1714_k1735_20260808`（blocked_until 2026-08-08T04:05Z）一致。`experiment_gates.py certify` 的 `reviewer` 欄位是自由文字，換 agy/Claude 出 verdict 機械上會過 —— 那是**繞過 gate 不是通過 gate**，故不做。lazypack 的 codex→agy fallback 屬 rendering fallback，不構成科學審查換人的先例。因 review 未過，替代 knowledge 條目依 task 明文**刻意不寫**。\n\n**本班實際產出**：(1) 上述回讀驗證；(2) `storage/ops/codex_reviews/k1583_codex_review_brief_20260806.md` —— 釘住 08-08 復額後該審什麼，讓該輪 one-shot 收尾。brief 點名最關鍵的方法論問題：listwise deletion 砍掉 883 天是否對 volatility regime 非隨機（若是，下游所有 conditional MCS 都繼承該偏誤）；另含 lookahead 三個入口、6 個 MCS family 未做 family-wise 校正（VIX-low B0 p=0.012，Bonferroni 後 0.072）、T=20 的 recession cell 無推論價值；(3) task 上 annotate `resume_contract` / `gates_passed` / `corrected_matrix_sha256` 供復工者直接接手。\n\n**狀態**：blocked（reason=`codex_quota_reset_pending`，until=2026-08-08T04:05:00+00:00），非 in_progress 殘留；PRE-PHASE-0 的 `unblock_expired_blocked_tasks.py` 到期會自動 flip 回 pending。"
   }
 ]
