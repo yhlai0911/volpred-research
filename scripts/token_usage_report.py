@@ -60,6 +60,10 @@ CATEGORY_META = {
     "file_edit": ("📄", "其他檔案編輯"),
     "agent_delegation": ("🤖", "Agent 派送（非實驗）"),
     "unclassified": ("◻️", "未分類 provider telemetry"),
+    "codex_review": ("🧾", "Codex 審查會話（auto-review / review originator）"),
+    "codex_exec": ("⚙️", "Codex exec（主 checkout 直呼）"),
+    "codex_agent_ops": ("🔧", "Codex agent worktree（非實驗）"),
+    "codex_desktop": ("🖥️", "Codex Desktop 互動會話"),
     "text_only": ("💬", "純文字回覆（無工具）"),
     "other": ("❔", "其他"),
 }
@@ -769,6 +773,34 @@ def _codex_token_fields(value):
     return parsed
 
 
+_CODEX_K_WORKTREE_RE = re.compile(r"worktrees/[^/]*-[Kk]\d+")
+
+
+def _classify_codex_session(cwd, originator, model):
+    """Best-effort Codex attribution from session_meta signals (2026-08-05).
+
+    Codex token_count still carries no authoritative task metadata, so these
+    are deliberately coarse, provenance-honest buckets derived from where the
+    session ran (cwd) and what launched it (originator / model name) — enough
+    to stop ~48% of the weekly bill reading as one opaque bucket, without
+    inventing a task-id that is not there. Boss directive: email-12201.
+    """
+    model_text = str(model or "")
+    origin_text = str(originator or "")
+    cwd_text = str(cwd or "")
+    if "auto-review" in model_text or "review" in origin_text:
+        return "codex_review"
+    if _CODEX_K_WORKTREE_RE.search(cwd_text):
+        return "experiment"
+    if "/worktrees/" in cwd_text:
+        return "codex_agent_ops"
+    if origin_text == "codex_exec":
+        return "codex_exec"
+    if "desktop" in origin_text.lower():
+        return "codex_desktop"
+    return "unclassified"
+
+
 def _iter_codex_session_records(
     target_date_start=None,
     target_date_end=None,
@@ -789,6 +821,8 @@ def _iter_codex_session_records(
         last_task_started_line = None
         previous_timestamp = None
         model = "codex-unknown"
+        session_cwd = ""
+        session_originator = ""
         previous = {field: 0 for field in _CODEX_TOKEN_FIELDS}
         file_records = []
         try:
@@ -817,6 +851,10 @@ def _iter_codex_session_records(
                             admitted = _repo_bound_cwd(payload.get("cwd"))
                             if not admitted:
                                 break
+                            session_cwd = str(payload.get("cwd") or "")
+                            session_originator = str(
+                                payload.get("originator") or ""
+                            )
                             forked = bool(
                                 payload.get("forked_from_id")
                                 or payload.get("parent_thread_id")
@@ -1023,10 +1061,13 @@ def _iter_codex_session_records(
                             "output_tokens": delta["output_tokens"],
                         },
                         # Codex token_count telemetry contains no authoritative
-                        # task type. Keep attribution explicitly unknown rather
-                        # than mislabelling every interactive/research turn as
-                        # platform operations.
-                        "category": "unclassified",
+                        # task type; attribution is inferred from session_meta
+                        # signals (cwd / originator / model) into coarse,
+                        # provenance-honest buckets — see
+                        # _classify_codex_session (boss email-12201).
+                        "category": _classify_codex_session(
+                            session_cwd, session_originator, model
+                        ),
                         "is_subagent": False,
                         "content": [],
                         "text_content": "",
