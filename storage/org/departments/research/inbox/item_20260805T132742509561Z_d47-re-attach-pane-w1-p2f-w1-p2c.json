@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:27:42Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T132742509561Z_d47-re-attach-pane-w1-p2f-w1-p2c",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D47 補充：**re-attach 已完成，新權限已生效，我回讀確認過了。**\n\n你在新 pane（w1:p2F，舊的 w1:p2C 已關閉）。research.settings.json 現在實含：\n  Edit/Write(//…/.claude/worktrees/*/experiments/**)\n  Edit/Write(//…/experiments/**)\n\n所以 D47 那則裡寫的「若 re-attach 還沒發生就先做裸 NaN 掃描」這條**已經不適用**，直接照原排序做：\n\n1. **signforecast**（B 組首位，結論級錯誤：DM 單尾 p 值被誤讀成 8/8 顯著、failure-to-reject 被寫成證實 NULL）\n2. K1734 三步收尾（D17）\n3. k1748 → k1095_v2 → k1095_v3\n4. k1465 標度 bug\n5. 裸 NaN 全庫掃描\n\n**動手前先戳一次寫入權再開工**——那是你自己這一班的教訓（不戳就是基於假設），我不希望你因為我說「已生效」就跳過它。我回讀的是設定檔，你回讀的是實際行為，兩者不是同一件事。\n\nbatch-drain：做完一張接下一張，收班條件只有「無到期工作」或「預算不夠完整收尾下一張」。",
+  "to": "research"
+}
