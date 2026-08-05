@@ -860,6 +860,13 @@ def enqueue(args) -> int:
         "claude_followup": followup,
         "followup_dispatched": False,
         "source_task_id": getattr(args, "source_task_id", None),
+        # Opt-in: a job whose whole purpose is to run once its source task
+        # succeeds (a post-success review/verification gate) must not be
+        # auto-cancelled the moment that source reaches "succeeded" -- see
+        # _reconcile_job_source_task_link's terminal-status branch.
+        "survives_source_success": bool(
+            getattr(args, "survives_source_success", False)
+        ),
         "source_task_link": (
             {
                 "state": "pending",
@@ -1223,6 +1230,22 @@ def _reconcile_job_source_task_link(
                 _write_job_file(job_path, latest)
                 return False
             if source_status in tpc.TERMINAL_STATUSES:
+                # A job enqueued to survive its source task's success (e.g. a
+                # K1259 post-success review gate) is not an orphan when that
+                # source reaches "succeeded" -- it is exactly the job that was
+                # supposed to run next. Only "succeeded" is exempted: a source
+                # that failed/was cancelled never produced the artifact this
+                # kind of job depends on, so the binding really is invalid.
+                if source_status == "succeeded" and latest.get(
+                    "survives_source_success"
+                ):
+                    latest["source_task_link"] = {
+                        "state": "linked",
+                        "reason": "source_task_succeeded_survives_by_design",
+                        "source_task_status": source_status,
+                    }
+                    _write_job_file(job_path, latest)
+                    return True
                 cancelled_at = utc_now()
                 latest["status"] = "cancelled"
                 latest["cancel_reason"] = (
@@ -1244,6 +1267,21 @@ def _reconcile_job_source_task_link(
                     "source_task_status": source_status,
                 }
                 _write_job_file(job_path, latest)
+                # 2026-08-05 incident: a follow-up review gate was cancelled
+                # here with zero notification, and nobody noticed the
+                # research artifact's promotion chain had silently broken
+                # until a human happened to re-read it days later
+                # (no-silent-fallback.md). Every automatic cancel now leaves
+                # a trace even when it is the correct outcome.
+                warn(
+                    "compute_queue_auto_cancel",
+                    "queued job auto-cancelled: source task reached a "
+                    "terminal state this job's binding cannot survive",
+                    job_id=str(latest.get("id")),
+                    title=str(latest.get("title") or ""),
+                    source_task_id=str(task_id),
+                    source_task_status=source_status,
+                )
                 return False
             bound_job_id = str(source_task.get("compute_job_id") or "")
             if (
@@ -1638,6 +1676,7 @@ def enqueue_agent(args) -> int:
         timeout_parent_job_id=getattr(args, "timeout_parent_job_id", None),
         split_stage=getattr(args, "split_stage", None),
         source_task_id=getattr(args, "source_task_id", None),
+        survives_source_success=getattr(args, "survives_source_success", False),
     )
     rc = enqueue(inner)
     if rc != 0:
@@ -3969,6 +4008,16 @@ def main():
         "--source-task-id",
         help="Pool task this job was dispatched for; marked in_progress so A0 stops re-surfacing it.",
     )
+    e.add_argument(
+        "--survives-source-success",
+        action="store_true",
+        help=(
+            "This job's purpose is to run once --source-task-id reaches "
+            "'succeeded' (e.g. a post-success review/verification gate). "
+            "Without this flag, a queued job is auto-cancelled the instant "
+            "its source task goes terminal for ANY reason, including success."
+        ),
+    )
     e.set_defaults(func=enqueue)
 
     ea = sub.add_parser(
@@ -3999,6 +4048,16 @@ def main():
         help=(
             "Pool task this job was dispatched for; marks it in_progress and blocks "
             "dispatch when another unmerged worktree branch already carries that task id."
+        ),
+    )
+    ea.add_argument(
+        "--survives-source-success",
+        action="store_true",
+        help=(
+            "This job's purpose is to run once --source-task-id reaches "
+            "'succeeded' (e.g. a post-success review/verification gate). "
+            "Without this flag, a queued job is auto-cancelled the instant "
+            "its source task goes terminal for ANY reason, including success."
         ),
     )
     ea.set_defaults(func=enqueue_agent)

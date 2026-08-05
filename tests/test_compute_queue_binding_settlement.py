@@ -185,6 +185,122 @@ def test_worker_explicitly_terminates_job_for_terminal_source_task(
     }
 
 
+def test_survives_source_success_job_is_not_cancelled_when_source_succeeds(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A post-success review gate is exactly the job meant to run next.
+
+    2026-08-05 incident: an erratum-review gate job (K1259 knowledge-write
+    precondition) was auto-cancelled the same minute its source task reached
+    "succeeded", because the terminal-status check treated success the same
+    as failure/cancellation. The research artifact's promotion chain broke
+    silently until a human happened to notice days later.
+    """
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text(
+        json.dumps([{"id": "task-succeeded", "status": "succeeded"}]),
+        encoding="utf-8",
+    )
+    job_path = queue_dir / "job-gate.json"
+    job_path.write_text(
+        json.dumps(
+            {
+                "id": "job-gate",
+                "status": "queued",
+                "title": "erratum review gate",
+                "queued_at": "2026-08-05T13:45:00Z",
+                "source_task_id": "task-succeeded",
+                "survives_source_success": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    ready, sleeping = compute_queue._ready_queued_jobs("test-survives-owner")
+
+    assert sleeping == 0
+    receipt = json.loads(job_path.read_text(encoding="utf-8"))
+    assert receipt["status"] == "queued"  # NOT cancelled
+    assert receipt["source_task_link"] == {
+        "state": "linked",
+        "reason": "source_task_succeeded_survives_by_design",
+        "source_task_status": "succeeded",
+    }
+
+
+def test_survives_source_success_still_cancels_on_failed_source(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """The exemption is for success specifically, not "any terminal state"."""
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text(
+        json.dumps([{"id": "task-failed", "status": "failed"}]),
+        encoding="utf-8",
+    )
+    job_path = queue_dir / "job-gate-2.json"
+    job_path.write_text(
+        json.dumps(
+            {
+                "id": "job-gate-2",
+                "status": "queued",
+                "title": "gate on a source that never produced an artifact",
+                "queued_at": "2026-08-05T13:45:00Z",
+                "source_task_id": "task-failed",
+                "survives_source_success": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    compute_queue._ready_queued_jobs("test-survives-owner-2")
+
+    receipt = json.loads(job_path.read_text(encoding="utf-8"))
+    assert receipt["status"] == "cancelled"
+    assert receipt["cancel_reason"] == "source_task_terminal:failed"
+
+
+def test_auto_cancel_on_terminal_source_leaves_a_diagnostics_trace(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A silent auto-cancel is what let the 2026-08-05 gate loss go unnoticed."""
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text(
+        json.dumps([{"id": "task-failed", "status": "failed"}]),
+        encoding="utf-8",
+    )
+    job_path = queue_dir / "job-invalid-2.json"
+    job_path.write_text(
+        json.dumps(
+            {
+                "id": "job-invalid-2",
+                "status": "queued",
+                "title": "invalid successor",
+                "queued_at": "2026-07-27T01:00:00Z",
+                "source_task_id": "task-failed",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    warned: list[tuple[str, str, dict]] = []
+    monkeypatch.setattr(
+        compute_queue,
+        "warn",
+        lambda tag, msg, **ctx: warned.append((tag, msg, ctx)),
+    )
+
+    compute_queue._ready_queued_jobs("test-terminal-owner-2")
+
+    assert len(warned) == 1
+    tag, _msg, ctx = warned[0]
+    assert tag == "compute_queue_auto_cancel"
+    assert ctx["job_id"] == "job-invalid-2"
+    assert ctx["source_task_status"] == "failed"
+
+
 def test_worker_explicitly_terminates_missing_source_after_creation_grace(
     tmp_path: Path,
     monkeypatch,
