@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "why": "老闆 2026-08-05 21:50：weekly allowance 89% used，週日 16:00 才重置。指令是 A+C（部門降 model + 只留 P1），但但書明確：每天該寫的文章、該蒐集的資料、該發的文照做，論文寫作延到週日，日常例行優先維持。",
+    "owner": "scripts/model_router.py::pick_model 是唯一套用點；不要在別處複製這張表",
+    "auto_expiry": "expires_at 一到就自動失效，不需要有人記得關掉。手動降檔最大的風險是沒人記得復原，那會讓臨時省錢變成永久降級。"
+  },
+  "active": true,
+  "expires_at": "2026-08-09T08:00:00Z",
+  "reason": "weekly allowance 89% at 2026-08-05T13:50Z; resets Sun 16:00 台北",
+
+  "_exempt_note": "日常例行與 boss-facing 不降檔 —— 老闆但書：文章、資料蒐集、發文照做。降這些等於用內容品質換 token，而內容品質是 mission 1。",
+  "exempt": [
+    "daily_article",
+    "daily_digest",
+    "event_article",
+    "trending_repost",
+    "member_qa",
+    "email_reply",
+    "telegram_reply"
+  ],
+
+  "_overrides_note": "ops / 治理 / 審查類是 checklist 型，sonnet 足夠。experiment 保留 opus 但砍掉最貴的 xhigh 檔位——研究誠實需要能力，不需要最深推演。paper_* 由部門暫停處理（見 deferred_departments），這裡的降檔只是雙保險。",
+  "overrides": {
+    "platform_ops": ["sonnet", "low"],
+    "governance": ["sonnet", "low"],
+    "code_review": ["sonnet", "medium"],
+    "resource_audit": ["sonnet", "medium"],
+    "lookup": ["sonnet", "low"],
+    "verify": ["sonnet", "low"],
+    "classification": ["sonnet", "low"],
+    "org_manager": ["sonnet", "medium"],
+    "experiment": ["opus", "high"],
+    "strategy_lifecycle": ["opus", "high"],
+    "paper_body": ["sonnet", "low"],
+    "paper_review": ["sonnet", "low"],
+    "paper_decision": ["sonnet", "low"]
+  },
+
+  "_deferred_note": "論文寫作延到週日（老闆指令）。部門 suspend 後閘門不再喚醒它，收件匣原地保留，expires_at 後 resume 即可接續。",
+  "deferred_departments": ["publications"]
+}

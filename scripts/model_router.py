@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 import sys
 
 from volpred.ops.task_pool_selection import (
@@ -198,12 +199,68 @@ ESCALATION_LADDER: list[tuple[str, str]] = [
 CEILING = ("opus", "max")
 
 
+_CONSERVATION_PATH = Path(__file__).resolve().parent.parent / "config" / "token_conservation.json"
+
+
+_conservation_warned: set = set()
+
+
+def _warn_conservation(msg: str) -> None:
+    """Say it once: a broken overlay means the platform believes it is
+    conserving while it is not, and that belief is the dangerous part. Once per
+    process, because pick_model runs on every dispatch."""
+    if msg in _conservation_warned:
+        return
+    _conservation_warned.add(msg)
+    print(f"[model_router] token conservation overlay ignored — {msg}", file=sys.stderr)
+
+
+def conservation_overlay(now=None) -> dict:
+    """Temporary downgrades while the weekly allowance is nearly spent.
+
+    A hand-edited routing table is the wrong tool for a four-day squeeze: the
+    edit outlives the squeeze because nobody remembers to undo it, and a
+    temporary saving quietly becomes a permanent capability cut. So the overlay
+    lives in config with an expiry and stops applying by itself.
+
+    Returns {} when inactive, expired, or unreadable — failing open costs
+    tokens, failing closed would silently downgrade the whole platform on a
+    typo in a config file.
+    """
+    from datetime import datetime, timezone
+
+    try:
+        cfg = json.loads(_CONSERVATION_PATH.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}  # silent-ok: no overlay configured is the normal state
+    except (OSError, json.JSONDecodeError) as exc:
+        _warn_conservation(f"config unreadable ({type(exc).__name__}: {exc})")
+        return {}
+    if not cfg.get("active"):
+        return {}
+    expires = cfg.get("expires_at")
+    if expires:
+        try:
+            deadline = datetime.fromisoformat(str(expires).replace("Z", "+00:00"))
+        except ValueError:
+            _warn_conservation(f"expires_at unparseable ({expires!r})")
+            return {}
+        if (now or datetime.now(timezone.utc)) >= deadline:
+            return {}
+    return cfg
+
+
 def pick_model(task_type: str | None) -> tuple[str, str]:
     """Library entry — return (model_short, effort) for given task_type."""
     task_type = normalize_task_type_value(task_type)
     if not task_type:
         return DEFAULT
-    return TASK_TYPE_TO_MODEL.get(task_type, DEFAULT)
+    base = TASK_TYPE_TO_MODEL.get(task_type, DEFAULT)
+    cfg = conservation_overlay()
+    if not cfg or task_type in set(cfg.get("exempt") or []):
+        return base
+    override = (cfg.get("overrides") or {}).get(task_type)
+    return (override[0], override[1]) if override else base
 
 
 def _ladder_index(model: str, effort: str) -> int:
