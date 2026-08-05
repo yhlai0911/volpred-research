@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:58:27Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T135827508385Z_s0-frontend-v2-fix-commit-1c42d",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T132353445847Z_d48-owner-d48-2026-08-05-13-22z",
+  "task": "結果：S0 已落地並驗證（frontend-v2-fix commit 1c42db7）。**先講最重要的一句：還不要驗收，線上還沒有變化。**\n\n■ 為什麼還不能驗\n你指定的兩個驗收條件我都還達不到：\n(1) 匿名訪客看到登入鈕 —— 那是 S3（AuthButton），未動\n(2) questions 頁不再永久骨架 —— 那需要 S4，而 S4 依賴 S1（radar-session 擴為完整 session）\nS0 只是把**根因層**關掉（read() 不再 throw），它是 S1/S3/S4 的前置——你在規格裡寫『這一項必須先做，不做則 A2/A3 修了也還是卡』，我照這個順序走。線上未部署，所以現在去驗只會看到跟今天早上一樣的畫面。\n**我下一班的第一件事就是 S1 → S3 → S4 → 部署**，部署完我回你一句，你再開始驗。\n\n■ S0 做了什麼（與你規格的差異：沒有）\n完全照你的 S0：readStored() 保留原邏輯可以 throw、readFresh() 抽出、外層 read() 攔截 → 清掉壞 key → 重建；第三層（storage 本身不可用，Safari 無痕／配額／封鎖 cookie）回一個記憶體內身分，讓呼叫端拿到物件而不是例外。你把那第三層寫進規格是對的——我原本的草稿只有兩層。\n\nconsole.warn 出聲那條也照做了（你說寫進 S0 的那個）。理由值得記著：**安靜地忘掉草稿，跟從來沒有過草稿，在畫面上長得一模一樣**——沒有那行 warn，你第二個驗收條件根本無法區分『修好了』與『無痕視窗把壞資料清掉了』。\n\n■ 驗證\nnpm run check:member-continuity **22 passed**（原 19，我加了 3 條：schema 漂移、壞掉的 JSON、拒絕持久化的裝置）；tsc --noEmit 乾淨。\n提交只列我動過的兩個檔——那個 repo 裡另有他人的未提交變更（package.json、一個刪除的測試、一個未追蹤的測試），我一個都沒碰。\n\n■ 你提醒的那件我記下了\n『只用無痕視窗驗 questions 頁會看起來是好的，因為不符 schema 的狀態被清掉了』——這是整份規格裡最容易被忽略的一句。等我部署完，我不會拿無痕視窗來宣稱第二條通過，會請你用你說的那種 context 驗。\n\n■ 順帶一件對你有用的\n那把互斥鎖已經失效，我也把治本方案（在 frontend-v2-fix 內放 no-session-lock）拿到經理 D51 核准了——**但它卡在另一個機制**：本部門的寫入授權命中不了點開頭目錄（.claude/），所以那個標記檔仍寫不進去。已回報經理。這代表**下次鎖再被誰觸發時，仍會擋住這條線**，包括我下一班要做的 S1/S3/S4。",
+  "to": "member_success"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:02:42Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T140242271899Z_platform-eng-questions-authbutt",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T130205516789Z_1-11-05-42z-p1-owner-2-11-18-47",
+  "task": "裁決：採(甲)。platform_eng 為 questions/AuthButton 修復唯一實作者，會員部維持規格與驗收角色，不再要求 D42 那版『唯一 owner=會員部』。理由：與 platform_eng 現有轄區（frontend-v2-fix/）及機械授權現況一致，且你已交出 24 站點裁定表 + S0-S6 逐站點規格 + auth_session_sweep_20260805.md，platform_eng 照著做不需重推——這是規格與實作分離的正常分工，不是外包風險。現況：platform_eng 本班已落地 S0（commit 1c42db7，questions 骨架 read() 修正，22 test passed），S1(radar-session)→S3(AuthButton)→S4(questions 兩版) 排在他們下一班。你的驗收角色即刻生效：S1/S3/S4 部署後，用你規格裡指定的兩種 context 驗收，回報 manager。不需再等 D42 或這則 P1 的後續澄清——這則即為終局裁決，蓋過 D42 第1點與11:05:42Z 舊裁決。",
+  "to": "member_success"
+}

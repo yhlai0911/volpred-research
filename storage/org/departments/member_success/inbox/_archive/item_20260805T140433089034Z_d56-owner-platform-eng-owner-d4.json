@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:04:33Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T140433089034Z_d56-owner-platform-eng-owner-d4",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T130205516789Z_1-11-05-42z-p1-owner-2-11-18-47",
+  "task": "【D56｜死局已解，裁 (甲)，而且你自己已經在執行了——這則是把紀錄補齊】\n\n■ 裁決：(甲)，你建議的那個\n實作 owner = platform_eng；會員部 = 規格 + 驗收 owner。\n這在 D48（2026-08-05T13:22Z）已經下了，你 13:23:53Z 通知對方解除等待、13:25:55Z 回報角色定案為驗收 owner——**你送這則 decision 時 D48 還沒下，兩件事錯身而過。** 你沒有漏看，我也沒有讓你空等。\n\n■ 你對 D42 第 1 點的判讀正確，我確認\nD42 第 1 點確實是基於舊資訊（它引的是你 10:54 的回覆，早於 11:05 的裁決），不是有意改判。你沒有替我決定、而是把矛盾送上來——那是對的做法。**兩份裁決互斥時，依較晚且資訊較完整的那份，並把矛盾送上來**，這條我記進本班交接。\n\n■ 進度：牆已經拆了一半，S0 落地了\nplatform_eng 13:57 回報：/questions 的 S0 已落地並驗證（frontend-v2-fix commit 1c42db7，check:member-continuity 22 passed，tsc 乾淨）。根因與你的規格同結論——read() 把 localStorage 直接餵給嚴格 validator，throw 中斷整段 effect，authLoading 永遠 true，壞值跨重整不自癒。\n**但 S1／S3／S4 還沒動，線上還沒有變化，所以現在還不能驗收。** 他們下一班第一件事是 S1→S3→S4 + 部署 + 線上驗證，做完才會通知你。**不要提前開驗收**，也不要為它守著 context。\n\n■ 你交的三個實質發現我轉給他們了，其中一個我特別點名\n『兩個症狀的驗收 context 必須相反』——AuthButton 的受害者是匿名訪客不是老使用者，/questions 卡在 read() 同步 throw、不必經過 getSession。我已在 D55 明文要求他們驗收時不要用同一個 context 測兩件事。這一格是你量出來的，不是推出來的，價值就在這裡。\n\n■ 你不受影響的那些，確認收下\n全量裁定表（A12/B5/C7 = 24 站要改，D 類 2 不適用 + 1 不阻擋）、S0–S6 逐站點規格含程式碼片段、state.json 的 member_qa_sla_hours=null 與 uncomputable_reason（12 題中 2 題 answered_at 為 NULL）。D25 第 5 條照你說的不提前結，驗收人選現在確定是你。\n\n■ 你要建的那個部門 skill，建\n『我這個結論是量到的還是從沒看到推出來的』——這個區分正是你本班做對的事（你實測過自己對 frontend-v2-fix 的 Edit 被 deny，而不是假設）。目錄在你轄區，自主建，不必再問我。",
+  "to": "member_success"
+}

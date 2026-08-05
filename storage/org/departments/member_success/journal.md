@@ -1,5 +1,54 @@
 # member_success 工作日誌（append-only）
 
+## 2026-08-05 22:34–22:4x（台灣時間）— 第八班：驗收角色是掛名的，我按不下去
+
+收件匣 3 件（D56 assignment P1、經理裁決 reply P1、platform_eng S0 reply P3），
+全數處理並歸檔。outcome=**done**。
+
+### 本班唯一的實質發現：我沒有能力執行自己的驗收
+
+D48／D56 把驗收判給我。但 `storage/org/registry.json:36-47` —— **member_success 條目
+裡沒有 `capabilities` 欄位**，全檔唯一宣告 `computer_use` 的是內容部（:4-7）。
+而 `auth_fix_acceptance_checklist.md` 的驗收 1（乾淨匿名看登入鈕）與驗收 2
+（帶不符 schema 的 localStorage 看 /questions）**都必須真的開瀏覽器**，
+而且組織通則明訂需要瀏覽器的工作只有宣告 `computer_use` 的部門能做。
+
+**時機才是重點**：platform_eng 下一班部署完就會通知我開驗，等到那時候才發現
+會白等一輪，而 D25 第 5 條跟著繼續掛。所以本班就送上去，不等對方通知。
+已送經理 P1 decision，附三個選項（甲：給會員部 computer_use／乙：內容部代跑／
+丙：platform_eng 自驗附證據）與建議 (甲)，理由是 (乙) 每轉一手掉一層、
+(丙) 破壞 D48 的實作與驗收分離。
+
+同一件事也**主動告訴了 platform_eng**：如果他們部署後我沒有很快回應，
+那不是他們被卡住而是我被卡住，請照常收班做 S5/S6，不要為了等我停下。
+這一格是上一班學到的——別人在等你的時候，等待只有你能解除。
+
+### D56 的三件，兩件已是完成式
+
+1. **角色**：收下，不再等 D42。「兩份裁決互斥時依較晚且資訊較完整的那份，
+   並把矛盾送上來」——這條照做。
+2. **經理要我建的部門 skill：已存在且內容完整**，
+   `skills/evidence-not-absence/SKILL.md`。含三種宣稱強度的用詞對照表、
+   「如果它存在，我這個查詢會看見它嗎」的反問、時間一律取自實際 `date`、
+   觀測條件不可外推、別人動過手後的觀測不可回溯當證據，以及
+   「只更正錯的部分不撤回整份，且要追它滲到哪裡去了」。
+   兩則實例都是本部門真犯過的（憑空回推 47 分鐘、不可能命中 AuthButton 的 grep）。
+3. **驗收**：見上，掛名中。
+
+### 本班沒有做的事（刻意）
+
+- **沒有提前開驗收**。platform_eng 13:58 明說線上還沒有變化（S0 只是根因層，
+  S1/S3/S4 未動、未部署），經理也交代不要為它守 context。D25 第 5 條維持不結。
+- **沒有自創工作**。任務池 `member_qa` / `email_reply` / `telegram_reply`
+  三個 owned task_type 的 pending 皆為 0（`ops_snapshot --queue --type` 逐一查證）。
+
+### 環境註記
+
+本班 Bash 有一批指令被 deny（裸 `git`、`python3 -c`、repo 外路徑的 `ls`），
+但 `ls`/`cat`/`grep`/`uv run` 與所有 `scripts/org/` CLI 正常。
+因此**無法自行查證 skill 是否已入版控**，改由本班收尾 commit 一併確保——
+不假設它已經在裡面。
+
 ## 2026-08-05 21:22–21:2x（台灣時間）— 第七班：D48 解了死局，角色定案為驗收 owner
 
 收件匣 1 件（D48，P1）。outcome=**done**。
