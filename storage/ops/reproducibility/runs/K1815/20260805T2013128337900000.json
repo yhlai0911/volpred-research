@@ -1,0 +1,109 @@
+{
+  "schema_version": "volpred.reproduce_report.v1",
+  "generated_at": "2026-08-05T20:13:12.833790+00:00",
+  "experiment_id": "K1815",
+  "engine": {
+    "name": "scripts/reproduce_check.py",
+    "schema": "volpred.reproduce_report.v1",
+    "path": "scripts/reproduce_check.py",
+    "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+    "committed_at_repo_head": true
+  },
+  "repo_head": "d98ec59ee82c6b0ddc9fb39b1ea8721ce23e23b6",
+  "methodology_references": [
+    {
+      "citation": "Peng (2011), Reproducible Research in Computational Science",
+      "doi": "10.1126/science.1213847",
+      "principle": "computational reproducibility is a minimum standard, not a validity verdict"
+    },
+    {
+      "citation": "Sandve et al. (2013), Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "principle": "record provenance and preserve the exact workflow behind every result"
+    },
+    {
+      "citation": "Stodden et al. (2016), Enhancing Reproducibility for Computational Methods",
+      "doi": "10.1126/science.aah6168",
+      "principle": "disclose code, data, workflow, and computational environment"
+    }
+  ],
+  "discovery": {
+    "inventory_record": {
+      "experiment": "K1815",
+      "path": "experiments/K1815",
+      "priority_sources": [],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "K1815.py",
+      "result_file": "K1815_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    "subject_files": [
+      {
+        "path": "experiments/K1815/K1815.py",
+        "sha256": "45534a593bf86096f0565033f69342e3ab12914250b096c07bb0f010d7c3addf",
+        "size": 14121
+      },
+      {
+        "path": "experiments/K1815/K1815_results.json",
+        "sha256": "e3537b600a12bf1f84b90ae39ec32f581f8bb863dc6fcccd36632cad96c61550",
+        "size": 3727
+      },
+      {
+        "path": "experiments/K1815/data/spy_ohlc_raw.csv",
+        "sha256": "10d647dbb562cb429c03497239edadd65eea9383913c2c866fcff8745f9a72d2",
+        "size": 844845
+      },
+      {
+        "path": "experiments/K1815/data/vix_ohlc_raw_unlagged.csv",
+        "sha256": "d76a727518e6a2e9f6fc1112d7b49ce933aef660f81ace7ff499e5c8d5a46a18",
+        "size": 873497
+      },
+      {
+        "path": "experiments/K1815/reproduce_spec.json",
+        "sha256": "7db832ca5312b4c708b85ccd7a23a19e69d6969987d5f7640965dd5d05514707",
+        "size": 2400
+      },
+      {
+        "path": "scripts/reproduce_check.py",
+        "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+        "size": 65995
+      }
+    ],
+    "entrypoint": "experiments/K1815/K1815.py",
+    "canonical_result": "experiments/K1815/K1815_results.json",
+    "spec_sha256": "7db832ca5312b4c708b85ccd7a23a19e69d6969987d5f7640965dd5d05514707",
+    "subject_sha256": "8a55c4de2520da4f4c96105326b8dafbdd71430c737d5e6ec445c6578d3f6491"
+  },
+  "environment": {
+    "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "uv_lock_sha256": "340b8dc87c7b1e0f1fc852bab3f62e2d084582c77831cee59a3729064706edf0",
+    "pythonhashseed": "0",
+    "package_versions": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "arch": "8.0.0",
+      "yfinance": "1.2.0",
+      "scikit-learn": "1.8.0"
+    }
+  },
+  "execution": null,
+  "comparison": null,
+  "integrity": null,
+  "outcome": {
+    "status": "unverified",
+    "reason_code": "WORKING_TREE_DRIFT",
+    "severity": "warn",
+    "reproducible": null,
+    "summary": "committed snapshot differs for: ['experiments/K1815/K1815.py', 'experiments/K1815/K1815_results.json', 'experiments/K1815/data/spy_ohlc_raw.csv', 'experiments/K1815/data/vix_ohlc_raw_unlagged.csv', 'experiments/K1815/reproduce_spec.json']"
+  }
+}
