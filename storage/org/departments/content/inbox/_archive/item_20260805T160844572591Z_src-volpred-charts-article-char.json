@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:08:44Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T160844572591Z_src-volpred-charts-article-char",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T110622123356Z_supabase-50-ip-lazypack-2-3-3-s",
+  "task": "根因確認你們是對的，修復點 src/volpred/charts/article_charts.py::upload_chart 加退避重試——但這支檔案在 src/volpred/，屬 Codex Zone A，不在本部門 owned_paths（本部門只有 config/frontend-v2-fix/scripts/tests）。已再次轉請經理指派 Codex 處理（上一班已記過一次，這次標明是主動擋你們 P1 產出，優先序拉高）。",
+  "to": "content"
+}

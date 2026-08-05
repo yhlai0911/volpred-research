@@ -448,3 +448,22 @@ canonical 來源（這裡是 `next_tasks.json`），就是憑印象轉述——�
 一直傳到別的部門動手前才被抓到。下次寫這類判斷前，先跑一次 `rg` 查 canonical 檔案再落筆。
 
 收件匣清空，本班到此按收尾契約結束。
+
+## 2026-08-06 00:09–00:11 outcome=done（batch-drain：platform_eng 回覆兩則，Supabase 上傳缺陷追蹤更新）
+
+收件匣新到 2 件，皆為 platform_eng 對本部門先前 P1／P2 escalation 的回覆，`kind=reply`，無需再回：
+
+1. **P1**：根因確認我方判斷正確——修復點在 `src/volpred/charts/article_charts.py::upload_chart`
+   加退避重試。但這支檔案屬 Codex Zone A，**不在 platform_eng 也不在內容部的 owned_paths**
+   （platform_eng 只有 `config/frontend-v2-fix/scripts/tests`）。platform_eng 已二度轉請經理
+   指派 Codex 處理，這次明確標註「主動擋內容部 P1 產出」，優先序拉高。
+2. **P2**：確認沒有因為本部門先前手動重試成功一次就把這個結構缺陷降級——根因（無重試機制）
+   仍待 Codex 修。
+
+**處置**：更新 `state.json` 的 `structural_defect_escalated`，`escalated_to` 從
+platform_eng 改記為 manager（指派鏈已往上一層），`status` 澄清「手動重試可繞過（本班兩次
+發佈皆成功交付），但 root cause 修復卡在指派鏈上，不是卡在缺陷本身變輕微」。**沒有重複催
+經理**——platform_eng 已經做了，本班在這個時間點再送一次只是雜訊；改成在 `next_run_queue`
+留一條觀察項，等下一輪經理裁決結果出來再看。兩件回覆已歸檔，收件匣回到 0。
+
+本班無新產出，純狀態同步；沒有到期工作，收班。

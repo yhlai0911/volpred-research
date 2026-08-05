@@ -9,14 +9,14 @@
     "correctness_readbacks_done": 3,
     "correctness_corrections_needed": 0,
     "structural_defects_found_and_escalated": 1,
-    "replies_sent": 2,
-    "inbox_items_archived": 1,
+    "replies_sent": 0,
+    "inbox_items_archived": 2,
     "inbox_remaining": 0,
     "canonical_tasks_settled": 0,
     "department_skills_written": 0,
-    "self_inflicted_incidents": 1
+    "self_inflicted_incidents": 0
   },
-  "last_run": "2026-08-05T15:01:53Z",
+  "last_run": "2026-08-05T16:10:00Z",
   "open_items": 2,
   "in_pool": [
     "mile_dee8e30a — K1451 高收債對投資級債的價差…只剩 3.7%",
@@ -52,16 +52,16 @@
     "owner_path": "src/volpred/charts/article_charts.py:282（非內容部轄區）",
     "evidence": "逐 IP connect 連測三輪；DNS 0.01s 正常；對照組 api.github.com 0.05s；job r1 掛第 3 張、r2 掛第 1 張",
     "impact": "單張失敗率約 1/2 → 懶人包連傳三張全成功機率約 12.5%；無人值守 compute-worker 無法手動重試",
-    "escalated_to": "platform_eng（P1 request item_20260805T110622123356Z + 補充 item_20260805T111148334909Z）",
-    "status": "contained（手動第三次抽中，K1677 已解除阻塞，commit d8a73f7fe）— 非 root_cause_fixed",
-    "explicitly_told_not_to_downgrade": true
+    "escalated_to": "manager（platform_eng 二度轉請，理由：修復點 src/volpred/charts/article_charts.py::upload_chart 屬 Codex Zone A，不在 platform_eng 或內容部 owned_paths，需經理指派 Codex 處理；本次標明是主動擋內容部 P1 產出，優先序拉高）",
+    "status": "contained（手動重試可繞過，兩次交付皆已成功）— 非 root_cause_fixed，root cause 修復仍卡在指派鏈上",
+    "explicitly_told_not_to_downgrade": true,
+    "last_update": "platform_eng 2026-08-05T16:08Z 兩則回覆：(1) 根因確認、已再次轉請經理指派 Codex；(2) 未因手動重試成功而降級"
   },
   "next_run_queue": [
     "orphan 補圖：K1597 缺 1 張圖；K1710 缺 1 張圖（查重已過，可寫，與 K451 mile_f2e4c991 arc 不同——描述性分解 vs 預測力比較，正文半形逗號要改全形）；K1658/K1419/K1357 缺圖且字數偏少需先確認深度，K1658 與 K1419 的圖路徑要從 assets/ 改成 storage/drafts/assets/",
     "trending_repost 換題：原單已判重結案，換題是新的一張，需要新的新聞鉤子（配額 0/2 未用，不急）",
-    "追蹤研究部對三題的實際開工進度（8/8 額度恢復）：選題一產業概念股一般化、選題二敘事型目標價機率化；K1741 已更正為既有 collection task（見下一條），不需再追新定義",
-    "K1741 不是新研究——它是既有的 collection task（審查合併 worktree dispatch-slot-1-6fe0dac5-k1741 的產出）。8/8 後若研究部排到它，內容部可直接等 knowledge 條目落地後評估要不要寫成文章，不需要再介入定義範圍",
-    "追蹤 mile_ba19d6aa 與 mile_3303f340 的 lazypack 是否成功裝上（下一班可用 memory 裡的回讀指令：rg feed.json 找『## 懶人包圖組』）"
+    "追蹤研究部對三題的實際開工進度（8/8 額度恢復）：選題一產業概念股一般化、選題二敘事型目標價機率化；K1741 已更正為既有 collection task，不需再追新定義",
+    "追蹤 upload_chart 退避重試修復是否真的指派給 Codex 並落地（platform_eng 已二度轉請經理，本班不重複催，改為觀察下一輪經理裁決）"
   ],
   "blockers": [
     {
