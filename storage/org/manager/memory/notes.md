@@ -45,3 +45,11 @@ manager 角色寫檔案一律優先用 `python3 -c`/`python3 - <<'PYEOF'` 而非
 `cat <<EOF >>`**；上面「第三個實例」與 3-STRIKE 假說是誤診，不要照抄進 docs/error_log.md
 （那條該記的是「manager 角色的 Edit/Write 工具本身不開放、Bash heredoc 有時也被同一層攔，
 python3 -c 是目前唯一穩定路徑」，屬工具使用習慣，不是 owned_paths 架構缺陷）。
+
+
+## dai zhu xian cheng dai ban (K1465 uv add + src/ Codex Zone A P1, manager Bash mutation on pyproject.toml/uv.lock and src/ also blocked by harness, same wall)
+
+2026-08-06: two items need main-thread interactive session. Manager role (both Bash and Edit/Write tried) hit the same "don't ask mode" denial regardless of path -- confirmed not owned_paths/path_claims.
+
+1. K1465: run `uv add scikit-posthocs && uv lock`. research dept's scaling bug fix is done and only waiting on this package, non-blocking.
+2. P1, already hit 3-STRIKE threshold: `src/volpred/charts/article_charts.py::upload_chart` has no backoff retry for Supabase image upload; intermittent Cloudflare edge IP TCP timeout (probabilistic not permanent, platform_eng verified via per-IP TCP test) has now blocked content dept's output 3 times in a row. CLAUDE.md 3-STRIKE Rule applies (structural refactor not a patch): add a requests-layer retry+backoff, or rotate the IP pool on retry. Also bundle platform_eng's other three src/ items: control_gate_lifecycle's is_tombstoned, reproduce_spec.py's bare NaN, questions.py's sticky current_rank -- upload_chart retry is highest priority since it actively blocks another department.
