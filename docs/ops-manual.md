@@ -155,6 +155,7 @@ Message-ID 先查 Gmail Sent；所以重啟 Codex／Claude、切換 Mac 或重�
 | 盤點 worktrees（未合併/dirty） | `uv run python scripts/ops_snapshot.py --worktrees` |
 | 看最近幾班派工結果 | `uv run python scripts/ops_snapshot.py --receipts 5` |
 | 監控 dashboard | http://127.0.0.1:8787 |
+| 組織全景（經理×部門層級＋任務快訊） | http://127.0.0.1:8787/org（JSON: `/api/org`；離線快照 `uv run python scripts/work_dashboard_org.py --html <out>`） |
 
 （G2 子命令一律回極簡 JSON <2KB，取代手寫 jq/grep 翻 `next_tasks.json` / `feed.json` / cron log。）
 

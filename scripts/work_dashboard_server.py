@@ -39,6 +39,12 @@ if str(ROOT / "src") not in sys.path:
 # at 2026-04-25 while the job ran healthy every morning) — the dashboard showed
 # the boss a dead job for ~3 months.
 from volpred.ops.schedules import job_liveness  # noqa: E402
+
+# The org strip below is a summary; the full hierarchy + message history lives at
+# /org. Same server on purpose — one dashboard owner, two depths of the same view.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import work_dashboard_org as org_view  # noqa: E402
+
 TZ = ZoneInfo("Asia/Taipei")
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
@@ -488,7 +494,9 @@ button{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:6
 <header><h1>🤖 VolPred · AI 工作監控</h1><span id=health class=pill>…</span><span id=daemons></span>
 <span class=muted id=gen></span><span class=muted style=margin-left:auto>每 15s 自動刷新</span></header>
 <div class=strip id=strip></div>
-<div class=orgbar><h2>🏢 組織 · 運營經理與部門</h2><span class=muted id=org-mgr></span></div>
+<div class=orgbar><h2>🏢 組織 · 運營經理與部門</h2>
+<a href="/org" style="color:#79c0ff;font-size:11px;text-decoration:none;border:1px solid #30363d;border-radius:11px;padding:2px 9px">組織全景 · 層級與任務快訊 →</a>
+<span class=muted id=org-mgr></span></div>
 <div class=orggrid id=org></div>
 <div class=cols>
   <div class=col><h2><span>⏰ 工作排程 · 台灣時間</span><span><button id=sb-next class="sbtn on">下次時間</button><button id=sb-day class=sbtn>每日順序</button></span></h2><div id=schedule></div></div>
@@ -606,8 +614,12 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path == "/":
             self._send(200, HTML, "text/html")
+        elif path == "/org":
+            self._send(200, org_view.PAGE, "text/html")
         elif path == "/api/work":
             self._send(200, json.dumps(build_work(), ensure_ascii=False))
+        elif path == "/api/org":
+            self._send(200, json.dumps(org_view.collect(), ensure_ascii=False))
         else:
             self._send(404, json.dumps({"error": "not found"}))
 
