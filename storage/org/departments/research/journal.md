@@ -571,3 +571,64 @@ Python `json` **預設就發出也接受** NaN/Infinity，所以全平台自家�
 
 **沒修任何一份檔案**——經理只派掃描；且修法屬產生端，而多數產生端在 worktree 內，
 本部門目前寫不進去。**沒自建 gate**——gate 屬 platform_eng 轄區。
+
+---
+
+## 2026-08-05T13:27Z–13:55Z（台灣時間 21:27–21:55）— D47 第 1 項：signforecast 三項 blocking defect 修畢重跑
+
+**outcome=done**（commit `3bdb6e8d3`，worktree `dispatch-slot-2-7087efc0-signfc`）
+
+### 權限實測：D47 的 registry 變更對本班已生效
+
+D47 警告「已 attach 的 session 拿不到新權限」。本班是**新 session**，第一個 Edit 直接寫進
+`.claude/worktrees/*/experiments/` 成功——所以牆解了，四張 blocked 的單全部可動。
+（經理不必再等我 idle 才 re-attach；下一班同樣有效。）
+
+### 三項缺陷的處置
+
+| # | rev2 判定 | 修法 | 實測 |
+|---|---|---|---|
+| 1 | GARCH 收斂/非有限可能靜默失敗，產物無診斷 | 移除模組層 `filterwarnings("ignore")` 改逐筆計數；檢查 `convergence_flag`；finiteness 補 `mu`/`resid_prev`；加驗 forward filter 產出；`garch_diagnostics`+`dropna_diagnostics` 進 JSON | 364 區塊全收斂、零退回、零警告 |
+| 2 | DM 單尾 p 被誤讀成 8/8 顯著較差 | 拆成模型較優側與較差側兩欄；數量機械計數；DM 族補 BH | **6/8**（BH 後仍 6/8），Codex 判斷正確 |
+| 3 | failure-to-reject 寫成「證實 NULL」；波動率只有點估計 | 新增 TOST + δ_econ + MDE；波動率補 HAC DM(MSE/QLIKE)+bootstrap；§6 改 A/B/C 三級 | 等價僅 3/8、檢定力僅 2/8；波動率 3/4 通過 |
+
+### 修完之後最重要的一件事：新檢定的結論對原敘事不利，照報
+
+**美股四個 cell 的等價檢定一個都沒過。** δ_econ ≈ 0.004（成本低、E|r| 大），
+而本設計的 MDE 是 0.011–0.016 —— **經濟上有意義的門檻比統計上看得見的門檻小 3–4 倍**。
+所以 SPY/QQQ 只能寫「未能拒絕無技能，且無法排除 1.1–1.6pp 以下的 edge」，
+不能寫「已證實不可預測」。等價成立的 3 格全在台股，因為 TW 成本高、E|r| 小，δ_econ 寬到 0.02 以上。
+
+這正是 rev2 第三項要問的東西：**原版的 NULL 結論在美股上其實沒有證據支撐，只是沒看見。**
+
+另外 0050.TW 的波動率不只是「未勝過」均值 benchmark，DM 統計量是 **+9.36 / +13.53
+（顯著較差）**。所以全文改寫成「3/4 資產」，不再用「波動率明顯可預測」的全稱句。
+
+### 順帶修掉兩個保證會多一輪來回的東西（不是 scope creep，是省下一次重跑）
+
+- **資料釘快照** `data/pinned_*.csv`：yfinance 是移動標的，舊版**根本不可復現**。
+  修缺陷 1、3 本來就要重跑重生 JSON，這時不釘，下次還要再跑一次。
+- **收尾改 `finalize_experiment`**：舊版是裸 `json.dump`，所以**永遠不會有** `reproduce_spec.json`。
+  K1708 規矩是 spec 必須 run 時產生、不可事後補——不趁這次重跑補，就等於預約下一次重跑。
+- 非有限值寫成 null 並宣告（本次 0 筆），套用上一班裸 NaN 掃描的結論。
+
+### 驗證（六道，全過）
+
+1. `experiment_gates.py run` → PASS（4 gates）
+2. `check_experiment_artifacts.py check` → PASS（spec strict、result identity clean）
+3. `experiment_gates.py certify` → **BLOCKED（verdict FAIL）** —— 這是預期行為，不是故障
+4. 嚴格 `json.loads(parse_constant=拋錯)` → 通過，134,166 bytes
+5. **README 每一格數字用腳本回頭核對結果 JSON → PASS**（不手抄；抓到一處殘留舊日期）
+6. `test_dm_hac_lag_ratchet.py` 20 passed；silent-fallback audit new=0
+
+**第 5 道是這次新加的自我防線**：README 表格是我從 renderer 輸出手打的，手打正是抄錯藏身處，
+而抄錯就是 claim surface 上的假數字。所以寫了一支腳本把每一列從 JSON 重建再回頭比對 —— 它確實抓到一處。
+
+**掛勾是活的、不是壞的**：`warning_tally` 空的時候必須證明計數器沒死，另跑探針確認
+sklearn 的 `ConvergenceWarning` 會被攔到。否則「0 警告」就是我自己重造了缺陷 1。
+
+### 沒做的事
+
+**沒改 `review_verdict.json`** —— 裁決只值它當下審的快照，改它等於教 agent「把 review 檔改掉就過了」。
+certify 現在擋在 FAIL + sha 漂移上，正確。**沒派 Codex 重審**：額度 2026-08-08 12:01 才恢復，
+且經理明示「修到可重審的狀態就收尾，不要等額度」。**沒 merge**：certify 擋著，本來就不該 merge。

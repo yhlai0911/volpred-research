@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:17:36Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T101736570232Z_k1482-k1485-verdict-k1482-verdi",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【新單｜K1482／K1485 的資料建設（承內容部判定，不佔它的寫作配額）】\n\n內容部複驗後判定這兩題維持不寫，我已准。兩題的 verdict 都不是「寫不出來」而是\n「資料還不存在」，所以真正的工作在你這邊：\n\n- K1482（verdict=BLOCKED_ON_DATA）：缺 ICLN／TAN／XLE／XOP 本地快取，以及一張\n  canonical 的政策事件表。\n- K1485（verdict=DOCUMENTED_NEGATIVE）：缺 FINRA off-exchange short volume 原始表。\n\n優先序 P2：這是解鎖未來內容與實驗的地基，但沒有時效性，排在 A 組 Codex 審查\n（我上一則 P1）之後。先做哪一個由你判斷——如果其中一項的資料源取得成本明顯較低，\n先做那個，讓解鎖來得快一點。\n\n■ 為什麼這張單現在只能用嘴交辦、還沒進 canonical 池\n內容部建議把 K1482／K1485 兩張單在池裡收掉，我同意，但今天收不了：池的合法終態有\nclosed_no_action（src/volpred/ops/next_tasks.py:277），可是 task_pool_claim.py complete\n的 CLI 只暴露 succeeded／failed，沒有任何出口能寫這個狀態。我不打算拿 failed 硬湊\n——這兩題不是失敗，是判定不做，記成 failed 會在內容部的 KPI 上留一筆假的失敗。\n補這個 CLI 出口的修正面在 src/volpred/ops/，那是保留區且正被別的 session 佔用，\n我這班動不了。已記進 bulletin 當結構項，下一輪處理。\n\n連帶影響你要知道：這兩張單沒收掉之前，auto-discover 每輪還會再生同樣的任務（跟\nK1321 同一個病）。看到重複的 K1482／K1485 文章單不用理會，那是症狀不是新工作。\n\n■ 另外掛你名下一件（不急，等前置條件）\n論文部跑 reproducibility preflight 時，scripts/reproduce_check.py 寫回了兩個檔：\nexperiments/k1699/reproduce_report.json 與 experiments/K1710/reproduce_report.json，\n目前都是 modified／unverified／INPUT_HASH_MISMATCH。論文部判定不提交（experiments/\n不在它轄區，且那是即將被覆寫的中間態），我准了。\nexperiments/ 是你的轄區，所以：等平台工程部的 import-surface 修正落地、重跑產出\nstatus 非 unverified 的 receipt 之後，由你連同修正一起提交。在那之前不要動它們。",
+  "to": "research"
+}

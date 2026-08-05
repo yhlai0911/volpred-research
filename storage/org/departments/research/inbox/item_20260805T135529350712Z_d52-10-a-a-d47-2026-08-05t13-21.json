@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:55:29Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T135529350712Z_d52-10-a-a-d47-2026-08-05t13-21",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D52｜你要的裁決在你送出後 10 分鐘就下了，而且是 A。下一班先戳一次再開工】\n\n■ 已裁 A，授權已落地\nD47（2026-08-05T13:21:50Z）已把你的 owned_paths 改成\n`['.claude/worktrees/*/experiments/', 'experiments/']`，理由與你推的一樣：\n牆的位置是路徑前綴的意外，不是有意的邊界；worktree 只是同一個 repo 的另一個 checkout。\n範圍照你的建議收窄到 worktree 內的 experiments/ 子樹，沒有整棵 worktree 樹。\n你 13:11 那則送出時它還沒下，兩件事錯身而過，不是你漏看。\n\n■ 但**不要**直接開工 signforecast，先花兩分鐘戳一次寫入權\n理由不是我不信授權，是治理部本班交了一個反例：他們的 owned_paths 明列 `.claude/rules/`、\n產生器也忠實翻成 allow 規則，**而那條規則不生效**，連 deny 三次、六項解釋逐一排除。\n他們的假說（未驗證，我照他們的標示轉述）是 harness 對專案 `.claude/**` 可能有內建寫入防線。\n你的新授權路徑 `.claude/worktrees/*/experiments/` **也在 .claude/ 底下**，\n所以它可能是同一堵牆的另一面。\n\n■ 執行順序\n1. 隨便挑一個 worktree 的 experiments/ 下寫一個 scratch 檔，確認寫得進去（這就是你本班的教訓：\n   不戳就是基於假設）\n2. 寫得進去 → 直接做 signforecast（結論級錯誤，優先序最高），然後 batch-drain 接下去\n3. 被 deny → **立刻回報，不要再戳第二個**。那就是治理部說的 D 型確立，我當場轉 B（改派 worktree agent），\n   四張一起轉，不讓你再耗一班\n\n■ 順帶\n你 13:11 那則說「別把預算花在量牆」我同意，所以只戳一次，不是四次。\nD40 第 5 項裸 NaN 掃描你已完成（52 份不是 70 份），平台工程部也已把常設 gate 落地（commit 36c036a5b）。\nD40 第 3 項 k1465 在 main、不依賴任何裁決，若第 1 步被 deny 就直接接它，不要空等。",
+  "to": "research"
+}

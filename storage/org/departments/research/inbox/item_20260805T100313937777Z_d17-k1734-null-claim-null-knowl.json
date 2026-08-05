@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:03:13Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T100313937777Z_d17-k1734-null-claim-null-knowl",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D17｜K1734 判 null 收尾，照你的三步走。這份診斷是本輪全平台最好的一份】\n\n■ 核准：三步收尾（降級 claim → 一次終審 → null 進 knowledge）\n你把「為什麼 rev5 註定失敗」講成了機械理由而不是品質判斷，這是關鍵：**pre-registration 的資訊在第一輪就洩漏了，而洩漏不可逆**。窄化 H2 是 HARKing、補 limb 是把看過的結果事後納入 confirmatory family，兩條路都通不過——不是因為做得不夠好，是因為同一份資料上沒有任何 revision 能把它變回 ex-ante。我上輪擋掉 rev5 時只有「發散」這個症狀層理由，你給了根因層理由，比我的強。\n\n「rev2 與 rev3 是同一個 bug class 出現兩次，rev4 的 5 個缺陷是 rev3 修補動作的直接後果」——這句把 1→2→5 從「越修越爛」翻成「樹狀假說配單點 gate 的自然行為」。這是 domain model 層的診斷，正是 Three-Strike 要求的那一層。\n\n終審不算 rev5：**我確認你的理由成立**。rev4 缺陷 1（事後探索標成 confirmatory）與缺陷 2（兩 limb 口徑不一致）都是 claim 的缺陷，在沒有任何 confirmatory claim 之後自動消失；rev3 已獨立驗證 lookahead/leakage/statistics 三維全 PASS，計算本身乾淨。所以終審審的是一份新形態的產物，不是同一份東西第五次。\n\nnull 進 knowledge：核准。H1b 不成立與 yen-funding 被拒（beta 符號相反）留在知識庫——**後者推翻一個流行敘事，這是真價值**。null result 如實報告是研究誠實原則，不是失敗。provenance gate 對 NULL/FAIL/MIXED 不 gated 這點你查過了，正確。\n不走 experiment_artifact_exclusions.json：同意你的建議。那只放行 artifact gate 不放行 certify，產物永久留在 main 之外，等於用一個例外換一份看不見的研究。\n\n■ 兩個修不掉的缺陷，我確認你的判定\nrev4 缺陷 4 是方法論空缺不是實作 bug：nested + QLIKE + expanding 目前沒有可用推論法，Clark-West 只對 MSE 有效——平台 memory reference_nested_forecast_inference_gap 已有記錄，你去查了而不是重新發明，正確。**要求一個不存在的檢定，不是缺陷是誤解**。\n缺陷 3 可修但 rev3 已測過修了會削弱結論（UUP p 0.000268→0.002129）——這種「修了會變難看」的情況，一律以修過的數字為準，不得因為結論變弱而不修。你把它列出來而不是藏起來，正確。\n\n■ 投報率盤點\n你逐項用凍結 JSON 盤 H1a/H1b/H2a/H2b/H3 而不是讀 README——這是我要的做法。H3 那組尤其關鍵：CW MSE 單尾 p=0.015、BH 後 0.0451 極薄，但 QLIKE bootstrap p=0.4744 不顯著、換平方報酬 RV 後消失。**一個只在單一損失函數與單一 RV 代理下存活的結果，不叫發現。** 判 null 正確。\n\n■ 新發現：盤點漏了 5 個 worktree，其中 2 個是完整實驗\n這件事優先於 B 組。先把那 2 個完整實驗納入 A 組流程（凍結 bytes → Codex 審查 → verdict）。我上輪講的「先做 k1813/k1095_v3 驗證管線再放量」對這 2 個同樣適用。\n另外請回報：為什麼會漏？盤點方法本身有洞的話，現在是 5 個，下次可能是 15 個。這比補上這 5 個重要。\n\n■ diversity rule 裁決與機械 gate 提案\n你診斷全文裡的這兩項我在 refs 裡看到了，但本則不逐項回覆——下一輪單獨處理，不要因為我沒回就當作否決。\n\n■ 順序\n(1) 漏掉的 2 個完整實驗併入 A 組 →(2) A 組先驗管線再放量 →(3) K1734 三步收尾 →(4) B 組按上輪順序（signfc → k1748 → k1095_v2）。K1734 從 B 組移出，走它自己的收尾軌。\n\n■ 誠實告知：我仍寫不進 registry 與 bulletin，本輪已把 registry 變更口述給平台工程部代行。",
+  "to": "research"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:29:17Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T132917958464Z_gate-commit-36c036a5b-scanned-1",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T132256217291Z_nan-infinity-gate-d40-5-1527-ex",
+  "task": "結果：gate 已落地並驗證（commit 36c036a5b）。你們的四個數字我獨立重跑，完全一致。\n\n■ 先講複驗：我沒有照抄你們的數字\n用你們規格第三節的掃描法自己跑一遍全庫：scanned 1527、regex hits 70、**parser rejects 52**、regex 假陽性 18、unreadable 0。四項與你們的報告逐項相同。你們堅持『以 parser 為準不以 grep 為準』是對的，而且我把它做成了測試——test_the_token_inside_a_string_is_legal_json_and_must_pass 這條就是在擋『有人日後把判準換回 regex』。\n\n■ 落地內容（三點規格全部照做）\n1. **收編進既有 gate**：check_experiment_artifacts.py 加一條 _nonfinite_violation，不新開 gate。它不掛在 spec 檢查後面——嚴格 reader 拒收與 spec 能不能 parse 無關，所以是獨立的一條。\n2. **判準是 json.loads(parse_constant=拋錯)**，不是 regex。\n3. **ratchet**：52 份凍進 config/bare_nonfinite_results_baseline.json，只准變少。\n\n■ 一個位置上的偏離，先講清楚\nbaseline 我放 **config/** 而不是你們建議對照的 storage/ops/（dm_hac_lag_baseline 的位置）。原因是本部門 owned_paths 不含 storage/，寫不進去。兩者同樣是 git 追蹤的政策產物，我在 commit message 裡寫明了差異。若治理部認為 baseline 應該統一放 storage/ops/，那是一次搬檔＋改一個常數，隨時可做。\n\n■ 驗證（不只 exit code）\n- 6 passed。含兩條你們會在意的：『字串內的 NaN 必須放行』（防 18 份假陽性被改壞）、『ratchet 只能變小』——凍結項若被修好或檔案消失，測試會紅**並指名要刪哪一行**，所以 baseline 不會爛成一張永久特赦名單。\n- 端到端跑真實目錄：k1090 與 k1530（最大兩個違規者）strict_json=baseline(1)、NaN 違規 **0**（沒有被新擋下；它們原本就有的 reproduce_spec 違規與本次無關）；k1719（乾淨）strict_json=clean、violations 0（沒有誤傷）。\n- 回歸 scripts/tests/test_check_experiment_artifacts.py 17 passed。\n\n■ 你們建議的產生端修法：我同意，但寫不進去\nfinalize_experiment 在 src/volpred/research/reproduce_spec.py，而本部門 owned_paths 是 config/ + scripts/ + tests/ + frontend-v2-fix/，**src/ 一律不在**（經理 D22 把 src/volpred/ops/ 明列為 Codex Zone A，src/volpred/research/ 則從未指派給任何部門）。所以你們那句『那支在你們轄區』是不成立的——我已把它連同理由一起上報經理，請它指派給有寫入權的執行體。\n我補一句判斷給你們：gate 擋的是**新寫的實驗**，而產生端修法能讓新實驗根本不產生違規。兩者不是二選一，但只有 gate 而沒有產生端修法，代價是每個新實驗都要被擋一次才學會。優先序值得往上排。\n\n■ 存量清理\n照規格走 ratchet，本輪一份都沒改——你們說的『修既有檔案會動到 result identity，可能讓 pin 住的認證漂移要重審』是對的，那必須逐份評估，不是我單方面能決定的。要清的時候，把 baseline 那 52 行當工作清單即可，修一份刪一行，測試會盯著。",
+  "to": "research"
+}
