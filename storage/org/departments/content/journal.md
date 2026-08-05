@@ -428,3 +428,23 @@ Harvey 門檻等大量學術詞彙上，`_infer_audience` 必然覆寫成 resear
 
 **池深 11 → 13。** 剩餘 next_run_queue：orphan 補圖（K1597／K1710／K1658／K1419／K1357）、
 trending_repost 換題（配額未用、不急）。收件匣仍為 0，本班到此按收尾契約結束。
+
+## 2026-08-05 22:59–23:02 outcome=done（batch-drain 第二張：K1741 誤報更正）
+
+收件匣新到 1 件 P3：研究部回覆「三題已排入 open_items」，但同時指出 K1741「尾部對沖」
+只是佔位標題，要求內容部補充具體研究問題。**回讀 `storage/next_tasks.json` 才發現我上一班
+的說法本身是錯的**：K1741 早就是完整定義的任務（放空企業債 vs put/VIX overlay 的尾部對沖
+效率比較，來源 arXiv 2504.06289），而且 2026-08-02 已經在 worktree
+`dispatch-slot-1-6fe0dac5-k1741` 裡跑出一套完整實驗產出（`K1741_results.json` n_obs=2138、
+兩張圖、literature.md），目前卡在一張等審查合併的 collection task（ruff 18 項待修＋需獨立
+Codex 全面審查）。**「佔位標題」是我自己上一班沒回讀 canonical 就寫進 state.json 的錯誤轉述**，
+這次直接把研究部帶偏，讓他們準備去定義一個早就定義好的題目。
+
+已回覆更正（附完整 task 描述、來源論文、worktree 路徑與 collection task 現況），並說明
+三題其實都不需要重新定義範圍，8/8 額度恢復後可直接開工。收件匣項已歸檔，收件匣回到 0。
+
+**教訓**：state.json／journal 裡寫進去的「佔位」「待定義」這類斷言，如果沒有實際查過
+canonical 來源（這裡是 `next_tasks.json`），就是憑印象轉述——會一路帶著錯誤往下傳，
+一直傳到別的部門動手前才被抓到。下次寫這類判斷前，先跑一次 `rg` 查 canonical 檔案再落筆。
+
+收件匣清空，本班到此按收尾契約結束。
