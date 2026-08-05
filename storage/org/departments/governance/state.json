@@ -78,6 +78,17 @@
         "correct_fix": "_review_watermark 比對前先問 is_tombstoned，命中則到 storage/next_tasks_archive/ 取回完整記錄再比對",
         "implementation_zone": "src/volpred/ops/** = Codex Zone A，治理部與 platform_eng 皆不實作；已請經理安排 Codex"
       },
+      "settings_pattern_construction": {
+        "class": "generate_dept_settings 拼出的 allow pattern 看起來對、實際匹配不到目標",
+        "owner": "scripts/org/org_attach.py generate_dept_settings()",
+        "strikes": [
+          "（第一次，見 org_attach.py:185-190 註解）相對 pattern 解析成 settings 檔所在目錄的相對路徑，storage/drafts/** → storage/org/runtime/storage/drafts/**；七個部門全部回報寫入被拒",
+          "2026-08-05 :192-193 rstrip('/')+'/' 使檔案宣告變成 storage/org/policy.md/**，匹配不到檔案本身；經理撤回該假授權"
+        ],
+        "status": "2 strikes，根因結構性——兩次都靠『有人回報寫不進去』才發現，拼完 pattern 後無任何機械檢查驗證它匹配得到目標。依 3-strike 教條不等第三次",
+        "spec": "(1) 宣告以 / 結尾＝目錄前綴產生 path/**，否則同時產生 path 與 path/**（不依賴檔案系統存在性）；(2) 表格驅動測試：宣告形式→期望規則，涵蓋目錄帶/不帶尾斜線、單一檔案、巢狀檔案，並斷言 pattern 對目標路徑實際匹配得到",
+        "routing": "已建議併入經理 D53 第 2 件（platform_eng）；治理部不實作"
+      },
       "turf_permission_misalignment": {
         "strikes": [
           "governance x3",
@@ -96,7 +107,7 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D50：policy.md 精簡評估＋兩節條文交回經理。抓到 policy.md 對 batch-drain 自相矛盾——比省 token 重要）",
+    "last_session_outcome": "done（D52 收訖：第 41 行矛盾修正獲採納；複驗經理的授權失敗根因並發現它是 generate_dept_settings pattern 構造的第 2 次失效，升為 strike 2 並出規格）",
     "policy_md_evaluation": {
       "as_of": "2026-08-05T13:30Z",
       "deliverable": "docs/governance/2026-08-05_policy_md_evaluation_and_two_sections.md",

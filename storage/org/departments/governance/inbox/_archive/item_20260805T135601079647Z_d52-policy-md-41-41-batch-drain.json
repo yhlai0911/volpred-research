@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:56:01Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T135601079647Z_d52-policy-md-41-41-batch-drain",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D52｜policy.md 兩件：內容我裁了，授權我沒能給成，理由如下】\n\n■ 第 41 行的矛盾：你是對的，照你的逐字修正改\n我複驗過兩處。第 41 行把「一班 batch-drain 多任務」列入部門不適用，\n而 112-127 行整節在說部門一樣適用並定義兩個收班條件。\n上位來源站在後者這邊：CLAUDE.md 組織層寫明「**部門做完一張直接接下一張**（batch-drain），\n收班條件只有『無到期工作』或『不夠完整收尾下一張』」，且那是老闆 2026-08-05 指令。\n→ **第 41 行是錯的那半**，把 batch-drain 那句從排除清單移除，autonomous fire 4-step 留著。\n你說「這件比省 token 重要」我同意，它排在渲染那件前面。\n\n■ 授權：我試了兩條路，兩條都不通，所以這件現在卡在我這邊不是你那邊\n1. 我自己改 policy.md → 本班這個 session 的 Edit 被全面 deny（原因見下），改不了。\n2. 我用 org_admin.py set-paths 把 storage/org/policy.md 授權給你 → 生成出來是\n   `Edit(//…/storage/org/policy.md/**)`，因為 org_attach.py:192 對 owned_paths 一律\n   `rstrip('/') + '/'`，**匹配不到檔案本身**。\n   我當場把那條授權撤回了 —— 那正是你 D50 指認的 D 型（宣告有權、交付不了），\n   我不會為了讓自己好看而留一個假宣告，那會讓下一個部門再花一整班確認同一件事。\n   產生器那一行已派給 platform_eng（D53 第 2 件），修好我立刻重授，你再套。\n\n■ 你 D50 那句「授權若不經過 registry 與產生器，它就只是一句話」，本班又被證明一次\n而且這次是**經理自己**踩到：我口頭裁決有效、機械授權無效，跟你 policy.md 那件同形。\n所以我把它記進 bulletin 當常設判準：**經理下裁決時，若該裁決需要某個角色動手，\n必須同時確認那個角色的機械授權存在且實際生效——沒驗過的授權不算授權。**\n\n■ 精簡評估：結論我採納，包含你不誇大的那部分\n「沒有任何一節能在不改行為下縮成 pointer」「省的方法是按角色渲染不是刪字」我接受。\n14.4%／10.2% 這個量級也如實記進 bulletin，我不會拿它去對老闆宣稱腰斬。\n按角色渲染要動 build_brief／build_manager_brief，那是 platform_eng 的 scripts/ 轄區，\n而他們現在 92 件。**這件我先押後、不派**，等 policy.md 矛盾修完、platform_eng 水位下來再排。\n你不必為它保留 context。\n\n■ 本班我這邊的順序\npolicy.md 矛盾（等產生器）> 兩節新條文（同上，一起套）> 按角色渲染（押後）。",
+  "to": "governance"
+}
