@@ -18,6 +18,15 @@ symlink 移除後又無回報）。memory 提醒（strike 1）與 CLAUDE.md 固�
   `<!-- task-done:極簡任務名 -->` 明確完成訊號，SDK/headless/API error 全部靜音
 - speech 以 assistant UUID 去重，鎖外 detached argv 直呼 `/usr/bin/say`，不經 shell
 
+**2026-08-05 flush-race 修正**（同一 session 內連續 4 次誤 block 合規文字收尾後發現）：
+Stop 事件觸發的當下，harness 把最終 text 記錄寫進 transcript JSONL 的動作可能還沒
+flush 完；hook 這時讀到的 tail 尾端不是不完整（不會走既有的 parse-fail silent-skip
+分支），而是那筆記錄根本還沒寫進磁碟 —— fallback 到「前一筆」有效紀錄（通常是
+一個 tool_use），誤判 turn 以 tool call 收尾。事後重讀同一份 transcript 可證實：
+真正的最終文字記錄確實存在且非空，只是讀取當下比寫入快。修法：判定為
+「非合規」時不立刻 block，改成短暫、有上限的重試讀取，給 writer 時間追上；
+仍不合規才真的 block。
+
 任何解析失敗一律 fail-open（放行）+ stderr 留 trace（no-silent-fallback）。
 Regression test: scripts/tests/test_enforce_final_text.sh
 """
@@ -27,10 +36,16 @@ import os
 import re
 import subprocess
 import sys
+import time
 import unicodedata
 from pathlib import Path
 
 TAIL_BYTES = 512 * 1024
+# flush-race 重試：Stop 觸發當下最終文字記錄可能還沒寫進 transcript 磁碟檔。
+# 4 次 × 0.1s = 至多多等 0.3s（不含最後一次判定），對互動 session 無感，
+# 遠低於曾觀測到的誤 block 造成的來回成本。
+BLOCK_RETRY_ATTEMPTS = 4
+BLOCK_RETRY_DELAY_SEC = 0.1
 DEFAULT_SPEECH_STATE = Path.home() / ".claude" / "state" / "task_completion_speech.json"
 SPEECH_MAX_LABEL_CHARS = 24
 INTERACTIVE_ENTRYPOINTS = frozenset({"claude-desktop", "claude-vscode"})
@@ -189,6 +204,23 @@ def main(*, speech_only: bool = False) -> int:
         return 0  # project final-text gate 已 block 過一次 — 放行避免迴圈
     if block is not None and block.get("type") == "text" and str(block.get("text", "")).strip():
         return 0  # 最終輸出是非空文字 → 合規
+    # 尚未合規：可能是真違規，也可能是 flush race（最終文字記錄還沒寫進磁碟）。
+    # 短暫重試讀取，避免把「讀太快」誤判成「turn 以 tool call 收尾」。
+    for attempt in range(1, BLOCK_RETRY_ATTEMPTS):
+        time.sleep(BLOCK_RETRY_DELAY_SEC)
+        try:
+            rec = _last_assistant_record(transcript_path)
+        except OSError as exc:
+            print(f"enforce_final_text: retry read error, fail-open: {exc}", file=sys.stderr)
+            return 0
+        block = _last_content_block(rec) if rec is not None else None
+        if block is not None and block.get("type") == "text" and str(block.get("text", "")).strip():
+            print(
+                f"enforce_final_text: compliant text found on retry {attempt} "
+                "(flush-race avoided, not a real violation)",
+                file=sys.stderr,
+            )
+            return 0
     print(json.dumps({"decision": "block", "reason": REASON}, ensure_ascii=False))
     return 0
 

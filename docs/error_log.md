@@ -6333,3 +6333,28 @@ ast-parse，兩個 wrapper 都鎖）已隨 `0f1a949a1` 落地。agy wrapper 用�
    merge 5066c02f4 落地、HEAD 驗證、artifacts gate PASS。Codex primary 補驗併入 8/8 任務（含 K1714/K1735）。
 
 本段主體狀態 **`root_cause_fixed_and_verified`**（第 4 點單獨 `contained`）。
+
+## 2026-08-05 — Stop hook（`enforce_final_text.py`）flush-race 誤 block：同一 session 連續 4 次誤判合規文字收尾
+
+**症狀**：互動 session 內連續 4 個 turn，主線程最終輸出明明是非空文字（含時間戳 + 下次排程），
+`scripts/hooks/enforce_final_text.py` 仍回報「你剛才以 tool call 或空輸出結束了 turn」並 block。
+事後直接讀該 session 的 live transcript JSONL 逐行核對（`type=="assistant"` 且非 sidechain 的最後
+一筆記錄），證實真正的最終文字記錄**確實存在、非空、且緊接在 Stop hook 收到的 user 回饋之前** ——
+不是輸出違規，是 hook 誤判。
+
+**根因**：Stop 事件觸發的當下，harness 把最終 text 記錄寫進 transcript JSONL 的動作可能還沒
+flush 完。hook 讀到的 tail 尾端不是不完整（不會走既有的 512KB byte-offset 截斷 parse-fail
+silent-skip 分支），而是那筆記錄根本還沒寫進磁碟；`_last_assistant_record` fallback 到「前一筆」
+有效紀錄（通常是一個 tool_use），因而誤判 turn 以 tool call 收尾。這是與 hook docstring 裡原本
+就承認的「tail 512KB 截斷」失效模式**同一個症狀、不同觸發源**的變體 —— 一個是讀取邊界問題，
+一個是寫入時序問題，但下游都是「最後一筆記錄讀不到就靜默 fallback 到前一筆」。
+
+**修法**：判定「非合規」時不立刻 block，改成短暫、有上限的重試讀取（4 次 × 0.1s，至多多等 0.3s），
+給 writer 時間追上；仍不合規才真的 block。不改變任何已通過的行為契約（真正的 tool-call 收尾 /
+空文字收尾仍必 block）。新增 regression case 用背景 process 延遲 0.15s 寫入最終文字記錄，
+模擬真實 flush race，鎖住這個修正（`scripts/tests/test_enforce_final_text.sh` case "flush-race
+延遲寫入仍放行"）。14/14 tests PASS（含既有 13 條全綠）。
+
+**制度化**：修正落在 hook 本體（唯一 enforcement owner，不疊加第二層 watchdog）；docstring 補記
+2026-08-05 條目說明觸發源與修法；regression test 覆蓋該觸發條件。本段狀態
+**`root_cause_fixed_and_verified`**（transcript 逐行核對證據 + regression test 覆蓋 + 全量回歸綠）。

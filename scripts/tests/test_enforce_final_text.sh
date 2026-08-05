@@ -6,6 +6,7 @@
 #  3. stop_hook_active=true → 放行（防無窮迴圈）
 #  4. transcript 缺失 → fail-open 放行
 #  5. 最後 assistant 行是空 text → block
+#  5b. 最終文字記錄延遲寫入（flush race）→ retry 後放行（2026-08-05 修正）
 #  6. explicit interactive completion marker → say short task label
 #  7. same turn re-fired → no duplicate speech
 #  8. sdk/headless entrypoint → no speech
@@ -56,6 +57,16 @@ cat > "$TMP/t5.jsonl" <<'EOF'
 {"type":"assistant","isSidechain":false,"message":{"role":"assistant","content":[{"type":"text","text":"   "}]}}
 EOF
 run_case "空文字收尾必 block" "$TMP/t5.jsonl" false true
+
+# case 6（2026-08-05 flush-race 修正）：最終文字記錄延遲寫入 transcript，
+# 模擬 Stop 觸發當下 harness 還沒 flush 完的真實 incident。retry 機制應該
+# 在重試窗口內讀到補寫的文字記錄並放行，而不是把「讀太快」誤判成違規。
+cat > "$TMP/t_race.jsonl" <<'EOF'
+{"type":"assistant","isSidechain":false,"message":{"role":"assistant","content":[{"type":"tool_use","name":"Bash","input":{}}]}}
+EOF
+( sleep 0.15; printf '%s\n' '{"type":"assistant","isSidechain":false,"message":{"role":"assistant","content":[{"type":"text","text":"⏱ 完成回報（延遲寫入模擬）"}]}}' >> "$TMP/t_race.jsonl" ) &
+run_case "flush-race 延遲寫入仍放行" "$TMP/t_race.jsonl" false false
+wait
 
 # Speech contract: fake /usr/bin/say replacement captures argv without producing audio.
 mkdir -p "$TMP/canonical" "$TMP/worktree"
