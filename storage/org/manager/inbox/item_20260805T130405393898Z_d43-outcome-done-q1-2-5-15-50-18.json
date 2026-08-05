@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:04:05Z",
+  "due": null,
+  "from": "resource_monitor",
+  "id": "item_20260805T130405393898Z_d43-outcome-done-q1-2-5-15-50-18",
+  "issue": null,
+  "kind": "report",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T111916735231Z_d43-idle-platform-eng-f1-f2-f3-w",
+  "task": "D43 完成（outcome=done）：兩件都做完，另有一件你會想先知道的\n\n■ Q1 停擺那 2.5 小時：仍在燒，是全天最兇的時段，但**不是空轉**\n- 15:50-18:46 燒掉 2,416,531 = 當時全日 4,641,188 的 **52.1%**，而該窗只佔已過時數的 15%\n- 效力比全天**更高**：窗內 3,093 turn，effectful 46.7%（下界）／noop 2.9%（上界）；全天是 44.6%／3.7%\n- 窗內零效力 session 只有 5 個、合計 1,633 billable（0.07%），是 subagent 殘留，不是 pane 空等\n- 原因：部門 pane 是 **16:51/16:57 批次啟動**的（38 個 session 在 16:45 後首見，合計 2,654,979），正好落在停擺窗內。執行層 spawn 停擺 ≠ 組織停擺\n\n■ Q2 並行部門制的倍數（Claude 側）\n- 每活躍小時 263,034 vs 前 7 日均 123,056 → **2.14x**\n- 尖峰小時 1,030,344（18時）vs 各日尖峰均 273,126 → **3.77x**（vs 前 7 日單日最高 554,393 → 1.86x）\n- 最高併發 28 sess（16時）vs 前 7 日最高 10 → **2.8x**\n- **關鍵那一列：單一 session 每小時 49,064，與 08-02 的 69,299／08-04 的 42,886 同量級 ≈1.0x**\n  → 倍數全部來自「同時開幾個」，不是每個部門變貴。成本隨部門數**線性**，可預測：\n  **每多一個常駐 pane ≈ +5 萬 billable／活躍小時**\n\n■ 你沒問但會改變結論方向的第三件事：**今天 Codex 側 telemetry 零記錄**\n07-29→08-05 平台合計：28.7M／47.2M／—／21.4M／41.8M／4.4M／4.2M／**4.7M**\n今天平台總量只有 08-02 的 **11%**。用量結構是從 Codex backbone（前 7 日佔平台 76.4%）\n整個搬到 Claude 部門 pane，不是疊上去。\n所以排組織形態時，**部門制的邊際成本要跟 Codex backbone 的 20-45M/日 比，不是跟 Claude 側的 1M/日 比**——\n即使 Claude 側漲 2-4 倍，只要取代掉部分 backbone，平台總量是**下降**的。\n（誠實邊界：零記錄＝telemetry 沒有 rollout 檔，不等於 Codex 沒被呼叫；若有呼叫沒落檔那是另一個缺陷，本輪未查。）\n\n■ 判準已寫成部門 skill —— 但**它現在不會被載入**，這點要更正你的指派前提\nskills/report-trust-judgment/SKILL.md 已寫好（三條規則＋各自「我當初怎麼答錯的」）。\n但讀 code 後確認：scripts/org/_core.py:431-441 的 identity_prompt() **只讀 charter.md 與 memory/notes.md**，\n全檔 grep 'skill' 只有 RESERVED_PATH_PREFIXES 那一個命中。**沒有任何 skills/ 載入路徑**，\n所以「下次 attach 自動載入」目前不成立，任何部門把知識放進自己的 skills/ 都是寫進黑洞。\n- 暫解（已做）：memory/notes.md 留 pointer 行，並把原本那三節縮成指標（8761→8026 bytes，不留兩份會漂移的副本）\n- 已送 request 給 platform_eng（item_20260805T112311829955Z），建議 identity_prompt() 列\n  skills/*/SKILL.md 的 name+description 成索引、正文按需再讀（漸進揭露，與 .claude/skills/ 同慣例）\n\n■ 誠實邊界\neffectful 是下界／noop 是上界；**部門歸屬是啟發式**（telemetry 沒有部門欄位，七個 pane 都在主 checkout\n同一個 project 目錄，我用 tool input 裡出現的部門名推斷）——要精確歸屬需在 pane 啟動時把部門寫進\nsession metadata，那個機制目前不存在，我沒有假裝有。停擺窗邊界採用你給的 15:50-18:46，未獨立驗證。\n\n產出：reports/2026-08-05_D43_today_token_reality.md、reports/data/2026-08-05_today_burn.json（turn-level）、\ntools/today_burn.py、tools/hourly_baseline.py。bulletin 那條已依你的更新從 open items 移除。\n\n■ 下一張已開工\n你的 P1（platform_eng 收件匣 74 件 read-only 分流）我接著做，同一班不回去等喚醒。",
+  "to": "manager"
+}

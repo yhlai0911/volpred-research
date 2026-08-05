@@ -21,14 +21,26 @@
     "cost_usd_extrapolated_reference_NOT_MEASURED": 6141,
     "cost_usd_priced_portion": 1242.43,
     "daily_report_usable": true,
+    "daily_unbackfilled_0721_0728_true_total": 222196866,
     "effectful_share_pct_lower_bound_claude": 41.65,
+    "email_correction_5day_known_total": 102758687,
+    "email_correction_deliverable": "reports/2026-08-05_email_correction_TEXT_ready_to_paste.md (finished text, snippet self-tested, one-shot; 5-day total 102,758,687; 08-05 intentionally unfilled)",
     "external_channel_sole": "daily 08:00 Asia/Taipei token report email (scripts/token_report_email.py)",
     "external_incorrect_sends_pending_correction": 6,
     "mission_output_share_pct_upstream_NOT_KPI": 4.5,
     "noop_text_only_share_pct_upper_bound_claude": 2.68,
-    "note": "判準定案：期間結束了沒 + 機制認不認為 due，不是內容是不是 0（三分支見 memory）。F2 已定案；F3 未修前成本不可對外；集中度真值 59.0%",
+    "note": "D43 定案：停擺窗非空轉；部門制成本隨部門數線性（每 pane ≈ +5 萬 billable/活躍小時）；今日 Codex telemetry 零記錄，平台總量反而降到 08-02 的 11%。判準已升級為 skills/report-trust-judgment。",
+    "org_parallel_max_concurrent_sessions": 28,
+    "org_parallel_multiple_peak_hour": 3.77,
+    "org_parallel_multiple_per_active_hour": 2.14,
+    "outage_window_billable_share_pct": 52.1,
+    "outage_window_effectful_share_pct_lower_bound": 46.7,
+    "per_session_hourly_rate_vs_baseline": "≈1.0x（倍數來自 session 數，非單價）",
     "platform_billable_total_reported": 184380508,
     "platform_billable_total_settled": 180312894,
+    "reports_lacking_self_describing_fields": "all sampled (generated_at/period_end/period_complete absent)",
+    "reports_total_scanned": 98,
+    "reports_written_before_period_end": 47,
     "session_longevity_hours_lower_bound": 103.76,
     "structural_defects_closed": [
       "F1_daily_report_utc_boundary(commit dab112d3a)",
@@ -43,14 +55,11 @@
       "daily_2026-07-21..07-28_never_backfilled",
       "report_completeness_stored_in_mtime_not_payload(does_not_survive_git_clone)"
     ],
+    "today_2026_08_05_claude_billable": 4734619,
+    "today_2026_08_05_codex_billable": 0,
     "top_root_concentration_pct": 59.0,
     "top_root_concentration_pct_session_id_level_UNDERESTIMATE": 34.2,
-    "weekly_report_gap": [
-      "weekly_2026-07-31 期間未結束(07-31->08-07)；2026-08-05 17:37 被 8cc3a6afc 重產為 126,428,721，仍是 mid-period 中間態，非缺陷"
-    ],
-    "window": "2026-07-29..2026-08-04 (UTC, 7d)",
-    "reports_written_before_period_end": 47,
-    "reports_total_scanned": 98,
+    "verification_plan": "reports/2026-08-05_verification_plan_v2.md (A:6 + B:backfill + C:fresh-clone)",
     "weekly_permanently_frozen_partial": [
       "weekly_2026-05-29=154173260",
       "weekly_2026-06-05=105557436",
@@ -58,14 +67,17 @@
       "weekly_2026-06-19=54310215",
       "weekly_2026-06-26=115229000"
     ],
-    "daily_unbackfilled_0721_0728_true_total": 222196866,
-    "email_correction_5day_known_total": 102758687,
-    "verification_plan": "reports/2026-08-05_verification_plan_v2.md (A:6 + B:backfill + C:fresh-clone)",
-    "reports_lacking_self_describing_fields": "all sampled (generated_at/period_end/period_complete absent)",
-    "email_correction_deliverable": "reports/2026-08-05_email_correction_TEXT_ready_to_paste.md (finished text, snippet self-tested, one-shot; 5-day total 102,758,687; 08-05 intentionally unfilled)"
+    "weekly_report_gap": [
+      "weekly_2026-07-31 期間未結束(07-31->08-07)；2026-08-05 17:37 被 8cc3a6afc 重產為 126,428,721，仍是 mid-period 中間態，非缺陷"
+    ],
+    "window": "2026-07-29..2026-08-04 (UTC, 7d)"
   },
-  "last_run": "2026-08-05T10:22:00Z",
-  "open_items": 6,
+  "last_run": "2026-08-05T13:03:30Z",
+  "open_items": [
+    "等 platform_eng 回填 F1/F2/F3/五份凍結 weekly/F5，之後回讀複算（不主動動）",
+    "platform_eng request item_20260805T112311829955Z：部門 skills/ 尚未被 identity_prompt 載入",
+    "D43(P1) platform_eng 收件匣 74 件 read-only 分流盤點（進行中）"
+  ],
   "open_items_detail": [
     "R3 session 壽命的 fork-root 層級尚未重算（目前只有下界 103.76h）",
     "五份凍結 weekly（05-29~06-26）真值未重算，需約 25 分鐘；platform_eng 回填後才跑",

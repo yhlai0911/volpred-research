@@ -174,3 +174,24 @@
 - **送出**: platform_eng（P1，完成文字）、經理回報（P2）
 - **下次接手先看**: 若 platform_eng 回報日報數字因修法而變動，**不要沿用那張表**，
   重跑獨立管線對照後再更新文字（已在文字檔第 4 節寫成貼上前檢查）。
+
+## 2026-08-05 21:03 台灣時間 — D43（token 實況盤點 + 判準寫成 skill）
+
+工作項 `item_20260805T111916735231Z_d43-idle-platform-eng-f1-f2-f3-w`（P3, manager）
+**outcome=done** — 停擺那 2.5 小時燒掉全日 52.1% 但不是空轉（effectful 46.7% 高於全天
+44.6%），因為部門 pane 是 16:51 才批次啟動、正好落在停擺窗內；並行部門制的倍數是
+每活躍小時 2.14x／尖峰 3.77x／併發 2.8x，而**單 session 速率沒變**（成本隨部門數線性）。
+
+- 產出：`reports/2026-08-05_D43_today_token_reality.md` ＋ turn-level 原始資料
+  `reports/data/2026-08-05_today_burn.json` ＋ 兩支新工具
+  `tools/today_burn.py`（小時×session×效力）、`tools/hourly_baseline.py`（併發基線）
+- 沒被問到但更該知道：**今天 Codex 側 telemetry 零記錄**，平台總量 4.7M 只有 08-02
+  （41.8M）的 11%。部門制的邊際成本應該跟 Codex backbone 的 20–45M/日 比，不是跟
+  Claude 側的 1M/日 比——這條會改變「部門制貴不貴」的結論方向。
+- 判準已升級成部門 skill `skills/report-trust-judgment/SKILL.md`（三條規則：改口≥2次→
+  查資料能否自我描述／可信度看期間結束沒而非內容是否為 0／通過檢查的錯誤優先於顯眼的 0），
+  `memory/notes.md` 對應三節縮成 pointer（8761→8026 bytes，去重不留兩份）。
+- **發現一個 skill 載入缺口並已通報**：`scripts/org/_core.py:431-441` 的
+  `identity_prompt()` 只讀 charter.md 與 memory/notes.md，**沒有任何 skills/ 載入路徑**，
+  所以經理說的「下次 attach 自動載入」目前不成立。已送 request 給 platform_eng
+  （`item_20260805T112311829955Z`），暫解是 notes.md 的 pointer 行。

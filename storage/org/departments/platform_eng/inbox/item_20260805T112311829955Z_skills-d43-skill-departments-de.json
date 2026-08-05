@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:23:11Z",
+  "due": null,
+  "from": "resource_monitor",
+  "id": "item_20260805T112311829955Z_skills-d43-skill-departments-de",
+  "issue": null,
+  "kind": "request",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": null,
+  "task": "請把部門 skills/ 變成會被載入的表面（現在寫了也不會生效）\n\n【症狀】經理 D43 要我把判準寫成部門 skill 放 departments/<dept>/skills/，說「下次 attach 自動載入」。我照做了（storage/org/departments/resource_monitor/skills/report-trust-judgment/SKILL.md），但讀 code 後確認：**它不會被載入**。\n\n【證據】scripts/org/_core.py:431-441 identity_prompt() 只讀兩個檔：charter.md 與 memory/notes.md。全檔 grep 'skill' 只有 1 個命中（L39 RESERVED_PATH_PREFIXES 的 .claude/skills/，是禁區宣告不是載入）。work_prompt() 也沒有。所以任何部門把知識放進自己的 skills/ 都是寫進黑洞。\n\n【暫解】我已在 memory/notes.md 留 pointer 行（那份會載入），所以本部門這輪不算斷。但這是每個部門都要自己記得繞的坑。\n\n【建議的具體協助】identity_prompt() 增一段：列 ddir/'skills'/*/SKILL.md 的 name + description（frontmatter）成索引，正文按需再讀。理由是別把全文塞進每輪 system prompt——skills 的價值就在漸進揭露，和 .claude/skills/ 同慣例。\n\n【邊界】scripts/ 是你們的轄區，我不動。這是 request 不是指派，你們排序自便；本部門有暫解不急。",
+  "to": "platform_eng"
+}

@@ -1,0 +1,2515 @@
+{
+  "generated_at_tpe": "2026-08-05T19:23:10.862728+08:00",
+  "window": "Asia/Taipei 2026-08-05 00:00 → now",
+  "outage_window_tpe": [
+    "2026-08-05T15:50:00+08:00",
+    "2026-08-05T18:46:00+08:00"
+  ],
+  "total": {
+    "billable": 4641188,
+    "turns": 6154,
+    "effects": {
+      "read_only": 3181,
+      "mutating_command": 1848,
+      "write": 898,
+      "noop_text_only": 227
+    }
+  },
+  "by_provider": {
+    "claude": {
+      "billable": 4641188,
+      "turns": 6154,
+      "effects": {
+        "read_only": 3181,
+        "mutating_command": 1848,
+        "write": 898,
+        "noop_text_only": 227
+      }
+    }
+  },
+  "by_hour": {
+    "00": {
+      "billable": 53265,
+      "turns": 74,
+      "effects": {
+        "read_only": 38,
+        "mutating_command": 18,
+        "write": 11,
+        "noop_text_only": 7
+      }
+    },
+    "01": {
+      "billable": 8584,
+      "turns": 15,
+      "effects": {
+        "noop_text_only": 4,
+        "read_only": 2,
+        "mutating_command": 9
+      }
+    },
+    "04": {
+      "billable": 44566,
+      "turns": 101,
+      "effects": {
+        "read_only": 79,
+        "write": 5,
+        "mutating_command": 11,
+        "noop_text_only": 6
+      }
+    },
+    "05": {
+      "billable": 16454,
+      "turns": 23,
+      "effects": {
+        "mutating_command": 7,
+        "read_only": 14,
+        "noop_text_only": 2
+      }
+    },
+    "06": {
+      "billable": 42443,
+      "turns": 82,
+      "effects": {
+        "read_only": 37,
+        "mutating_command": 26,
+        "write": 16,
+        "noop_text_only": 3
+      }
+    },
+    "08": {
+      "billable": 50427,
+      "turns": 52,
+      "effects": {
+        "read_only": 26,
+        "mutating_command": 17,
+        "write": 7,
+        "noop_text_only": 2
+      }
+    },
+    "09": {
+      "billable": 31754,
+      "turns": 81,
+      "effects": {
+        "read_only": 37,
+        "mutating_command": 37,
+        "noop_text_only": 3,
+        "write": 4
+      }
+    },
+    "10": {
+      "billable": 212617,
+      "turns": 299,
+      "effects": {
+        "read_only": 141,
+        "mutating_command": 99,
+        "write": 44,
+        "noop_text_only": 15
+      }
+    },
+    "11": {
+      "billable": 290381,
+      "turns": 414,
+      "effects": {
+        "read_only": 226,
+        "mutating_command": 134,
+        "write": 37,
+        "noop_text_only": 17
+      }
+    },
+    "12": {
+      "billable": 161604,
+      "turns": 229,
+      "effects": {
+        "read_only": 133,
+        "mutating_command": 65,
+        "noop_text_only": 16,
+        "write": 15
+      }
+    },
+    "13": {
+      "billable": 192884,
+      "turns": 234,
+      "effects": {
+        "read_only": 112,
+        "mutating_command": 73,
+        "noop_text_only": 22,
+        "write": 27
+      }
+    },
+    "14": {
+      "billable": 161721,
+      "turns": 226,
+      "effects": {
+        "read_only": 120,
+        "mutating_command": 64,
+        "write": 36,
+        "noop_text_only": 6
+      }
+    },
+    "15": {
+      "billable": 340265,
+      "turns": 430,
+      "effects": {
+        "mutating_command": 116,
+        "read_only": 236,
+        "write": 62,
+        "noop_text_only": 16
+      }
+    },
+    "16": {
+      "billable": 498377,
+      "turns": 710,
+      "effects": {
+        "mutating_command": 221,
+        "read_only": 413,
+        "write": 59,
+        "noop_text_only": 17
+      }
+    },
+    "17": {
+      "billable": 875795,
+      "turns": 1116,
+      "effects": {
+        "read_only": 499,
+        "write": 233,
+        "mutating_command": 356,
+        "noop_text_only": 28
+      }
+    },
+    "18": {
+      "billable": 1030344,
+      "turns": 1324,
+      "effects": {
+        "read_only": 673,
+        "write": 242,
+        "mutating_command": 366,
+        "noop_text_only": 43
+      }
+    },
+    "19": {
+      "billable": 629707,
+      "turns": 744,
+      "effects": {
+        "read_only": 395,
+        "mutating_command": 229,
+        "noop_text_only": 20,
+        "write": 100
+      }
+    }
+  },
+  "by_agent_class": {
+    "dispatch_worker": {
+      "billable": 248730,
+      "turns": 344,
+      "effects": {
+        "read_only": 173,
+        "mutating_command": 114,
+        "write": 47,
+        "noop_text_only": 10
+      }
+    },
+    "dispatch_worker_subagent": {
+      "billable": 17055,
+      "turns": 117,
+      "effects": {
+        "read_only": 60,
+        "noop_text_only": 7,
+        "mutating_command": 35,
+        "write": 15
+      }
+    },
+    "main_thread": {
+      "billable": 4348522,
+      "turns": 5571,
+      "effects": {
+        "mutating_command": 1673,
+        "read_only": 2860,
+        "write": 836,
+        "noop_text_only": 202
+      }
+    },
+    "main_thread_subagent": {
+      "billable": 26881,
+      "turns": 122,
+      "effects": {
+        "read_only": 88,
+        "noop_text_only": 8,
+        "mutating_command": 26
+      }
+    }
+  },
+  "by_session": {
+    "claude:7cdc5dc3-2f38-4e28-b9ba-f0199042d601": {
+      "billable": 405014,
+      "turns": 487,
+      "effects": {
+        "mutating_command": 199,
+        "noop_text_only": 29,
+        "read_only": 180,
+        "write": 79
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T13:07:20.871000+08:00",
+      "last": "2026-08-05T17:49:23.373000+08:00",
+      "dept_signals": {
+        "manager": 142,
+        "research": 141,
+        "content": 68,
+        "resource_monitor": 30
+      }
+    },
+    "claude:66dfcf3a-8c8e-4a7b-b4a0-cc81ff217492": {
+      "billable": 271385,
+      "turns": 432,
+      "effects": {
+        "read_only": 248,
+        "mutating_command": 75,
+        "write": 100,
+        "noop_text_only": 9
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:51:21.060000+08:00",
+      "last": "2026-08-05T18:54:51.057000+08:00",
+      "dept_signals": {
+        "research": 235,
+        "platform_eng": 184,
+        "content": 93,
+        "manager": 39
+      }
+    },
+    "claude:0946be3c-c40e-4f9e-9360-0d6005af8d14": {
+      "billable": 251659,
+      "turns": 241,
+      "effects": {
+        "mutating_command": 32,
+        "read_only": 139,
+        "write": 63,
+        "noop_text_only": 7
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:51:26.428000+08:00",
+      "last": "2026-08-05T18:44:42.290000+08:00",
+      "dept_signals": {
+        "research": 104,
+        "paper": 101,
+        "content": 36,
+        "manager": 28
+      }
+    },
+    "claude:4df45983-81db-4825-9965-123b205d55d1": {
+      "billable": 243045,
+      "turns": 279,
+      "effects": {
+        "mutating_command": 64,
+        "read_only": 153,
+        "write": 58,
+        "noop_text_only": 4
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:51:28.968000+08:00",
+      "last": "2026-08-05T18:45:46.704000+08:00",
+      "dept_signals": {
+        "research": 178,
+        "content": 40,
+        "manager": 27,
+        "platform_eng": 16
+      }
+    },
+    "claude:e41ed794-ada8-41ab-a55f-9eabb12bcb76": {
+      "billable": 212451,
+      "turns": 360,
+      "effects": {
+        "read_only": 157,
+        "mutating_command": 104,
+        "write": 94,
+        "noop_text_only": 5
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:51:22.165000+08:00",
+      "last": "2026-08-05T18:37:34.415000+08:00",
+      "dept_signals": {
+        "research": 336,
+        "content": 116,
+        "platform_eng": 59,
+        "manager": 16
+      }
+    },
+    "claude:f5153fb1-ad06-418d-a31e-76373199af07": {
+      "billable": 194163,
+      "turns": 235,
+      "effects": {
+        "read_only": 119,
+        "mutating_command": 74,
+        "write": 35,
+        "noop_text_only": 7
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T17:50:23.141000+08:00",
+      "last": "2026-08-05T19:21:34.331000+08:00",
+      "dept_signals": {
+        "research": 114,
+        "manager": 67,
+        "platform_eng": 17,
+        "content": 12
+      }
+    },
+    "claude:fdbcc872-42f5-482c-95c1-e8e373413a2a": {
+      "billable": 179244,
+      "turns": 263,
+      "effects": {
+        "mutating_command": 103,
+        "read_only": 114,
+        "write": 38,
+        "noop_text_only": 8
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:51:20.661000+08:00",
+      "last": "2026-08-05T18:32:58.871000+08:00",
+      "dept_signals": {
+        "governance": 146,
+        "research": 71,
+        "paper": 71,
+        "platform_eng": 54
+      }
+    },
+    "claude:c4ef4804-4fe0-4950-af7c-8f22d3f398ce": {
+      "billable": 141921,
+      "turns": 181,
+      "effects": {
+        "mutating_command": 55,
+        "read_only": 97,
+        "write": 23,
+        "noop_text_only": 6
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T10:26:10.881000+08:00",
+      "last": "2026-08-05T13:15:59.084000+08:00",
+      "dept_signals": {
+        "research": 132,
+        "content": 16,
+        "paper": 8,
+        "manager": 6
+      }
+    },
+    "claude:d36323dc-e7bf-4068-ba35-f85469f00c62": {
+      "billable": 132263,
+      "turns": 140,
+      "effects": {
+        "mutating_command": 41,
+        "read_only": 72,
+        "noop_text_only": 2,
+        "write": 25
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T10:33:12.152000+08:00",
+      "last": "2026-08-05T12:02:04.330000+08:00",
+      "dept_signals": {
+        "research": 41,
+        "paper": 4
+      }
+    },
+    "claude:553594d7-ebcb-4356-8fd7-239d51fcad19": {
+      "billable": 130776,
+      "turns": 183,
+      "effects": {
+        "read_only": 84,
+        "write": 12,
+        "mutating_command": 75,
+        "noop_text_only": 12
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T04:33:56.675000+08:00",
+      "last": "2026-08-05T12:43:09.909000+08:00",
+      "dept_signals": {
+        "research": 77,
+        "content": 13
+      }
+    },
+    "claude:b575276c-b48e-47b2-a6d5-c816ee245fcb": {
+      "billable": 126084,
+      "turns": 188,
+      "effects": {
+        "read_only": 78,
+        "mutating_command": 61,
+        "write": 44,
+        "noop_text_only": 5
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:57:49.340000+08:00",
+      "last": "2026-08-05T18:54:56.144000+08:00",
+      "dept_signals": {
+        "research": 164,
+        "member_success": 90,
+        "platform_eng": 42,
+        "content": 39
+      }
+    },
+    "claude:dd2c8bcc-5dcd-4b94-aabb-1875018afb0a": {
+      "billable": 120553,
+      "turns": 134,
+      "effects": {
+        "read_only": 86,
+        "noop_text_only": 15,
+        "mutating_command": 25,
+        "write": 8
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T11:52:05.181000+08:00",
+      "last": "2026-08-05T13:23:28.905000+08:00",
+      "dept_signals": {
+        "research": 23,
+        "content": 8,
+        "manager": 1
+      }
+    },
+    "claude:95bcff51-1bcf-4a6b-9d8d-09d18d64cf1f": {
+      "billable": 115462,
+      "turns": 137,
+      "effects": {
+        "read_only": 66,
+        "mutating_command": 57,
+        "write": 10,
+        "noop_text_only": 4
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:57:49.169000+08:00",
+      "last": "2026-08-05T18:23:30.725000+08:00",
+      "dept_signals": {
+        "resource_monitor": 71,
+        "research": 35,
+        "platform_eng": 30,
+        "governance": 14
+      }
+    },
+    "claude:0dd8c910-4fa0-4a72-b420-06f669db0a69": {
+      "billable": 109846,
+      "turns": 114,
+      "effects": {
+        "read_only": 60,
+        "mutating_command": 43,
+        "write": 3,
+        "noop_text_only": 8
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:57:51.122000+08:00",
+      "last": "2026-08-05T19:03:12.396000+08:00",
+      "dept_signals": {
+        "manager": 53,
+        "platform_eng": 25,
+        "governance": 21,
+        "content": 18
+      }
+    },
+    "claude:47bce991-2c91-48d5-b252-be85ea48197f": {
+      "billable": 106115,
+      "turns": 173,
+      "effects": {
+        "read_only": 95,
+        "mutating_command": 50,
+        "write": 13,
+        "noop_text_only": 15
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T00:00:10.355000+08:00",
+      "last": "2026-08-05T13:17:10.899000+08:00",
+      "dept_signals": {
+        "research": 154,
+        "content": 3
+      }
+    },
+    "claude:41a5e02c-00a1-4414-9bc8-7b8a2f3c86a4": {
+      "billable": 74712,
+      "turns": 93,
+      "effects": {
+        "read_only": 31,
+        "mutating_command": 26,
+        "write": 35,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T17:03:31.180000+08:00",
+      "last": "2026-08-05T17:26:20.578000+08:00",
+      "dept_signals": {
+        "research": 53,
+        "manager": 10,
+        "content": 7,
+        "governance": 3
+      }
+    },
+    "claude:14da4bbf-639d-41c3-87b9-1acbdbbfd46a": {
+      "billable": 68345,
+      "turns": 70,
+      "effects": {
+        "read_only": 36,
+        "mutating_command": 21,
+        "write": 12,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T14:35:32.457000+08:00",
+      "last": "2026-08-05T15:10:03.430000+08:00",
+      "dept_signals": {
+        "research": 31,
+        "resource_monitor": 16,
+        "content": 13,
+        "manager": 5
+      }
+    },
+    "claude:7e813e78-98dc-455a-8209-60ef8423bb69": {
+      "billable": 68289,
+      "turns": 94,
+      "effects": {
+        "mutating_command": 15,
+        "read_only": 59,
+        "write": 19,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:59:56.296000+08:00",
+      "last": "2026-08-05T19:21:56.684000+08:00",
+      "dept_signals": {
+        "research": 42,
+        "platform_eng": 32,
+        "content": 13,
+        "member_success": 7
+      }
+    },
+    "claude:8de7199c-a879-4142-8305-4f7bdbd99610": {
+      "billable": 67117,
+      "turns": 115,
+      "effects": {
+        "write": 8,
+        "read_only": 46,
+        "mutating_command": 48,
+        "noop_text_only": 13
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T00:07:11.059000+08:00",
+      "last": "2026-08-05T13:33:23.534000+08:00",
+      "dept_signals": {
+        "research": 12,
+        "content": 1
+      }
+    },
+    "claude:0017756f-68a3-42d8-86a9-93e53f3e4f4e": {
+      "billable": 65229,
+      "turns": 60,
+      "effects": {
+        "mutating_command": 9,
+        "read_only": 41,
+        "write": 9,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T15:44:35.861000+08:00",
+      "last": "2026-08-05T16:06:16.520000+08:00",
+      "dept_signals": {
+        "research": 29,
+        "resource_monitor": 23,
+        "platform_eng": 8,
+        "content": 6
+      }
+    },
+    "claude:5c117fd6-a04f-464a-8534-d4da19ae50e1": {
+      "billable": 64824,
+      "turns": 72,
+      "effects": {
+        "mutating_command": 22,
+        "read_only": 36,
+        "write": 14
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:03:06.656000+08:00",
+      "last": "2026-08-05T19:21:38.411000+08:00",
+      "dept_signals": {
+        "paper": 44,
+        "research": 31,
+        "manager": 5,
+        "platform_eng": 3
+      }
+    },
+    "claude:cc471bf7-f609-4d5e-8cfb-07efe97ea4eb": {
+      "billable": 64243,
+      "turns": 68,
+      "effects": {
+        "mutating_command": 27,
+        "read_only": 31,
+        "write": 10
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:58:23.166000+08:00",
+      "last": "2026-08-05T19:20:48.274000+08:00",
+      "dept_signals": {
+        "research": 67,
+        "content": 37,
+        "platform_eng": 17,
+        "member_success": 3
+      }
+    },
+    "claude:a91f469b-23dd-48d9-90d2-838aadfb2e6b": {
+      "billable": 60226,
+      "turns": 66,
+      "effects": {
+        "mutating_command": 27,
+        "read_only": 30,
+        "write": 8,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:00:23.754000+08:00",
+      "last": "2026-08-05T19:21:00.612000+08:00",
+      "dept_signals": {
+        "research": 50,
+        "platform_eng": 9,
+        "content": 7,
+        "manager": 6
+      }
+    },
+    "claude:d2107efc-82a9-4395-a970-701bced91b76": {
+      "billable": 59590,
+      "turns": 100,
+      "effects": {
+        "read_only": 47,
+        "mutating_command": 25,
+        "write": 27,
+        "noop_text_only": 1
+      },
+      "agent_class": "dispatch_worker",
+      "agent_id": "dispatch:dispatch-slot-1-353fc09c",
+      "first": "2026-08-05T10:33:49.771000+08:00",
+      "last": "2026-08-05T10:58:50.729000+08:00",
+      "dept_signals": {
+        "research": 31,
+        "content": 12
+      }
+    },
+    "claude:f706aa93-3097-413b-a597-ff24132c3ca1": {
+      "billable": 53336,
+      "turns": 47,
+      "effects": {
+        "read_only": 23,
+        "mutating_command": 19,
+        "write": 3,
+        "noop_text_only": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:04:16.752000+08:00",
+      "last": "2026-08-05T18:22:16.806000+08:00",
+      "dept_signals": {
+        "manager": 23,
+        "research": 14,
+        "platform_eng": 7,
+        "paper": 7
+      }
+    },
+    "claude:bb5b4d09-06ee-443b-8bb8-469378c8af1e": {
+      "billable": 51399,
+      "turns": 91,
+      "effects": {
+        "mutating_command": 24,
+        "read_only": 46,
+        "write": 20,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:58:29.588000+08:00",
+      "last": "2026-08-05T19:22:00.409000+08:00",
+      "dept_signals": {
+        "member_success": 57,
+        "research": 48,
+        "manager": 12,
+        "platform_eng": 6
+      }
+    },
+    "claude:cc2d1cd2-743c-464c-bf7a-ea1782fe9552": {
+      "billable": 50427,
+      "turns": 52,
+      "effects": {
+        "read_only": 26,
+        "mutating_command": 17,
+        "write": 7,
+        "noop_text_only": 2
+      },
+      "agent_class": "dispatch_worker",
+      "agent_id": "dispatch:dispatch-slot-1-5ab668a6",
+      "first": "2026-08-05T08:08:46.651000+08:00",
+      "last": "2026-08-05T08:22:28.114000+08:00",
+      "dept_signals": {
+        "research": 13,
+        "content": 7,
+        "manager": 1
+      }
+    },
+    "claude:29d04fd2-0a10-4132-9950-dde8a73565e4": {
+      "billable": 49720,
+      "turns": 59,
+      "effects": {
+        "mutating_command": 3,
+        "read_only": 39,
+        "write": 15,
+        "noop_text_only": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T15:44:23.978000+08:00",
+      "last": "2026-08-05T16:08:24.732000+08:00",
+      "dept_signals": {
+        "research": 34,
+        "content": 14,
+        "manager": 1
+      }
+    },
+    "claude:ce1888ce-2371-496c-814b-893a16d417c6": {
+      "billable": 42025,
+      "turns": 70,
+      "effects": {
+        "read_only": 42,
+        "mutating_command": 23,
+        "write": 3,
+        "noop_text_only": 2
+      },
+      "agent_class": "dispatch_worker",
+      "agent_id": "dispatch:dispatch-slot-1-7d690de1",
+      "first": "2026-08-05T11:05:52.638000+08:00",
+      "last": "2026-08-05T11:29:22.484000+08:00",
+      "dept_signals": {
+        "content": 4,
+        "research": 2,
+        "paper": 2
+      }
+    },
+    "claude:961c812d-6800-4fae-a743-7242e2767f10": {
+      "billable": 40794,
+      "turns": 58,
+      "effects": {
+        "mutating_command": 24,
+        "read_only": 27,
+        "noop_text_only": 1,
+        "write": 6
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T15:03:01.673000+08:00",
+      "last": "2026-08-05T15:19:17.305000+08:00",
+      "dept_signals": {
+        "research": 12,
+        "manager": 4,
+        "content": 2,
+        "governance": 1
+      }
+    },
+    "claude:935419ca-1e5c-4104-be89-53862c4717e4": {
+      "billable": 39087,
+      "turns": 70,
+      "effects": {
+        "mutating_command": 28,
+        "read_only": 31,
+        "noop_text_only": 3,
+        "write": 8
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:58:26.126000+08:00",
+      "last": "2026-08-05T19:21:07.064000+08:00",
+      "dept_signals": {
+        "governance": 43,
+        "research": 27,
+        "platform_eng": 22,
+        "manager": 13
+      }
+    },
+    "claude:8a82aa75-3bd5-4307-8f88-8800603d9d7a": {
+      "billable": 38485,
+      "turns": 68,
+      "effects": {
+        "read_only": 52,
+        "mutating_command": 12,
+        "write": 3,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:10:49.970000+08:00",
+      "last": "2026-08-05T18:23:41.380000+08:00",
+      "dept_signals": {
+        "manager": 19,
+        "platform_eng": 10,
+        "research": 9,
+        "governance": 9
+      }
+    },
+    "claude:74a3f2a1-0220-46b0-9b23-b328c1511226": {
+      "billable": 38337,
+      "turns": 35,
+      "effects": {
+        "read_only": 20,
+        "mutating_command": 8,
+        "write": 5,
+        "noop_text_only": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:56:13.696000+08:00",
+      "last": "2026-08-05T19:07:58.039000+08:00",
+      "dept_signals": {
+        "manager": 14,
+        "platform_eng": 11,
+        "research": 10,
+        "member_success": 6
+      }
+    },
+    "claude:3d3bad78-b0f5-40af-bab8-6f5a5f011f4a": {
+      "billable": 37469,
+      "turns": 41,
+      "effects": {
+        "read_only": 30,
+        "mutating_command": 8,
+        "write": 2,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:31:46.904000+08:00",
+      "last": "2026-08-05T18:44:17.801000+08:00",
+      "dept_signals": {
+        "manager": 13,
+        "platform_eng": 9,
+        "research": 5,
+        "member_success": 3
+      }
+    },
+    "claude:ece2484a-cd0d-42b3-a6ab-fa41a09450e6": {
+      "billable": 36308,
+      "turns": 48,
+      "effects": {
+        "read_only": 26,
+        "mutating_command": 16,
+        "write": 5,
+        "noop_text_only": 1
+      },
+      "agent_class": "dispatch_worker",
+      "agent_id": "dispatch:dispatch-slot-1-e13623e7",
+      "first": "2026-08-05T11:39:13.314000+08:00",
+      "last": "2026-08-05T11:49:26.744000+08:00",
+      "dept_signals": {
+        "research": 14,
+        "content": 7
+      }
+    },
+    "claude:4e2a1154-1895-433a-80ce-8362e6a716d2": {
+      "billable": 36149,
+      "turns": 40,
+      "effects": {
+        "mutating_command": 14,
+        "read_only": 22,
+        "write": 2,
+        "noop_text_only": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:55:54.098000+08:00",
+      "last": "2026-08-05T19:07:29.523000+08:00",
+      "dept_signals": {
+        "manager": 17,
+        "platform_eng": 17,
+        "research": 12,
+        "member_success": 10
+      }
+    },
+    "claude:32b02b9d-76fd-44d4-929d-5075b6854a4b": {
+      "billable": 36104,
+      "turns": 41,
+      "effects": {
+        "read_only": 19,
+        "mutating_command": 20,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:11:52.898000+08:00",
+      "last": "2026-08-05T18:23:47.276000+08:00",
+      "dept_signals": {
+        "manager": 16,
+        "platform_eng": 5,
+        "research": 4,
+        "member_success": 4
+      }
+    },
+    "claude:7a689e11-1e7e-4f97-9de5-c78dbaee2e72": {
+      "billable": 36064,
+      "turns": 34,
+      "effects": {
+        "read_only": 19,
+        "mutating_command": 11,
+        "write": 2,
+        "noop_text_only": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:07:50.148000+08:00",
+      "last": "2026-08-05T18:20:39.801000+08:00",
+      "dept_signals": {
+        "manager": 15,
+        "research": 10,
+        "governance": 5,
+        "platform_eng": 5
+      }
+    },
+    "claude:c102bfc2-f74f-4330-ba51-62303f9a91dd": {
+      "billable": 34516,
+      "turns": 42,
+      "effects": {
+        "read_only": 16,
+        "mutating_command": 19,
+        "write": 5,
+        "noop_text_only": 2
+      },
+      "agent_class": "dispatch_worker",
+      "agent_id": "dispatch:dispatch-slot-1-b6a4336d",
+      "first": "2026-08-05T06:08:43.731000+08:00",
+      "last": "2026-08-05T06:29:45.349000+08:00",
+      "dept_signals": {
+        "research": 12,
+        "content": 6,
+        "paper": 1
+      }
+    },
+    "claude:0dd739fa-d346-4827-acbf-786bd1d9e7ac": {
+      "billable": 31973,
+      "turns": 19,
+      "effects": {
+        "noop_text_only": 2,
+        "mutating_command": 3,
+        "read_only": 13,
+        "write": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T15:42:51.180000+08:00",
+      "last": "2026-08-05T15:54:40.815000+08:00",
+      "dept_signals": {
+        "research": 8,
+        "content": 1,
+        "manager": 1
+      }
+    },
+    "claude:de5d936a-43e8-4676-a137-aeb697179050": {
+      "billable": 31675,
+      "turns": 36,
+      "effects": {
+        "mutating_command": 13,
+        "read_only": 21,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:02:28.014000+08:00",
+      "last": "2026-08-05T19:11:58.611000+08:00",
+      "dept_signals": {
+        "manager": 17,
+        "research": 12,
+        "platform_eng": 12,
+        "content": 3
+      }
+    },
+    "claude:e9662215-bcd6-4479-a977-ebc1069d612b": {
+      "billable": 30717,
+      "turns": 39,
+      "effects": {
+        "mutating_command": 6,
+        "read_only": 26,
+        "write": 7
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:38:15.705000+08:00",
+      "last": "2026-08-05T16:49:39.860000+08:00",
+      "dept_signals": {
+        "research": 23,
+        "resource_monitor": 5,
+        "content": 5,
+        "platform_eng": 3
+      }
+    },
+    "claude:5332b031-b519-45b8-8f3e-719ee083f10c": {
+      "billable": 30179,
+      "turns": 43,
+      "effects": {
+        "read_only": 25,
+        "mutating_command": 16,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T15:41:35.395000+08:00",
+      "last": "2026-08-05T15:51:32.102000+08:00",
+      "dept_signals": {
+        "research": 36,
+        "manager": 17,
+        "governance": 11,
+        "platform_eng": 10
+      }
+    },
+    "claude:d0fa5cbf-964e-4d35-addd-88be3b90dd73": {
+      "billable": 29174,
+      "turns": 23,
+      "effects": {
+        "read_only": 13,
+        "write": 1,
+        "mutating_command": 8,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T18:02:08.897000+08:00",
+      "last": "2026-08-05T18:10:45.247000+08:00",
+      "dept_signals": {
+        "manager": 13,
+        "governance": 6,
+        "platform_eng": 6,
+        "research": 5
+      }
+    },
+    "claude:eddebb09-8425-4617-8248-40820d00e4ce": {
+      "billable": 28731,
+      "turns": 33,
+      "effects": {
+        "mutating_command": 22,
+        "read_only": 5,
+        "write": 4,
+        "noop_text_only": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:38:09.737000+08:00",
+      "last": "2026-08-05T16:47:40.643000+08:00",
+      "dept_signals": {
+        "governance": 15,
+        "research": 6,
+        "platform_eng": 6,
+        "manager": 6
+      }
+    },
+    "claude:b18127d0-6a4b-463e-9dfe-36286e19181e": {
+      "billable": 27852,
+      "turns": 71,
+      "effects": {
+        "mutating_command": 22,
+        "read_only": 36,
+        "write": 13
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:38:04.662000+08:00",
+      "last": "2026-08-05T16:49:47.729000+08:00",
+      "dept_signals": {
+        "research": 25,
+        "content": 7
+      }
+    },
+    "claude:1749e0fd-497c-4e32-906f-edd0ec713b3d": {
+      "billable": 27779,
+      "turns": 36,
+      "effects": {
+        "read_only": 25,
+        "mutating_command": 10,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:01:40.418000+08:00",
+      "last": "2026-08-05T19:10:48.251000+08:00",
+      "dept_signals": {
+        "manager": 19,
+        "research": 6,
+        "platform_eng": 4,
+        "member_success": 4
+      }
+    },
+    "claude:8fcc3160-7565-412d-a321-b6309d420511": {
+      "billable": 26969,
+      "turns": 24,
+      "effects": {
+        "read_only": 14,
+        "mutating_command": 8,
+        "write": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:14:14.595000+08:00",
+      "last": "2026-08-05T19:21:37.930000+08:00",
+      "dept_signals": {
+        "manager": 14,
+        "research": 9,
+        "platform_eng": 3,
+        "content": 1
+      }
+    },
+    "claude:682913ff-0379-4e88-9d2a-b00b46b601b4": {
+      "billable": 26681,
+      "turns": 28,
+      "effects": {
+        "read_only": 10,
+        "mutating_command": 16,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:38:03.827000+08:00",
+      "last": "2026-08-05T16:47:41.638000+08:00",
+      "dept_signals": {
+        "manager": 17,
+        "platform_eng": 8,
+        "research": 6,
+        "governance": 4
+      }
+    },
+    "claude:e1c70ba9-93ab-4a16-9f73-d9e675b9376d": {
+      "billable": 26485,
+      "turns": 25,
+      "effects": {
+        "read_only": 13,
+        "mutating_command": 10,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:06:36.002000+08:00",
+      "last": "2026-08-05T19:14:46.979000+08:00",
+      "dept_signals": {
+        "research": 21,
+        "manager": 18,
+        "paper": 6,
+        "platform_eng": 4
+      }
+    },
+    "claude:1540d88c-bb40-44e0-9aae-441c00a6eecc": {
+      "billable": 26166,
+      "turns": 27,
+      "effects": {
+        "mutating_command": 2,
+        "read_only": 25
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:42:05.628000+08:00",
+      "last": "2026-08-05T16:48:47.433000+08:00",
+      "dept_signals": {
+        "research": 15,
+        "content": 1
+      }
+    },
+    "claude:e730c681-61df-445c-acfa-c41600174847": {
+      "billable": 25864,
+      "turns": 32,
+      "effects": {
+        "read_only": 16,
+        "mutating_command": 14,
+        "noop_text_only": 2
+      },
+      "agent_class": "dispatch_worker",
+      "agent_id": "dispatch:dispatch-slot-1-48fd136e",
+      "first": "2026-08-05T09:08:17.798000+08:00",
+      "last": "2026-08-05T09:30:37.538000+08:00",
+      "dept_signals": {
+        "content": 6,
+        "research": 3
+      }
+    },
+    "claude:d055e3d9-3409-448b-b7d6-0c44fa52fae2": {
+      "billable": 24699,
+      "turns": 24,
+      "effects": {
+        "read_only": 12,
+        "mutating_command": 9,
+        "write": 3
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:14:01.643000+08:00",
+      "last": "2026-08-05T19:21:57.694000+08:00",
+      "dept_signals": {
+        "manager": 11,
+        "platform_eng": 8,
+        "research": 8,
+        "governance": 4
+      }
+    },
+    "claude:981e0abe-af6f-4db5-b2df-7f56f071b8b7": {
+      "billable": 22979,
+      "turns": 20,
+      "effects": {
+        "mutating_command": 4,
+        "read_only": 12,
+        "write": 3,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:24:18.027000+08:00",
+      "last": "2026-08-05T16:30:41.650000+08:00",
+      "dept_signals": {
+        "research": 6,
+        "content": 4,
+        "manager": 3,
+        "governance": 2
+      }
+    },
+    "claude:85b6107c-e68d-439e-b7db-d497843c5934": {
+      "billable": 22380,
+      "turns": 21,
+      "effects": {
+        "mutating_command": 7,
+        "read_only": 12,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:14:50.349000+08:00",
+      "last": "2026-08-05T19:21:35.614000+08:00",
+      "dept_signals": {
+        "manager": 10,
+        "platform_eng": 6,
+        "research": 5,
+        "governance": 4
+      }
+    },
+    "claude:a1471e23-d10e-4ae1-8afb-02f3a20179bc": {
+      "billable": 22345,
+      "turns": 32,
+      "effects": {
+        "read_only": 26,
+        "mutating_command": 6
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:15:34.378000+08:00",
+      "last": "2026-08-05T19:21:58.682000+08:00",
+      "dept_signals": {
+        "manager": 11,
+        "research": 10,
+        "platform_eng": 5,
+        "resource_monitor": 3
+      }
+    },
+    "claude:63424833-94b5-48c7-9fba-074c99a3417f": {
+      "billable": 21600,
+      "turns": 25,
+      "effects": {
+        "mutating_command": 10,
+        "read_only": 13,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:39:04.568000+08:00",
+      "last": "2026-08-05T16:48:16.757000+08:00",
+      "dept_signals": {
+        "paper": 18,
+        "research": 6,
+        "manager": 3,
+        "platform_eng": 1
+      }
+    },
+    "claude:a89bc1c6-8d71-4fbe-8f04-42e1b7377eb6": {
+      "billable": 20107,
+      "turns": 32,
+      "effects": {
+        "read_only": 23,
+        "mutating_command": 8,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T14:05:09.759000+08:00",
+      "last": "2026-08-05T14:10:23.517000+08:00",
+      "dept_signals": {
+        "research": 10,
+        "manager": 4,
+        "content": 1
+      }
+    },
+    "claude:49c62e26-2b6b-44d9-8d54-1915e7293c2f": {
+      "billable": 18970,
+      "turns": 41,
+      "effects": {
+        "read_only": 32,
+        "mutating_command": 5,
+        "noop_text_only": 3,
+        "write": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T13:45:48.123000+08:00",
+      "last": "2026-08-05T13:54:24.885000+08:00",
+      "dept_signals": {
+        "content": 1
+      }
+    },
+    "claude:44ea1f35-65b4-4835-be9b-3af989c2fc32": {
+      "billable": 17532,
+      "turns": 43,
+      "effects": {
+        "read_only": 28,
+        "mutating_command": 10,
+        "write": 3,
+        "noop_text_only": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T15:44:58.827000+08:00",
+      "last": "2026-08-05T15:51:39.748000+08:00",
+      "dept_signals": {
+        "research": 12,
+        "content": 11,
+        "manager": 2
+      }
+    },
+    "claude:3979fbbe-3d8f-42fd-9306-7762af9f5c83": {
+      "billable": 15982,
+      "turns": 21,
+      "effects": {
+        "read_only": 14,
+        "mutating_command": 4,
+        "write": 1,
+        "noop_text_only": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:15:09.435000+08:00",
+      "last": "2026-08-05T19:19:46.808000+08:00",
+      "dept_signals": {
+        "manager": 10,
+        "platform_eng": 6,
+        "research": 4,
+        "content": 2
+      }
+    },
+    "claude:153cb5a9-d3fa-43d8-82ec-50ec694a0d66": {
+      "billable": 14585,
+      "turns": 21,
+      "effects": {
+        "mutating_command": 8,
+        "read_only": 11,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:38:12.752000+08:00",
+      "last": "2026-08-05T16:49:56.725000+08:00",
+      "dept_signals": {
+        "research": 6,
+        "member_success": 4,
+        "content": 1
+      }
+    },
+    "claude:c0014d76-9e18-4bb4-932b-9d5d2bd3a8c3": {
+      "billable": 13874,
+      "turns": 6,
+      "effects": {
+        "mutating_command": 2,
+        "read_only": 3,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T10:29:16.538000+08:00",
+      "last": "2026-08-05T10:31:04.946000+08:00",
+      "dept_signals": {
+        "research": 3
+      }
+    },
+    "claude:51f25fae-2b27-4699-ab86-8b6ef2db7858": {
+      "billable": 13375,
+      "turns": 43,
+      "effects": {
+        "mutating_command": 16,
+        "read_only": 27
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:45:03.574000+08:00",
+      "last": "2026-08-05T16:50:04.570000+08:00",
+      "dept_signals": {
+        "resource_monitor": 7,
+        "research": 7,
+        "manager": 3,
+        "governance": 2
+      }
+    },
+    "claude:54b17307-ff8a-4a72-a2c0-6bb50574c4ac": {
+      "billable": 10433,
+      "turns": 16,
+      "effects": {
+        "noop_text_only": 3,
+        "mutating_command": 5,
+        "read_only": 6,
+        "write": 2
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T15:41:41.714000+08:00",
+      "last": "2026-08-05T15:52:15.381000+08:00",
+      "dept_signals": {
+        "research": 7,
+        "governance": 5,
+        "content": 2,
+        "manager": 1
+      }
+    },
+    "claude:553594d7-ebcb-4356-8fd7-239d51fcad19/agent-a8267561d45a19a74": {
+      "billable": 9193,
+      "turns": 30,
+      "effects": {
+        "read_only": 29,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T04:57:31.661000+08:00",
+      "last": "2026-08-05T05:04:43.089000+08:00",
+      "dept_signals": {
+        "research": 29,
+        "content": 12
+      }
+    },
+    "claude:c102bfc2-f74f-4330-ba51-62303f9a91dd/agent-a3e7dfedab94fd95e": {
+      "billable": 7927,
+      "turns": 40,
+      "effects": {
+        "read_only": 21,
+        "mutating_command": 7,
+        "write": 11,
+        "noop_text_only": 1
+      },
+      "agent_class": "dispatch_worker_subagent",
+      "agent_id": "dispatch:dispatch-slot-1-b6a4336d/subagent",
+      "first": "2026-08-05T06:12:28.263000+08:00",
+      "last": "2026-08-05T06:22:07.105000+08:00",
+      "dept_signals": {
+        "research": 20,
+        "content": 4,
+        "paper": 3,
+        "manager": 2
+      }
+    },
+    "claude:e81e324f-9f31-4b62-8d74-b81f8bb5ce11": {
+      "billable": 7823,
+      "turns": 13,
+      "effects": {
+        "read_only": 8,
+        "mutating_command": 4,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T14:14:23.779000+08:00",
+      "last": "2026-08-05T14:16:13.197000+08:00",
+      "dept_signals": {
+        "manager": 2
+      }
+    },
+    "claude:553594d7-ebcb-4356-8fd7-239d51fcad19/agent-a1b5ade11825de25e": {
+      "billable": 7811,
+      "turns": 33,
+      "effects": {
+        "read_only": 32,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T04:46:44.075000+08:00",
+      "last": "2026-08-05T04:54:18.475000+08:00",
+      "dept_signals": {
+        "research": 32,
+        "content": 10
+      }
+    },
+    "claude:3c8bb1f1-5385-40a9-936c-203e829f5463": {
+      "billable": 7282,
+      "turns": 12,
+      "effects": {
+        "mutating_command": 5,
+        "read_only": 6,
+        "write": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:19:20.349000+08:00",
+      "last": "2026-08-05T19:21:37.973000+08:00",
+      "dept_signals": {
+        "research": 10,
+        "resource_monitor": 5,
+        "manager": 1,
+        "governance": 1
+      }
+    },
+    "claude:7cdc5dc3-2f38-4e28-b9ba-f0199042d601/agent-abe4fc31209b8a1ac": {
+      "billable": 5983,
+      "turns": 17,
+      "effects": {
+        "mutating_command": 12,
+        "read_only": 4,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T13:07:51.624000+08:00",
+      "last": "2026-08-05T13:24:43.876000+08:00",
+      "dept_signals": {
+        "research": 6
+      }
+    },
+    "claude:e730c681-61df-445c-acfa-c41600174847/agent-ac6d8365c22983378": {
+      "billable": 5890,
+      "turns": 49,
+      "effects": {
+        "read_only": 21,
+        "mutating_command": 23,
+        "write": 4,
+        "noop_text_only": 1
+      },
+      "agent_class": "dispatch_worker_subagent",
+      "agent_id": "dispatch:dispatch-slot-1-48fd136e/subagent",
+      "first": "2026-08-05T09:13:42.266000+08:00",
+      "last": "2026-08-05T09:27:41.564000+08:00",
+      "dept_signals": {
+        "content": 15,
+        "research": 6
+      }
+    },
+    "claude:7778fa06-b42f-4e59-a427-f75f9e6041c3": {
+      "billable": 5692,
+      "turns": 7,
+      "effects": {
+        "read_only": 4,
+        "mutating_command": 3
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:12:26.436000+08:00",
+      "last": "2026-08-05T16:13:27.477000+08:00",
+      "dept_signals": {
+        "manager": 3,
+        "content": 2,
+        "research": 2,
+        "governance": 1
+      }
+    },
+    "claude:2e98c9fc-8cba-4bd5-b076-db591d848848": {
+      "billable": 4757,
+      "turns": 4,
+      "effects": {
+        "read_only": 2,
+        "mutating_command": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T19:06:02.448000+08:00",
+      "last": "2026-08-05T19:07:08.158000+08:00",
+      "dept_signals": {
+        "manager": 1
+      }
+    },
+    "claude:8e9b9628-e1dd-4d89-9f96-d6fcc436d056": {
+      "billable": 4487,
+      "turns": 9,
+      "effects": {
+        "mutating_command": 5,
+        "read_only": 4
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T13:24:58.033000+08:00",
+      "last": "2026-08-05T13:26:02.230000+08:00",
+      "dept_signals": {
+        "research": 3,
+        "paper": 2
+      }
+    },
+    "claude:c9ce7140-a15a-432e-a336-597e0f0a758d": {
+      "billable": 4190,
+      "turns": 7,
+      "effects": {
+        "read_only": 5,
+        "mutating_command": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T15:59:55.108000+08:00",
+      "last": "2026-08-05T16:00:41.227000+08:00",
+      "dept_signals": {
+        "research": 6,
+        "manager": 1,
+        "resource_monitor": 1
+      }
+    },
+    "claude:d2107efc-82a9-4395-a970-701bced91b76/agent-ac2542a5cab1c18fb": {
+      "billable": 3190,
+      "turns": 18,
+      "effects": {
+        "read_only": 13,
+        "noop_text_only": 4,
+        "mutating_command": 1
+      },
+      "agent_class": "dispatch_worker_subagent",
+      "agent_id": "dispatch:dispatch-slot-1-353fc09c/subagent",
+      "first": "2026-08-05T10:40:16.258000+08:00",
+      "last": "2026-08-05T10:55:20.639000+08:00",
+      "dept_signals": {
+        "research": 14
+      }
+    },
+    "claude:553594d7-ebcb-4356-8fd7-239d51fcad19/agent-a4b563c0fb50655e9": {
+      "billable": 2426,
+      "turns": 12,
+      "effects": {
+        "read_only": 11,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T11:32:16.575000+08:00",
+      "last": "2026-08-05T11:38:28.509000+08:00",
+      "dept_signals": {
+        "research": 11,
+        "content": 1
+      }
+    },
+    "claude:13bc9b23-1a79-47e3-bcdb-2c1e2d059205": {
+      "billable": 1139,
+      "turns": 1,
+      "effects": {
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread",
+      "agent_id": "main_thread",
+      "first": "2026-08-05T16:13:08.443000+08:00",
+      "last": "2026-08-05T16:13:08.443000+08:00",
+      "dept_signals": {}
+    },
+    "claude:7cdc5dc3-2f38-4e28-b9ba-f0199042d601/agent-a25d2c5b4a0c70bc2": {
+      "billable": 768,
+      "turns": 11,
+      "effects": {
+        "mutating_command": 7,
+        "read_only": 3,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T13:08:08.260000+08:00",
+      "last": "2026-08-05T13:15:15.916000+08:00",
+      "dept_signals": {
+        "research": 5,
+        "paper": 1
+      }
+    },
+    "claude:7cdc5dc3-2f38-4e28-b9ba-f0199042d601/agent-acd4c5c6601e4cc7a": {
+      "billable": 480,
+      "turns": 4,
+      "effects": {
+        "read_only": 3,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T16:43:51.511000+08:00",
+      "last": "2026-08-05T16:44:32.114000+08:00",
+      "dept_signals": {
+        "research": 1
+      }
+    },
+    "claude:7cdc5dc3-2f38-4e28-b9ba-f0199042d601/agent-a3d9740d95f96312e": {
+      "billable": 182,
+      "turns": 7,
+      "effects": {
+        "mutating_command": 4,
+        "read_only": 2,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T13:08:26.159000+08:00",
+      "last": "2026-08-05T13:12:04.242000+08:00",
+      "dept_signals": {
+        "research": 3,
+        "content": 1
+      }
+    },
+    "claude:d2107efc-82a9-4395-a970-701bced91b76/agent-ac90fefce0ec7a7f2": {
+      "billable": 48,
+      "turns": 10,
+      "effects": {
+        "read_only": 5,
+        "mutating_command": 4,
+        "noop_text_only": 1
+      },
+      "agent_class": "dispatch_worker_subagent",
+      "agent_id": "dispatch:dispatch-slot-1-353fc09c/subagent",
+      "first": "2026-08-05T10:40:02.048000+08:00",
+      "last": "2026-08-05T10:43:17.410000+08:00",
+      "dept_signals": {
+        "research": 9
+      }
+    },
+    "claude:7cdc5dc3-2f38-4e28-b9ba-f0199042d601/agent-af39f389c3ed17e96": {
+      "billable": 15,
+      "turns": 3,
+      "effects": {
+        "read_only": 1,
+        "mutating_command": 1,
+        "noop_text_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T13:42:27.157000+08:00",
+      "last": "2026-08-05T13:44:34.185000+08:00",
+      "dept_signals": {
+        "research": 2,
+        "paper": 1
+      }
+    },
+    "claude:7778fa06-b42f-4e59-a427-f75f9e6041c3/agent-a851d48c02727ff42": {
+      "billable": 9,
+      "turns": 2,
+      "effects": {
+        "mutating_command": 2
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T16:13:54.513000+08:00",
+      "last": "2026-08-05T16:14:25.072000+08:00",
+      "dept_signals": {
+        "research": 2,
+        "manager": 1,
+        "governance": 1
+      }
+    },
+    "claude:63424833-94b5-48c7-9fba-074c99a3417f/agent-aprg-frl-gate-bec599c66addda9e": {
+      "billable": 8,
+      "turns": 1,
+      "effects": {
+        "read_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T16:50:00.314000+08:00",
+      "last": "2026-08-05T16:50:00.314000+08:00",
+      "dept_signals": {
+        "paper": 1,
+        "research": 1
+      }
+    },
+    "claude:63424833-94b5-48c7-9fba-074c99a3417f/agent-aprg-citation-verify-adbe8580d0e623e2": {
+      "billable": 3,
+      "turns": 1,
+      "effects": {
+        "read_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T16:49:39.570000+08:00",
+      "last": "2026-08-05T16:49:39.570000+08:00",
+      "dept_signals": {
+        "paper": 1,
+        "research": 1
+      }
+    },
+    "claude:63424833-94b5-48c7-9fba-074c99a3417f/agent-aprg-latex-review-fc59a9c660c26325": {
+      "billable": 3,
+      "turns": 1,
+      "effects": {
+        "read_only": 1
+      },
+      "agent_class": "main_thread_subagent",
+      "agent_id": "main_thread/subagent",
+      "first": "2026-08-05T16:49:18.379000+08:00",
+      "last": "2026-08-05T16:49:18.379000+08:00",
+      "dept_signals": {
+        "paper": 1,
+        "research": 1
+      }
+    }
+  },
+  "outage_by_session": {
+    "claude:66dfcf3a-8c8e-4a7b-b4a0-cc81ff217492": {
+      "billable": 255854,
+      "turns": 410,
+      "effects": {
+        "read_only": 238,
+        "mutating_command": 72,
+        "write": 92,
+        "noop_text_only": 8
+      },
+      "dept_signals": {
+        "research": 235,
+        "platform_eng": 184,
+        "content": 93,
+        "manager": 39
+      }
+    },
+    "claude:0946be3c-c40e-4f9e-9360-0d6005af8d14": {
+      "billable": 251659,
+      "turns": 241,
+      "effects": {
+        "mutating_command": 32,
+        "read_only": 139,
+        "write": 63,
+        "noop_text_only": 7
+      },
+      "dept_signals": {
+        "research": 104,
+        "paper": 101,
+        "content": 36,
+        "manager": 28
+      }
+    },
+    "claude:4df45983-81db-4825-9965-123b205d55d1": {
+      "billable": 243045,
+      "turns": 279,
+      "effects": {
+        "mutating_command": 64,
+        "read_only": 153,
+        "write": 58,
+        "noop_text_only": 4
+      },
+      "dept_signals": {
+        "research": 178,
+        "content": 40,
+        "manager": 27,
+        "platform_eng": 16
+      }
+    },
+    "claude:e41ed794-ada8-41ab-a55f-9eabb12bcb76": {
+      "billable": 212451,
+      "turns": 360,
+      "effects": {
+        "read_only": 157,
+        "mutating_command": 104,
+        "write": 94,
+        "noop_text_only": 5
+      },
+      "dept_signals": {
+        "research": 336,
+        "content": 116,
+        "platform_eng": 59,
+        "manager": 16
+      }
+    },
+    "claude:fdbcc872-42f5-482c-95c1-e8e373413a2a": {
+      "billable": 179244,
+      "turns": 263,
+      "effects": {
+        "mutating_command": 103,
+        "read_only": 114,
+        "write": 38,
+        "noop_text_only": 8
+      },
+      "dept_signals": {
+        "governance": 146,
+        "research": 71,
+        "paper": 71,
+        "platform_eng": 54
+      }
+    },
+    "claude:7cdc5dc3-2f38-4e28-b9ba-f0199042d601": {
+      "billable": 164437,
+      "turns": 191,
+      "effects": {
+        "mutating_command": 111,
+        "read_only": 54,
+        "write": 10,
+        "noop_text_only": 16
+      },
+      "dept_signals": {
+        "manager": 142,
+        "research": 141,
+        "content": 68,
+        "resource_monitor": 30
+      }
+    },
+    "claude:f5153fb1-ad06-418d-a31e-76373199af07": {
+      "billable": 132225,
+      "turns": 156,
+      "effects": {
+        "read_only": 84,
+        "mutating_command": 47,
+        "write": 22,
+        "noop_text_only": 3
+      },
+      "dept_signals": {
+        "research": 114,
+        "manager": 67,
+        "platform_eng": 17,
+        "content": 12
+      }
+    },
+    "claude:b575276c-b48e-47b2-a6d5-c816ee245fcb": {
+      "billable": 120372,
+      "turns": 180,
+      "effects": {
+        "read_only": 76,
+        "mutating_command": 59,
+        "write": 41,
+        "noop_text_only": 4
+      },
+      "dept_signals": {
+        "research": 164,
+        "member_success": 90,
+        "platform_eng": 42,
+        "content": 39
+      }
+    },
+    "claude:95bcff51-1bcf-4a6b-9d8d-09d18d64cf1f": {
+      "billable": 115462,
+      "turns": 137,
+      "effects": {
+        "read_only": 66,
+        "mutating_command": 57,
+        "write": 10,
+        "noop_text_only": 4
+      },
+      "dept_signals": {
+        "resource_monitor": 71,
+        "research": 35,
+        "platform_eng": 30,
+        "governance": 14
+      }
+    },
+    "claude:0dd8c910-4fa0-4a72-b420-06f669db0a69": {
+      "billable": 92286,
+      "turns": 90,
+      "effects": {
+        "read_only": 48,
+        "mutating_command": 34,
+        "write": 2,
+        "noop_text_only": 6
+      },
+      "dept_signals": {
+        "manager": 53,
+        "platform_eng": 25,
+        "governance": 21,
+        "content": 18
+      }
+    },
+    "claude:41a5e02c-00a1-4414-9bc8-7b8a2f3c86a4": {
+      "billable": 74712,
+      "turns": 93,
+      "effects": {
+        "read_only": 31,
+        "mutating_command": 26,
+        "write": 35,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 53,
+        "manager": 10,
+        "content": 7,
+        "governance": 3
+      }
+    },
+    "claude:0017756f-68a3-42d8-86a9-93e53f3e4f4e": {
+      "billable": 54824,
+      "turns": 44,
+      "effects": {
+        "write": 8,
+        "read_only": 28,
+        "mutating_command": 7,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 29,
+        "resource_monitor": 23,
+        "platform_eng": 8,
+        "content": 6
+      }
+    },
+    "claude:f706aa93-3097-413b-a597-ff24132c3ca1": {
+      "billable": 53336,
+      "turns": 47,
+      "effects": {
+        "read_only": 23,
+        "mutating_command": 19,
+        "write": 3,
+        "noop_text_only": 2
+      },
+      "dept_signals": {
+        "manager": 23,
+        "research": 14,
+        "platform_eng": 7,
+        "paper": 7
+      }
+    },
+    "claude:8a82aa75-3bd5-4307-8f88-8800603d9d7a": {
+      "billable": 38485,
+      "turns": 68,
+      "effects": {
+        "read_only": 52,
+        "mutating_command": 12,
+        "write": 3,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "manager": 19,
+        "platform_eng": 10,
+        "research": 9,
+        "governance": 9
+      }
+    },
+    "claude:3d3bad78-b0f5-40af-bab8-6f5a5f011f4a": {
+      "billable": 37469,
+      "turns": 41,
+      "effects": {
+        "read_only": 30,
+        "mutating_command": 8,
+        "write": 2,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "manager": 13,
+        "platform_eng": 9,
+        "research": 5,
+        "member_success": 3
+      }
+    },
+    "claude:32b02b9d-76fd-44d4-929d-5075b6854a4b": {
+      "billable": 36104,
+      "turns": 41,
+      "effects": {
+        "read_only": 19,
+        "mutating_command": 20,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "manager": 16,
+        "platform_eng": 5,
+        "research": 4,
+        "member_success": 4
+      }
+    },
+    "claude:7a689e11-1e7e-4f97-9de5-c78dbaee2e72": {
+      "billable": 36064,
+      "turns": 34,
+      "effects": {
+        "read_only": 19,
+        "mutating_command": 11,
+        "write": 2,
+        "noop_text_only": 2
+      },
+      "dept_signals": {
+        "manager": 15,
+        "research": 10,
+        "governance": 5,
+        "platform_eng": 5
+      }
+    },
+    "claude:29d04fd2-0a10-4132-9950-dde8a73565e4": {
+      "billable": 34377,
+      "turns": 31,
+      "effects": {
+        "write": 11,
+        "read_only": 18,
+        "noop_text_only": 2
+      },
+      "dept_signals": {
+        "research": 34,
+        "content": 14,
+        "manager": 1
+      }
+    },
+    "claude:e9662215-bcd6-4479-a977-ebc1069d612b": {
+      "billable": 30717,
+      "turns": 39,
+      "effects": {
+        "mutating_command": 6,
+        "read_only": 26,
+        "write": 7
+      },
+      "dept_signals": {
+        "research": 23,
+        "resource_monitor": 5,
+        "content": 5,
+        "platform_eng": 3
+      }
+    },
+    "claude:d0fa5cbf-964e-4d35-addd-88be3b90dd73": {
+      "billable": 29174,
+      "turns": 23,
+      "effects": {
+        "read_only": 13,
+        "write": 1,
+        "mutating_command": 8,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "manager": 13,
+        "governance": 6,
+        "platform_eng": 6,
+        "research": 5
+      }
+    },
+    "claude:eddebb09-8425-4617-8248-40820d00e4ce": {
+      "billable": 28731,
+      "turns": 33,
+      "effects": {
+        "mutating_command": 22,
+        "read_only": 5,
+        "write": 4,
+        "noop_text_only": 2
+      },
+      "dept_signals": {
+        "governance": 15,
+        "research": 6,
+        "platform_eng": 6,
+        "manager": 6
+      }
+    },
+    "claude:b18127d0-6a4b-463e-9dfe-36286e19181e": {
+      "billable": 27852,
+      "turns": 71,
+      "effects": {
+        "mutating_command": 22,
+        "read_only": 36,
+        "write": 13
+      },
+      "dept_signals": {
+        "research": 25,
+        "content": 7
+      }
+    },
+    "claude:682913ff-0379-4e88-9d2a-b00b46b601b4": {
+      "billable": 26681,
+      "turns": 28,
+      "effects": {
+        "read_only": 10,
+        "mutating_command": 16,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "manager": 17,
+        "platform_eng": 8,
+        "research": 6,
+        "governance": 4
+      }
+    },
+    "claude:1540d88c-bb40-44e0-9aae-441c00a6eecc": {
+      "billable": 26166,
+      "turns": 27,
+      "effects": {
+        "mutating_command": 2,
+        "read_only": 25
+      },
+      "dept_signals": {
+        "research": 15,
+        "content": 1
+      }
+    },
+    "claude:981e0abe-af6f-4db5-b2df-7f56f071b8b7": {
+      "billable": 22979,
+      "turns": 20,
+      "effects": {
+        "mutating_command": 4,
+        "read_only": 12,
+        "write": 3,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 6,
+        "content": 4,
+        "manager": 3,
+        "governance": 2
+      }
+    },
+    "claude:63424833-94b5-48c7-9fba-074c99a3417f": {
+      "billable": 21600,
+      "turns": 25,
+      "effects": {
+        "mutating_command": 10,
+        "read_only": 13,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "paper": 18,
+        "research": 6,
+        "manager": 3,
+        "platform_eng": 1
+      }
+    },
+    "claude:0dd739fa-d346-4827-acbf-786bd1d9e7ac": {
+      "billable": 17571,
+      "turns": 9,
+      "effects": {
+        "read_only": 7,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 8,
+        "content": 1,
+        "manager": 1
+      }
+    },
+    "claude:153cb5a9-d3fa-43d8-82ec-50ec694a0d66": {
+      "billable": 14585,
+      "turns": 21,
+      "effects": {
+        "mutating_command": 8,
+        "read_only": 11,
+        "write": 1,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 6,
+        "member_success": 4,
+        "content": 1
+      }
+    },
+    "claude:51f25fae-2b27-4699-ab86-8b6ef2db7858": {
+      "billable": 13375,
+      "turns": 43,
+      "effects": {
+        "mutating_command": 16,
+        "read_only": 27
+      },
+      "dept_signals": {
+        "resource_monitor": 7,
+        "research": 7,
+        "manager": 3,
+        "governance": 2
+      }
+    },
+    "claude:7778fa06-b42f-4e59-a427-f75f9e6041c3": {
+      "billable": 5692,
+      "turns": 7,
+      "effects": {
+        "read_only": 4,
+        "mutating_command": 3
+      },
+      "dept_signals": {
+        "manager": 3,
+        "content": 2,
+        "research": 2,
+        "governance": 1
+      }
+    },
+    "claude:5332b031-b519-45b8-8f3e-719ee083f10c": {
+      "billable": 4800,
+      "turns": 7,
+      "effects": {
+        "read_only": 4,
+        "mutating_command": 2,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 36,
+        "manager": 17,
+        "governance": 11,
+        "platform_eng": 10
+      }
+    },
+    "claude:54b17307-ff8a-4a72-a2c0-6bb50574c4ac": {
+      "billable": 4330,
+      "turns": 4,
+      "effects": {
+        "write": 1,
+        "mutating_command": 2,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 7,
+        "governance": 5,
+        "content": 2,
+        "manager": 1
+      }
+    },
+    "claude:c9ce7140-a15a-432e-a336-597e0f0a758d": {
+      "billable": 4190,
+      "turns": 7,
+      "effects": {
+        "read_only": 5,
+        "mutating_command": 1,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 6,
+        "manager": 1,
+        "resource_monitor": 1
+      }
+    },
+    "claude:44ea1f35-65b4-4835-be9b-3af989c2fc32": {
+      "billable": 4040,
+      "turns": 13,
+      "effects": {
+        "read_only": 7,
+        "mutating_command": 5,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 12,
+        "content": 11,
+        "manager": 2
+      }
+    },
+    "claude:13bc9b23-1a79-47e3-bcdb-2c1e2d059205": {
+      "billable": 1139,
+      "turns": 1,
+      "effects": {
+        "noop_text_only": 1
+      },
+      "dept_signals": {}
+    },
+    "claude:7cdc5dc3-2f38-4e28-b9ba-f0199042d601/agent-acd4c5c6601e4cc7a": {
+      "billable": 480,
+      "turns": 4,
+      "effects": {
+        "read_only": 3,
+        "noop_text_only": 1
+      },
+      "dept_signals": {
+        "research": 1
+      }
+    },
+    "claude:7778fa06-b42f-4e59-a427-f75f9e6041c3/agent-a851d48c02727ff42": {
+      "billable": 9,
+      "turns": 2,
+      "effects": {
+        "mutating_command": 2
+      },
+      "dept_signals": {
+        "research": 2,
+        "manager": 1,
+        "governance": 1
+      }
+    },
+    "claude:63424833-94b5-48c7-9fba-074c99a3417f/agent-aprg-frl-gate-bec599c66addda9e": {
+      "billable": 8,
+      "turns": 1,
+      "effects": {
+        "read_only": 1
+      },
+      "dept_signals": {
+        "paper": 1,
+        "research": 1
+      }
+    },
+    "claude:63424833-94b5-48c7-9fba-074c99a3417f/agent-aprg-citation-verify-adbe8580d0e623e2": {
+      "billable": 3,
+      "turns": 1,
+      "effects": {
+        "read_only": 1
+      },
+      "dept_signals": {
+        "paper": 1,
+        "research": 1
+      }
+    },
+    "claude:63424833-94b5-48c7-9fba-074c99a3417f/agent-aprg-latex-review-fc59a9c660c26325": {
+      "billable": 3,
+      "turns": 1,
+      "effects": {
+        "read_only": 1
+      },
+      "dept_signals": {
+        "paper": 1,
+        "research": 1
+      }
+    }
+  },
+  "daily_billable_last_days": {
+    "2026-07-29|claude": {
+      "billable": 647490,
+      "sessions": 15
+    },
+    "2026-07-29|codex": {
+      "billable": 28006858,
+      "sessions": 41
+    },
+    "2026-07-30|claude": {
+      "billable": 1482812,
+      "sessions": 28
+    },
+    "2026-07-30|codex": {
+      "billable": 45729629,
+      "sessions": 66
+    },
+    "2026-07-31|claude": {
+      "billable": 123081,
+      "sessions": 3
+    },
+    "2026-08-01|claude": {
+      "billable": 1040120,
+      "sessions": 45
+    },
+    "2026-08-01|codex": {
+      "billable": 20397554,
+      "sessions": 45
+    },
+    "2026-08-02|claude": {
+      "billable": 743198,
+      "sessions": 107
+    },
+    "2026-08-02|codex": {
+      "billable": 41026019,
+      "sessions": 113
+    },
+    "2026-08-03|claude": {
+      "billable": 246826,
+      "sessions": 14
+    },
+    "2026-08-03|codex": {
+      "billable": 4127676,
+      "sessions": 6
+    },
+    "2026-08-04|claude": {
+      "billable": 2630238,
+      "sessions": 33
+    },
+    "2026-08-04|codex": {
+      "billable": 1536440,
+      "sessions": 19
+    },
+    "2026-08-05|claude": {
+      "billable": 4661659,
+      "sessions": 88
+    }
+  }
+}
