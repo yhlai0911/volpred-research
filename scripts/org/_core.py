@@ -41,6 +41,15 @@ RESERVED_PATH_PREFIXES = (
     "storage/org/manager/",
 )
 
+# Reserved FROM DEPARTMENTS, but owned by the coordinator: these are the things
+# it governs. Folding them into one list made the coordinator's own generated
+# settings deny it the registry and its own outbox -- turf reserved from
+# everyone, including the role it was reserved for.
+MANAGER_OWNED_PREFIXES = (
+    "storage/org/registry.json",
+    "storage/org/manager/",
+)
+
 # Denied wherever they appear, including inside a department's own turf.
 #
 # `paper/` used to be reserved wholesale, which meant the publications
@@ -531,7 +540,7 @@ def validate_dept_name(name: str) -> None:
         )
 
 
-def reserved_carveouts(paths: list[str]) -> list[str]:
+def reserved_carveouts(paths: list[str], *, role: str = "department") -> list[str]:
     """Reserved subtrees that fall INSIDE the given turf.
 
     These are the holes the generated settings must deny. A department owning
@@ -539,10 +548,14 @@ def reserved_carveouts(paths: list[str]) -> list[str]:
     may drive. Returning them here keeps one list of reserved zones doing both
     jobs instead of a second hand-maintained deny list that drifts.
     """
+    reserved = tuple(
+        prefix for prefix in RESERVED_PATH_PREFIXES
+        if role != "manager" or prefix not in MANAGER_OWNED_PREFIXES
+    )
     out = []
     for p in paths:
         base = p.rstrip("/") + "/"
-        out += [prefix for prefix in RESERVED_PATH_PREFIXES
+        out += [prefix for prefix in reserved
                 if prefix.startswith(base) and prefix != base]
         out += [pat for pat in RESERVED_FILE_PATTERNS if pat.startswith(base)]
     return sorted(set(out))

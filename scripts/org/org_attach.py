@@ -167,7 +167,18 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
     departments/<dept>/settings.json always wins.
     """
     registry = load_registry(root)
-    meta = registry.get("departments", {}).get(dept)
+    if dept == MANAGER:
+        # The coordinator was the one role with no generated settings, so it
+        # could not write anything -- not the registry it governs, not the
+        # bulletin that is its audit trail, not even its own outbox. On
+        # 2026-08-05 that cost two proposals (owner-facing, never landed on
+        # disk) and left the bulletin blank for three hours; the coordinator
+        # reported "Edit/Write 連續第二班被 deny" and had to route its own
+        # decisions through Telegram. Its charter already names this scope:
+        # registry, bulletin, any department inbox, its own subtree.
+        meta = {"owned_paths": ["storage/org/"], "capabilities": []}
+    else:
+        meta = registry.get("departments", {}).get(dept)
     if meta is None:
         return None
 
@@ -222,7 +233,8 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
     # pattern (`paper/**/*.tex`) is already complete and appending `**` to it
     # produces `*.tex**`, which matches nothing — a deny rule that silently
     # protects nothing is worse than no rule, because it reads as protection.
-    carveouts = reserved_carveouts(list(meta.get("owned_paths") or []))
+    carveouts = reserved_carveouts(list(meta.get("owned_paths") or []),
+                                   role="manager" if dept == MANAGER else "department")
     deny = [f"{tool}(/{REPO_ROOT}/{c + '**' if c.endswith('/') else c})"
             for c in carveouts for tool in ("Edit", "Write")]
 
@@ -256,7 +268,7 @@ def dept_session_args(root: Path, dept: str) -> list[str]:
     ddir = dept_dir(root, dept) if dept != MANAGER else root / MANAGER
     extra: list[str] = []
     settings = ddir / "settings.json"
-    if not settings.is_file() and dept != MANAGER:
+    if not settings.is_file():
         generated = generate_dept_settings(root, dept)
         if generated:
             settings = generated

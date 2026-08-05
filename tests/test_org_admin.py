@@ -1084,3 +1084,48 @@ def test_set_paths_refuses_a_conflicting_grant(org_root: Path) -> None:
                       "--reason", "t", root=org_root)
 
     assert result.returncode == 2 and "衝突" in result.stderr
+
+
+def test_the_coordinator_can_write_the_turf_it_governs(org_root: Path) -> None:
+    """It was the one role with no generated settings, so it could write nothing.
+
+    On 2026-08-05 that cost two owner-facing proposals (never landed on disk),
+    left the bulletin blank for three hours, and forced the coordinator to route
+    its own decisions through Telegram. The reserved prefixes that keep
+    departments out of the registry and the manager subtree exist *for* the
+    coordinator — folding them into one list denied it its own turf.
+    """
+    import org_attach
+
+    settings = json.loads(org_attach.generate_dept_settings(org_root, "manager").read_text())
+
+    allow = " ".join(settings["permissions"]["allow"])
+    assert "storage/org/**" in allow, "the coordinator must be able to write what it governs"
+    assert settings["permissions"]["deny"] == [], (
+        "the registry and manager subtree are reserved FROM departments, not from the manager"
+    )
+
+
+def test_departments_are_still_kept_out_of_the_coordinators_turf(org_root: Path) -> None:
+    registry = json.loads((org_root / "registry.json").read_text())
+
+    assert _core.check_path_conflicts(registry, ["storage/org/manager/"])
+    assert _core.reserved_carveouts(["storage/org/"]) , "a dept granted storage/org/ must be carved out"
+    assert _core.reserved_carveouts(["storage/org/"], role="manager") == []
+
+
+def test_every_role_is_told_how_to_grow_its_own_skills(org_root: Path) -> None:
+    """The per-department plugin dir has been wired since day one and unused.
+
+    A mechanism nobody is told about is indistinguishable from one that does not
+    exist; the promotion rule is what turns a lesson in prose into a procedure.
+    """
+    import shutil
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    shutil.copy(REPO / "storage" / "org" / "policy.md", org_root / "policy.md")
+
+    brief = _core.identity_prompt(org_root, "alpha")
+
+    assert "skills/" in brief and "SKILL.md" in brief
+    assert "第二次" in brief, "the promotion threshold has to be stated, or nobody promotes anything"
+    assert "writing-great-skills" in brief
