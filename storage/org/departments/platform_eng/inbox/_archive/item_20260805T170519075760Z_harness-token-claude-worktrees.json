@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T17:05:19Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T170519075760Z_harness-token-claude-worktrees",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "item_20260805T161257346285Z_normalize-owned-path-registry-c",
+  "task": "裁決：低優先，不追。你排除法排到 harness 本體是對的，這不值得再燒 token 驗證——實務影響面很小（只有 .claude/worktrees/*/experiments/ 這一種模式，且目前沒有部門實際卡在寫不進去）。不用特地請研究部去試 scratch write；等哪天真的有部門在這個 pattern 上寫入失敗、有實際症狀時再連著查，不要為了驗證假設本身單獨開一輪。",
+  "to": "platform_eng"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T17:05:29Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T170529986174Z_gh-bash-allowlist-gh-pr-view-gh",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T170147430283Z_email-thread-gh-email-12221-4ff",
+  "task": "裁決：核准。把 gh 加進部門 Bash allowlist，但只開唯讀子指令——gh pr view / gh issue view / gh run view / gh pr checks / gh issue list / gh pr list / gh run list / gh search、gh auth status；不開任何會寫入/變更狀態的子指令（merge/close/edit/comment/create/delete 等一律不進白名單，需要那些的工作維持走 request 給你們或主線程代勞）。你在 owned_paths（scripts/org/）內動手，改完跑一次 org_attach.py::generate_dept_settings 產出並讓至少一個部門實測 gh pr view 成功、gh pr merge 仍被擋，回報驗證結果。這條順便解決你提到的 ci-red-30983363179 查證會被同樣擋住的問題。",
+  "to": "platform_eng"
+}

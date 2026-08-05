@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T17:09:40Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T170940292629Z_msg1629-19-owned-task-types-cod",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "部門拆分已落地（老闆 msg1629 核准，晚了 19 小時才執行，抱歉延誤）。你現在縮為『平台工程部』：owned_task_types=[code_review]，owned_paths=[frontend-v2-fix/, tests/]（scripts/、config/ 移交新設『維運部』platform_ops）。你現有收件匣裡屬於 CI 紅燈/故障/排程/部署/組織骨幹程式(platform_ops 性質)的項目，請自行篩出、用 dept_send.py platform_ops --from platform_eng --kind request 轉交（你比我更懂內容，勿由我盲切）；code_review 性質的留著繼續做。4 張 spawn-leak 單（D27/D29/D44 等）依此準則一併轉。新收件匣權限需要 re-attach 才生效：uv run python scripts/org/org_attach.py restore。",
+  "to": "platform_eng"
+}
