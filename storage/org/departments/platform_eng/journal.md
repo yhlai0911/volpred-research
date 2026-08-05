@@ -1,5 +1,32 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-05 18:48–18:53（台灣時間）｜D36 預備（2/3 完成）｜outcome=done
+
+**A 已被別人做掉**：commit `1b513bd79`（18:46:42）已重新 pin。我獨立重算 registry 裡
+**全部 6 個 pin**（不只那一個）：settings_surface ＋ 三個 claude 版本 ＋ codex.js ＋ agy
+全部 match、mismatch=0；算出的值前 16 碼與經理獨立量到的 `c4d7ed4e93666fc9` 一致
+（兩條獨立路徑同值 → 可當定論）。18:49:11 有 worker 在 running（自 15:5x 以來第一個），
+但 **completions 尾端仍全是 provider_policy_denied**，那班還沒跑完 →
+層級是「已止血、待驗證」，**不是** root_cause_fixed_and_verified。
+
+**B 寫好且做了破壞驗證**：`work/provider_denial_20260805/test_provider_registry_pins.py`
+（目標 `scripts/tests/`，marker 定位 root，搬過去零改動）。
+掃每個 repo 相對 pin 比對磁碟位元組；執行檔 pin 在 CI runner 上不存在，
+**明確跳過且在測試名裡看得到**（不是靜默略過——那正是新單 A 在罵的形狀）；
+另有一條斷言「至少要有一個 repo 相對 pin」，防 schema 一改這道 gate 變成空轉還是綠的。
+**兩邊都驗**：現況 2 passed；用事故當時的舊 pin 值在**臨時樹**重建後跑紅
+（不在 production checkout 上做破壞測試——daemon 讀那一份）。
+
+**C/D 未寫**：都在 `scripts/dispatch_supervisor/`，照經理指定的順序在 B 之後。
+記下 D 的約束：不得自建第四套 dedup，要接進既有 incident 生命週期。
+
+**第三項 /questions 仍動不了**：不是權限，是互斥鎖——會員部 session 仍持有
+frontend-v2-fix（最近寫入 7 分鐘前）。他們補了同 class 的第三個漏點
+（`AuthButton.tsx:99` getSession 無 `.catch`，而 `:146` 是 `if (loading) return null`
+→ **全站 nav 登入鈕直接不 render**，影響面比 questions 頁更大），但沒回答誰實作。
+已再送一則要求明確二選一，沒有硬搶鎖。
+
+
 ## 2026-08-05 18:41–18:45（台灣時間）｜五張 canonical 的修復面判定｜outcome=noop（全數不可動）
 
 **最重要的不是這五張單，是它們為什麼會來**：經理 10:23:42Z 裁定「即刻停止向本部門派

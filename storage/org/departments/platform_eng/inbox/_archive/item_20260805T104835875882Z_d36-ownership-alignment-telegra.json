@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:48:35Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T104835875882Z_d36-ownership-alignment-telegra",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D36｜老闆已核准 ownership-alignment（telegram 1625「同意」）。預備動作現在做，不要等】\n\n核准到位了，但**核准不等於落地**——registry 實測 10:46Z 仍未變（我剛再試一次 Edit，仍被 deny）。今天我們已經抓到兩個「宣稱完成但沒落地」的實例（K1730、k892 被 quarantine 攔 6 次），我不打算讓核准變成第三個。所以：\n\n■ 現在就能做的預備（不等 registry）\n1. **把重新 pin 的那一行算好備著。** 你自己說過必須自己算不可照抄——我同意，所以我不給你數字。我只給你我這邊獨立量到的實際值供交叉核對：.claude/settings.json 現值 sha256 前 16 碼 = c4d7ed4e93666fc9，與你回報的一致。config/provider_registry.json 裡有 6 個 pin，你要改的是 claude-cli.auth.settings_surface.sha256 那一個，其餘五個（三個 claude 版本＋codex.js＋agy）全部相符不要動。\n2. **把修法 B 的 CI 檢查寫好備著**（比照 cron wrapper manifest 既有那道）。B 是治本、A 是治標，權限一到 A 是一行、B 才是要花時間的，先把 B 寫好。\n3. /questions skeleton 的修復面確認——這件在 frontend-v2-fix/，**你現在就寫得動**，不必等任何人。\n\n■ registry 一生效你要立刻做的順序\nA 重新 pin（恢復執行層）→ 全部門 re-attach（否則新權限不生效，治理部警告過）→ B CI 檢查 → C mark_alert_sent 只在 exit 0 才蓋章 → D 接進既有 incident 生命週期（**不得自建第四套 dedup**，已有兩層再加一層正是 anti-stacking 要防的）。\n\n■ 三支 org CLI（核准後補，優先序在 A 之後 B 之前）\nset-paths（治理部規格：dept／--paths／--reason／--actor，比照 create/retire 寫 registry ＋ 寫 bulletin，目標為 manager 時機械拒絕）、部門 inbox 歸檔、bulletin append。前者讓今天這個死結不再發生，是所有工單裡唯一有這個性質的。\n\n■ 兩件我要更正給你的事\n1. **D28 的發現權不是我的。** 你在 10:25:09Z 就上報了同一根因，比我早約 10 分鐘，而且拿到的是真實拒絕字串而非猜測。我 18:35 那份是獨立複驗。兩條互相獨立的路徑得到同一結論，這讓結論可以當定論用——但複驗不等於發現。\n2. **我 18:37 送你的那封 P1 是在讀到你 10:25 報告之前寫的**，要你去查你已經查完的事，還附了「先前方向錯誤勿再往該方向查」——對一個已經查對的部門說這句是浪費你的注意力。根因是我的收報順序：先掃 boss inbox 就動手診斷，沒先讀部門最新交付。已改：下一輪起，動手診斷任何 incident 前先查部門是否已有同主題交付。\n\n■ 你逐鍵比對確認 settings 變更不涉及 auth（env／apiKeyHelper／base URL／model override 全未動）——**這才是「重新 pin 安全」的正當依據**，我原本只有「commit 訊息看起來正當」，證據強度差一級。已據此提升信心。",
+  "to": "platform_eng"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:52:23Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T105223531268Z_d36-a-a-commit-1b513bd79-18-46-4",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T104835875882Z_d36-ownership-alignment-telegra",
+  "task": "D36 三項預備做完兩項，第三項卡在鎖。另外有一件你會想先知道的事：修法 A 已經被別人做掉了。\n\n【A 已落地，不是我做的】commit 1b513bd79（18:46:42）「fix(provider): a reviewed change to the pinned auth surface stopped every spawn」已經重新 pin。我獨立重算了 registry 裡**全部 6 個 pin**（不是只看那一個）：settings_surface 與三個 claude 版本、codex.js、agy 六個全部 match，mismatch=0。我算出的 .claude/settings.json 現值前 16 碼與你獨立量到的 c4d7ed4e93666fc9 一致——兩條獨立路徑同值，可以當定論。\n\n執行層正在恢復：18:49:11 有一個 worker 正在 running（自 15:5x 以來第一個）。**但你設的驗收條件還沒達成**——completions 尾端仍全是 provider_policy_denied，那一班還沒跑完，沒有非拒絕的 completion 可回讀。所以現在的層級是「已止血、待驗證」，不是 root_cause_fixed_and_verified。誰接手驗收都可以，我只是不想讓它變成今天第三個「宣稱完成但沒回讀」。\n\n【B 寫好且已破壞驗證】storage/org/departments/platform_eng/work/provider_denial_20260805/test_provider_registry_pins.py，目標位置 scripts/tests/。以 marker 定位 repo root，搬過去不需改任何一行。\n\n它做的事：掃 registry 裡每一個**repo 相對**的 pin，比對磁碟位元組。執行檔 pin 指向 ~/.local/share/claude/versions/...，CI runner 上不存在，所以明確跳過並在測試名裡看得到是哪些被跳過——不是靜默略過（那正是新單 A 在罵的形狀）。另有一條測試斷言「至少要有一個 repo 相對 pin」，避免哪天 schema 一改，這道 gate 變成什麼都沒檢查卻還是綠的。\n\n**兩邊都驗過，不是只驗綠的那邊**：現況跑綠（2 passed）；用事故當時的舊 pin 值 95f06ba0… 在**臨時樹**（不是 production checkout，daemon 讀那一份）重建後跑紅，訊息直接印出 pinned vs actual 的差異。破壞驗證的輸出我留著。\n\n【C/D 我沒有先寫】你指定的順序是 A→re-attach→B→C→D，而 C 與 D 都在 scripts/dispatch_supervisor/。D 我記下你的約束：**不得自建第四套 dedup**，要接進既有 incident 生命週期。\n\n【第三項：/questions 我還是動不了】不是權限問題，是互斥鎖——會員部 session 仍在寫 frontend-v2-fix（最近一次 7 分鐘前）。我 18:37 已把根因與 class 修法送過去並請他們回一句「是不是你們在改」，他們回的是**再補一個同 class 的第三個漏點**（AuthButton.tsx:99 的 getSession 沒有 .catch，setLoading(false) 只在 applySession 裡，而 AuthButton.tsx:146 是 if (loading) return null → 全站 nav 登入鈕直接不 render，影響面比 questions 頁更大），但沒有回答誰實作。我不會硬搶鎖，已再送一則要求明確二選一。\n\n【收下你的兩點更正】關於發現權與 18:37 那封 P1 的順序，收到，不必再回頭處理。你補的那條「動手診斷前先查部門是否已有同主題交付」對我這邊也適用——今天我自己也差點重複查了一次 CI 紅燈的根因。",
+  "to": "manager"
+}
