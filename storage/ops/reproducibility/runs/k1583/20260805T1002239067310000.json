@@ -1,0 +1,198 @@
+{
+  "schema_version": "volpred.reproduce_report.v1",
+  "generated_at": "2026-08-05T10:02:23.906731+00:00",
+  "experiment_id": "k1583",
+  "engine": {
+    "name": "scripts/reproduce_check.py",
+    "schema": "volpred.reproduce_report.v1",
+    "path": "scripts/reproduce_check.py",
+    "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+    "committed_at_repo_head": true
+  },
+  "repo_head": "1b1d295a4d5aa383139c0206ccb58c4fc9e74353",
+  "methodology_references": [
+    {
+      "citation": "Peng (2011), Reproducible Research in Computational Science",
+      "doi": "10.1126/science.1213847",
+      "principle": "computational reproducibility is a minimum standard, not a validity verdict"
+    },
+    {
+      "citation": "Sandve et al. (2013), Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "principle": "record provenance and preserve the exact workflow behind every result"
+    },
+    {
+      "citation": "Stodden et al. (2016), Enhancing Reproducibility for Computational Methods",
+      "doi": "10.1126/science.aah6168",
+      "principle": "disclose code, data, workflow, and computational environment"
+    }
+  ],
+  "discovery": {
+    "inventory_record": {
+      "experiment": "k1583",
+      "path": "experiments/k1583",
+      "priority_sources": [],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": true,
+      "report_status": "fail_mismatch",
+      "report_stale": true,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "k1583.py",
+      "result_file": "k1583_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    "subject_files": [
+      {
+        "path": "experiments/K1380_v4/k1380_v4_losses_all.npy",
+        "sha256": "2b7232b99a7cb9521adfce843f399cf51099581ef9ac6a9d2e2e4f74e35551f4",
+        "size": 258528
+      },
+      {
+        "path": "experiments/k1583/data/usrecd_snapshot.json",
+        "sha256": "8550855aff2f368fea603e58f35a6a9d06d1503b0cc0b97f2c9242b025270b95",
+        "size": 370064
+      },
+      {
+        "path": "experiments/k1583/k1583.py",
+        "sha256": "5dd1ed6b63bb8873a7cb8bd87c1946b100a4a1ae278545636e78a195f8559602",
+        "size": 31657
+      },
+      {
+        "path": "experiments/k1583/k1583_results.json",
+        "sha256": "96f922010cb24fdd8e1fc9f5faff2a91d501e0a45d4b1432e04277b4361010a5",
+        "size": 35033
+      },
+      {
+        "path": "experiments/k1583/reproduce_spec.json",
+        "sha256": "cafd423ee2a1a46a99375b2dc4246f9ff5d983844c5e77079d118073f611f831",
+        "size": 3228
+      },
+      {
+        "path": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+        "sha256": "43870c199d00c922ca607c674254edd66c5acca00209eb501a94c5c339449830",
+        "size": 3179160
+      },
+      {
+        "path": "scripts/reproduce_check.py",
+        "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+        "size": 65995
+      }
+    ],
+    "entrypoint": "experiments/k1583/k1583.py",
+    "canonical_result": "experiments/k1583/k1583_results.json",
+    "spec_sha256": "cafd423ee2a1a46a99375b2dc4246f9ff5d983844c5e77079d118073f611f831",
+    "subject_sha256": "f2e1983220de01f574ea3f681e8ea31421b8d073ca9a839a5bfbccac676da7bb"
+  },
+  "environment": {
+    "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "uv_lock_sha256": "340b8dc87c7b1e0f1fc852bab3f62e2d084582c77831cee59a3729064706edf0",
+    "pythonhashseed": "0",
+    "package_versions": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "arch": "8.0.0",
+      "yfinance": "1.2.0",
+      "scikit-learn": "1.8.0"
+    },
+    "seed_evidence": [
+      "experiments/k1583/k1583.py:31: Seed = 42, B = 1000 bootstrap, alpha = 0.10.",
+      "experiments/k1583/k1583.py:69: SEED = 42",
+      "experiments/k1583/k1583.py:364: seed: int = SEED,",
+      "experiments/k1583/k1583.py:386: losses_dict, alpha=alpha, n_boot=n_boot, seed=seed",
+      "experiments/k1583/k1583.py:403: seed: int = SEED,",
+      "experiments/k1583/k1583.py:441: seed=seed + k,  # vary seed per window to avoid bootstrap correlation",
+      "experiments/k1583/k1583.py:575: rng = np.random.default_rng(SEED)  # global anchor (not strictly needed)",
+      "experiments/k1583/k1583.py:649: \"seed\": SEED,",
+      "experiments/k1583/k1583.py:736: seeds=[(\"numpy_default_rng\", SEED), (\"mcs_bootstrap\", SEED)],",
+      "scripts/reproduce_check.py:76: SEED_RE = re.compile(r\"\\b(seed|random_state|default_rng|RandomState)\\b\", re.IGNORECASE)",
+      "scripts/reproduce_check.py:360: raise ValueError(\"declared randomness requires at least one seed\")",
+      "scripts/reproduce_check.py:361: for index, seed in enumerate(seeds):",
+      "scripts/reproduce_check.py:362: if not isinstance(seed, dict) or not isinstance(seed.get(\"library\"), str):",
+      "scripts/reproduce_check.py:364: value = seed.get(\"value\")",
+      "scripts/reproduce_check.py:886: # An empty list reads as \"this experiment sets no seed\" — a real audit verdict.",
+      "scripts/reproduce_check.py:887: warn(\"reproduce_check\", \"seed scan could not read entrypoint\", path=str(entrypoint), err=str(exc))",
+      "scripts/reproduce_check.py:1197: seed[\"value\"]",
+      "scripts/reproduce_check.py:1198: for seed in randomness[\"seeds\"]",
+      "scripts/reproduce_check.py:1199: if str(seed[\"value\"]) not in \"\\n\".join(seed_evidence)",
+      "scripts/reproduce_check.py:1208: summary=f\"declared seed values lack code evidence: {missing_seed_values}\","
+    ],
+    "declared_randomness": {
+      "status": "declared",
+      "seeds": [
+        {
+          "library": "numpy_default_rng",
+          "value": 42
+        },
+        {
+          "library": "mcs_bootstrap",
+          "value": 42
+        }
+      ]
+    }
+  },
+  "execution": {
+    "command": [
+      "/Users/yhlai0911/volpred-research/.venv/bin/python3",
+      "experiments/k1583/k1583.py"
+    ],
+    "backend": "macos_sandbox_exec",
+    "network": "deny",
+    "exit_code": 0,
+    "timeout_seconds": 100,
+    "duration_seconds": 46.938,
+    "stdout_sha256": "66591dbcf4073c0a000f3aa5fb939f87e728c749649b62136b588238b6ee1ed1",
+    "stderr_sha256": "0b3426d7be3a28df3dea835ab52156be222fd832f3a4cde852349b7ea1ee7e15",
+    "stdout_tail": "\n======================================================================\nK1583 SUMMARY\n======================================================================\nUnconditional MCS (T=1017): ['A1', 'A2', 'A3', 'A4', 'A5', 'A2f', 'A4f', 'A3f', 'A2n', 'A4n', 'B1', 'B2', 'B3', 'C2', 'C3', 'B0']\nBy VIX regime:\n  high  (T=335): ['A1', 'A2', 'A3', 'A4', 'A5', 'A2f', 'A4f', 'A3f', 'A2n', 'A4n', 'B1', 'B2', 'B3', 'C2', 'C3', 'B0']\n  mid   (T=520): ['A1', 'A2', 'A3', 'A4', 'A5', 'A2f', 'A4f', 'A3f', 'A2n', 'A4n', 'B1', 'B2', 'B3', 'C2', 'C3', 'B0']\n  low   (T=162): ['A1', 'A2', 'A3', 'A4', 'A5', 'A2f', 'A4f', 'A3f', 'A2n', 'A4n', 'B1', 'B2', 'B3', 'C2', 'C3']\nBy NBER state:\n  recession  (T=20): ['A1', 'A2', 'A3', 'A4', 'A5', 'A2f', 'A4f', 'A3f', 'A2n', 'A4n', 'B1', 'B2', 'B3', 'C2', 'C3', 'B0']\n  expansion  (T=997): ['A1', 'A2', 'A3', 'A4', 'A5', 'A2f', 'A4f', 'A3f', 'A2n', 'A4n', 'B1', 'B2', 'B3', 'C2', 'C3', 'B0']\nSequential drift: 16 winner switches detected\n  2021-07-01  →  A5\n  2023-03-03  →  A3f\n  2023-04-03  →  A5\n  2023-09-05  →  A3f\n  2024-05-06  →  B0\n  2024-06-05  →  A3f\n  2025-04-08  →  A4f\n  2025-05-08  →  A3f\n  2025-09-09  →  A4f\n  2025-10-08  →  A2\n  2025-11-06  →  A1\n  2026-01-08  →  A2\n  2026-04-10  →  A5\n  2026-05-11  →  A2\n  2026-06-09  →  A5\n  2026-07-20  →  A2\n",
+    "stderr_tail": "/IosevkaNerdFontPropo-ExtraBoldItalic.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFontPropo-ExtraBoldItalic.ttf'\n2026-08-05 18:03:10,425 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFontMono-Medium.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFontMono-Medium.ttf'\n2026-08-05 18:03:10,426 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFontMono-MediumItalic.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFontMono-MediumItalic.ttf'\n2026-08-05 18:03:10,426 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/JetBrainsMonoNerdFontPropo-ExtraLight.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/JetBrainsMonoNerdFontPropo-ExtraLight.ttf'\n2026-08-05 18:03:10,426 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFontMono-SemiBoldOblique.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFontMono-SemiBoldOblique.ttf'\n2026-08-05 18:03:10,427 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFont-Bold.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFont-Bold.ttf'\n2026-08-05 18:03:10,428 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFont-Italic.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFont-Italic.ttf'\n2026-08-05 18:03:10,428 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFont-ExtraBoldItalic.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFont-ExtraBoldItalic.ttf'\n2026-08-05 18:03:10,430 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFontPropo-LightOblique.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFontPropo-LightOblique.ttf'\n2026-08-05 18:03:10,430 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/JetBrainsMonoNLNerdFontMono-ThinItalic.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/JetBrainsMonoNLNerdFontMono-ThinItalic.ttf'\n2026-08-05 18:03:10,430 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFontPropo-LightItalic.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFontPropo-LightItalic.ttf'\n2026-08-05 18:03:10,431 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFontPropo-ExtraLight.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFontPropo-ExtraLight.ttf'\n2026-08-05 18:03:10,432 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFont-ExtraLightOblique.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFont-ExtraLightOblique.ttf'\n2026-08-05 18:03:10,433 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/IosevkaNerdFont-LightItalic.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/IosevkaNerdFont-LightItalic.ttf'\n2026-08-05 18:03:10,434 [INFO] Failed to extract font properties from /System/Library/Fonts/SFIndia.ttc: Can not load face (SFNT font table missing; error code 0x8e)\n2026-08-05 18:03:10,435 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/JetBrainsMonoNerdFontMono-ExtraLight.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/JetBrainsMonoNerdFontMono-ExtraLight.ttf'\n2026-08-05 18:03:10,436 [INFO] Failed to open font file /Users/yhlai0911/Library/Fonts/JetBrainsMonoNLNerdFont-BoldItalic.ttf: [Errno 1] Operation not permitted: '/Users/yhlai0911/Library/Fonts/JetBrainsMonoNLNerdFont-BoldItalic.ttf'\n2026-08-05 18:03:10,457 [INFO] generated new fontManager\n[reproduce_spec] wrote k1583_results.json + reproduce_spec.json (entrypoint 5dd1ed6b63bb, 31657 bytes)\n2026-08-05 18:03:10,815 [INFO] Wrote experiments/k1583/k1583_results.json (+ reproduce_spec.json)\n",
+    "clean_snapshot": true,
+    "sandbox_removed_after_run": true
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/run_utc",
+      "/runtime_env",
+      "/runtime_seconds"
+    ],
+    "archived_scalar_count": 1205,
+    "rerun_scalar_count": 1205,
+    "numeric_compared": 122,
+    "matched_scalars": 1205,
+    "mismatch_count": 0,
+    "mismatches_truncated": false,
+    "mismatches": [],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "integrity": {
+    "canonical_unchanged": true,
+    "changed_paths": []
+  },
+  "canonical_results": [
+    {
+      "archived_result": "experiments/k1583/k1583_results.json",
+      "archived_sha256": "96f922010cb24fdd8e1fc9f5faff2a91d501e0a45d4b1432e04277b4361010a5",
+      "rerun_sha256": "4bdd061b2ab3e1ef52b98f5daf2f03450059bb07b42a7078df303616ca60ceb9",
+      "bit_identical": false
+    }
+  ],
+  "outcome": {
+    "status": "pass_tolerated",
+    "reason_code": "WITHIN_PREDECLARED_TOLERANCE",
+    "severity": "info",
+    "reproducible": true,
+    "summary": "all scalar values match within predeclared tolerance"
+  }
+}

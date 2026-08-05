@@ -1,7 +1,7 @@
 {
   "schema_version": "volpred.reproduce_inventory.v1",
-  "generated_at": "2026-08-05T10:00:38.547674+00:00",
-  "repo_head": "1cb90631a6b645c9c4920600dc6dc9bacdeb82d8",
+  "generated_at": "2026-08-05T10:03:13.662996+00:00",
+  "repo_head": "98c989c6f232cabd1227735a3d688d6532ee9f4f",
   "scope": {
     "paper_sources": "paper/*/experiments.md plus canonical submission compile closures; README fallback only when both are absent",
     "recent_feed_articles": "latest 60 records with status=published",
@@ -762,14 +762,13 @@
     "priority_stale_reports": 2,
     "priority_unverified": 233,
     "priority_code_without_results": 2,
-    "broken_reports": 3,
+    "broken_reports": 2,
     "stale_reports": 4,
     "knowledge_base_readable": true,
     "results_without_knowledge": 0
   },
   "report_status_counts": {
-    "fail_mismatch": 1,
-    "pass_tolerated": 4,
+    "pass_tolerated": 5,
     "unverified": 2
   },
   "missing_priority_experiment_dirs": [
@@ -7300,21 +7299,6 @@
       "spec_file": "reproduce_spec.json",
       "entrypoint": "K1710.py",
       "result_file": "K1710_results.json",
-      "classification": "runnable",
-      "blocker": null
-    },
-    {
-      "experiment": "k1583",
-      "path": "experiments/k1583",
-      "priority_sources": [],
-      "code_count": 1,
-      "results_count": 1,
-      "reproduce_report": true,
-      "report_status": "fail_mismatch",
-      "report_stale": false,
-      "spec_file": "reproduce_spec.json",
-      "entrypoint": "k1583.py",
-      "result_file": "k1583_results.json",
       "classification": "runnable",
       "blocker": null
     },
