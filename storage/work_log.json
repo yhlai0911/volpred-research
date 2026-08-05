@@ -34693,5 +34693,22 @@
     "owner": "hourly-slot-1-e13623e764a54c8ab42b5eb1f9bd0781",
     "commit": null,
     "summary": "K1356 general-audience 文章完稿並入池：`mile_5641798f`（status=draft, audience=general, 2,427 字）。草稿 `storage/drafts/K1356_general_draft.md`。\n\n**選題與查重**：`check_arc_dedup.py --k-id k1356 --audience general` exit 0、verdict=clean（k_coverage 空、arc_duplicates 空）；主線程另手做層 2 grep（`feed.json` 無 K1356 / GDELT / 新聞熱度 標題命中、`storage/drafts/` 無 1356 草稿），確認不是 gate exit 0 但線上早有覆蓋的 K1586/K1605 情境。\n\n**證據包**（全數 byte-for-byte 對回 `experiments/k1356/K1356_results.json`，sha256 83fd9605…483e）：跨標的共同測試日 1,626 天、面板 9,515 列、平均誤差差距 −0.000571（統計強度 −0.74、顯著性 0.46）、絕對衝擊變體 +0.002907（顯著性 0.28）、逐標的 +0.10% / +0.95% / −0.53% / −0.26%（2/4，未達開工前 3/4 門檻）。\n\n**新增量化層**（本文原創，非轉抄 README）：從 `experiments/k1356/data/model_panel.csv` 重算「同一關係量三次」的相關階梯 —— 當天 0.235 / 隔天 0.173 / 扣掉波動自身 d-w-m 歷史後 0.027（原油期貨）；USO 0.221→0.166→0.046；XLE 0.076→0.028→−0.004；XOP 0.094→0.040→0.007。這一層把 NULL 的**機制**講清楚：新聞熱度與波動同步是因為兩者跟同一批事件，波動自身的持續性已經把該資訊講完，故增量歸零。這是原 results.json 沒有的診斷，也是文章的敘事骨架。\n\n**產出物**：3 張真實 matplotlib 圖（`scripts/gen_k1356_article_charts.py`，可重跑；時間序列 / 相關階梯 / 逐標的改善），已 upload Supabase article-images；1 張成績單表格。\n\n**Gates**（全過）：`anti_ai_gate.py --no-fb-mode` exit 0（warn 0/3）；`_infer_audience` 回讀 = general（未被學術關鍵字覆寫成 research，全文無 K-id / QLIKE / GARCH / 裸 t=、p= 寫法，統計資訊以白話保留數值）；`_audit_general_content` issues 空；depth 2,249 chars > general floor 1,500；表 1 / 圖 3。\n\n**懶人包**：strict v1 plan `storage/lazypack_jobs/K1356_general/plan.json`，4 panel（concept / method / results / takeaway），`lazypack_render.py --validate-only` 回 `{\"valid\": true, \"panels\": 4}`；所有 reader-visible 數值皆 binding 回 sha 驗證過的 evidence（validator 兩次擋下我的錯：suffix \" / 4\" 硬編數字、panel info 用了非法的 \"conclusion\"，均已修正）。async render job `lazypack-mile_5641798f` 已 queued，交 */15 compute worker 跑 codex-primary 渲染鏈；release_pool 會在 flip published 前 enforce 懶人包段落。\n\n**topology_override: subagent→inline** — router 回 `daily_article = opus / medium / subagent`。改 inline 執行的原因：主線程為了做層 2/3 查重與挑證據，已把 results.json、model_panel.csv、相關階梯全載入 context，派 writer subagent 等於把同一份證據再組一次 brief 重傳；且本 fire 只 claim 一張 task（supervisor 預選），無並行寫作需求，inline 省一次完整 context 轉手且保留數字對帳的直接控制。\n\n**未修的既有缺陷（不在本 task 範圍，留報）**：`publish_draft.py` 印 `WARN ignored malformed publish receipt: JSONDecodeError: Expecting value: line 1 column 64` —— 它解析 `volpred ops publish-milestone` stdout 的 `JSON: {...}` 時被 stdout 換行折斷（本次 stdout 實測在 `\"phase\": ` 後斷行）。本次發佈未受影響（milestone 已建、lazypack 已 queue、feed 回讀正常），但 receipt 解析對換行寬度敏感是真缺陷，屬 platform_ops，未在本班擅自改。"
+  },
+  {
+    "timestamp": "2026-08-05T12:01:09+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_5641798f",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_5641798f:codex->agy",
+    "article_id": "mile_5641798f",
+    "job_id": "lazypack-mile_5641798f",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
   }
 ]
