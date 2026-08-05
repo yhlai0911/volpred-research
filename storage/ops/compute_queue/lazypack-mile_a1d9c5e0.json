@@ -1,0 +1,61 @@
+{
+  "id": "lazypack-mile_a1d9c5e0",
+  "title": "lazypack render mile_a1d9c5e0",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_a1d9c5e0",
+    "--article-id",
+    "mile_a1d9c5e0",
+    "--plan",
+    "storage/lazypack_jobs/mile_a1d9c5e0/runs/lazypack-mile_a1d9c5e0/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_a1d9c5e0/runs/lazypack-mile_a1d9c5e0/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "mile_a1d9c5e0 懶人包"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 1,
+  "queued_at": "2026-08-05T10:27:27Z",
+  "started_at": "2026-08-05T10:30:14Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_a1d9c5e0.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_a1d9c5e0.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_a1d9c5e0/runs/lazypack-mile_a1d9c5e0/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_a1d9c5e0/runs/lazypack-mile_a1d9c5e0/plan.json",
+    "storage/lazypack_jobs/mile_a1d9c5e0/runs/lazypack-mile_a1d9c5e0/panels/1_concept.png",
+    "storage/lazypack_jobs/mile_a1d9c5e0/runs/lazypack-mile_a1d9c5e0/panels/2_results.png",
+    "storage/lazypack_jobs/mile_a1d9c5e0/runs/lazypack-mile_a1d9c5e0/panels/3_takeaway.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "routing": {
+    "lane": "compute_queue",
+    "token_cost_estimate": 0,
+    "router": "manual_enqueue"
+  },
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "source_task_link": null,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 86481,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:91d54ae5558f69473f1db5b5",
+    "scheduled_for": "2026-08-05T10:30:00Z"
+  },
+  "claimed_by_pid_start_wall": "Wed Aug  5 18:30:14 2026"
+}
