@@ -1,6 +1,6 @@
 {
   "schema_version": "volpred.reproduce_report.v1",
-  "generated_at": "2026-08-05T20:13:12.833790+00:00",
+  "generated_at": "2026-08-05T20:14:55.972041+00:00",
   "experiment_id": "K1815",
   "engine": {
     "name": "scripts/reproduce_check.py",
@@ -9,7 +9,7 @@
     "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
     "committed_at_repo_head": true
   },
-  "repo_head": "d98ec59ee82c6b0ddc9fb39b1ea8721ce23e23b6",
+  "repo_head": "26307c7f3bcc2c614f53793857f4a2ff6d058d76",
   "methodology_references": [
     {
       "citation": "Peng (2011), Reproducible Research in Computational Science",
@@ -34,9 +34,9 @@
       "priority_sources": [],
       "code_count": 1,
       "results_count": 1,
-      "reproduce_report": false,
-      "report_status": null,
-      "report_stale": null,
+      "reproduce_report": true,
+      "report_status": "unverified",
+      "report_stale": true,
       "spec_file": "reproduce_spec.json",
       "entrypoint": "K1815.py",
       "result_file": "K1815_results.json",
@@ -46,13 +46,13 @@
     "subject_files": [
       {
         "path": "experiments/K1815/K1815.py",
-        "sha256": "45534a593bf86096f0565033f69342e3ab12914250b096c07bb0f010d7c3addf",
-        "size": 14121
+        "sha256": "b99836ca685f958236eeaf1b3a576b8bb750b5f6ead6e28e2528afb94baf0909",
+        "size": 14102
       },
       {
         "path": "experiments/K1815/K1815_results.json",
-        "sha256": "e3537b600a12bf1f84b90ae39ec32f581f8bb863dc6fcccd36632cad96c61550",
-        "size": 3727
+        "sha256": "b2cbbdd43628955f5a78d596357e72c889510a3b69d7291bb1613d9b87c63274",
+        "size": 3723
       },
       {
         "path": "experiments/K1815/data/spy_ohlc_raw.csv",
@@ -66,7 +66,7 @@
       },
       {
         "path": "experiments/K1815/reproduce_spec.json",
-        "sha256": "7db832ca5312b4c708b85ccd7a23a19e69d6969987d5f7640965dd5d05514707",
+        "sha256": "371fe23988a95791c97659ddc72af09e900f7279e7da9878e39c77e313e7fd55",
         "size": 2400
       },
       {
@@ -77,8 +77,8 @@
     ],
     "entrypoint": "experiments/K1815/K1815.py",
     "canonical_result": "experiments/K1815/K1815_results.json",
-    "spec_sha256": "7db832ca5312b4c708b85ccd7a23a19e69d6969987d5f7640965dd5d05514707",
-    "subject_sha256": "8a55c4de2520da4f4c96105326b8dafbdd71430c737d5e6ec445c6578d3f6491"
+    "spec_sha256": "371fe23988a95791c97659ddc72af09e900f7279e7da9878e39c77e313e7fd55",
+    "subject_sha256": "f955cc763c08ef7ac516e7bc199f9a28d427806a4e4d30098323972c67f87a70"
   },
   "environment": {
     "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
@@ -94,16 +94,90 @@
       "arch": "8.0.0",
       "yfinance": "1.2.0",
       "scikit-learn": "1.8.0"
+    },
+    "seed_evidence": [
+      "experiments/K1815/K1815.py:87: SEED = 1815",
+      "experiments/K1815/K1815.py:284: \"seed\": SEED,",
+      "experiments/K1815/K1815.py:295: seeds=[(\"numpy\", SEED)],",
+      "scripts/reproduce_check.py:76: SEED_RE = re.compile(r\"\\b(seed|random_state|default_rng|RandomState)\\b\", re.IGNORECASE)",
+      "scripts/reproduce_check.py:360: raise ValueError(\"declared randomness requires at least one seed\")",
+      "scripts/reproduce_check.py:361: for index, seed in enumerate(seeds):",
+      "scripts/reproduce_check.py:362: if not isinstance(seed, dict) or not isinstance(seed.get(\"library\"), str):",
+      "scripts/reproduce_check.py:364: value = seed.get(\"value\")",
+      "scripts/reproduce_check.py:886: # An empty list reads as \"this experiment sets no seed\" — a real audit verdict.",
+      "scripts/reproduce_check.py:887: warn(\"reproduce_check\", \"seed scan could not read entrypoint\", path=str(entrypoint), err=str(exc))",
+      "scripts/reproduce_check.py:1197: seed[\"value\"]",
+      "scripts/reproduce_check.py:1198: for seed in randomness[\"seeds\"]",
+      "scripts/reproduce_check.py:1199: if str(seed[\"value\"]) not in \"\\n\".join(seed_evidence)",
+      "scripts/reproduce_check.py:1208: summary=f\"declared seed values lack code evidence: {missing_seed_values}\","
+    ],
+    "declared_randomness": {
+      "status": "declared",
+      "seeds": [
+        {
+          "library": "numpy",
+          "value": 1815
+        }
+      ]
     }
   },
-  "execution": null,
-  "comparison": null,
-  "integrity": null,
+  "execution": {
+    "command": [
+      "/Users/yhlai0911/volpred-research/.venv/bin/python3",
+      "experiments/K1815/K1815.py"
+    ],
+    "backend": "macos_sandbox_exec",
+    "network": "deny",
+    "exit_code": 0,
+    "timeout_seconds": 60,
+    "duration_seconds": 9.148,
+    "stdout_sha256": "0a43b2c14342291ec734efebbbbcdf86127c162d37ba35a89daaead082c4204c",
+    "stderr_sha256": "636e99e15469c3d50ff8949ca879d2105da767e1960198a5d5ae355b0b10cf12",
+    "stdout_tail": "{\n  \"experiment_id\": \"K1815\",\n  \"title\": \"Nested Clark-West increment test -- vix-sufficiency Family 10 (overnight VIX gap)\",\n  \"predecessors\": [\n    \"k1116c (weekly F12/F13)\",\n    \"k1116e (daily F2/F4)\",\n    \"k1116g (daily F1/F8/F11)\"\n  ],\n  \"adjudication\": \"storage/org/departments/publications/adjudications/vix_sufficiency_f3_f9_f10_20260805.md\",\n  \"baseline\": \"fwd_rv22 ~ 1 + VIX_level (M2, restricted); VIX_level = VIX close-of-day-t, identical to k1116e/k1116g baseline\",\n  \"augmented\": \"fwd_rv22 ~ 1 + VIX_level + sig_F10_overnight_vix (nests baseline)\",\n  \"signal_definition\": \"sig_F10_overnight_vix[t] = |VIX_Open[t] - VIX_Close[t-1]|, from an UNLAGGED daily ^VIX OHLC series pinned independently of the lagged VIX snapshot used by every other family in this replication package (main_v5.tex:240)\",\n  \"target\": \"22-day FORWARD realized vol of SPY (annualized, x100)\",\n  \"horizon_H\": 22,\n  \"inference_nw_lag\": 21,\n  \"is_end\": \"2018-12-31\",\n  \"oos_start\": \"2019-01-01\",\n  \"embargo_days\": 22,\n  \"harvey_threshold\": 3.0,\n  \"lag_convention\": \"VIX_level baseline feature = close-of-day-t info set (identical to k1116e/k1116g); sig_F10 = day-t OPEN vs day-(t-1) CLOSE, both known strictly before day t's close and strictly before the target's (t, t+H] realization window -> no lookahead in either the baseline or the augmented model\",\n  \"table4_dm_target\": {\n    \"F10\": 1.12,\n    \"note\": \"paper main-table DM |t| (main_v5.tex Table 4); fixed-split DM here is a directional cross-check only (cf. k1116e/k1116g), not an exact reproduction of the expanding-window Table-3/4 DM\"\n  },\n  \"references\": [\n    \"Clark-West (2007) JoE 138:291-311\",\n    \"Harvey-Leybourne-Newbold (1997) IJF 13:281-291\",\n    \"Harvey-Liu-Zhu (2016) RFS 29:5-68\",\n    \"Diebold-Mariano (1995) JBES 13:253-263\"\n  ],\n  \"family_covered\": \"F10_overnight_vix\",\n  \"spec\": {\n    \"signal_col\": \"sig_F10_overnight_vix\",\n    \"n_is\": 6505,\n    \"n_oos\": 1861,\n    \"oos_start\": \"2019-01-02\",\n    \"oos_end\": \"2026-05-28\",\n    \"is_signal_tstat\": -4.523214693650083,\n    \"mspe_baseline_vixonly\": 81.6301834268023,\n    \"mspe_augmented_vixplus\": 82.13663995862477,\n    \"mspe_adjustment_mean\": 0.1867021591089304,\n    \"dm_mspe\": {\n      \"t\": -0.6589732387997089,\n      \"p_two\": 0.5099945217323976,\n      \"p_one_greater\": 0.7450027391338012,\n      \"n\": 1861,\n      \"hln_factor\": 0.9884470349525796,\n      \"nw_lag\": 21,\n      \"note\": \"fixed-split DM on squared fwd-RV errors; +t => augmented beats VIX-only; directional cross-check, not exact Table-3 expanding-window DM\"\n    },\n    \"clark_west\": {\n      \"t\": -0.42823371500434476,\n      \"p_one_greater\": 0.6657347231657069,\n      \"p_two\": 0.6685305536685862,\n      \"hln_factor\": 0.9884470349525796,\n      \"nw_lag\": 21,\n      \"mspe_adjusted_mean\": -0.3197543727135273,\n      \"note\": \"one-sided H1: VIX+signal improves on VIX; |t|>3.0 => Harvey pass\"\n    },\n    \"harvey_pass_cw\": false,\n    \"verdict\": \"CW FAILS to reject: no incremental value beyond VIX (sufficiency holds under the MORE-POWERFUL nested CW test)\"\n  },\n  \"seed\": 1815\n}\n\n[written] /private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-mu5odi4g/repo/experiments/K1815/K1815_results.json\n",
+    "stderr_tail": "/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-reproduce-mu5odi4g/repo/experiments/K1815/K1815.py:240: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.\n  started_at = pd.Timestamp.utcnow()\n[reproduce_spec] wrote K1815_results.json + reproduce_spec.json (entrypoint b99836ca685f, 14102 bytes)\n",
+    "clean_snapshot": true,
+    "sandbox_removed_after_run": true
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/run_utc",
+      "/runtime_env",
+      "/runtime_seconds"
+    ],
+    "archived_scalar_count": 56,
+    "rerun_scalar_count": 56,
+    "numeric_compared": 15,
+    "matched_scalars": 56,
+    "mismatch_count": 0,
+    "mismatches_truncated": false,
+    "mismatches": [],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "integrity": {
+    "canonical_unchanged": true,
+    "changed_paths": []
+  },
+  "canonical_results": [
+    {
+      "archived_result": "experiments/K1815/K1815_results.json",
+      "archived_sha256": "b2cbbdd43628955f5a78d596357e72c889510a3b69d7291bb1613d9b87c63274",
+      "rerun_sha256": "af9356f56d360ba86c093146445e2c7b6f6aa12f33b93d8df3edb078478c58d5",
+      "bit_identical": false
+    }
+  ],
   "outcome": {
-    "status": "unverified",
-    "reason_code": "WORKING_TREE_DRIFT",
-    "severity": "warn",
-    "reproducible": null,
-    "summary": "committed snapshot differs for: ['experiments/K1815/K1815.py', 'experiments/K1815/K1815_results.json', 'experiments/K1815/data/spy_ohlc_raw.csv', 'experiments/K1815/data/vix_ohlc_raw_unlagged.csv', 'experiments/K1815/reproduce_spec.json']"
+    "status": "pass_tolerated",
+    "reason_code": "WITHIN_PREDECLARED_TOLERANCE",
+    "severity": "info",
+    "reproducible": true,
+    "summary": "all scalar values match within predeclared tolerance"
   }
 }
