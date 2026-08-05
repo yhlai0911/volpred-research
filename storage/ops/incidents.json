@@ -306,6 +306,11 @@
      "at": "2026-08-05T16:50:47.311295+00:00",
      "instance_key": "31025599450:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-05T17:35:30.955792+00:00",
+     "instance_key": "31028803601:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -416,14 +421,20 @@
      "first_seen_at": "2026-08-05T16:50:47.311295+00:00",
      "key": "31025599450:1",
      "last_seen_at": "2026-08-05T16:50:47.311295+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-05T17:35:30.955792+00:00",
+     "key": "31028803601:1",
+     "last_seen_at": "2026-08-05T17:35:30.955792+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-05T16:50:00.3901474Z E AssertionError: CLAUDE.md / AGENTS.md drifted from config/governance_shared.md. Edit the canonical file, then run: uv run python scripts/sync_governance.py --apply",
-   "last_seen_at": "2026-08-05T16:50:47.311295+00:00",
+   "last_breach_detail": "2026-08-05T17:30:58.7700569Z E AssertionError: CLAUDE.md / AGENTS.md drifted from config/governance_shared.md. Edit the canonical file, then run: uv run python scripts/sync_governance.py --apply",
+   "last_seen_at": "2026-08-05T17:35:30.955792+00:00",
    "notified_at": null,
-   "occurrence_count": 18,
+   "occurrence_count": 19,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2226,7 +2237,7 @@
    "clean_streak_started_at": null,
    "control_gate_id": "dispatch_worker_ownership",
    "current_task_id": null,
-   "episode_count": 1457,
+   "episode_count": 1466,
    "episode_failures": [
     {
      "at": "2026-08-04T04:16:20.228925+00:00",
@@ -2236,7 +2247,7 @@
      "task_id": "inc_792a94b0ecf4_e1"
     }
    ],
-   "episode_opened_at": "2026-08-05T16:58:06.552320+00:00",
+   "episode_opened_at": "2026-08-05T17:52:18.171379+00:00",
    "escalation": {
     "at": "2026-08-04T04:16:20.270924+00:00",
     "notification_id": "effect_owned_email_5b3a5d4b722faea245a48bbb9ca01d93",
@@ -3206,7 +3217,7 @@
      },
      "first_seen_at": "2026-08-04T06:55:40.479741+00:00",
      "key": "dispatch-slot-1-3175c52f",
-     "last_seen_at": "2026-08-05T16:57:37.981340+00:00"
+     "last_seen_at": "2026-08-05T17:51:40.726861+00:00"
     },
     {
      "cleared_at": null,
@@ -3220,7 +3231,7 @@
      },
      "first_seen_at": "2026-08-04T07:21:54.991363+00:00",
      "key": "dispatch-slot-1-1675be8d",
-     "last_seen_at": "2026-08-05T16:57:46.650459+00:00"
+     "last_seen_at": "2026-08-05T17:51:52.947560+00:00"
     },
     {
      "cleared_at": null,
@@ -3234,7 +3245,7 @@
      },
      "first_seen_at": "2026-08-04T07:46:21.551654+00:00",
      "key": "dispatch-slot-1-592ef34e",
-     "last_seen_at": "2026-08-05T16:57:54.625043+00:00"
+     "last_seen_at": "2026-08-05T17:52:05.333241+00:00"
     },
     {
      "cleared_at": null,
@@ -3304,7 +3315,7 @@
      },
      "first_seen_at": "2026-08-05T05:28:01.199569+00:00",
      "key": "dispatch-slot-1-12eda1cf",
-     "last_seen_at": "2026-08-05T16:58:06.552320+00:00"
+     "last_seen_at": "2026-08-05T17:52:18.171379+00:00"
     },
     {
      "cleared_at": null,
@@ -3332,66 +3343,21 @@
      },
      "first_seen_at": "2026-08-05T15:40:28.863409+00:00",
      "key": "dispatch-slot-1-29018b66",
-     "last_seen_at": "2026-08-05T16:23:08.751637+00:00"
+     "last_seen_at": "2026-08-05T17:11:53.572461+00:00"
     }
    ],
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-12eda1cf unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-05T16:58:06.552320+00:00",
+   "last_seen_at": "2026-08-05T17:52:18.171379+00:00",
    "notified_at": null,
-   "occurrence_count": 11761,
+   "occurrence_count": 11770,
    "resolution": {
-    "at": "2026-08-05T16:58:06.552320+00:00",
+    "at": "2026-08-05T17:52:18.171379+00:00",
     "by": "inc_792a94b0ecf4_rootcause_e2",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
-    {
-     "at": "2026-08-05T16:14:38.262317+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T16:14:49.879520+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T16:14:57.227965+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T16:22:27.122749+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T16:22:37.869315+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T16:22:49.118103+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T16:22:58.972444+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T16:23:08.751637+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
-    {
-     "at": "2026-08-05T16:57:37.981340+00:00",
-     "by": "inc_792a94b0ecf4_rootcause_e2",
-     "criterion": "root_cause_task_succeeded"
-    },
     {
      "at": "2026-08-05T16:57:46.650459+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
@@ -3404,6 +3370,51 @@
     },
     {
      "at": "2026-08-05T16:58:06.552320+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T17:11:11.239827+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T17:11:23.152095+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T17:11:35.280848+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T17:11:45.454699+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T17:11:53.572461+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T17:51:40.726861+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T17:51:52.947560+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T17:52:05.333241+00:00",
+     "by": "inc_792a94b0ecf4_rootcause_e2",
+     "criterion": "root_cause_task_succeeded"
+    },
+    {
+     "at": "2026-08-05T17:52:18.171379+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     }
@@ -5644,6 +5655,6 @@
    }
   }
  },
- "updated_at": "2026-08-05T17:05:28.712828+00:00",
+ "updated_at": "2026-08-05T17:52:18.236530+00:00",
  "version": 1
 }

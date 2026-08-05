@@ -1,0 +1,74 @@
+{
+  "schema_version": "volpred.reproduce_report.v1",
+  "generated_at": "2026-08-05T17:39:14.385664+00:00",
+  "experiment_id": "K1710",
+  "engine": {
+    "name": "scripts/reproduce_check.py",
+    "schema": "volpred.reproduce_report.v1",
+    "path": "scripts/reproduce_check.py",
+    "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+    "committed_at_repo_head": true
+  },
+  "repo_head": "f2424375c63c07eeaa341fdc90d42a48c2fb2b48",
+  "methodology_references": [
+    {
+      "citation": "Peng (2011), Reproducible Research in Computational Science",
+      "doi": "10.1126/science.1213847",
+      "principle": "computational reproducibility is a minimum standard, not a validity verdict"
+    },
+    {
+      "citation": "Sandve et al. (2013), Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "principle": "record provenance and preserve the exact workflow behind every result"
+    },
+    {
+      "citation": "Stodden et al. (2016), Enhancing Reproducibility for Computational Methods",
+      "doi": "10.1126/science.aah6168",
+      "principle": "disclose code, data, workflow, and computational environment"
+    }
+  ],
+  "discovery": {
+    "inventory_record": {
+      "experiment": "K1710",
+      "path": "experiments/K1710",
+      "priority_sources": [],
+      "code_count": 1,
+      "results_count": 2,
+      "reproduce_report": true,
+      "report_status": "unverified",
+      "report_stale": true,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "K1710.py",
+      "result_file": "K1710_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    "subject_files": []
+  },
+  "environment": {
+    "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "uv_lock_sha256": "340b8dc87c7b1e0f1fc852bab3f62e2d084582c77831cee59a3729064706edf0",
+    "pythonhashseed": "0",
+    "package_versions": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "arch": "8.0.0",
+      "yfinance": "1.2.0",
+      "scikit-learn": "1.8.0"
+    }
+  },
+  "execution": null,
+  "comparison": null,
+  "integrity": null,
+  "outcome": {
+    "status": "unverified",
+    "reason_code": "INPUT_HASH_MISMATCH",
+    "severity": "warn",
+    "reproducible": null,
+    "summary": "missing=[]; hash_mismatch=['src/volpred/stats/model_evaluation.py']"
+  }
+}

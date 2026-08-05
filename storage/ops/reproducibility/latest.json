@@ -1,7 +1,7 @@
 {
   "schema_version": "volpred.reproduce_inventory.v1",
-  "generated_at": "2026-08-05T10:03:13.662996+00:00",
-  "repo_head": "98c989c6f232cabd1227735a3d688d6532ee9f4f",
+  "generated_at": "2026-08-05T17:49:06.839087+00:00",
+  "repo_head": "917197da74e715292942c2e8b157a8228bb636b4",
   "scope": {
     "paper_sources": "paper/*/experiments.md plus canonical submission compile closures; README fallback only when both are absent",
     "recent_feed_articles": "latest 60 records with status=published",
@@ -242,6 +242,7 @@
       "K1436",
       "K1448",
       "K1450",
+      "K1451",
       "K1478",
       "K1479",
       "K1492",
@@ -365,6 +366,7 @@
       "K1436",
       "K1448",
       "K1450",
+      "K1451",
       "K1457",
       "K1470",
       "K1471",
@@ -606,6 +608,7 @@
     "K1436": "k1436",
     "K1448": "k1448",
     "K1450": "k1450",
+    "K1451": "k1451",
     "K1457": "k1457",
     "K1470": "k1470_eav_multistart_main_spec",
     "K1471": "k1471_vt_crowding_redesign",
@@ -749,27 +752,26 @@
     "with_code": 1441,
     "with_results": 1286,
     "with_reproduce_report": 7,
-    "runnable": 40,
-    "unverified_missing_spec": 1167,
+    "runnable": 41,
+    "unverified_missing_spec": 1166,
     "code_without_results": 168,
     "results_without_code": 13,
-    "priority_refs": 238,
-    "priority_existing": 234,
+    "priority_refs": 239,
+    "priority_existing": 235,
     "priority_missing_dirs": 4,
-    "priority_runnable": 11,
+    "priority_runnable": 12,
     "priority_with_reproduce_report": 3,
-    "priority_reproduced_match": 1,
-    "priority_stale_reports": 2,
-    "priority_unverified": 233,
+    "priority_reproduced_match": 3,
+    "priority_stale_reports": 0,
+    "priority_unverified": 232,
     "priority_code_without_results": 2,
-    "broken_reports": 2,
-    "stale_reports": 4,
+    "broken_reports": 0,
+    "stale_reports": 2,
     "knowledge_base_readable": true,
     "results_without_knowledge": 0
   },
   "report_status_counts": {
-    "pass_tolerated": 5,
-    "unverified": 2
+    "pass_tolerated": 7
   },
   "missing_priority_experiment_dirs": [
     "K54",
@@ -2428,6 +2430,23 @@
       "blocker": "missing reproduce_spec.json"
     },
     {
+      "experiment": "k1451",
+      "path": "experiments/k1451",
+      "priority_sources": [
+        "recent_feed"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": null,
+      "entrypoint": "k1451.py",
+      "result_file": "k1451_results.json",
+      "classification": "unverified_missing_spec",
+      "blocker": "missing reproduce_spec.json"
+    },
+    {
       "experiment": "k1457",
       "path": "experiments/k1457",
       "priority_sources": [
@@ -2861,8 +2880,8 @@
       "code_count": 1,
       "results_count": 2,
       "reproduce_report": true,
-      "report_status": "unverified",
-      "report_stale": true,
+      "report_status": "pass_tolerated",
+      "report_stale": false,
       "spec_file": "reproduce_spec.json",
       "entrypoint": "k1699.py",
       "result_file": "k1699_results.json",
@@ -2929,8 +2948,8 @@
       "code_count": 1,
       "results_count": 2,
       "reproduce_report": true,
-      "report_status": "unverified",
-      "report_stale": true,
+      "report_status": "pass_tolerated",
+      "report_stale": false,
       "spec_file": "reproduce_spec.json",
       "entrypoint": "K1710.py",
       "result_file": "K1710_results.json",
@@ -4478,11 +4497,11 @@
       "reproduce_report": false,
       "report_status": null,
       "report_stale": null,
-      "spec_file": null,
+      "spec_file": "reproduce_spec.json",
       "entrypoint": "k892_verify_tw_gamma.py",
       "result_file": "k892_verify_tw_gamma_results.json",
-      "classification": "unverified_missing_spec",
-      "blocker": "missing reproduce_spec.json"
+      "classification": "runnable",
+      "blocker": null
     },
     {
       "experiment": "k896",
@@ -7284,42 +7303,7 @@
     }
   ],
   "results_without_knowledge": [],
-  "broken_reports": [
-    {
-      "experiment": "K1710",
-      "path": "experiments/K1710",
-      "priority_sources": [
-        "paper"
-      ],
-      "code_count": 1,
-      "results_count": 2,
-      "reproduce_report": true,
-      "report_status": "unverified",
-      "report_stale": true,
-      "spec_file": "reproduce_spec.json",
-      "entrypoint": "K1710.py",
-      "result_file": "K1710_results.json",
-      "classification": "runnable",
-      "blocker": null
-    },
-    {
-      "experiment": "k1699",
-      "path": "experiments/k1699",
-      "priority_sources": [
-        "paper"
-      ],
-      "code_count": 1,
-      "results_count": 2,
-      "reproduce_report": true,
-      "report_status": "unverified",
-      "report_stale": true,
-      "spec_file": "reproduce_spec.json",
-      "entrypoint": "k1699.py",
-      "result_file": "k1699_results.json",
-      "classification": "runnable",
-      "blocker": null
-    }
-  ],
+  "broken_reports": [],
   "sample_candidates": [
     {
       "experiment": "k1436",
@@ -7449,8 +7433,8 @@
       "code_count": 1,
       "results_count": 2,
       "reproduce_report": true,
-      "report_status": "unverified",
-      "report_stale": true,
+      "report_status": "pass_tolerated",
+      "report_stale": false,
       "spec_file": "reproduce_spec.json",
       "entrypoint": "k1699.py",
       "result_file": "k1699_results.json",
@@ -7466,8 +7450,8 @@
       "code_count": 1,
       "results_count": 2,
       "reproduce_report": true,
-      "report_status": "unverified",
-      "report_stale": true,
+      "report_status": "pass_tolerated",
+      "report_stale": false,
       "spec_file": "reproduce_spec.json",
       "entrypoint": "K1710.py",
       "result_file": "K1710_results.json",
@@ -7488,6 +7472,23 @@
       "spec_file": "reproduce_spec.json",
       "entrypoint": "k741_nfp_event_study_canonical.py",
       "result_file": "k741_nfp_event_study_canonical_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    {
+      "experiment": "k892",
+      "path": "experiments/k892",
+      "priority_sources": [
+        "paper"
+      ],
+      "code_count": 1,
+      "results_count": 1,
+      "reproduce_report": false,
+      "report_status": null,
+      "report_stale": null,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "k892_verify_tw_gamma.py",
+      "result_file": "k892_verify_tw_gamma_results.json",
       "classification": "runnable",
       "blocker": null
     },

@@ -1,12 +1,12 @@
 {
-  "last_seen_run_id": 31025599450,
-  "last_seen_conclusion": "failure",
+  "last_seen_run_id": 31030745635,
+  "last_seen_conclusion": "cancelled",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-30983363179",
   "last_push_remediation": {
     "attempted": true,
-    "ahead": 1,
-    "head_sha": "7a86e16f2ea7fc65be31cd3a23677d6242799eef",
+    "ahead": 2,
+    "head_sha": "6ec020458fe6c721fe34b8514e58252d2a593b5e",
     "pushed": true,
     "rc": 0,
     "outcome": "pushed",
@@ -14,36 +14,33 @@
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "31025599450:1",
-    "run_id": 31025599450,
+    "key": "31031128319:1",
+    "run_id": 31031128319,
     "attempt": 1,
-    "status": "completed",
-    "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31025599450",
-    "head_sha": "aed4833be6fd5c7b771b292089bcba3bf280c2bc",
-    "created_at": "2026-08-05T16:30:29Z",
-    "started_at": "2026-08-05T16:30:29Z",
-    "updated_at": "2026-08-05T16:50:16Z",
+    "status": "in_progress",
+    "conclusion": "",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31031128319",
+    "head_sha": "6ec020458fe6c721fe34b8514e58252d2a593b5e",
+    "created_at": "2026-08-05T17:40:38Z",
+    "started_at": "2026-08-05T17:40:38Z",
+    "updated_at": "2026-08-05T17:41:08Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "31025599450:1",
-    "run_id": 31025599450,
+    "key": "31030745635:1",
+    "run_id": 31030745635,
     "attempt": 1,
     "status": "completed",
-    "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31025599450",
-    "head_sha": "aed4833be6fd5c7b771b292089bcba3bf280c2bc",
-    "created_at": "2026-08-05T16:30:29Z",
-    "started_at": "2026-08-05T16:30:29Z",
-    "updated_at": "2026-08-05T16:50:16Z",
+    "conclusion": "cancelled",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31030745635",
+    "head_sha": "1912bece081d51849734f48aa654041eefa86d24",
+    "created_at": "2026-08-05T17:35:40Z",
+    "started_at": "2026-08-05T17:35:40Z",
+    "updated_at": "2026-08-05T17:40:59Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-08-05T17:05:23.808056+00:00",
+  "updated_at": "2026-08-05T17:55:22.095502+00:00",
   "processed_run_keys": [
-    "29936014806:1",
-    "29940488856:1",
-    "29944840844:1",
     "29949169552:1",
     "29953366645:1",
     "29957516318:1",
@@ -540,7 +537,10 @@
     "31020755163:1",
     "31023164717:1",
     "31024009526:1",
-    "31025599450:1"
+    "31025599450:1",
+    "31028387964:1",
+    "31028803601:1",
+    "31030745635:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -759,7 +759,7 @@
       "updated_at": "2026-08-05T07:19:19Z",
       "attempt_history_complete": true
     },
-    "root_cause": "2026-08-05T16:50:00.3901474Z E AssertionError: CLAUDE.md / AGENTS.md drifted from config/governance_shared.md. Edit the canonical file, then run: uv run python scripts/sync_governance.py --apply",
+    "root_cause": "2026-08-05T17:30:58.7700569Z E AssertionError: CLAUDE.md / AGENTS.md drifted from config/governance_shared.md. Edit the canonical file, then run: uv run python scripts/sync_governance.py --apply",
     "root_cause_status": "complete",
     "failure_run_keys": [
       "30983363179:1",
@@ -779,7 +779,8 @@
       "31018124379:1",
       "31020755163:1",
       "31024009526:1",
-      "31025599450:1"
+      "31025599450:1",
+      "31028803601:1"
     ],
     "repair_task_ids": [
       "ci-red-30983363179"
@@ -816,7 +817,7 @@
         "sent_at": "2026-08-05T08:20:38.806320+00:00"
       }
     },
-    "root_cause_run_key": "31025599450:1",
+    "root_cause_run_key": "31028803601:1",
     "declared_output_paths": [
       "config/governance_shared.md",
       "scripts/daily_update.py",
@@ -851,18 +852,18 @@
       "tests/test_shared_lock.py",
       "tests/test_write_claim_guard.py"
     ],
-    "declared_output_paths_run_key": "31025599450:1",
+    "declared_output_paths_run_key": "31028803601:1",
     "latest_failure": {
-      "key": "31025599450:1",
-      "run_id": 31025599450,
+      "key": "31028803601:1",
+      "run_id": 31028803601,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31025599450",
-      "head_sha": "aed4833be6fd5c7b771b292089bcba3bf280c2bc",
-      "created_at": "2026-08-05T16:30:29Z",
-      "started_at": "2026-08-05T16:30:29Z",
-      "updated_at": "2026-08-05T16:50:16Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/31028803601",
+      "head_sha": "bf8262d7bf86901537d1cf7f063f51ab5df61ff4",
+      "created_at": "2026-08-05T17:10:52Z",
+      "started_at": "2026-08-05T17:10:52Z",
+      "updated_at": "2026-08-05T17:31:13Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
@@ -883,9 +884,10 @@
       "07ebe6d6d3e1af7ee7870958772f770e84502a9f",
       "3089446e8669051d1ba65665cb7446b368d14fdc",
       "d96070981cd4b9b1cf01d4331c93f1e01bf8699c",
-      "aed4833be6fd5c7b771b292089bcba3bf280c2bc"
+      "aed4833be6fd5c7b771b292089bcba3bf280c2bc",
+      "bf8262d7bf86901537d1cf7f063f51ab5df61ff4"
     ],
-    "failure_cycles": 18,
+    "failure_cycles": 19,
     "repair_admission": {
       "status": "admitted",
       "task_id": "ci-red-30983363179",
@@ -894,24 +896,24 @@
     "repair_task_statuses": {
       "ci-red-30983363179": "pending"
     },
-    "dispatch_request_count": 53,
-    "last_dispatch_request_at": "2026-08-05T17:05:23.808056+00:00",
+    "dispatch_request_count": 56,
+    "last_dispatch_request_at": "2026-08-05T17:40:29.362395+00:00",
     "push_intent": {
-      "head_sha": "7a86e16f2ea7fc65be31cd3a23677d6242799eef",
-      "run_key": "31025599450:1",
-      "recorded_at": "2026-08-05T17:05:23.808056+00:00"
+      "head_sha": "6ec020458fe6c721fe34b8514e58252d2a593b5e",
+      "run_key": "31028803601:1",
+      "recorded_at": "2026-08-05T17:40:29.362395+00:00"
     },
     "last_push_remediation": {
       "attempted": true,
-      "ahead": 1,
-      "head_sha": "7a86e16f2ea7fc65be31cd3a23677d6242799eef",
+      "ahead": 2,
+      "head_sha": "6ec020458fe6c721fe34b8514e58252d2a593b5e",
       "pushed": true,
       "rc": 0,
       "outcome": "pushed",
       "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-08-05T17:05:23.808056+00:00",
-    "last_verified_push_head": "7a86e16f2ea7fc65be31cd3a23677d6242799eef",
+    "last_push_remediation_at": "2026-08-05T17:40:29.362395+00:00",
+    "last_verified_push_head": "6ec020458fe6c721fe34b8514e58252d2a593b5e",
     "remediation_poll_keys": [
       "2026-08-05T07",
       "2026-08-05T08",
@@ -926,6 +928,6 @@
       "2026-08-05T17"
     ],
     "remediation_checks": 11,
-    "escalation_reason": "ci_failed_more_than_two_cycles: 18"
+    "escalation_reason": "ci_failed_more_than_two_cycles: 19"
   }
 }

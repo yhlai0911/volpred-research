@@ -1,0 +1,169 @@
+{
+  "schema_version": "volpred.reproduce_report.v1",
+  "generated_at": "2026-08-05T17:42:28.228921+00:00",
+  "experiment_id": "K1710",
+  "engine": {
+    "name": "scripts/reproduce_check.py",
+    "schema": "volpred.reproduce_report.v1",
+    "path": "scripts/reproduce_check.py",
+    "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+    "committed_at_repo_head": true
+  },
+  "repo_head": "6ec020458fe6c721fe34b8514e58252d2a593b5e",
+  "methodology_references": [
+    {
+      "citation": "Peng (2011), Reproducible Research in Computational Science",
+      "doi": "10.1126/science.1213847",
+      "principle": "computational reproducibility is a minimum standard, not a validity verdict"
+    },
+    {
+      "citation": "Sandve et al. (2013), Ten Simple Rules for Reproducible Computational Research",
+      "doi": "10.1371/journal.pcbi.1003285",
+      "principle": "record provenance and preserve the exact workflow behind every result"
+    },
+    {
+      "citation": "Stodden et al. (2016), Enhancing Reproducibility for Computational Methods",
+      "doi": "10.1126/science.aah6168",
+      "principle": "disclose code, data, workflow, and computational environment"
+    }
+  ],
+  "discovery": {
+    "inventory_record": {
+      "experiment": "K1710",
+      "path": "experiments/K1710",
+      "priority_sources": [],
+      "code_count": 1,
+      "results_count": 2,
+      "reproduce_report": true,
+      "report_status": "unverified",
+      "report_stale": true,
+      "spec_file": "reproduce_spec.json",
+      "entrypoint": "K1710.py",
+      "result_file": "K1710_results.json",
+      "classification": "runnable",
+      "blocker": null
+    },
+    "subject_files": [
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1544_prg_fair_info_gjr/k1544_prg_fair_info_gjr.py",
+        "sha256": "41f11ac7833ef232d5f097782315b2548c457f6cfdefd2305bc271103bcba516",
+        "size": 35341
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/0050_TW_snapshot.csv",
+        "sha256": "91ec88b94cc7692c5f3feaded96c28218f9b8408cd52105367bd296a388e8b0f",
+        "size": 1071123
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/EEM_snapshot.csv",
+        "sha256": "924a7447754546c05852aee899951995f567cae5b23e37e2eccf7c8bef87d7c3",
+        "size": 1483233
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/GLD_snapshot.csv",
+        "sha256": "0741addcf29a2769bd550ea80558a1f6579f6a0441d49039b5437e48b9395f35",
+        "size": 1370527
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/QQQ_snapshot.csv",
+        "sha256": "b42eb032309215841faa55a7476366df9541b991dcb8b046ac4135c31fb4835d",
+        "size": 1691694
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/SPY_snapshot.csv",
+        "sha256": "501af099f9e8205d4629b607ee2e30a147e7beef6ed5ce1282abc00ad2ae183b",
+        "size": 1692574
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/TAIFEX_daily_snapshot.csv",
+        "sha256": "b573f0e2736532c7671bab7120c1872ef23b5682e50013c607a635790cf42588",
+        "size": 366885
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/TAIFEX_sessions_snapshot.csv",
+        "sha256": "59c21377aea941e9c18094a47d07a1d2caa3d0b73a66c7f97e8bd6b44f950acf",
+        "size": 260370
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k880_prg_spy_validation.py",
+        "sha256": "26fb1424b3cab2fef16e7ff234b1aed232359f84d313d17ece6934b7c5365265",
+        "size": 53290
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k880_results.json",
+        "sha256": "3c59d18ce52ba296e00975f7c13cab0e6d8edbf2b918e53ff29bd7780926784b",
+        "size": 11161
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k881_prg_multi_asset.py",
+        "sha256": "698173175a24fa865bd12990ba37f498b242b70aa4331f5c4daa4c01a2a5bff2",
+        "size": 61538
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k883_taifex_tick_prg.py",
+        "sha256": "0c787fabfc8732ba3656932fba3271e887da70c2053e5de680e0d7e61821e331",
+        "size": 61627
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k886_prg_0050tw.py",
+        "sha256": "9a16dab8a6f5b453637f2dfe6040c4d71039ad0de4f866ed7fb98d7a2a200f9c",
+        "size": 63620
+      },
+      {
+        "path": ".claude/worktrees/dispatch-slot-1-1e5922b4-k1734/src/volpred/stats/model_evaluation.py",
+        "sha256": "c33b4617cf92e92696d2cb15d4eafa39316e1422332f7ef154cce7195a8493ca",
+        "size": 20257
+      },
+      {
+        "path": "experiments/K1710/K1710.py",
+        "sha256": "6e5c26d5a68a1d3ef525d6227313c0dfa661d71630c60c815153c39b3ba9a3f8",
+        "size": 44621
+      },
+      {
+        "path": "experiments/K1710/K1710_results.json",
+        "sha256": "581d527b3d2754050a6fd7513b2ee1ffba3961d4baefb3eb67e27079ee17a1c3",
+        "size": 29851
+      },
+      {
+        "path": "experiments/K1710/reproduce_spec.json",
+        "sha256": "0fc997f831ec6f24e05f86511477531680bf851143ca5e0ebe3e052d361571da",
+        "size": 5248
+      },
+      {
+        "path": "scripts/reproduce_check.py",
+        "sha256": "a580fa59ed49ce7e91b3236e54c6b378038309bf8e333f992b93cbe561e3c727",
+        "size": 65995
+      }
+    ],
+    "entrypoint": "experiments/K1710/K1710.py",
+    "canonical_result": "experiments/K1710/K1710_results.json",
+    "spec_sha256": "0fc997f831ec6f24e05f86511477531680bf851143ca5e0ebe3e052d361571da",
+    "subject_sha256": "64be088abd8a1ca03ebc762cbdd52bd22d1eda765ed4b7e39b774a5d983a2f5f"
+  },
+  "environment": {
+    "python": "3.12.10 (main, May 30 2025, 05:53:56) [Clang 20.1.4 ]",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "uv_lock_sha256": "340b8dc87c7b1e0f1fc852bab3f62e2d084582c77831cee59a3729064706edf0",
+    "pythonhashseed": "0",
+    "package_versions": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "scipy": "1.17.1",
+      "statsmodels": "0.14.6",
+      "arch": "8.0.0",
+      "yfinance": "1.2.0",
+      "scikit-learn": "1.8.0"
+    }
+  },
+  "execution": null,
+  "comparison": null,
+  "integrity": null,
+  "outcome": {
+    "status": "unverified",
+    "reason_code": "WORKING_TREE_DRIFT",
+    "severity": "warn",
+    "reproducible": null,
+    "summary": "committed snapshot differs for: ['.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1544_prg_fair_info_gjr/k1544_prg_fair_info_gjr.py', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/0050_TW_snapshot.csv', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/EEM_snapshot.csv', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/GLD_snapshot.csv', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/QQQ_snapshot.csv', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/SPY_snapshot.csv', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/TAIFEX_daily_snapshot.csv', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1699/data/TAIFEX_sessions_snapshot.csv', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k880_prg_spy_validation.py', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k880_results.json', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k881_prg_multi_asset.py', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k883_taifex_tick_prg.py', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/paper/prg-periodic-garch/experiments/k886_prg_0050tw.py', '.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/src/volpred/stats/model_evaluation.py', 'experiments/K1710/K1710_results.json', 'experiments/K1710/reproduce_spec.json']"
+  }
+}
