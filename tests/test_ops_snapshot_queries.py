@@ -126,6 +126,47 @@ def feed_file(tmp_path: Path) -> Path:
     return p
 
 
+# ── alerts_state ─────────────────────────────────────────────────────────────
+@pytest.fixture()
+def alert_dedup_file(tmp_path: Path) -> Path:
+    from datetime import datetime, timedelta, timezone
+
+    recent = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat()
+    stale = (datetime.now(timezone.utc) - timedelta(days=10)).isoformat()
+    payload = {
+        "alerts": {
+            "a1": {
+                "level": "critical",
+                "title": "dispatch worker down",
+                # real writer (src/volpred/ops/alerts.py) uses last_sent_at /
+                # first_sent_at, never sent_at / ts.
+                "last_sent_at": recent,
+                "first_sent_at": stale,
+            },
+            "a2": {
+                "level": "warn",
+                "title": "old alert outside the 24h window",
+                "last_sent_at": stale,
+                "first_sent_at": stale,
+            },
+        }
+    }
+    p = tmp_path / "alert_dedup.json"
+    p.write_text(json.dumps(payload))
+    return p
+
+
+def test_alerts_state_reads_the_real_writer_key(alert_dedup_file: Path):
+    # 2026-08-05 resource_monitor finding: the reader looked for sent_at/ts,
+    # a key the writer never produces, so sent_last_24h was structurally 0
+    # in every manager brief regardless of actual alert volume.
+    out = MOD.alerts_state(path=alert_dedup_file)
+    assert out["sent_last_24h"] == 1
+    assert out["recent"][0]["title"] == "dispatch worker down"
+    _size_ok(out)
+
+
+# ── --article ────────────────────────────────────────────────────────────────
 def test_article_query_by_id_excludes_content(feed_file: Path):
     out = MOD.article_query("mile_aaa111", path=feed_file)
     assert out["matched"] == 1

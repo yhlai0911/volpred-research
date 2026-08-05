@@ -171,14 +171,14 @@ def content_pool() -> dict:
         return {"error": f"{type(e).__name__}: {e}"}
 
 
-def alerts_state() -> dict:
-    dedup = _read_json(STORAGE / "ops" / "alert_dedup.json")
+def alerts_state(path: Path | None = None) -> dict:
+    dedup = _read_json(path or STORAGE / "ops" / "alert_dedup.json")
     alerts = dedup.get("alerts") or {}
     if not isinstance(alerts, dict):
         return {"recent": []}
     now_recent = []
     for v in alerts.values():
-        age = _age_min(v.get("sent_at") or v.get("ts"))
+        age = _age_min(v.get("sent_at") or v.get("ts") or v.get("last_sent_at") or v.get("first_sent_at"))
         if age is not None and age < 24 * 60:
             now_recent.append(
                 {"level": v.get("level"), "title": str(v.get("title", ""))[:60], "age_min": age}
