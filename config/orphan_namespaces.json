@@ -63,6 +63,15 @@
       "max_files": 40,
       "commit_subject": "chore(experiment-reap): collect orphaned experiment artifacts ({count} files)",
       "commit_body": "Auto-collected by reap_orphan_deliverables: experiment scripts, result JSON and caches left uncommitted after the producing session ended. Root-cause: the author session that wrote them never came back, and PHASE-Z only commits what its own fire produced - so the files had no owner and re-alerted every fire."
+    },
+    {
+      "id": "reports_assets",
+      "path": "storage/reports/assets",
+      "owner_source": "feed_chart_reference",
+      "default": "adopt",
+      "max_files": 40,
+      "commit_subject": "chore(reports-assets-reap): collect orphaned article chart assets ({count} files)",
+      "commit_body": "Auto-collected by reap_orphan_deliverables: chart PNGs generated for published feed articles (referenced by inline content) but left untracked in storage/reports/assets/. Root-cause: chart-generation scripts write directly into this directory and PHASE-Z only commits what its own fire produced, so output from a crashed or out-of-lane producer had no owner and re-alerted every fire. Fourth namespace missing from this registry (paper 07-14, storage/drafts 07-15/07-17, experiments 07-19) - the gap is always the missing config row, not a missing recognizer."
     }
   ]
 }
