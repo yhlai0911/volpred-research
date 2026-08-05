@@ -83,7 +83,33 @@ fb-publishing 唯一入口這件事，現在無人閘門**」。
 3. `computer_use` 本身的三條 Bash 允許（fb_realchrome_post.py 等）維持不變，這條路徑本來
    就對。
 
-## 4. 為什麼不現在自己動手做機制修法
+## 4. 現場驗證回饋（member_success 2026-08-05T16:03Z，`item_20260805T160350235367Z`）
+
+裁定生效後 member_success 立即重測，結果與追加發現：
+
+- **D48/D56 驗收 1 已通過**：乾淨匿名 context 下 `navigate` 對 `/questions`、`/v3/questions`
+  皆確認登入鈕正常 render、提問卡未卡骨架（commit `785ca70`）。D25 第 5 條可結——這是
+  member_success 自己的判斷與動作，不是本裁定要求他們做的事，本文件僅記錄以求完整。
+- **精確補充 §3 的機制描述**：member_success 回報他們的 pane 裡 `navigate`／`read_page`
+  可用，`javascript_tool`／`select_browser` 被 deny。**這不是巧合，是可解釋的結構**：
+  `.claude/settings.local.json`（專案層）只顯式 allow 了 `computer`／`find`／`form_input`／
+  `navigate`／`read_page`／`switch_browser`／`tabs_context_mcp`／`tabs_create_mcp`／
+  `browser_batch` 這幾支；`javascript_tool`／`select_browser`／`get_page_text`／
+  `list_connected_browsers`（依變體）等不在清單內的工具，在 don't-ask 模式下**預設被拒**——
+  跟 `.claude/**` 那個「疑似 harness 內建防線」不是同一機制，這裡單純是「沒被列進 allow list
+  的工具，在沒有人現場按確認的模式下走預設 deny」，`.claude/settings.local.json` 本身就是
+  這樣長出來的（老闆過去互動 session 逐次核准累積的清單，從未為部門架構設計過）。
+- **這對 §3 建議方向是關鍵新資訊，不只是背景**：`org_attach.py` 的 `capability_rules['computer_use']`
+  **目前只加三條 Bash 允許，沒有加任何一條 MCP 工具 allow 規則**。也就是說：**就算某部門
+  真的宣告了 `computer_use`，它拿到的 MCP 工具權限跟 member_success（未宣告）完全一樣**——
+  一樣沒有 `javascript_tool`、一樣沒有 `select_browser`。**驗收 2（注入不符 schema 的
+  localStorage，需要 `javascript_tool`）目前對任何部門都是死路，不分實作方或驗收方，
+  也不分有沒有宣告 `computer_use`**——這比原本以為的「唯讀組已存在」更急：唯讀組是意外長出來
+  的，**互動組其實還不存在**，需要 platform_eng 明確幫 `computer_use` 部門加上
+  `javascript_tool`／`select_browser`（與其餘互動工具）的 allow 規則，不能假設宣告了
+  capability 就自動拿到。已併入 §3 建議方向的路由，不另開新單。
+
+## 5. 為什麼不現在自己動手做機制修法
 
 `scripts/org/org_attach.py` 不在治理部轄區，且此修法涉及對「互動組」工具清單的判斷
 （哪些工具算可變更、哪些純唯讀是安全邊界判斷，需要與 platform_eng 一起核對 MCP 工具的

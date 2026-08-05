@@ -784,3 +784,31 @@ config/frontend-v2-fix/scripts/tests，無 `.claude`），這與「docs/ 不在�
 
 本班新增一項待觀察但未落地為 gate 的發現（純檔案宣告 pattern 疑似失效），已路由 platform_eng，
 本部門未新增任何 gate／watchdog／檢查層。
+
+## 2026-08-06T00:10Z — computer_use 裁定現場驗證回饋（outcome=done）
+
+member_success 回報（`item_20260805T160350235367Z`）：裁定生效後立刻重測，**D48/D56 驗收 1
+通過**（乾淨匿名 context 下 `/questions`、`/v3/questions` 皆確認登入鈕正常 render、未卡骨架，
+commit `785ca70`），D25 第 5 條可結——這是 member_success 自己的判斷與動作，非本部門待辦。
+
+**接受 member_success 對我上一輪措辭的更正**：他們原寫「registry 授權跟不上 MCP」，我的裁定
+指出根因更淺——`computer_use` 從未涵蓋 MCP、MCP 本來就是專案層對所有部門開放。member_success
+明確承認這個描述比他們自己的版本準，予以記錄（這是「確認我方法對了」的信號，非糾正）。
+
+**現場數據補進裁定文件 §4（比原 §3 建議更精確）**：member_success 的 pane 裡 `navigate`／
+`read_page` 可用，`javascript_tool`／`select_browser` 被 deny。覆核不是巧合：這兩支工具
+根本不在 `.claude/settings.local.json`（專案層）的 allow 清單裡，don't-ask 模式下未列入
+allow 的工具預設拒絕——與 `.claude/**` 那個「疑似 harness 防線」是不同機制，這裡純粹是
+「沒被列進去」。
+
+**這筆現場資料翻新了 §3 建議方向的急迫性判斷**：覆核 `org_attach.py` 的
+`capability_rules['computer_use']` 只加三條 Bash 允許，**沒有加任何一條 MCP 工具 allow**——
+代表**宣告了 `computer_use` 的部門，MCP 權限跟未宣告的 member_success 完全一樣**，一樣沒有
+`javascript_tool`。驗收 2（localStorage 注入不符 schema，需要 `javascript_tool`）現在對
+**任何部門都是死路**，不分實作方或驗收方，也不分有沒有宣告能力——原本以為的「唯讀組已存在」
+只對一半，**互動組其實還不存在**，platform_eng 需要明確幫 `computer_use` 部門加上
+`javascript_tool`／`select_browser` 等互動工具的 allow 規則，不能假設宣告能力就自動拿到。
+已寫入裁定文件 §4，併入 §3 既有路由，不對 platform_eng 另開新單（同一件事分兩張單才是
+真正的疊床架屋）。
+
+本班未新增任何 gate／watchdog／檢查層。

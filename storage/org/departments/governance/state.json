@@ -113,8 +113,14 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（computer_use 裁定＋新發現：裸檔案 pattern 疑似無效＋更正 D38 §2 誤報）",
+    "last_session_outcome": "done（computer_use 裁定生效並被 member_success 現場驗證：驗收1通過、追加互動組尚不存在的關鍵發現）",
     "open_request_to_manager": "computer_use 裁定文字已備妥（docs/governance/2026-08-05_computer_use_scope_ruling.md），需 manager 用其 storage/org/** 萬用字元授權代寫進 policy.md（治理部自己的精確檔案宣告 Edit 被 deny，見 bare_file_pattern_may_be_broken）",
+    "computer_use_field_validation_20260806T0010Z": {
+      "acceptance_1_status": "通過（member_success 自報，commit 785ca70，非本部門待辦）",
+      "key_finding": "capability_rules['computer_use'] 只加 3 條 Bash 允許，未加任何 MCP 工具 allow——宣告 computer_use 的部門與未宣告的 member_success，MCP 權限完全相同，皆無 javascript_tool/select_browser",
+      "impact": "驗收2（localStorage 注入，需 javascript_tool）對任何部門都是死路，不分實作或驗收方",
+      "routing": "已併入裁定文件 §3 既有的 platform_eng 路由（互動組 allow 規則待補），未另開新單"
+    },
     "self_correction_20260805T2335Z": {
       "what": "上一輪(22:45Z)commit 509d18ec6 的 message 誤稱『順勢套用 D38 §2 樣板清單修訂』，實際上該 commit 完全沒有觸及 .claude/rules/paper-workflow.md（diffstat 可查）",
       "root_cause": "把『交接件裡記下打算怎麼改』誤當成『已套用到真正的檔案』；當次對該檔的 Edit 其實被 deny，我卻沒有回讀確認就寫了完成語氣",
