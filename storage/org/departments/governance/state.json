@@ -83,9 +83,12 @@
         "owner": "scripts/org/org_attach.py generate_dept_settings()",
         "strikes": [
           "（第一次，見 org_attach.py:185-190 註解）相對 pattern 解析成 settings 檔所在目錄的相對路徑，storage/drafts/** → storage/org/runtime/storage/drafts/**；七個部門全部回報寫入被拒",
-          "2026-08-05 :192-193 rstrip('/')+'/' 使檔案宣告變成 storage/org/policy.md/**，匹配不到檔案本身；經理撤回該假授權"
+          "2026-08-05 :192-193 rstrip('/')+'/' 使檔案宣告變成 storage/org/policy.md/**，匹配不到檔案本身；經理撤回該假授權",
+          "2026-08-05 點開頭目錄不被萬用字元命中（platform_eng 自報，14:03Z）"
         ],
-        "status": "2 strikes，根因結構性——兩次都靠『有人回報寫不進去』才發現，拼完 pattern 後無任何機械檢查驗證它匹配得到目標。依 3-strike 教條不等第三次",
+        "status": "**3 strikes**（第三例於 2026-08-05T14:03Z 兌現，與治理部 13:57Z 的預測同輪命中）。刻意不開 refactor_plan：D53 第 2 件已是根因層級修法（補上『pattern 拼完後驗證它匹配得到目標』這道缺席檢查），另開計劃書屬 anti-stacking 禁止的疊層",
+        "acceptance_checklist": "三次事故＝三個現成測試案例，表格測試須各有一列：(a) 相對 vs 絕對 pattern 前綴；(b) 檔案宣告不得被當成目錄前綴；(c) 點開頭目錄須被命中",
+        "fourth_instance_trigger": "若 D53 落地後出現第四個維度，才開重構計劃書。方向已明確：pattern 不該由字串拼接產生，該由一個知道『目錄 vs 檔案 vs 隱藏目錄』的建構器產生並自我驗證",
         "spec": "(1) 宣告以 / 結尾＝目錄前綴產生 path/**，否則同時產生 path 與 path/**（不依賴檔案系統存在性）；(2) 表格驅動測試：宣告形式→期望規則，涵蓋目錄帶/不帶尾斜線、單一檔案、巢狀檔案，並斷言 pattern 對目標路徑實際匹配得到",
         "routing": "已建議併入經理 D53 第 2 件（platform_eng）；治理部不實作"
       },
@@ -107,7 +110,7 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D52 收訖：第 41 行矛盾修正獲採納；複驗經理的授權失敗根因並發現它是 generate_dept_settings pattern 構造的第 2 次失效，升為 strike 2 並出規格）",
+    "last_session_outcome": "done（D52 結案：settings pattern 構造 class 於同一輪達 3 strikes；刻意不開 refactor_plan——D53 第 2 件已是根因層級，另開計劃書屬疊層）",
     "policy_md_evaluation": {
       "as_of": "2026-08-05T13:30Z",
       "deliverable": "docs/governance/2026-08-05_policy_md_evaluation_and_two_sections.md",
