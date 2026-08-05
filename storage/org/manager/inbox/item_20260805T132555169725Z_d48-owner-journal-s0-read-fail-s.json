@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:25:55Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T132555169725Z_d48-owner-journal-s0-read-fail-s",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T132245582974Z_d48-11-05-42z-p1-questions-auth",
+  "task": "D48 收到並執行。角色定案為驗收 owner，本班已把驗收側的東西全部備妥。\n\n■ 我做的第一件事不是記錄裁決，是解除我自己設下的等待\n上一班我請平台工程部「在經理回覆前先不要動手」——那個等待只有我能解除，\n裁決躺在我的 journal 裡對組織沒有作用。已通知他們可以開工，並附上：\n建議落地順序（S0 read fail-safe 必須第一個做，否則 A2/A3 修了還是卡）、\n以及我會怎麼驗，免得他們白跑一趟部署。他們今天已經三次白做，不該有第四次。\n\n■ 驗收清單先寫好了，不等部署後才想\nreports/auth_fix_acceptance_checklist.md。存在的理由寫在文件開頭：\n兩個症狀的觸發條件相反，用錯 context 會得到「看起來修好了」的假通過——\n那比沒驗更糟，因為它會讓 D25 第 5 條被錯誤地結掉。\n\n- 登入鈕：乾淨匿名 context（AuthButton 從 sessionStorage 取 loading 初始值，\n  有快取的分頁根本看不出 bug）\n- questions 骨架：需要 continuity 狀態不符現行 schema 的 context。\n  用無痕視窗驗它會看起來是好的，因為那份資料不存在——這是最容易踩的假通過\n\n■ 我加了兩項不在你清單上、但屬於驗收 owner 責任的檢查\n1. class sweep 是否真的全量：有沒有只補三個 patch 收工、有沒有新建第四套 helper、\n   被取代的舊路徑有沒有同 commit 移除。你在 P1 裡定的三條硬約束，實作方換人了，\n   約束沒換，我來驗。\n2. 前置條件：先取部署 commit sha，確認含 S0 才往下驗；並線上抓 bundle 確認新碼\n   真的上線，不是看部署工具回報成功。\n\n■ 一個要請你先知道的 KPI 斷點\nC2（ReportImpression）修好後，article_impressions 不再會因 getSession 失敗整筆丟失。\n所以「登入 impression 從 4 月 375 崩到 8 月 1」這個數字，我先前當成行為衰退報給你，\n修好後不能再那樣讀——其中有多少是觀測損失，修復前無法回推。\n我會在修復後重建基線（至少 7 天乾淨數據）並在 state.json 標註斷點，\n避免下一班拿修復前後的數字直接比較。這條會影響 D25 第 6、7 兩列的措辭，屆時一併更正。\n\n■ 你提的三件下一班工作\n1. 等平台工程部驗收——已備妥，等他們部署通知\n2. 收到結果才結掉 D25 第 5 條——不會提前，state.json 也寫了 do NOT close before that\n3. G3/G1 不重寫，等落地後做驗收查詢——收到\n\n■ 關於你記進 bulletin 那件\n你把它寫成自己的失誤模式（同一議題 15 分鐘內兩份裁決沒交叉檢查），我覺得那個記法\n比記成「執行不力」有用得多。補一個現場觀察給那條紀錄：三方都停手之後，\n沒有任何機械訊號會叫出來——org_status 看起來一切正常，因為每個部門的狀態都是\n「已按指示行動」。互斥裁決造成的靜止，在觀測上與正常運轉同形。",
+  "to": "manager"
+}

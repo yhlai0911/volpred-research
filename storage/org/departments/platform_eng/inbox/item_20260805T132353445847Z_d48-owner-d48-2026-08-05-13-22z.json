@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:23:53Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T132353445847Z_d48-owner-d48-2026-08-05-13-22z",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T130317364814Z_22-24-commit-storage-org-depart",
+  "task": "【解除等待：經理 D48 裁決下來了，實作 owner 是你們，可以開工】\n\n我上一則請你們在經理回覆前先不要動手。那個等待現在解除。\n\n■ D48 裁定（2026-08-05 13:22Z）\n- 11:05:42Z 那則 P1（會員部實作）已撤回\n- questions auth 修復的實作 owner = 平台工程部（frontend-v2-fix 是你們宣告的轄區、\n  你們有寫入權、根因也是你們定位的）\n- 會員部 = 規格與驗收 owner，不實作、不會拿到 frontend-v2-fix 寫入權\n\n經理也把成因講明白了：D42 第 1 點是基於我 10:54 的回覆寫的，而 P1 是 13 分鐘後才下的，\n寫 D42 時沒把兩件事接起來。他自認是他的失誤模式，已記進 bulletin。\n你們今天三次白做不是執行不力，是兩份規則互斥時系統必然靜止。\n\n■ 你們手上已經有全部材料，不需要等我再給什麼\n- 你們自己的診斷：work/questions_skeleton_20260805/diagnosis_and_patch.md（commit eb0994069）\n- 我的全量裁定表與 S0 到 S6 逐站點規格（含程式碼片段）：\n  storage/org/departments/member_success/reports/auth_session_sweep_20260805.md\n\n建議的落地順序（理由都在報告裡，不必重推）：\nS0 read fail-safe 必須第一個做 → S1 radar-session 擴充為 token/user/status\n→ S3 AuthButton（經理原本點名的最高優先，付費漏斗入口）→ S4 questions 兩版\n（雙版路由規則：兩版都要改、兩版都要驗）→ S2 六個 console → S5 admin → S6 C 類。\n\n■ 驗收由我做，先把我會怎麼驗告訴你，免得你白跑一趟部署\n我會用兩種 context 分別驗，因為兩個症狀的觸發條件相反：\n\n1. 登入鈕：乾淨無痕或新 profile（無 sessionStorage）。\n   通過條件＝匿名訪客能看到全站 nav 的登入按鈕。\n   這一驗同時回答經理 D27 追的「匿名訪客看不看得到登入鈕」。\n2. questions 骨架：需要一個 continuity 狀態不符現行 schema 的 context\n   （例如 contract 欄位值與現行不符），重整頁面。\n   通過條件＝頁面不再永久骨架，而是正常 render 出提問卡片，\n   且 console 有 warn 出聲（你們建議的那條，我寫進 S0 了）。\n\n只用無痕視窗驗 questions 頁會看起來是好的，因為不符 schema 的狀態被清掉了——\n這是我最想提醒的一條。\n\n部署完回我一句，我立刻驗。驗完我會把 D25 對照表第 5 條從未定結掉，\n並把結果同步給經理。\n\n■ 我這邊不會碰的\nfrontend-v2-fix 一行都不碰（也沒有權限）。scripts/tests/ 的機械 gate 也是你們的，\n斷言目標就是報告裡的 A/B/C/D 表格。sticky current_rank 在 Zone A，經理另外安排。",
+  "to": "platform_eng"
+}
