@@ -70,15 +70,16 @@
     ],
     "structural_defects_open": [
       "F3_pricing_coverage",
-      "F2_fix_pending_platform_eng(session identity -> fork root)",
+      "F2_fix_pending_platform_ops(session identity -> fork root)",
       "6_sent_daily_emails_showing_zero(correction block spec delivered)",
       "F5_weekly_2026-07-19_understates_by_>=58272103_despite_passing_completeness_check",
       "5_weekly_permanently_frozen_at_partial_period_values(2026-05-29..06-26)",
       "daily_2026-07-21..07-28_never_backfilled",
       "report_completeness_stored_in_mtime_not_payload(does_not_survive_git_clone)",
-      "weekly_cap_dual_source_contradiction_and_billable_as_quota_signal(platform_eng decision: folded into next F1/F2/F3 round, same presentation layer, not fixed standalone yet)",
-      "ops_snapshot.py_other_.get()_reader_writer_key_mismatches_unswept(68 sites, platform_eng disclosed not yet class-swept)"
+      "weekly_cap_dual_source_contradiction_and_billable_as_quota_signal(decided by platform_eng pre-split 2026-08-05T16:07Z; scripts/ ownership moved to platform_ops 17:09Z, execution now theirs; folded into next F1/F2/F3 round)",
+      "ops_snapshot.py_other_.get()_reader_writer_key_mismatches_unswept(68 sites; disclosed by platform_eng pre-split; ops_snapshot.py now owned by platform_ops)"
     ],
+    "org_split_2026_08_05T17_09Z": "platform_eng narrowed to frontend-v2-fix/+tests/ (owned_task_types: code_review); new dept platform_ops created owning scripts/+config/ (owned_task_types: platform_ops). scripts/token_usage_report.py, scripts/ops_snapshot.py, ~/.volpred/bin/cron_token_report.sh and all outstanding F1/F2/F3/email-correction/Codex-worktree requests transferred to platform_ops inbox by platform_eng. Future token-script requests go to platform_ops, not platform_eng.",
     "today_2026_08_05_claude_billable": 46951901,
     "today_2026_08_05_codex_billable": 0,
     "top_root_concentration_pct": 59.0,
@@ -97,20 +98,21 @@
     ],
     "window": "2026-07-29..2026-08-04 (UTC, 7d)"
   },
-  "last_run": "2026-08-06T00:07:00Z",
+  "last_run": "2026-08-06T00:52:00Z",
   "open_items": [
     "停擺窗佔比用修好的工具重做（舊值 52.1% 已作廢）",
-    "查 Codex 側 _iter_codex_session_records 是否同樣需要正規化（歷史金額待複驗）",
+    "查 Codex 側 _iter_codex_session_records 是否同樣需要正規化（歷史金額待複驗）——owner 現為 platform_ops",
     "08-06T00:00 UTC（台灣 08:00）過後回讀 daily_2026-08-05.json 是否自癒（不人工補；當下 UTC 日尚未結束，未到查核時機）",
-    "cap 錨點漂移（weekly cap 兩源矛盾＋billable 當配額訊號）：platform_eng 已裁決併入下一輪 F1/F2/F3 一起修，不單獨處理",
-    "tools/usage_breakdown.py 是否已真的 join runtime/*.sessions.jsonl，下次逐角色分析時覆核（platform_eng 聲稱已改，本班未重跑驗證）"
+    "cap 錨點漂移（weekly cap 兩源矛盾＋billable 當配額訊號）：折入下一輪 F1/F2/F3，owner 現為 platform_ops（原 platform_eng 拆分後移交）",
+    "tools/usage_breakdown.py 是否已真的 join runtime/*.sessions.jsonl，下次逐角色分析時覆核（此工具在本部門子樹內，非 platform_eng/ops 轄區，本班未重跑驗證）"
   ],
   "open_items_detail": [
     "R3 session 壽命的 fork-root 層級尚未重算（目前只有下界 103.76h）",
-    "五份凍結 weekly（05-29~06-26）真值未重算，需約 25 分鐘；platform_eng 回填後才跑",
-    "待 platform_eng 交付後執行驗證計畫 v2（A 6 項 + B 回填 + C fresh clone case）",
-    "F3 PRICING 覆蓋率 20.2% 未修，成本欄位在修好前不可對外",
-    "更正完成文字已交 platform_eng，待貼上並寄出後回讀該封 email",
-    "bulletin L13 錯誤數字未更正（經理無寫入權限）；本部門建議併入提案批次，待經理裁決"
+    "五份凍結 weekly（05-29~06-26）真值未重算，需約 25 分鐘；platform_ops 回填後才跑",
+    "待 platform_ops 交付後執行驗證計畫 v2（A 6 項 + B 回填 + C fresh clone case）",
+    "F3 PRICING 覆蓋率 20.2% 未修，成本欄位在修好前不可對外，owner 現為 platform_ops",
+    "更正完成文字已交（原 platform_eng），待貼上並寄出後回讀該封 email——後續請求改對 platform_ops",
+    "bulletin L13 錯誤數字未更正（經理無寫入權限）；本部門建議併入提案批次，待經理裁決",
+    "F1/F2/F3/email 更正/Codex worktree 清點等 7 則請求，platform_eng 已於 2026-08-05T17:45Z 原樣轉交 platform_ops inbox，本部門未動作，待 platform_ops 回覆"
   ]
 }

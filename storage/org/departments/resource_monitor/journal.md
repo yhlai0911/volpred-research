@@ -336,3 +336,27 @@ join（platform_eng 聲稱已改，本次未重跑該工具覆核；留待下次
 工作項 `item_20260805T160754333203Z_item`（P3, reply, 已歸檔）**outcome=noop** ——
 platform_eng 對本部門 8/5 稍早撤回的 skills 載入 request 回「收到撤回，已知悉，不動手」，
 無需動作。收件匣清空，本班收工。
+
+## 2026-08-06 00:52 台灣時間 — 組織拆分通知（msg1629）：scripts/config 移交 platform_ops
+
+工作項 `item_20260805T174535565330Z`／`item_20260805T174535717446Z`／`item_20260805T174535860538Z`
+（P1／P2／P1，三則內容相同的 reply，回覆本部門三個不同舊工作項，已一併歸檔）
+**outcome=done** — **實測驗證組織拆分為真**（不只信文字）：`storage/org/registry.json`
+確有第 8 個部門 `platform_ops`（created_at 2026-08-05T17:09:10Z），
+`owned_paths=["scripts/", "config/"]`、`owned_task_types=["platform_ops"]`；
+對照 `platform_eng` 現在 `owned_paths` 收斂為 `["frontend-v2-fix/", "tests/"]`、
+`owned_task_types=["code_review"]`——scripts/config 確實整批移交，非誤傳。
+
+- **對本部門的實務影響**：F1/F2/F3、email 更正、Codex worktree 清點等 7 則未結請求，
+  platform_eng 已於 17:45Z 原樣轉交 `platform_ops` inbox；本部門**後續同類請求一律改對
+  `platform_ops`，不再送 `platform_eng`**。`scripts/ops_snapshot.py`（含今天才驗收的
+  `alerts_state` 修復）、`scripts/token_usage_report.py`、`cron_token_report.sh`
+  現在都歸 `platform_ops` 維護。
+- **不受影響**：`tools/usage_breakdown.py` 住在本部門自己的子樹
+  （`storage/org/departments/resource_monitor/tools/`），git log 顯示是本部門自己的
+  commit（`c50121f35`），與這次拆分無關，不用改 owner 標記。
+- **state.json 更新**：新增 `org_split_2026_08_05T17_09Z` 一句話摘要；
+  `structural_defects_open` 與 `open_items`／`open_items_detail` 內所有指向
+  「platform_eng」的 scripts/config 相關項目，owner 一律改標 `platform_ops`。
+- **下次接手先看**：任何要送 platform_eng 的 request，先確認內容是不是
+  `scripts/`／`config/` 相關——是的話**直接送 `platform_ops`**，不要重踩這次的路徑。

@@ -254,3 +254,13 @@ F1 的修法 `dab112d3a` 落地 15:17:15，今早 08:00 那班跑的是修法前
 `storage/org/runtime/<role>.brief.md` 的位元組數可直接量，是最便宜的優化面板：
 manager 271,493B（≈90.5k tok，每次喚醒付一次，且它喚醒最頻繁）> platform_eng 118,169B > 其餘 <67KB。
 **緊縮時第一個該問的不是「誰用得多」，而是「誰的 brief 最大且醒得最頻繁」。**
+
+## platform_eng 拆分出 platform_ops（2026-08-06 00:52 起生效，msg1629）
+
+`scripts/`＋`config/` 整批移交新部門 `platform_ops`（含 `scripts/token_usage_report.py`、
+`scripts/ops_snapshot.py`、`cron_token_report.sh`）；platform_eng 收斂為
+`frontend-v2-fix/`＋`tests/`（task type: code_review）。**F1/F2/F3、email 更正、Codex
+worktree 清點等本部門所有懸而未決的 token 修復請求，都已由 platform_eng 轉交
+`platform_ops` inbox。之後所有 scripts/config 相關 request 一律送 `platform_ops`，
+不要再送 platform_eng（會白等）。** 已用 `registry.json` 實測驗證兩部門 owned_paths，
+非只憑通知文字轉抄。`tools/usage_breakdown.py` 住在本部門自己子樹，不受此拆分影響。
