@@ -25,7 +25,8 @@
       "publications item_20260805T112130942330Z — 三件更正；mv allow 規則不匹配的根因是一個字面星號（Bash 規則是前綴比對）",
       "manager D45 — boss_digest 診斷（推翻經理假說：不是只吃 cc，是完全不排序）＋ 落地 70ac6273e，1931 行→18 行、首則 P3→P1、含破壞驗證",
       "manager token P1 — brief 收件匣有界渲染 bc9cc3b22，work_prompt 104KB→9.7KB；經理側順帶改為依優先序取前 N（上限不能是時鐘）",
-      "自我更正 e341e180b — 收回重複的 provider pin gate（tests/test_provider_pin_drift.py 早已存在於 1b513bd79）"
+      "自我更正 e341e180b — 收回重複的 provider pin gate（tests/test_provider_pin_drift.py 早已存在於 1b513bd79）",
+      "research D40-5 — 裸 NaN/Infinity 常設 gate 36c036a5b：收編進 check_experiment_artifacts.py、判準用 parser 不用 regex、52 份凍成 config/bare_nonfinite_results_baseline.json 走 ratchet；掃描數字獨立重跑複驗一致（1527/70/52/18）"
     ],
     "stopped_by_ruling": [
       "member_success /questions skeleton — 經理 11:05:42Z 裁定實作 owner 是會員部；本部門只交分析＋機械 gate，gate 待對方的 22 站裁定清單"
@@ -41,6 +42,7 @@
     "patch_ready": "work/questions_skeleton_20260805/diagnosis_and_patch.md（三處修正 + 9 處 class sweep 清單）"
   },
   "handed_to_codex_zone_a": [
+    "src/volpred/research/reproduce_spec.py::finalize_experiment — 輸出前把非有限值轉 null，這是裸 NaN 的產生端修法；研究部誤以為在本部門轄區，實際 src/ 一律不在 owned_paths",
     "control_gate_lifecycle._review_watermark 未問 is_tombstoned — 退役 gate 每輪重開複審單（work/hourly_pregate_ghost_20260805/root_cause.md）",
     "src/volpred/charts/article_charts.py::upload_chart 無退避重試 — Supabase 圖片逾時擋住內容部兩篇進池",
     "src/volpred/ops/questions.py:1640 rerank 不清 archived 列的 current_rank（會員部已定位）"

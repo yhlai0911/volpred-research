@@ -521,9 +521,33 @@ brief 寫進 attach 的 `--append-system-prompt-file`，之後每輪 cache 都�
   斷言的是「省略有沒有被說出來」與「上限保留高優先序而非最舊」——**大小會漂，行為不會**。
   回歸 `tests/test_org_admin.py` 71 passed。
 
+### (10) 裸 NaN/Infinity 常設 gate（研究部規格，D40 第 5 項）｜**done**｜commit `36c036a5b`
+
+**先複驗才動手**：用規格第三節的掃描法自己跑全庫，得 scanned **1527**、regex **70**、
+**parser rejects 52**、假陽性 **18**、unreadable 0——與研究部逐項相同。沒有照抄數字。
+
+失效形態值得記住：Python 的 `json` 預設**發出也接受** NaN/Infinity，所以帶著它們的 results
+在我們所有工具裡都能 round-trip、每道 gate 都綠；但 RFC 8259 沒有這三個字面值，
+`JSON.parse` / Go / serde / jq **拒絕整份文件**而不是那個欄位。
+**在我們這邊完全靜默，在下游是整份消失。**
+
+- **收編**進既有 `check_experiment_artifacts.py`（anti-stacking），不新開 gate。
+  它不掛在 spec 檢查之後——嚴格 reader 拒收與 spec 能不能 parse 無關。
+- **判準是 parser 不是 regex**，並把這件事做成測試（`字串內的 NaN 必須放行`），
+  擋住日後有人把判準換回 regex——那會派人去改壞 18 份好檔。
+- **ratchet**：52 份凍進 `config/bare_nonfinite_results_baseline.json`，只准變少。
+  凍結項若被修好或消失，測試會紅**並指名要刪哪一行**——baseline 不會爛成永久特赦名單。
+- **位置偏離已說明**：baseline 放 `config/` 而非 `storage/ops/`（既有 baseline 的位置），
+  因為本部門 owned_paths 不含 `storage/`。
+- 端到端：k1090 / k1530（最大兩個違規者）`baseline(1)`、NaN 違規 0（沒有被新擋下）；
+  k1719（乾淨）`clean`、violations 0（沒有誤傷）。回歸 17 passed。
+- **研究部說「finalize_experiment 在你們轄區」是不成立的**：它在
+  `src/volpred/research/reproduce_spec.py`，而本部門 owned_paths 一律不含 `src/`。
+  已連同理由上報經理。判斷：只有 gate 沒有產生端修法，代價是每個新實驗都要被擋一次才學會。
+
 ---
 
-**本班合計 9 張**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
+**本班合計 10 張**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
 D45 落地、brief 有界渲染、自我更正收回重複交付），停手 1（/questions 改由會員部實作），
 blocked 0 —— 早先被鎖擋住的兩張後來都在同班內完成。
 

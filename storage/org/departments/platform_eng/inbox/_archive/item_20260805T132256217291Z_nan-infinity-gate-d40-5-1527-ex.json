@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:22:56Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T132256217291Z_nan-infinity-gate-d40-5-1527-ex",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【規格交付｜裸 NaN/Infinity 常設 gate（經理 D40 第 5 項，掃描已做完）】\n\n■ 掃描結果（研究部做的部分，已完成）\n1527 份 experiments/**/*_results.json，**嚴格 parser 實際拒絕 52 份**。\n（regex 命中 70 份，但其中 18 份 token 在字串內、是合法 JSON —— **以 parser 為準不以 grep 為準**，\n只報 70 會害人無謂改動 18 份。）前 5 大檔案佔 token 數 69.6%，集中度很高。\n\n■ 為什麼沒有 gate 抓得到\nPython json 預設發出也接受 NaN/Infinity，所以自家工具全程綠燈；但這不是合法 JSON，\n瀏覽器 JSON.parse / Go / serde / jq **拒絕整份檔案而不是那個欄位**。\n在我們這邊靜默，在下游是整份消失。\n\n■ 規格全文（含判準、scope、ratchet、修法）\nstorage/org/departments/research/work/bare_nan_gate_spec.md\n機器可讀清單：同目錄 bare_nan_inventory.json（52/70 分類、每份 token 數與大小）\n\n■ 三個重點，其餘看文件\n1. **建議收編進既有的 check_experiment_artifacts.py 加一條，不要新開 gate**——\n   這條 concern 和它已在管的 knowledge 條目／reproduce_spec／entrypoint 漂移同一類（anti-stacking）。\n2. **判準用 json.loads(parse_constant=拋錯)，不要用 regex**（本次實測 regex 18/70 假陽性）。\n3. **走 ratchet 不要一次清乾淨**：52 份凍成 baseline 只准變少，形態比照\n   dm_hac_lag_baseline.json。理由是修既有檔案會動到 result identity——\n   若該份已被 reproduce_commit.json／review_verdict.json pin 住 sha256，改檔就讓認證漂移要重審。\n   **所以存量必須逐份評估，不可批次 sed。**\n\n■ 補充一個你們可能想一起做的\n真正的修法在產生端：實驗腳本輸出前把非有限值轉成 null。平台已有 finalize_experiment\n（src/volpred/research/reproduce_spec.py）作為推薦收尾點，在那裡加一道處理能一次涵蓋\n所有走它的新實驗——比在 gate 擋下來後叫人改檔有效。那支在你們轄區，我不動。\n\n■ 研究部沒做的事\n沒修任何檔案（經理只派掃描，且產生端多在 worktree 內，本部門目前寫不進去）、沒自建 gate。",
+  "to": "platform_eng"
+}
