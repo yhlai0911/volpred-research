@@ -292,3 +292,41 @@ def test_wake_prompts_an_idle_cockpit_manager(org_root: Path, monkeypatch) -> No
 
     assert result["woken"] is True and result["via"] == "cockpit"
     assert "manager inbox has 2 items" in sent[0][-1], "the wake must say why it woke"
+
+
+def test_manager_brief_carries_the_platform_queue(org_root: Path, monkeypatch) -> None:
+    """A coordinator blind to the canonical queue dispatches against a fiction."""
+    import subprocess
+
+    class _R:
+        returncode = 0
+        stdout = json.dumps({
+            "backbone": {"heartbeat_age_min": 0.4, "current_job": None, "auth_blocked": False},
+            "queue": {"pending": 98, "pending_by_priority": {"p1": 7, "p2": 56},
+                      "blocked": 18, "in_flight": 1,
+                      "top_pending": [{"id": "K1451", "p": 1, "type": "daily_article"}]},
+            "content_pool": {}, "alerts": {"sent_last_24h": 0}, "git": {},
+        })
+        stderr = ""
+
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: _R())
+
+    brief = _core.build_manager_brief(org_root)
+
+    assert "98" in brief and "P1=7" in brief
+    assert "blocked 18" in brief
+    assert "K1451" in brief
+
+
+def test_manager_is_told_loudly_when_platform_state_is_unavailable(org_root: Path, monkeypatch) -> None:
+    import subprocess
+
+    def _explode(*a, **k):
+        raise OSError("snapshot unavailable")
+
+    monkeypatch.setattr(subprocess, "run", _explode)
+
+    brief = _core.build_manager_brief(org_root)
+
+    assert "無法取得平台全局狀態" in brief, "blindness must be visible, never silent"
+    assert "不要當作沒事" in brief

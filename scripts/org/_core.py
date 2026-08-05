@@ -177,6 +177,67 @@ def org_policy(root: Path) -> str:
     return path.read_text(encoding="utf-8").strip()
 
 
+def platform_overview() -> str:
+    """Past / present / future of the whole platform, for the coordinator.
+
+    A coordinator that only sees its own inbox will dispatch against a fiction:
+    on 2026-08-05 the manager was assigning work while blind to 98 pending
+    items (7 of them P1) in the canonical queue. Sourced from ops_snapshot.py —
+    the canonical one-call readout — rather than a second inventory that could
+    disagree with it.
+    """
+    import subprocess
+
+    try:
+        raw = subprocess.run(
+            ["uv", "run", "python", "scripts/ops_snapshot.py"],
+            cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=60,
+        )
+        snap = json.loads(raw.stdout)
+    except (OSError, subprocess.SubprocessError, ValueError) as exc:
+        return (f"⚠️ **無法取得平台全局狀態**（{type(exc).__name__}）。"
+                f"在修好之前，你只看得到組織內部，派工前請先自行跑 "
+                f"`uv run python scripts/ops_snapshot.py` 確認，不要當作沒事。")
+
+    q = snap.get("queue") or {}
+    bb = snap.get("backbone") or {}
+    pool = snap.get("content_pool") or {}
+    alerts = snap.get("alerts") or {}
+    git = snap.get("git") or {}
+
+    top = q.get("top_pending") or []
+    top_lines = "\n".join(
+        f"  - [P{t.get('p', '?')}] `{t.get('id')}` ({t.get('type', '?')})"
+        for t in top[:8]
+    ) or "  （無）"
+
+    by_p = q.get("pending_by_priority") or {}
+    return f"""### 現在
+
+- backbone：心跳 {bb.get('heartbeat_age_min', '?')} 分前；當前工作 {bb.get('current_job') or '無'}；
+  上次 fire {bb.get('last_fire_age_min', '?')} 分前；auth_blocked={bb.get('auth_blocked')}
+- 正在執行：{q.get('in_flight', '?')} 件；主線程收件匣 {q.get('main_thread_inbox', '?')} 件
+- 未推 commit / git：{json.dumps(git, ensure_ascii=False)[:200]}
+
+### 未來（canonical 任務池 `storage/next_tasks.json`）
+
+- pending **{q.get('pending', '?')}** 件（P1={by_p.get('p1', 0)}／P2={by_p.get('p2', 0)}／
+  P3={by_p.get('p3', 0)}／P4={by_p.get('p4', 0)}）；urgent {q.get('urgent_pending', 0)} 件；
+  blocked {q.get('blocked', '?')} 件
+- 隊首：
+{top_lines}
+
+### 過去 24 小時
+
+- alerts 已送 {alerts.get('sent_last_24h', '?')} 則
+- 內容池：{json.dumps(pool, ensure_ascii=False)[:200]}
+
+**這個池是舊 dispatch 引擎在消化的，與部門收件匣目前並行。** 你要對它有判斷：
+哪些該由部門接手、哪些該讓舊引擎跑完、哪些該退役。看到 P1 積壓或 blocked 堆高，
+那是你的問題，不是別人的。
+"""
+
+
 def build_manager_brief(root: Path) -> str:
     """The coordinator's rehydration brief: charter, org state, inbox, tools."""
     mdir = root / "manager"
@@ -239,6 +300,10 @@ def build_manager_brief(root: Path) -> str:
 ## 組織現況
 
 {chr(10).join(lines) or "（尚無 active 部門）"}
+
+## 平台全局（過去／現在／未來）
+
+{platform_overview()}
 
 ## 你的收件匣（{len(inbox)} 件；老闆指令與部門上報都在這裡）
 
