@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import re
 import tempfile
 from datetime import datetime, timezone
@@ -238,6 +239,45 @@ def platform_overview() -> str:
 """
 
 
+def org_blockages(root: Path) -> str:
+    """Who is blocked and who they are waiting on.
+
+    Reuses the dashboard's aggregation rather than recomputing it: one
+    calculation, two renderings (a page for the boss, this text for the
+    coordinator). An agent should never be asked to read a web page to learn
+    something that exists as data.
+    """
+    try:
+        sys.path.insert(0, str(REPO_ROOT / "scripts"))
+        import work_dashboard_org as view  # noqa: PLC0415
+        snap = view.collect(root)
+    except Exception as exc:  # noqa: BLE001 — a view problem must not blind the coordinator
+        return (f"⚠️ 阻塞聚合讀不到（{type(exc).__name__}）。改用 org_status.py "
+                f"與各部門 journal 自行判斷，不要當作沒有阻塞。")
+
+    lines = []
+    depts = snap.get("departments") or {}
+    rows = depts.values() if isinstance(depts, dict) else depts
+    for d in rows:
+        blockers = d.get("blockers") or []
+        waiting = d.get("pending_on_others") or []
+        if not blockers and not waiting:
+            continue
+        lines.append(f"- **{d.get('title') or d.get('name')}**（health={d.get('health')}）")
+        for b in blockers[:3]:
+            what = b.get("what") if isinstance(b, dict) else str(b)
+            fix = f" → 暫解：{b.get('workaround')}" if isinstance(b, dict) and b.get("workaround") else ""
+            lines.append(f"  - 阻塞：{str(what)[:160]}{fix[:120]}")
+        for w in waiting[:3]:
+            lines.append(f"  - 等待：{str(w)[:160]}")
+    if not lines:
+        return "（目前沒有部門自報阻塞）"
+    return "\n".join(lines) + (
+        "\n\n**這些是你的工作**：等待別人的要確認對方知道且有排；被擋住的要裁決"
+        "（放寬轄區、改派、或判定該項不做）。放著不動等於預設它會自己好。"
+    )
+
+
 def build_manager_brief(root: Path) -> str:
     """The coordinator's rehydration brief: charter, org state, inbox, tools."""
     mdir = root / "manager"
@@ -304,6 +344,10 @@ def build_manager_brief(root: Path) -> str:
 ## 平台全局（過去／現在／未來）
 
 {platform_overview()}
+
+## 誰卡住了（部門自報的阻塞與等待）
+
+{org_blockages(root)}
 
 ## 你的收件匣（{len(inbox)} 件；老闆指令與部門上報都在這裡）
 

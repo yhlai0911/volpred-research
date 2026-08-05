@@ -199,6 +199,13 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
     for cap in meta.get("capabilities") or []:
         allow += capability_rules.get(cap, [])
 
+    # The closeout contract requires archiving handled items, which is a file
+    # move inside the department's own tree. Granting Edit/Write without the
+    # move made the contract mechanically impossible to satisfy — content
+    # reported exactly that.
+    own = f"{REPO_ROOT}/storage/org/departments/{dept}"
+    allow += [f"Bash(mv {own}/inbox/*:*)", f"Bash(mkdir -p {own}/:*)"]
+
     allow += [
         "Bash(uv run python scripts/org/dept_send.py:*)",
         "Bash(uv run python scripts/org/org_status.py:*)",
@@ -208,8 +215,14 @@ def generate_dept_settings(root: Path, dept: str) -> Path | None:
     ]
     path = runtime_dir(root) / f"{dept}.settings.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({"permissions": {"allow": allow}}, ensure_ascii=False, indent=2),
-                    encoding="utf-8")
+    # The department, not the session, is the writer identity. Successive panes
+    # for the same department get different session ids, so a claim keyed by
+    # session made a department block ITSELF: content could not land drafts
+    # because an earlier content session still held storage/drafts/.
+    path.write_text(json.dumps({
+        "permissions": {"allow": allow},
+        "env": {"VOLPRED_ORG_DEPT": dept},
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
     return path
 
 

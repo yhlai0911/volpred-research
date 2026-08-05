@@ -83,6 +83,16 @@ ZONE_PREFIXES = (
 )
 
 
+def _who(holder: dict) -> str:
+    """Name the holder so the blocked writer knows who to talk to.
+
+    Truncating to 8 chars turned "dept:content" into "dept:con" — a department
+    name must survive, or the block cannot be resolved by talking to anyone.
+    """
+    sid = str(holder.get("session_id") or "?")
+    return sid if sid.startswith("dept:") else f"session {sid[:8]}"
+
+
 def _noop() -> None:
     print(NOOP)
     raise SystemExit(0)
@@ -182,7 +192,11 @@ def main() -> None:
     except ValueError:
         _noop()  # outside the repo: not our concern
 
-    session = str(payload.get("session_id") or "").strip()
+    # A department is one writer across its successive sessions; anyone else is
+    # identified by session. Keying purely on session id made a department block
+    # its own next pane (observed: content could not write storage/drafts/).
+    session = (os.environ.get("VOLPRED_ORG_DEPT") or "").strip()
+    session = f"dept:{session}" if session else str(payload.get("session_id") or "").strip()
     if not session:
         _noop()  # without an identity every write looks like the same writer
 
@@ -198,7 +212,7 @@ def main() -> None:
                 "permissionDecision": "allow",
                 "permissionDecisionReason": (
                     f"{OVERRIDE_ENV}=1 — took {scope} from session "
-                    f"{str(holder.get('session_id'))[:8]}; recorded in {OVERRIDE_LOG.name}"
+                    f"{_who(holder)}; recorded in {OVERRIDE_LOG.name}"
                 ),
             }}))
             raise SystemExit(0)
@@ -206,7 +220,7 @@ def main() -> None:
         remaining = int(float(holder.get("expires_at", 0)) - _now())
         reason = (
             f"另一個 session 正在改 `{scope}`（本次目標 {rel}）。\n"
-            f"持有者 session {str(holder.get('session_id'))[:8]}（actor={holder.get('actor')}），"
+            f"持有者 {_who(holder)}（actor={holder.get('actor')}），"
             f"最後動到 {holder.get('last_path')}，於 {holder.get('taken_at')} 取得，"
             f"還有 {max(remaining, 0) // 60} 分鐘到期。\n\n"
             f"兩個 session 同時改同一處，會各自 lock、各自 commit、設計往兩個方向走——"

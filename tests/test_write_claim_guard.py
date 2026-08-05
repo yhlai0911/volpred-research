@@ -127,3 +127,26 @@ def test_malformed_payload_never_breaks_edit(claims: Path) -> None:
     )
     assert proc.returncode == 0
     assert proc.stdout.strip() == "{}"
+
+
+def test_a_department_does_not_block_its_own_next_session(claims: Path) -> None:
+    """Observed: content could not land drafts because an earlier content
+    session still held storage/drafts/. Successive panes are the same writer."""
+    run_hook("storage/drafts/a.md", "session-A", claim_dir=claims,
+             env_extra={"VOLPRED_ORG_DEPT": "content"})
+
+    out = run_hook("storage/drafts/b.md", "session-B", claim_dir=claims,
+                   env_extra={"VOLPRED_ORG_DEPT": "content"})
+
+    assert decision(out) is None, "the department is the writer, not the session"
+
+
+def test_another_department_is_still_blocked(claims: Path) -> None:
+    run_hook("storage/drafts/a.md", "session-A", claim_dir=claims,
+             env_extra={"VOLPRED_ORG_DEPT": "content"})
+
+    out = run_hook("storage/drafts/b.md", "session-B", claim_dir=claims,
+                   env_extra={"VOLPRED_ORG_DEPT": "research"})
+
+    assert decision(out) == "deny"
+    assert "dept:content" in out["hookSpecificOutput"]["permissionDecisionReason"]
