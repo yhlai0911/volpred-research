@@ -25,12 +25,13 @@ import os
 import subprocess
 import sys
 import time
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dept_routing import resolve_dept_routing  # noqa: E402
 from model_router import pick_model  # noqa: E402
 from _core import (  # noqa: E402
+    declares_a_file,
     reserved_carveouts,
     DEFAULT_ORG_ROOT,
     REPO_ROOT,
@@ -182,9 +183,7 @@ def turf_patterns(declared: list[str]) -> list[str]:
         item = (raw or "").strip()
         if not item:
             continue
-        last = PurePosixPath(item.rstrip("/")).name
-        names_a_file = not item.endswith("/") and ("." in last)
-        if names_a_file:
+        if declares_a_file(item):
             patterns.append(item)
             continue
         base = item.rstrip("/")

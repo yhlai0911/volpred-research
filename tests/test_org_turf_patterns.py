@@ -23,6 +23,7 @@ argue about policy instead of to read the pattern.
 
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import sys
 from pathlib import Path
@@ -85,6 +86,51 @@ def test_a_trailing_slash_is_not_required(attach):
 
 def test_blank_declarations_are_dropped_not_turned_into_root_access(attach):
     assert attach.turf_patterns(["", "   "]) == []
+
+
+def test_a_file_granted_through_the_cli_is_still_a_file_in_the_settings(tmp_path, attach):
+    """The row that would have caught the fourth instance.
+
+    Everything above tests the generator in isolation, and the generator was
+    correct — yet granting `storage/org/policy.md` still produced
+    `.../policy.md/**`, because `org_admin set-paths` had already normalised the
+    declaration into a directory on the way *in*. Two string-builders, one at
+    each end of the chain, and fixing either alone loses: a unit test of the
+    reader passes while the real path stays broken.
+
+    So this row spans both: write the grant the way an operator writes it, then
+    read what the department would actually receive.
+    """
+    import org_admin
+
+    root = tmp_path / "org"
+    (root / "departments" / "widgets").mkdir(parents=True)
+    (root / "bulletin").mkdir()
+    org_admin.save_registry(root, {
+        "version": org_admin.REGISTRY_VERSION,
+        "departments": {
+            "widgets": {"status": "active", "title": "小工具部", "owned_paths": []}
+        },
+    })
+
+    args = argparse.Namespace(
+        root=root, name="widgets", paths="storage/org/policy.md,config/",
+        replace=True, actor="test", reason="turf test",
+    )
+    assert org_admin.cmd_set_paths(args) == 0
+
+    stored = org_admin.load_registry(root)["departments"]["widgets"]["owned_paths"]
+    assert "storage/org/policy.md" in stored, (
+        "a file declaration must survive the write; storing it as a directory is "
+        "where the fourth instance was born"
+    )
+
+    patterns = attach.turf_patterns(stored)
+    assert "storage/org/policy.md" in patterns
+    assert not any(p.startswith("storage/org/policy.md/") for p in patterns), (
+        "granting policy.md/** grants nothing at all, while reading as a real grant"
+    )
+    assert "config/**" in patterns, "directories must keep working"
 
 
 def test_the_real_registry_still_yields_usable_patterns(attach):

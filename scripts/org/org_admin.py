@@ -31,6 +31,7 @@ from _core import (  # noqa: E402
     reserved_carveouts,
     dept_dir,
     load_registry,
+    normalize_owned_path,
     now_iso,
     registry_path,
     save_registry,
@@ -199,7 +200,14 @@ def cmd_set_paths(args: argparse.Namespace) -> int:
         return 1
 
     before = list(meta.get("owned_paths") or [])
-    incoming = [p.strip().rstrip("/") + "/" for p in args.paths.split(",") if p.strip()]
+    # Not `.rstrip("/") + "/"`: that stored every declaration as a directory, so
+    # `storage/org/policy.md` became `storage/org/policy.md/` and the settings
+    # generator -- which cannot see what it was told -- granted `...md/**`, a
+    # pattern matching nothing. The writer and the reader now share one
+    # definition of what an owned path is (_core.normalize_owned_path).
+    incoming = [
+        normalize_owned_path(p) for p in args.paths.split(",") if p.strip()
+    ]
     after = sorted(set(incoming if args.replace else before + incoming))
 
     conflicts = check_path_conflicts(registry, after, exclude=args.name)

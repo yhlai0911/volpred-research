@@ -16,7 +16,7 @@ import sys
 import re
 import tempfile
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_ORG_ROOT = REPO_ROOT / "storage" / "org"
@@ -213,6 +213,36 @@ def inbox_overflow_note(total: int, shown: int, inbox_path: Path) -> str:
         f"這裡的截斷只是為了省 token，不代表那些工作不存在。"
         f"完整內容在 `{inbox_path}`，用 jq 讀單件：`jq -r '.task' <該檔>`）"
     )
+
+
+def declares_a_file(path: str) -> bool:
+    """True when an owned_paths entry names a file rather than a tree.
+
+    `owned_paths` never said which it stored, so both ends of the chain guessed
+    -- and guessed differently. `org_admin set-paths` appended a slash to
+    everything on the way in, so `storage/org/policy.md` was persisted as
+    `storage/org/policy.md/`; `org_attach` then had no way to tell a file from a
+    directory and granted `.../policy.md/**`, a pattern matching nothing. Fixing
+    either end alone cannot win, which is why this predicate is shared: one
+    definition, consulted by the writer and the reader.
+
+    A trailing slash means directory, explicitly. Otherwise a dot in the final
+    segment means file -- the same rule a person uses reading the registry.
+    """
+    item = (path or "").strip()
+    if not item or item.endswith("/"):
+        return False
+    return "." in PurePosixPath(item).name
+
+
+def normalize_owned_path(path: str) -> str:
+    """Canonical stored form: directories carry a trailing slash, files do not."""
+    item = (path or "").strip()
+    if not item:
+        return ""
+    if declares_a_file(item):
+        return item
+    return item.rstrip("/") + "/"
 
 
 def inbox_items(root: Path, dept: str) -> list[dict]:
