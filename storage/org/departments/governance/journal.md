@@ -723,3 +723,64 @@ D57 說它根本收不到檔案，因為上游已經改掉了）。建議併單�
 是待確認的既成事實。
 
 本班未新增任何 gate／watchdog／檢查層。
+
+## 2026-08-05T23:35Z — computer_use 政策裁定 ＋ 兩件自我更正（outcome=done，含一項誠實揭露）
+
+**member_success 的 request**（`item_20260805T145102833811Z`）：computer_use 段落與機制打架
+（他們宣稱沒有的 capability 規則，卻用 MCP 成功呼叫 `list_connected_browsers`）。實測覆核為真，
+但根因比他們寫的更淺一層：問題不在 registry／`org_attach.py capability_rules`，是**專案層
+`.claude/settings.local.json` 本身就有 20 條 `mcp__` allow 規則、對所有部門一律開放**——
+`computer_use` 這道 capability 閘門從立案起就只加了三條 Bash 允許（FB 發文腳本），從未管過
+MCP 工具，「沒有 capability 規則卻打得通」不是漏洞，是設計範圍本來就沒涵蓋 MCP。
+
+**裁定**（`docs/governance/2026-08-05_computer_use_scope_ruling.md`）：
+1. 本節政策範圍收窄為明文：只管「代替老闆／VolPred 身分對外部平台採取行動」，**唯讀查看
+   VolPred 自己的網站不在管轄範圍**，不需宣告 `computer_use`。member_success 現在就可以做
+   D48/D56 驗收，不需等任何機制落地。
+2. 真正的機制缺口記錄下來但不現在動手：瀏覽器 MCP 工具目前無法用網域粒度限定「只能查自家站、
+   不能對 Facebook 動作」——`computer`／`form_input` 等互動類工具在技術上沒有 per-site 授權
+   語法，只能用「有沒有宣告 computer_use」這個粗粒度去分組，且分組後仍擋不住已宣告
+   `computer_use` 的部門把工具用錯地方。這侷限已寫進裁定文件與 policy.md，不誇稱風險已消除。
+   路由 platform_eng：把 Claude-in-Chrome MCP 工具分「唯讀組」（預設所有部門可用）與
+   「互動組」（只有宣告 computer_use 才給，其餘明文 deny）。
+
+**意外發現：第 6 種型態的 owned_paths 失效，且是全新的、獨立於 `.claude/**` 那條**。
+把裁定文字寫進 `storage/org/policy.md`（治理部剛拿到的第三授，精確檔案宣告，D57 修過的那條鏈）
+時，**Edit 被 deny**——而這次目標**不在 `.claude/` 之下**，排除了今天稍早那個假說。
+覆核：`governance.settings.json` 裡的 pattern 是 `Edit(//…/storage/org/policy.md)`，
+**沒有任何 `**` 或萬用字元、是純字面路徑**。翻遍 `.claude/settings.local.json`（專案層基準，
+111 條 allow）**沒有任何一條 Edit/Write 規則是不帶萬用字元的**——這個 repo 從來沒有一個
+「純字面檔案路徑、不帶 `**`」的 Edit/Write 授權被實際驗證過會生效。對照組：manager 用它自己
+`storage/org/**` 這條**帶萬用字元**的規則，剛才這班確實成功寫入同一個檔（commit `0331b60ce`）。
+**假說：`declares_a_file`（D57 新增，讓檔案宣告不再被逼加 `/**`）產生的裸路徑 pattern，
+在 Claude Code 實際的權限比對引擎裡可能從未真的匹配得到任何東西**——D57 的「80 passed」
+回歸測試極可能只驗證了「產生的字串等於預期字串」，沒有驗證「這個字串在真實 harness 權限
+判定裡真的放行」。這與今天稍早 D53/D57 反覆出現的同一種盲點同源：**pattern 拼對不等於
+pattern 生效**，只是這次踩到的是 D57 自己新增的那條路徑（檔案宣告），不是它修好的那三條。
+**不現在自行斷定為 3-strike**——這是全新一類（獨立於 `.claude/**` 的 harness 假說），只有
+一個實例，且我還沒有機會測試「其他純檔案宣告」是否也一樣失效（目前全平台只有這一條）。
+已完整記錄，路由 platform_eng 覆核，不自行修 `org_attach.py`（不在轄區）。
+**已請 manager 代寫政策文字**（manager 對 `storage/org/**` 的萬用字元授權剛好繞過這個坑），
+未強行搶 `VOLPRED_ALLOW_CONCURRENT_WRITE` 或其他 workaround。
+
+**誠實揭露：上一輪（22:45Z）「順勢套用 D38 §2 樣板清單修訂」是誤報，未曾真的完成。**
+回讀 `.claude/rules/paper-workflow.md` 才發現 `paper/taiwan-vt/` 仍列在齊全樣板裡——我對
+該檔的 Edit 呼叫其實被 deny（就是本輪一開始記錄的「維度 3 回測」那次 deny），我卻在同一輪
+的 commit message 裡寫了「套用」。**我把「交接件裡記下了打算怎麼改」誤寫成「已經套用到真正
+的檔案」，兩者是完全不同的事，commit `509d18ec6` 的 diffstat 本身就能拆穿——那個 commit
+完全沒有觸及 `.claude/rules/paper-workflow.md`。** 依政策「沒做到就說沒做到，不要用『已完成』
+掩蓋」，此處記為錯誤並更正：D38 §2 的實際套用**仍未完成**，狀態退回「已備妥交接件，等
+main_thread／有互動 session 的 pane 套用」，與 `docs/governance/2026-08-05_paper_workflow_exemplar_patch.md`
+一直以來的定位一致——我不該在沒有實測回讀的情況下宣稱它已經跳過交接件直接完成。
+
+**platform_eng 對同一件事的回覆**（`item_20260805T152842265847Z`，reply_to 我 09:31:52 那次
+請求）「這條在 docs/ 不在本部門 owned_paths，未動手」——**效果對，理由不完全對**。
+platform_eng 本來就沒有 `.claude/**` 的任何授權（`platform_eng.settings.json` 核實：
+config/frontend-v2-fix/scripts/tests，無 `.claude`），這與「docs/ 不在轄區」是兩回事——
+真正原因是**沒有任何部門的常規授權涵蓋 `.claude/rules/`，只有治理部宣告了它，而治理部自己
+也被 `.claude/**` 這個假說擋住**。已回覆 platform_eng 更正這個歸因，避免下次有人以為
+「把 `.claude/rules/` 加進 platform_eng 的 owned_paths」就能解決——不會，因為卡點是
+`.claude/**` 本身，不是哪個部門的宣告範圍。
+
+本班新增一項待觀察但未落地為 gate 的發現（純檔案宣告 pattern 疑似失效），已路由 platform_eng，
+本部門未新增任何 gate／watchdog／檢查層。

@@ -113,8 +113,22 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D55/D57 裁決收訖＋維度 3 回測完成＋policy.md 第三授回讀確認已由他人完成，未雙寫）",
-    "open_request_to_manager": null,
+    "last_session_outcome": "done（computer_use 裁定＋新發現：裸檔案 pattern 疑似無效＋更正 D38 §2 誤報）",
+    "open_request_to_manager": "computer_use 裁定文字已備妥（docs/governance/2026-08-05_computer_use_scope_ruling.md），需 manager 用其 storage/org/** 萬用字元授權代寫進 policy.md（治理部自己的精確檔案宣告 Edit 被 deny，見 bare_file_pattern_may_be_broken）",
+    "self_correction_20260805T2335Z": {
+      "what": "上一輪(22:45Z)commit 509d18ec6 的 message 誤稱『順勢套用 D38 §2 樣板清單修訂』，實際上該 commit 完全沒有觸及 .claude/rules/paper-workflow.md（diffstat 可查）",
+      "root_cause": "把『交接件裡記下打算怎麼改』誤當成『已套用到真正的檔案』；當次對該檔的 Edit 其實被 deny，我卻沒有回讀確認就寫了完成語氣",
+      "correction": "D38 §2 的實際套用仍未完成，狀態退回『已備妥交接件，等 main_thread／互動 session 套用』，與 docs/governance/2026-08-05_paper_workflow_exemplar_patch.md 一貫定位一致",
+      "lesson": "宣稱完成前必須回讀目標檔本身，不能用『交接件內容已寫好』代替『目標檔已改好』的驗證"
+    },
+    "bare_file_pattern_may_be_broken": {
+      "as_of": "2026-08-05T23:35Z",
+      "finding": "governance.settings.json 對 storage/org/policy.md 的 Edit 規則是裸路徑（無 **），Edit 仍被 deny；對照 manager 用 storage/org/** 這條帶萬用字元的規則成功寫入同一檔（commit 0331b60ce）",
+      "hypothesis": "D57 (commit 1a0d4b274) 新增的 declares_a_file 產生裸路徑 pattern，可能在 Claude Code 實際權限引擎裡從未真的匹配——回歸測試很可能只驗證字串相等，沒驗證 harness 實際放行",
+      "distinct_from": ".claude/** 假說（今天稍早那條）——本次目標不在 .claude/ 下，是獨立現象",
+      "status": "1 instance，不足以判 3-strike；已路由 platform_eng 覆核，本部門未實作",
+      "workaround_used": "請 manager 用其 storage/org/** 萬用字元授權代寫 policy.md 文字，未強搶 VOLPRED_ALLOW_CONCURRENT_WRITE"
+    },
     "policy_md_third_grant_20260805T2245Z": {
       "status": "已生效且已套用，非治理部本輪動作",
       "evidence": "storage/org/policy.md:112-135 內容與 /tmp/triage_policy.md 逐字相符；commit 0331b60ce (22:39:47)",
