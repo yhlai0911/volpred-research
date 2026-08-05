@@ -48,30 +48,83 @@ replication snapshot, then run the k1116e/k1116g harness on F10 with the fixed 2
 NW lag 21, HLN h=22. No new data source, no cost, no external dependency. This is a
 straightforward experiment task and should be dispatched as one.
 
-## F3 — blocked on a provisioning decision, and the decision is small
+## F3 — SUPERSEDED SAME DAY: Family 3 never used put-call data at all
 
-`data_sources.md:30` records the source as *"CBOE (via yfinance/manual)"*. The word **manual** is
-the actual blocker: it means no replayable acquisition script exists, so the series cannot be
-re-derived from a clean clone — which is a replication-package requirement for Journal of
-Forecasting, not merely an internal preference.
+**What this section said first** (kept, because the correction matters more than the answer):
+that F3 was blocked on a provisioning decision, because `data_sources.md:30` records the source
+as *"CBOE (via yfinance/manual)"* and **manual** means no replayable acquisition script exists.
+A request went to platform engineering asking whether CBOE's historical equity put-call volume is
+still retrievable programmatically.
 
-Two acceptable resolutions, both cheap:
+Their reply reported **zero hits** for any put-call collector anywhere in `src/` or `scripts/`.
+That prompted reading the producing experiment instead of the data manifest, and the manifest is
+wrong.
 
-1. **Replayable fetch** — if CBOE's historical equity put-call volume file is still retrievable
-   programmatically, write the fetch into the harness and pin the resulting CSV with its hash.
-2. **One-time pinned snapshot with documented provenance** — if acquisition is genuinely manual
-   (registration-gated download), pin the CSV and document in `data_sources.md` exactly which
-   file, from which CBOE page, retrieved on which date, under what access terms. A manual source
-   is acceptable in a replication package **only** when documented to that level.
+### What Family 3 actually computes
 
-A **PIT detail that must be settled before the run, not after**: equity put-call volume is a
-settled end-of-day statistic, published after the close. Under the paper's close-of-`t−1`
-convention for Families 1–9 and 11 this is fine — but only if the harness enforces the shift that
-convention implies. This should be asserted in code, in the same style as the existing lag
-enforcement, not assumed.
+`paper/vix-sufficiency/experiments/k732_pcr_behavioral_sentiment.py` — the Family 3 producer per
+`experiments.md:18` — downloads exactly five tickers (`:53-58`):
 
-**Action**: route the acquisition-path question to platform engineering; the answer determines
-which of the two resolutions applies. The CW run itself is then the same harness call as F10.
+```
+SPY, GLD, ^VIX, ^SKEW, ^VIX3M
+```
+
+No put-call series, from CBOE or anywhere else. The signal is a composite built at `:131`:
+
+```python
+df['BSI'] = (df['vix_level_pctile'] + df['ts_ratio_pctile']
+             + df['vix_mom_pctile'] + df['skew_pctile']) / 4
+```
+
+Four percentile ranks: VIX level, VIX term-structure ratio, VIX momentum, and the CBOE SKEW
+index. The script's own header says why (`:11`, `:13`): *"K191: PCR data unavailable, used VIX
+proxies"* and *"K523: VIX percentile as PCR proxy"*. The put-call data was never obtained, a
+proxy was substituted, and the substitution is recorded in the script but nowhere downstream.
+
+### Three consequences, in increasing order of seriousness
+
+1. **`data_sources.md:30` documents a source that was never used.** The row claims CBOE put-call
+   volume, 1995–2026, daily, for Family 3. Nothing reads it. The line should be deleted or
+   rewritten to name the actual inputs (`^VIX`, `^SKEW`, `^VIX3M`, 2010–2026).
+
+2. **F3 is not blocked and never was.** Every input is free from Yahoo and `^VIX` is already
+   pinned. The nested Clark-West for Family 3 can run today, on the same harness as F10, with no
+   external dependency and no provisioning decision. Two of the three "blocked on external data"
+   families were never blocked.
+
+3. **The manuscript describes Family 3 as something it is not — and this one is not a
+   bookkeeping fix.** `main_v5.tex:519` calls it *"Family 3 (behavioural put-call ratio)"* and
+   the Table 4 row is labelled behavioural sentiment. What the family actually tests is whether a
+   percentile composite of *VIX level, VIX term structure, VIX momentum and SKEW* improves on a
+   VIX-only benchmark. Three of the four components are transforms of the benchmark itself, and
+   the fourth (SKEW) is also an SPX-option-implied index — squarely inside the option-market
+   information set whose sufficiency the paper is testing.
+
+   That has two effects the paper should state rather than absorb silently:
+   - **The Family 3 null is close to tautological.** DM |t| = 0.52 is what one should expect from
+     asking whether a non-linear recombination of VIX beats linear VIX. It is not independent
+     evidence for VIX sufficiency, and the nested Clark-West will not change that.
+   - **Family 3 overlaps Family 2.** The `ts_ratio` component *is* the VIX term structure, which
+     is Family 2. The thirteen families are presented as pre-specified and distinct; two of them
+     share a component and one is built from the benchmark.
+
+   The headline null survives — nothing here suggests a signal was missed. What does not survive
+   is the count: the paper's rhetorical force comes from "thirteen families, none of them work,"
+   and one of the thirteen is the benchmark wearing a different label.
+
+### Recommended handling
+
+- Run the F3 nested Clark-West (free, immediate) **and** report it under an accurate label.
+- Correct the family description in §2.3, Table 4, and `main_v5.tex:519`: it is an option-implied
+  sentiment composite (VIX level / term structure / momentum + SKEW), not a put-call ratio.
+- Add one sentence acknowledging that Family 3's inputs are option-implied and therefore inside
+  the information set under test — which makes its null *predicted by the paper's own thesis*
+  rather than an independent test of it. Stated that way it reads as coherence, not as a weakness.
+- Fix `data_sources.md:30`.
+- Tell platform engineering to stop looking for the CBOE collector (done, same day).
+
+A referee who opens the replication package and greps for put-call finds nothing. Better to
+correct this ourselves than to have it found.
 
 ## F9 — withdraw the CW cell; the obstacle is methodological, not logistical
 

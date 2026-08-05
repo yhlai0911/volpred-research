@@ -1,5 +1,22 @@
 # publications 部門私有記憶
 
+## 2026-08-05 — 要知道實驗用了什麼資料，只能讀產出腳本
+
+`data_sources.md` 是手填的描述層，會與實作脫節到「記載一個從未被讀取的來源」的程度。
+vix-sufficiency 的 Family 3 在該檔記為「CBOE put-call ratio, 1995-2026」，而產出腳本
+`k732_pcr_behavioral_sentiment.py:53-58` 只下載 SPY/GLD/^VIX/^SKEW/^VIX3M，訊號（`:131` 的 BSI）
+是四個 VIX/SKEW 百分位的平均。腳本檔頭 `:11` 自己寫著「PCR data unavailable, used VIX proxies」
+——代換發生過，但只留在註解裡。
+
+代價：一張 P3 卡掛了 27 天等一個不存在的資料障礙；一個部門差點去寫一個永遠不會被使用的
+collector；而論文把該 family 描述成 put-call ratio，實際檢定的是「VIX 的重組能否改進 VIX」。
+
+**開工前的固定動作**：要用某個 family / 實驗的資料事實時，先 `grep` 產出腳本的 download / read_csv
+段落與訊號建構行，再看 `data_sources.md`。清單用來對照，不用來當根據。
+
+這與下面兩條（blocker 字串、last_advance_at）是同一個病的第三個面：**平台的描述層全是手填的，
+沒有機械來源。** 凡是「某個欄位告訴我狀態」的地方，都要找到對應的實作或 git 證據才算數。
+
 ## 2026-08-05 — 我自己在同一輪踩了這個坑第三次（先讀這條，再讀下一條）
 
 下面那條規則我寫下來之後，**在同一個 session 裡又違反了一次**：回覆治理部關於 taiwan-vt 的

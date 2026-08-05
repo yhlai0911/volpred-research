@@ -47,15 +47,17 @@
   "open_items_detail": [
     "prg-periodic-garch：4 MAJOR + 2 MINOR 待 paper-update（需 paper/ 寫入權），MAJOR-1 最急（FRL 具名指控風險）；修完重編後開 v9 round（含 Codex 第三軌）",
     "vix-sufficiency F10：可立即執行的 nested CW（^VIX daily OHLC Open 欄，未 lag），需 experiments/ 寫入權",
-    "vix-sufficiency F3：待 platform_eng 回覆 CBOE put-call 可重播取得路徑",
+    "vix-sufficiency F3：NOT BLOCKED（同日更正）——Family 3 從未使用 put-call 資料，k732 只讀 ^VIX/^SKEW/^VIX3M，CW 可立即跑；另需更正論文對該 family 的描述（main_v5.tex:519 稱 behavioural put-call ratio）與 data_sources.md:30",
     "D7/D11 k892：已驗證實作在 quarantine commit 6349aec58，待收養（只取 experiments/k892/ 兩路徑，不可整包 merge）；需 experiments/ 寫入權",
     "D7/D11 k994：0050.TW + ^VIX pinned snapshot 延長到 2026-04-08 後 repoint，驗證 DM t≈1.44 重現（經理已裁選項 1）",
     "12 篇 blocker 過時逐篇核實：已確認 3 篇（prg/vix-sufficiency/taiwan-vt）+ 高度可疑 1 篇（vt-crowding-abm）；其餘隨輪替逐篇回讀，不另開卡"
   ],
   "self_corrections_this_run": [
     "上輪把 9 篇 last_advance_at=2026-07-01 全判為「疑批次填寫、不採計 KPI」——查證後其中 4 篇在該日之後有實質推進 commit，是 stamp 過時而非虛報，判嚴了。已更正並回報。",
-    "回覆治理部 taiwan-vt 樣板資格時，引用 pipeline blocker 敘事欄位當證據而未回讀原始檔——三項證據有兩項已過期，由治理部逐項回讀糾正。與本輪自己發現的缺陷同型；已寫入 memory。"
+    "回覆治理部 taiwan-vt 樣板資格時，引用 pipeline blocker 敘事欄位當證據而未回讀原始檔——三項證據有兩項已過期，由治理部逐項回讀糾正。與本輪自己發現的缺陷同型；已寫入 memory。",
+    "早上裁定 vix-sufficiency F3「卡在 CBOE 採集路徑」，同日被 platform_eng 的 0 命中回報推翻：Family 3 從未使用 put-call 資料。裁決文件已標 SUPERSEDED 並保留原文。錯因與前一條相同——採信 data_sources.md 的描述而未讀產出腳本。"
   ],
+  "method_lesson_this_run": "平台的描述層（pipeline blocker、last_advance_at、data_sources.md）全是手填且與實作脫節，本輪三次踩到同一個病。凡是欄位告訴你狀態的地方，一律要找到對應實作或 git 證據才算數。",
   "outbound_requests": [
     {
       "to": "platform_eng",

@@ -235,6 +235,38 @@ paper 目錄，false positive 極高。它是排序器不是判定器。真訊�
 finishing，但 07-16 有「P0-5 收官 — 修正流動性歸因方向倒置」）。逐篇核實走治理部示範的回讀法，
 已排進輪替當固定步驟，不另開 12 張卡。
 
+#### 平台工程部回覆 CBOE 查詢 → 我早上對 F3 的裁決被推翻（同日第二次更新）
+
+他們回報 `src/` 與 `scripts/` 全域 **0 命中**，沒有任何 put-call collector，並誠實表示這一班沒做完
+外部來源測試、不想憑印象回答會寫進論文資料章節的問題。
+
+**那個 0 命中不是漏找，是決定性證據**——它讓我去讀產出腳本而不是繼續讀資料清單。結果是資料清單
+本身錯了：
+
+`paper/vix-sufficiency/experiments/k732_pcr_behavioral_sentiment.py`（`experiments.md:18` 指定的
+Family 3 產出者）`:53-58` 只下載 SPY / GLD / `^VIX` / `^SKEW` / `^VIX3M`，**沒有任何 put-call
+序列**。`:131` 的訊號是 `BSI = (vix_level_pctile + ts_ratio_pctile + vix_mom_pctile +
+skew_pctile) / 4`。檔頭 `:11`/`:13` 自己寫著「K191: PCR data unavailable, used VIX proxies」
+——put-call 當年就沒拿到，換了 proxy，而這件事只留在腳本註解裡，**沒傳到任何下游文件**。
+
+三個後果（嚴重度遞增）：
+1. `data_sources.md:30` 記載了一個從未被讀取的來源。
+2. **F3 根本沒有 blocker**：輸入全部 Yahoo 免費可得，跟 F10 一樣可以立刻跑。三個「blocked on
+   external data」的家族裡**兩個從來沒被 blocked**——這張卡從 2026-07-09 掛到今天，掛的是一個
+   不存在的障礙。
+3. **論文把 Family 3 稱為 behavioural put-call ratio**（`main_v5.tex:519` 與 Table 4），而它實際
+   檢定的是「VIX 的百分位重組 + SKEW 能否改進 VIX」。四個成分裡三個是 benchmark 自己的變換，
+   第四個 SKEW 也是 SPX 選擇權隱含指數——全都落在論文正在檢定其充分性的那個資訊集內。所以
+   Family 3 的 null 是**論文自己的理論所預測的**，不是對該理論的獨立證據；而且它與 Family 2
+   （VIX 期限結構）共用成分，而十三個 family 宣稱 pre-specified 且各自獨立。
+
+結論不受影響（NULL 仍成立、沒有訊號被漏掉），受影響的是**證據的獨立性計數**。已建議主動更正而
+非靜默吸收——審稿人打開 replication package grep put-call 找不到東西，代價高得多。裁決文件已更新
+並標 SUPERSEDED（保留原文存查），已回覆平台工程部停止那三個步驟、並回報經理。
+
+**這一輪的方法教訓（第三次同型）**：資料清單、pipeline blocker、last_advance_at——三個都是手填的
+描述層，三個都與實作脫節。**要知道一個實驗用了什麼資料，只能讀產出腳本。**
+
 #### governance P3 — taiwan-vt 樣板資格
 
 選「從樣板清單移除」，但理由比「缺一個 README」強：taiwan-vt 現在 `do_not_advance=true`，且有兩個
