@@ -360,6 +360,8 @@ def build_manager_brief(root: Path) -> str:
   部門收到的是**指標**不是副本：canonical 任務仍是唯一真相，部門用 task_pool_claim 結案。
 - 派工到部門（**會直接送進該部門的視窗**，若對方 idle）：
   `scripts/org/dept_send.py <dept> --from manager --priority P1|P2|P3 --task "..."`
+- 組織全景（含各部門自報阻塞，agent 讀 JSON 不讀網頁）：`curl -s localhost:8787/api/org`
+  （老闆看的是同一份資料的網頁版 http://127.0.0.1:8787/org）
 - 看組織狀態：`scripts/org/org_status.py`　｜　看誰在哪個 pane：`scripts/org/org_attach.py status`
 - 看部門的 model/effort 路由：`scripts/org/dept_routing.py`
 - 開/裁部門（裁撤與新開屬重大變更，需先寫提案 email 老闆）：`scripts/org/org_admin.py`

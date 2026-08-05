@@ -408,11 +408,18 @@ def cmd_restore(args: argparse.Namespace) -> int:
     root: Path = args.root
 
     print("1/3 檢查無人值守骨幹（重開機後由 launchd 自動復活，與 Herdr 無關）")
-    for label in ("com.volpred.operations-core-scheduler", "com.volpred.dispatch-supervisor"):
+    for label in ("com.volpred.operations-core-scheduler", "com.volpred.dispatch-supervisor",
+                  "com.volpred.work-dashboard"):
         try:
             probe = subprocess.run(["launchctl", "list", label],
                                    capture_output=True, text=True, timeout=15)
-            print(f"    {'✓' if probe.returncode == 0 else '✗'} {label}")
+            ok = probe.returncode == 0
+            print(f"    {'✓' if ok else '✗'} {label}")
+            if not ok and label.endswith("work-dashboard"):
+                # Everyone queries the dashboard for org state; a dead one makes
+                # the whole organization guess instead of look.
+                print("      ↳ 組織全景失明。復原："
+                      "launchctl kickstart -k gui/$(id -u)/com.volpred.work-dashboard")
         except (OSError, subprocess.SubprocessError) as exc:
             print(f"    ? {label}（無法查詢：{type(exc).__name__}）")
 

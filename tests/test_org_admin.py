@@ -649,3 +649,18 @@ def test_plain_report_needs_no_reply(org_root: Path, quiet_platform) -> None:
     gate = _tick().evaluate_gate(org_root, platform_facts=lambda: [])
 
     assert not any("沒有回覆" in r for r in gate["reasons"]), "status reports are not questions"
+
+
+def test_everyone_is_told_where_the_org_panorama_is(org_root: Path) -> None:
+    """A department that cannot see the org guesses instead of looking."""
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    import shutil
+    shutil.copy(REPO / "storage" / "org" / "policy.md", org_root / "policy.md")
+
+    dept = _core.identity_prompt(org_root, "alpha")
+    manager = _core.build_manager_brief(org_root)
+
+    for text in (dept, manager):
+        assert "localhost:8787" in text
+    assert "api/org" in dept, "agents must be pointed at the JSON, not the HTML"
+    assert "不要當作沒有阻塞" in dept, "a dead dashboard must not read as an all-clear"

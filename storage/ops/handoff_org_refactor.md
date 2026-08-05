@@ -34,7 +34,8 @@ uv run python scripts/org/queue_dispatch.py --dry-run   # canonical 池 → 部�
 uv run python scripts/org/manager_tick.py --shadow  # 看閘門會不會 fire 及理由（不喚醒）
 uv run python scripts/org/boss_digest.py --dry-run  # 預覽給老闆的日報
 uv run python scripts/path_claims.py list           # 誰正在改什麼
-curl -s localhost:8787/api/org | jq .               # 組織全景（含 blockers）
+curl -s localhost:8787/api/org | jq .               # 組織全景（含 blockers）— agent 讀這個
+# 老闆看網頁版 http://127.0.0.1:8787/org（launchd RunAtLoad+KeepAlive，開機自動起）
 ```
 
 ## 已完成（今天，逐項可驗證）
