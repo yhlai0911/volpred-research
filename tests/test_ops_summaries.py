@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from volpred.ops import summaries
@@ -462,6 +462,12 @@ def test_build_token_usage_maintenance_skips_when_daily_is_fresh(tmp_path: Path)
         },
     )
 
+    # 2026-04-23 sits in the Friday-week starting 2026-04-17.
+    _write_json(
+        storage_dir / "reports" / "token_usage" / "weekly_2026-04-17.json",
+        {"week_start": "2026-04-17", "totals": {"billable_total": 100}},
+    )
+
     summary = summaries.build_token_usage_maintenance(
         storage_dir=str(storage_dir),
         target_date=date(2026, 4, 23),
@@ -500,7 +506,50 @@ def test_build_token_usage_maintenance_requests_daily_and_weekly_when_friday_rep
     assert summary["weekly_due"] is True
     assert summary["recommended_actions"] == ["generate_daily_report", "generate_weekly_report"]
     assert summary["execution_commands"][0].endswith("--date 2026-04-24")
-    assert summary["execution_commands"][1].endswith("--week-start 2026-04-24")
+    # 2026-04-24 is a Friday, so the week starting that day has only just begun.
+    # The reportable week is the previous one — reporting the current one is what
+    # zeroed weekly_2026-07-24 and weekly_2026-07-31 in production.
+    assert summary["execution_commands"][1].endswith("--week-start 2026-04-17")
+    assert summary["week_start"] == "2026-04-17"
+
+
+def test_maintenance_defaults_to_the_last_completed_day_not_today():
+    """The job fires at 00:00 UTC; targeting "today" reported a 50-second-old day."""
+    today = datetime.now(timezone.utc).date()
+
+    summary = summaries.build_token_usage_maintenance(storage_dir="storage")
+
+    assert summary["target_date"] == (today - timedelta(days=1)).isoformat()
+    assert summary["target_date"] != today.isoformat()
+
+
+def test_maintenance_never_targets_an_unfinished_week(tmp_path: Path):
+    """A week is reportable only after it ends, whatever weekday the job runs."""
+    storage_dir = tmp_path / "storage"
+    today = datetime.now(timezone.utc).date()
+
+    summary = summaries.build_token_usage_maintenance(storage_dir=str(storage_dir))
+
+    week_end = date.fromisoformat(summary["week_end_exclusive"])
+    assert week_end <= today, f"week {summary['week_start']}..{week_end} has not finished"
+    assert date.fromisoformat(summary["target_date"]) < today
+
+
+def test_missed_weekly_stays_due_until_written(tmp_path: Path):
+    """A single missed Friday fire used to lose that week's report forever."""
+    storage_dir = tmp_path / "storage"
+    _write_json(
+        storage_dir / "reports" / "token_usage" / "daily_2026-04-23.json",
+        {"date": "2026-04-23", "totals": {"billable_total": 10}},
+    )
+
+    summary = summaries.build_token_usage_maintenance(
+        storage_dir=str(storage_dir),
+        target_date=date(2026, 4, 23),
+    )
+
+    assert summary["weekly_due"] is True, "a completed week with no report is still due"
+    assert summary["recommended_actions"] == ["generate_weekly_report"]
 
 
 def test_run_token_usage_maintenance_executes_missing_reports(monkeypatch):
@@ -1138,3 +1187,41 @@ def test_build_memory_health_summary_flags_size_duplicates_and_orphans(tmp_path:
     assert any("記憶檔偏大" in s for s in summary["suggestions"])
     assert any("重複" in s for s in summary["suggestions"])
     assert any("orphan" in s for s in summary["suggestions"])
+
+
+def test_report_written_before_its_period_ended_is_not_accepted(tmp_path: Path):
+    """Six daily reports sat at 0 for a week because existence meant "done"."""
+    storage_dir = tmp_path / "storage"
+    stale = storage_dir / "reports" / "token_usage" / "daily_2026-04-23.json"
+    _write_json(stale, {"date": "2026-04-23", "totals": {"billable_total": 0}})
+    # Stamp it as written 50 seconds into the day it claims to report.
+    written_at = datetime(2026, 4, 23, 0, 0, 50, tzinfo=timezone.utc).timestamp()
+    import os
+
+    os.utime(stale, (written_at, written_at))
+
+    summary = summaries.build_token_usage_maintenance(
+        storage_dir=str(storage_dir),
+        target_date=date(2026, 4, 23),
+    )
+
+    assert summary["daily_report_exists"] is False, "a premature report must not count as done"
+    assert "generate_daily_report" in summary["recommended_actions"]
+
+
+def test_report_written_after_its_period_is_accepted(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    good = storage_dir / "reports" / "token_usage" / "daily_2026-04-23.json"
+    _write_json(good, {"date": "2026-04-23", "totals": {"billable_total": 42}})
+    written_at = datetime(2026, 4, 24, 0, 5, 0, tzinfo=timezone.utc).timestamp()
+    import os
+
+    os.utime(good, (written_at, written_at))
+
+    summary = summaries.build_token_usage_maintenance(
+        storage_dir=str(storage_dir),
+        target_date=date(2026, 4, 23),
+    )
+
+    assert summary["daily_report_exists"] is True
+    assert "generate_daily_report" not in summary["recommended_actions"]

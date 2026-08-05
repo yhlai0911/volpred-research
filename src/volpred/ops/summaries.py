@@ -510,6 +510,25 @@ def build_token_summary(storage_dir: str = "storage", *, days: int = 7) -> dict[
     }
 
 
+def _report_covers_its_period(path: Path, period_end_exclusive: date) -> bool:
+    """A report written before its period ended cannot contain the whole period.
+
+    Existence alone used to mean "done", so a report generated 50 seconds into
+    its own day locked in a near-zero total that was never recomputed. mtime is
+    the same evidence used to diagnose that outage, and it fails safe: a fresh
+    clone stamps every historical report with a time after its period, so no
+    spurious regeneration is triggered.
+    """
+    if not path.exists():
+        return False
+    written = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+    period_end = datetime(
+        period_end_exclusive.year, period_end_exclusive.month, period_end_exclusive.day,
+        tzinfo=timezone.utc,
+    )
+    return written >= period_end
+
+
 def _friday_week_range(target_date: date) -> tuple[date, date]:
     weekday = target_date.weekday()
     days_since_friday = (weekday - 4) % 7
@@ -524,17 +543,36 @@ def build_token_usage_maintenance(
     days: int = 7,
     target_date: date | None = None,
 ) -> dict[str, Any]:
-    target = target_date or datetime.now(timezone.utc).date()
+    # A period can only be reported once it has ENDED. This job fires at 00:00
+    # UTC, so defaulting to "today" produced a report covering a day that was 50
+    # seconds old — and because the file then existed, the near-zero value was
+    # never recomputed. Six of seven daily reports were 0 (141.1M tokens
+    # unaccounted) and the auto-generated weeklies (2026-07-24, 2026-07-31) were
+    # zeroed the same way; every non-zero report on disk was a manual rerun.
+    target = target_date or (datetime.now(timezone.utc).date() - timedelta(days=1))
+    # `target` is by definition the last completed day, so the moment being
+    # reasoned about is the day after it. Anchoring on the target rather than the
+    # wall clock keeps the answer deterministic for any explicit target_date.
+    as_of = target + timedelta(days=1)
     report_dir = project_path(storage_dir, "reports", "token_usage")
     summary = build_token_summary(storage_dir=storage_dir, days=days)
 
     daily_path = report_dir / f"daily_{target.isoformat()}.json"
+
     week_start, week_end = _friday_week_range(target)
+    if week_end > as_of:
+        # The Friday-week containing the target has not finished yet; the newest
+        # reportable week is the previous one.
+        week_start -= timedelta(days=7)
+        week_end -= timedelta(days=7)
     weekly_path = report_dir / f"weekly_{week_start.isoformat()}.json"
 
-    daily_exists = daily_path.exists()
-    weekly_due = target.weekday() == 4
-    weekly_exists = weekly_path.exists()
+    daily_exists = _report_covers_its_period(daily_path, as_of)
+    weekly_exists = _report_covers_its_period(weekly_path, week_end)
+    # Self-healing: a completed week whose report is missing stays due until it
+    # is written. The old `target.weekday() == 4` gate meant a single missed
+    # Friday fire lost that week's report permanently.
+    weekly_due = not weekly_exists
 
     actions: list[str] = []
     execution_commands: list[str] = []
@@ -562,9 +600,14 @@ def build_token_usage_maintenance(
         suggestions.append("日報與本週週報都已就緒；維持低噪音 summary 巡檢即可。")
     else:
         if not daily_exists:
-            suggestions.append("今日 token 日報尚未生成；先跑 daily report 再讀 summary。")
-        if weekly_due and not weekly_exists:
-            suggestions.append("今天是週五且本週週報缺失；補 weekly detail 後再看趨勢。")
+            suggestions.append(
+                f"最近一個完整日（{target.isoformat()} UTC）的 token 日報尚未生成；"
+                "先跑 daily report 再讀 summary。"
+            )
+        if weekly_due:
+            suggestions.append(
+                f"最近一個完整週（{week_start.isoformat()} 起）的週報缺失；補 weekly detail 後再看趨勢。"
+            )
 
     return {
         "generated_at": _generated_at(),
