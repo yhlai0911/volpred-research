@@ -301,3 +301,29 @@ realized quarticity、RQ、DM 檢定、QLIKE、Diebold-Mariano、Harvey，分布
 **本輪三張 orphan 的實際成本對照**：K1609 與 k1706 各只花了「寫一份 plan + 修 frontmatter／
 標點」的力氣就進池，k1600 則因為整篇建立在學術術語上、audience gate 擋下而需要實質改寫。
 **orphan 不是同質的**——判斷「可救 / 需補 / 該改寫」比逐篇硬啃重要得多。
+
+## 2026-08-05 21:25–21:40 outcome=done（batch-drain 第四張：積壓歸檔清空 ＋ 部門 skill）
+
+**歸檔終於做得到了，而且解法不是我以為的那個。** CLAUDE.md 更新揭露了 canonical 入口
+`scripts/org/inbox_archive.py`——**裸 `mv` 至今仍然被 deny**，所以經理與治理部推論的
+「重新 attach 拿到 mv 權限就能做」實測不成立，真正解掉它的是這支 CLI。
+一次補做 **22 件**歸檔，收件匣 26 → 5。
+
+**這支 CLI 做了裸 mv 做不到的事**：它擋下我批次裡的一則，理由是「decision 沒回覆就歸檔＝
+對方會一直等」。我補了回覆才放行。**這就是為什麼答案是 canonical 入口而不是放寬權限**——
+放寬只會讓我安靜地把一則沒回的裁決掃進 _archive。
+
+**canonical 任務五張結案**（走 `task_pool_claim complete`，不是只歸檔工單）：
+K1451／K1465／K1677／K1704 標 succeeded 並附 mile_id 與查重結論；
+K1321 標 failed 並附判重證據與根因，避免下一輪 auto-discover 再生。
+
+**寫了部門第一支 skill：`departments/content/skills/draft-safety/SKILL.md`**（D41 第 4 點）。
+把今天兩次整輪損失的教訓做成動手前的程序：大小寫覆寫、path claim 被擋時的處置、
+frontmatter 欄位位置、四類發佈擋點（audience／全形減號／來源沒有的數字／lazypack schema）、
+發佈後回讀。**每一條都對應一次真實事故，不是預防性清單。**
+下次 attach 就會自動載入，不再依賴人工警覺。
+
+**發現兩則裁決互相矛盾，已回報**：11:07 的 decision 說「FB 那一半由你們承接，不另設 owner」，
+11:18 的 D41 說「FB 端不歸你——你是 headless pane，結構上做不了」。**同一個問題兩個相反答案，
+相隔 11 分鐘。** 我依較新的 D41 執行（FB 不歸我），但這個矛盾本身要讓經理知道，
+否則下一班會照哪一則做全憑運氣。

@@ -9,7 +9,11 @@
     "correctness_readbacks_done": 2,
     "correctness_corrections_needed": 0,
     "structural_defects_found_and_escalated": 1,
-    "replies_sent": 5,
+    "replies_sent": 7,
+    "inbox_items_archived": 22,
+    "inbox_remaining": 5,
+    "canonical_tasks_settled": 5,
+    "department_skills_written": 1,
     "self_inflicted_incidents": 0
   },
   "last_run": "2026-08-05T11:20:00Z",
@@ -57,9 +61,15 @@
   ],
   "blockers": [
     {
-      "what": "inbox 歸檔仍做不到：本班 content.settings.json 確實含 mv/mkdir 規則，但實測 mkdir -p .../inbox/_archive 仍被 deny",
-      "significance": "上一班「重新 attach 就能做」的診斷被本班證偽——本班是 18:58 新產生的設定檔",
-      "extra_evidence": "同檔的 Edit/Write 規則路徑是雙斜線 Edit(//Users/...)，疑為上一輪相對路徑修法留下的新變體",
+      "what": "【已解除】inbox 歸檔",
+      "resolution": "canonical CLI scripts/org/inbox_archive.py 上線，本班一次補做 22 件，收件匣 26→5",
+      "correction": "裸 mv 至今仍被 deny——經理與治理部推論的『重新 attach 拿到 mv 權限就能做』實測不成立，解掉它的是這支 CLI 不是權限放寬",
+      "why_cli_beats_permission": "它擋下了我批次裡一則未回覆的 decision（『沒回覆就歸檔＝對方會一直等』），放寬權限只會讓我安靜地把它掃進 _archive"
+    },
+    {
+      "what": "兩則經理裁決互相矛盾，本班依較新者執行並已回報",
+      "detail": "11:07 decision 說『FB 那一半由你們承接，不另設 owner』；11:18 D41 說『FB 端不歸你，你是 headless pane 結構上做不了』。相隔 11 分鐘、同一問題兩個相反答案",
+      "handling": "依較新的 D41 執行（FB 不歸內容部）；矛盾本身已回報經理，否則下一班照哪一則做全憑運氣",
       "escalated_to": "manager"
     },
     {
