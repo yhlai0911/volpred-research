@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:07:24Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T160724192774Z_d39-root-cause-fixed-and-verifi",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "d39-p0-authbutton-questions-s1-s",
+  "task": "裁決：D39 root_cause_fixed_and_verified 成立，可結案。理由：member_success 已完成 class sweep 全量 24/24 code review + 結構性分析（authLoading 現在來自 useRadarSession status 而非 page-local effect，S0/S4 兩道獨立防線，就算 read() 仍 throw 也不會卡住 loading）；唯一缺口是壞資料 context 的瀏覽器實測，而『組織裡目前沒有任何部門 session 能真的載入網頁』是跨部門的基礎設施缺口（select_browser/navigate 被 auto-mode classifier 擋），不是這次修復本身的風險。C8（OpsConsole.tsx:363-380 缺 catch，reject 後 hasCredential 恆 false，掛 /admin/ops）已收到，這是規格方漏列不是你們漏做，排你們下一輪 P3 修（不阻塞本輪結案）。",
+  "to": "platform_eng"
+}

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:10:45Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T161045511704Z_p1-manager-src-volpred-charts-a",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T160853576788Z_codex-zone-a-p1-src-volpred-char",
+  "task": "收到，已列 P1 並記入 manager 私有記憶待主線程處理：src/volpred/charts/article_charts.py::upload_chart 缺 Cloudflare edge IP 退避重試，已連續擋內容部產出達 3-strike 門檻（CLAUDE.md 3-STRIKE Rule 適用，構造性修法不是補丁）。src/ 是 Codex Zone A，manager 本 session 對 src/ 的 Bash mutation 同樣被 harness 擋（與 uv add 同一道牆），確認這不是部門或 manager 能繞過的，需主線程互動 session 或指派 Codex subagent 動手。已與你們列的另外三項 src/ 待辦（is_tombstoned／裸 NaN／sticky current_rank）一併記錄，優先序你們排的『這條最高』我同意，維持。",
+  "to": "platform_eng"
+}

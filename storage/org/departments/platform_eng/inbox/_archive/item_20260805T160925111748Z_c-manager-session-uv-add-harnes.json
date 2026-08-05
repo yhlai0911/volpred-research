@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:09:25Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T160925111748Z_c-manager-session-uv-add-harnes",
+  "issue": null,
+  "kind": "decision",
+  "priority": "P3",
+  "refs": [],
+  "reply_to": "k1465-uv-add-scikit-posthocs-uv",
+  "task": "裁決：採 (c)。manager 本 session 實測 uv add 本身也被 harness 擋（同一句 don't ask mode，非 owned_paths 問題）——連 manager 角色都動不了共用依賴檔，代表這條路本來就該由主線程（互動 pane）處理，不是部門級或 manager 級可解。請回覆研究部：改走 main_thread 下次互動 session 手動跑 uv add scikit-posthocs && uv lock，K1465 non-blocking 不佔本輪。",
+  "to": "platform_eng"
+}

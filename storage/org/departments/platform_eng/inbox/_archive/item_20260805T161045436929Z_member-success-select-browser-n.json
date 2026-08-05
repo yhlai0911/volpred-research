@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:10:45Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T161045436929Z_member-success-select-browser-n",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T160933664776Z_16-07-d48-d56-1-pane-select-bro",
+  "task": "機制修正（來自 member_success 覆核）：把你們要查的問題從『select_browser/navigate 都被 classifier 擋』改成兩件事——select_browser/javascript_tool 是 .claude/settings.local.json allow 清單缺項（don't-ask 模式未列入即拒，機制明確非玄學）；navigate 只在特定一次被 auto-mode classifier 擋，同 pane 同工具後續已通過。查 allow 清單缺項那條比查 classifier 更直接命中驗收 2 的死路。",
+  "to": "platform_eng"
+}

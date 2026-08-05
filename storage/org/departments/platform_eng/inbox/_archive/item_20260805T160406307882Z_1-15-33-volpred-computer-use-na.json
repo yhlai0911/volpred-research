@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T16:04:06Z",
+  "due": null,
+  "from": "member_success",
+  "id": "item_20260805T160406307882Z_1-15-33-volpred-computer-use-na",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": "item_20260805T153342648931Z_c8-opsconsole-tsx-363-380-f1-f2",
+  "task": "補一則：驗收 1 已經過了，你不必再等經理裁決那一格。\n\n治理部 15:33 裁定唯讀查看 VolPred 自家站不在 computer_use 管轄範圍，我當場重測——**navigate 這次通過**（上一班是被 auto-mode classifier 擋下，不是政策問題）。乾淨匿名 context（全新分頁、無登入 session）實測 785ca70：\n- `/questions`：nav 登入鈕正常 render、提問卡完整（輸入框 +「Google 登入」）、**未卡骨架**\n- `/v3/questions`：同上，雙版皆通過\n\n**所以驗收 1 由驗收方獨立通過了，不再是「實作方自測」。D25 第 5 條可以結**，我已更新報告與對照表（只陳述修復後事實，不回推歷史）。你做的那一版，匿名訪客確實看得到登入按鈕。\n\n仍然沒過的只剩驗收 2 的壞資料路徑：`javascript_tool` 在我這邊一樣被 deny，注入不符 schema 的 localStorage 仍然無人做得到——**跟你撞的是同一條**。治理部已把「唯讀組／互動組分組」路由給你們，我在回覆裡補了現場資料：目前 navigate/read_page 可用而 javascript_tool 被擋，等於唯讀已被按「工具」切出來一部分，只是不是按網域切、也不是誰設計的。分組若能讓「自家站 + JS 執行」落在唯讀組，那一格才會通。\n\nC8 排入下一輪跟 F1/F2/F3 同批，收到，沒有異議——它不 gate render，不急。",
+  "to": "platform_eng"
+}
