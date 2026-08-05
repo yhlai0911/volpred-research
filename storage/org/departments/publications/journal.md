@@ -2,6 +2,43 @@
 
 ## 2026-08-05T09:20Z（台灣 17:20）— 經理四項裁決 + 兩張 canonical 卡：三件實質產出
 
+### k892 收養完成（研究部執行）— 一半 fixed_and_verified，另一半直接改變論文措辭
+
+研究部在 `77b1884fc` 落地收養。**我自己從 canonical HEAD 驗過，不是採信回報**：兩個路徑
+`git cat-file -e` 都在；`k892_verify_tw_gamma.py:54` 有 `PINNED_SOURCES`、`:82-83` 讓 0050.TW
+在任何 `yf.download` 之前先走 `_load_pinned`；直接 jq 讀 canonical 的 results.json 得
+`gamma = 0.09704215871857629`、`gamma_t = 3.5965275718364866`、`n_obs = 4219`，與回報一致。
+**這一半升格為 `root_cause_fixed_and_verified`。**
+
+**流程偏差認可，不 revert**：研究部沒有 worktree 與 `merge_worktree.sh` 的執行權限，改走
+「取檔案內容 → 寫 owned_paths → 跑 gate → `git_writer_lock` commit」。判斷正確——
+`merge_worktree.sh` 的五層防禦針對「worktree commit 遺失」，這條路沒有 worktree，防禦對象不存在。
+**規格是我寫的，我預設了執行者有 worktree 權限，那是我的疏漏不是他們偏離**。他們主動寫出偏差並
+提出可 revert，處理得比照著一份不適用的規格硬做好。
+
+**另一半才是對論文最重要的**：研究部實跑後發現腳本仍跑不完——0050.TW 從 pinned snapshot 成功
+載入，接著 cross-check 的 `^TWII` 回 None，`raise ValueError`，**在寫出 results.json 之前中止**。
+
+因為 `body_v3.tex:53` 早就寫著「no live yfinance dependency」，而那句話的真值今天翻了兩次：
+
+| 時點 | 那句話 |
+|---|---|
+| 今天之前 | **假** — repoint 沒進 canonical，腳本仍 live 抓 0050.TW |
+| `77b1884fc` 之後（0050.TW 那一腿） | **真** |
+| `77b1884fc` 之後（整支腳本） | **仍假** — cross-check 還是 live，而且會讓腳本掛掉 |
+
+**若研究部只回驗收值而不實跑，我會把那句留著不動**，而它會帶著「replication package 可完整執行」
+的暗示送進投稿。一份誠實的半完成回報，價值高於一份漂亮的驗收數字。
+
+修正措辭寫成 `work/taiwan_vt_repoint_wording.md`（單一 edit + 獨立驗證 + 「不得宣稱什麼」三條）
+交主線程。**不得宣稱**：package 可完整執行、可從乾淨 clone 重現。**可以宣稱**：論文引用的統計量
+由 pinned snapshot 決定並 byte-for-byte 重現。
+
+**記錄但未裁定的數字不一致**：`body_v3.tex:33` 寫 0050.TW 樣本「4,217 trading days、到 March
+2026」，而估計輸出 `n_obs = 4219`、期間到 2026-04-02。差 2 天、期末差一個月。可能有正當解釋
+（returns vs price observations、排除 2014 split date），但我試不出哪個組合等於 4,217。
+**不下結論**，排進 W4 核實——那要讀腳本的載入邏輯，不是猜。
+
 ### 收尾：治理部把「不得批量回填戳記」升格進 v3 裁定，並給了一條通用判準
 
 治理部採納我的論證、**撤回**原本「請評估把 12 篇補上的優先序」那句請求（他們自述那句預設了批量補

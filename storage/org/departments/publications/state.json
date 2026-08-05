@@ -51,7 +51,8 @@
     "已知漂移（我自己造成，待 set-paths 修）：charter.md min_cadence=weekly 而 registry min_cadence=null。經理裁決二無 writer 可用，只能寫進 charter。",
     "vix-sufficiency F10：可立即執行的 nested CW（^VIX daily OHLC Open 欄，未 lag），需 experiments/ 寫入權",
     "vix-sufficiency F3：NOT BLOCKED（同日更正）——Family 3 從未使用 put-call 資料，k732 只讀 ^VIX/^SKEW/^VIX3M，CW 可立即跑；另需更正論文對該 family 的描述（main_v5.tex:519 稱 behavioural put-call ratio）與 data_sources.md:30",
-    "D7/D11/D19 k892：經理已核准收養；已 P1 request 研究部代為執行（他們的 owned_paths 是 experiments/），附完整規格與驗收標準，不需等 registry 變更。待研究部回覆 canonical HEAD 已含那兩個路徑。",
+    "D7/D11/D19 k892 收養：DONE（研究部 77b1884fc，我從 canonical HEAD 獨立驗過三個值）。但腳本仍跑不完——cross-check 的 ^TWII 走 live yfinance 回 None，在寫出 results.json 前 raise；因此 taiwan-vt body_v3.tex:53 的『no live yfinance dependency』需限定到 0050.TW 那一腿，修正措辭已交 work/taiwan_vt_repoint_wording.md。experiments/k892 仍缺 reproduce_spec.json（須 run 時產生，K1708），卡在同一個 ^TWII。",
+    "W4 taiwan-vt 待核實：body_v3.tex:33 寫樣本『4,217 trading days、到 March 2026』，而 n_obs=4219、期間到 2026-04-02。差 2 天、期末差一個月，未裁定，需讀腳本載入邏輯。",
     "D7/D11 k994：0050.TW + ^VIX pinned snapshot 延長到 2026-04-08 後 repoint，驗證 DM t≈1.44 重現（經理已裁選項 1）",
     "12 篇 blocker 過時逐篇核實：已確認 3 篇（prg/vix-sufficiency/taiwan-vt）+ 高度可疑 1 篇（vt-crowding-abm）；其餘隨輪替逐篇回讀，不另開卡"
   ],
