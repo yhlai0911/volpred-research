@@ -254,3 +254,29 @@ K1710 查重也做完了：與已發佈的 K451 同主題但 arc 不同（描述
 另外 **path claim 仍是 session 級不是部門級**——journal/state/memory/drafts 全被上一班
 session `e41ed794` 持有，本班等它自然到期才寫得進來，全程沒硬搶也沒 release 別人的活 claim。
 兩項都附證據回報經理。
+
+## 2026-08-05 19:20–19:35 outcome=done（batch-drain 第二張：orphan 救援）
+
+**K1609 已進池 `mile_d9bf7b73`，池深 9→10。** 這是 orphan sweep 裡躺了 2.2 小時的稿子，
+不是新寫的——照 K1451 樣板補一份 `K1609_lazypack_plan.json` 就推出去了，比從零寫便宜得多。
+
+**過程中證實了我上一輪回報的那個全平台級缺陷確實會咬人。** 第一次 dry-run 印的是
+`experiment_refs=[]` 與 `content-vs-source audit SKIPPED (no citable source for refs=[])`——
+draft 把 `experiment_refs` 只寫在 `details:` 裡，頂層沒有，parser 讀不到於是**靜默略過**整道
+數字稽核。把 `experiment_refs` 與 `tags` 補到 frontmatter 頂層後重跑，audit 變成
+`PASS (3 claims vs 78 source values)`。**同一篇稿子、同一道關卡，一個欄位位置的差別就是
+「驗了三個數字」與「一個都沒驗卻印 SKIPPED 放行」。** 這正是為什麼它必須改成響亮失敗。
+
+**k1600 判定：本班不動，留給下一班。** 它的 lazypack plan 我已寫好
+（`k1600_lazypack_plan.json`，sha256 已對齊），但 **audience gate 擋下**：
+draft 宣告 general 卻被推斷成 research。實查命中的術語密集且是文章骨架的一部分——
+HAR／HARQ 各出現十餘次，另有 Corsi、Bollerslev、Patton、Quaedvlieg、Journal of Econometrics、
+realized quarticity、RQ、DM 檢定、QLIKE、Diebold-Mariano、Harvey，分布在 10、31、33、35、37、
+47、49、51、57、61、63、75、83 行。`tags` 裡也直接放了 `HAR`、`HARQ` 兩個術語。
+這不是換幾個詞就好，整篇建立在這套術語的說明上，**是一次實質改寫**。
+依收班條件二（剩餘預算不足以完整做完並收尾），本班不開這個頭——**做一半丟下比不做更糟**。
+白話替換對照表已在 memory，下一班照表改即可，plan 不必重寫。
+
+**下一班第一件事**：查 `mile_d9bf7b73` 的懶人包有沒有裝上。publish 時已自動 queue，
+但依本班診斷的 Supabase 上傳缺陷（單張約 1/2 失敗、三張連傳約 12.5% 全成功），
+它有相當機率 failed。回讀方法與重跑步驟都在 memory。

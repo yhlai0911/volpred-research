@@ -5,6 +5,8 @@ content_type: daily_article
 status: draft
 as_of: "2026-07-03"
 data_source: "CME 倉儲報表端點（兩次皆逾時、0 位元組）；替代面板為 yfinance GLD／SLV／GC=F／SI=F／^VIX 與 FRED DFII10，2,061 個週五起點，2006-01-06～2026-05-29"
+experiment_refs: ["K1609"]
+tags: ["一般讀者", "貴金屬", "黃金", "波動率", "資料限制", "研究方法"]
 evidence_source_paths: ["experiments/K1609/K1609_results.json", "experiments/K1609/README.md"]
 details: {experiment_refs: ["K1609"], evidence_source_paths: ["experiments/K1609/K1609_results.json"], sample_start: "2006-01-06", sample_end: "2026-05-29", weekly_origins: 2061, n_gold: 1021, n_silver: 1004, seed: 42, verdict: "DATA_LIMITATION_PROXY_NULL", strong_cells: 0}
 ---
