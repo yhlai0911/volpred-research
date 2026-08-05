@@ -1,42 +1,24 @@
 {
-  "last_patrol": "2026-08-05T13:30:00Z",
-  "last_tick": "2026-08-05T13:30:00Z",
+  "last_patrol": "2026-08-05T14:50:00Z",
+  "last_tick": "2026-08-05T14:50:00Z",
   "next_review_due": "2026-08-12T13:30:00Z",
-  "pending_proposals": [],
+  "pending_proposals": [
+    "2026-08-05_split_platform_eng"
+  ],
   "open_items": [
     {
       "id": "research-reattach-pending",
       "what": "D47 已擴充 research.owned_paths 到 .claude/worktrees/*/experiments/，但已 attach 的 session 拿不到新權限",
-      "state": "waiting_for_idle",
+      "state": "resolved",
       "owner": "manager",
-      "next": "研究部 pane 轉 idle 後跑 org_attach.py restore（或只 attach research）"
-    },
-    {
-      "id": "bulletin-single-contended-file",
-      "what": "連兩輪經理紀錄被寫入認領擋下；bulletin 同時是經理判斷紀錄與 org_admin 自動落款，兩種寫者一個檔",
-      "state": "to_assign",
-      "owner": "manager",
-      "next": "開單給 platform_eng：bulletin 改每則一檔或提供 append CLI"
-    },
-    {
-      "id": "tick-record-pending-merge",
-      "what": "D47-D50 的 bulletin 條目暫存於 manager/work/tick_20260805T1330Z_D47_D50.md",
-      "state": "deferred_write_claim",
-      "owner": "manager",
-      "note": "storage/org/bulletin/2026-08.md 由 dept:platform_eng 持有至 2026-08-05T14:07Z"
+      "note": "research 本班已實測新 session 直接可寫，見 2026-08-05T14:08:33Z bulletin"
     },
     {
       "id": "platform-eng-split-proposal",
-      "what": "拆部門提案暫不送老闆；等 30 件批次歸檔與 auth owner 歸位後看真實負載",
-      "state": "deferred_by_judgment",
-      "owner": "manager"
-    },
-    {
-      "id": "policy-md-two-sections",
-      "what": "policy.md 兩節（訊號隔幾層／擋之前先問往壞修正）已授權治理部代寫",
-      "state": "delegated",
-      "owner": "governance",
-      "ref": "D50"
+      "what": "拆部門提案已寫入 storage/org/manager/outbox/proposals/2026-08-05_split_platform_eng.md 並 email 老闆(needs-reply)",
+      "state": "awaiting_boss_approval",
+      "owner": "manager",
+      "next": "等老闆 telegram 回 approve/reject 2026-08-05_split_platform_eng"
     },
     {
       "id": "zone-a-three-items",
@@ -44,6 +26,33 @@
       "state": "unassigned",
       "owner": "manager",
       "next": "走主線程或 Codex，platform_eng 已明確不做"
+    },
+    {
+      "id": "docs-error-log-3strike-owned-paths",
+      "what": "owned_paths 檔案vs目錄構造連續4次歸因錯誤(3-STRIKE)，逐字草稿已存 manager/memory/notes.md，manager 角色 Edit/Write 對 docs/ 機械 deny 寫不進 docs/error_log.md",
+      "state": "deferred_to_main_thread",
+      "owner": "main_thread",
+      "next": "主線程讀 manager/memory/notes.md 逐字套用進 docs/error_log.md"
+    },
+    {
+      "id": "claude-dir-ownership-blocked",
+      "what": "governance 授權 storage/org/policy.md 生效後，Edit .claude/rules/paper-workflow.md 仍被 deny(對照組 docs/governance/** 成功)——.claude/ 前綴有獨立於 owned_paths 型別契約之外的阻擋，疑似 Claude Code 內建對 .claude/ 的保護",
+      "state": "unresolved",
+      "owner": "governance",
+      "next": "governance 建議 .claude/** 從所有 owned_paths 移除、org_admin.py set-paths 對該前綴直接拒絕宣告、改由互動 pane 人工套用；本班認同方向但未執行移除，留待下次 org_review 正式改 registry"
+    },
+    {
+      "id": "prg-v8-tex-application",
+      "what": "PRG v8 逐字修法(移除兩處 citep)規格與 verdict 齊備，publications 已 suspended，依 CLAUDE.md 禁止 background agent 寫論文 .tex，manager 角色不算主線程不代勞",
+      "state": "awaiting_main_thread",
+      "owner": "main_thread",
+      "ref": "D54"
+    },
+    {
+      "id": "manager-role-write-allowlist-gap",
+      "what": "manager 角色 Edit/Write 允許清單只涵蓋 storage/org/manager/**；policy.md/registry.json/proposals 等 storage/org/ 其他子樹一開始也顯示 path_claims 衝突(實為同session陳舊claim，release後可寫)，但 docs/ 是真正的權限層 deny，與 policy.md 描述的『manager 可寫 registry/bulletin/任何部門inbox/manager自身子樹』不完全一致(registry.json 實際可寫，不在該清單裡卻能寫，docs/確實寫不進去)",
+      "state": "flagged_for_org_review",
+      "owner": "manager"
     }
   ]
 }
