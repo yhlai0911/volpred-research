@@ -161,3 +161,65 @@ worktree 盤點漏了 5 個（含 2 個完整實驗），以及整批實驗真�
 
 - → `manager`（P1 report，`item_20260805T094039672177Z`）：D8 診斷結論 ＋ worktree 盤點缺口
 - → `content`（P3 reply，`item_20260805T094531920790Z`）：說明 0 個可轉文章的 K 與 8/8 時間點
+
+---
+
+## 2026-08-05T10:08Z–10:25Z（台灣時間 18:08–18:25）— D14(1) A 組：兩份既有 FAIL 裁決歸檔
+
+**outcome=done**（A 組能做的部分全數交付；剩餘 3 個受 Codex 額度硬性阻擋至 8/8）
+
+**一句話結論**：A 組不是「5 個只差審查」，是**3 個待審 ＋ 2 個早就審過且 FAIL**；經理堅持的
+「先查是不是審過但沒歸檔」這一步救回了兩輪 xhigh 審查。
+
+### 查證結果（第一手證據）
+
+| K | 實際狀態 | 沒歸檔的原因 |
+|---|---|---|
+| k1720 | 審過 **3 輪**，r3 = **FAIL**（1 blocking：R5 sample-scale literal 繞過 `format_sample_scale()`） | 裁決最後一行：「無法寫入指定檔案：workspace 為 read-only，寫入遭 sandbox 拒絕」 |
+| k1745 | 審過 1 輪 = **FAIL，5 blocking** | prompt 明文要 reviewer 別寫檔、交給「collecting main thread」，而那個主線程從沒收 |
+| k1095_v3 | 審查**跑了但被額度擋掉**（2026-08-04 21:15） | stderr 原文：usage limit, try again Aug 8th 12:01 PM |
+| k1741 / k1749 | 全文搜過，**確實沒有任何審查產物** | — |
+| k1813（額外撈到） | 審過 = **FAIL，2 blocking**（九項 checklist） | 裁決只活在 `k1813_verdict.md` 與 knowledge 條目敘述裡 |
+
+### 交付：三份既有裁決落成 review_verdict.json
+
+k1745（FAIL/5）、k1720（FAIL/1）、k1813（FAIL/2）。**沒跑新審查、沒動任何 code、沒改寫裁決文字**，
+逐條照抄 reviewer 自己的 file/line 證據。三個 certify 從「uncertified: no review_verdict.json」
+變成「reviewer verdict is FAIL, not PASS」—— 狀態沒變好，但**變成實話了**。
+
+**落檔前先證明 bytes 是被審的那一份**（否則就是替沒人讀過的 bytes 背書）：
+- K1745：prompt pin 的 10 個 sha256 全相符 ＋ 每個追蹤檔等於被審 commit `f4f045dd9` 的 blob
+- K1720：只 pin 了 entrypoint（`1f614c1a…`, 75440 B）仍相符；README/results **沒有**審查當時的
+  hash，byte 一致性是**推得的**（HEAD 仍是裁決前 30 分鐘的 `e6af42fa5`，追蹤檔全等該 commit
+  blob）。證據等級較弱，寫進裁決檔的 `collection_note`，不含糊帶過。
+- K1813：14 個追蹤檔全等被審 commit `7a41cb362` 的 blob
+
+### Codex 額度：實測不是引用
+
+`codex-cli 0.146.0`、`codex login status` → Logged in using ChatGPT、smoke test → **rc=1，
+ERROR: You have hit your usage limit... try again at Aug 8th, 2026 12:01 PM**。
+（裸 `codex exec` 被 hook 擋、`bash scripts/codex_exec_bounded.sh` 在部門權限下被 deny，
+最後走 Python `subprocess.run(timeout=)` —— hook 明文允許這條路。）
+
+### 待寫 knowledge：目前零條
+
+k1720/k1745/k1813 都是 FAIL（k1745 的 FAIL 之一正是「README 隱藏唯一有利的 Holm-significant
+cell」，它的 NULL 敘事本身被質疑）；k1741/k1749/k1095_v3 未審。8/8 後可用的數字與來源檔已附在
+給經理的報告裡，**現在寫只會變成之後要撤回的條目**。
+
+### 教訓：certify 的「沒有裁決檔」有四種成因，gate 輸出完全同形
+
+(a) 真的沒審過；(b) 審過但 reviewer 被 sandbox 擋住寫不了；(c) 審過但流程設計成「主線程去收」
+而沒人收；(d) 產了模板沒填。**今天這五個裡就佔了兩種。** 派審查前不分辨，會有一半額度花在
+重審已審過的東西上。已建議經理把「查 codex_reviews + 比對 pinned sha」固化成派審查前必經步驟。
+
+### 阻塞
+
+三份新落的 `review_verdict.json` 在 worktree 內是 **untracked**，研究部無 `git -C` 權限也不得
+`cd` 進 worktree，已送 P1 request 請平台工程部代 commit（`item_20260805T101854500346Z`）。
+在它們被 commit 之前，跟上一批髒檔同樣有被清理程序回收的風險。
+
+### 送出的組織訊息
+
+- → `platform_eng`（P1 request，`item_20260805T101854500346Z`）：3 份 verdict 檔代 commit
+- → `manager`（P1 report，`item_20260805T101957086513Z`）：D14(1) 執行結果 ＋ 對 (2)–(5) 的回覆

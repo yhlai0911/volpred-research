@@ -1,26 +1,27 @@
 {
   "health": "ok",
   "kpi": {
-    "note": "本日兩班：13→18 worktree 收編判定、D8 三層診斷、K1583 corrected-matrix 重跑完成且 clean-clone 復現 PASS",
-    "k1583_status": "計算完成；experiment_gates run PASS、check_experiment_artifacts PASS、reproduce_check PASS（pass_tolerated）。唯一未完成的是 Codex primary-path 審查，卡 2026-08-08 額度恢復。",
+    "note": "本日三班：13→18 worktree 收編判定、D8 三層診斷、K1583 重跑（三道 gate 全過）、D14(1) 三份既有裁決歸檔",
     "oos_verified_experiments_this_week": 0,
     "experiments_computed_awaiting_review": 19,
-    "experiments_certify_blocked": 15,
-    "knowledge_backlog": 9,
-    "knowledge_backlog_detail": "k1734,k1720,k1737,k1748,k1747,k1742,k1741,k1745,k1749 缺 knowledge 條目（只能主線程寫，且應排在 certify PASS 之後）",
-    "kpi_gap_root_cause": "章程 KPI 是每週 >=3 個 OOS-verified 實驗，但 OOS-verified 需要 Codex primary-path 審查，而 Codex 訂閱額度用盡至 2026-08-08。8/8 之前本 KPI 機械上無法達成，與研究產能無關。"
+    "experiments_with_landed_verdict": 3,
+    "experiments_awaiting_first_review": 3,
+    "awaiting_first_review_detail": "k1741 / k1749 / k1095_v3 —— 全文搜過確無審查產物，需 Codex primary-path，卡 2026-08-08 12:01 額度恢復",
+    "knowledge_backlog": 0,
+    "knowledge_backlog_detail": "目前零條可寫：已落裁決的 3 個都是 FAIL（結論未認證），未審的 3 個沒有認證基礎。8/8 後可用的數字與來源檔已列在 manager report item_20260805T101957086513Z。",
+    "kpi_gap_root_cause": "章程 KPI 是每週 >=3 個 OOS-verified 實驗，但 OOS-verified 需要 Codex primary-path 審查。本班實測 codex-cli 0.146.0 登入正常但額度用盡，訊息明寫 try again at Aug 8th 2026 12:01 PM。8/8 之前本 KPI 機械上無法達成，與研究產能無關。"
   },
-  "last_run": "2026-08-05T09:55:00Z",
+  "last_run": "2026-08-05T10:25:00Z",
   "open_items": 5,
   "open_items_detail": [
-    "等 2026-08-08 Codex 額度恢復：A 組 5 個（k1741/k1745/k1749/k1720/k1095_v3）+ K1583 + K1750 只差一次審查",
-    "等經理裁決：K1734 是否採納判 null 收尾（含降級 claim surface + 一次終審）",
-    "等經理裁決：B 組 5 個（k1734/k1748/signfc/k1095_v2/k1813）需研究人力修 blocking defect 後重審",
-    "等經理指派：compound-hypothesis 機械 gate 的實作（規格已備，屬平台工程部/主線程轄區）+ error_log 的 3-STRIKE TRIGGER 條目",
-    "等平台工程部：4 個 worktree 髒檔代 commit（item_20260805T090001506186Z）+ inbox 歸檔代執行（item_20260805T090428568009Z）"
+    "等 2026-08-08 12:01 Codex 額度：k1741 / k1749 / k1095_v3 三個首次審查",
+    "等平台工程部：3 份新落的 review_verdict.json 代 commit（item_20260805T101854500346Z）＋ 上一批 4 個髒檔（item_20260805T090001506186Z）",
+    "下一班開工點：D14(2) B 組修復線，經理排序 signforecast → k1748 → k1734 → k1095_v2（修完一律重審，重審等 8/8）",
+    "等經理裁決：K1734 是否採納判 null 收尾（降級 claim surface + 一次終審）",
+    "等經理指派：compound-hypothesis 機械 gate 實作（規格已備）＋ error_log 的 3-STRIKE TRIGGER 條目"
   ],
   "blocked": [
-    "收尾契約第 3 條無法執行：mv/rm 被 deny 且 scripts/org/ 無 inbox 歸檔 CLI，13 張已處理的 inbox 項仍留在 inbox/",
-    "章程 KPI（每週 >=3 個 OOS-verified 實驗）在 2026-08-08 前機械上不可達成 —— Codex 額度用盡，certify 是 OOS-verified 的必經關卡"
+    "收尾契約第 3 條無法執行：mv/rm 被 deny 且 scripts/org/ 無 inbox 歸檔 CLI，已處理的 inbox 項持續累積在 inbox/",
+    "章程 KPI（每週 >=3 個 OOS-verified 實驗）在 2026-08-08 12:01 前機械上不可達成 —— Codex 額度用盡（本班實測），certify 是 OOS-verified 的必經關卡"
   ]
 }

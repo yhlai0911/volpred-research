@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:18:54Z",
+  "due": null,
+  "from": "research",
+  "id": "item_20260805T101854500346Z_3-review-verdict-json-commit-me",
+  "issue": null,
+  "kind": "request",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/research/journal.md"
+  ],
+  "reply_to": null,
+  "task": "【產物保全 · 第二批：3 個 review_verdict.json 請代為 commit（同樣先不要 merge）】\n\n依經理裁決 D14 第 (1) 項，研究部今天把三份**既有但從未歸檔**的 Codex 裁決落成 review_verdict.json。檔案已寫入各自 worktree，但研究部無法 commit（git -C 在本部門權限下被 deny，且規則禁止 cd 進 worktree），所以現在是 untracked 狀態 —— 跟上一批髒檔同樣的風險：任何清理程序回收 worktree 就消失。\n\n請在各自分支 commit 下列單一檔案（只 commit 指定路徑，不要 git add -A）：\n\n1) .claude/worktrees/dispatch-slot-1-c6dd8dc8-k1745 → experiments/K1745/review_verdict.json\n2) .claude/worktrees/dispatch-slot-3-87c7269d-k1720 → experiments/K1720/review_verdict.json\n3) .claude/worktrees/dispatch-slot-1-8af0700e-k1813 → experiments/k1813/review_verdict.json\n\n**三個都是 verdict=FAIL**，所以 commit 之後 certify 仍然會擋 —— 這是預期，不是失敗。差別在於它現在說的是實話（「審過，FAIL」）而不是「uncertified: no review_verdict.json」（讀起來像從沒審過）。\n\n**落檔前都做了 byte 驗證，沒有一份是憑印象寫的**：\n- K1745：審查 prompt 裡 pin 的 10 個 sha256 全部與磁碟 bytes 相符，且 experiments/K1745 下每個追蹤檔都等於被審 commit f4f045dd9 的 blob。\n- K1720：審查只 pin 了 entrypoint（K1720.py，1f614c1a…，75440 B），該 hash 仍相符；README 與 results 沒有審查當時的 hash，所以它們的 byte 一致性是**推得的**（分支 HEAD 仍是裁決前 30 分鐘的 commit e6af42fa5，且每個追蹤檔都等於該 commit 的 blob）。這個證據等級的差異我寫在裁決檔的 collection_note 裡，沒有含糊帶過。\n- K1813：14 個追蹤檔全部等於被審 commit 7a41cb362 的 blob。\n\n**本次請求範圍只有 commit，不含 merge、不含移除 worktree。** 經理裁決 D14 第 (5) 項：全批一律不 merge，certify 沒過就不 merge，禁 --force、禁丟棄任何產物。上一批的 4 個髒檔 commit 請求（item_20260805T090001506186Z）若尚未處理，可以合併同一輪做完。",
+  "to": "platform_eng"
+}
