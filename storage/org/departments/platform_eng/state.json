@@ -1,6 +1,16 @@
 {
-  "health": "new",
-  "kpi": {},
-  "last_run": null,
-  "open_items": 0
+  "health": "blocked",
+  "kpi": {
+    "control_gate_evidence_sources_unhealthy": 2,
+    "incident_five_step_stage": "root_cause_identified_not_landed",
+    "last_fresh_detector_run": "2026-08-05T09:00:00Z"
+  },
+  "last_run": "2026-08-05T09:05:00Z",
+  "open_items": 16,
+  "blocked_on": {
+    "reason": "owned_paths 只有 frontend-v2-fix/，無法寫 src/volpred/ops、config、tests",
+    "escalated_to": "manager",
+    "escalation_item": "item_20260805T090132643067Z_alert-control-gate-source-healt",
+    "patch_ready_at": "storage/org/departments/platform_eng/work/alert_control_gate_source_health_20260802/diagnosis_and_patch.md"
+  }
 }

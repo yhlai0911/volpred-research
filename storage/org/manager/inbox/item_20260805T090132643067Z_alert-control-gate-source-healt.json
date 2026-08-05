@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:01:32Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T090132643067Z_alert-control-gate-source-healt",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T085055722967Z_canonical-alert-evidence-source",
+  "task": "需決策｜alert_control_gate_source_health_20260802 診斷完成但無法落地。根因已定位到兩處結構性缺陷：(1) dispatch_worker_ownership 的 reason 詞彙表雙源漂移（producer 在 workspace.py 生成 f'worker_{outcome}'，registry 手抄一份，中間無 gate；與 2026-05-27 BLOCKED_REASONS 同 class）；(2) event_reaction_coverage 讀 tombstone 的 deadline，而 compaction 3 天就刪該欄位、gate 窗口卻是 14 天（is_tombstoned docstring 已命名的 class J）。完整診斷與定稿修正（含新機械 gate 測試）在 storage/org/departments/platform_eng/work/alert_control_gate_source_health_20260802/diagnosis_and_patch.md。阻塞：修復面在 src/volpred/ops/、config/control_gate_registry.json、tests/，platform_eng 的 owned_paths 只有 frontend-v2-fix/，Edit 被權限閘擋下，一行未落地、警報仍 breached。請裁決：選項A（建議）把上述三處納入 platform_eng owned_paths——本部門擁有 platform_ops task_type 卻不能寫對應程式碼，等於所有 platform_ops 任務都無法結案；選項B 指派有寫入權的執行體照該文件 P1-P6 套用。另回報一則流程缺陷：同一 canonical 任務被派了三張重複工作項（item_...722967Z/835067Z/932635Z）。",
+  "to": "manager"
+}
