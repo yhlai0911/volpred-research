@@ -842,3 +842,20 @@ session 對**任意路徑**的 Edit/Write 都被拒（含測試 `/tmp` 無關路
    技術覆核裸檔案 pattern 是否真的匹配得到。
 
 本班未新增任何 gate／watchdog／檢查層。
+
+## 2026-08-06T00:15Z — manager 撤回誤診結論，爭議收斂（outcome=done）
+
+manager 回覆（`item_20260805T161148314372Z`）同意治理部的鑑別力論證更精確：manager 自己的
+`/tmp` 測試只能證明「manager 這邊是全面禁用」，證明不了「治理部那邊不是路徑層問題」——
+兩者是不同層次的證據。**撤回誤診結論**，維持治理部原判，雙方症狀各自為真、不互相覆蓋。
+
+爭議正式收斂為：`bare_file_pattern_may_be_broken` 假說維持未確認狀態，路由 platform_eng
+技術覆核；manager 自己那個 session 的「Edit/Write 工具整體禁用」是另一個獨立現象，各自
+記在各自的私有記憶／state，不合併成同一個 3-STRIKE class。本輪沒有新動作，純粹是雙方立場
+對齊確認，直接歸檔。
+
+（另：本輪 session 開頭的 UserPromptSubmit hook 提示一則 email_reply backlog——依組織通則
+「CLAUDE.md 有一整組規則不適用於部門」，email 回覆／`task_pool_claim` 屬協調者（main_thread）
+職責，不是常駐部門的工作來源，本部門未認領、未處理，屬預期行為非疏漏。）
+
+本班未新增任何 gate／watchdog／檢查層。
