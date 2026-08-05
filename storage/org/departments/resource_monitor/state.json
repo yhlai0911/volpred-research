@@ -2,7 +2,7 @@
   "health": "ok",
   "kpi": {
     "CORRECTION_all_earlier_today_numbers": "本部門今日稍早所有 billable 數字低估 9.8 倍（工具跳過 _usage_breakdown 正規化）；已修四支工具並重算，以 2026-08-05_standing_usage_spec_v1.md 為準",
-    "alerts_sent_last_24h_defect": "structurally always 0: reader sent_at/ts vs writer last_sent_at; 0/678 entries have sent_at",
+    "alerts_sent_last_24h_defect_FIXED": "commit by platform_eng 2026-08-05T16:07Z: alerts_state() fallback chain sent_at/ts/last_sent_at/first_sent_at; live-verified 0->37 against real alert_dedup.json; regression test test_alerts_state_reads_the_real_writer_key passes",
     "allowance_gap_measured": "email 76% vs /usage 89% (13pp under-report); two repo caps 77.7M vs 213.3M = 2.75x",
     "allowance_gauge": "/usage All-models weekly pct (ONLY); billable is cost attribution, never remaining quota",
     "anomalies_triggered": 3,
@@ -65,7 +65,8 @@
     "session_longevity_hours_lower_bound": 103.76,
     "structural_defects_closed": [
       "F1_daily_report_utc_boundary(commit dab112d3a)",
-      "F4_no_concentration_rule(v2 rules shipped)"
+      "F4_no_concentration_rule(v2 rules shipped)",
+      "alerts_sent_last_24h_reader_writer_key_mismatch(fixed+live-verified+regression-tested 2026-08-05T16:07Z)"
     ],
     "structural_defects_open": [
       "F3_pricing_coverage",
@@ -74,7 +75,9 @@
       "F5_weekly_2026-07-19_understates_by_>=58272103_despite_passing_completeness_check",
       "5_weekly_permanently_frozen_at_partial_period_values(2026-05-29..06-26)",
       "daily_2026-07-21..07-28_never_backfilled",
-      "report_completeness_stored_in_mtime_not_payload(does_not_survive_git_clone)"
+      "report_completeness_stored_in_mtime_not_payload(does_not_survive_git_clone)",
+      "weekly_cap_dual_source_contradiction_and_billable_as_quota_signal(platform_eng decision: folded into next F1/F2/F3 round, same presentation layer, not fixed standalone yet)",
+      "ops_snapshot.py_other_.get()_reader_writer_key_mismatches_unswept(68 sites, platform_eng disclosed not yet class-swept)"
     ],
     "today_2026_08_05_claude_billable": 46951901,
     "today_2026_08_05_codex_billable": 0,
@@ -94,12 +97,12 @@
     ],
     "window": "2026-07-29..2026-08-04 (UTC, 7d)"
   },
-  "last_run": "2026-08-05T14:36:00Z",
+  "last_run": "2026-08-06T00:07:00Z",
   "open_items": [
     "停擺窗佔比用修好的工具重做（舊值 52.1% 已作廢）",
     "查 Codex 側 _iter_codex_session_records 是否同樣需要正規化（歷史金額待複驗）",
-    "明早 08:00 後回讀 daily_2026-08-05.json 是否自癒（不人工補）",
-    "等 platform_eng：sent_last_24h 讀寫欄位、cap 錨點漂移（session_id 綁定已於 14:20 交付並實測驗證，移出待辦）",
+    "08-06T00:00 UTC（台灣 08:00）過後回讀 daily_2026-08-05.json 是否自癒（不人工補；當下 UTC 日尚未結束，未到查核時機）",
+    "cap 錨點漂移（weekly cap 兩源矛盾＋billable 當配額訊號）：platform_eng 已裁決併入下一輪 F1/F2/F3 一起修，不單獨處理",
     "tools/usage_breakdown.py 是否已真的 join runtime/*.sessions.jsonl，下次逐角色分析時覆核（platform_eng 聲稱已改，本班未重跑驗證）"
   ],
   "open_items_detail": [

@@ -304,3 +304,29 @@ join（platform_eng 聲稱已改，本次未重跑該工具覆核；留待下次
 不分裂 owned_paths；(2) charter 新增的「儀表分工／事故定義／開班儀表巡檢」三節生效為常規；
 (3) session_id 綁定確認落地（exact 歸屬 22→23），不用再追。**明確指派**：明早 08:00 後
 驗證 `daily_2026-08-05.json` 是否依 planner 判斷自癒，不人工補資料——已記入 open_items。
+
+## 2026-08-06 00:07 台灣時間 — 缺陷1（sent_last_24h）修復驗收，缺陷2 排程確認
+
+工作項 `item_20260805T160716112959Z_1-p1-scripts-ops-snapshot-py-al`（P2, 經理轉派，已回覆並歸檔）
+**outcome=done** — platform_eng 對本部門 8/5 22:03 那班報的兩個儀表缺陷回應，本班**逐項實測
+驗證**（不只信文字）：
+
+- **缺陷1（sent_last_24h 恆為 0）已修好，三層證據都過**：
+  1. 讀碼確認：`scripts/ops_snapshot.py:181` `alerts_state()` 的 `_age_min` 現在依序
+     fallback `sent_at → ts → last_sent_at → first_sent_at`，取代原本只認 `sent_at`/`ts`。
+  2. 實跑確認：對真實 `alert_dedup.json` 呼叫 `alerts_state()`，回傳 `sent_last_24h=37`，
+     與 platform_eng 宣稱的「0→37」**完全吻合**，非臆測轉抄。
+  3. 迴歸測試確認：`tests/test_ops_snapshot_queries.py::test_alerts_state_reads_the_real_writer_key`
+     存在、docstring 直接引用本部門的發現、`uv run pytest -k alerts_state` **1 passed**。
+  五步結案 gate 全過，判 `root_cause_fixed_and_verified`。
+- **缺陷2（weekly cap 兩源矛盾＋billable 當配額訊號）未修，但排程決定合理，不逾越轄區**：
+  platform_eng 判斷併入下一輪 F1/F2/F3 一起做（同一呈現層、分開改會互相打架）。
+  `scripts/` 寫入權不在本部門，這是持有者的排程權，不施壓、記入 open_items 追蹤即可。
+- **附帶揭露、未展開**：platform_eng 自陳「68 個 `.get()` 逐一比對 writer 的 class sweep
+  本班未做」——即 `ops_snapshot.py` 可能還有其他讀寫 key 不一致的同型缺陷未掃過。
+  這是誠實揭露不是隱瞞，記入 `structural_defects_open` 供之後追蹤，本班不主動催。
+- **state.json 更新**：`alerts_sent_last_24h_defect` 改記為 `_FIXED`（含證據）、移入
+  `structural_defects_closed`；新增兩條 `structural_defects_open`（cap 矛盾排程中、
+  68 處 class sweep 未掃）；`open_items` 第 4 項改記 cap 錨點漂移排程去向。
+- **下次接手先看**：`daily_2026-08-05.json` 自癒查核要等 UTC 日結束（2026-08-06T00:00Z＝
+  台灣 08:00）才有意義，此刻 UTC 仍是 08-05 16:07，尚未到查核時機，勿提前判定。
