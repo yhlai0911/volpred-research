@@ -1,22 +1,21 @@
 {
   "kid": "k1814",
   "verdict": "PASS",
-  "reviewer": "claude-opus-5 / xhigh",
-  "reviewed_at": "2026-08-02T09:36:44Z",
-  "reviewed_commit": "e79386351",
-  "review_artifact": "experiments/k1814/stage3_certification_review.md",
+  "reviewer": "gemini-3.6-flash / high effort (agy review; Codex quota exhausted until 2026-08-08)",
+  "reviewed_at": "2026-08-05T11:23:42+08:00",
+  "reviewed_commit": "5e3113ff6bb0177a05804b6a0922f17638643439",
+  "review_artifact": "experiments/k1814/reviews/agy_recert_2026_08_05.md",
   "blocking_defects": [],
   "reviewed_sha256": {
-    "K1814_results.json": "73fa1562cfdf92b514212686f434970401a14149749fc764d1a8fb2f0c4637d7",
-    "README.md": "f2e6ef2594796a057ba6e171f02a11a1caae36105e187e7ca496c5401a2769c0",
+    "K1814_results.json": "2fc91afa501ff2a477e5f41c9e30ad8f9a7d07f4d4978569d53cc091b9db761f",
+    "README.md": "8d3a0c7dc28e68cf3019d0b323aff5675fa0fa29c336bdb924116c93c6424776",
     "fig1_longmemory_regimes.png": "643bb9efe1d36122922c16a25a85d0dc461c06f77c5c3cc8e27053f1ebaccc57",
     "fig2_qlike_by_horizon.png": "06ab80d31b044016ef9c4d9a0e888f4385ce17146c8b8d7e645c710f7763346d",
-    "fig3_dm_statistics.png": "37ede784b5c127f98b32ab7089a61bb6cec82341bd048fb3b57882e091b9c849",
+    "fig3_dm_statistics.png": "b7411b1de713baa3d260057f52d8fdae509c02e7a8c5392c529bca68db668e19",
     "fig4_forecast_vs_actual.png": "ee8c631fa0283578cff2780302da7f63e649198c55b5a7445f7fbeaac07b02e0",
     "fig5_proxy_validation.png": "50698259bd7c7e494064396c12efeacc4aee9f7cfb3bfff8cc12f4ff861a99fa",
     "gate_history/b1a67269__k1814.py": "b1a67269d6f645eb69e303fd0d80ecaeedf723a60078aa5d3a39398c48c71a3b",
-    "k1814.py": "d5b851a99cfcfda07962bc05f74a7268f38c233bdd7aaf475352ca1b91f0f212",
-    "render_readme_results.py": "dcefb4932668b338d935c7e4c02c3fb98a6d4f5a26df7004caf52fa935c0f44f"
-  },
-  "notes": "Stage-3 independent certification, read from the frozen bytes (gate_history/b1a67269__k1814.py), not inherited from stage 2. Verified: target window (t, t+h]; tight direct-h-step embargo (last training row T-h, target closes exactly at row_of(T)); exactly-disjoint h-1 fit/validation purge in the rolling engine; per-origin scalers and per-row lognormal correction; all six models share origins, embargo and the 13,176-row evaluation set. BH-FDR recomputed from scratch (12/12 match); DM-HLN arithmetic reconstructed (12/12 match); README 2/3/4 hand-typed numbers recomputed from raw CSVs (exact). Headline intact: h_star null, zero FDR rejections favour DL, h=22 HARL_BETTER at q=0.0414. 5-min/1-h probe data never reaches a model. Two write-up defects found and fixed in this stage, both documented in the review artifact: (A) select_hyperparams applies no h-1 purge although the frozen artifact string claims it does -- strictly pre-OOS, no reported number affected, recorded in README 6.3 since the artifact string cannot be corrected without a re-run; (B) README 8.2 asserted the corrected/uncorrected lognormal ranking was unchanged when 2 of 6 cells reverse -- the sentence was hardcoded inside the drift-gated block so --check certified it while false; the renderer now derives the claim. No frozen byte, no number and no verdict field was altered; this PASS pins the post-fix bytes."
+    "k1814.py": "3b4c36711a758621cef21abcee6acc27c3c0504b252dd409b94d0c8734531860",
+    "render_readme_results.py": "956db1553c69edc73343d0babbe373c0939277128a90b92b51f7017f9c7c0eeb"
+  }
 }
