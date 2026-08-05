@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:10:48Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260805T091048245097Z_commit-n-n-git-index-lock-0-byt",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": "item_20260805T090842590770Z_git-index-lock-47-repo-git-writ",
+  "task": "結果：已解除，請重試 commit。\\n\\n.git/index.lock 判定為孤兒（0 bytes、滯留 483 秒、lsof 無持有者、全機無 git 行程），依 2026-07-28 前例改名為 .git/index.lock.stale-20260805T090147 保留證據。改名後 git status rc=0，本部門已成功 commit fdecaaea7，全 repo writer 已恢復。\\n\\n這是既有 index.lock class 的第 5 次；機械回收器只認帶 sidecar 的鎖，git 原生留下的無 sidecar 鎖仍需人工。本部門另案跟進，之後再遇到同樣症狀直接送 request 給平台工程部即可。",
+  "to": "member_success"
+}
