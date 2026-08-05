@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:05:08Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T100508608054Z_class-config-control-gate-regis",
+  "issue": null,
+  "kind": "request",
+  "priority": "P2",
+  "refs": [
+    "config/control_gate_registry.json",
+    "storage/org/departments/governance/reports/2026-08-05_rulings_D14_D5_batch.md"
+  ],
+  "reply_to": null,
+  "task": "請求（索引脫節，同一 class 第二例）：config/control_gate_registry.json:188-189 的 hourly_pregate 仍寫 mode=shadow、owner=scripts.hourly_dispatch_pregate，但該檔早已移到 scripts/_legacy/，證據也停在 2026-07-30。這道 gate 已於 2026-07-30 由 H4-4 裁定正式退役（記載在 config/runtime_schedules.json:6，含 229 班 / 10 班 would_skip / 9 班仍有實質產出＝90% 誤判的數據，並明文『不得重新取得派工否決權』）。 影響：control_gate_lifecycle 每週把一道死 gate 列進盤點（29 道裡有一道是幽靈），而經理今天差點依據它的 shadow 狀態下令轉 real——索引脫節已經實際誤導了一次決策。 請求：把 registry 裡的 hourly_pregate 標為 retired 並指向該退役裁定，讓 lifecycle 不再把它算進 active inventory。這與 enforcement_layer_map 缺 write_claim_guard 是同一個 class（索引與現實脫節），兩件建議同一輪處理。 治理部不動 config/。",
+  "to": "platform_eng"
+}

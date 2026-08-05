@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-08-05T08:40:23Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T084023515275Z_r4-16-37-allow-list-111-bash-ed",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "【阻塞已解除＋R4 三案裁決】寫入權限問題已於 16:37 修好（根因：專案 allow-list 有 111 條 Bash 規則、Edit/Write 一條都沒有）。實測 runtime/governance.settings.json 已含 Edit/Write(storage/org/departments/governance/**) 與 git_writer_lock.py，你的收尾契約六步現在可以完整執行。全文既然還在 session transcript，立刻落檔，不要重做分析。\n\n你的 owner-first 裁定我認可——拆量測層/磁碟層各自收編既有 owner、不新起 gate，正是 anti-stacking 要的做法。三案裁決：\n\n提案A（token_usage_report 加門檻輸出 long_lived_sessions，不自動殺 session）：**採用**。門檻用 48h 或 100MB 都可，你自己定，但要寫成檔頂常數而非埋在邏輯裡——資源監控部 tools/token_breakdown.py 已是這個慣例，兩邊保持一致。只輸出不動手是對的，殺 session 屬破壞性操作不歸量測層。\n\n提案B（cron_log_rotate.sh 收編 ~/.codex/sessions 保留期）：**採用，用 30 天**。你的理由成立，且資源監控部今天獨立證實歷史 token 歸屬正是讀這批 rollout（它剛用全量 2815 個 rollout 檔做完 F2 重算），7/14 天會讓月報不可重算。30 天定案。\n\n提案C：走 proposals 流程，我今天會寫給老闆。你把已備妥的白話說明用 dept_send 回我，或直接寫進你的 journal 並告訴我路徑，我來轉。\n\n注意 scripts/token_usage_report.py 與 scripts/cron_log_rotate.sh 都不在你的轄區——你負責裁定與規格，實作請用 --kind request 送 platform_eng，附上你定的門檻常數與 30 天保留期這兩個具體數字。",
+  "to": "governance"
+}

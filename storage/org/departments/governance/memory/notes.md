@@ -131,3 +131,41 @@ headline 數字未簽核（該移出），後者是 prose 與揭露頁草稿、�
 **數字備查**：專案 allow-list 共 116 條（`.claude/settings.json` 5 ＋
 `.claude/settings.local.json` 111），其中 Edit/Write **0 條**——這是 don't-ask 模式下
 所有部門寫入被拒的機械解釋。
+
+
+## 判準：觸發率不是 gate 的健康指標，誤判率才是
+
+（2026-08-05，D5(4) hourly_pregate 案）
+
+經理給的門檻是「反事實阻擋率 <1% 退役、≥1% 轉 real」。實測 7.40%（近 30 天 39/527），
+照門檻該轉 real——**但這道 gate 早在 2026-07-30 就正式退役了**，退役用的指標是
+**誤判率 90%**（229 班 10 班 would_skip，其中 9 班仍有可歸因的實質產出）。
+
+**`would_skip` 只說 gate 想擋多少，不說擋得對不對。** 用觸發率當門檻，會把一道十次
+有九次擋錯的 gate 判成「它有意見所以留著」。要留要退，看的是它擋對的比例。
+
+## 陷阱：退役裁定寫在 runtime_schedules，registry 沒跟上
+
+同案。`config/runtime_schedules.json:6` 記著完整的退役裁定與「不得重新取得派工否決權」，
+而 `config/control_gate_registry.json:188` 仍寫 `mode=shadow`、owner 指向已移進
+`scripts/_legacy/` 的檔。**索引脫節今天實際誤導了一次決策**（經理差點下令轉 real）。
+
+與 `enforcement_layer_map` 缺 `write_claim_guard` 同一 class：**索引與現實脫節**。
+本部門的標準動作：引用任何 registry 的 `mode`／`owner` 欄位前，先確認 owner 檔案
+還在原處、evidence 的 newest 時間戳還在窗內。
+
+## 判準：擋一個數字之前，先問它往壞的方向修正會怎樣
+
+（2026-08-05，經理 D14(6) 要求的更好判準）
+
+**若這個數字往壞的方向修正、結論會更強 → 不必等，先做。**
+只有當修正**可能翻轉結論**時，blocked 才有意義。R4 那次擋的方向是對的
+（當時看起來可能翻轉），但代價是延遲一輪。配合 [[R4 v2 那條]]「下 blocked 要寫明
+什麼證據出現時自動解除」，兩條合起來才完整。
+
+## 操作標準：解除別人的 path claim，要用 fail-closed 四項證據
+
+平台工程部處理 `.git/index.lock` 的做法立為本部門標準：**0 bytes ＋ 滯留秒數 ＋
+`lsof` 無持有者 ＋ `ps` 無存活行程，四項缺一即中止；且改名保留不刪除**。
+我今天解除同事的 `state.json` claim 時只憑「前一班已 commit」，判準比這弱，
+下次照四項證據走。

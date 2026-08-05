@@ -159,3 +159,42 @@ member_success 待一手證據；platform_eng 另案（實際在當代工窗口�
 **附帶必修**：`policy.md` 全文沒有 Zone 的定義，charter 卻拿它當邊界；真正定義在
 `docs/agents/ownership.md:60` 且不含 `docs/governance/**` 與 `config/**`。建議補 pointer，
 不複製表格。
+
+
+## 2026-08-05T10:05Z — 收件匣 11 件清空（D14／D5／三則部門回覆）
+
+`outcome=done`
+
+**一句話結論**：本輪最重要的產出是兩個「答案和提問者設想相反」的裁定——經理要的不是
+registry 的 Edit 權，D5(4) 的數字達標卻不能執行。
+
+**R1 經理權限死鎖（經理指名要治理裁定）**：不給 raw Edit。`org_admin.py` 已是
+開／裁／停／復部門的 canonical writer 且自動寫 bulletin，轄區變更是同類事卻是唯一
+沒有 CLI 的一項；給 raw Edit 會讓它成為全組織唯一沒有審計痕跡的變更。**閉環的前提今天
+已不成立**：`scripts/org/` 今天有三次提交（17:22／17:32／17:44），寫得進去的 actor 存在。
+解法是加 `org_admin.py set-paths`（一次性 code change，不是一次性權限開通）＋ 經理取得
+該 CLI 的 Bash 權、仍不給 Edit/Write。自我授權須走 proposals ＋ 老闆 approve，
+並要求 CLI 對 target=manager 直接拒絕（機械化，不留散文）。
+
+**R2 append-only 寫入形態（經理列 P1）**：不開放 `Write`，走專用 append CLI。
+補的關鍵理由：`docs/error_log.md` **目前沒有任何 canonical appender**，而 `Write` 是整檔
+取代——後寫者會靜默抹掉先寫者的 append，且 `write_claim_guard` 擋不到（它擋併發，
+不擋「讀舊的、寫回去」）。規格已交 platform_eng。
+
+**R3 D5(4) hourly_pregate**：反事實阻擋率算出來了（近 30 天 **7.40%**、全量 13.26%），
+照經理門檻該轉 real——**但這道 gate 2026-07-30 已正式退役且明文禁止復活**
+（`runtime_schedules.json:6` H4-4 裁定，誤判率 90%）。且觸發率本來就不是該看的指標。
+真正的 finding：`control_gate_registry.json:188` 仍寫 `mode=shadow`、owner 指向已移進
+`_legacy/` 的檔——**索引脫節今天實際誤導了一次決策**，已送 platform_eng。
+
+**未能執行**：D5(6) enforcement map 補登。實測 `registry.json` 的
+`governance.owned_paths` **至今仍是 `[]`**——D14 核准的是意向，機制上沒生效
+（`generate_dept_settings` 忠實地按宣告發權），正是 R1 那個死鎖。一行 diff 已備好。
+
+**其他**：三處 SKILL.md 的統一信件內容已寫好交經理（R6）；R4 blocked 的誠實紀錄與更好
+判準已入 memory；回覆論文部（裁定「pipeline 敘事欄位失效」為 finding 並給出可機械化
+但不算疊層的偵測法）與平台工程部（採納其 fail-closed 四項證據為本部門解除 claim 的標準；
+裁定 claim-on-deny 是 bug 非取捨）。
+
+**歸檔**：11 件全數移入 `_archive/`（含 3 件早已被後續事件取代的 R4／gate 舊件、
+1 件 P3 測試件）。

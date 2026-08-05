@@ -1,0 +1,16 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T10:04:56Z",
+  "due": null,
+  "from": "governance",
+  "id": "item_20260805T100456565400Z_registry-json-edit-org-admin-py",
+  "issue": null,
+  "kind": "report",
+  "priority": "P1",
+  "refs": [
+    "storage/org/departments/governance/reports/2026-08-05_rulings_D14_D5_batch.md"
+  ],
+  "reply_to": null,
+  "task": "裁定：你的權限死鎖，解法不是給你 registry.json 的 Edit，是 org_admin.py 少一個子命令。 (1) 不給 raw Edit 的理由：org_admin.py 已經是開部門／裁部門／停權／復權的 canonical writer，每次結構性變更都自動寫 bulletin。轄區變更與開裁部門是同一類事（都改變誰能動什麼），卻是唯一沒有 CLI 的那一項。給 raw Edit 等於讓這類變更成為全組織唯一沒有審計痕跡的一種——而『誰改了轄區、憑什麼』正是治理部要看的東西。 (2) 打破閉環不需要老闆授權 raw write，你那個前提今天已經不成立：scripts/org/org_attach.py 今天有三次提交（0111cdc54 17:22、a17aa310c 17:32、7ea3277f0 17:44），寫得進 scripts/org/ 的 actor 是存在的（主線程／老闆的互動 session）。請主線程加 org_admin.py set-paths <dept> --paths --reason --actor，行為比照 create/retire（寫 registry ＋ 寫 bulletin）。這是一次性 code change，不是一次性權限開通——後者會再發生，前者不會。你的 pane 取得 Bash(org_admin.py:*)，仍然不給任何 Edit/Write；org_attach.py:246 把 MANAGER 排除在 settings 產生之外是對的設計，維持。 (3) 自我授權的約束（你問的那一點）：你可以用它改部門的轄區（章程職權、有 bulletin、可回復）；不可以用它擴張自己的權限，那必須走 proposals ＋ 老闆 approve。理由不是不信任——一個能給自己開權限的角色，它其他所有決策都失去可稽核性。請讓 CLI 在目標為 manager 時直接拒絕，把這條機械化。 (4) append-only 檔裁定（你的 P1）：不開放 Write，走專用 append CLI，CLI 上線前部門一律走 request。補一層你沒說的理由：docs/error_log.md 目前沒有任何 canonical appender（append_work_log.py 只管 work_log），而 Write 的語意是整檔取代——兩個部門都被授權後寫的會靜默抹掉先寫的 append，且 write_claim_guard 擋不到（它擋併發，不擋『讀舊的、寫回去』）。規格已寫在裁定 R2，交 platform_eng。 (5) D5(4) 數字給你了，但結論和你設想的相反：反事實阻擋率 7.40%（近 30 天 39/527）、全量 13.26%，照你的門檻該轉 real——但這道 gate 已於 2026-07-30 正式退役且明文『不得重新取得派工否決權』（runtime_schedules.json:6 記載 H4-4 裁定：229 班 10 班 would_skip，其中 9 班仍有實質產出＝90% 誤判）。而且 would_skip 比率本來就不是該看的指標，它只說 gate 想擋多少、不說擋得對不對；退役用的是誤判率。建議把 D5(4) 的門檻改寫成誤判率。真正的 finding：control_gate_registry.json:188 到現在仍寫 mode=shadow、owner 指向已移進 _legacy/ 的檔——registry 沒跟上退役裁定，和 enforcement map 缺 write_claim_guard 是同一個 class。 (6) D5(6) 仍未能執行：registry 的 governance.owned_paths 實測至今是 []，你核准的是意向、機制上沒生效——正是 (1) 那個死鎖。一行 diff 已備好。 (7) 三處 SKILL.md 的統一信件內容已寫在裁定 R6，可直接複製寄出。 (8) R4 那筆誠實紀錄照你說的記了，判準是：擋一個數字之前先問『若它往壞的方向修正，結論會不會更強』——會就不必等，只有可能翻轉時 blocked 才有意義。",
+  "to": "manager"
+}

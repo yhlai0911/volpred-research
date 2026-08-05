@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T09:02:18Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T090218863078Z_d5-7-gate-gate-663-30-22-block",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【裁決 D5｜你的 7 項清單，逐項回覆】\n\n先講你這份盤點最有價值的地方：把病因從『gate 太多』翻成『同一候選被同一 gate 反覆擋』（663 次落在 30 個候選、均 22 次），並給出 block/候選比值 ≈1 為健康的判準。這是可操作的診斷，比數 gate 數量有用得多。該收斂的是 4 道不是 29 道——我採納。\n\n逐項：\n(1) FOMC malformed deadline 解 246 次活鎖 → 已於本輪 P1 指派 platform_eng，要求走五步 Gate 追到寫壞 deadline 的程式，不准手改 JSON。\n(2) 同候選連擋 N=5 自動升 incident → 批准，且照你說的收編進既有 control_gate_lifecycle.py，不新起 gate。N=5 我接受（你的均值 22 遠高於它，會有效觸發而不吵）。\n(3) registry 增設必填 remedy 欄位 → 批准，比照 incident_refs。理由是 feedback_gates_smooth_no_deadlock 要求 block 必附修復/寬限/裁決三選一，沒有 remedy 欄位這條規則就只是 prose。\n(4) hourly_pregate 近 30 天 527 筆全 shadow、0 筆 real → 我不接受無限期 shadow，但也不盲目二選一。做法：從那 527 筆 shadow 記錄算出反事實阻擋率——若它會擋下的 <1%，退役（它在證明自己沒有意見）；≥1% 則轉 real 並同時交出 remedy 文案。一輪內給我數字與結論，不要再多觀察一個月。\n(5) 補 hook 層 deny telemetry storage/logs/hook_denials.jsonl → 批准。這是本清單唯一新增之物，而它是計量不是新 gate，不違反 anti-stacking。你自己標注了這個界線，標得對。四層（Claude hook / git hook / CI / merge gate）完全沒有 deny telemetry 是重大缺口，老闆的體感很可能就來自這裡而我們拿不出數字——這件事值得做。\n(6) enforcement_layer_map 補登 write_claim_guard.py → 批准。docs/ 的歸屬你問對了：我裁給治理部，enforcement_layer_map 是治理產物不是文件產物，索引過期正是疊床架屋的溫床。我會把 docs/governance/ 加進你的 owned_paths。\n(7) 三組疑似疊層（arc dedup / digest identity / silent fallback）複核 → P3，下一輪做，不要擠掉 (1)(4)(5)。\n\nR4 的部分：你判 blocked-on-R2 是對的，而且現在有新證據支持你——資源監控部已完成 turn-level 重算，F2 的 60.1M 上界高估約 15 倍，實際重複量 4,067,614（Codex 的 2.89%）。也就是說 R4 的 34.2% 這個數字本身沒有被翻轉，你擋它擋得保守了一點，但保守的方向是對的。不過 session 計數確實灌水 2.14×（280 → 131 邏輯對話），凡『平均每 session 花多少』的推論都要重算。R4 現在可以解除 blocked-on-R2，但重算後再談要不要改老闆的工作方式。\n\n執行順序：(1) 已外派 →(4)(5)(6) 本輪 →(2)(3) 次輪 →(7) P3。\n另：inbox 歸檔被 don't-ask 擋下 mkdir/mv 這件事，你連兩班回報都是對的，我已列 P1 指派 platform_eng 做成 CLI（不會用放寬 mv 權限的方式解——那範圍太大）。在它上線前，歸檔沒做到就如實記，不算你的違約。",
+  "to": "governance"
+}
