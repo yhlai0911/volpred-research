@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-05T01:00:16.870648+00:00",
+  "generated_at": "2026-08-05T02:00:12.512982+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 188.4
+      "age_hours": 189.4
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 188.3
+      "age_hours": 189.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 183.6
+      "age_hours": 184.6
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 182.7
+      "age_hours": 183.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 347.6
+      "age_hours": 348.6
     },
     {
       "path": "storage/drafts/K1609_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2819,
-      "age_hours": 151.8
+      "age_hours": 152.8
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 182.6
+      "age_hours": 183.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 199.6
+      "age_hours": 200.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -71,7 +71,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 207.7
+      "age_hours": 208.7
     },
     {
       "path": "storage/drafts/k1706_general_draft.md",
@@ -79,14 +79,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 4605,
-      "age_hours": 32.8
+      "age_hours": 33.8
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 103,
-    "grace": 2,
+    "grace": 3,
     "inflight": 0
   },
   "orphan_count": 10,
@@ -104,85 +104,18 @@
   ],
   "applied": true,
   "job_deliverable_candidates": [],
-  "job_deliverable_held": [
-    {
-      "job_id": "compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795",
-      "reason": "experiment_admission_blocked",
-      "paths": [
-        "experiments/k1814/K1814_results.json",
-        "experiments/k1814/fig1_longmemory_regimes.png",
-        "experiments/k1814/fig2_qlike_by_horizon.png",
-        "experiments/k1814/fig3_dm_statistics.png",
-        "experiments/k1814/fig4_forecast_vs_actual.png",
-        "experiments/k1814/fig5_proxy_validation.png"
-      ],
-      "detail": "experiment atomic unit experiments/k1814 has undeclared dirty experiment paths: experiments/k1814/reproduce_commit.json, experiments/k1814/reproduce_spec.json"
-    }
-  ],
+  "job_deliverable_held": [],
   "job_deliveries": [],
   "namespaces": {
     "drafts": {
-      "collectable": [
-        {
-          "path": "storage/drafts/assets/twvix_ratio_gate_20260528.png",
-          "kind": "png",
-          "reason": "untracked",
-          "admission_snapshot": {
-            "head": "f088d0dd43cc5d4a026b4b4afecf2bbc2b79e94e",
-            "sha256": "a83364ef2793a4e0c5a9c6afcefba5ca55df990b86a8876403813a5c4511e655",
-            "git_blob": "0e132c8a6a46bc928d97c31b2d91a7d17a24e4be"
-          }
-        },
-        {
-          "path": "storage/drafts/assets/twvix_ratio_vs_baseline_20260528.png",
-          "kind": "png",
-          "reason": "untracked",
-          "admission_snapshot": {
-            "head": "f088d0dd43cc5d4a026b4b4afecf2bbc2b79e94e",
-            "sha256": "d2a253eccdf3e5e04a1cd1b6e6ea2f9bdbf5addce242a762981c79d3664d32db",
-            "git_blob": "0862e1c77e6fd85100ddf7527f957cc58663a0a6"
-          }
-        },
-        {
-          "path": "storage/drafts/k1323_general_draft.md",
-          "kind": "md",
-          "reason": "untracked",
-          "admission_snapshot": {
-            "head": "f088d0dd43cc5d4a026b4b4afecf2bbc2b79e94e",
-            "sha256": "abb3c9fc005a3a33fd04324a5fa468c940032ac806fc4dcb3818f6f516c3abde",
-            "git_blob": "e4af4086e432a7c65412ea88375f3d4428bc41f5"
-          }
-        },
-        {
-          "path": "storage/drafts/k1323_lazypack_plan.json",
-          "kind": "json",
-          "reason": "untracked",
-          "admission_snapshot": {
-            "head": "f088d0dd43cc5d4a026b4b4afecf2bbc2b79e94e",
-            "sha256": "5f9425464bb4413f0538f4fe4d1dcc9cbc2393d7fc284351dc6e1c723a1e9660",
-            "git_blob": "42844870aa431399bd65d98005d7689fc5361afd"
-          }
-        }
-      ],
+      "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 2,
+        "grace": 3,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": [
-        {
-          "namespace": "drafts",
-          "paths": [
-            "storage/drafts/assets/twvix_ratio_gate_20260528.png",
-            "storage/drafts/assets/twvix_ratio_vs_baseline_20260528.png",
-            "storage/drafts/k1323_general_draft.md",
-            "storage/drafts/k1323_lazypack_plan.json"
-          ],
-          "committed": true,
-          "detail": "[9457454f1d1b443642db9c070f944da3f5d24c87] chore(draft-reap): collect orphaned draft artifacts (4 files)\n"
-        }
-      ]
+      "collections": []
     },
     "paper": {
       "collectable": [],
@@ -225,14 +158,15 @@
   },
   "held_escalations": [
     {
-      "task_id": "assign_5a3f603f",
+      "task_id": "assign_b7ff833d",
       "paths": [
-        "experiments/k1814"
+        "job:compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795"
       ]
     }
   ],
   "held_escalated_paths": [
     "experiments/k1814",
-    "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543"
+    "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543",
+    "job:compute-k1814-rerun-at-the-corrected-dm-bandwidth-1785860795"
   ]
 }
