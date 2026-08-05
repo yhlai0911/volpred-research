@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：油市新聞越吵，隔天就越震盪？九年資料跑完是空的",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1356/K1356_results.json",
+      "sha256": "83fd9605fdb524d62ddf1beefcba60e9b0ecb22493e313b753b64c0fe601483e",
+      "label": "免費新聞熱度代理對原油與能源 ETF 隔日波動的預測增益檢定結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "新聞數得越多，油價就越晃嗎",
+      "alt": "中東出事新聞就爆量、油價當天也跳，本研究檢定免費新聞熱度能否預測隔日波動",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "直覺很順",
+          "body": [
+            "OPEC 開會、油輪被扣，版面立刻被油塞滿，油價當天也跟著跳。",
+            "如果新聞量真的走在波動前面，那就是一個不用付錢的預警訊號。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "檢定用的日資料筆數",
+          "value": {
+            "source": "results",
+            "path": "/data/n_panel_rows",
+            "format": {
+              "kind": "integer",
+              "suffix": " 列"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同時檢定的標的數",
+          "value": {
+            "source": "results",
+            "path": "/verdict/asset_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "怎麼測才算公平",
+      "alt": "基準模型是波動自己的歷史加原油庫存變化，挑戰者多加前一天的新聞熱度，全程只用昨天以前的資訊",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "比法",
+          "body": [
+            "基準：波動自己的歷史，加上美國原油庫存變化這個基本面控制項。",
+            "挑戰者：同一套再加前一天的新聞熱度。所有訊號都往後挪一天，不准偷看當天。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "跨標的共同測試日數",
+          "value": {
+            "source": "results",
+            "path": "/pooled/HAR_INV_NEWS_vs_HAR_INV/n_dates",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "開工前就寫死的門檻",
+          "body": [
+            "四個標的至少要有三個變準才算數。事後降門檻等於讓實驗不可能失敗。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "誤差幾乎不動，四個只中兩個",
+      "alt": "加了新聞熱度後跨標的平均誤差幾乎不動且未達統計顯著，四個標的只有兩個變準",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "改善最多的原油 ETF",
+          "value": {
+            "source": "results",
+            "path": "/per_asset/1/comparisons/HAR_INV_NEWS_vs_HAR_INV/qlike_improvement_pct",
+            "format": {
+              "kind": "percent",
+              "scale": 1.0,
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "退步最多的能源類股 ETF",
+          "value": {
+            "source": "results",
+            "path": "/per_asset/2/comparisons/HAR_INV_NEWS_vs_HAR_INV/qlike_improvement_pct",
+            "format": {
+              "kind": "percent",
+              "scale": 1.0,
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "四個標的中變準的個數",
+          "value": {
+            "source": "results",
+            "path": "/verdict/positive_asset_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個標的變準"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "整體比較的顯著性（越小越有力）",
+          "value": {
+            "source": "results",
+            "path": "/pooled/HAR_INV_NEWS_vs_HAR_INV/dm_p",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "波動自己昨天就講完了",
+      "alt": "新聞熱度與波動同步但無獨立預測資訊，扣掉波動自身歷史後貢獻歸零，否定的是數篇數這個做法",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "為什麼是空的",
+          "body": [
+            "新聞熱度跟波動一起動，但兩邊跟的是同一批事件。",
+            "把波動自己的昨天、上週、上個月扣掉之後，新聞剩下的獨立貢獻接近零。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "改用新聞衝擊絕對值的顯著性（更差）",
+          "value": {
+            "source": "results",
+            "path": "/pooled/HAR_INV_NEWS_ABS_vs_HAR_INV/dm_p",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "不能說的話",
+          "body": [
+            "這裡數的是文章篇數，不是文章在講什麼、語氣多緊張。",
+            "否定的是數篇數這個做法，不是新聞對油市沒有影響。"
+          ]
+        }
+      ]
+    }
+  ]
+}
