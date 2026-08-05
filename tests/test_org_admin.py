@@ -415,3 +415,16 @@ def test_platform_backlog_alone_wakes_the_manager(org_root: Path, monkeypatch) -
     assert gate["fire"] is True
     assert any("P1 pending" in r for r in gate["reasons"])
     assert any("draft 池" in r for r in gate["reasons"])
+
+
+def test_policy_tells_departments_to_use_the_org_channel_when_stuck(org_root: Path) -> None:
+    """member_success diagnosed correctly, then asked the human instead of the org."""
+    assert run_tool("org_admin.py", "create", "alpha", root=org_root).returncode == 0
+    import shutil
+    shutil.copy(REPO / "storage" / "org" / "policy.md", org_root / "policy.md")
+
+    identity = _core.identity_prompt(org_root, "alpha")
+
+    assert "不是問視窗前的人" in identity
+    assert "--to-manager" in identity, "the blocked-report command must be in reach"
+    assert "老闆不是你的上級介面" in identity
