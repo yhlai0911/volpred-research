@@ -172,6 +172,22 @@ if printf '%s' "$COMMAND" | grep -qE 'python[^[:space:]]*[[:space:]].*(experimen
 如果以上任何一項沒做，先停下來做完再跑。"
 fi
 
+# ── graphify-first nudge（2026-08-05 boss email-12201；bash_other 週 21.9M 的結構性削減）──
+# 架構 / caller / 影響面問題用 rg/grep 鏈掃 src|scripts 最耗 context；scoped graphify query
+# 通常一次取代整條鏈（WS1b 實測此類佔過週 10.1M）。HINT only — 不 deny、不改命令；
+# 單檔精準 grep（明確 .py/.sh/.md 檔名目標）不觸發。
+if [[ -z "$ADDITIONAL_CONTEXT" ]] \
+   && printf '%s' "$COMMAND" | grep -qE "${CMD_START}(rg|ugrep|grep|egrep)[[:space:]]" \
+   && printf '%s' "$COMMAND" | grep -qE '(^|[[:space:]])(src|scripts)(/[^[:space:]]*)?([[:space:]]|$)' \
+   && { printf '%s' "$COMMAND" | grep -qE '[[:space:]]-[a-zA-Z]*[rR][a-zA-Z]*([[:space:]]|$)' \
+        || printf '%s' "$COMMAND" | grep -qE '(^|[[:space:]])(src|scripts)/?([[:space:]]|$)'; } \
+   && ! printf '%s' "$COMMAND" | grep -q 'graphify'; then
+  ADDITIONAL_CONTEXT="💡 graphify-first：架構 / caller / 依賴 / 影響面問題，先
+  uv run python scripts/graphify_integration.py query \"<question>\"
+（前端加 --graph active_frontend）。一次 scoped query 通常取代整條 grep 鏈；
+單檔精準 grep 照用不受影響。此為提示非攔截。"
+fi
+
 if printf '%s' "$COMMAND" | grep -qE '(^|[[:space:]])(uv run pytest|pytest|python -m pytest|npm test|pnpm test|yarn test|go test)([[:space:]]|$)'; then
   ESCAPED_COMMAND="$(printf '%q' "$COMMAND")"
   UPDATED_COMMAND="/bin/bash \"$ROOT/.claude/hooks/run-compact-bash.sh\" test $ESCAPED_COMMAND"
