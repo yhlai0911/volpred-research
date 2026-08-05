@@ -1,0 +1,33 @@
+[agy_exec_bounded] stripped from child env: ANTHROPIC_BASE_URL
+VERDICT: PASS
+REVIEWER: Antigravity / Gemini 3.6 Flash (fallback path)
+BLOCKING_DEFECTS: none
+RESIDUAL_RISKS:
+1. **日收盤粒度限制**：事件窗採每日收盤價（T-3 close 至 T-1 close），無法觀察日內（intraday）或跨夜短視窗內發生並於當日收盤前消散的波動率升溫。
+2. **資產類別侷限**：本研究僅限於 VIX 指數報酬，結論不可直接推廣至利率 (MOVE)、外匯 (CVIX)、個股選擇權或長端選擇權期限結構。
+3. **HAC Lag 選擇屬有限樣本判定**：NW lag=22 係基於月度交易日週期設定；雖經敏感度測試（lag 6, 22, 60）驗證結果極度穩定（p 介於 0.278~0.298），有限樣本下 lag 設定仍屬分析約定。
+
+---
+
+### 認證審查報告 (nfp_20260807_t2)
+
+#### 1. Lookahead 與視窗建構審查
+- **日期對齊與視窗**：在 [`nfp_20260807_t2.py:L58-L65`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/experiments/nfp_20260807_t2/nfp_20260807_t2.py#L58-L65) 釘定 `PRE_LAG = 3` 與 `HORIZON = 2`。對於位於索引 $i$ 的 NFP 發布日，事件窗定義為 $i-3$ 到 $i-1$ 之兩日報酬 (`close.iloc[i-1] / close.iloc[i-3] - 1.0`)，即 T-3 收盤至 T-1 收盤。
+- **BLS 行事曆 Mapping**：在 [`nfp_20260807_t2.py:L198-L202`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/experiments/nfp_20260807_t2/nfp_20260807_t2.py#L198-L202) 使用 `idx.searchsorted(release)` 精確匹配交易日。
+- **控制窗不重疊建構**：在 [`nfp_20260807_t2.py:L179-L187`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/experiments/nfp_20260807_t2/nfp_20260807_t2.py#L179-L187)，對長度為 $HORIZON=2$ 的控制窗，`_overlapping_control_starts` 排除了 $k \in [i-4, i-2]$ 的所有控制起點。搭配 [`L235-L240`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/experiments/nfp_20260807_t2/nfp_20260807_t2.py#L235-L240) 之掩碼，無任何控制窗的報酬區間重疊事件段，完全杜絕資料滲漏。
+
+#### 2. HAC 推論與樣本會計
+- **NW Lag 22 之合理性**：控制窗採滾動兩日報酬（rolling two-return），相鄰控制樣本預設具備 MA(1) 重疊結構，加上 VIX 之月度波動聚集特性，採用 `maxlags = 22` 符合一個月交易日之自相關調整需求。
+- **HAC Lag 敏感度**：在 [`nfp_20260807_t2_results.json:L64-L101`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/experiments/nfp_20260807_t2/nfp_20260807_t2_results.json#L64-L101)，lag 6 ($t=-1.084, p=0.2782$), lag 22 ($t=-1.062, p=0.2880$), lag 60 ($t=-1.040, p=0.2981$) 之點估計與標準誤極為一致，展現完整誠實性。
+- **樣本會計**：總樣本 $n=3788$，包含 $n_{\text{event}}=191$ 與 $n_{\text{control}}=3597$（扣除 191 個事件起點及 $191 \times 2 = 382$ 個重疊控制區間，$4170 - 191 - 382 = 3597$），會計完全精確。
+
+#### 3. NULL 表述與已發佈文章對齊
+- **已發佈文章對照**：[`storage/drafts/fb_mile_63e0e1ff.md:L18-L28`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/storage/drafts/fb_mile_63e0e1ff.md#L18-L28) 敘述「191 次公佈日，最後兩天 VIX 平均 -0.17%，隨便抽一段沒有非農的兩日窗是 +0.72%... 差 0.89 個百分點，p=0.288」、「這兩天我手上沒有數字支持先把波動率買起來」，精確反映實驗結果（點估計 -0.89pp，方向偏負，統計不顯著）。
+- **過度宣稱防護**：[`README.md:L38`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/experiments/nfp_20260807_t2/README.md#L38) 及 [`nfp_20260807_t2_results.json:L326`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/experiments/nfp_20260807_t2/nfp_20260807_t2_results.json#L326) 均明確註記 `NULL = 偵測不到`，且警示 "Failure to reject is not evidence that the event effect is exactly zero."，無過度宣稱。
+
+#### 4. 資料快照與 T-2 視角
+- **無未來資料滲漏**：在 [`nfp_20260807_t2.py:L58`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/experiments/nfp_20260807_t2/nfp_20260807_t2.py#L58)，VIX 資料快照截至 `2026-08-04` 收盤（即 2026-08-07 非農事件前 3 個交易日 T-3）。對於 2026-08-05（T-2 視角），僅使用截至 T-3 收盤之已知資訊，無任何未來交易日資料。
+
+#### 5. 隨機性與 Spec 宣告
+- **確定性程序**：本研究為 OLS + Newey-West HAC 之全樣本推論，不包含 Bootstrap 或隨機抽樣。
+- **Spec 一致性**：[`reproduce_spec.json:L33-L36`](file:///Users/yhlai0911/volpred-research/.claude/worktrees/nfp-t2-adopt/experiments/nfp_20260807_t2/reproduce_spec.json#L33-L36) 正確宣告 `"randomness": {"status": "not_applicable", "seeds": []}`，與程式碼實作 100% 一致。
