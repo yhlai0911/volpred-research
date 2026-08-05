@@ -34710,5 +34710,22 @@
     "failure_class": "quota",
     "primary_renderer": "scripts/gen_lazypack_codex.py",
     "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-08-05T16:46:43+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_217a1b05",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_217a1b05:codex->agy",
+    "article_id": "mile_217a1b05",
+    "job_id": "lazypack-mile_217a1b05",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
   }
 ]
