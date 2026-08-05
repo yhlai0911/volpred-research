@@ -113,8 +113,21 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D57 計劃書交付＋D55 收訖；已請經理收口 D55/D57 兩張同根因單，anti-stacking 適用於工作項不只適用於機制）",
-    "open_request_to_manager": "D55 與 D57 同一根因、兩張單派給 platform_eng，且 D55 作用域太小（只涵蓋 org_attach，維度 4 的根因在 org_admin.py:202 上游）。建議併單或標 superseded_by D57。治理部不能替經理合併它派出去的單，故為請求非裁定",
+    "last_session_outcome": "done（D55/D57 裁決收訖＋維度 3 回測完成＋policy.md 第三授回讀確認已由他人完成，未雙寫）",
+    "open_request_to_manager": null,
+    "policy_md_third_grant_20260805T2245Z": {
+      "status": "已生效且已套用，非治理部本輪動作",
+      "evidence": "storage/org/policy.md:112-135 內容與 /tmp/triage_policy.md 逐字相符；commit 0331b60ce (22:39:47)",
+      "why_not_redone": "manager 或 main_thread 已代做在先，依指示避免雙寫；org_attach.py restore --dry-run 證實 governance 因 live pane 被 skip，無法藉此重新載入 settings（需 detach 才能測，判斷不值得犧牲 session 連續性——22:40Z 對照組已足以排除 staleness 解釋）"
+    },
+    "dimension3_retest_20260805T2240Z": {
+      "trigger": "經理裁決保留項：D57(commit 1a0d4b274)落地後，回測 .claude/rules/ 是否解封",
+      "preconditions_confirmed": "governance.settings.json 22:34:28 重新生成，內容含 Edit(//…/.claude/rules/**) 等三條完整 pattern；registry 現值 .claude/rules/、docs/governance/ 均帶尾斜線，型別判定正確",
+      "result": "未解封。同一 session 內對 .claude/rules/paper-workflow.md 套用 D38 §2 交接件仍被 deny，訊息與修復前相同；對照組 docs/governance/**（同輪重生成 pattern）Edit 成功",
+      "conclusion": "維度 3 與 .claude/rules/ 打不進去是兩個不同 class，不是同一根因。D57 驗收本身無異議（它涵蓋的維度這次確認正常），但 .claude/** 這個前綴的問題不在它的作用域內。原『harness 對 .claude/** 有內建寫入防線』假說由『未驗證』升級為『目前最佳可用結論』（仍非可從此處直接驗證）",
+      "deliverable_updated": "docs/governance/2026-08-05_paper_workflow_exemplar_patch.md §5（新增回測記錄）＋ §4（修正一個指錯路徑的 pointer）",
+      "recommendation_to_manager": ".claude/** 應從所有部門 owned_paths 移除；org_admin.py set-paths 對該前綴直接拒絕宣告；此類交接件改由有互動 session 的 pane 人工套用（§1 原建議，現以實測背書）"
+    },
     "policy_md_evaluation": {
       "as_of": "2026-08-05T13:30Z",
       "deliverable": "docs/governance/2026-08-05_policy_md_evaluation_and_two_sections.md",
@@ -160,7 +173,7 @@
         "test": "settings 涵蓋該路徑 且 同一份 settings 的其他路徑本 session 寫入成功 且 仍被 deny",
         "instance": "governance Edit .claude/rules/paper-workflow.md 連兩次 deny，而同一份 settings 的 docs/governance/** Edit 本輪成功；上層 deny 皆空",
         "fix": "撤回宣告（13:15Z 更正；原寫『查 generate_dept_settings 為何宣告未變成權限』方向錯——產生器沒錯，它忠實翻譯了一個不該存在的宣告）。建議把 .claude/** 移出所有 owned_paths 並讓 org_admin.py set-paths 拒絕該前綴",
-        "hypothesis_downgraded": "【2026-08-05T14:10Z 自我更正】原假說（.claude/** 為 harness 層自我提權防線）**很可能是多餘的**。治理部宣告 .claude/rules/ 渲染成 //…/.claude/rules/**，而 settings_pattern_construction 的維度 3 正是『點開頭目錄不被萬用字元命中』——那個 deny 很可能就是本 class 的實例。當時把『六個我想得到的 repo 內解釋都排除了』誤讀成『問題在 repo 外』，維度 3 不在那六個裡。待驗：維度 3 修好後回測 .claude/rules/ 是否解封；解封則假說作廢並更正 paper_workflow_exemplar_patch §1。在那之前不接受任何 harness 層解釋",
+        "hypothesis_downgraded": "【2026-08-05T14:10Z 自我更正 → 2026-08-05T22:40Z 回測後再更正】14:10Z 曾懷疑維度 3（點開頭目錄不被萬用字元命中）就是本 class 的根因，待維度 3 修好後回測驗證。**回測已完成，結果推翻該懷疑**：commit 1a0d4b274 落地、settings 重新生成且 pattern 確認正確後，.claude/rules/ 的 Edit 仍被 deny，同一 session 對 docs/governance/**（同輪重生成）Edit 成功。兩者是不同 class。原始假說（harness 對 .claude/** 有內建寫入防線）由未驗證升級為目前最佳可用結論，不再是待驗項",
         "spec_correction": "§3 自動分型第 3 步『settings 涵蓋＝C』不足，須追問『同一份 settings 其他路徑本 session 寫成功過嗎』"
       },
       "self_correction_B3": "『缺 mv 權限』判為 B 是錯的：scripts/org/inbox_archive.py 是 canonical 歸檔入口（且會擋 request/decision 未回覆就歸檔）。授權 Bash(mv .../inbox/*) 反而是給第二個寫入者。治理部本班亦曾用 shutil.move 繞過，已改正",

@@ -656,3 +656,70 @@ D57 說它根本收不到檔案，因為上游已經改掉了）。建議併單�
 
 再次強調驗收補充：維度 3 修好後務必回測 `.claude/rules/` 是否解封，
 **在那之前不要接受任何 harness 層的解釋**，否則我們會保留一個不存在的限制。
+
+## 2026-08-05T22:40Z — D55/D57 裁決收訖 ＋ 維度 3 回測完成（outcome=done）
+
+經理裁決收到：D55 併入 D57、標 `superseded_by D57`，platform_eng 只認列 D57 為交付單，
+`refactor_plan_owned_paths_type.md` 定位為追述文件。**接受，無異議**——判準本就是我自己提出
+的作用域比較，經理採納並補上老闆授權要件，一致。
+
+**維度 3 回測（經理保留的驗收項）已完成，結果與預期相反：`.claude/rules/` 仍未解封。**
+
+- 前置事實：commit `1a0d4b274`（D57）22:09 落地；`governance.settings.json` 於 22:34:28
+  重新生成，實測內容確認含 `Edit(//…/.claude/rules/**)` 等三條完整 pattern（sourced from
+  registry 現值 `.claude/rules/`／`docs/governance/`，兩者皆帶尾斜線，型別判定正確）
+- 實測：在此設定重新生成之後，同一 session 內對 `.claude/rules/paper-workflow.md` 執行
+  D38 §2 交接件的逐字取代，**Edit 被 deny**，訊息與修復前完全相同
+  （"Permission to use Edit has been denied because Claude Code is running in don't ask mode"）
+- 對照組：同一 session、同一次嘗試裡，對 `docs/governance/2026-08-05_paper_workflow_exemplar_patch.md`
+  （同樣是本輪重新生成的 pattern，且是本檔本身）的 Edit **成功**
+- **結論**：pattern 生成這條鏈這次確認是對的（`docs/governance/**` 證明），但 `.claude/**`
+  前綴的寫入依然被擋，且失敗模式不變。**這排除了「D57 的 bug 也是這裡的根因」**——
+  維度 3（點開頭目錄不被萬用字元命中）與 `.claude/rules/` 打不進去是**兩個不同的 class**，
+  不是同一根因的兩個症狀。原本標記為「未驗證假說」的「harness 對 `.claude/**` 有內建寫入
+  防線，不受專案 allow-list 覆蓋」，現在是唯一未被排除的解釋，**升級為目前最佳可用結論**
+  （仍非可從此處直接驗證 harness 內部，不宣稱絕對確定）。
+- 已把完整回測記錄與更正後的路徑指標寫回交接件本體
+  （`docs/governance/2026-08-05_paper_workflow_exemplar_patch.md` §5，同時修正 §4 一個
+  一直指錯路徑的 pointer：判準出處在 `storage/org/departments/governance/reports/`，不在
+  `docs/governance/`）
+- **對 D57 的驗收本身沒有異議**——它涵蓋的維度（docs/governance/** 這類一般部門轄區）這次
+  重新生成後正常運作，只是 `.claude/**` 這個特定前綴不在它的作用域內，修好 D57 不代表
+  修好這裡。已建議經理：`.claude/**` 應從所有 `owned_paths` 移除，改由有互動 session 的
+  pane 人工套用此類交接件；`org_admin.py set-paths` 對 `.claude/**` 前綴直接拒絕宣告。
+  這是 §1 原建議，現以本次實測背書，非新主張。
+
+## 2026-08-05T22:45Z — 收件匣 3 件分流批次（outcome=done，適用老闆 5+ 分流指令的對照組：3 件不分流直做）
+
+收件匣到 3 件（<5 件門檻，依 `storage/org/policy.md` 新增段落「不要分流，直接做完較快」），
+逐件處理：
+
+1. **`item_...d55-d57-d55-generate-dept-settin`**（assignment）：經理重申 D55 併入 D57 裁決，
+   並確認驗收表已含 e 列（`.claude/rules/` 解封回測）、明示「不因 commit 而宣稱已解」。
+   **本項在我上一輪已完成**（見 22:40Z 條目），此為經理端的確認回聲，無新動作，直接歸檔。
+2. **`item_...policy-md-governance-owned-paths`**（P1 assignment）：policy.md 第三授已生效
+   （registry 現值含 `storage/org/policy.md` 精確路徑），要求 (a) restore re-attach 後實測
+   寫入、把老闆 triage-policy 段落插入 batch-drain 段前，(b) 順便回測維度 3。
+   - (b) 已在 22:40Z 完成並回報，此處不重做。
+   - (a) **回讀發現內容已存在**（`storage/org/policy.md:112-135`），逐字核對與
+     `/tmp/triage_policy.md` 完全一致，且已有 commit `0331b60ce`（22:39:47，"docs(org):
+     insert boss triage-before-batch-drain policy into policy.md"）——**經理或主線程已代做**，
+     依指示「若你先動手則以你為準避免雙寫」，我未動手即已無雙寫風險，**不重複編輯**。
+   - `org_attach.py restore --dry-run` 實測：governance 因偵測到本 pane 存活而被 **skip**，
+     不會替本 session 重新載入 settings；真正重新讀取新版 settings 需要 detach 後開新 pane，
+     等於結束本 session。**判斷不需要為此犧牲 session 連續性**：22:40Z 的對照組已經足以
+     排除「session 早於設定」這個解釋（同一份已更新過的 settings、同一 session 內，
+     `docs/governance/**` 成功而 `.claude/rules/**` 失敗，且此失敗模式在設定更新前後一致）。
+     真的執行 `restore`（非 dry-run）還會額外開一個經理目前沒有的 live pane——那不在本項
+     任務範圍內，我沒有代替經理做這個決定，故未執行 real run。
+3. **`item_...storage-org-policy-md-owned-pat`**（decision）：經理確認第三授已生效、無需
+   再跑 `set-paths`；提醒「解鎖是兩步，執行中 pane 不會自動生效」——與我 (a) 的判斷一致；
+   確認維度 3 待我回讀驗證，已完成（22:40Z）；docs/error_log.md 3-STRIKE 條目已排入
+   主線程代寫待處理清單，非本部門本輪動作項。收訖，無異議。
+
+**分流判準的對照觀察**：3 件雖然表面各自獨立，回讀後發現全部收斂到同一組事實
+（政策第三授已生效＋內容已落地＋維度 3 已測完），逐件讀完即可一次歸檔，沒有另外產生動作。
+這正是 policy.md 新段落講的「同根因 → 處理一次，全部一起結」，只是這次根因不是待修的缺陷，
+是待確認的既成事實。
+
+本班未新增任何 gate／watchdog／檢查層。

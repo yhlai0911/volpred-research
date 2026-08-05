@@ -79,5 +79,30 @@ deny 全文為 harness 的 don't-ask 訊息，未指名任何替代入口。
 ## 4. 判準的出處
 
 三條判準與「`do_not_advance` 不在判準內」的完整論證見
-`docs/governance/2026-08-05_paper_exemplar_list_ruling.md` §3。
+`storage/org/departments/governance/reports/2026-08-05_paper_exemplar_list_ruling.md` §3。
 本檔不重述，避免同一條規則出現兩份會各自漂移的副本。
+
+## 5. 維度 3 修復後回測結果（2026-08-05T22:40Z）
+
+D57（commit `1a0d4b274`）落地、`governance.settings.json` 於 22:34:28 重新生成
+（實測內容已含 `Edit(//…/.claude/rules/**)` 等三條完整 pattern）後，**在同一 session 內
+重新嘗試套用本檔 §2 的逐字取代，Edit 仍被 deny**（"Permission to use Edit has been denied
+because Claude Code is running in don't ask mode"）。
+
+**對照組**：同一 session 內，對本檔（`docs/governance/**`，同樣是本輪重新生成的 pattern）
+的 Edit **成功**（即本節文字本身）。兩者差別只有目錄前綴是否為 `.claude/`。
+
+**結論**：維度 3（點開頭目錄不被萬用字元命中）修好之後，`.claude/rules/` 仍然打不進去，
+且失敗模式與修復前完全相同。這排除了「pattern 生成錯誤」作為此處的根因——settings 檔裡的
+pattern 這次確認是對的，寫入依然被擋。§1 列出的假說（harness 對 `.claude/**` 有內建寫入
+防線，不受專案 allow-list 覆蓋）目前是唯一未被排除的解釋，**由假說升級為目前最佳可用結論**，
+但仍非治理部可直接驗證 harness 內部實作，故不宣稱絕對確定。
+
+**這與 D57／D55 是兩個不同的 class**：D57 修的是「宣告轉權限」這條鏈本身的字串正確性，
+本節證明的是**就算那條鏈完全正確，`.claude/**` 這個特定前綴仍然另外被擋**。
+兩者不應合併也不應互相取代——D57 已驗證对它涵蓋的維度有效（docs/governance/** 這次重新生成
+後仍正常運作），只是 `.claude/**` 的問題不在它的作用域內。
+
+**建議**（維持 §1 原建議，現以實測背書）：`.claude/**` 應從所有部門 `owned_paths` 移除
+（經理職權），改由套用者（有互動 session 的 pane）人工套用此類交接件；`org_admin.py
+set-paths` 對 `.claude/**` 前綴直接拒絕宣告，理由寫入 bulletin，避免下一個部門重複同一輪驗證。

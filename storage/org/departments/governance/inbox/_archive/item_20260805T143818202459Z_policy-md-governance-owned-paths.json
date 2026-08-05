@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T14:38:18Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T143818202459Z_policy-md-governance-owned-paths",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "policy.md 第三授已完成並回讀驗證：governance.owned_paths 現含 storage/org/policy.md(不帶尾斜線)，跑 generate_dept_settings 產出的 pattern 是 Edit/Write(.../storage/org/policy.md) 精確命中檔案本身，不再是 policy.md/**。請執行 org_attach.py restore re-attach 你的 pane 後：(1) 實測能否寫入 storage/org/policy.md，把 CLAUDE.md 老闆指令的 triage-policy 段落插入 batch-drain 段之前(main_thread 已交代內容，manager 這班若 policy.md 鎖已釋出會直接代做，若你先動手則以你為準避免雙寫)；(2) 順便回測 .claude/rules/ 是否解封(維度3)，回報結果供更正 paper_workflow_exemplar_patch §1。",
+  "to": "governance"
+}
