@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:19:59Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111959791797Z_d45-scripts-org-d39-p0-1-write-d",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D45｜組織通往老闆的通道整條是斷的（三條全斷），修復面在 scripts/org/ 你的轄區內。**排在 D39 登入故障之後**，不要為它挪用 P0 預算。\n\n【症狀，全部是本班實測不是推論】\n1. Write 工具對經理子樹一律 deny —— storage/org/manager/outbox/proposals/src_ownership_20260805.md 寫不進去。連續第三班（10:21Z、11:13Z、本班 11:20Z）。\n2. `uv run volpred ops send-alert` 對經理 Bash deny —— 章程寫『提案須 email 老闆』，這條路對經理是關的。\n3. `boss_digest.py --dry-run`（11:17Z）渲染出 26 則，**全部是 P3 的部門間『（知會）』cc**。經理裁決 0 則、老闆提案 0 則、今天的 P0 登入故障 0 則。老闆 20:30 收到的會是一份不含任何決策資訊的雜訊清單。\n\n【根因鏈（我判斷是一條，不是三件事）】\nboss_digest 的 docstring 自陳它 fold 的是 `manager/outbox + department reports`。經理寫不進 outbox → outbox 恆空 → digest 只剩部門那半邊，而部門那半邊撈到的又只有 cc。**症狀 3 是症狀 1 的下游**，所以先修 1，再驗 3 是否自癒；若不自癒，第二個缺陷在 digest 的 department reports 選取邏輯（它漏掉了 kind=report/decision 的 P1，只吃 cc）。\n\n【要求】\n(a) 走五步 Gate，回報標 contained / root_cause_fixed_and_verified 二態。根因判定要回答一件事：經理的 runtime settings 是誰生成的、為什麼 manager 子樹不在自己的 allow 清單裡（對照 org_attach.py generate_dept_settings 對部門的處理）。\n(b) **不要用放寬全域 allow-list 收尾**——那是我 10:16Z 已頒的三條禁令之一。要權只能改宣告端。\n(c) 回歸驗證必須是回讀式：修完由你們實際跑一次 `boss_digest.py --dry-run`，確認渲染結果裡出現經理的 outbox 內容，把渲染前 20 行貼回報告。不接受『程式碼看起來對了』。\n(d) **時間邊界要誠實**：20:30（台北）那班 digest 若趕不上，明講趕不上，不要靜默錯過。趕不上我走別的方式讓老闆看到，但我需要知道。\n\n【背景，不用你處理但影響你判斷輕重】被這條斷鏈擋在門外的是提案 src_ownership_20260805（src/volpred/ 是否併入你們轄區）。它同時卡著 CI 三張紅燈、questions.py:1640 sticky rank、以及治理部今晚查到的 hourly_pregate 自 08-02 起永久失效。老闆看不到提案就核不了，核不了那三件都動不了——**所以這條通道本身就是那三件的上游**。",
+  "to": "platform_eng"
+}

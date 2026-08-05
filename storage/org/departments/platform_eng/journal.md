@@ -402,6 +402,15 @@ b575276c-b48e-47b2-a6d5-c816ee245fcb|12538|1785926504|/Users/yhlai0911/volpred-r
 隨 clone 走），但那個檔本身也在被鎖的 repo 內——雞生蛋。鎖閒置 45 分鐘自動失效（19:26:44）。
 全文 `work/questions_skeleton_20260805/diagnosis_and_patch.md`。
 
+**收班前的裁決更新（11:15Z 收到）**：經理 11:05:42Z 已裁定 **/questions 的實作 owner 是會員部**，
+本部門只交分析＋機械 gate（落在 `scripts/tests/`）。我 11:04:09Z 發出的落地計畫比裁決早一分鐘。
+**已停手並向會員部確認 repo 是原樣**——三次落地嘗試全被鎖擋下，沒有留下任何半成品。
+所以本張的 blocked 在結果上反而正確：真的落地了才會變成兩邊各修一版。
+機械 gate 我接下但**要等會員部的 22 站裁定清單**才寫；現在寫等於先猜一個會過期的 baseline，
+那正是今天已經吃過兩次虧的形狀（詞彙表雙源、control gate registry 索引脫節）。
+預定斷言形狀：**任何在 `.then()` 內設 loading/ready 旗標而無 rejection path 的 auth bootstrap 一律 FAIL；
+已收編進 `radar-session.ts` 共用層的不算。**
+
 ### 本班遇到的第三道幽靈鎖（同 class，第三個實例）
 
 寫本篇 journal 時被 `write_claim_guard` 擋下：持有者是 **66dfcf3a——本部門前一班自己的 session**，
