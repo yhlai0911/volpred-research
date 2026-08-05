@@ -564,9 +564,37 @@ opt-out，隨 clone 走）。判斷 (b) 沒有安全損失：這個 repo 的併�
 **可執行能力已確認**：`npm run check:member-continuity` 跑得起來（基準 19 passed），
 所以 S0 落地後可以真的驗證，不是只能改完就宣稱。
 
+### (12) CI test-leak 紅燈｜**done**｜commit `87c62e134`
+
+**經理的歸因是錯的，最小重現推翻了它。** 派工單說紅燈來自我新增的三支測試；
+逐檔探測（marker → 單檔 pytest → 掃 `storage|config|paper` 有無更新，附 idle 對照組）
+顯示**三支都乾淨**。而 `44e44f92d` 也不是我的 commit，是治理部的歸檔那筆。
+
+真正的來源是 `tests/test_org_admin.py`，它會寫 `storage/logs/cron/org_manager_run.log`
+——該檔在 idle 對照組**不會**出現，所以不是 daemon 噪音。
+
+**根因不是測試髒，是喚醒沒有守門**（＝經理 D27/D29 追了一整天那條）：
+`record_boss_message` 預設 `wake=True`，而該測試用**真的 subprocess** 跑 CLI 並傳 tmp_path
+當 org root；其他測試用的 in-process monkeypatch **跨不了行程**。於是 pytest 真的叫醒了一個
+協調者，它從 pytest 暫存目錄 rehydrate、對著虛構組織做判斷、在 storage/ 留下腳印。
+D27 那班 brief 指向 pytest tmpdir 的謎，答案就是這個。
+
+**守門放在 root 不放呼叫端**：直接 import、subprocess、`uv run`、孤兒孫行程都走同一支函式，
+唯一守得住的判準是「這個 root 是不是 canonical」。**對著暫存 org 喚醒正式協調者永遠是 bug**，
+所以拒絕不需要例外條款。
+
+既有四個測試要跟著改，而**改法本身就是規格**：in-process 測試必須明確宣告
+「這個 tmp root 對本行程而言就是 canonical」（monkeypatch `DEFAULT_ORG_ROOT`），
+而不是只 patch waker——**只 patch waker 正是守門要擋的形態**。
+
+驗證：74 passed；修後連三次探測該訊號都不再出現。
+**誠實邊界**：本機有 daemon 與 cron 在寫同一棵樹，所以本機只能證明那個訊號消失，
+不能證明 CI 轉綠——以 CI 為準。（`gh` 讀 CI log 被權限層擋下，所以改用最小重現反推，
+這也正是發現歸因錯誤的原因。）
+
 ---
 
-**本班合計 10 張完成**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
+**本班合計 11 張完成**：完成 7（系列 drift、hourly_pregate 根因、論文部三件更正、D45 診斷、
 D45 落地、brief 有界渲染、自我更正收回重複交付），停手 1（/questions 改由會員部實作），
 blocked 0 —— 早先被鎖擋住的兩張後來都在同班內完成。
 

@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": "assign_422c1a65",
+  "created_at": "2026-08-05T13:48:24Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T134824639187Z_2026-08-05-ownership-alignment",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【老闆已核准 · 最高優先】執行 2026-08-05-ownership-alignment（五行版）registry 變更與解鎖序列。\n\n老闆 telegram msg 1625 明確回「同意」，msg 1621 已在追問「有改了？」——這張自核准後仍是 pending，沒有動。本輪起它是你的第一順位，其他 P2 全部讓路。\n\n必做：\n1. registry 變更一律走 `scripts/org/org_admin.py set-paths`，**不可手改 registry.json**（手改會跳過衝突檢查與 bulletin 記錄）。\n2. 對齊時必須解掉這條已證實的矛盾：**論文部擁有 paper_body 任務型別，卻被 `_core.py:61-64` deny `paper/**/*.tex`**——擁有任務卻沒有執行它的寫入權，等於該型別永遠無人能結案。這是本次 alignment 必須有明確處置的一項（授權、或改由誰承接、或正式記為主線程保留區並建立交接路徑，三選一，不可留空）。\n3. 落地後回讀驗證：`org_status.py` + `dept_routing.py` 兩邊都要看到新轄區生效，並確認 63 件可派工作不再全部壓在平台工程部一個部門（目前其餘 6 部門待辦全為 0，這是失衡不是閒置）。\n\n回報時明分 contained 與 root_cause_fixed_and_verified 二態。",
+  "to": "platform_eng"
+}

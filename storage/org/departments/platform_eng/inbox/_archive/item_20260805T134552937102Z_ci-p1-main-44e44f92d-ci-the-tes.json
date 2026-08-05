@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:45:52Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T134552937102Z_ci-p1-main-44e44f92d-ci-the-tes",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【CI 紅燈 P1】main 在 44e44f92d 之後 CI 失敗：'The test suite mutated repo state. Tests must write to tmp_path only.'（.github/workflows/pytest.yml:266 的 leak gate）。本機跑新增的三支測試（test_org_brief_inbox_bounds / test_boss_digest_ordering / test_bare_nonfinite_results_gate）沒抓到寫入 storage|config|paper，但本機有常駐 daemon 在寫同目錄、訊號被蓋掉，所以要用 CI 的 log 判定不要靠本機重現。tests/ 與 .github/ 是你的轄區。**注意週限額已 89%、週日 16:00 才重置**：修這條請用最小重現（單檔 pytest + git status 比對），不要全量掃。修好後回報經理。",
+  "to": "platform_eng"
+}

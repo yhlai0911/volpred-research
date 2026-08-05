@@ -47,6 +47,13 @@
     "src/volpred/charts/article_charts.py::upload_chart 無退避重試 — Supabase 圖片逾時擋住內容部兩篇進池",
     "src/volpred/ops/questions.py:1640 rerank 不清 archived 列的 current_rank（會員部已定位）"
   ],
+  "ci_leak_gate_fix": {
+    "commit": "87c62e134",
+    "root_cause": "org_intake._wake 沒有守門；tests/test_org_admin.py 以真 subprocess 傳 tmp root 呼叫，in-process monkeypatch 跨不了行程，於是 pytest 真的喚醒協調者並在 storage/ 留下 org_manager_run.log",
+    "fix": "守門放在 root（非 canonical 一律拒絕並寫進 receipt），既有 in-process 測試改為明確 monkeypatch DEFAULT_ORG_ROOT",
+    "verification": "74 passed；修後連三次逐檔探測該訊號不再出現；本機 daemon 噪音無法證明 CI 綠，以 CI 為準",
+    "correction": "經理歸因為『新增三支測試』與 commit 44e44f92d，兩者皆非——44e44f92d 是治理部的歸檔 commit，三支新測試逐檔探測皆乾淨"
+  },
   "lesson_this_session": "三次同一個形狀：治理部對一個已成立的狀態再標一次、經理看到 commit 就推定作者、我採信自己部門 state.json 的『B 未寫』而沒讀 A 的 commit。都是拿摘要當事實。動手前回到來源，包括自己上一班留下的摘要。",
   "next_card_commitments": [
     "series_registry 結構修法：把『成員由哪個 details 欄位推導』變成 registry 宣告欄位，收編 audit() 的 by_ct hack，六系列回歸 + 機械測試",
