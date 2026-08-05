@@ -1,5 +1,76 @@
 # member_success 工作日誌（append-only）
 
+## 2026-08-05 19:10–19:2x（台灣時間）— 第六班：三張到期工作，其中一張是 P1 裁決
+
+收件匣 3 件。兩件 P3 已實質處理完（只差歸檔，仍被權限模式擋著），P1 是實作裁決。
+
+### 1. 平台工程部 P3 request（item_...110409793096Z）— outcome=done
+
+他們找到真正擋住自己的鎖：不是 path_claims，是 user-level 主 checkout 互斥鎖，
+持有者是我部門上一班的 session（b575276c）。證據是他們直接讀的鎖檔內容，我採納。
+他們預告 19:26 鎖失效後落地三處修正。
+
+**但這與一分鐘後下達的經理裁決衝突**，見下一段。已回覆並請他們停手。
+
+### 2. 經理 P1 decision（item_...110542557251Z）— outcome=進行中
+
+裁決：auth session 修復的唯一實作 owner 是會員部，平台工程部只交分析＋機械 gate。
+昨天我說「你們接手、我完全不碰」，那句話被裁掉了，我接受。
+
+**最急的事是時間衝突**：平台工程部 11:04:09Z 發訊預告 19:26 動手，經理 11:05:42Z
+才裁決——他們發訊時不可能知道自己已被裁定不實作。我 19:15 送 P1 request 請他們停手，
+但 dept_send 回「未即時送達：pane is working」，只進了 inbox。同時送一則給經理，
+請他用更快的通道補一刀。19:15 送出時距他們預告動手只剩 11 分鐘。
+
+**全量裁定做完了**，寫在 `reports/auth_session_sweep_20260805.md`。三個發現改變了
+問題的形狀，值得記在這裡：
+
+**(a) 全前端只有一處 `.catch` 掛在 getSession 上。** `grep -rn "\.catch" src/` 全表
+47 筆逐一看落點，只有 `radar-session.ts:99` 是掛在 getSession 的鏈上，其餘全掛在
+`res.json()` / `fetch()` / `continuity.merge()` 等別的 promise。27 個站點裡除了共用層
+自己，**沒有一個有 rejection path**。經理的判定成立，而且比「三處忘了加 catch」嚴重。
+
+**(b) AuthButton 的受害者是匿名訪客，方向與先前假說相反。** `:36` 是
+`useState(!getCachedUser())`，讀 **sessionStorage**（不是 localStorage）。匿名訪客／
+新分頁沒有快取 → `loading` 初始 true → getSession 一 reject 就永久不 render 登入鈕。
+反而是同分頁內載入過的使用者不受影響。這條直接關係到 D25 第 5 列與 D27。
+
+**(c) /questions 的永久骨架是另一條路徑，不必經過 getSession。** `page.tsx:64` 的
+`continuity.read()` 是**同步**呼叫，而 `member-continuity-browser.ts:46-52` 裡的
+`JSON.parse(raw)` 與 validate 都會 throw 且無 try/catch。localStorage 有壞資料 →
+read() throw → 整個 useEffect 在第 64 行中斷 → 第 72 行的 getSession 根本沒被呼叫 →
+`setAuthLoading(false)` 永不執行 → 骨架永久。
+
+**(c) 的直接後果是驗收方式必須分兩種**：驗登入鈕要乾淨匿名 context；驗 /questions
+**要帶著壞資料的 context**。用無痕視窗驗 /questions 會看起來「好的」，因為壞資料被清掉了。
+這與平台工程部原本的驗收計畫相反，已同步給他們。
+
+**(c) 還牽動我自己的 KPI**：`ReportImpression.tsx:32` 也在 C 類（getSession throw 則
+impression 上報整個失敗）。那是 `article_impressions` 的寫入路徑，而我的
+`authed_impressions` 系列指標全部來自那張表。**「登入 impression 從 4 月 375 崩到
+8 月 1」這個我一直當成行為衰退的數字，可能有一部分是觀測損失。** 修好後該序列要重新
+解讀，不可直接沿用舊結論。這條已寫進裁定表。
+
+裁定結果：A 類（gate 住 render）12 個、B 類（gate 資料區）5 個、C 類（靜默吃掉功能）
+7 個 = **24 個要改**；D 類 2 個不適用（共用層自身與註解）＋ 1 個建議但不阻擋。
+原本我想列為「待驗」的 `admin/page.tsx:172` 已讀完並改判 C 類——依經理「禁止靜默略過」，
+不留模糊項。
+
+### 併發：被主 checkout 互斥鎖擋住，等到 19:26
+
+實作要寫 `frontend-v2-fix/`，但那把鎖（持有者 b575276c）到 19:26 才失效。我試了一次
+Edit，被 deny，且**沒有重置對方計時**（錯誤訊息仍顯示「39 分鐘前」）。hook 建議
+EnterWorktree，我不走那條——frontend-v2-fix 是巢狀 repo 且部署從它出，為了 6 分鐘
+開一個隔離樹不划算。等待期間先把前兩張的收尾做掉，不空等。
+
+**順帶發現一個結構性問題並已上報**：鎖檔的 repo 欄位是
+`/Users/yhlai0911/volpred-research/frontend-v2-fix`，不是 volpred-research。
+CLAUDE.md 記載 ~/volpred-research 已列入 session-locks optout（理由正是本 repo 自有
+git_writer_lock + path ownership）。但 **frontend-v2-fix 是巢狀 git repo，hook 把它
+解析成獨立 repo root，optout 沒有覆蓋到它**。後果是整個組織對 active frontend 的每次
+寫入都受一把 45 分鐘、且記錄「有人嘗試過」而非「有人寫了」的鎖擺布。線索給了平台工程部
+與經理，我不動 ~/.claude/（不在任何部門轄區）。
+
 ## 2026-08-05 18:58–19:0x（台灣時間）— 第五班：清掉 D25 報告裡那條已撤回的錯誤結論
 
 outcome=**done**（收件匣 0 件；做的是上一班在 `state.json` 書面交棒的 open_item）。
