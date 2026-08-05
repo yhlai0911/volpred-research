@@ -97,7 +97,15 @@
       "session_lifetime_hours": ">=103.76（下界，root 層級待重算）",
       "ruling_status": "blocked 已解除；C3 是否上呈老闆待經理裁決"
     },
-    "last_session_outcome": "done（D41 §二 class sweep 交付 docs/governance/2026-08-05_permission_gap_class_sweep.md；分堆為三型而非兩型，經理指定的最嚴重一例屬 C 陳舊設定、修法是重新 attach）",
+    "last_session_outcome": "done（D41 兩件皆交付：§二 class sweep 三型分堆、§一 tex carve-out 裁定不放寬）",
+    "tex_carveout_ruling": {
+      "as_of": "2026-08-05T11:25Z",
+      "deliverable": "docs/governance/2026-08-05_tex_carveout_proposal.md",
+      "ruling": "不建議放寬；未動 CLAUDE.md 與 _core.py",
+      "mechanical_conditions_C1_C6": "sha256+byte 綁定／FIND 全檔唯一／等行數不得新增段落／diff 僅落在替換 span／round 證據夾不可變／驗證輸出交回裁決者。六條皆可機械驗，論文部 prg_v8 交接件已自發做到五條",
+      "core_reason": "C1-C6 證明『套用忠實』，不證明『判斷歸屬』。v8 六筆的判斷出自論文部自身，主線程未讀過該散文；放寬後形狀是同一部門先裁決再套用，規則會被拆成兩步繞過而非被違反",
+      "alternative": "scripts/apply_paper_edits.py — 不移動界線、降低過路費；主線程仍是看過 diff 才確認的角色，成本降為讀一份 diff。實作面屬 platform_eng，依經理 (c) 本輪不派"
+    },
     "permission_gap_class_sweep": {
       "as_of": "2026-08-05T11:21Z",
       "deliverable": "docs/governance/2026-08-05_permission_gap_class_sweep.md",

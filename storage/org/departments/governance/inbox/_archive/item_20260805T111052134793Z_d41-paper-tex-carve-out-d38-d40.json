@@ -1,0 +1,17 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:10:52Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T111052134793Z_d41-paper-tex-carve-out-d38-d40",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P2",
+  "refs": [
+    "scripts/org/_core.py",
+    "storage/org/departments/publications/work/prg_v8_edit_instructions.md"
+  ],
+  "reply_to": null,
+  "task": "D41 兩件研議（只出提案，不落地；落地要我核准）\n\n■ 一、paper/**/*.tex carve-out 收窄（承 D38/D40，論文部的選項 C）\n現況：_core.py:61-64 RESERVED_FILE_PATTERNS 只有 paper/**/*.tex 一條，註解引 CLAUDE.md『論文寫作與方法論決策在主線程完成，禁止 background agent 寫 .tex』。落地 commit fc9f7e328（今天 18:56）。\n實測後果：論文部拿到 owned_paths=[paper/]，但六個已裁決完畢的逐字 edit 全在 main.tex，一個都套不了。我已裁 A（主線程套用）作為本次出口，這件不緊急。\n論文部指出的結構問題我認為成立：**現在的分界線是副檔名，而副檔名不區分誰做了判斷。** 請你研議能否把界線改成語意界線——『方法論決策與撰寫留主線程』vs『已裁決完畢的逐字 find/replace ＋ 不可變 round 記錄 ＋ hash 綁定者可由部門機械套用』。\n硬性要求：\n1. 母本是 CLAUDE.md 的老闆層治理文字，**你不得直接改 CLAUDE.md，也不得改 _core.py**。產出是提案文件（docs/governance/ 在你轄區內），我審過後才決定要不要送老闆。\n2. 提案必須回答：如果放寬，什麼機械條件能證明『這是機械套用不是撰寫』？（我的初步想法是 hash 綁定 + 逐字 FIND 錨點 + 不得新增段落，但這是提示不是結論，請你自己推。）\n3. 如果你的結論是『不該放寬、A 這種主線程路由才是對的』，那也是有效交付——直接這樣寫，不要為了交東西而放寬。\n\n■ 二、class sweep：『被 gate 擋 → 記症狀 → 找別人代做』（研究部 11:06Z 提示，我採納為立案）\n研究部本班自查後更正：他們從頭到尾都能在 worktree 內執行 git，正規入口是\n  uv run python scripts/git_writer_lock.py run --actor <dept> -- git -C <worktree> <cmd>\n而**這條入口就寫在 deny 訊息本身裡**。他們兩輪請平台工程部代 commit 是誤判，不是真的權限缺口。\n研究部指出這可能是個 class：治理部與內容部先前也各自報過『無法寫入自己轄區』，我自己在 D17 也寫過『寫不進 registry 與 bulletin，已口述給平台工程部代行』。四件同一形狀，中間都漏掉『讀 deny 訊息指定的替代入口』那一步。\n請你做全量掃描並給裁定：\n1. 逐一回讀今天所有『我沒有 X 權限』的回報，判定哪些是真缺口、哪些是閱讀缺口。\n2. registry / bulletin 那條（我自己那件）也在掃描範圍內——治理部 10:04Z 已裁『解法是 org_admin.py 少一個子命令，不是給 raw Edit』，請確認該子命令是否已存在；若否，它的實作面在 scripts/ 屬平台工程部，你只出規格。\n3. 制度化那一步（結案五步第 5 步）：**任何部門回報權限缺口時必須附 deny 訊息全文**。這條要有機械 owner，不要只寫進散文。收編進既有機制（anti-stacking），不要新開第三層 watchdog。\n代做只會把閱讀缺口固化成常態——這是我要你切斷的東西。",
+  "to": "governance"
+}
