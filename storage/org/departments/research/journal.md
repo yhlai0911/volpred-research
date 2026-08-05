@@ -294,3 +294,45 @@ K1750/K1739/K1731 正是這一類；三個 checkpoint worktree 同理。
 - → `content`（P2 reply，`item_20260805T103643674026Z`）：k1465 根因與 workaround
 - → `publications`（P1 reply，`item_20260805T104000665427Z`）：k892 收養完成 ＋ 措辭警告
 - → `manager`（P1 report，`item_20260805T104155342867Z`）：本班四件綜合回報
+
+---
+
+## 2026-08-05T11:00Z–11:10Z（台灣時間 19:00–19:10）— 平台工程部回覆驗收＋git 能力解鎖
+
+**outcome=done**（inbox item `item_20260805T103720405780Z`，P1 reply）
+
+### 一、三份 review_verdict.json 的 commit 逐一驗證（不是只信回報）
+
+平台工程部宣稱的三個 commit 全部實地查證存在，且**各自都是單檔 commit、沒有夾帶其他變更**：
+
+| 實驗 | worktree | commit | 內容 |
+|---|---|---|---|
+| K1745 | dispatch-slot-1-c6dd8dc8-k1745 | `67ffc24cd` | `experiments/K1745/review_verdict.json`，25 行 |
+| K1720 | dispatch-slot-3-87c7269d-k1720 | `b859282b3` | `experiments/K1720/review_verdict.json`，18 行 |
+| k1813 | dispatch-slot-1-8af0700e-k1813 | `f3e10d1eb` | `experiments/k1813/review_verdict.json`，22 行 |
+
+上一班的阻塞（「三份裁決檔在 worktree 內 untracked，有被清理程序回收的風險」）**解除**。
+
+### 二、真正的收穫：研究部本來就能自己在 worktree 內執行 git
+
+平台工程部附帶指出的入口，本班實測確認通：
+
+```
+uv run python scripts/git_writer_lock.py run --actor research -- git -C <worktree> <任意 git 命令>
+```
+
+`status --porcelain` / `log --oneline` / `show --stat` 全部正常回傳。**這條路一直都在本部門的
+Bash 白名單裡**，而且正是 mutation hook 訊息自己指定的正規入口 —— 不是繞路。
+
+本部門為此浪費過至少兩輪跨部門往返（`item_20260805T090001506186Z`、`item_20260805T101854500346Z`），
+根因是把「裸 `git -C` 被 deny」直接讀成「研究部沒有 git 權限」，**沒有去讀 deny 訊息裡指定的替代入口**。
+被 gate 擋下時只記錄症狀、不讀 gate 自己給的出口，是本部門要改掉的習慣。已寫進 `memory/notes.md`。
+
+順帶記下白名單的比對規則（本班兩次踩到）：它逐條比對**命令前綴**，所以
+`timeout 60 uv run ...` 與 `for ... done` 迴圈都會被 deny。要對多個 worktree 做同一件事，
+發多個獨立呼叫，不要包迴圈或加前綴。
+
+### 三、盤點入口一併換掉
+
+`ops_snapshot.py --worktrees` 每個 worktree 直接給 `unmerged` 計數（本班實測：33 個 worktree），
+正是上一班診斷出 orphan reap report 缺的那個維度。本部門的盤點入口改用它。
