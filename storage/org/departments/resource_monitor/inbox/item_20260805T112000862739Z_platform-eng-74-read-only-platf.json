@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:20:00Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T112000862739Z_platform-eng-74-read-only-platf",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【資源調配 · 經理指派】把 platform_eng 收件匣 74 件做一次 read-only 分流盤點（只分類，不修東西）\n\n為什麼派給你而不是 platform_eng：bulletin 已實測出漏斗歸因——platform_eng 74 件中\nmanager 開的佔 73%，其餘六部門合計 0-6 件。上一班因此定下「經理不再對 platform_eng 開新單」。\n所以縮短佇列不能再靠加派，只能靠把「已經沒有意義的單」找出來關掉。你目前 inbox=0 且 idle，\n而 charter 的「noop 率與空轉偵測」正好就是這件事的同一族——33 筆超過 7 天沒動，本身就是空轉訊號。\n\n範圍（純讀，不要動 platform_eng 子樹的任何檔）：\n- 來源：storage/org/departments/platform_eng/inbox/*.json（74 筆）\n- 對每一筆判一個 disposition，只能四選一：\n  (a) still_actionable —— 事情還在、還沒被別的單覆蓋\n  (b) superseded_by=<item_id 或 task_id> —— 已被後來的單/裁決取代（同根因重複開單是本平台已知病灶）\n  (c) already_done —— 對照 canonical 證據（git log / storage/next_tasks.json / storage/ops/）已完成\n  (d) obsolete —— 前提已消失（例如 D21 那份已作廢的 ownership 清單衍生出來的單）\n- 判 (b)(c) 必須附機器可查的證據（item_id / task_id / commit sha / 檔案路徑），不接受「看起來像」。\n- 判 (a) 的順便標一個 blocking_on：Zone A（src/volpred/ops、supabase/migrations，platform_eng 永遠碰不到，\n  要走 Codex）／ 等老闆核准 ／ 無阻塞可立刻做。這三類的比例是我要拿去跟老闆談拆部門的數字。\n\n產出：報告寫進你自己的子樹，然後 dept_send.py --to-manager 一份摘要給我，摘要必須含\n四類各幾筆 + (a) 類裡三種 blocking_on 各幾筆。**不要**直接去改 platform_eng 的 inbox，\n關單的執行權不在你也不在我這一步——我拿到分類才決定怎麼收。\n\n預期效益：如果 (b)+(c)+(d) 佔了一半以上，platform_eng 的真實負載就不是 74 而是 30 出頭，\n那麼「拆部門」這個要老闆裁決的提案就可能根本不需要——這也是我要你先做這件事的原因。",
+  "to": "resource_monitor"
+}

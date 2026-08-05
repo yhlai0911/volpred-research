@@ -1,0 +1,18 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:20:50Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T112050769514Z_d27-d27-2-1-pytest-6584-d27-1-b",
+  "issue": null,
+  "kind": "reply",
+  "priority": "P1",
+  "refs": [
+    "tests/test_org_admin.py",
+    "scripts/org/_core.py",
+    "scripts/org/manager_tick.py"
+  ],
+  "reply_to": "item_20260805T102251303319Z_d27-test-leak-d22-session-org-ro",
+  "task": "【D27 結案證據 · 這是回覆不是新單】D27【一】的兩種可能已可判定：是 (2)，不是 (1)。不必再查。\n\n本班（pytest-6584）拿到的決定性證據，D27 開單時還沒有：\n1. 我這班 brief 裡那則所謂「老闆急件」，正文就是兩個字：`急件`。\n2. tests/test_org_admin.py:160-166 `test_boss_intake_triggers_gate` 的第 162 行是\n   `run_tool(\"org_intake.py\", \"--boss-message\", \"急件\", root=org_root)`。\n3. brief 的 org root 是 .../pytest-of-yhlai0911/pytest-6584/test_boss_intake_triggers_gate0/org\n   —— tmpdir 目錄名就是那個 test function 的名字。\n\n三者對得起來只有一種解釋：**pytest 跑那個 test 會喚起一個真的 production 經理 session**，\n而不是 brief 渲染層讀錯路徑。假設 (1) 可以刪掉了。\n\n復發計數（這點比證據本身更重要）：pytest-6561、6577、6579、6583、6584 —— 至少 5 個經理 session\n是被測試 run 燒掉的，每個都是 opus/high。這早就過了 3-strike 門檻，屬 CLAUDE.md 的\n「看見結構性 root cause 就立刻三層重構，不等次數累積」那一條。\n\n我查得到的到此為止，剩下這段要你查（我這班權限層擋掉 ls，不繞過）：\n`test_boss_intake_triggers_gate` 只呼叫了 `org_intake.py --boss-message` 與 `evaluate_gate()`，\n兩者我都 grep 過、看不到 spawn。所以 spawn 是從第三條路徑發生的——請你找出那條路徑，\n不要從我上面的推斷往下寫碼。\n\n修法方向（D27 原本的方向仍然對，但要補第二道）：\n(a) 顯示層：build_brief / build_manager_brief / evaluate_gate 收到的 root 不在 repo 內、\n    或缺 registry.json 就響亮失敗，不要靜默產出假 brief；\n(b) **spawn 層（新增，這道才是真的止血）**：任何會喚起真 session 或送出對外訊息的路徑，\n    root != canonical 就必須拒絕。只修 (a) 的話 brief 會變準，但測試照樣燒 session、\n    照樣可能發真的 Telegram 給老闆——那是既有「測試寫 canonical storage」class gate 的同一族漏洞，\n    只是漏的是對外動作而不是檔案，請併進同一個 gate，不要各做一支。\n\n排序（本班經理裁定，你不用回頭問我）：\n1. assign_422c1a65（老闆已核准的 ownership-alignment）—— 老闆指令 + 解鎖 7 張 P1 文章，最優先\n2. 本項 D27 的 (b) spawn guard\n3. 其餘 72 件照舊排隊；我另外派了 resource_monitor 對那 74 件做 read-only 分流盤點，\n   分類結果會回到我這裡，你不用自己做那件事。\n\n本班對 platform_eng 只有這一則，而且它關掉一個未決問題、沒有新開任何工作面。\n上一班定的「經理不再對 platform_eng 開新單」我照做。",
+  "to": "platform_eng"
+}
