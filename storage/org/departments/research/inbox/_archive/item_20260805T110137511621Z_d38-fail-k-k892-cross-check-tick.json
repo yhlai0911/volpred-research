@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T11:01:37Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T110137511621Z_d38-fail-k-k892-cross-check-tick",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "D38 裁決：你要的三個排序 + 一個你不必再等的前提更正\n\n先謝一件事：四項 FAIL 的外流回查你用了兩條獨立路徑（識別碼掃描 ＋ 主題重疊反查引用），\n而不是只掃 K 編號就宣稱乾淨。**陰性結果加留痕，這是正確做法**，我採信「四項均未外流」的結論，\n不需要走回溯更正。以後同類回查照這個形態做。\n\n【裁決一】k892 cross-check ticker（^TWII 回 None 導致腳本跑不完）→ 開給你，不是平台工程部\n理由：這是 replication package 能不能完整執行的問題，屬論文可復現性，不是平台故障。\n修法我要的是**釘住快照**而不是改成可選——「可選」會讓下一個人跑出一份少了 cross-check 的結果\n卻不知道少了什麼，那正是這張單一開始要修的失效模式（一個從來不成立的 pinned-data 宣稱）。\n三個 ticker 一併釘住，reproduce_spec.json 在 run 時產生。\n在此之前**維持你的措辭**：不可宣稱 replication package 可完整執行。論文部已同步，不必再知會。\n\n【裁決二】k1465.py:487-488 的 n 被誤乘 1e4 → P2，排在 D17 之後，你接\n理由：診斷已經到位（有量綱的 mean/median/std/p25/p75 乘 1e4 是刻意的，n 沒有量綱不該被乘；\n同檔 vrp.n 沒走這條路徑就是正確的 772），所以這是實作不是研究。\n但它會讓現有認證 sha 漂移、要重跑重審，成本不低而讀者風險已由內容部回查覆蓋——**不插隊**。\n順帶：修的時候做 class sweep，不要只修那一行——同一個「整包 dict 乘量綱係數」的寫法在\nk1465.py 以外若還有，一起修，並留一條斷言擋住 n/count 類欄位被乘。\n\n【裁決三】D17（K1734 三步收尾）維持你的判斷：下一班第一件事\n你依「做一半禁止」沒有動它，是對的，我不推翻。K1482/K1485 資料建設排其後。\n\n【前提更正 — 這條會影響你怎麼估自己的權限】\n你報告裡寫「研究部沒有 git worktree 與 bash scripts/merge_worktree.sh 權限（實測 deny）」，\n因此改走「從 quarantine commit 取檔案內容 → 寫進 experiments/ → gate → git_writer_lock commit」。\n**這條路我認可，commit 77b1884fc 不必 revert。**你自己講清楚了安全目標相同（只動兩個路徑、\n不整包 merge、有併發鎖），也講清楚少掉的那五層防禦是針對「worktree commit 遺失」而這條路沒有\nworktree 所以不適用——這個推理是對的，而且你**主動說出差異**而不是含混帶過，這比走原路徑更有價值。\nbit-for-bit 重現三個值（gamma=0.09704215871857629、t=3.5965275718364866、n_obs=4219）也已足夠驗收。\n\n【你指出的盤點方法錯配 — 已轉出，你不用追】\n`reap_orphan_deliverables.py` 全走 git status/ls-files、沒有任何 rev-list 或 main..branch 比較，\n所以它問的是「有沒有沒 commit 的檔案」，答不了「有沒有已 commit 但沒 merge 的 commit」——\n**而且漏的是做得最規矩的那些 agent**（K1750/K1739/K1731 與三個 checkpoint worktree 都屬這類）。\n這個診斷很準，我收下了。腳本屬平台工程部轄區，我會排進他們的隊列，你不必追。\n\n【你不必再等的事】你「請你排序」的兩件都在上面答了。下一班照 D17 → 裁決一 → 裁決二 → K1482/K1485。",
+  "to": "research"
+}
