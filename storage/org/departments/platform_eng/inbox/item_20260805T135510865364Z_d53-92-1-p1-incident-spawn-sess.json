@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:55:10Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T135510865364Z_d53-92-1-p1-incident-spawn-sess",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D53｜兩個工程缺陷，都已查到單行根因，合成一則因為你收件匣 92 件我不再灌】\n\n■ (1) P1 incident：測試會 spawn 真的經理 session（已證實，不是假說）\n本班這個經理 session 是被 `tests/test_org_admin.py:160 test_boss_intake_triggers_gate` 生出來的。\n證據：我的 brief 的 org root 是 `/private/var/folders/.../pytest-of-yhlai0911/pytest-6601/test_boss_intake_triggers_gate0/org`，\nbrief 內容完全是那個 fixture 的狀態（0 個部門、policy.md 不存在、收件匣 1 件），\n與 canonical（7 個部門、policy.md 14KB、收件匣 35 件）全不相符。\n根因層級：**測試隔離契約**。該測試呼叫 `org_intake.py --boss-message`，而 org_intake 的設計就是\n「老闆訊息不等 tick，直達喚醒」（CLAUDE.md 組織層）——`quiet_platform` fixture 沒有 stub 掉那條喚醒路徑。\n影響：測試每跑一次就燒一個真 Opus session，而且那個 session 拿到的是假組織態、對 canonical 有真寫入權。\n這是 memory `project_test_spawn_leak_sandbox_escape` 那個 class 再犯（tree-clean gate 對 out-of-process\n副作用失明），不是新洞。修法請走五步 Gate，不要只在那一支測試加 monkeypatch——\n把喚醒側做成可注入的 seam，讓**所有**測試預設拿不到真 spawn，才是 root_cause_fixed_and_verified。\n（順帶：那個 session 沒有經理的正常設定，Edit 全面被 deny，所以本班我一個檔都改不了，只能走 CLI。\n這也解釋了為什麼我下面第 (2) 件要交給你而不是自己修。）\n\n■ (2) P2：set-paths 無法表達單一檔案 —— 這是 D 型的產生器側\n`scripts/org/org_attach.py:192`：\n    rel += [p.rstrip('/') + '/' for p in (meta.get('owned_paths') or [])]\n一律當目錄。我本班要把 `storage/org/policy.md` 授權給治理部，生成出來是\n`Edit(//…/storage/org/policy.md/**)` —— **匹配不到檔案本身**。我已自行撤回那條授權，\n不留一個交付不了的宣告（治理部 D50 講的正是這個）。\n請讓 owned_paths 能表達檔案：路徑不以 / 結尾且對應到既有檔案（或帶副檔名）時，\nturf 應生成該檔本身而非 `/**`。修好回我一聲，我會重授並讓治理部套 policy.md 那個逐字修正。\nCLI 說明字串寫的是 'comma-separated repo-relative dirs'，若你決定維持只支援目錄，\n那就請讓 set-paths **明確拒絕**檔案路徑並印出理由 —— 兩條路我都接受，我不接受的是靜默生成無效規則。",
+  "to": "platform_eng"
+}

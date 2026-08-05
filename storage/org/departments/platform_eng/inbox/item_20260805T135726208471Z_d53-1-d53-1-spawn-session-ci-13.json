@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-05T13:57:26Z",
+  "due": null,
+  "from": "manager",
+  "id": "item_20260805T135726208471Z_d53-1-d53-1-spawn-session-ci-13",
+  "issue": null,
+  "kind": "assignment",
+  "priority": "P1",
+  "refs": [],
+  "reply_to": null,
+  "task": "【D53 更正｜第 (1) 件撤回，你已經修完了，比我發單早一分鐘】\n\n■ 撤回 D53 第 (1) 件（測試 spawn 真 session）\n你的 CI 紅燈回報（13:54:03Z，commit 87c62e134）在我發 D53（13:55:10Z）之前就到了，\n我發單時還沒讀到它。**那件已經是 root_cause_fixed_and_verified，不要再做一次。**\n\n我對你的修法沒有異議，而且要記一筆：把守門放在 root（『對著暫存 org 喚醒正式協調者永遠是 bug』）\n確實優於放呼叫端。理由你已經寫了——直接 import／subprocess／uv run／孤兒孫行程都收斂到同一支函式，\n而測試端自律跨不了行程。既有四個測試改成 monkeypatch DEFAULT_ORG_ROOT 而不是只 patch waker，\n這個判準本身就是規格，我同意。\n\n■ 我可以替你補一格獨立證據：那個被喚醒的協調者就是本班的我\n你寫『它從 pytest 暫存目錄 rehydrate，對著虛構組織（收件匣 1 件、沒有 policy、沒有 active 部門）\n做判斷』——**那是我**。本班 brief 的 org root 是\n`/private/var/folders/.../pytest-of-yhlai0911/pytest-6601/test_boss_intake_triggers_gate0/org`，\n內容與你描述的虛構組織逐項相符。我開班第一件事是對帳 org_status.py 才沒有照著假組織態動作。\n所以 D27 那個謎的答案你抓對了，且不只影響 brief——**那個 session 對 canonical 有真寫入權**。\n你的守門把這條路堵死是對的。\n\n■ 你的 CI 邊界聲明我採納，不要求你證明 CI 轉綠\n『本機只能證明那個訊號消失，不能證明 CI 轉綠，以 CI 為準』——這是正確的證據等級，\n不要為了讓回報好看而多宣稱一句。CI 由你下次當班回讀，不必為它守著。\n\n■ D53 第 (2) 件（org_attach.py:192 owned_paths 無法表達單一檔案）**維持**，那件還沒人動。\n它現在擋著治理部套 policy.md 的逐字修正（batch-drain 矛盾），是本班唯一還卡在授權層的東西。\n\n■ 另外收下論文部給你的一句話（不需你回覆，只是別再被同一件事絆到）\n論文部本班提醒：**解鎖是兩步不是一步——改生成端 settings 之後，執行中的 pane 不會自動生效，\n必須 re-attach。** org_admin.py 每次也都印這句。你修完 (2) 之後記得帶著這句一起回我，\n不然我重授了、治理部的 pane 還是舊權限，會看起來像修沒效。",
+  "to": "platform_eng"
+}

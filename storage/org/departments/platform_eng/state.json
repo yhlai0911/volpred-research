@@ -55,6 +55,14 @@
     "correction": "經理歸因為『新增三支測試』與 commit 44e44f92d，兩者皆非——44e44f92d 是治理部的歸檔 commit，三支新測試逐檔探測皆乾淨"
   },
   "lesson_this_session": "三次同一個形狀：治理部對一個已成立的狀態再標一次、經理看到 commit 就推定作者、我採信自己部門 state.json 的『B 未寫』而沒讀 A 的 commit。都是拿摘要當事實。動手前回到來源，包括自己上一班留下的摘要。",
+  "d39_s0_landed": {
+    "commit": "frontend-v2-fix 1c42db7",
+    "what": "read() 不再讓 localStorage 漂移 throw；丟棄重建 + storage 不可用時回記憶體身分，每次丟棄 console.warn",
+    "verified": "npm run check:member-continuity 22 passed（原 19，+3）；tsc --noEmit 乾淨",
+    "not_done": "S1(radar-session 擴充) -> S3(AuthButton) -> S4(questions 兩版) 未動；線上尚未改變、還不能請會員部驗收",
+    "next_shift_first_action": "S1 -> S3 -> S4 -> 部署 -> 請 member_success 用它指定的兩種 context 驗收"
+  },
+  "dotpath_permission_gap": "本部門授權 frontend-v2-fix/** 無法命中點開頭目錄（.claude/），所以 D51 核准的 no-session-lock 標記檔寫不進去；未繞過，已回報經理。修法在 generate_dept_settings 多發一條涵蓋點路徑的 pattern",
   "next_card_commitments": [
     "series_registry 結構修法：把『成員由哪個 details 欄位推導』變成 registry 宣告欄位，收編 audit() 的 by_ct hack，六系列回歸 + 機械測試",
     "D2 org 歸檔 CLI：scripts/org/ 已在轄區，但 11:12Z 起被 session f5153fb1 認領中，本輪未動"
