@@ -47,11 +47,11 @@ key 是 deny 訊息開頭到第一個 `（` 或 `。` 為止。
 | workflow 檔 | job id | 擋什麼 |
 |---|---|---|
 | `experiment-artifacts.yml` | `artifacts` | 實驗 artifact 完整性 |
-| `knowledge-provenance.yml` | `audit` | canonical state provenance 與 vocabulary |
+| `knowledge-provenance.yml` | `data-baseline` | canonical state provenance 與 vocabulary |
 | `pytest.yml` | `pytest` | 測試與 tree-clean gate（`-m "not real_queue"`；live-queue ratchet 見下一列）|
 | `queue-invariants.yml` | `real-queue` | supervisor 寫壞 `storage/next_tasks.json`（status vocabulary、blocked 無 until_at、roadmap P1 無對應任務）|
-| `silent-fallbacks.yml` | `audit` | 新增 silent fallback |
-| `source-encoding.yml` | `audit` | mojibake / 非 UTF-8 原始碼 |
+| `silent-fallbacks.yml` | `silent-fallback` | 新增 silent fallback |
+| `source-encoding.yml` | `source-encoding` | mojibake / 非 UTF-8 原始碼 |
 
 ## Git hooks
 
