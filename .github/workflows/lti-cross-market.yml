@@ -29,10 +29,27 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install numpy pandas scipy matplotlib yfinance tabulate
 
-      - name: Materialize the versioned empirical script
+      - name: Materialize and validate the versioned empirical script
         run: |
           base64 --decode research/lti_cross_market/run_cross_market_particle_filter.py.gz.b64 \
             | gzip --decompress > research/lti_cross_market/run_cross_market_particle_filter.py
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("research/lti_cross_market/run_cross_market_particle_filter.py")
+          text = path.read_text(encoding="utf-8")
+          needle = '    ax.scatter(het["factor_r2"], het["relative_improvement_pct"], alpha=0.35, s=16)'
+          replacement = (
+              '    factor_r2_col = next(c for c in ("factor_r2", "factor_r2_x", "factor_r2_y") '
+              'if c in het.columns)\n'
+              '    ax.scatter(het[factor_r2_col], het["relative_improvement_pct"], alpha=0.35, s=16)'
+          )
+          if needle not in text:
+              raise RuntimeError("Expected factor-R2 plotting line was not found; refusing a silent patch")
+          text = text.replace(needle, replacement, 1)
+          text = text.replace('het["factor_r2"]', 'het[factor_r2_col]')
+          path.write_text(text, encoding="utf-8")
+          PY
           python -m py_compile research/lti_cross_market/run_cross_market_particle_filter.py
 
       - name: Run cross-market mechanism-aware particle filter
