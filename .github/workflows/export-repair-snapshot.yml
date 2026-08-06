@@ -1,57 +1,13 @@
-name: Export Repair Snapshot
+name: Repair CI Contract Drift
 
 on:
-  push:
-    branches:
-      - fix/ci-contract-drift-20260806
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  export:
+  parked:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - name: Check out the repair branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Build a focused repair snapshot
-        shell: bash
-        run: |
-          set -euo pipefail
-          items=(
-            .github
-            scripts
-            src
-            tests
-            config
-            docs
-            CLAUDE.md
-            AGENTS.md
-            pyproject.toml
-            uv.lock
-            requirements.txt
-            storage/memory/knowledge.json
-            storage/org/registry.json
-            experiments/K1815
-          )
-          present=()
-          for item in "${items[@]}"; do
-            if [[ -e "$item" ]]; then
-              present+=("$item")
-            fi
-          done
-          tar -czf "$RUNNER_TEMP/volpred-repair-snapshot.tar.gz" "${present[@]}"
-
-      - name: Upload the focused source snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: volpred-repair-snapshot
-          path: ${{ runner.temp }}/volpred-repair-snapshot.tar.gz
-          if-no-files-found: error
-          retention-days: 1
-          compression-level: 0
+      - run: echo "Repair inputs are being staged."
