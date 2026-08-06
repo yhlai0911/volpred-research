@@ -85,7 +85,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          uv run --extra dev ruff check \
+          uvx ruff check \
             scripts/org/manager_run.py \
             src/volpred/ops/execution/registry.py \
             tests/test_provider_spawn_audit.py \
