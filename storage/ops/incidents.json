@@ -401,6 +401,11 @@
      "at": "2026-08-06T06:30:43.562540+00:00",
      "instance_key": "31076142830:1",
      "transition": "opened"
+    },
+    {
+     "at": "2026-08-06T10:40:23.499955+00:00",
+     "instance_key": "31092884640:1",
+     "transition": "opened"
     }
    ],
    "instances": [
@@ -625,14 +630,20 @@
      "first_seen_at": "2026-08-06T06:30:43.562540+00:00",
      "key": "31076142830:1",
      "last_seen_at": "2026-08-06T06:30:43.562540+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-08-06T10:40:23.499955+00:00",
+     "key": "31092884640:1",
+     "last_seen_at": "2026-08-06T10:40:23.499955+00:00"
     }
    ],
    "is_control_intervention": false,
    "kind": "ci_red",
-   "last_breach_detail": "2026-08-06T06:25:14.3908467Z E AssertionError: CLAUDE.md / AGENTS.md drifted from config/governance_shared.md. Edit the canonical file, then run: uv run python scripts/sync_governance.py --apply",
-   "last_seen_at": "2026-08-06T06:30:43.562540+00:00",
+   "last_breach_detail": "2026-08-06T10:39:12.3808760Z tests/test_alerts.py:1847: AssertionError",
+   "last_seen_at": "2026-08-06T10:40:23.499955+00:00",
    "notified_at": null,
-   "occurrence_count": 37,
+   "occurrence_count": 38,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2435,7 +2446,7 @@
    "clean_streak_started_at": null,
    "control_gate_id": "dispatch_worker_ownership",
    "current_task_id": null,
-   "episode_count": 2881,
+   "episode_count": 3005,
    "episode_failures": [
     {
      "at": "2026-08-04T04:16:20.228925+00:00",
@@ -2445,7 +2456,7 @@
      "task_id": "inc_792a94b0ecf4_e1"
     }
    ],
-   "episode_opened_at": "2026-08-06T10:11:53.713627+00:00",
+   "episode_opened_at": "2026-08-06T11:12:01.603854+00:00",
    "escalation": {
     "at": "2026-08-04T04:16:20.270924+00:00",
     "notification_id": "effect_owned_email_5b3a5d4b722faea245a48bbb9ca01d93",
@@ -3427,7 +3438,7 @@
      },
      "first_seen_at": "2026-08-04T06:55:40.479741+00:00",
      "key": "dispatch-slot-1-3175c52f",
-     "last_seen_at": "2026-08-06T10:11:15.475114+00:00"
+     "last_seen_at": "2026-08-06T11:11:29.359613+00:00"
     },
     {
      "cleared_at": null,
@@ -3441,7 +3452,7 @@
      },
      "first_seen_at": "2026-08-04T07:21:54.991363+00:00",
      "key": "dispatch-slot-1-1675be8d",
-     "last_seen_at": "2026-08-06T10:11:27.703507+00:00"
+     "last_seen_at": "2026-08-06T11:11:38.662286+00:00"
     },
     {
      "cleared_at": null,
@@ -3455,7 +3466,7 @@
      },
      "first_seen_at": "2026-08-04T07:46:21.551654+00:00",
      "key": "dispatch-slot-1-592ef34e",
-     "last_seen_at": "2026-08-06T10:11:40.881058+00:00"
+     "last_seen_at": "2026-08-06T11:11:48.056806+00:00"
     },
     {
      "cleared_at": null,
@@ -3525,7 +3536,7 @@
      },
      "first_seen_at": "2026-08-05T05:28:01.199569+00:00",
      "key": "dispatch-slot-1-12eda1cf",
-     "last_seen_at": "2026-08-06T10:11:53.713627+00:00"
+     "last_seen_at": "2026-08-06T11:12:01.603854+00:00"
     },
     {
      "cleared_at": null,
@@ -3553,7 +3564,7 @@
      },
      "first_seen_at": "2026-08-05T15:40:28.863409+00:00",
      "key": "dispatch-slot-1-29018b66",
-     "last_seen_at": "2026-08-06T10:07:34.038905+00:00"
+     "last_seen_at": "2026-08-06T11:08:54.652545+00:00"
     },
     {
      "cleared_at": null,
@@ -3567,7 +3578,7 @@
      },
      "first_seen_at": "2026-08-05T19:27:40.691281+00:00",
      "key": "dispatch-slot-1-de54b3f5",
-     "last_seen_at": "2026-08-06T10:07:40.840319+00:00"
+     "last_seen_at": "2026-08-06T11:09:01.164085+00:00"
     },
     {
      "cleared_at": null,
@@ -3587,72 +3598,72 @@
    "is_control_intervention": true,
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-12eda1cf unmergeable (worker_superseded_generation)",
-   "last_seen_at": "2026-08-06T10:11:53.713627+00:00",
+   "last_seen_at": "2026-08-06T11:12:01.603854+00:00",
    "notified_at": null,
-   "occurrence_count": 13185,
+   "occurrence_count": 13309,
    "resolution": {
-    "at": "2026-08-06T10:11:53.713627+00:00",
+    "at": "2026-08-06T11:12:01.603854+00:00",
     "by": "inc_792a94b0ecf4_rootcause_e2",
     "criterion": "root_cause_task_succeeded"
    },
    "resolutions": [
     {
-     "at": "2026-08-06T10:05:01.512844+00:00",
+     "at": "2026-08-06T11:06:28.805892+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:05:08.305810+00:00",
+     "at": "2026-08-06T11:06:35.217156+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:07:03.235174+00:00",
+     "at": "2026-08-06T11:08:25.226602+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:07:10.075737+00:00",
+     "at": "2026-08-06T11:08:31.816176+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:07:17.259853+00:00",
+     "at": "2026-08-06T11:08:38.585238+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:07:27.183516+00:00",
+     "at": "2026-08-06T11:08:48.111701+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:07:34.038905+00:00",
+     "at": "2026-08-06T11:08:54.652545+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:07:40.840319+00:00",
+     "at": "2026-08-06T11:09:01.164085+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:11:15.475114+00:00",
+     "at": "2026-08-06T11:11:29.359613+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:11:27.703507+00:00",
+     "at": "2026-08-06T11:11:38.662286+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:11:40.881058+00:00",
+     "at": "2026-08-06T11:11:48.056806+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     },
     {
-     "at": "2026-08-06T10:11:53.713627+00:00",
+     "at": "2026-08-06T11:12:01.603854+00:00",
      "by": "inc_792a94b0ecf4_rootcause_e2",
      "criterion": "root_cause_task_succeeded"
     }
@@ -5893,6 +5904,6 @@
    }
   }
  },
- "updated_at": "2026-08-06T10:11:53.794875+00:00",
+ "updated_at": "2026-08-06T11:12:01.650950+00:00",
  "version": 1
 }
