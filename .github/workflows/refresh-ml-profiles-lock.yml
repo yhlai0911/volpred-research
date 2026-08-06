@@ -1,0 +1,17 @@
+# TEMPORARY SENTINEL FOR EXISTING FINALIZER RUN 31125666683.
+# The stored workflow definition removes this file before committing.
+name: ML profile finalizer deletion sentinel
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sentinel:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Never execute
+        run: echo "This file exists only so the stored finalizer can prove deletion."
