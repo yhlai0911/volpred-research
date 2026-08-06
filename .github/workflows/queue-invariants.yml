@@ -57,11 +57,12 @@ jobs:
       VOLPRED_NO_CANONICAL_WRITE: "1"
       VOLPRED_NO_REMOTE_READ: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v9
         with:
           enable-cache: true
+          prune-cache: true
       - name: Set up Python
         run: uv python install 3.12
       - name: Run the live-queue ratchets

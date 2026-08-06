@@ -169,7 +169,7 @@ jobs:
         postgresql://postgres:postgres@127.0.0.1:5432/volpred_ops_test
       VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The nested-DM fixed-memory gate verifies an external review receipt
           # against its exact reviewed commit. A depth-1 checkout makes that
@@ -183,7 +183,7 @@ jobs:
           echo "repository=$(jq -r '.frontends[.active_frontend].source_repository' config/project_targets.json)" >> "$GITHUB_OUTPUT"
           echo "revision=$(jq -r '.frontends[.active_frontend].source_revision' config/project_targets.json)" >> "$GITHUB_OUTPUT"
       - name: Checkout the private active frontend at its audited revision
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ steps.frontend-target.outputs.repository }}
           ref: ${{ steps.frontend-target.outputs.revision }}
@@ -204,9 +204,10 @@ jobs:
         # the runner user could not SIGKILL a surviving root dpkg descendant.
         run: sudo python3 scripts/ci_install_system_test_dependencies.py
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v9
         with:
           enable-cache: true
+          prune-cache: true
       - name: Set up Python
         run: uv python install 3.12
       - name: Stamp a sentinel before the suite runs

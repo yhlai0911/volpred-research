@@ -2,8 +2,7 @@
 
 Guards the 2026-05-16 fix where:
   * `qlike` was using `a/f + log(f)` (non-Patton, can be negative)
-  * `diebold_mariano_test` HAC loop used `range(1, h)` so h=1 (the default and
-    most common call) silently skipped HAC entirely
+  * `diebold_mariano_test` HAC loop used the wrong lag contract
   * `christoffersen_test` reassigned `alpha = p_hat` then never computed the
     joint CC LR statistic
 
@@ -43,7 +42,7 @@ def test_qlike_is_non_negative_for_any_positive_inputs():
 
 def test_qlike_two_point_analytical_value():
     """For a=[1,1], f=[2,0.5]: ratio=[0.5, 2]; loss = mean(r - log(r) - 1)
-    = mean([0.5 - log(0.5) - 1, 2 - log(2) - 1])
+    = mean([0.5 - log(0.5) - 1, 2 - log(2.0) - 1])
     = mean([-0.5 + 0.6931..., 1 - 0.6931...])
     = mean([0.1931..., 0.3069...])
     = 0.2500 (analytically)
@@ -94,14 +93,12 @@ def test_stats_qlike_pointwise_uses_actual_over_predicted_orientation():
     assert float(np.mean(under_loss)) > float(np.mean(over_loss))
 
 
-# ─── DM HAC — range(1, h+1) coverage ──────────────────────────────
+# ─── DM HAC — lags 1..h-1 coverage ────────────────────────────────
 
 
 def test_dm_test_h1_uses_only_gamma0():
-    """h=1 → range(1, 2) → exactly one lag-1 term added; gamma_0 alone is
-    a degenerate case that should NOT happen anymore."""
+    """For a one-step forecast, the standard DM HAC estimate uses gamma_0 only."""
     rng = np.random.default_rng(1)
-    # Independent losses → gamma_1 should be small but nonzero
     loss1 = rng.normal(0, 1, 300)
     loss2 = loss1 + rng.normal(0, 0.5, 300)
     result = diebold_mariano_test(loss1, loss2, h=1)
@@ -128,13 +125,24 @@ def test_dm_test_strongly_correlated_diff_increases_hac_variance():
     assert abs(r_h5["statistic"]) < abs(r_h1["statistic"])
 
 
-def test_dm_test_equal_losses_returns_zero_stat():
+def test_dm_test_equal_losses_returns_exact_tie_without_warning():
     loss = np.array([0.1] * 100)
     r = diebold_mariano_test(loss, loss, h=1)
-    # Zero diff → V = 0; current implementation will produce nan/inf —
-    # this is acceptable as long as it doesn't silently produce a false
-    # significant result. p_value should not be < 0.05 with bogus stat.
-    assert np.isnan(r["statistic"]) or r["p_value"] >= 0.05
+    assert r["statistic"] == 0.0
+    assert r["p_value"] == 1.0
+    assert r["mean_diff"] == 0.0
+    assert r["conclusion"] == "fail_to_reject"
+    assert r["better_model"] is None
+
+
+def test_dm_test_constant_nonzero_difference_is_deterministic():
+    loss1 = np.ones(100)
+    loss2 = np.zeros(100)
+    r = diebold_mariano_test(loss1, loss2, h=1)
+    assert r["statistic"] == float("inf")
+    assert r["p_value"] == 0.0
+    assert r["conclusion"] == "reject_equal"
+    assert r["better_model"] == 2
 
 
 # ─── Clark-West — nested forecast comparisons ────────────────────

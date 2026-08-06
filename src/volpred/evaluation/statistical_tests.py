@@ -16,28 +16,53 @@ def diebold_mariano_test(loss1: np.ndarray, loss2: np.ndarray, h: int = 1) -> di
     Returns:
         dict with 'statistic', 'p_value', 'conclusion' (at 5% level)
     """
-    d = loss1 - loss2
+    if h < 1:
+        raise ValueError("h must be a positive integer")
+
+    d = np.asarray(loss1, dtype=float) - np.asarray(loss2, dtype=float)
     T = len(d)
-    d_bar = np.mean(d)
+    if T < 2:
+        raise ValueError("Diebold-Mariano test requires at least two observations")
+    d_bar = float(np.mean(d))
 
     # HAC variance estimator (Newey-West style, standard DM formula).
     # For an h-step forecast, lags 1..h-1 are included. For h=1 (most common)
     # range(1, h) = range(1, 1) is intentionally empty: V = gamma_0 only.
-    gamma_0 = np.var(d, ddof=1)
+    gamma_0 = float(np.var(d, ddof=1))
     V = gamma_0
     for k in range(1, h):
-        gamma_k = np.sum((d[k:] - d_bar) * (d[:-k] - d_bar)) / T
+        gamma_k = float(np.sum((d[k:] - d_bar) * (d[:-k] - d_bar)) / T)
         V += 2 * gamma_k
 
-    dm_stat = d_bar / np.sqrt(V / T)
-    p_value = 2 * (1 - stats.norm.cdf(abs(dm_stat)))
+    # Equal (or deterministically separated) loss sequences have a zero sampling
+    # variance. Letting NumPy evaluate 0/0 used to leak NaN into reports and emit
+    # a RuntimeWarning. Handle the degenerate DM limit explicitly instead.
+    scale = max(float(np.max(np.abs(d))), abs(d_bar), 1.0)
+    tolerance = np.finfo(float).eps * (scale**2) * 100
+    if not np.isfinite(V):
+        raise ValueError("Diebold-Mariano variance estimate is not finite")
+    if V < -tolerance:
+        raise ValueError("Diebold-Mariano variance estimate is negative")
+    if abs(V) <= tolerance:
+        if abs(d_bar) <= tolerance:
+            dm_stat = 0.0
+            p_value = 1.0
+            better_model = None
+        else:
+            dm_stat = float(np.copysign(np.inf, d_bar))
+            p_value = 0.0
+            better_model = 1 if d_bar < 0 else 2
+    else:
+        dm_stat = float(d_bar / np.sqrt(V / T))
+        p_value = float(2 * stats.norm.sf(abs(dm_stat)))
+        better_model = 1 if d_bar < 0 else 2
 
     return {
-        'statistic': float(dm_stat),
-        'p_value': float(p_value),
-        'mean_diff': float(d_bar),
+        'statistic': dm_stat,
+        'p_value': p_value,
+        'mean_diff': d_bar,
         'conclusion': 'reject_equal' if p_value < 0.05 else 'fail_to_reject',
-        'better_model': 1 if d_bar < 0 else 2,  # lower loss = better
+        'better_model': better_model,  # lower loss = better; None means a tie
     }
 
 
