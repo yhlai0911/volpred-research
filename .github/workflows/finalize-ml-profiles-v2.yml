@@ -5,7 +5,7 @@ name: Finalize isolated ML profiles v2
 on:
   push:
     branches:
-      - fix/linux-cpu-ci-finalizer-20260807
+      - fix/linux-cpu-torch-20260806
     paths:
       - pyproject.toml
       - tests/test_linux_cpu_torch.py
@@ -31,10 +31,10 @@ concurrency:
 jobs:
   finalize:
     # Never grant a write-capable finalizer to any head except the named
-    # same-repository isolation branch.
+    # same-repository PR #61 branch.
     if: >-
       github.event_name != 'pull_request' ||
-      github.head_ref == 'fix/linux-cpu-ci-finalizer-20260807'
+      github.head_ref == 'fix/linux-cpu-torch-20260806'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: fix/linux-cpu-ci-finalizer-20260807
+          ref: fix/linux-cpu-torch-20260806
           fetch-depth: 1
       - uses: astral-sh/setup-uv@v9.0.0
         with:
@@ -131,4 +131,4 @@ jobs:
             uv.lock
           git diff --cached --check
           git commit -m "ci: isolate CPU ML wheels to hosted runners"
-          git push origin HEAD:fix/linux-cpu-ci-finalizer-20260807
+          git push origin HEAD:fix/linux-cpu-torch-20260806
