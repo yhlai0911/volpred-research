@@ -111,21 +111,20 @@ def _normalized_command(command: str) -> str:
 
 
 def _command_invocations(command: str, executable: str) -> list[str]:
-    """Extract simple shell invocations and reject unparseable hidden uses."""
+    """Extract direct shell commands, not quoted prose that names a command."""
     invocations: list[str] = []
-    needle = re.compile(rf"\b{re.escape(executable)}\b")
+    prefix = re.compile(
+        rf"^(?:(?:if|then|do|time|command|exec)\s+|!\s+)*"
+        rf"(?P<command>{re.escape(executable)}(?:\s+.*)?$)"
+    )
     for raw_line in command.splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
         for segment in re.split(r"\s*(?:&&|\|\||;)\s*", line):
-            segment = segment.strip()
-            if segment.startswith(f"{executable} ") or segment == executable:
-                invocations.append(_normalized_command(segment))
-            elif needle.search(segment):
-                raise AssertionError(
-                    f"cannot safely parse {executable!r} invocation: {segment!r}"
-                )
+            match = prefix.match(segment.strip())
+            if match:
+                invocations.append(_normalized_command(match.group("command")))
     return invocations
 
 
