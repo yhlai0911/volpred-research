@@ -16,11 +16,16 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
+WORKFLOWS = ROOT / ".github" / "workflows"
 CPU_INDEX = "https://download.pytorch.org/whl/cpu"
 PYPI_INDEX = "https://pypi.org/simple"
 EXPECTED_TORCH_VERSION = "2.10.0"
 EXPECTED_XGBOOST_VERSION = "3.2.0"
 EXPECTED_SB3_VERSION = "2.9.0"
+CI_SYNC_COMMAND = (
+    "uv sync --frozen --no-default-groups "
+    "--group dev --group ci-ml --extra dev"
+)
 
 
 def _read_toml(path: Path) -> dict:
@@ -104,6 +109,25 @@ def _normalized_command(command: str) -> str:
     return " ".join(command.split())
 
 
+def _command_invocations(command: str, executable: str) -> list[str]:
+    """Extract simple shell invocations and reject unparseable hidden uses."""
+    invocations: list[str] = []
+    needle = re.compile(rf"\b{re.escape(executable)}\b")
+    for raw_line in command.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        for segment in re.split(r"\s*(?:&&|\|\||;)\s*", line):
+            segment = segment.strip()
+            if segment.startswith(f"{executable} ") or segment == executable:
+                invocations.append(_normalized_command(segment))
+            elif needle.search(segment):
+                raise AssertionError(
+                    f"cannot safely parse {executable!r} invocation: {segment!r}"
+                )
+    return invocations
+
+
 def test_pyproject_separates_research_and_ci_ml_profiles() -> None:
     project = _read_toml(ROOT / "pyproject.toml")
     base_dependencies = set(project["project"]["dependencies"])
@@ -130,6 +154,7 @@ def test_pyproject_separates_research_and_ci_ml_profiles() -> None:
         f"xgboost-cpu=={EXPECTED_XGBOOST_VERSION}; sys_platform == 'linux'",
         f"xgboost=={EXPECTED_XGBOOST_VERSION}; sys_platform != 'linux'",
     }
+    assert set(optional["dev"]) >= {"packaging>=24.0", "pytest>=8.0"}
     assert groups["runtime-ml"] == ["volpred[research-ml]"]
     assert groups["ci-ml"] == ["volpred[ci-ml-cpu]"]
     assert uv["default-groups"] == ["dev", "runtime-ml"]
@@ -258,48 +283,68 @@ def test_linux_ci_profile_exports_no_accelerator_runtime() -> None:
     assert not accelerator_packages
 
 
-@pytest.mark.parametrize(
-    ("filename", "job_name", "expected_uv_runs"),
-    [
-        ("pytest.yml", "pytest", 2),
-        ("queue-invariants.yml", "real-queue", 1),
-    ],
-)
-def test_github_ci_selects_cpu_profile_without_resync(
-    filename: str,
-    job_name: str,
-    expected_uv_runs: int,
-) -> None:
-    workflow = yaml.safe_load(
-        (ROOT / ".github" / "workflows" / filename).read_text(encoding="utf-8")
-    )
-    job = workflow["jobs"][job_name]
-    assert job["env"]["VOLPRED_EXPECT_CPU_ML"] == "1"
+def test_every_project_uv_workflow_is_bound_to_the_cpu_profile() -> None:
+    covered_uv_run_jobs: set[tuple[str, str]] = set()
 
-    steps = job["steps"]
-    sync_steps = [
-        step
-        for step in steps
-        if step.get("name") == "Sync explicit Linux CPU CI profile"
-    ]
-    assert len(sync_steps) == 1
-    assert _normalized_command(sync_steps[0]["run"]) == (
-        "uv sync --frozen --no-default-groups "
-        "--group dev --group ci-ml --extra dev"
+    workflow_paths = sorted(WORKFLOWS.glob("*.yml")) + sorted(
+        WORKFLOWS.glob("*.yaml")
     )
+    assert workflow_paths, "workflow inventory unexpectedly empty"
 
-    sync_index = steps.index(sync_steps[0])
-    uv_run_steps = [
-        step
-        for step in steps
-        if str(step.get("run", "")).lstrip().startswith("uv run ")
-    ]
-    assert len(uv_run_steps) == expected_uv_runs
-    assert all(steps.index(step) > sync_index for step in uv_run_steps)
-    assert all(
-        str(step["run"]).lstrip().startswith("uv run --no-sync ")
-        for step in uv_run_steps
-    )
+    for path in workflow_paths:
+        workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
+        for job_name, job in workflow.get("jobs", {}).items():
+            steps = job.get("steps", [])
+            sync_steps: list[tuple[int, str]] = []
+            uv_run_steps: list[tuple[int, str]] = []
+
+            for index, step in enumerate(steps):
+                command = str(step.get("run", ""))
+                sync_steps.extend(
+                    (index, invocation)
+                    for invocation in _command_invocations(command, "uv sync")
+                )
+                uv_run_steps.extend(
+                    (index, invocation)
+                    for invocation in _command_invocations(command, "uv run")
+                )
+
+            if not sync_steps and not uv_run_steps:
+                continue
+
+            assert job.get("env", {}).get("VOLPRED_EXPECT_CPU_ML") == "1", (
+                f"{path.name}:{job_name} uses the project uv environment "
+                "without declaring the CPU-only CI runtime contract"
+            )
+            assert sync_steps == [
+                (
+                    next(
+                        index
+                        for index, step in enumerate(steps)
+                        if step.get("name")
+                        == "Sync explicit Linux CPU CI profile"
+                    ),
+                    CI_SYNC_COMMAND,
+                )
+            ], f"{path.name}:{job_name} must perform exactly one canonical CPU sync"
+
+            sync_index = sync_steps[0][0]
+            for run_index, invocation in uv_run_steps:
+                assert run_index > sync_index, (
+                    f"{path.name}:{job_name} runs {invocation!r} before CPU sync"
+                )
+                assert invocation.startswith("uv run --no-sync "), (
+                    f"{path.name}:{job_name} may reselect default research ML: "
+                    f"{invocation!r}"
+                )
+
+            if uv_run_steps:
+                covered_uv_run_jobs.add((path.name, job_name))
+
+    assert {
+        ("pytest.yml", "pytest"),
+        ("queue-invariants.yml", "real-queue"),
+    } <= covered_uv_run_jobs
 
 
 @pytest.mark.skipif(
