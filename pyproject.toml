@@ -17,9 +17,9 @@ dependencies = [
     "fastapi>=0.135.1",
     "uvicorn>=0.41.0",
     "scikit-learn>=1.8.0",
-    "xgboost-cpu>=3.2.0; sys_platform == 'linux'",
-    "xgboost>=3.2.0; sys_platform != 'linux'",
-    "torch>=2.10.0",
+    "xgboost-cpu==3.2.0; sys_platform == 'linux'",
+    "xgboost==3.2.0; sys_platform != 'linux'",
+    "torch==2.10.0",
     "emd>=0.8.1",
     "mgarch>=0.3.0",
     "python-multipart>=0.0.22",
@@ -62,9 +62,9 @@ packages = ["src/volpred"]
 # GitHub's Linux runners are CPU-only. PyPI's Linux torch wheel carries the CUDA
 # runtime and several gigabytes of NVIDIA packages that this project cannot use
 # in CI. Resolve only Linux from PyTorch's explicit CPU index; macOS and Windows
-# continue to use their native PyPI CPU wheels. The project dependency list uses
-# XGBoost's CPU distribution on Linux for the same reason while retaining the
-# standard xgboost distribution on macOS, where xgboost-cpu is not provided.
+# continue to use their native PyPI CPU wheels. Pin Torch and XGBoost to the same
+# public version on every platform so CI optimization cannot change research
+# behavior merely by selecting a different distribution.
 [tool.uv.sources]
 torch = [
     { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
