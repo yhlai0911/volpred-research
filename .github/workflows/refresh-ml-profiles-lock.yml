@@ -53,6 +53,16 @@ jobs:
               return text.replace(old, new, 1)
 
 
+          pyproject_path = ROOT / "pyproject.toml"
+          pyproject_text = pyproject_path.read_text(encoding="utf-8")
+          pyproject_text = replace_once(
+              pyproject_text,
+              'dev = [\n    "pytest>=8.0",\n]\n',
+              'dev = [\n    "packaging>=24.0",\n    "pytest>=8.0",\n]\n',
+              "direct test dependencies",
+          )
+          pyproject_path.write_text(pyproject_text, encoding="utf-8")
+
           pytest_path = ROOT / ".github/workflows/pytest.yml"
           pytest_text = pytest_path.read_text(encoding="utf-8")
           pytest_text = replace_once(
@@ -161,6 +171,7 @@ jobs:
               ".github/workflows/pytest.yml",
               ".github/workflows/queue-invariants.yml",
               ".github/workflows/refresh-ml-profiles-lock.yml",
+              "pyproject.toml",
               "uv.lock",
           }
           status = subprocess.check_output(
@@ -187,6 +198,7 @@ jobs:
             .github/workflows/pytest.yml \
             .github/workflows/queue-invariants.yml \
             .github/workflows/refresh-ml-profiles-lock.yml \
+            pyproject.toml \
             uv.lock
           git diff --cached --check
           git commit -m "ci: isolate CPU ML wheels to hosted runners"
