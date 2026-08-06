@@ -53,9 +53,7 @@ def _font_has_glyphs(path: str | Path, glyphs: str = CJK_GLYPH_PROBE) -> bool:
 
     try:
         charmap = FT2Font(str(path)).get_charmap()
-    except (OSError, RuntimeError, ValueError):
-        # silent-ok: an unreadable font file is a negative candidate result;
-        # no chart is rendered until another candidate passes the glyph probe.
+    except (OSError, RuntimeError, ValueError):  # silent-ok: unreadable font is not a usable candidate
         return False
     return all(ord(character) in charmap for character in glyphs)
 
@@ -71,9 +69,7 @@ def _refresh_system_fonts() -> None:
             continue
         try:
             fm.fontManager.addfont(path)
-        except (OSError, RuntimeError, ValueError):
-            # silent-ok: one malformed system font must not abort discovery;
-            # strict application still fails when no usable CJK font remains.
+        except (OSError, RuntimeError, ValueError):  # silent-ok: malformed candidate is skipped; strict mode still fails if none remain
             continue
         known.add(resolved)
 
