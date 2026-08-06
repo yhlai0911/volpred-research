@@ -1,0 +1,75 @@
+name: Refresh ML profile lock (one-shot)
+
+on:
+  push:
+    branches:
+      - fix/linux-cpu-torch-20260806
+    paths:
+      - pyproject.toml
+      - tests/test_linux_cpu_torch.py
+      - .github/workflows/refresh-ml-profiles-lock.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-ml-profiles-lock-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VOLPRED_EXPECT_CPU_ML: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/linux-cpu-torch-20260806
+          fetch-depth: 1
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+          cache-python: true
+          prune-cache: true
+      - name: Install Python
+        run: uv python install 3.12
+      - name: Resolve all mutually exclusive ML profiles
+        run: uv lock
+      - name: Verify default research profile remains accelerator-capable
+        run: |
+          set -euo pipefail
+          uv export --frozen --no-hashes --no-header --no-annotate > "$RUNNER_TEMP/research.txt"
+          grep -Fx "torch==2.10.0" "$RUNNER_TEMP/research.txt"
+          grep -Fx "xgboost==3.2.0" "$RUNNER_TEMP/research.txt"
+          grep -Fx "stable-baselines3==2.9.0" "$RUNNER_TEMP/research.txt"
+          if grep -Eq '^(torch==2\.10\.0\+cpu|xgboost-cpu==)' "$RUNNER_TEMP/research.txt"; then
+            echo "::error::default research profile unexpectedly selected CPU-only distributions"
+            exit 1
+          fi
+      - name: Sync the explicit Linux CPU CI profile
+        run: >-
+          uv sync --frozen --no-default-groups
+          --group dev --group ci-ml --extra dev
+      - name: Verify CPU profile contract and runtime
+        run: .venv/bin/python -m pytest -q tests/test_linux_cpu_torch.py
+      - name: Commit only the regenerated lockfile
+        run: |
+          set -euo pipefail
+          dirty="$(git status --short)"
+          unexpected="$(printf '%s\n' "$dirty" | grep -vE '^ M uv\.lock$' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "::error::lock refresh changed files other than uv.lock"
+            printf '%s\n' "$dirty"
+            exit 1
+          fi
+          if git diff --quiet -- uv.lock; then
+            echo "uv.lock already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add uv.lock
+          git commit -m "chore(deps): lock accelerator and CPU ML profiles"
+          git push origin HEAD:fix/linux-cpu-torch-20260806
