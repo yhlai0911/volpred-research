@@ -500,3 +500,35 @@ session 能動 `src/`）。經理明確告知內容部不需再追。
 3. 沒有再對 platform_ops 發新請求——原單已經是原樣轉交，狀態沒變，重複發等於製造雜訊。
 
 已歸檔，收件匣回到 0。本班到此按收尾契約結束。
+
+## 2026-08-06 02:03–02:04 outcome=done（batch-drain：trending_repost AI 資本支出單，arc-covered 判定 failed）
+
+收件匣 1 件 P2 canonical 派工：`trending_repost_2026_08_06_ai_資本支出`——「AI 巨頭資本支出膨脹，
+隱含波動率與權益風險溢價解構」，要求透過大型科技股選擇權隱含波動率與 SKEW 驗證市場對
+「ROI 延遲實現」的尾部風險定價。任務自帶的 `dedup_screen` 已標 `warn_theme_saturated`
+（90 天內 8 篇同主題文章，僅 advisory 不 hard block），列出 3 個 near_misses。
+
+**做 3-layer 查重，逐一核對 near_misses 加上手動補查的兩篇（dedup_screen 沒抓到）**：
+
+- `mile_e1ff7ef9`（2026-07-07）已專門用 CBOE SKEW 指數回答「選擇權市場會不會歪」——逐字對應
+  本單的 Skew 訴求。
+- `mile_0fa841ed`（2026-07-05）已用 Mag 7 選擇權鏈驗證「資本支出佔比最高的三家下跌保護是否
+  較貴」，結論是市場沒有多收保費——逐字對應本單「ROI 延遲實現的尾部風險定價」訴求。
+  **dedup_screen 的 near_misses 清單沒列這篇**，是手動核對才發現的。
+- `mile_08b69f7c`（2026-07-28）已用六家 AI 資本支出主力的選擇權鏈回答「支出跑得比營收快，
+  市場在怕什麼」——逐字對應本單「資本支出膨脹→隱含波動率」的框架。
+- `mile_f5f4cb43`（2026-06-30，同樣未列入 near_misses）涵蓋隱含波動率拐點；
+  `mile_66c3fc3b`（2026-07-10）涵蓋信用市場對照。
+
+本單要求的三個元素（implied vol／skew／ROI-delay 尾部定價）拆開看**全部各自已有專文回答過**，
+組合起來沒有新變數、沒有新資料、沒有新時間窗——是重組既有結論的關鍵詞，不是新研究角度。
+且任務描述完全沒有具體事件/日期/財報這類新聞鉤子，不像典型 trending_repost（本應由時效新聞
+驅動），比較像是主題關鍵詞被 refill pipeline 重新排列出來的單。**這是本週第 2 張同題材單被
+標 failed**（前一張 2026-08-05 的 `trending_repost_2026_08_05_ai資本支出`，經理 D41 已核准
+該次判定）。
+
+**處置**：`task_pool_claim.py complete --status failed`，result 附完整證據鏈與建議（對這個
+主題叢集加生成端冷卻期，或把 trending_repost 的 saturation 門檻收緊到 hard block）；
+已回報經理（P2，附建議，裁決權在經理，本部門不自行改 dedup 邏輯）。已歸檔，收件匣回到 0。
+
+本班到此按收尾契約結束。
