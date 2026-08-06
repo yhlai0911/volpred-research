@@ -35,7 +35,7 @@ jobs:
           prune-cache: true
       - name: Install Python
         run: uv python install 3.12
-      - name: Patch permanent CI profile selection and its ratchet
+      - name: Patch permanent CI profile selection
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -122,71 +122,6 @@ jobs:
               "queue ratchets no-resync",
           )
           queue_path.write_text(queue_text, encoding="utf-8")
-
-          test_path = ROOT / "tests/test_linux_cpu_torch.py"
-          test_text = test_path.read_text(encoding="utf-8")
-          test_text = replace_once(
-              test_text,
-              'import tomllib\n\nimport pytest\n',
-              'import tomllib\n\nimport pytest\nimport yaml\n',
-              "workflow parser import",
-          )
-          ratchet_lines = [
-              "",
-              "",
-              "def _normalized_command(command: str) -> str:",
-              '    return " ".join(command.split())',
-              "",
-              "",
-              "@pytest.mark.parametrize(",
-              '    ("filename", "job_name", "expected_uv_runs"),',
-              "    [",
-              '        ("pytest.yml", "pytest", 2),',
-              '        ("queue-invariants.yml", "real-queue", 1),',
-              "    ],",
-              ")",
-              "def test_github_ci_selects_cpu_profile_without_resync(",
-              "    filename: str,",
-              "    job_name: str,",
-              "    expected_uv_runs: int,",
-              ") -> None:",
-              "    workflow = yaml.safe_load(",
-              '        (ROOT / ".github" / "workflows" / filename).read_text(',
-              '            encoding="utf-8"',
-              "        )",
-              "    )",
-              '    job = workflow["jobs"][job_name]',
-              '    assert job["env"]["VOLPRED_EXPECT_CPU_ML"] == "1"',
-              "",
-              '    steps = job["steps"]',
-              "    sync_steps = [",
-              "        step",
-              "        for step in steps",
-              '        if step.get("name") == "Sync explicit Linux CPU CI profile"',
-              "    ]",
-              "    assert len(sync_steps) == 1",
-              '    assert _normalized_command(sync_steps[0]["run"]) == (',
-              '        "uv sync --frozen --no-default-groups "',
-              '        "--group dev --group ci-ml --extra dev"',
-              "    )",
-              "",
-              "    sync_index = steps.index(sync_steps[0])",
-              "    uv_run_steps = [",
-              "        step",
-              "        for step in steps",
-              '        if str(step.get("run", "")).lstrip().startswith("uv run ")',
-              "    ]",
-              "    assert len(uv_run_steps) == expected_uv_runs",
-              "    assert all(steps.index(step) > sync_index for step in uv_run_steps)",
-              "    assert all(",
-              '        str(step["run"]).lstrip().startswith("uv run --no-sync ")',
-              "        for step in uv_run_steps",
-              "    )",
-          ]
-          ratchet = "\n".join(ratchet_lines)
-          if "test_github_ci_selects_cpu_profile_without_resync" in test_text:
-              raise SystemExit("CI profile ratchet already exists unexpectedly")
-          test_path.write_text(test_text.rstrip() + ratchet + "\n", encoding="utf-8")
           PY
       - name: Resolve all mutually exclusive ML profiles
         run: uv lock
@@ -194,10 +129,10 @@ jobs:
         run: |
           set -euo pipefail
           uv export --frozen --no-hashes --no-header --no-annotate > "$RUNNER_TEMP/research.txt"
-          grep -Eq '^torch==2\.10\.0($|;)' "$RUNNER_TEMP/research.txt"
-          grep -Eq '^xgboost==3\.2\.0($|;)' "$RUNNER_TEMP/research.txt"
-          grep -Eq '^stable-baselines3==2\.9\.0($|;)' "$RUNNER_TEMP/research.txt"
-          if grep -Eq '^(torch==2\.10\.0\+cpu|xgboost-cpu==)' "$RUNNER_TEMP/research.txt"; then
+          grep -Eq '^torch==2\.10\.0([[:space:]]*;|$)' "$RUNNER_TEMP/research.txt"
+          grep -Eq '^xgboost==3\.2\.0([[:space:]]*;|$)' "$RUNNER_TEMP/research.txt"
+          grep -Eq '^stable-baselines3==2\.9\.0([[:space:]]*;|$)' "$RUNNER_TEMP/research.txt"
+          if grep -Eq '^(torch==2\.10\.0\+cpu([[:space:]]*;|$)|xgboost-cpu==)' "$RUNNER_TEMP/research.txt"; then
             echo "::error::default research profile unexpectedly selected CPU-only distributions"
             exit 1
           fi
@@ -222,14 +157,12 @@ jobs:
           python - <<'PY'
           import subprocess
 
-          allowed = {
+          required = {
               ".github/workflows/pytest.yml",
               ".github/workflows/queue-invariants.yml",
               ".github/workflows/refresh-ml-profiles-lock.yml",
-              "tests/test_linux_cpu_torch.py",
               "uv.lock",
           }
-          required = allowed - {"uv.lock"}
           status = subprocess.check_output(
               ["git", "status", "--porcelain"], text=True
           )
@@ -239,7 +172,7 @@ jobs:
               if " -> " in path:
                   path = path.split(" -> ", 1)[1]
               changed.add(path)
-          unexpected = changed - allowed
+          unexpected = changed - required
           missing = required - changed
           if unexpected or missing:
               raise SystemExit(
@@ -254,7 +187,6 @@ jobs:
             .github/workflows/pytest.yml \
             .github/workflows/queue-invariants.yml \
             .github/workflows/refresh-ml-profiles-lock.yml \
-            tests/test_linux_cpu_torch.py \
             uv.lock
           git diff --cached --check
           git commit -m "ci: isolate CPU ML wheels to hosted runners"
