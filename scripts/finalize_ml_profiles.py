@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Finalize the permanent research/CI ML dependency split.
 
-This file is temporary.  The one-shot workflow must delete it before committing
-its validated result.  Every replacement is exact and fail-closed so a changed
+This file is temporary. The one-shot workflow must delete it before committing
+its validated result. Every replacement is exact and fail-closed so a changed
 anchor cannot produce a plausible but partial configuration.
 """
 from __future__ import annotations
@@ -10,10 +10,12 @@ from __future__ import annotations
 from pathlib import Path
 import tomllib
 
-import yaml
-
 
 ROOT = Path(__file__).resolve().parents[1]
+CI_SYNC_COMMAND = (
+    "uv sync --frozen --no-default-groups "
+    "--group dev --group ci-ml --extra dev"
+)
 
 
 def replace_once(text: str, old: str, new: str, label: str) -> str:
@@ -156,13 +158,25 @@ def validate_static_result() -> None:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert project["tool"]["uv"]["default-groups"] == ["dev", "runtime-ml"]
 
-    for filename in ("pytest.yml", "queue-invariants.yml"):
-        workflow = yaml.safe_load(
-            (ROOT / ".github" / "workflows" / filename).read_text(
-                encoding="utf-8"
-            )
-        )
-        assert isinstance(workflow.get("jobs"), dict)
+    pytest_text = (
+        ROOT / ".github" / "workflows" / "pytest.yml"
+    ).read_text(encoding="utf-8")
+    queue_text = (
+        ROOT / ".github" / "workflows" / "queue-invariants.yml"
+    ).read_text(encoding="utf-8")
+    for label, workflow_text in (("pytest", pytest_text), ("queue", queue_text)):
+        assert 'VOLPRED_EXPECT_CPU_ML: "1"' in workflow_text, label
+        assert "Sync explicit Linux CPU CI profile" in workflow_text, label
+        assert CI_SYNC_COMMAND in " ".join(workflow_text.split()), label
+    assert "uv run --no-sync python scripts/validate_feed_audience.py" in pytest_text
+    assert (
+        'uv run --no-sync python -m pytest -q -p no:cacheprovider -m "not real_queue"'
+        in pytest_text
+    )
+    assert (
+        "uv run --no-sync python -m pytest -q -p no:cacheprovider -m real_queue"
+        in queue_text
+    )
 
     test_text = (ROOT / "tests" / "test_linux_cpu_torch.py").read_text(
         encoding="utf-8"
