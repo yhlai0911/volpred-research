@@ -1,4 +1,4 @@
-name: Refresh ML profile lock (one-shot)
+name: Finalize isolated ML profiles (one-shot)
 
 on:
   push:
@@ -14,13 +14,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: refresh-ml-profiles-lock-${{ github.ref }}
+  group: finalize-ml-profiles-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  refresh:
+  finalize:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     env:
       VOLPRED_EXPECT_CPU_ML: "1"
     steps:
@@ -35,6 +35,156 @@ jobs:
           prune-cache: true
       - name: Install Python
         run: uv python install 3.12
+      - name: Patch permanent CI profile selection and its ratchet
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+
+          ROOT = Path.cwd()
+
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(
+                      f"{label}: expected exactly one anchor, found {count}"
+                  )
+              return text.replace(old, new, 1)
+
+
+          pytest_path = ROOT / ".github/workflows/pytest.yml"
+          pytest_text = pytest_path.read_text(encoding="utf-8")
+          pytest_text = replace_once(
+              pytest_text,
+              '      VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST: "1"\n',
+              '      VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST: "1"\n'
+              '      # Only hosted CI promises the CPU-only ML environment.\n'
+              '      VOLPRED_EXPECT_CPU_ML: "1"\n',
+              "pytest CPU contract env",
+          )
+          pytest_text = replace_once(
+              pytest_text,
+              '      - name: Set up Python\n'
+              '        run: uv python install 3.12\n'
+              '      - name: Stamp a sentinel before the suite runs\n',
+              '      - name: Set up Python\n'
+              '        run: uv python install 3.12\n'
+              '      - name: Sync explicit Linux CPU CI profile\n'
+              '        run: >-\n'
+              '          uv sync --frozen --no-default-groups\n'
+              '          --group dev --group ci-ml --extra dev\n'
+              '      - name: Stamp a sentinel before the suite runs\n',
+              "pytest explicit CPU sync",
+          )
+          pytest_text = replace_once(
+              pytest_text,
+              '        run: uv run python scripts/validate_feed_audience.py\n',
+              '        run: uv run --no-sync python scripts/validate_feed_audience.py\n',
+              "pytest audience no-resync",
+          )
+          pytest_text = replace_once(
+              pytest_text,
+              '        run: uv run --extra dev python -m pytest -q -p no:cacheprovider -m "not real_queue"\n',
+              '        run: uv run --no-sync python -m pytest -q -p no:cacheprovider -m "not real_queue"\n',
+              "pytest suite no-resync",
+          )
+          pytest_path.write_text(pytest_text, encoding="utf-8")
+
+          queue_path = ROOT / ".github/workflows/queue-invariants.yml"
+          queue_text = queue_path.read_text(encoding="utf-8")
+          queue_text = replace_once(
+              queue_text,
+              '      VOLPRED_NO_REMOTE_READ: "1"\n',
+              '      VOLPRED_NO_REMOTE_READ: "1"\n'
+              '      # Keep nested uv invocations inside the explicitly synced profile.\n'
+              '      VOLPRED_EXPECT_CPU_ML: "1"\n',
+              "queue CPU contract env",
+          )
+          queue_text = replace_once(
+              queue_text,
+              '      - name: Set up Python\n'
+              '        run: uv python install 3.12\n'
+              '      - name: Run the live-queue ratchets\n',
+              '      - name: Set up Python\n'
+              '        run: uv python install 3.12\n'
+              '      - name: Sync explicit Linux CPU CI profile\n'
+              '        run: >-\n'
+              '          uv sync --frozen --no-default-groups\n'
+              '          --group dev --group ci-ml --extra dev\n'
+              '      - name: Run the live-queue ratchets\n',
+              "queue explicit CPU sync",
+          )
+          queue_text = replace_once(
+              queue_text,
+              '        run: uv run --extra dev python -m pytest -q -p no:cacheprovider -m real_queue\n',
+              '        run: uv run --no-sync python -m pytest -q -p no:cacheprovider -m real_queue\n',
+              "queue ratchets no-resync",
+          )
+          queue_path.write_text(queue_text, encoding="utf-8")
+
+          test_path = ROOT / "tests/test_linux_cpu_torch.py"
+          test_text = test_path.read_text(encoding="utf-8")
+          test_text = replace_once(
+              test_text,
+              'import tomllib\n\nimport pytest\n',
+              'import tomllib\n\nimport pytest\nimport yaml\n',
+              "workflow parser import",
+          )
+          ratchet = r'''
+
+
+def _normalized_command(command: str) -> str:
+    return " ".join(command.split())
+
+
+@pytest.mark.parametrize(
+    ("filename", "job_name", "expected_uv_runs"),
+    [
+        ("pytest.yml", "pytest", 2),
+        ("queue-invariants.yml", "real-queue", 1),
+    ],
+)
+def test_github_ci_selects_cpu_profile_without_resync(
+    filename: str,
+    job_name: str,
+    expected_uv_runs: int,
+) -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github" / "workflows" / filename).read_text(encoding="utf-8")
+    )
+    job = workflow["jobs"][job_name]
+    assert job["env"]["VOLPRED_EXPECT_CPU_ML"] == "1"
+
+    steps = job["steps"]
+    sync_steps = [
+        step
+        for step in steps
+        if step.get("name") == "Sync explicit Linux CPU CI profile"
+    ]
+    assert len(sync_steps) == 1
+    assert _normalized_command(sync_steps[0]["run"]) == (
+        "uv sync --frozen --no-default-groups "
+        "--group dev --group ci-ml --extra dev"
+    )
+
+    sync_index = steps.index(sync_steps[0])
+    uv_run_steps = [
+        step
+        for step in steps
+        if str(step.get("run", "")).lstrip().startswith("uv run ")
+    ]
+    assert len(uv_run_steps) == expected_uv_runs
+    assert all(steps.index(step) > sync_index for step in uv_run_steps)
+    assert all(
+        str(step["run"]).lstrip().startswith("uv run --no-sync ")
+        for step in uv_run_steps
+    )
+'''
+          if "test_github_ci_selects_cpu_profile_without_resync" in test_text:
+              raise SystemExit("CI profile ratchet already exists unexpectedly")
+          test_path.write_text(test_text.rstrip() + ratchet + "\n", encoding="utf-8")
+          PY
       - name: Resolve all mutually exclusive ML profiles
         run: uv lock
       - name: Verify default research profile remains accelerator-capable
@@ -52,24 +202,57 @@ jobs:
         run: >-
           uv sync --frozen --no-default-groups
           --group dev --group ci-ml --extra dev
-      - name: Verify CPU profile contract and runtime
-        run: .venv/bin/python -m pytest -q tests/test_linux_cpu_torch.py
-      - name: Commit only the regenerated lockfile
+      - name: Verify CPU runtime, workflow contracts, and source encoding
+        run: |
+          .venv/bin/python -m pytest -q \
+            tests/test_linux_cpu_torch.py \
+            tests/test_github_actions_node24.py \
+            tests/test_pytest_checkout_history.py \
+            tests/test_required_check_contexts.py
+          .venv/bin/python scripts/audit_source_encoding.py \
+            --roots tests/test_linux_cpu_torch.py
+      - name: Remove the write-enabled one-shot workflow
+        run: rm .github/workflows/refresh-ml-profiles-lock.yml
+      - name: Commit only the validated permanent changes
         run: |
           set -euo pipefail
-          dirty="$(git status --short)"
-          unexpected="$(printf '%s\n' "$dirty" | grep -vE '^ M uv\.lock$' || true)"
-          if [ -n "$unexpected" ]; then
-            echo "::error::lock refresh changed files other than uv.lock"
-            printf '%s\n' "$dirty"
-            exit 1
-          fi
-          if git diff --quiet -- uv.lock; then
-            echo "uv.lock already current"
-            exit 0
-          fi
+          python - <<'PY'
+          import subprocess
+
+          allowed = {
+              ".github/workflows/pytest.yml",
+              ".github/workflows/queue-invariants.yml",
+              ".github/workflows/refresh-ml-profiles-lock.yml",
+              "tests/test_linux_cpu_torch.py",
+              "uv.lock",
+          }
+          required = allowed - {"uv.lock"}
+          status = subprocess.check_output(
+              ["git", "status", "--porcelain"], text=True
+          )
+          changed = set()
+          for line in status.splitlines():
+              path = line[3:]
+              if " -> " in path:
+                  path = path.split(" -> ", 1)[1]
+              changed.add(path)
+          unexpected = changed - allowed
+          missing = required - changed
+          if unexpected or missing:
+              raise SystemExit(
+                  f"unexpected paths={sorted(unexpected)}; "
+                  f"missing required paths={sorted(missing)}; status={status!r}"
+              )
+          PY
+          git diff --check
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add uv.lock
-          git commit -m "chore(deps): lock accelerator and CPU ML profiles"
+          git add -A -- \
+            .github/workflows/pytest.yml \
+            .github/workflows/queue-invariants.yml \
+            .github/workflows/refresh-ml-profiles-lock.yml \
+            tests/test_linux_cpu_torch.py \
+            uv.lock
+          git diff --cached --check
+          git commit -m "ci: isolate CPU ML wheels to hosted runners"
           git push origin HEAD:fix/linux-cpu-torch-20260806
