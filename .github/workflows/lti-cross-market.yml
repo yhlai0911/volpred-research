@@ -1,0 +1,56 @@
+name: LTI cross-market particle-filter study
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/lti-cross-market-particle-filter-20260806
+    paths:
+      - research/lti_cross_market/**
+      - .github/workflows/lti-cross-market.yml
+
+permissions:
+  contents: read
+
+jobs:
+  empirical-study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install empirical-study dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pandas scipy matplotlib yfinance tabulate
+
+      - name: Materialize the versioned empirical script
+        run: |
+          base64 --decode research/lti_cross_market/run_cross_market_particle_filter.py.gz.b64 \
+            | gzip --decompress > research/lti_cross_market/run_cross_market_particle_filter.py
+          python -m py_compile research/lti_cross_market/run_cross_market_particle_filter.py
+
+      - name: Run cross-market mechanism-aware particle filter
+        env:
+          LTI_REPS: "2"
+          LTI_PARTICLES: "200"
+          LTI_MIN_OBS: "1400"
+          LTI_OUTPUT: research/lti_cross_market/results
+        run: |
+          python research/lti_cross_market/run_cross_market_particle_filter.py
+          cp research/lti_cross_market/run_cross_market_particle_filter.py \
+            research/lti_cross_market/results/
+
+      - name: Upload reproducible results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: lti-cross-market-particle-filter-results
+          path: research/lti_cross_market/results
+          if-no-files-found: error
+          retention-days: 30
