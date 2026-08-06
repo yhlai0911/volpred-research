@@ -8,7 +8,7 @@
     "diagnoses_complete_awaiting_write_access": 0,
     "last_fresh_detector_run": "2026-08-05T11:07:40Z"
   },
-  "last_run": "2026-08-06T01:46:00Z",
+  "last_run": "2026-08-06T08:11:00Z",
   "open_items": 0,
   "owned_paths_now_effective": {
     "paths": ["frontend-v2-fix/", "tests/"],
@@ -27,7 +27,8 @@
       "assign_c7c2b761／assign_e6cdb287：experiments/k1583、K1710 reaper-held 判定完成（非 reaper bug，需研究部審查），送 research request item_20260805T173612147257Z，副作用發現 check_experiment_artifacts.py 的知識條目檢查會被單純提及滿足（一併記錄轉交）",
       "orphan_namespace_reports_assets_20260805：config/orphan_namespaces.json 補第 4 個管理 namespace，commit 1912bece0",
       "msg1629 gh 唯讀 allowlist 落地，commit 6ec020458，9 條唯讀規則 + 邊界回歸測試",
-      "msg1629 部門拆分執行：52→0 件收件匣，35 張 canonical 任務 + 8 則直接通訊全數轉交 platform_ops（4 則先回覆等待中的請求者再歸檔），4 則已被後續事實取代/已完成直接歸檔記理由，回報 manager item_20260805T174610931654Z"
+      "msg1629 部門拆分執行：52→0 件收件匣，35 張 canonical 任務 + 8 則直接通訊全數轉交 platform_ops（4 則先回覆等待中的請求者再歸檔），4 則已被後續事實取代/已完成直接歸檔記理由，回報 manager item_20260805T174610931654Z",
+      "scripts/apply_paper_edits.py 落地（D41，manager item_20260806T000246193694Z）：C1-C6 全實作，commit f82e233f0，9 個新測試含真實 prg_v8 交接件 dry-run acceptance test，回報 manager 與知會論文部，未對真實 main.tex 跑 --apply（留給主線程，per D40 裁決）"
     ],
     "declined_or_deferred": [
       "ci-red-30983363179：已有 dispatch-supervisor 背景 worker 正在處理（pid 42868，fire_reason 明確指向同一 incident），本班判斷雙寫風險高於價值，主動不搶，且已隨拆分轉交 platform_ops",

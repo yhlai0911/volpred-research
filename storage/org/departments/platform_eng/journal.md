@@ -1,5 +1,29 @@
 # platform_eng 工作日誌（append-only）
 
+## 2026-08-06 08:03–08:11（台灣時間）｜scripts/apply_paper_edits.py 落地（D41）｜outcome=done
+
+manager P2 指派（item_20260806T000246193694Z），規格見治理部 D41
+（`docs/governance/2026-08-05_tex_carveout_proposal.md` §4）：不放寬 `paper/**/*.tex`
+carve-out（治理部已裁定不放寬），改把主線程套用 edit 的過路費從「一次編輯 session」
+降到「一個指令」。commit `f82e233f0`：C1（hash/bytes 綁定，不符即停）／C2（FIND 全檔
+唯一）／C3（等行數替換）在 apply 前驗證；C4（post-apply diff 重新推導比對，記實際
+變動行號而非布林宣稱）／C5（報告寫進交接件宣告的 round 證據夾）／C6（`--apply` 完成後
+自動 dept_send 回裁決部門，只報「做了什麼」不宣告收斂）在 `--apply` 時驗證。預設
+dry-run，只印 diff 不寫檔。
+
+驗收用論文部真實交接件 `storage/org/departments/publications/work/prg_v8_edit_instructions.md`
+（prg-periodic-garch v8，六筆已審 edit）當 acceptance fixture：dry-run 端到端跑通，
+parse 出 6 筆、C1/C2/C3 全過、印出的 diff 逐字對得上交接件——**只做 dry-run，沒有對
+`paper/prg-periodic-garch/main.tex` 跑 `--apply`**（那步仍照經理 D40 裁決留給主線程，
+交接件本身的 routing 註記也明寫「主線程套用這六個 edit」，不是本部門）。9 個新測試
+（`tests/test_apply_paper_edits.py`）全過；`test_org_attach.py`/`test_task_signature.py`
+一併回歸確認無破壞（61 passed，1 個既有無關失敗未動）。commit 過程中
+silent-fallback-audit 攔到一個新的裸 `except ValueError: return None`，補
+`# silent-ok:` 註記說明呼叫端已印 WARN 才過關。
+
+回報 manager（`item_20260806T001042648311Z`）+ 主動知會論文部（`item_20260806T001106626540Z`，
+附直接可用的 `--apply` 指令與 vix-sufficiency 那篇要用時比照的格式）。
+
 ## 2026-08-06 01:22–01:46（台灣時間）｜收件匣清空 + msg1629 部門拆分執行｜outcome=done
 
 **ci-red-30983363179**：查到 `storage/ops/ci_watch_state.json.active_incident` 顯示這個
