@@ -1,0 +1,86 @@
+{
+  "digest_id": "daily_digest_20260806",
+  "topic": "信用市場示警是否能作為股市波動率的早報，還是只是 VIX 的回音",
+  "source_note": "每個數字取自已發佈文章正文，可逐一回溯到各自的實驗結果檔；本檔為 digest 自身的彙整摘要，不是新實驗。",
+  "cases": [
+    {
+      "article_id": "mile_dee8e30a",
+      "experiment_id": "K1451",
+      "signal": "HYG/LQD 高收債對投資級債價差（22日變化）",
+      "step1_raw_p": 0.0254,
+      "step1_raw_coef": -1.1137,
+      "step2_vix_controlled_coef": -0.0410,
+      "step2_vix_controlled_p": 0.868,
+      "step2_min_p_after_multiple_test_correction": 0.1015,
+      "survives_step2": false
+    },
+    {
+      "article_id": "mile_f1be9128",
+      "experiment_id": "K872",
+      "signal": "高收益債利差（FRED BAMLH0A0HYM2）",
+      "step1_raw_corr_signal": 0.55,
+      "step1_raw_corr_vix": 0.71,
+      "step2_signal_vix_cross_corr": 0.77,
+      "step2_incremental_r2": 0.000266,
+      "step2_incremental_f_p": 0.067,
+      "step3_sign_flips_across_5yr_windows": true,
+      "survives_step2": false,
+      "survives_step3": false
+    },
+    {
+      "article_id": "mile_164f88ce",
+      "experiment_id": "K1529",
+      "signal": "FOMC 前後信用 ETF 壓力（HYG 相對 LQD）",
+      "n_fomc_events": 102,
+      "n_evaluable_windows": 97,
+      "step1_paired_t_p": 0.737525,
+      "step1_wilcoxon_p": 0.340171,
+      "step1_block_bootstrap_p": 0.376623,
+      "pre_fomc_oos_qlike_change_pct": -13.849,
+      "post_fomc_oos_qlike_change_pct": 5.9212,
+      "post_fomc_dm_t": -1.294,
+      "survives_step1": false
+    },
+    {
+      "article_id": "mile_0c1f9687",
+      "experiment_id": "K531",
+      "signal": "四項另類指標同台對決 VIX（含高收益債利差）",
+      "n_alt_indicators_tested": 4,
+      "n_beating_vix_oos": 0,
+      "prior_null_family_count": 5,
+      "survives_step2": false
+    },
+    {
+      "article_id": "mile_a89bdd96",
+      "experiment_id": "K1332/K1499",
+      "signal": "BDC 籃整體壓力 vs BIZD 相對 HYG 折價代理",
+      "basket_signal_survives_control": false,
+      "relative_discount_h5_t": 3.18,
+      "relative_discount_h5_p": 0.0015,
+      "relative_discount_h10_t": 2.57,
+      "relative_discount_h21_t": 1.80,
+      "survives_step2_horizon_5d_only": true,
+      "survives_step3_all_horizons": false
+    },
+    {
+      "article_id": "mile_66c3fc3b",
+      "as_of": "2026-07-09",
+      "signal": "即時對照：科技股拋售當下的信用市場反應",
+      "qqq_20d_rv_pct": 30.95,
+      "qqq_20d_rv_vs_60d_avg_pp": 8.7,
+      "hyg_20d_rv_pct": 3.31,
+      "hyg_20d_rv_vs_60d_avg_pp": -1.38,
+      "hy_oas_pct": 2.70,
+      "hy_oas_vs_60d_avg_bp": -7.5,
+      "vix_level": 15.84
+    }
+  ],
+  "summary": {
+    "total_independent_tests": 6,
+    "surviving_full_vix_control_all_horizons": 0,
+    "surviving_narrow_horizon_only": 1,
+    "sample_span_days": 140,
+    "earliest_source_date": "2026-03-18",
+    "latest_source_date": "2026-08-05"
+  }
+}

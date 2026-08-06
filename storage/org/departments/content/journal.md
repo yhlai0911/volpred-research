@@ -532,3 +532,48 @@ session 能動 `src/`）。經理明確告知內容部不需再追。
 已回報經理（P2，附建議，裁決權在經理，本部門不自行改 dedup 邏輯）。已歸檔，收件匣回到 0。
 
 本班到此按收尾契約結束。
+
+## 2026-08-06 02:04–03:20 outcome=done（batch-drain：daily_digest P1，回音測試）
+
+收件匣 1 件 P1 canonical 派工：`daily_digest_20260806`——寫一篇每日精選導讀專題策展並立即發佈。
+規格要求：時事/投資議題驅動、跨全 archive（非本週）撈 5-8 篇、具名可帶走框架當骨幹、深度對齊
+金標竿（每篇引用要用足具體數字）、內文證據圖 inline、文末懶人包另生框架合成海報、立即 published。
+
+**選題**：查了金標竿範例 `mile_4901f7bc`（AI 資本支出×VIX）才發現這正是**本班前兩張工作項剛
+判 failed 兩次的同一個主題叢集**——若拿它當本次 digest 主題會是第三次撞同一個題材。改查
+「信用市場能不能當股市波動率的預警系統」這條線：`grep` 全 archive 發現這個平台過去五個月
+（2026-03-18 至 2026-08-05）做過至少六次互相獨立的測試，包含本班自己前面兩個工作項用到的
+`mile_dee8e30a`（K1451，8/5 剛發）。跨度 140 天，遠超 14 天門檻，六篇涵蓋不同方法（迴歸控制、
+FOMC 事件研究、四指標對決、BDC 影子指標、即時市場觀察），敘事完整、無需硬湊。
+
+**命名框架「回音測試」**（單看／扣掉恐慌指數／換情境重測三步驟），貫穿六個案例逐一套用，
+案例五（BDC 折價代理）特意保留唯一部分倖存但範圍極窄的例外，避免把六個案例寫成單調的
+「全部都不行」；收尾再用 `mile_71c0d805`（風險調整報酬 +26%）點出「預警不合格≠配置沒用」，
+避免過度簡化的結論。逐案例 inline 連結原文＋內文證據圖，數字全部逐字取自各篇已發佈正文。
+
+**發佈流程踩到兩個新坑，皆已回讀確認修正**：
+
+1. **daily_digest 立即發佈需要同步渲染懶人包，不能走 draft 的非同步佇列**——`publish_draft.py`
+   直接印出明確指引（`lazypack_render.py --plan ... --out-dir ...` 產完本地圖再 retry），
+   照做後用本地路徑（`storage/drafts/assets/...`）寫入「## 懶人包圖組」，`publish_draft.py`
+   自動偵測本地圖並上傳轉 HTTPS，不需要手動呼叫上傳腳本。
+2. **`experiment_refs` 指到已有 general 文章的 K-id 會觸發 duplicate gate**（因為這些 K 本來就
+   已經各自有自己的文章）——這對 digest 是合理的**誤判**，因為 digest 本來就是要引用既有文章。
+   用 `--force-duplicate` 通過；順帶確認設定 `experiment_refs` 讓 content-vs-source audit 真的
+   跑起來並 PASS（9 claims / 1213 source values），比完全不設 refs（audit 直接 SKIPPED）更保守。
+
+**發佈後自查抓到兩個遺漏，已用 update mode 補上並回讀確認**：
+
+- `details.digest_articles`（前端側欄「本期精選」唯一資料源）frontmatter 有寫但發佈後讀回是
+  `None`——原因不明（可能是 update 路徑對嵌套陣列的 merge 行為與新建路徑不同），用
+  `--update-details-json` 補回並回讀確認 7 個 slug 全部落地。
+- 寫作時查到 K872（樣本外預測誤差、係數翻轉）與 mile_66c3fc3b（即時波動率背離）的圖片 URL，
+  但最終稿忘記實際嵌入——回讀圖片清單只有 7 張少了 3 張，補上後回讀確認共 10 張圖。
+
+**最終驗證**（發佈後即時回讀，非假設）：`mile_bba2bf8e`，status=published，audience=general
+（未被覆寫），body 7362 字元，10 張圖（7 張內文證據圖 inline 對應論證段落 + 3 張懶人包框架
+摘要海報），無 K-id 洩漏正文，無本地路徑洩漏，`details.digest_articles` 7 個 slug 齊全，
+`details.content_type=daily_digest`。`anti_ai_gate` PASS，`content-vs-source audit` PASS。
+canonical task `daily_digest_20260806` 標 succeeded 並附完整過程紀錄。
+
+本班到此按收尾契約結束。

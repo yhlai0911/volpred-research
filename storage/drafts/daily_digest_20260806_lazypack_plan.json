@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "title": "回音測試：辨認一個警訊是早報還是回音",
+  "evidence": {
+    "results": {
+      "path": "storage/drafts/daily_digest_20260806_echo_test_evidence.json",
+      "sha256": "7aabea1326f4829292203c6085454102f85c227a1173107bd62620114d01fddb",
+      "label": "六篇信用市場示警測試的彙整結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "辨認一個警訊的三個問題",
+      "alt": "說明回音測試的三個步驟與本篇彙整的測試數量",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "三步驟",
+          "body": [
+            "第一步單看：這個指標自己跟未來的市場波動，關聯強不強。",
+            "第二步扣掉大盤已經知道的：把恐慌指數當對照組拿掉，還剩多少解釋力。",
+            "第三步換情境重測：換一次事件、資產或天期，結論還一樣嗎。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "獨立測試次數",
+          "value": {"source": "results", "path": "summary.total_independent_tests", "format": {"kind": "integer", "suffix": " 次"}}
+        },
+        {
+          "kind": "metric",
+          "label": "樣本橫跨天數",
+          "value": {"source": "results", "path": "summary.sample_span_days", "format": {"kind": "integer", "suffix": " 天"}}
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "六次測試，只有一次撐過第二步",
+      "alt": "呈現六次測試中通過完整檢驗與部分通過的數量對照",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "扣掉恐慌指數後仍全期程存活",
+          "value": {"source": "results", "path": "summary.surviving_full_vix_control_all_horizons", "format": {"kind": "integer", "suffix": " 次"}}
+        },
+        {
+          "kind": "metric",
+          "label": "僅在最短期程部分存活",
+          "value": {"source": "results", "path": "summary.surviving_narrow_horizon_only", "format": {"kind": "integer", "suffix": " 次"}}
+        },
+        {
+          "kind": "metric",
+          "label": "最新一次測試：控制前機率值",
+          "value": {"source": "results", "path": "cases.0.step1_raw_p", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "最新一次測試：控制後機率值",
+          "value": {"source": "results", "path": "cases.0.step2_vix_controlled_p", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這四個數字",
+          "body": [
+            "六次裡五次一扣掉恐慌指數就垮，唯一撐住的一次只撐到最短的一週天期。",
+            "最新一次的機率值從過關直接掉到接近完全無關。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "帶走的問題，不是帶走的答案",
+      "alt": "說明這套檢查法適用於任何號稱能提早示警的新指標",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "能帶走的一句話",
+          "body": [
+            "下次聽到某個指標開始示警，先問這三個問題，再決定要不要當真。",
+            "撐得住三步是早報，垮在任何一步都可能只是恐慌指數的回音。"
+          ]
+        }
+      ]
+    }
+  ]
+}
