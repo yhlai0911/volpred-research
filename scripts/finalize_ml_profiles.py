@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Second commit after workflow registration: intentionally triggers the one-shot.
 """Finalize the permanent research/CI ML dependency split.
 
 This file is temporary. The one-shot workflow must delete it before committing
