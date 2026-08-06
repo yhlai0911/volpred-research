@@ -97,7 +97,7 @@ jobs:
               queue_text,
               '      VOLPRED_NO_REMOTE_READ: "1"\n',
               '      VOLPRED_NO_REMOTE_READ: "1"\n'
-              '      # Keep nested uv invocations inside the explicitly synced profile.\n'
+              '      # This job explicitly promises the CPU-only ML runtime.\n'
               '      VOLPRED_EXPECT_CPU_ML: "1"\n',
               "queue CPU contract env",
           )
@@ -131,56 +131,59 @@ jobs:
               'import tomllib\n\nimport pytest\nimport yaml\n',
               "workflow parser import",
           )
-          ratchet = r'''
-
-
-def _normalized_command(command: str) -> str:
-    return " ".join(command.split())
-
-
-@pytest.mark.parametrize(
-    ("filename", "job_name", "expected_uv_runs"),
-    [
-        ("pytest.yml", "pytest", 2),
-        ("queue-invariants.yml", "real-queue", 1),
-    ],
-)
-def test_github_ci_selects_cpu_profile_without_resync(
-    filename: str,
-    job_name: str,
-    expected_uv_runs: int,
-) -> None:
-    workflow = yaml.safe_load(
-        (ROOT / ".github" / "workflows" / filename).read_text(encoding="utf-8")
-    )
-    job = workflow["jobs"][job_name]
-    assert job["env"]["VOLPRED_EXPECT_CPU_ML"] == "1"
-
-    steps = job["steps"]
-    sync_steps = [
-        step
-        for step in steps
-        if step.get("name") == "Sync explicit Linux CPU CI profile"
-    ]
-    assert len(sync_steps) == 1
-    assert _normalized_command(sync_steps[0]["run"]) == (
-        "uv sync --frozen --no-default-groups "
-        "--group dev --group ci-ml --extra dev"
-    )
-
-    sync_index = steps.index(sync_steps[0])
-    uv_run_steps = [
-        step
-        for step in steps
-        if str(step.get("run", "")).lstrip().startswith("uv run ")
-    ]
-    assert len(uv_run_steps) == expected_uv_runs
-    assert all(steps.index(step) > sync_index for step in uv_run_steps)
-    assert all(
-        str(step["run"]).lstrip().startswith("uv run --no-sync ")
-        for step in uv_run_steps
-    )
-'''
+          ratchet_lines = [
+              "",
+              "",
+              "def _normalized_command(command: str) -> str:",
+              '    return " ".join(command.split())',
+              "",
+              "",
+              "@pytest.mark.parametrize(",
+              '    ("filename", "job_name", "expected_uv_runs"),',
+              "    [",
+              '        ("pytest.yml", "pytest", 2),',
+              '        ("queue-invariants.yml", "real-queue", 1),',
+              "    ],",
+              ")",
+              "def test_github_ci_selects_cpu_profile_without_resync(",
+              "    filename: str,",
+              "    job_name: str,",
+              "    expected_uv_runs: int,",
+              ") -> None:",
+              "    workflow = yaml.safe_load(",
+              '        (ROOT / ".github" / "workflows" / filename).read_text(',
+              '            encoding="utf-8"',
+              "        )",
+              "    )",
+              '    job = workflow["jobs"][job_name]',
+              '    assert job["env"]["VOLPRED_EXPECT_CPU_ML"] == "1"',
+              "",
+              '    steps = job["steps"]',
+              "    sync_steps = [",
+              "        step",
+              "        for step in steps",
+              '        if step.get("name") == "Sync explicit Linux CPU CI profile"',
+              "    ]",
+              "    assert len(sync_steps) == 1",
+              '    assert _normalized_command(sync_steps[0]["run"]) == (',
+              '        "uv sync --frozen --no-default-groups "',
+              '        "--group dev --group ci-ml --extra dev"',
+              "    )",
+              "",
+              "    sync_index = steps.index(sync_steps[0])",
+              "    uv_run_steps = [",
+              "        step",
+              "        for step in steps",
+              '        if str(step.get("run", "")).lstrip().startswith("uv run ")',
+              "    ]",
+              "    assert len(uv_run_steps) == expected_uv_runs",
+              "    assert all(steps.index(step) > sync_index for step in uv_run_steps)",
+              "    assert all(",
+              '        str(step["run"]).lstrip().startswith("uv run --no-sync ")',
+              "        for step in uv_run_steps",
+              "    )",
+          ]
+          ratchet = "\n".join(ratchet_lines)
           if "test_github_ci_selects_cpu_profile_without_resync" in test_text:
               raise SystemExit("CI profile ratchet already exists unexpectedly")
           test_path.write_text(test_text.rstrip() + ratchet + "\n", encoding="utf-8")
