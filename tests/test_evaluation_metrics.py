@@ -145,6 +145,19 @@ def test_dm_test_constant_nonzero_difference_is_deterministic():
     assert r["better_model"] == 2
 
 
+def test_dm_test_small_magnitude_nonconstant_losses_are_not_misclassified():
+    """A valid tiny variance is still stochastic; absolute epsilon is not a gate."""
+    pattern = np.array([1.0, 2.0, 1.5, 3.0, 2.5]) * 1e-10
+    loss1 = np.tile(pattern, 40)
+    loss2 = np.zeros_like(loss1)
+
+    r = diebold_mariano_test(loss1, loss2, h=1)
+
+    assert np.isfinite(r["statistic"])
+    assert r["statistic"] > 0
+    assert r["better_model"] == 2
+
+
 # ─── Clark-West — nested forecast comparisons ────────────────────
 
 
