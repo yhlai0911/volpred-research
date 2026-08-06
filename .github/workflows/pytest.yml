@@ -204,7 +204,7 @@ jobs:
         # the runner user could not SIGKILL a surviving root dpkg descendant.
         run: sudo python3 scripts/ci_install_system_test_dependencies.py
       - name: Install uv
-        uses: astral-sh/setup-uv@v9
+        uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
           prune-cache: true
