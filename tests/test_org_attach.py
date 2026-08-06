@@ -137,13 +137,24 @@ def test_manager_is_attached_by_default(org_root: Path, monkeypatch, capsys) -> 
     monkeypatch.setenv("HERDR_ENV", "1")
     monkeypatch.setattr(attach, "HERDR", sys.executable)
     monkeypatch.setattr(attach, "live_agents", lambda: {})
+    routed: list[str] = []
+
+    def route(task_type: str) -> tuple[str, str]:
+        routed.append(task_type)
+        return "opus", "high"
+
+    monkeypatch.setattr(attach, "pick_model", route)
 
     args = attach.build_parser().parse_args(["--root", str(org_root), "attach", "--dry-run"])
     assert args.func(args) == 0
 
     out = capsys.readouterr().out
     assert "manager" in out
-    assert "opus/high" in out, "manager routing must come from model_router, not a literal"
+    assert "opus/high" in out
+    assert routed == [attach.MANAGER_TASK_TYPE], (
+        "manager routing must come from model_router, not a literal or the "
+        "ambient token-conservation overlay"
+    )
 
 
 def test_attach_dry_run_touches_no_herdr(org_root: Path, monkeypatch, capsys) -> None:

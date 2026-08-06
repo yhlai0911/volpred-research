@@ -2890,7 +2890,16 @@ def audit_control_gates(
             "allowed_actions": list(REVIEW_ACTIONS),
         }
         gate_verdicts.append(verdict)
-        if materialize_reviews and due:
+        # A due decision is not actionable when any required evidence source is
+        # unhealthy.  Missing or malformed inputs mean "unknown", not zero
+        # observations; materializing a PDCA review in that state fabricates a
+        # clean review window and can flood the canonical task pool.  The
+        # audit-health breach remains visible below, while actuation fails
+        # closed until the evidence graph is readable again.
+        gate_sources_healthy = all(
+            source.get("ok") is True for source in source_health
+        )
+        if materialize_reviews and due and gate_sources_healthy:
             stored, created = _materialize_review_task(
                 gate,
                 verdict,

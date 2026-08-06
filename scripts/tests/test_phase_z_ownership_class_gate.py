@@ -34,7 +34,12 @@ DECISION_DOC = "docs/governance/2026-07/phase_z_ownership_external_review.md"
 KNOWN_PROVENANCE_GUESSES = frozenset({"_adopt_orphan_halves"})
 
 # Directories whose contents the reaper may adopt on directory membership alone.
-KNOWN_ADOPTABLE_NAMESPACES = frozenset({"drafts", "experiments", "paper"})
+# reports_assets is deliberate: published feed entries already reference these
+# chart bytes, and the namespace row supplies the same generic content/size gates
+# as the other managed outputs without adding another provenance recognizer.
+KNOWN_ADOPTABLE_NAMESPACES = frozenset(
+    {"drafts", "experiments", "paper", "reports_assets"}
+)
 
 # The symbol D2 will introduce: an immutable ref that stuck foreign bytes are
 # checkpointed to. Pinned by name so the xfail below flips on the real landing,
