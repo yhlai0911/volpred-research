@@ -30,21 +30,34 @@ def diebold_mariano_test(loss1: np.ndarray, loss2: np.ndarray, h: int = 1) -> di
     # range(1, h) = range(1, 1) is intentionally empty: V = gamma_0 only.
     gamma_0 = float(np.var(d, ddof=1))
     V = gamma_0
+    variance_scale = abs(gamma_0)
     for k in range(1, h):
         gamma_k = float(np.sum((d[k:] - d_bar) * (d[:-k] - d_bar)) / T)
-        V += 2 * gamma_k
+        contribution = 2 * gamma_k
+        V += contribution
+        variance_scale += abs(contribution)
 
     # Equal (or deterministically separated) loss sequences have a zero sampling
     # variance. Letting NumPy evaluate 0/0 used to leak NaN into reports and emit
     # a RuntimeWarning. Handle the degenerate DM limit explicitly instead.
-    scale = max(float(np.max(np.abs(d))), abs(d_bar), 1.0)
-    tolerance = np.finfo(float).eps * (scale**2) * 100
+    #
+    # Mean differences and variances use different units, so they require
+    # separate scale-aware tolerances. In particular, never floor the variance
+    # scale at 1.0: that would misclassify valid small-magnitude loss series as
+    # deterministic merely because their variance is below machine epsilon in
+    # absolute, rather than relative, terms.
     if not np.isfinite(V):
         raise ValueError("Diebold-Mariano variance estimate is not finite")
-    if V < -tolerance:
+    tiny = np.finfo(float).tiny
+    eps = np.finfo(float).eps
+    variance_tolerance = eps * max(variance_scale, tiny) * 100
+    difference_scale = max(float(np.max(np.abs(d))), abs(d_bar), tiny)
+    mean_tolerance = eps * difference_scale * 100
+
+    if V < -variance_tolerance:
         raise ValueError("Diebold-Mariano variance estimate is negative")
-    if abs(V) <= tolerance:
-        if abs(d_bar) <= tolerance:
+    if abs(V) <= variance_tolerance:
+        if abs(d_bar) <= mean_tolerance:
             dm_stat = 0.0
             p_value = 1.0
             better_model = None
