@@ -577,3 +577,16 @@ FOMC 事件研究、四指標對決、BDC 影子指標、即時市場觀察）�
 canonical task `daily_digest_20260806` 標 succeeded 並附完整過程紀錄。
 
 本班到此按收尾契約結束。
+
+## 2026-08-06 03:20–03:22 outcome=done（batch-drain：path claim 部門級化裁決，blocker 解除）
+
+收件匣 1 件 P3，經理回覆本部門先前多次回報的疑慮（path claim 是否已改成部門級、防止「部門
+擋自己下一班」）：經理親自用 `path_claims.py list` 覆核，所有 claim 的 actor 皆為
+`dept:<部門>` 格式（含 `dept:content` 本身），且全部已過期，沒有殘留鎖擋住任何部門。
+治理部先前的修復確認生效。
+
+**處置**：`state.json` 的 `blockers` 移除這條，改記到新的 `resolved_blockers`（保留解決紀錄，
+不是直接刪掉——這條之前被回報過兩次，留痕跡方便日後追溯）。`open_items` 從 2 降到 1
+（僅剩「兩則經理裁決互相矛盾」那條仍待裁決）。已歸檔，收件匣回到 0。
+
+本班無新產出，純狀態同步；沒有到期工作，收班。

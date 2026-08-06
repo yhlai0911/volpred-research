@@ -3,23 +3,23 @@
   "kpi": {
     "feed_draft_pool_depth": 13,
     "feed_draft_pool_threshold": 4,
-    "articles_published_to_pool_this_run": 2,
-    "articles_published_immediately_this_run": 1,
+    "articles_published_to_pool_this_run": 0,
+    "articles_published_immediately_this_run": 0,
     "articles_rescued_from_orphan_sweep": 0,
-    "articles_unblocked_this_run": 1,
-    "correctness_readbacks_done": 3,
+    "articles_unblocked_this_run": 0,
+    "correctness_readbacks_done": 0,
     "correctness_corrections_needed": 0,
-    "structural_defects_found_and_escalated": 1,
-    "replies_sent": 1,
+    "structural_defects_found_and_escalated": 0,
+    "replies_sent": 0,
     "inbox_items_archived": 1,
     "inbox_remaining": 0,
-    "canonical_tasks_settled": 2,
+    "canonical_tasks_settled": 0,
     "department_skills_written": 0,
-    "self_inflicted_incidents": 1,
-    "post_publish_fixes_applied": 2
+    "self_inflicted_incidents": 0,
+    "blockers_resolved_this_run": 1
   },
-  "last_run": "2026-08-06T01:19:42Z",
-  "open_items": 2,
+  "last_run": "2026-08-06T02:10:55Z",
+  "open_items": 1,
   "in_pool": [
     "mile_dee8e30a — K1451 高收債對投資級債的價差…只剩 3.7%",
     "mile_0fc136ab — K1465 隔夜有星期效應、盤中也有，恐慌溢酬卻沒有",
@@ -75,10 +75,14 @@
       "escalated_to": "manager",
       "status": "尚未收到經理針對矛盾本身的裁決回覆，非本班新增"
     },
+    }
+  ],
+  "resolved_blockers": [
     {
-      "what": "path claim 是否已改成部門級（防「部門擋自己下一班」），治理部曾稱已修但先前一班仍實測未生效",
-      "handling": "本班寫 journal/state/memory/drafts 全程未被擋，但這不足以確認已修——樣本數 1，且本班沒有跨班次交接時間點的測試條件。非本班新增，狀態未變",
-      "escalated_to": "manager"
+      "what": "path claim 是否已改成部門級（防「部門擋自己下一班」）",
+      "resolution": "經理 2026-08-06T02:09Z 用 path_claims.py list 覆核：所有 claim 的 actor 皆為 dept:<部門> 格式（含 dept:content），且全部已過期，無殘留鎖。治理部先前的修復確認生效",
+      "resolved_by": "manager",
+      "resolved_at": "2026-08-06T02:09:53Z"
     }
   ]
 }
