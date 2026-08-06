@@ -16,6 +16,7 @@ EXPECTED_BUSINESS_LAUNCHERS = {
     "scripts/dispatch_supervisor/worker.py",
     "scripts/gen_lazypack_agy.py",
     "scripts/gen_lazypack_codex.py",
+    "scripts/org/manager_run.py",
     "scripts/run_agent_job.py",
     "scripts/scan_trending_agy.py",
     "src/volpred/ops/execution_brief.py",
