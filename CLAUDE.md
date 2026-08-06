@@ -201,6 +201,23 @@
 <!-- 本區由 scripts/sync_governance.py 從 config/governance_shared.md 生成。請改 canonical 來源，不要直接改這裡。 -->
 ## Token / Context 紀律
 
+### 額度緊縮的常設分層（老闆 2026-08-05 指令，不是一次性處置）
+
+額度訊號看 **`/usage`**（All models 週用量 %）。`storage/reports/token_usage/daily_*.json` 的
+billable 計數是**使用報告與成本歸屬**用的，單位不同，**不能拿來回答「還剩多少」**——兩個
+儀表兩個工作。平常就要做**逐角色／逐 task_type 的用量分析**，緊縮當下才知道該砍哪裡；
+沒有分析就降檔＝憑印象砍。
+
+緊縮時一律照這個順序，不必每次重想（機械 owner＝`config/token_conservation.json` ＋
+`scripts/model_router.py::pick_model`，帶 `expires_at` 自動失效，避免臨時降檔變永久降級）：
+
+1. **絕不砍**：每日必做 —— 文章撰寫、資料蒐集、發文、boss 回覆
+2. **降檔**：ops／治理／審查／查詢（checklist 型，sonnet 足夠）
+3. **暫緩**：論文寫作與修改（無時效性；**暫緩不是降檔**——用降檔模型改論文比晚幾天改更糟）
+4. **完全不受限**：**不耗 token 的程式運算**（compute queue、回測、模擬、資料抓取）。
+   那是 CPU 不是 token，暫停它只損失研究進度、省不到額度。只有「需要 LLM 判讀結果」
+   那一段才受上面三條管。
+
 
 - **Session 開頭運營定位一律 `uv run python scripts/ops_snapshot.py`**（backbone / queue / pool / alerts / git 一份 JSON，0.4s）— 不用零散 ls / git status / jq 翻抽屜重建狀態（2026-07-14 WS1b：repo-navigation bash 曾佔一週 10.1M tokens）。
 - **禁止整檔讀取** `storage/reports/feed.json`；用 `grep`、`jq`、單篇 `storage/reports/<id>.json`。〔Bash 側 L1 機械 deny：`cat/less/more feed.json·knowledge.json` 由 `.claude/hooks/pretooluse-bash-optimizer.sh` 攔截；內建 Read 側由 `scripts/hooks/read_context_budget.py` 自動 bound（非 deny）。細則唯一 owner = `.claude/rules/context-hygiene.md`〕
@@ -312,7 +329,8 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 ## 自動化與控制面
 
 
-**核心 dispatch 規則（inline 保留；2026-07-21 lane 重構後）**：
+**核心 dispatch 規則**（2026-08-05 起：「誰派工」看上面的組織層那節；這裡是**任務池本身**
+的規則，對經理的 `queue_dispatch` 與 supervisor lane 同樣成立）：
 - **選擇順序機械化**（唯一 owner = `task_urgency` + `continue_task_dispatch` lane 排序）：老闆急件（boss 來源）FIFO 永遠第一 → 時效性任務（看 task_type 不看數字）→ 其餘 P2/P3 + 餓死保護 + 輪替。餓死保護只在剩餘 slots 運作，不可能逐出 lane head。
 - **系統來源禁自封 P1**：入池 gateway 機械夾到 P2（`clamp_machine_priority_inflation`）。P1 只屬於老闆急件與時效任務；手動建時效任務仍寫 `priority: 1`（時效性 / 即時性研究與發文一律 P1，老闆 2026-07-12）。
 - **一班 batch-drain 多任務**（老闆 2026-07-21 硬性指令）：完成一張後預算 ≥12 分鐘就接下一張，收班條件僅「無任務」或「不足以完整收尾一張」；批次單位是完整任務，做一半丟下一班照樣禁止。
