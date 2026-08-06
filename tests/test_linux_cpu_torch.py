@@ -224,18 +224,36 @@ def test_lock_keeps_cpu_and_accelerator_profiles_version_aligned() -> None:
     }
 
 
-def test_default_profile_exports_accelerator_capable_research_distributions() -> None:
-    names, lines = _exported_requirements()
+def test_default_profile_exports_linux_accelerator_research_stack() -> None:
+    _, lines = _exported_requirements()
+    linux_lines = _active_requirement_lines(lines, sys_platform="linux")
+    linux_names = {_requirement_name(line) for line in linux_lines}
 
-    assert any(line.startswith(f"torch=={EXPECTED_TORCH_VERSION}") for line in lines)
-    assert not any(
-        line.startswith(f"torch=={EXPECTED_TORCH_VERSION}+cpu") for line in lines
-    )
-    assert any(line.startswith(f"xgboost=={EXPECTED_XGBOOST_VERSION}") for line in lines)
     assert any(
-        line.startswith(f"stable-baselines3=={EXPECTED_SB3_VERSION}") for line in lines
+        re.match(
+            rf"^torch=={re.escape(EXPECTED_TORCH_VERSION)}(?:\s*;|$)",
+            line,
+        )
+        for line in linux_lines
     )
-    assert "xgboost-cpu" not in names
+    assert not any(
+        line.startswith(f"torch=={EXPECTED_TORCH_VERSION}+cpu")
+        for line in linux_lines
+    )
+    assert any(
+        line.startswith(f"xgboost=={EXPECTED_XGBOOST_VERSION}")
+        for line in linux_lines
+    )
+    assert any(
+        line.startswith(f"stable-baselines3=={EXPECTED_SB3_VERSION}")
+        for line in linux_lines
+    )
+    assert "xgboost" in linux_names
+    assert "xgboost-cpu" not in linux_names
+    assert any(
+        name.startswith("nvidia-") or name in {"cuda-bindings", "triton"}
+        for name in linux_names
+    ), "standard Linux research profile lost its accelerator runtime"
 
 
 @pytest.mark.skipif(sys.platform != "linux", reason="Linux CI profile export")
