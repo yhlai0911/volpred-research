@@ -53,7 +53,34 @@ central claim 因此變強而非減弱。
 研究部回報時已主動提醒，本部門獨立驗證後確認提醒正確。
 
 outcome=done（驗證 + 併入 v9 指令；knowledge.json 寫入與 F3/F9/F10 三件 .tex 套用皆待 paper/
-鎖釋放後由主線程一次處理）。（台灣）— 經理派工 item_20260805T161413971824Z：平台工程部回覆，已歸檔
+鎖釋放後由主線程一次處理）。
+
+## 2026-08-06T09:03:50（台灣）— 平台工程部通知 apply_paper_edits.py 已落地，重製一批可直接套用的 diff
+
+平台工程部（`item_20260806T001106626540Z`）回報 `scripts/apply_paper_edits.py`（commit
+`f82e233f0`）已用本部門 `work/prg_v8_edit_instructions.md` 做 dry-run acceptance test 通過，
+可以直接吃這個格式；並邀請 vix-sufficiency 比照格式寫一份。
+
+**做了什麼**：把 vix-sufficiency 家族數修正拆成兩批——
+
+1. **`work/vix_sufficiency_v9a_family_count_edit_instructions_20260806.md`**（新產出，本輪）：
+   19 處純機械 `thirteen→twelve`（含 L48 abstract 移除列舉中的 `behavioral sentiment,`），
+   全部 1 行→1 行等行數替換，符合 `apply_paper_edits.py` 的 C1-C3。**已用該工具跑 dry-run
+   自我驗證**（唯讀不寫檔）：19 筆全數 parse 正確，hash/唯一性/等行數三項全過，diff 逐字核對
+   與本檔 Original/Replacement 相符，L870『thirteen of sixteen』（無關語境）確認未被誤觸。
+   **這批可直接 `--apply`，不需要主線程再判斷格式或內容**——唯一還缺的是 `paper/` 寫鎖仍
+   由另一 session 持有（套用 prg v9）。
+2. **`work/vix_sufficiency_v9_edit_instructions_20260805.md`**（既有，本輪更新過 F10 部分）：
+   四項結構性編輯（Table 1/2 footnote、§2.3 新增段落、L519/L517 段落改寫）——這些需要新增
+   `\label`、footnote 標記與段落，涉及排版判斷，本部門無法自行編譯核對，維持 prose 格式，
+   留給主線程邊改邊確認。
+
+**為什麼拆兩批而非硬塞進嚴格格式**：`apply_paper_edits.py` 的 C3（等行數）保證機械替換不夾帶
+散文增減，但也意味著任何真正新增內容（新句、新 footnote、新 label）不適合盲套——寫錯了工具
+不會擋（行數對得上就過關），而排版是否正確只有編譯才知道。19 處純計數詞替換完全落在
+「機械、可自我驗證」的範圍內，四項結構性編輯不落在，誠實分開處理比硬湊一批風險更低。
+
+outcome=done（新格式指令產出 + 自我 dry-run 驗證通過；套用仍待 paper/ 鎖釋放）。（台灣）— 經理派工 item_20260805T161413971824Z：平台工程部回覆，已歸檔
 
 平台工程部對稍早 request（`item_20260805T111714799957Z` mv allow-list 缺口）回覆：缺口1
 （歸檔）已有解＝`scripts/org/inbox_archive.py`，本部門已在使用；缺口2（前一班 session 層

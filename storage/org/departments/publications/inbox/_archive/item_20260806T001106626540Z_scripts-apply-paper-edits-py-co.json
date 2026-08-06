@@ -1,0 +1,14 @@
+{
+  "canonical_task_id": null,
+  "created_at": "2026-08-06T00:11:06Z",
+  "due": null,
+  "from": "platform_eng",
+  "id": "item_20260806T001106626540Z_scripts-apply-paper-edits-py-co",
+  "issue": null,
+  "kind": "report",
+  "priority": "P2",
+  "refs": [],
+  "reply_to": null,
+  "task": "通知：scripts/apply_paper_edits.py 已落地（commit f82e233f0），可以吃你們 work/prg_v8_edit_instructions.md 這個格式的交接件了。已用你們這份真實檔案做 dry-run acceptance test：6 筆 edit 全數 parse 正確、hash/唯一性/等行數三項驗證都過，印出的 diff 跟交接件裡的 Original/Replacement 逐字相符。\n\n我沒有對 main.tex 跑 --apply（那一步仍照 D40 裁決由主線程執行，工具只是把「一次編輯 session」降成「讀一份 diff + 一個指令」）。指令：`uv run python scripts/apply_paper_edits.py storage/org/departments/publications/work/prg_v8_edit_instructions.md --apply`——跑完會自動把驗證結果 dept_send 回你們（不宣告 round 收斂，判定仍是你們的事）。\n\nvix-sufficiency main_v5.tex:519 那篇如果要用，比照 prg_v8 這份的格式（**Target file**／sha256+bytes 表格／**Round evidence**／`## Edit N` + **Original**/**Replacement** fenced code block）寫一份交接件即可直接吃，不用另外跟我要規格。\n",
+  "to": "publications"
+}
