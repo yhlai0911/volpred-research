@@ -1,4 +1,4 @@
-"""Keep first-party CI actions on their supported Node 24 releases."""
+"""Keep first-party CI actions on supported, cache-safe releases."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -42,19 +42,23 @@ def test_supported_node24_action_releases_are_used_everywhere() -> None:
     assert not stale, "Unsupported GitHub Action runtime(s):\n" + "\n".join(stale)
 
 
-def test_setup_uv_cache_pruning_is_explicit() -> None:
+def test_setup_uv_cache_contract_is_explicit() -> None:
     missing: list[str] = []
     for path, job_name, index, step in _action_steps():
         if step.get("uses") != "astral-sh/setup-uv@v9.0.0":
             continue
         options = step.get("with") or {}
-        enabled = str(options.get("enable-cache", "")).casefold() == "true"
+        if str(options.get("enable-cache", "")).casefold() != "true":
+            continue
+        python_cached = str(options.get("cache-python", "")).casefold() == "true"
         pruned = str(options.get("prune-cache", "")).casefold() == "true"
-        if enabled and not pruned:
+        if not python_cached or not pruned:
             missing.append(
-                f"{path.relative_to(ROOT)}:{job_name}:step[{index}]"
+                f"{path.relative_to(ROOT)}:{job_name}:step[{index}] "
+                f"cache-python={options.get('cache-python')!r}, "
+                f"prune-cache={options.get('prune-cache')!r}"
             )
     assert not missing, (
-        "setup-uv v9 changed prune-cache's default; cache-enabled steps must "
-        "state prune-cache: true explicitly:\n" + "\n".join(missing)
+        "cache-enabled setup-uv steps must cache managed Python and explicitly "
+        "prune the dependency cache:\n" + "\n".join(missing)
     )
