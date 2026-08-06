@@ -81,11 +81,11 @@ jobs:
             tests/test_write_claim_guard.py \
             scripts/tests/test_phase_z_ownership_class_gate.py::test_orphan_namespaces_stays_a_declaration_not_a_recognizer_zoo
 
-      - name: Run Ruff on the repaired surface
+      - name: Run isolated Ruff correctness checks on the repaired surface
         shell: bash
         run: |
           set -euo pipefail
-          uvx ruff check \
+          uvx ruff check --isolated \
             scripts/org/manager_run.py \
             src/volpred/ops/execution/registry.py \
             tests/test_provider_spawn_audit.py \
