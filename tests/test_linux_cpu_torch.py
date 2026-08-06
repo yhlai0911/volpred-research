@@ -9,7 +9,10 @@ import subprocess
 import sys
 import tomllib
 
+from packaging.markers import default_environment
+from packaging.requirements import Requirement
 import pytest
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,6 +64,44 @@ def _exported_requirements(*args: str) -> tuple[set[str], list[str]]:
             continue
         names.add(_requirement_name(line))
     return names, lines
+
+
+def _active_requirement_lines(lines: list[str], *, sys_platform: str) -> list[str]:
+    """Evaluate universal-export markers for one concrete target platform."""
+    environment = default_environment()
+    if sys_platform == "linux":
+        environment.update(
+            {
+                "sys_platform": "linux",
+                "os_name": "posix",
+                "platform_system": "Linux",
+                "platform_machine": "x86_64",
+            }
+        )
+    elif sys_platform == "win32":
+        environment.update(
+            {
+                "sys_platform": "win32",
+                "os_name": "nt",
+                "platform_system": "Windows",
+                "platform_machine": "AMD64",
+            }
+        )
+    else:
+        raise ValueError(f"unsupported test platform: {sys_platform}")
+
+    active: list[str] = []
+    for line in lines:
+        if line.startswith(("#", "--", ".", "-e ")):
+            continue
+        requirement = Requirement(line)
+        if requirement.marker is None or requirement.marker.evaluate(environment):
+            active.append(line)
+    return active
+
+
+def _normalized_command(command: str) -> str:
+    return " ".join(command.split())
 
 
 def test_pyproject_separates_research_and_ci_ml_profiles() -> None:
@@ -174,7 +215,7 @@ def test_default_profile_exports_accelerator_capable_research_distributions() ->
 
 @pytest.mark.skipif(sys.platform != "linux", reason="Linux CI profile export")
 def test_linux_ci_profile_exports_no_accelerator_runtime() -> None:
-    names, lines = _exported_requirements(
+    _, lines = _exported_requirements(
         "--no-default-groups",
         "--group",
         "dev",
@@ -183,23 +224,82 @@ def test_linux_ci_profile_exports_no_accelerator_runtime() -> None:
         "--extra",
         "dev",
     )
+    linux_lines = _active_requirement_lines(lines, sys_platform="linux")
+    linux_names = {_requirement_name(line) for line in linux_lines}
 
-    assert any(line.startswith(f"torch=={EXPECTED_TORCH_VERSION}+cpu") for line in lines)
     assert any(
-        line.startswith(f"xgboost-cpu=={EXPECTED_XGBOOST_VERSION}") for line in lines
+        line.startswith(f"torch=={EXPECTED_TORCH_VERSION}+cpu")
+        for line in linux_lines
+    )
+    assert not any(
+        re.match(
+            rf"^torch=={re.escape(EXPECTED_TORCH_VERSION)}(?:\s*;|$)",
+            line,
+        )
+        for line in linux_lines
     )
     assert any(
-        line.startswith(f"stable-baselines3=={EXPECTED_SB3_VERSION}") for line in lines
+        line.startswith(f"xgboost-cpu=={EXPECTED_XGBOOST_VERSION}")
+        for line in linux_lines
     )
-    assert "xgboost" not in names
+    assert any(
+        line.startswith(f"stable-baselines3=={EXPECTED_SB3_VERSION}")
+        for line in linux_lines
+    )
+    assert "xgboost-cpu" in linux_names
+    assert "xgboost" not in linux_names
     accelerator_packages = {
         name
-        for name in names
+        for name in linux_names
         if name.startswith("nvidia-")
         or name.startswith("cuda-")
         or name in {"triton", "pytorch-triton"}
     }
     assert not accelerator_packages
+
+
+@pytest.mark.parametrize(
+    ("filename", "job_name", "expected_uv_runs"),
+    [
+        ("pytest.yml", "pytest", 2),
+        ("queue-invariants.yml", "real-queue", 1),
+    ],
+)
+def test_github_ci_selects_cpu_profile_without_resync(
+    filename: str,
+    job_name: str,
+    expected_uv_runs: int,
+) -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github" / "workflows" / filename).read_text(encoding="utf-8")
+    )
+    job = workflow["jobs"][job_name]
+    assert job["env"]["VOLPRED_EXPECT_CPU_ML"] == "1"
+
+    steps = job["steps"]
+    sync_steps = [
+        step
+        for step in steps
+        if step.get("name") == "Sync explicit Linux CPU CI profile"
+    ]
+    assert len(sync_steps) == 1
+    assert _normalized_command(sync_steps[0]["run"]) == (
+        "uv sync --frozen --no-default-groups "
+        "--group dev --group ci-ml --extra dev"
+    )
+
+    sync_index = steps.index(sync_steps[0])
+    uv_run_steps = [
+        step
+        for step in steps
+        if str(step.get("run", "")).lstrip().startswith("uv run ")
+    ]
+    assert len(uv_run_steps) == expected_uv_runs
+    assert all(steps.index(step) > sync_index for step in uv_run_steps)
+    assert all(
+        str(step["run"]).lstrip().startswith("uv run --no-sync ")
+        for step in uv_run_steps
+    )
 
 
 @pytest.mark.skipif(
