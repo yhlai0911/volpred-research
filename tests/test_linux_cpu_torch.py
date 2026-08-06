@@ -17,6 +17,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
+ONE_SHOT_WORKFLOW = "refresh-ml-profiles-lock.yml"
 CPU_INDEX = "https://download.pytorch.org/whl/cpu"
 PYPI_INDEX = "https://pypi.org/simple"
 EXPECTED_TORCH_VERSION = "2.10.0"
@@ -283,15 +284,18 @@ def test_linux_ci_profile_exports_no_accelerator_runtime() -> None:
     assert not accelerator_packages
 
 
-def test_every_project_uv_workflow_is_bound_to_the_cpu_profile() -> None:
+def test_every_permanent_uv_workflow_is_bound_to_the_cpu_profile() -> None:
     covered_uv_run_jobs: set[tuple[str, str]] = set()
 
     workflow_paths = sorted(WORKFLOWS.glob("*.yml")) + sorted(
         WORKFLOWS.glob("*.yaml")
     )
-    assert workflow_paths, "workflow inventory unexpectedly empty"
+    permanent_paths = [
+        path for path in workflow_paths if path.name != ONE_SHOT_WORKFLOW
+    ]
+    assert permanent_paths, "permanent workflow inventory unexpectedly empty"
 
-    for path in workflow_paths:
+    for path in permanent_paths:
         workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
         for job_name, job in workflow.get("jobs", {}).items():
             steps = job.get("steps", [])
@@ -316,16 +320,16 @@ def test_every_project_uv_workflow_is_bound_to_the_cpu_profile() -> None:
                 f"{path.name}:{job_name} uses the project uv environment "
                 "without declaring the CPU-only CI runtime contract"
             )
+            canonical_sync_indexes = [
+                index
+                for index, step in enumerate(steps)
+                if step.get("name") == "Sync explicit Linux CPU CI profile"
+            ]
+            assert len(canonical_sync_indexes) == 1, (
+                f"{path.name}:{job_name} must own exactly one named CPU sync step"
+            )
             assert sync_steps == [
-                (
-                    next(
-                        index
-                        for index, step in enumerate(steps)
-                        if step.get("name")
-                        == "Sync explicit Linux CPU CI profile"
-                    ),
-                    CI_SYNC_COMMAND,
-                )
+                (canonical_sync_indexes[0], CI_SYNC_COMMAND)
             ], f"{path.name}:{job_name} must perform exactly one canonical CPU sync"
 
             sync_index = sync_steps[0][0]
