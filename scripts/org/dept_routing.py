@@ -23,9 +23,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from _core import DEFAULT_ORG_ROOT, load_registry  # noqa: E402
 from model_router import (  # noqa: E402
+    DEFAULT,
     TASK_TYPE_TO_MODEL,
     normalize_task_type_value,
-    pick_model,
 )
 
 ROUTING_SOURCES = {
@@ -50,7 +50,7 @@ def resolve_dept_routing(registry: dict) -> dict:
         rows: dict[str, dict] = {}
         for task_type in meta.get("owned_task_types", []):
             normalized = normalize_task_type_value(task_type)
-            model, effort = pick_model(task_type)
+            model, effort = TASK_TYPE_TO_MODEL.get(normalized, DEFAULT)
             rows[task_type] = {
                 "model": model,
                 "effort": effort,
@@ -81,7 +81,7 @@ def session_routing(rows: dict) -> dict:
     xhigh only costs tokens. Cost stays visible — resource_monitor audits it.
     """
     if not rows:
-        model, effort = pick_model(None)
+        model, effort = DEFAULT
         return {"model": model, "effort": effort, "basis": "router default (no owned task_types)"}
 
     models = sorted({r["model"] for r in rows.values()})
