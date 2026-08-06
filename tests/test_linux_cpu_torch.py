@@ -158,6 +158,20 @@ def test_lock_keeps_cpu_and_accelerator_profiles_version_aligned() -> None:
     }
 
 
+def test_default_profile_exports_accelerator_capable_research_distributions() -> None:
+    names, lines = _exported_requirements()
+
+    assert any(line.startswith(f"torch=={EXPECTED_TORCH_VERSION}") for line in lines)
+    assert not any(
+        line.startswith(f"torch=={EXPECTED_TORCH_VERSION}+cpu") for line in lines
+    )
+    assert any(line.startswith(f"xgboost=={EXPECTED_XGBOOST_VERSION}") for line in lines)
+    assert any(
+        line.startswith(f"stable-baselines3=={EXPECTED_SB3_VERSION}") for line in lines
+    )
+    assert "xgboost-cpu" not in names
+
+
 @pytest.mark.skipif(sys.platform != "linux", reason="Linux CI profile export")
 def test_linux_ci_profile_exports_no_accelerator_runtime() -> None:
     names, lines = _exported_requirements(
