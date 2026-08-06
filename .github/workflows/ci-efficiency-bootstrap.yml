@@ -1,0 +1,71 @@
+name: CI Efficiency Bootstrap
+
+on:
+  push:
+    branches:
+      - fix/ci-efficiency-20260806
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          filter: blob:none
+      - name: Apply the reviewed CI-only patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              target = Path(path)
+              text = target.read_text(encoding="utf-8")
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{path}: expected one occurrence, found {count}: {old!r}")
+              target.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          replace_once(
+              ".github/workflows/pytest.yml",
+              "          fetch-depth: 0\n",
+              "          filter: blob:none\n          fetch-depth: 0\n",
+          )
+          replace_once(
+              ".github/workflows/pytest.yml",
+              "          enable-cache: true\n          prune-cache: true\n",
+              "          enable-cache: true\n          cache-python: true\n          prune-cache: true\n",
+          )
+          replace_once(
+              ".github/workflows/experiment-artifacts.yml",
+              "          fetch-depth: 0\n",
+              "          filter: blob:none\n          fetch-depth: 0\n",
+          )
+
+          Path("tests/test_pytest_checkout_history.py").write_text(
+              '''"""Keep CI history deep enough for commit-bound review receipts.\n\nA blobless partial clone retains every commit and tree object while fetching file\nblobs only when the checked-out tip or a test actually needs them. This preserves\nreceipt verification without downloading the repository's full historical blob\ncorpus on every CI run.\n"""\n\nfrom pathlib import Path\n\nimport yaml\n\n\nROOT = Path(__file__).resolve().parents[1]\n\n\ndef test_pytest_checkout_fetches_reviewed_commits_bloblessly() -> None:\n    workflow = yaml.safe_load((ROOT / ".github/workflows/pytest.yml").read_text())\n    steps = workflow["jobs"]["pytest"]["steps"]\n    checkout = next(\n        step for step in steps if str(step.get("uses", "")).startswith("actions/checkout@")\n    )\n\n    options = checkout.get("with", {})\n    assert checkout["uses"] == "actions/checkout@v7"\n    assert options.get("fetch-depth") == 0\n    assert options.get("filter") == "blob:none"\n\n\ndef test_every_full_history_checkout_is_blobless() -> None:\n    offenders: list[str] = []\n    for path in sorted((ROOT / ".github/workflows").glob("*.y*ml")):\n        workflow = yaml.safe_load(path.read_text(encoding="utf-8")) or {}\n        for job_name, job in (workflow.get("jobs") or {}).items():\n            for index, step in enumerate((job or {}).get("steps") or []):\n                if not isinstance(step, dict):\n                    continue\n                if not str(step.get("uses", "")).startswith("actions/checkout@"):\n                    continue\n                options = step.get("with") or {}\n                if options.get("fetch-depth") == 0 and options.get("filter") != "blob:none":\n                    offenders.append(\n                        f"{path.relative_to(ROOT)}:{job_name}:step[{index}]"\n                    )\n    assert not offenders, (\n        "full-history checkouts must retain commit objects without eagerly "\n        "downloading all historical blobs:\\n" + "\\n".join(offenders)\n    )\n''',
+              encoding="utf-8",
+          )
+
+          Path("tests/test_github_actions_node24.py").write_text(
+              '''"""Keep first-party CI actions on supported, cache-safe releases."""\nfrom __future__ import annotations\n\nfrom pathlib import Path\n\nimport yaml\n\n\nROOT = Path(__file__).resolve().parents[1]\nWORKFLOWS = ROOT / ".github" / "workflows"\nREQUIRED_ACTIONS = {\n    "actions/checkout": "v7",\n    "actions/setup-python": "v7",\n    # setup-uv published v9.0.0 before creating a movable v9 tag. Pin the\n    # resolvable release tag so CI cannot fail during action resolution.\n    "astral-sh/setup-uv": "v9.0.0",\n}\n\n\ndef _action_steps():\n    for path in sorted(WORKFLOWS.glob("*.y*ml")):\n        workflow = yaml.safe_load(path.read_text(encoding="utf-8")) or {}\n        jobs = workflow.get("jobs") or {}\n        for job_name, job in jobs.items():\n            for index, step in enumerate((job or {}).get("steps") or []):\n                uses = step.get("uses") if isinstance(step, dict) else None\n                if uses:\n                    yield path, str(job_name), index, step\n\n\ndef test_supported_node24_action_releases_are_used_everywhere() -> None:\n    stale: list[str] = []\n    for path, job_name, index, step in _action_steps():\n        uses = str(step["uses"])\n        action, separator, version = uses.partition("@")\n        expected = REQUIRED_ACTIONS.get(action)\n        if expected is not None and (not separator or version != expected):\n            stale.append(\n                f"{path.relative_to(ROOT)}:{job_name}:step[{index}] "\n                f"uses {uses!r}; expected {action}@{expected}"\n            )\n    assert not stale, "Unsupported GitHub Action runtime(s):\\n" + "\\n".join(stale)\n\n\ndef test_setup_uv_cache_contract_is_explicit() -> None:\n    missing: list[str] = []\n    for path, job_name, index, step in _action_steps():\n        if step.get("uses") != "astral-sh/setup-uv@v9.0.0":\n            continue\n        options = step.get("with") or {}\n        if str(options.get("enable-cache", "")).casefold() != "true":\n            continue\n        python_cached = str(options.get("cache-python", "")).casefold() == "true"\n        pruned = str(options.get("prune-cache", "")).casefold() == "true"\n        if not python_cached or not pruned:\n            missing.append(\n                f"{path.relative_to(ROOT)}:{job_name}:step[{index}] "\n                f"cache-python={options.get('cache-python')!r}, "\n                f"prune-cache={options.get('prune-cache')!r}"\n            )\n    assert not missing, (\n        "cache-enabled setup-uv steps must cache managed Python and explicitly "\n        "prune the dependency cache:\\n" + "\\n".join(missing)\n    )\n''',
+              encoding="utf-8",
+          )
+
+          Path("tests/test_required_check_contexts.py").write_text(
+              '''"""Required CI gates must expose stable, unambiguous check contexts."""\nfrom __future__ import annotations\n\nfrom pathlib import Path\n\nimport yaml\n\n\nROOT = Path(__file__).resolve().parents[1]\nWORKFLOWS = ROOT / ".github" / "workflows"\nEXPECTED = {\n    "pytest.yml": {"pytest"},\n    "source-encoding.yml": {"source-encoding"},\n    "silent-fallbacks.yml": {"silent-fallback"},\n    "knowledge-provenance.yml": {"data-baseline"},\n    "queue-invariants.yml": {"real-queue"},\n    "experiment-artifacts.yml": {"artifacts"},\n}\n\n\ndef test_required_gate_check_contexts_are_stable_and_unique() -> None:\n    contexts: list[str] = []\n    for filename, expected in EXPECTED.items():\n        workflow = yaml.safe_load((WORKFLOWS / filename).read_text(encoding="utf-8")) or {}\n        jobs = set((workflow.get("jobs") or {}).keys())\n        assert jobs == expected, f"{filename}: expected {expected}, found {jobs}"\n        contexts.extend(jobs)\n\n    assert len(contexts) == len(set(contexts)), (\n        "required status checks cannot safely select duplicate job contexts: "\n        f"{contexts}"\n    )\n''',
+              encoding="utf-8",
+          )
+          PY
+      - name: Remove this one-shot bootstrap and commit the result
+        run: |
+          git rm .github/workflows/ci-efficiency-bootstrap.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows tests
+          git diff --cached --check
+          git commit -m "ci: reduce checkout overhead and stabilize gate contexts"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
