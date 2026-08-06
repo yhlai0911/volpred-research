@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  audit:
+  data-baseline:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

@@ -39,8 +39,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          # The gate diffs against a base commit, so the shallow default clone is
-          # not enough — `git diff base...HEAD` needs the merge-base present.
+          # Keep all commit/tree objects for merge-base diffing, but fetch
+          # historical file blobs only when Git actually needs them.
+          filter: blob:none
           fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
