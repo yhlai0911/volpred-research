@@ -19,19 +19,35 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Build a source snapshot
+      - name: Build a focused repair snapshot
         shell: bash
         run: |
           set -euo pipefail
-          tar \
-            --exclude=.git \
-            --exclude=.venv \
-            --exclude='frontend-v2-fix' \
-            --exclude='*.pyc' \
-            --exclude='__pycache__' \
-            -czf "$RUNNER_TEMP/volpred-repair-snapshot.tar.gz" .
+          items=(
+            .github
+            scripts
+            src
+            tests
+            config
+            docs
+            CLAUDE.md
+            AGENTS.md
+            pyproject.toml
+            uv.lock
+            requirements.txt
+            storage/memory/knowledge.json
+            storage/org/registry.json
+            experiments/K1815
+          )
+          present=()
+          for item in "${items[@]}"; do
+            if [[ -e "$item" ]]; then
+              present+=("$item")
+            fi
+          done
+          tar -czf "$RUNNER_TEMP/volpred-repair-snapshot.tar.gz" "${present[@]}"
 
-      - name: Upload the source snapshot
+      - name: Upload the focused source snapshot
         uses: actions/upload-artifact@v4
         with:
           name: volpred-repair-snapshot
