@@ -171,10 +171,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          # The nested-DM fixed-memory gate verifies an external review receipt
-          # against its exact reviewed commit. A depth-1 checkout makes that
-          # trusted commit look nonexistent and turns a valid K1709 receipt
-          # into a false methodology failure.
+          # Keep every commit/tree object required by fixed-memory review
+          # receipts while fetching historical file blobs only on demand.
+          filter: blob:none
           fetch-depth: 0
       - name: Resolve the pinned active frontend dependency
         id: frontend-target
@@ -207,6 +206,7 @@ jobs:
         uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
+          cache-python: true
           prune-cache: true
       - name: Set up Python
         run: uv python install 3.12
