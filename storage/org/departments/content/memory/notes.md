@@ -1,5 +1,30 @@
 # content 部門私有記憶
 
+## daily_digest 發佈流程的三個坑（2026-08-06，mile_bba2bf8e 實例）
+
+1. **daily_digest 是 immediate-publish，懶人包不能走 draft 的非同步佇列**。跟一般 K 文章
+   `status=draft` 先發、`lazypack_async_render.py enqueue` 排隊不同，digest 一律
+   `status=published`，`publish_draft.py` 會擋並直接印出正確做法：先
+   `uv run python scripts/lazypack_render.py --plan <plan.json> --out-dir <dir>` 本地產圖，
+   把本地路徑（`storage/drafts/assets/...`）寫進「## 懶人包圖組」，`publish_draft.py`
+   會自動偵測本地圖片並上傳轉 HTTPS——不需要另外呼叫上傳腳本，也不需要 `--article-id`
+   （這個階段文章還沒建立、沒有 mile_id）。
+2. **`experiment_refs` 若指到已有 general 文章的 K-id，會觸發 duplicate gate**，因為那個 K
+   本來就已經有自己的獨立文章。對一般 K 文章這是正確的擋法，但對 digest 是**合理的誤判**——
+   digest 本來就是要引用既有文章。用 `--force-duplicate` 通過即可。**但不要因此就不設
+   `experiment_refs`**：設了才能讓 content-vs-source audit 真的跑起來查對數字（親測 9 claims
+   / 1213 source values 全過），不設的話 audit 直接 SKIPPED，等於完全沒有機械覆核。
+3. **`details.digest_articles`（前端側欄「本期精選」唯一資料源）在初次發佈時可能沒有落地**，
+   即使 frontmatter 明確寫了巢狀陣列。**發佈後一定要回讀確認**（`jq`/`python` 檢查
+   `details.digest_articles` 是否為 `None`），沒落地就用
+   `publish_draft.py --update <mile_id> --update-details-json '{"digest_articles": [...]}'`
+   補。這條目前原因不明，可能是新建路徑對 frontmatter 巢狀陣列的解析與 update 路徑不同，
+   下次踩到同一坑時應追根因回報 platform_ops，不要每次都手動補。
+
+**額外收穫**：查金標竿範例（如 `mile_4901f7bc`）選題前，先確認它的主題有沒有正好撞上
+本班剛判過 arc-covered 的題材——本次差點又選到「AI 資本支出×VIX」，跟本班前兩張工作項
+（trending_repost）判 failed 的完全同一叢集，是查金標竿時順便發現才躲掉的。
+
 ## 部門拆分：scripts/ 相關求助改找 platform_ops，不再找 platform_eng（2026-08-05 msg1629）
 
 `platform_eng`（平台工程部）已拆出新部門 `platform_ops`（維運部），`scripts/`（含
