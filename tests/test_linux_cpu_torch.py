@@ -1,10 +1,13 @@
-"""Linux CI must use CPU-only ML distributions without version drift."""
+"""CI may use CPU wheels, but research hosts must keep accelerator choice."""
 from __future__ import annotations
 
 from importlib import metadata
+import os
+from pathlib import Path
+import re
+import subprocess
 import sys
 import tomllib
-from pathlib import Path
 
 import pytest
 
@@ -14,6 +17,7 @@ CPU_INDEX = "https://download.pytorch.org/whl/cpu"
 PYPI_INDEX = "https://pypi.org/simple"
 EXPECTED_TORCH_VERSION = "2.10.0"
 EXPECTED_XGBOOST_VERSION = "3.2.0"
+EXPECTED_SB3_VERSION = "2.9.0"
 
 
 def _read_toml(path: Path) -> dict:
@@ -24,23 +28,83 @@ def _lock_packages(lock: dict, name: str) -> list[dict]:
     return [package for package in lock["package"] if package["name"] == name]
 
 
-def test_pyproject_routes_linux_ml_to_cpu_distributions() -> None:
+def _conflict_pair(*entries: tuple[str, str]) -> frozenset[tuple[str, str]]:
+    return frozenset(entries)
+
+
+def _exported_requirements(*args: str) -> tuple[set[str], list[str]]:
+    completed = subprocess.run(
+        [
+            "uv",
+            "export",
+            "--frozen",
+            "--no-hashes",
+            "--no-header",
+            "--no-annotate",
+            *args,
+        ],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    lines = [line.strip() for line in completed.stdout.splitlines() if line.strip()]
+    names: set[str] = set()
+    for line in lines:
+        if line.startswith(("#", "--", ".", "-e ")):
+            continue
+        match = re.match(r"([A-Za-z0-9_.-]+)", line)
+        if match:
+            names.add(match.group(1).lower().replace("_", "-"))
+    return names, lines
+
+
+def test_pyproject_separates_research_and_ci_ml_profiles() -> None:
     project = _read_toml(ROOT / "pyproject.toml")
-    dependencies = set(project["project"]["dependencies"])
+    base_dependencies = set(project["project"]["dependencies"])
+    optional = project["project"]["optional-dependencies"]
+    groups = project["dependency-groups"]
     uv = project["tool"]["uv"]
 
-    assert f"torch=={EXPECTED_TORCH_VERSION}" in dependencies
-    assert (
-        f"xgboost-cpu=={EXPECTED_XGBOOST_VERSION}; sys_platform == 'linux'"
-        in dependencies
-    )
-    assert (
-        f"xgboost=={EXPECTED_XGBOOST_VERSION}; sys_platform != 'linux'"
-        in dependencies
+    forbidden_base_names = {
+        "stable-baselines3",
+        "torch",
+        "xgboost",
+        "xgboost-cpu",
+    }
+    assert not any(
+        dependency.split(";", 1)[0].split("=", 1)[0].strip() in forbidden_base_names
+        for dependency in base_dependencies
     )
 
+    assert set(optional["research-ml"]) == {
+        f"stable-baselines3=={EXPECTED_SB3_VERSION}",
+        f"torch=={EXPECTED_TORCH_VERSION}",
+        f"xgboost=={EXPECTED_XGBOOST_VERSION}",
+    }
+    assert set(optional["ci-ml-cpu"]) == {
+        f"stable-baselines3=={EXPECTED_SB3_VERSION}",
+        f"torch=={EXPECTED_TORCH_VERSION}",
+        f"xgboost-cpu=={EXPECTED_XGBOOST_VERSION}; sys_platform == 'linux'",
+        f"xgboost=={EXPECTED_XGBOOST_VERSION}; sys_platform != 'linux'",
+    }
+    assert groups["runtime-ml"] == ["volpred[research-ml]"]
+    assert groups["ci-ml"] == ["volpred[ci-ml-cpu]"]
+    assert uv["default-groups"] == ["dev", "runtime-ml"]
+
+    conflicts = {
+        frozenset((kind, value) for entry in conflict for kind, value in entry.items())
+        for conflict in uv["conflicts"]
+    }
+    assert conflicts == {
+        _conflict_pair(("extra", "research-ml"), ("extra", "ci-ml-cpu")),
+        _conflict_pair(("group", "runtime-ml"), ("group", "ci-ml")),
+        _conflict_pair(("group", "runtime-ml"), ("extra", "ci-ml-cpu")),
+        _conflict_pair(("group", "ci-ml"), ("extra", "research-ml")),
+    }
+
     assert uv["sources"]["torch"] == [
-        {"index": "pytorch-cpu", "marker": "sys_platform == 'linux'"}
+        {"index": "pytorch-cpu", "extra": "ci-ml-cpu"}
     ]
     cpu_indexes = [
         entry for entry in uv["index"] if entry.get("name") == "pytorch-cpu"
@@ -50,69 +114,84 @@ def test_pyproject_routes_linux_ml_to_cpu_distributions() -> None:
     ]
 
 
-def test_lock_keeps_cpu_and_non_linux_ml_versions_aligned() -> None:
+def test_lock_keeps_cpu_and_accelerator_profiles_version_aligned() -> None:
     lock = _read_toml(ROOT / "uv.lock")
     torch_packages = _lock_packages(lock, "torch")
-    linux_cpu = [
+    cpu = [
         package
         for package in torch_packages
         if package.get("source", {}).get("registry") == CPU_INDEX
     ]
-    non_linux_pypi = [
+    accelerator_capable = [
         package
         for package in torch_packages
         if package.get("source", {}).get("registry") == PYPI_INDEX
     ]
 
-    assert len(linux_cpu) == 1
-    assert len(non_linux_pypi) == 1
-    assert linux_cpu[0]["version"] == f"{EXPECTED_TORCH_VERSION}+cpu"
-    assert non_linux_pypi[0]["version"] == EXPECTED_TORCH_VERSION
-    assert any(
-        "sys_platform == 'linux'" in marker
-        for marker in linux_cpu[0]["resolution-markers"]
-    )
-    assert any(
-        "sys_platform != 'linux'" in marker
-        for marker in non_linux_pypi[0]["resolution-markers"]
-    )
-
-    xgboost_cpu = _lock_packages(lock, "xgboost-cpu")
-    xgboost_full = _lock_packages(lock, "xgboost")
-    assert [package["version"] for package in xgboost_cpu] == [
+    assert [package["version"] for package in cpu] == [
+        f"{EXPECTED_TORCH_VERSION}+cpu"
+    ]
+    assert [package["version"] for package in accelerator_capable] == [
+        EXPECTED_TORCH_VERSION
+    ]
+    assert [package["version"] for package in _lock_packages(lock, "xgboost-cpu")] == [
         EXPECTED_XGBOOST_VERSION
     ]
-    assert [package["version"] for package in xgboost_full] == [
+    assert [package["version"] for package in _lock_packages(lock, "xgboost")] == [
         EXPECTED_XGBOOST_VERSION
     ]
+    assert [
+        package["version"] for package in _lock_packages(lock, "stable-baselines3")
+    ] == [EXPECTED_SB3_VERSION]
 
     project_package = next(
         package for package in lock["package"] if package["name"] == "volpred"
     )
-    project_dependencies = project_package["dependencies"]
-    assert {
-        dependency.get("marker")
-        for dependency in project_dependencies
-        if dependency["name"] == "xgboost-cpu"
-    } == {"sys_platform == 'linux'"}
-    assert {
-        dependency.get("marker")
-        for dependency in project_dependencies
-        if dependency["name"] == "xgboost"
-    } == {"sys_platform != 'linux'"}
+    assert set(project_package["optional-dependencies"]) >= {
+        "research-ml",
+        "ci-ml-cpu",
+    }
+    assert set(project_package["dev-dependencies"]) >= {
+        "runtime-ml",
+        "ci-ml",
+    }
 
-    package_names = {package["name"] for package in lock["package"]}
+
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux CI profile export")
+def test_linux_ci_profile_exports_no_accelerator_runtime() -> None:
+    names, lines = _exported_requirements(
+        "--no-default-groups",
+        "--group",
+        "dev",
+        "--group",
+        "ci-ml",
+        "--extra",
+        "dev",
+    )
+
+    assert any(line.startswith(f"torch=={EXPECTED_TORCH_VERSION}+cpu") for line in lines)
+    assert any(
+        line.startswith(f"xgboost-cpu=={EXPECTED_XGBOOST_VERSION}") for line in lines
+    )
+    assert any(
+        line.startswith(f"stable-baselines3=={EXPECTED_SB3_VERSION}") for line in lines
+    )
+    assert "xgboost" not in names
     accelerator_packages = {
         name
-        for name in package_names
+        for name in names
         if name.startswith("nvidia-")
-        or name in {"cuda-bindings", "cuda-pathfinder", "triton"}
+        or name.startswith("cuda-")
+        or name in {"triton", "pytorch-triton"}
     }
     assert not accelerator_packages
 
 
-@pytest.mark.skipif(sys.platform != "linux", reason="Linux CI accelerator contract")
-def test_installed_linux_ml_stack_is_cpu_only() -> None:
+@pytest.mark.skipif(
+    sys.platform != "linux" or os.environ.get("VOLPRED_EXPECT_CPU_ML") != "1",
+    reason="only the explicit Linux CPU CI environment promises this runtime",
+)
+def test_installed_linux_ci_ml_stack_is_cpu_only() -> None:
     import torch
     import xgboost
 
