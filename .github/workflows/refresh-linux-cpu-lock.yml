@@ -1,0 +1,54 @@
+name: Refresh Linux CPU Dependency Lock
+
+on:
+  push:
+    branches:
+      - fix/linux-cpu-torch-20260806
+    paths:
+      - pyproject.toml
+
+permissions:
+  contents: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9.0.0
+      - name: Refresh universal lockfile
+        run: uv lock
+      - name: Verify Linux CPU distributions
+        run: |
+          uv sync --frozen --no-dev
+          uv run --frozen python - <<'PY'
+          from importlib import metadata
+          import torch
+          import xgboost
+
+          print("torch", torch.__version__)
+          print("torch.version.cuda", torch.version.cuda)
+          print("xgboost", xgboost.__version__)
+          print("xgboost-cpu distribution", metadata.version("xgboost-cpu"))
+          if torch.version.cuda is not None or torch.cuda.is_available():
+              raise SystemExit("Linux resolved a CUDA-enabled PyTorch build")
+          try:
+              metadata.version("xgboost")
+          except metadata.PackageNotFoundError:
+              pass
+          else:
+              raise SystemExit("Linux resolved the full xgboost distribution")
+          PY
+      - name: Commit the lockfile only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add uv.lock
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "uv.lock already current"
+            exit 0
+          fi
+          git commit -m "lock: resolve Linux ML dependencies from CPU builds"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
