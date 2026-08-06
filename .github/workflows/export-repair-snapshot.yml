@@ -85,7 +85,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          uvx ruff check --isolated \
+          uvx ruff check --isolated --select E4,E7,E9,F \
             scripts/org/manager_run.py \
             src/volpred/ops/execution/registry.py \
             tests/test_provider_spawn_audit.py \
