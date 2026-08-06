@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-06T01:00:50.712480+00:00",
+  "generated_at": "2026-08-06T02:01:00.368317+00:00",
   "registry_path": "/Users/yhlai0911/volpred-research/config/control_gate_registry.json",
   "registry_owner": "volpred.ops.control_gate_lifecycle",
   "inventory": {
     "window": {
       "hours": 168.0,
-      "start": "2026-07-30T01:00:50.712480+00:00",
-      "end": "2026-08-06T01:00:50.712480+00:00"
+      "start": "2026-07-30T02:01:00.368317+00:00",
+      "end": "2026-08-06T02:01:00.368317+00:00"
     },
     "registered_gate_count": 29,
-    "observed_gate_count": 11,
+    "observed_gate_count": 13,
     "observed_gates": [
       {
         "gate_id": "anti_ai_style",
@@ -18,7 +18,7 @@
         "trigger_count": 48,
         "blocking_count": 4,
         "distinct_candidates": 36,
-        "latest_at": "2026-08-05T22:00:12.780076+00:00"
+        "latest_at": "2026-08-06T01:16:13.551765+00:00"
       },
       {
         "gate_id": "dispatch_collision",
@@ -39,8 +39,8 @@
       {
         "gate_id": "event_reaction_coverage",
         "registered": true,
-        "trigger_count": 42,
-        "blocking_count": 42,
+        "trigger_count": 30,
+        "blocking_count": 30,
         "distinct_candidates": 1,
         "latest_at": "2026-07-30T04:30:40.496467+00:00"
       },
@@ -50,15 +50,15 @@
         "trigger_count": 78,
         "blocking_count": 0,
         "distinct_candidates": 56,
-        "latest_at": "2026-08-06T00:03:32.528936+00:00"
+        "latest_at": "2026-08-06T01:16:13.615609+00:00"
       },
       {
         "gate_id": "publisher_arc_dedup",
         "registered": true,
-        "trigger_count": 189,
+        "trigger_count": 223,
         "blocking_count": 0,
-        "distinct_candidates": 56,
-        "latest_at": "2026-08-05T14:53:03.622424+00:00"
+        "distinct_candidates": 55,
+        "latest_at": "2026-08-06T01:12:47.158082+00:00"
       },
       {
         "gate_id": "publisher_coverage_metadata_gap",
@@ -67,6 +67,22 @@
         "blocking_count": 0,
         "distinct_candidates": 6,
         "latest_at": "2026-08-05T08:40:14.022110+00:00"
+      },
+      {
+        "gate_id": "publisher_digest_identity",
+        "registered": true,
+        "trigger_count": 1,
+        "blocking_count": 1,
+        "distinct_candidates": 1,
+        "latest_at": "2026-08-06T01:30:55.377038+00:00"
+      },
+      {
+        "gate_id": "publisher_image_url_contract",
+        "registered": true,
+        "trigger_count": 1,
+        "blocking_count": 1,
+        "distinct_candidates": 1,
+        "latest_at": "2026-08-06T01:29:54.281901+00:00"
       },
       {
         "gate_id": "publisher_provenance_contract",
@@ -95,7 +111,7 @@
       {
         "gate_id": "task_generation",
         "registered": true,
-        "trigger_count": 138,
+        "trigger_count": 126,
         "blocking_count": 0,
         "distinct_candidates": 9,
         "latest_at": "2026-08-05T22:00:37.529581+00:00"
@@ -110,7 +126,7 @@
         "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
         "ok": true,
         "error": null,
-        "row_count": 3303,
+        "row_count": 3343,
         "malformed_rows": 0,
         "invalid_timestamps": 0,
         "identity_conflicts": 0
@@ -159,9 +175,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -183,7 +199,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -201,22 +217,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -259,14 +275,14 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-30T04:30:40.496467+00:00"
       },
       "evidence": {
-        "trigger_count": 42,
+        "trigger_count": 30,
         "distinct_candidates": 1,
         "malformed_rows": 0,
         "incident_count": 0,
@@ -283,7 +299,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -309,26 +325,26 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 1,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 1,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "event_article_fomc_2026-07-29_tplus0",
-            "decision_count": 42,
+            "decision_count": 30,
             "task_ids": [
               "event_article_fomc_2026-07-29_tplus0"
             ],
@@ -344,7 +360,7 @@
       "review": {
         "due": true,
         "reasons": [
-          "raw_triggers=42>=20"
+          "raw_triggers=30>=20"
         ]
       },
       "pdca_phase": "act",
@@ -380,15 +396,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-30T04:07:39.599005+00:00"
       },
       "evidence": {
-        "trigger_count": 4,
-        "distinct_candidates": 4,
+        "trigger_count": 3,
+        "distinct_candidates": 3,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_metric": "raw_observations",
@@ -417,31 +433,23 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
+        "unjoined": 3,
         "blocked": 0,
-        "unjoined": 4,
-        "sequence_coverage_gap": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
-          {
-            "candidate_id": "200b3ff5bc30d61b",
-            "decision_count": 1,
-            "task_ids": [],
-            "outcomes": [
-              "unjoined"
-            ]
-          },
           {
             "candidate_id": "874e184978fc8bc0",
             "decision_count": 1,
@@ -474,7 +482,7 @@
       "review": {
         "due": true,
         "reasons": [
-          "harm_outcomes=4>=1"
+          "harm_outcomes=3>=1"
         ]
       },
       "pdca_phase": "act",
@@ -510,9 +518,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-03T09:06:12.258850+00:00"
       },
@@ -547,22 +555,22 @@
         ]
       },
       "outcomes": {
-        "queued": 4,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 2,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 2,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 6,
+        "dispatch_fire": 0,
+        "queued": 4,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 6,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "K1733",
@@ -675,9 +683,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
         "start": "2026-08-01T07:46:11.981203+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": "2026-08-01T07:46:11.981203+00:00",
         "newest_evidence_at": "2026-08-03T09:06:12.258850+00:00"
       },
@@ -712,22 +720,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 2,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 2,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 2,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 2,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "K1654_article_general",
@@ -794,9 +802,9 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-23T01:00:50.712480+00:00",
-        "start": "2026-07-23T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-23T02:01:00.368317+00:00",
+        "start": "2026-07-23T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-26T19:38:01.064738+00:00"
       },
@@ -840,22 +848,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 2,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "03148540bd1f4e09936eeee66024ecb9",
@@ -920,9 +928,9 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-23T01:00:50.712480+00:00",
-        "start": "2026-07-23T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-23T02:01:00.368317+00:00",
+        "start": "2026-07-23T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-05T08:18:32.105743+00:00"
       },
@@ -964,22 +972,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 1,
         "incident_resolved": 0,
@@ -1025,9 +1033,9 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-23T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-23T02:01:00.368317+00:00",
         "start": "2026-07-30T16:26:26.447893+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": "2026-07-30T16:26:26.447893+00:00",
         "newest_evidence_at": "2026-08-03T22:27:16.533775+00:00"
       },
@@ -1069,22 +1077,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 1,
         "incident_resolved": 0,
@@ -1127,11 +1135,11 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-23T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-23T02:01:00.368317+00:00",
         "start": "2026-08-01T15:00:57.336745+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": "2026-08-01T15:00:57.336745+00:00",
-        "newest_evidence_at": "2026-08-06T00:59:46.950976+00:00"
+        "newest_evidence_at": "2026-08-06T02:00:14.399391+00:00"
       },
       "evidence": {
         "trigger_count": 0,
@@ -1152,7 +1160,7 @@
           "worker_killed_timeout": 2,
           "worker_orphan_gone_or_reused": 1
         },
-        "incident_observations": 12147,
+        "incident_observations": 12191,
         "incident_ids": [
           "inc_792a94b0ecf4"
         ],
@@ -1180,7 +1188,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/ops/dispatch_workspace_receipts.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 21763,
+            "row_count": 21833,
             "malformed_rows": 0,
             "selected_event_rows": 49,
             "indexed_identity_count": 49
@@ -1203,22 +1211,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 1,
         "incident_resolved": 0,
@@ -1261,14 +1269,14 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-05T22:00:37.529581+00:00"
       },
       "evidence": {
-        "trigger_count": 138,
+        "trigger_count": 126,
         "distinct_candidates": 9,
         "malformed_rows": 0,
         "incident_count": 0,
@@ -1285,7 +1293,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -1298,26 +1306,26 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 3,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 2,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 1,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 3,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 4,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 2,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "event_article_fomc_2026-07-29_tplus0",
-            "decision_count": 130,
+            "decision_count": 118,
             "task_ids": [
               "event_article_fomc_2026-07-29_tplus0"
             ],
@@ -1450,11 +1458,11 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
-        "newest_evidence_at": "2026-08-06T00:03:32.528936+00:00"
+        "newest_evidence_at": "2026-08-06T01:16:13.615609+00:00"
       },
       "evidence": {
         "trigger_count": 78,
@@ -1474,7 +1482,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -1492,22 +1500,22 @@
         ]
       },
       "outcomes": {
-        "queued": 10,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 46,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 10,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_04438b53",
@@ -1750,16 +1758,6 @@
             ]
           },
           {
-            "candidate_id": "mile_6bf24727",
-            "decision_count": 1,
-            "task_ids": [
-              "mile_6bf24727"
-            ],
-            "outcomes": [
-              "published"
-            ]
-          },
-          {
             "candidate_id": "mile_6c6fa752",
             "decision_count": 1,
             "task_ids": [
@@ -1927,6 +1925,16 @@
             ],
             "outcomes": [
               "queued"
+            ]
+          },
+          {
+            "candidate_id": "mile_bba2bf8e",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_bba2bf8e"
+            ],
+            "outcomes": [
+              "published"
             ]
           },
           {
@@ -2111,11 +2119,11 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
-        "newest_evidence_at": "2026-08-05T22:00:12.780076+00:00"
+        "newest_evidence_at": "2026-08-06T01:16:13.551765+00:00"
       },
       "evidence": {
         "trigger_count": 48,
@@ -2135,7 +2143,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -2153,22 +2161,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 36,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 1,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 1,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_04438b53",
@@ -2321,16 +2329,6 @@
             ]
           },
           {
-            "candidate_id": "mile_6bf24727",
-            "decision_count": 1,
-            "task_ids": [
-              "mile_6bf24727"
-            ],
-            "outcomes": [
-              "published"
-            ]
-          },
-          {
             "candidate_id": "mile_6c6fa752",
             "decision_count": 1,
             "task_ids": [
@@ -2445,6 +2443,16 @@
             "decision_count": 2,
             "task_ids": [
               "mile_b4223d34"
+            ],
+            "outcomes": [
+              "published"
+            ]
+          },
+          {
+            "candidate_id": "mile_bba2bf8e",
+            "decision_count": 1,
+            "task_ids": [
+              "mile_bba2bf8e"
             ],
             "outcomes": [
               "published"
@@ -2573,9 +2581,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -2597,7 +2605,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -2624,22 +2632,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -2689,9 +2697,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-03T17:00:18.324785+00:00"
       },
@@ -2713,7 +2721,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -2740,22 +2748,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 3,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 3,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 3,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_5378daa1",
@@ -2826,9 +2834,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -2850,7 +2858,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -2877,22 +2885,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -2935,9 +2943,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-04T18:00:23.854780+00:00"
       },
@@ -2959,7 +2967,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -2977,22 +2985,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 3,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_5378daa1",
@@ -3066,9 +3074,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3090,7 +3098,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -3108,22 +3116,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -3166,9 +3174,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3190,7 +3198,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -3208,22 +3216,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -3266,9 +3274,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3290,7 +3298,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -3308,22 +3316,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -3366,15 +3374,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
-        "newest_evidence_at": null
+        "newest_evidence_at": "2026-08-06T01:30:55.377038+00:00"
       },
       "evidence": {
-        "trigger_count": 0,
-        "distinct_candidates": 0,
+        "trigger_count": 1,
+        "distinct_candidates": 1,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_metric": "raw_observations",
@@ -3390,7 +3398,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -3408,32 +3416,44 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
-        "unjoined": 0,
-        "sequence_coverage_gap": 0,
-        "candidate_outcomes": [],
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
+        "unjoined": 1,
+        "blocked": 1,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "mile_f3d374cf",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "blocked",
+              "unjoined"
+            ]
+          }
+        ],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "harm_outcomes=1>=1"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -3466,9 +3486,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3490,7 +3510,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -3508,22 +3528,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -3566,15 +3586,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
         "start": "2026-08-01T10:52:24.643612+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": "2026-08-01T10:52:24.643612+00:00",
-        "newest_evidence_at": "2026-08-05T14:53:03.622424+00:00"
+        "newest_evidence_at": "2026-08-06T01:12:47.158082+00:00"
       },
       "evidence": {
-        "trigger_count": 108,
-        "distinct_candidates": 36,
+        "trigger_count": 144,
+        "distinct_candidates": 37,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_metric": "raw_observations",
@@ -3590,7 +3610,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -3608,22 +3628,22 @@
         ]
       },
       "outcomes": {
-        "queued": 9,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 13,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
+        "dispatch_fire": 0,
+        "queued": 9,
+        "retry": 0,
+        "unjoined": 15,
         "blocked": 0,
-        "unjoined": 14,
-        "sequence_coverage_gap": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "daily_digest_20260802",
@@ -3652,6 +3672,14 @@
           {
             "candidate_id": "daily_digest_20260805",
             "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "unjoined"
+            ]
+          },
+          {
+            "candidate_id": "daily_digest_20260806",
+            "decision_count": 36,
             "task_ids": [],
             "outcomes": [
               "unjoined"
@@ -3955,9 +3983,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3979,7 +4007,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -3997,22 +4025,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -4055,9 +4083,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
         "start": "2026-08-01T08:54:03.118132+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": "2026-08-01T08:54:03.118132+00:00",
         "newest_evidence_at": "2026-08-05T08:40:14.022110+00:00"
       },
@@ -4079,7 +4107,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -4097,22 +4125,22 @@
         ]
       },
       "outcomes": {
-        "queued": 2,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 3,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 2,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "k:K1323|audience:general",
@@ -4196,9 +4224,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -4220,7 +4248,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -4238,22 +4266,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -4300,9 +4328,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -4324,7 +4352,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -4342,22 +4370,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -4400,9 +4428,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-05T08:49:26.650665+00:00"
       },
@@ -4424,7 +4452,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -4442,22 +4470,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 10,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 10,
-        "sequence_coverage_gap": 0,
+        "blocked": 10,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_0454c051",
@@ -4595,15 +4623,15 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
-        "newest_evidence_at": null
+        "newest_evidence_at": "2026-08-06T01:29:54.281901+00:00"
       },
       "evidence": {
-        "trigger_count": 0,
-        "distinct_candidates": 0,
+        "trigger_count": 1,
+        "distinct_candidates": 1,
         "malformed_rows": 0,
         "incident_count": 0,
         "incident_metric": "raw_observations",
@@ -4619,7 +4647,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -4637,32 +4665,44 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
-        "unjoined": 0,
-        "sequence_coverage_gap": 0,
-        "candidate_outcomes": [],
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
+        "unjoined": 1,
+        "blocked": 1,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
+        "candidate_outcomes": [
+          {
+            "candidate_id": "mile_5639d4cc",
+            "decision_count": 1,
+            "task_ids": [],
+            "outcomes": [
+              "blocked",
+              "unjoined"
+            ]
+          }
+        ],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "harm_outcomes=1>=1"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -4696,9 +4736,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T01:00:50.712480+00:00",
-        "start": "2026-07-30T01:00:50.712480+00:00",
-        "end": "2026-08-06T01:00:50.712480+00:00",
+        "lookback_start": "2026-07-30T02:01:00.368317+00:00",
+        "start": "2026-07-30T02:01:00.368317+00:00",
+        "end": "2026-08-06T02:01:00.368317+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -4720,7 +4760,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/logs/dedup_decisions.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 3303,
+            "row_count": 3343,
             "malformed_rows": 0,
             "invalid_timestamps": 0,
             "identity_conflicts": 0
@@ -4738,22 +4778,22 @@
         ]
       },
       "outcomes": {
-        "queued": 0,
-        "superseded": 0,
+        "sequence_coverage_gap": 0,
+        "succeeded": 0,
         "task_claim": 0,
-        "retry": 0,
-        "failed": 0,
-        "in_flight": 0,
         "missed_deadline": 0,
         "published": 0,
-        "worker_failed": 0,
-        "dispatch_fire": 0,
-        "waiver": 0,
-        "succeeded": 0,
+        "superseded": 0,
         "observed": 0,
-        "blocked": 0,
+        "dispatch_fire": 0,
+        "queued": 0,
+        "retry": 0,
         "unjoined": 0,
-        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "worker_failed": 0,
+        "failed": 0,
+        "waiver": 0,
+        "in_flight": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -4776,13 +4816,16 @@
     "gate_count": 29,
     "unregistered_gate_count": 0,
     "unclassified_blocking_count": 0,
-    "review_due_count": 7,
+    "review_due_count": 9,
     "hard_gate_count": 15,
     "unhealthy_source_count": 2
   },
   "review_tasks": {
-    "created_count": 0,
-    "created_ids": [],
+    "created_count": 2,
+    "created_ids": [
+      "control_gate_review_publisher_digest_identity_20260806T013055_3213eabcd96c",
+      "control_gate_review_publisher_image_url_contract_20260806T012954_1a729c82df96"
+    ],
     "existing_ids": [
       "control_gate_review_candidate_silent_fallback_audit_20260805T081832_dd7d054f5e69",
       "control_gate_review_dispatch_collision_20260802T083038_2637a01a9d20",
