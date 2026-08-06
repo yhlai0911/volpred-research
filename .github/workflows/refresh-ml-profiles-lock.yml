@@ -35,7 +35,7 @@ jobs:
           prune-cache: true
       - name: Install Python
         run: uv python install 3.12
-      - name: Patch permanent CI profile selection
+      - name: Patch permanent research and CI profile selection
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -57,9 +57,23 @@ jobs:
           pyproject_text = pyproject_path.read_text(encoding="utf-8")
           pyproject_text = replace_once(
               pyproject_text,
-              'dev = [\n    "pytest>=8.0",\n]\n',
-              'dev = [\n    "packaging>=24.0",\n    "pytest>=8.0",\n]\n',
-              "direct test dependencies",
+              '[tool.uv]\n'
+              '# Temporary Draft safety: until the finalizer patches the permanent workflows,\n'
+              '# any delayed PR run must select the CPU profile rather than downloading CUDA.\n'
+              '# The finalizer restores runtime-ml before regenerating and committing uv.lock.\n'
+              'default-groups = ["dev", "ci-ml"]\n',
+              '[tool.uv]\n'
+              '# Existing `uv sync` / `uv run` behavior remains accelerator-capable by default.\n'
+              '# CI must opt out of defaults and select `ci-ml` explicitly.\n'
+              'default-groups = ["dev", "runtime-ml"]\n',
+              "restore research default profile",
+          )
+          pyproject_text = replace_once(
+              pyproject_text,
+              '# Faster feedback on the queue, and the suite stops being cancelled by commits it did not need to run for. scripts/audit_ci_paths_ignore.py check keeps the\n',
+              '# Faster feedback on the queue, and the suite stops being cancelled by a commit\n'
+              '# it did not need to run for. scripts/audit_ci_paths_ignore.py check keeps the\n',
+              "restore queue marker comment wrapping",
           )
           pyproject_path.write_text(pyproject_text, encoding="utf-8")
 
