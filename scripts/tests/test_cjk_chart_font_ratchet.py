@@ -94,32 +94,61 @@ def test_detector_rejects_uninvoked_apply_cjk_style_import(audit):
     assert not audit._establishes_cjk_font(src)
 
 
-def test_every_style_helper_actually_sets_a_cjk_font_chain(audit):
-    """A name may only sit in STYLE_HELPERS if its definition earns it.
+def test_every_style_helper_has_a_real_font_chain_or_delegates_to_one(audit):
+    """Every static escape hatch must root in a helper naming a real CJK face.
 
-    STYLE_HELPERS is the gate's only escape hatch: calling one of these clears
-    the check. That makes appending a name the cheapest way to silence a red
-    build without fixing anything. So each listed name must resolve to a real
-    definition in the repo whose body names a CJK face — otherwise the tuple
-    could quietly grow into a hole.
+    Delegation is allowed so ``article_charts._setup_style`` can call the single
+    canonical ``apply_cjk_style`` implementation instead of duplicating its font
+    list. A helper cycle with no literal CJK face still fails.
     """
     import ast
 
-    for helper in audit.STYLE_HELPERS:
-        found = []
-        for path in audit._iter_python_files():
-            try:
-                tree = ast.parse(path.read_text(encoding="utf-8"))
-            except (OSError, UnicodeDecodeError, SyntaxError):  # silent-ok: skipping an unparseable file can only hide a definition, and a helper with none found fails the assert below — errs toward failing the gate, never toward passing it
+    definitions: dict[str, list[tuple[str, set[str]]]] = {
+        helper: [] for helper in audit.STYLE_HELPERS
+    }
+    for path in audit._iter_python_files():
+        try:
+            source = path.read_text(encoding="utf-8")
+            tree = ast.parse(source)
+        except (OSError, UnicodeDecodeError, SyntaxError):
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.FunctionDef) or node.name not in definitions:
                 continue
-            for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef) and node.name == helper:
-                    found.append(ast.get_source_segment(
-                        path.read_text(encoding="utf-8"), node) or "")
+            body = ast.get_source_segment(source, node) or ""
+            calls: set[str] = set()
+            for child in ast.walk(node):
+                if not isinstance(child, ast.Call):
+                    continue
+                fn = child.func
+                calls.add(
+                    fn.attr if isinstance(fn, ast.Attribute) else getattr(fn, "id", "")
+                )
+            definitions[node.name].append((body, calls))
+
+    for helper, found in definitions.items():
         assert found, f"STYLE_HELPERS 列了 {helper!r}，但 repo 裡沒有這個函式的定義"
-        assert any(
-            any(face in body for face in audit.CJK_FACES) for body in found
-        ), f"{helper!r} 被當成 CJK style helper，但它的定義沒有建立任何 CJK 字型鏈"
+
+    valid = {
+        helper
+        for helper, found in definitions.items()
+        if any(any(face in body for face in audit.CJK_FACES) for body, _ in found)
+    }
+    changed = True
+    while changed:
+        changed = False
+        for helper, found in definitions.items():
+            if helper in valid:
+                continue
+            if any(calls & valid for _, calls in found):
+                valid.add(helper)
+                changed = True
+
+    invalid = sorted(set(audit.STYLE_HELPERS) - valid)
+    assert not invalid, (
+        "下列 CJK style helper 既未建立字型鏈，也未委派給有效 helper："
+        + ", ".join(invalid)
+    )
 
 
 def test_detector_ignores_chinese_docstrings(audit):

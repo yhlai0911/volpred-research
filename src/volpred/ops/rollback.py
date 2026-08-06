@@ -84,9 +84,51 @@ def _archive_paths(paths: list[Path], destination: Path) -> None:
                 tar.add(path, arcname=str(path.relative_to(project_path())))
 
 
+def _point_dir(storage_dir: str, point_id: str) -> Path:
+    """Resolve a rollback point without allowing ``point_id`` path traversal."""
+    root = _rollback_root(storage_dir).resolve()
+    candidate = (root / point_id).resolve()
+    if candidate == root or root not in candidate.parents:
+        raise RuntimeError(f"Rollback point id escapes rollback root: {point_id!r}")
+    return candidate
+
+
+def _point_file(point_dir: Path, relative_path: str) -> Path:
+    """Resolve a manifest-owned file without allowing escape from its point."""
+    root = point_dir.resolve()
+    candidate = (point_dir / relative_path).resolve()
+    if candidate == root or root not in candidate.parents:
+        raise RuntimeError(
+            f"Rollback manifest path escapes its point directory: {relative_path!r}"
+        )
+    return candidate
+
+
+def _validate_archive_members(tar: tarfile.TarFile, destination: Path) -> None:
+    """Validate every member before any extraction can partially modify state."""
+    destination = destination.resolve()
+    for member in tar.getmembers():
+        try:
+            filtered = tarfile.data_filter(member, str(destination))
+        except (tarfile.FilterError, OSError, ValueError) as exc:
+            raise RuntimeError(
+                f"Unsafe rollback archive member {member.name!r}: {exc}"
+            ) from exc
+        if filtered is None:
+            raise RuntimeError(
+                f"Rollback archive member {member.name!r} was rejected by the data filter"
+            )
+
+
+def _safe_extract_archive(tar: tarfile.TarFile, destination: Path) -> None:
+    """Extract only data-safe members after an all-or-nothing validation pass."""
+    _validate_archive_members(tar, destination)
+    tar.extractall(destination, filter="data")
+
+
 def create_rollback_point(*, point_id: str | None = None, storage_dir: str = "storage") -> dict[str, Any]:
     point_id = point_id or datetime.now(timezone.utc).strftime("rollback_%Y%m%dT%H%M%SZ")
-    point_dir = _rollback_root(storage_dir) / point_id
+    point_dir = _point_dir(storage_dir, point_id)
     if point_dir.exists():
         raise RuntimeError(f"Rollback point already exists: {point_id}")
     point_dir.mkdir(parents=True, exist_ok=False)
@@ -171,7 +213,7 @@ def _restore_rollback_point_unlocked(
     force: bool = False,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    point_dir = _rollback_root(storage_dir) / point_id
+    point_dir = _point_dir(storage_dir, point_id)
     manifest_path = point_dir / "manifest.json"
     if not manifest_path.exists():
         raise RuntimeError(f"Unknown rollback point: {point_id}")
@@ -179,9 +221,15 @@ def _restore_rollback_point_unlocked(
     if not force and _git("rev-parse", "HEAD").strip() != str(manifest["head_sha"]):
         raise RuntimeError("Current HEAD differs from rollback baseline. Re-run with force=True if intentional.")
 
+    untracked_list_path = _point_file(
+        point_dir, str(manifest["untracked_list_path"])
+    )
+    tracked_patch_path = _point_file(
+        point_dir, str(manifest["tracked_patch_path"])
+    )
     baseline_untracked = {
         line.strip()
-        for line in (point_dir / str(manifest["untracked_list_path"])).read_text().splitlines()
+        for line in untracked_list_path.read_text().splitlines()
         if line.strip()
     }
     current_untracked = {
@@ -204,6 +252,17 @@ def _restore_rollback_point_unlocked(
     if dry_run:
         return result
 
+    # Validate every manifest archive before the destructive restore starts.
+    archive_paths: list[Path] = []
+    for archive_key in ("storage_archive_path", "config_archive_path", "untracked_archive_path"):
+        archive_name = manifest.get(archive_key)
+        if not archive_name:
+            continue
+        archive_path = _point_file(point_dir, str(archive_name))
+        with tarfile.open(archive_path, "r:gz") as tar:
+            _validate_archive_members(tar, project_path())
+        archive_paths.append(archive_path)
+
     subprocess.run(
         ["git", "restore", "--source", str(manifest["head_sha"]), "--worktree", "--staged", "."],
         cwd=project_path(),
@@ -221,19 +280,15 @@ def _restore_rollback_point_unlocked(
             target.unlink()
 
     subprocess.run(
-        ["git", "apply", str(point_dir / str(manifest["tracked_patch_path"]))],
+        ["git", "apply", str(tracked_patch_path)],
         cwd=project_path(),
         check=True,
         **git_writer_subprocess_kwargs(),
     )
 
-    for archive_key in ("storage_archive_path", "config_archive_path", "untracked_archive_path"):
-        archive_name = manifest.get(archive_key)
-        if not archive_name:
-            continue
-        archive_path = point_dir / str(archive_name)
+    for archive_path in archive_paths:
         with tarfile.open(archive_path, "r:gz") as tar:
-            tar.extractall(project_path())
+            _safe_extract_archive(tar, project_path())
 
     restore_log = point_dir / "restore_log.json"
     restore_log.write_text(
