@@ -41,9 +41,9 @@ jobs:
         run: |
           set -euo pipefail
           uv export --frozen --no-hashes --no-header --no-annotate > "$RUNNER_TEMP/research.txt"
-          grep -Fx "torch==2.10.0" "$RUNNER_TEMP/research.txt"
-          grep -Fx "xgboost==3.2.0" "$RUNNER_TEMP/research.txt"
-          grep -Fx "stable-baselines3==2.9.0" "$RUNNER_TEMP/research.txt"
+          grep -Eq '^torch==2\.10\.0($|;)' "$RUNNER_TEMP/research.txt"
+          grep -Eq '^xgboost==3\.2\.0($|;)' "$RUNNER_TEMP/research.txt"
+          grep -Eq '^stable-baselines3==2\.9\.0($|;)' "$RUNNER_TEMP/research.txt"
           if grep -Eq '^(torch==2\.10\.0\+cpu|xgboost-cpu==)' "$RUNNER_TEMP/research.txt"; then
             echo "::error::default research profile unexpectedly selected CPU-only distributions"
             exit 1
