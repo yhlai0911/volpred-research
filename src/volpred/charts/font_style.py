@@ -155,18 +155,31 @@ def apply_cjk_style(*, dpi: int | None = None, strict: bool = False) -> Resolved
     """
     import matplotlib.pyplot as plt
 
-    resolved = resolve_cjk_font()
-    if resolved is None:
-        resolved = resolve_cjk_font(refresh=True)
-
-    if resolved is None:
+    resolution_error: Exception | None = None
+    try:
+        resolved = resolve_cjk_font()
+        if resolved is None:
+            resolved = resolve_cjk_font(refresh=True)
+    except Exception as exc:
+        resolution_error = exc
         message = (
-            "apply_cjk_style: no installed font covers the CJK probe "
-            f"{CJK_GLYPH_PROBE!r}; Chinese text will render incorrectly"
+            "CJK font resolution check failed "
+            f"({type(exc).__name__}: {exc}); Chinese text may render incorrectly"
         )
         if strict:
-            raise RuntimeError(message)
+            raise RuntimeError(message) from exc
         warnings.warn(message, stacklevel=2)
+        resolved = None
+
+    if resolved is None:
+        if resolution_error is None:
+            message = (
+                "apply_cjk_style: no installed font covers the CJK probe "
+                f"{CJK_GLYPH_PROBE!r}; Chinese text will render incorrectly"
+            )
+            if strict:
+                raise RuntimeError(message)
+            warnings.warn(message, stacklevel=2)
         families = [*CJK_FONT_CHAIN, "DejaVu Sans", "sans-serif"]
     else:
         # The resolver only returns entries already registered in the global
