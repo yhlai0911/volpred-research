@@ -1,13 +1,120 @@
 name: Repair CI Contract Drift
 
 on:
+  push:
+    branches:
+      - fix/ci-contract-drift-20260806
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: repair-ci-contract-drift-20260806
+  cancel-in-progress: true
+
+env:
+  VOLPRED_NO_REMOTE_WRITE: "1"
+  VOLPRED_NO_EMAIL: "1"
+  VOLPRED_NO_CANONICAL_WRITE: "1"
+  VOLPRED_NO_REMOTE_READ: "1"
 
 jobs:
-  parked:
-    runs-on: ubuntu-latest
+  repair-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     steps:
-      - run: echo "Repair inputs are being staged."
+      - name: Check out the fixed repair branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Apply the reviewed code patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          patch=.github/ci-contract-drift.patch
+          if git apply --check "$patch"; then
+            git apply "$patch"
+          elif git apply --reverse --check "$patch"; then
+            echo "Patch is already applied."
+          else
+            echo "::error::Repair patch no longer matches this branch."
+            exit 1
+          fi
+
+      - name: Record K1815 conservatively and regenerate governance files
+        run: python3 .github/repair_ci_contract_drift.py
+
+      - name: Compile changed Python modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            scripts/org/manager_run.py \
+            src/volpred/ops/execution/registry.py \
+            tests/test_provider_spawn_audit.py \
+            tests/test_provider_spawn_contracts.py \
+            tests/test_org_attach.py \
+            scripts/hooks/write_claim_guard.py \
+            scripts/tests/test_phase_z_ownership_class_gate.py
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Run the failed contracts and adjacent regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --extra dev python -m pytest -q -p no:cacheprovider \
+            tests/test_governance_sync.py \
+            tests/test_org_attach.py::test_manager_is_attached_by_default \
+            tests/test_provider_spawn_audit.py \
+            tests/test_provider_spawn_contracts.py \
+            scripts/tests/test_agentic_cli_timeout_killpg.py::test_timed_out_agentic_cli_is_killed_as_a_group \
+            scripts/tests/test_knowledge_unrecorded_ratchet.py \
+            tests/test_write_claim_guard.py \
+            scripts/tests/test_phase_z_ownership_class_gate.py::test_orphan_namespaces_stays_a_declaration_not_a_recognizer_zoo
+
+      - name: Run Ruff on the repaired surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --extra dev ruff check \
+            scripts/org/manager_run.py \
+            src/volpred/ops/execution/registry.py \
+            tests/test_provider_spawn_audit.py \
+            tests/test_provider_spawn_contracts.py \
+            tests/test_org_attach.py \
+            scripts/hooks/write_claim_guard.py \
+            scripts/tests/test_phase_z_ownership_class_gate.py \
+            .github/repair_ci_contract_drift.py
+
+      - name: Commit the verified repair to the branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            CLAUDE.md \
+            AGENTS.md \
+            scripts/org/manager_run.py \
+            src/volpred/ops/execution/registry.py \
+            tests/test_provider_spawn_audit.py \
+            tests/test_provider_spawn_contracts.py \
+            tests/test_org_attach.py \
+            scripts/hooks/write_claim_guard.py \
+            scripts/tests/test_phase_z_ownership_class_gate.py \
+            storage/memory/knowledge.json
+          if git diff --cached --quiet; then
+            echo "Verified repair was already committed."
+            exit 0
+          fi
+          git commit -m "fix(ci): restore governance and execution contracts"
+          git push origin HEAD:fix/ci-contract-drift-20260806
