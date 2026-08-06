@@ -42,6 +42,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "packaging>=24.0",
     "pytest>=8.0",
 ]
 # The normal research profile keeps Linux accelerator support. The CI profile
@@ -71,9 +72,10 @@ build-backend = "hatchling.build"
 packages = ["src/volpred"]
 
 [tool.uv]
-# Existing `uv sync` / `uv run` behavior remains accelerator-capable by default.
-# CI must opt out of defaults and select `ci-ml` explicitly.
-default-groups = ["dev", "runtime-ml"]
+# Temporary Draft safety: until the finalizer patches the permanent workflows,
+# any delayed PR run must select the CPU profile rather than downloading CUDA.
+# The finalizer restores runtime-ml before regenerating and committing uv.lock.
+default-groups = ["dev", "ci-ml"]
 conflicts = [
     [
         { extra = "research-ml" },
@@ -117,8 +119,7 @@ testpaths = ["tests", "scripts/tests"]
 # CI splits them out: the 15-minute suite runs `-m "not real_queue"` and skips
 # supervisor commits entirely, while .github/workflows/queue-invariants.yml
 # runs `-m real_queue` on every queue change and answers in about a minute.
-# Faster feedback on the queue, and the suite stops being cancelled by a commit
-# it did not need to run for. scripts/audit_ci_paths_ignore.py check keeps the
+# Faster feedback on the queue, and the suite stops being cancelled by commits it did not need to run for. scripts/audit_ci_paths_ignore.py check keeps the
 # two halves consistent.
 markers = [
     "real_queue: reads the live storage/next_tasks.json on purpose",
