@@ -23,7 +23,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Move intentional governance edits into the canonical source
+      - name: Reconfirm canonical governance and generated files
         run: python3 .github/canonicalize_governance_repair.py
 
       - name: Install uv
@@ -39,16 +39,25 @@ jobs:
           uv run --extra dev python -m pytest -q -p no:cacheprovider \
             tests/test_governance_sync.py
 
-      - name: Commit the canonicalized governance set
+      - name: Assert the canonical set is already committed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet -- config/governance_shared.md CLAUDE.md AGENTS.md; then
+            echo "::error::Canonical governance changed after its verified commit."
+            git diff -- config/governance_shared.md CLAUDE.md AGENTS.md
+            exit 1
+          fi
+
+      - name: Remove the temporary repair infrastructure in one commit
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add config/governance_shared.md CLAUDE.md AGENTS.md
-          if git diff --cached --quiet; then
-            echo "Governance is already canonical and synchronized."
-            exit 0
-          fi
-          git commit -m "fix(governance): preserve standing policy in canonical source"
+          git rm \
+            .github/canonicalize_governance_repair.py \
+            .github/canonicalize-governance-trigger.txt \
+            .github/workflows/canonicalize-governance-repair.yml
+          git commit -m "ci: remove temporary canonical governance repair"
           git push origin HEAD:fix/ci-contract-drift-20260806
