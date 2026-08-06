@@ -54,6 +54,8 @@ def _font_has_glyphs(path: str | Path, glyphs: str = CJK_GLYPH_PROBE) -> bool:
     try:
         charmap = FT2Font(str(path)).get_charmap()
     except (OSError, RuntimeError, ValueError):
+        # silent-ok: an unreadable font file is a negative candidate result;
+        # no chart is rendered until another candidate passes the glyph probe.
         return False
     return all(ord(character) in charmap for character in glyphs)
 
@@ -70,6 +72,8 @@ def _refresh_system_fonts() -> None:
         try:
             fm.fontManager.addfont(path)
         except (OSError, RuntimeError, ValueError):
+            # silent-ok: one malformed system font must not abort discovery;
+            # strict application still fails when no usable CJK font remains.
             continue
         known.add(resolved)
 
@@ -154,7 +158,6 @@ def apply_cjk_style(*, dpi: int | None = None, strict: bool = False) -> Resolved
     Traditional-Chinese glyph probe.
     """
     import matplotlib.pyplot as plt
-    from matplotlib import font_manager as fm
 
     resolved = resolve_cjk_font()
     if resolved is None:
@@ -170,12 +173,8 @@ def apply_cjk_style(*, dpi: int | None = None, strict: bool = False) -> Resolved
         warnings.warn(message, stacklevel=2)
         families = [*CJK_FONT_CHAIN, "DejaVu Sans", "sans-serif"]
     else:
-        # Ensure a font discovered during cache refresh is visible to the global
-        # manager used by subsequent findfont/draw calls.
-        try:
-            fm.fontManager.addfont(resolved.path)
-        except (OSError, RuntimeError, ValueError):
-            pass
+        # The resolver only returns entries already registered in the global
+        # manager; a refresh registers missing system fonts before re-resolving.
         families = [
             resolved.family,
             *(family for family in CJK_FONT_CHAIN if family != resolved.family),
