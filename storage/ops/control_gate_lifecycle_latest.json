@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-06T08:00:50.228472+00:00",
+  "generated_at": "2026-08-06T09:01:01.066213+00:00",
   "registry_path": "/Users/yhlai0911/volpred-research/config/control_gate_registry.json",
   "registry_owner": "volpred.ops.control_gate_lifecycle",
   "inventory": {
     "window": {
       "hours": 168.0,
-      "start": "2026-07-30T08:00:50.228472+00:00",
-      "end": "2026-08-06T08:00:50.228472+00:00"
+      "start": "2026-07-30T09:01:01.066213+00:00",
+      "end": "2026-08-06T09:01:01.066213+00:00"
     },
     "registered_gate_count": 29,
     "observed_gate_count": 12,
@@ -31,8 +31,8 @@
       {
         "gate_id": "dispatch_starvation_lockout",
         "registered": true,
-        "trigger_count": 22,
-        "blocking_count": 22,
+        "trigger_count": 18,
+        "blocking_count": 18,
         "distinct_candidates": 10,
         "latest_at": "2026-08-03T09:06:12.258850+00:00"
       },
@@ -103,7 +103,7 @@
       {
         "gate_id": "task_generation",
         "registered": true,
-        "trigger_count": 51,
+        "trigger_count": 39,
         "blocking_count": 0,
         "distinct_candidates": 9,
         "latest_at": "2026-08-06T03:10:21.576789+00:00"
@@ -167,9 +167,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -209,22 +209,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -267,9 +267,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -309,32 +309,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -367,9 +369,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -404,32 +406,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -462,9 +466,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-03T09:06:12.258850+00:00"
       },
@@ -499,22 +503,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 6,
-        "queued": 4,
-        "succeeded": 2,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 4,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 6,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 2,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "K1733",
@@ -627,9 +631,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
         "start": "2026-08-01T07:46:11.981203+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": "2026-08-01T07:46:11.981203+00:00",
         "newest_evidence_at": "2026-08-03T09:06:12.258850+00:00"
       },
@@ -664,22 +668,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 2,
-        "queued": 0,
-        "succeeded": 2,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 2,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 2,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "K1654_article_general",
@@ -746,9 +750,9 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-23T08:00:50.228472+00:00",
-        "start": "2026-07-23T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-23T09:01:01.066213+00:00",
+        "start": "2026-07-23T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-07-26T19:38:01.064738+00:00"
       },
@@ -792,22 +796,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 2,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "03148540bd1f4e09936eeee66024ecb9",
@@ -872,9 +876,9 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-23T08:00:50.228472+00:00",
-        "start": "2026-07-23T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-23T09:01:01.066213+00:00",
+        "start": "2026-07-23T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-05T08:18:32.105743+00:00"
       },
@@ -916,22 +920,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 1,
         "incident_resolved": 0,
@@ -940,7 +944,8 @@
       "review": {
         "due": true,
         "reasons": [
-          "incident_occurrences=60>=2"
+          "incident_occurrences=60>=2",
+          "review_age_hours=168.1>=168"
         ]
       },
       "pdca_phase": "act",
@@ -977,9 +982,9 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-23T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-23T09:01:01.066213+00:00",
         "start": "2026-07-30T16:26:26.447893+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": "2026-07-30T16:26:26.447893+00:00",
         "newest_evidence_at": "2026-08-03T22:27:16.533775+00:00"
       },
@@ -1021,22 +1026,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 1,
         "incident_resolved": 0,
@@ -1079,11 +1084,11 @@
       ],
       "window": {
         "hours": 336.0,
-        "lookback_start": "2026-07-23T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-23T09:01:01.066213+00:00",
         "start": "2026-08-01T15:00:57.336745+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": "2026-08-01T15:00:57.336745+00:00",
-        "newest_evidence_at": "2026-08-06T07:59:31.340699+00:00"
+        "newest_evidence_at": "2026-08-06T08:59:46.314392+00:00"
       },
       "evidence": {
         "trigger_count": 0,
@@ -1104,7 +1109,7 @@
           "worker_killed_timeout": 2,
           "worker_orphan_gone_or_reused": 1
         },
-        "incident_observations": 12919,
+        "incident_observations": 13038,
         "incident_ids": [
           "inc_792a94b0ecf4"
         ],
@@ -1132,7 +1137,7 @@
             "path": "/Users/yhlai0911/volpred-research/storage/ops/dispatch_workspace_receipts.jsonl",
             "ok": true,
             "error": null,
-            "row_count": 22868,
+            "row_count": 23034,
             "malformed_rows": 0,
             "selected_event_rows": 49,
             "indexed_identity_count": 49
@@ -1155,22 +1160,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 1,
         "incident_resolved": 0,
@@ -1213,14 +1218,14 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-06T03:10:21.576789+00:00"
       },
       "evidence": {
-        "trigger_count": 51,
+        "trigger_count": 39,
         "distinct_candidates": 9,
         "malformed_rows": 0,
         "incident_count": 0,
@@ -1250,26 +1255,26 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 2,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 3,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 1,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 4,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 1,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 2,
+        "succeeded": 3,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "event_article_fomc_2026-07-29_tplus0",
-            "decision_count": 42,
+            "decision_count": 30,
             "task_ids": [
               "event_article_fomc_2026-07-29_tplus0"
             ],
@@ -1366,7 +1371,8 @@
       "review": {
         "due": true,
         "reasons": [
-          "harm_outcomes=6>=1"
+          "harm_outcomes=6>=1",
+          "review_age_hours=168.1>=168"
         ]
       },
       "pdca_phase": "act",
@@ -1402,9 +1408,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-06T06:00:30.135896+00:00"
       },
@@ -1444,22 +1450,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 9,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 45,
+        "queued": 9,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 45,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_04438b53",
@@ -2007,10 +2013,12 @@
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "check",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -2043,9 +2051,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-06T06:00:29.989107+00:00"
       },
@@ -2085,22 +2093,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 1,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 35,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 1,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 35,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_04438b53",
@@ -2459,10 +2467,12 @@
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "check",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -2495,9 +2505,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -2546,32 +2556,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -2611,9 +2623,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-03T17:00:18.324785+00:00"
       },
@@ -2662,22 +2674,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 3,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 3,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 3,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 3,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_5378daa1",
@@ -2712,10 +2724,12 @@
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "check",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -2748,9 +2762,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -2799,32 +2813,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -2857,9 +2873,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-04T18:00:23.854780+00:00"
       },
@@ -2899,22 +2915,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 3,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 3,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_5378daa1",
@@ -2952,10 +2968,12 @@
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "check",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -2988,9 +3006,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3030,32 +3048,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -3088,9 +3108,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3130,22 +3150,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -3188,9 +3208,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3230,32 +3250,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -3288,9 +3310,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-06T01:30:55.377038+00:00"
       },
@@ -3330,22 +3352,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 1,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 1,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 1,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_f3d374cf",
@@ -3400,9 +3422,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3442,32 +3464,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -3500,9 +3524,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
         "start": "2026-08-01T10:52:24.643612+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": "2026-08-01T10:52:24.643612+00:00",
         "newest_evidence_at": "2026-08-06T01:12:47.158082+00:00"
       },
@@ -3542,22 +3566,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 9,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 13,
+        "queued": 9,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 15,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 13,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "daily_digest_20260802",
@@ -3897,9 +3921,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -3939,22 +3963,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
@@ -3997,9 +4021,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
         "start": "2026-08-01T08:54:03.118132+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": "2026-08-01T08:54:03.118132+00:00",
         "newest_evidence_at": "2026-08-05T08:40:14.022110+00:00"
       },
@@ -4039,22 +4063,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 1,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 4,
+        "queued": 1,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 4,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "k:K1323|audience:general",
@@ -4138,9 +4162,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -4180,32 +4204,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -4242,9 +4268,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -4284,32 +4310,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -4342,9 +4370,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-05T08:49:26.650665+00:00"
       },
@@ -4384,22 +4412,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 10,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 10,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 10,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_0454c051",
@@ -4501,7 +4529,8 @@
         "reasons": [
           "raw_triggers=10>=10",
           "distinct_candidates=10>=5",
-          "harm_outcomes=10>=1"
+          "harm_outcomes=10>=1",
+          "review_age_hours=168.1>=168"
         ]
       },
       "pdca_phase": "act",
@@ -4537,9 +4566,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": "2026-08-06T01:29:54.281901+00:00"
       },
@@ -4579,22 +4608,22 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 1,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 1,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 1,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [
           {
             "candidate_id": "mile_5639d4cc",
@@ -4613,7 +4642,8 @@
       "review": {
         "due": true,
         "reasons": [
-          "harm_outcomes=1>=1"
+          "harm_outcomes=1>=1",
+          "review_age_hours=168.1>=168"
         ]
       },
       "pdca_phase": "act",
@@ -4650,9 +4680,9 @@
       ],
       "window": {
         "hours": 168.0,
-        "lookback_start": "2026-07-30T08:00:50.228472+00:00",
-        "start": "2026-07-30T08:00:50.228472+00:00",
-        "end": "2026-08-06T08:00:50.228472+00:00",
+        "lookback_start": "2026-07-30T09:01:01.066213+00:00",
+        "start": "2026-07-30T09:01:01.066213+00:00",
+        "end": "2026-08-06T09:01:01.066213+00:00",
         "last_reviewed_at": null,
         "newest_evidence_at": null
       },
@@ -4692,32 +4722,34 @@
         ]
       },
       "outcomes": {
-        "waiver": 0,
-        "failed": 0,
-        "blocked": 0,
-        "queued": 0,
-        "succeeded": 0,
-        "dispatch_fire": 0,
         "task_claim": 0,
         "worker_failed": 0,
+        "published": 0,
+        "queued": 0,
+        "dispatch_fire": 0,
+        "sequence_coverage_gap": 0,
+        "blocked": 0,
+        "observed": 0,
+        "retry": 0,
+        "waiver": 0,
         "in_flight": 0,
         "unjoined": 0,
-        "missed_deadline": 0,
-        "observed": 0,
-        "published": 0,
         "superseded": 0,
-        "retry": 0,
-        "sequence_coverage_gap": 0,
+        "failed": 0,
+        "succeeded": 0,
+        "missed_deadline": 0,
         "candidate_outcomes": [],
         "incident_open": 0,
         "incident_resolved": 0,
         "incident_recurrence": 0
       },
       "review": {
-        "due": false,
-        "reasons": []
+        "due": true,
+        "reasons": [
+          "review_age_hours=168.1>=168"
+        ]
       },
-      "pdca_phase": "plan",
+      "pdca_phase": "act",
       "allowed_actions": [
         "retain",
         "recalibrate",
@@ -4730,13 +4762,28 @@
     "gate_count": 29,
     "unregistered_gate_count": 0,
     "unclassified_blocking_count": 0,
-    "review_due_count": 7,
+    "review_due_count": 21,
     "hard_gate_count": 15,
     "unhealthy_source_count": 1
   },
   "review_tasks": {
-    "created_count": 0,
-    "created_ids": [],
+    "created_count": 14,
+    "created_ids": [
+      "control_gate_review_event_reaction_coverage_20260806T090101_2cc32d5150e1",
+      "control_gate_review_hourly_pregate_20260806T090101_a57e1e0e34e1",
+      "control_gate_review_publish_throttle_20260806T060030_4d6c3a43f822",
+      "control_gate_review_anti_ai_style_20260806T060029_596cdde422bf",
+      "control_gate_review_release_content_audit_20260806T090101_8d1a90631983",
+      "control_gate_review_release_lazypack_completeness_20260803T170018_c0446bdeeb51",
+      "control_gate_review_member_qa_publish_identity_20260806T090101_85c6bbcaf1eb",
+      "control_gate_review_release_pool_arc_dedup_20260804T180023_407eb97eb01f",
+      "control_gate_review_event_cross_stage_similarity_20260806T090101_858b4cc03df3",
+      "control_gate_review_publisher_content_depth_20260806T090101_866437ea135e",
+      "control_gate_review_publisher_digest_recap_20260806T090101_1c7606262963",
+      "control_gate_review_publisher_cluster_cap_20260806T090101_07dd00aab554",
+      "control_gate_review_event_metadata_contract_20260806T090101_87c32c3b739b",
+      "control_gate_review_publisher_cjk_font_contract_20260806T090101_afe1b18ace79"
+    ],
     "existing_ids": [
       "control_gate_review_candidate_silent_fallback_audit_20260805T081832_dd7d054f5e69",
       "control_gate_review_dispatch_collision_20260802T083038_2637a01a9d20",
