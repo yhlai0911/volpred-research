@@ -241,6 +241,14 @@ _LAUNCH_CONTRACTS = {
         required_capabilities=frozenset({"filesystem", "python", "shell"}),
         requires_formal_gate=False,
     ),
+    "org-manager.claude": LaunchContract(
+        provider_id="claude-cli",
+        semantic_class="task-orchestration",
+        required_capabilities=frozenset(
+            {"filesystem", "shell", "task-routing"}
+        ),
+        requires_formal_gate=False,
+    ),
     "dispatch-supervisor.codex-probe": LaunchContract(
         provider_id="codex-cli",
         semantic_class="task-orchestration",

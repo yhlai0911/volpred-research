@@ -43304,5 +43304,29 @@
   ],
   "confidence": 0.92,
   "created_at": "2026-08-05T05:07:33.879015"
+ },
+ {
+  "item_id": "23849d7e",
+  "category": "experiment_result",
+  "content": "[K1815 review=PENDING；verdict=UNVERIFIED；暫定結果=NULL_INCREMENTAL_VALUE] 以 SPY 的 22 日 forward realized volatility 為 target，restricted model 為 VIX level，augmented model 加入 F10 隔夜 VIX gap |VIX Open_t−VIX Close_{t−1}|。固定 IS/OOS 切分（IS 至 2018-12-31；OOS 2019-01-02–2026-05-28，n=1861）下，nested Clark-West t=-0.4282、one-sided p=0.6657，未達預先指定 Harvey |t|>3.0；augmented MSPE 82.1366 亦高於 baseline 81.6302。這只支持『本設計下未偵測到 F10 對 VIX 的樣本外增量預測價值』，不能證明效果不存在。reproduce_report 顯示 56/56 scalar 在預宣告容忍度內重現，但 review_verdict.json 仍是 placeholder，故依 K1259 以 UNVERIFIED 收錄；完成獨立 source-level review 前不得引用為 PASS、不得作正式論文認證。",
+  "evidence": [
+   "experiments/K1815/K1815_results.json (sha256=b2cbbdd43628955f5a78d596357e72c889510a3b69d7291bb1613d9b87c63274)",
+   "experiments/K1815/reproduce_report.json (status=pass_tolerated; 56/56 scalar matches)",
+   "experiments/K1815/README.md",
+   "experiments/K1815/review_verdict.json (placeholder; independent review pending)"
+  ],
+  "confidence": 0.6,
+  "created_at": "2026-08-06T17:05:00+08:00",
+  "k_id": "K1815",
+  "experiment_id": "K1815",
+  "experiment_path": "experiments/K1815",
+  "verdict": "UNVERIFIED",
+  "needs_human": true,
+  "gap": "Independent source-level review is not complete; review_verdict.json is still a placeholder.",
+  "provenance": {
+   "recorded_by": "main-thread CI repair",
+   "scientific_status": "preliminary reproduced result, not review-certified",
+   "canonical_result_sha256": "b2cbbdd43628955f5a78d596357e72c889510a3b69d7291bb1613d9b87c63274"
+  }
  }
 ]

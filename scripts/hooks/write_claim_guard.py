@@ -82,6 +82,16 @@ ZONE_PREFIXES = (
     "frontend-v2-fix/src/",
 )
 
+# Department ownership answers "who may write here"; a path claim answers
+# "which concurrent edits are one unit of work".  Broad engineering roots are
+# shared by many unrelated tasks, so treating their ownership declaration as a
+# directory-wide lock would make one script edit block every other script edit.
+# Explicit high-coherence subtrees above (for example scripts/org/) still take a
+# coarse claim; files elsewhere under these broad roots claim only themselves.
+FILE_GRANULAR_OWNED_PREFIXES = frozenset(
+    {"config/", "frontend-v2-fix/", "scripts/", "tests/"}
+)
+
 
 def _who(holder: dict) -> str:
     """Name the holder so the blocked writer knows who to talk to.
@@ -103,7 +113,7 @@ def _now() -> float:
 
 
 def _declared_prefixes() -> tuple[str, ...]:
-    """Zone prefixes plus every department's declared owned_paths."""
+    """Coarse zones plus exclusive department paths used as claim scopes."""
     prefixes = list(ZONE_PREFIXES)
     registry = REPO_ROOT / "storage" / "org" / "registry.json"
     try:
@@ -111,7 +121,12 @@ def _declared_prefixes() -> tuple[str, ...]:
         for meta in (data.get("departments") or {}).values():
             if meta.get("status") == "retired":
                 continue
-            prefixes.extend(p for p in (meta.get("owned_paths") or []) if isinstance(p, str))
+            for prefix in meta.get("owned_paths") or []:
+                if not isinstance(prefix, str):
+                    continue
+                if prefix in FILE_GRANULAR_OWNED_PREFIXES:
+                    continue
+                prefixes.append(prefix)
     except (OSError, ValueError):  # silent-ok: no org yet is a valid state; zones still apply
         pass
     return tuple(sorted(set(prefixes), key=len, reverse=True))

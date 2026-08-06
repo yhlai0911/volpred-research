@@ -16,6 +16,7 @@ from volpred.ops.execution.registry import (
 CONTRACT_CASES = (
     ("execution-brief.claude", "claude-opus-5", "claude-cli"),
     ("execution-brief.codex", "gpt-5.6-sol", "codex-cli"),
+    ("org-manager.claude", "claude-opus-5", "claude-cli"),
     ("lazypack.codex", "gpt-5.6-sol", "codex-cli"),
     ("lazypack.agy", "gemini-3.6-flash-high", "agy-cli"),
     ("trending-scan.agy", "gemini-3.6-flash-high", "agy-cli"),
