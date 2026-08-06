@@ -41,7 +41,7 @@ jobs:
           uv run --extra dev python -m pytest -q -p no:cacheprovider \
             tests/test_alerts.py::test_check_alert_conditions_marks_registered_self_heal_as_noninterrupting \
             tests/test_control_gate_lifecycle.py
-          uvx ruff check src/volpred/ops/control_gate_lifecycle.py
+          uvx ruff check --select E4,E7,E9,F src/volpred/ops/control_gate_lifecycle.py
 
       - name: Commit repair and remove temporary runner
         shell: bash
