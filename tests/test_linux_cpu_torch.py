@@ -28,6 +28,12 @@ def _lock_packages(lock: dict, name: str) -> list[dict]:
     return [package for package in lock["package"] if package["name"] == name]
 
 
+def _requirement_name(requirement: str) -> str:
+    match = re.match(r"\s*([A-Za-z0-9_.-]+)", requirement)
+    assert match, f"cannot parse requirement name: {requirement!r}"
+    return match.group(1).lower().replace("_", "-")
+
+
 def _conflict_pair(*entries: tuple[str, str]) -> frozenset[tuple[str, str]]:
     return frozenset(entries)
 
@@ -53,9 +59,7 @@ def _exported_requirements(*args: str) -> tuple[set[str], list[str]]:
     for line in lines:
         if line.startswith(("#", "--", ".", "-e ")):
             continue
-        match = re.match(r"([A-Za-z0-9_.-]+)", line)
-        if match:
-            names.add(match.group(1).lower().replace("_", "-"))
+        names.add(_requirement_name(line))
     return names, lines
 
 
@@ -72,10 +76,7 @@ def test_pyproject_separates_research_and_ci_ml_profiles() -> None:
         "xgboost",
         "xgboost-cpu",
     }
-    assert not any(
-        dependency.split(";", 1)[0].split("=", 1)[0].strip() in forbidden_base_names
-        for dependency in base_dependencies
-    )
+    assert not ({_requirement_name(item) for item in base_dependencies} & forbidden_base_names)
 
     assert set(optional["research-ml"]) == {
         f"stable-baselines3=={EXPECTED_SB3_VERSION}",
