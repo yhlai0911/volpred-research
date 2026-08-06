@@ -11,6 +11,14 @@ on:
       - tests/test_linux_cpu_torch.py
       - scripts/finalize_ml_profiles.py
       - .github/workflows/finalize-ml-profiles-v2.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - pyproject.toml
+      - tests/test_linux_cpu_torch.py
+      - scripts/finalize_ml_profiles.py
+      - .github/workflows/finalize-ml-profiles-v2.yml
   workflow_dispatch:
 
 permissions:
@@ -22,6 +30,11 @@ concurrency:
 
 jobs:
   finalize:
+    # Never grant a write-capable finalizer to any head except the named
+    # same-repository isolation branch.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.head_ref == 'fix/linux-cpu-ci-finalizer-20260807'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
