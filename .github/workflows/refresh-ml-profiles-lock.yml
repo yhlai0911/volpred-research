@@ -1,17 +1,295 @@
-# TEMPORARY SENTINEL FOR EXISTING FINALIZER RUN 31125666683.
-# The stored workflow definition removes this file before committing.
-name: ML profile finalizer deletion sentinel
+# TEMPORARY SELF-DELETING FINALIZER.
+# This workflow must remove itself before committing the permanent result.
+name: Finalize isolated ML profiles (self-deleting)
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - fix/linux-cpu-torch-20260806
+    paths:
+      - '.github/workflows/refresh-ml-profiles-lock.yml'
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: finalize-ml-profiles-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  sentinel:
-    if: ${{ false }}
+  finalize:
+    if: github.ref == 'refs/heads/fix/linux-cpu-torch-20260806'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VOLPRED_EXPECT_CPU_ML: "1"
     steps:
-      - name: Never execute
-        run: echo "This file exists only so the stored finalizer can prove deletion."
+      - name: Checkout the latest Draft branch
+        uses: actions/checkout@v7
+        with:
+          ref: fix/linux-cpu-torch-20260806
+          fetch-depth: 1
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+          cache-python: true
+          prune-cache: true
+      - name: Install Python
+        run: uv python install 3.12
+      - name: Patch the permanent dependency and workflow contracts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import tomllib
+
+
+          ROOT = Path.cwd()
+          CI_SYNC_COMMAND = (
+              "uv sync --frozen --no-default-groups "
+              "--group dev --group ci-ml --extra dev"
+          )
+
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(
+                      f"{label}: expected exactly one anchor, found {count}"
+                  )
+              return text.replace(old, new, 1)
+
+
+          pyproject_path = ROOT / "pyproject.toml"
+          pyproject_text = pyproject_path.read_text(encoding="utf-8")
+          pyproject_text = replace_once(
+              pyproject_text,
+              '[project.optional-dependencies]\n'
+              'dev = [\n'
+              '    "pytest>=8.0",\n'
+              ']\n',
+              '[project.optional-dependencies]\n'
+              'dev = [\n'
+              '    "packaging>=24.0",\n'
+              '    "pytest>=8.0",\n'
+              ']\n',
+              "direct marker-parser test dependency",
+          )
+          pyproject_path.write_text(pyproject_text, encoding="utf-8")
+
+          pytest_path = ROOT / ".github" / "workflows" / "pytest.yml"
+          pytest_text = pytest_path.read_text(encoding="utf-8")
+          pytest_text = replace_once(
+              pytest_text,
+              '      VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST: "1"\n',
+              '      VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST: "1"\n'
+              '      # Only hosted CI promises the CPU-only ML environment.\n'
+              '      VOLPRED_EXPECT_CPU_ML: "1"\n',
+              "pytest CPU runtime contract",
+          )
+          pytest_text = replace_once(
+              pytest_text,
+              '      - name: Set up Python\n'
+              '        run: uv python install 3.12\n'
+              '      - name: Stamp a sentinel before the suite runs\n',
+              '      - name: Set up Python\n'
+              '        run: uv python install 3.12\n'
+              '      - name: Sync explicit Linux CPU CI profile\n'
+              '        run: >-\n'
+              '          uv sync --frozen --no-default-groups\n'
+              '          --group dev --group ci-ml --extra dev\n'
+              '      - name: Stamp a sentinel before the suite runs\n',
+              "pytest explicit CPU sync",
+          )
+          pytest_text = replace_once(
+              pytest_text,
+              '        run: uv run python scripts/validate_feed_audience.py\n',
+              '        run: uv run --no-sync python scripts/validate_feed_audience.py\n',
+              "pytest audience no-resync",
+          )
+          pytest_text = replace_once(
+              pytest_text,
+              '        run: uv run --extra dev python -m pytest -q -p no:cacheprovider -m "not real_queue"\n',
+              '        run: uv run --no-sync python -m pytest -q -p no:cacheprovider -m "not real_queue"\n',
+              "pytest suite no-resync",
+          )
+          pytest_path.write_text(pytest_text, encoding="utf-8")
+
+          queue_path = ROOT / ".github" / "workflows" / "queue-invariants.yml"
+          queue_text = queue_path.read_text(encoding="utf-8")
+          queue_text = replace_once(
+              queue_text,
+              '      VOLPRED_NO_REMOTE_READ: "1"\n',
+              '      VOLPRED_NO_REMOTE_READ: "1"\n'
+              '      # This job explicitly promises the CPU-only ML runtime.\n'
+              '      VOLPRED_EXPECT_CPU_ML: "1"\n',
+              "queue CPU runtime contract",
+          )
+          queue_text = replace_once(
+              queue_text,
+              '      - name: Set up Python\n'
+              '        run: uv python install 3.12\n'
+              '      - name: Run the live-queue ratchets\n',
+              '      - name: Set up Python\n'
+              '        run: uv python install 3.12\n'
+              '      - name: Sync explicit Linux CPU CI profile\n'
+              '        run: >-\n'
+              '          uv sync --frozen --no-default-groups\n'
+              '          --group dev --group ci-ml --extra dev\n'
+              '      - name: Run the live-queue ratchets\n',
+              "queue explicit CPU sync",
+          )
+          queue_text = replace_once(
+              queue_text,
+              '        run: uv run --extra dev python -m pytest -q -p no:cacheprovider -m real_queue\n',
+              '        run: uv run --no-sync python -m pytest -q -p no:cacheprovider -m real_queue\n',
+              "queue ratchets no-resync",
+          )
+          queue_path.write_text(queue_text, encoding="utf-8")
+
+          project = tomllib.loads(pyproject_text)
+          assert project["tool"]["uv"]["default-groups"] == [
+              "dev",
+              "runtime-ml",
+          ]
+          assert set(project["project"]["optional-dependencies"]["dev"]) >= {
+              "packaging>=24.0",
+              "pytest>=8.0",
+          }
+          for label, workflow_text in (
+              ("pytest", pytest_text),
+              ("queue", queue_text),
+          ):
+              assert 'VOLPRED_EXPECT_CPU_ML: "1"' in workflow_text, label
+              assert "Sync explicit Linux CPU CI profile" in workflow_text, label
+              assert CI_SYNC_COMMAND in " ".join(workflow_text.split()), label
+          assert (
+              "uv run --no-sync python scripts/validate_feed_audience.py"
+              in pytest_text
+          )
+          assert (
+              'uv run --no-sync python -m pytest -q -p no:cacheprovider '
+              '-m "not real_queue"'
+              in pytest_text
+          )
+          assert (
+              "uv run --no-sync python -m pytest -q -p no:cacheprovider "
+              "-m real_queue"
+              in queue_text
+          )
+          print("Permanent files patched and statically validated.")
+          PY
+      - name: Regenerate the mutually exclusive universal lock
+        run: uv lock
+      - name: Sync the explicit Linux CPU CI profile
+        run: >-
+          uv sync --frozen --no-default-groups
+          --group dev --group ci-ml --extra dev
+      - name: Verify both profiles and the temporary exclusion
+        run: |
+          .venv/bin/python -m pytest -q \
+            tests/test_linux_cpu_torch.py \
+            tests/test_github_actions_node24.py \
+            tests/test_pytest_checkout_history.py \
+            tests/test_required_check_contexts.py
+          .venv/bin/python scripts/audit_source_encoding.py \
+            --roots tests/test_linux_cpu_torch.py
+      - name: Delete the finalizer and remove its temporary test exclusion
+        run: |
+          rm .github/workflows/refresh-ml-profiles-lock.yml
+          python - <<'PY'
+          from pathlib import Path
+
+
+          path = Path("tests/test_linux_cpu_torch.py")
+          text = path.read_text(encoding="utf-8")
+
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(
+                      f"{label}: expected exactly one anchor, found {count}"
+                  )
+              return text.replace(old, new, 1)
+
+
+          text = replace_once(
+              text,
+              'ONE_SHOT_WORKFLOW = "refresh-ml-profiles-lock.yml"\n',
+              "",
+              "remove one-shot workflow constant",
+          )
+          text = replace_once(
+              text,
+              "def test_every_permanent_uv_workflow_is_bound_to_the_cpu_profile() -> None:\n",
+              "def test_every_uv_workflow_is_bound_to_the_cpu_profile() -> None:\n",
+              "rename final workflow audit",
+          )
+          text = replace_once(
+              text,
+              '    permanent_paths = [\n'
+              '        path for path in workflow_paths if path.name != ONE_SHOT_WORKFLOW\n'
+              '    ]\n'
+              '    assert permanent_paths, "permanent workflow inventory unexpectedly empty"\n\n'
+              '    for path in permanent_paths:\n',
+              '    assert workflow_paths, "workflow inventory unexpectedly empty"\n\n'
+              '    for path in workflow_paths:\n',
+              "remove temporary workflow exclusion",
+          )
+          path.write_text(text, encoding="utf-8")
+          PY
+      - name: Verify the exact final tree without any exception
+        run: |
+          .venv/bin/python -m pytest -q \
+            tests/test_linux_cpu_torch.py \
+            tests/test_github_actions_node24.py \
+            tests/test_pytest_checkout_history.py \
+            tests/test_required_check_contexts.py
+          .venv/bin/python scripts/audit_source_encoding.py \
+            --roots tests/test_linux_cpu_torch.py
+      - name: Commit only the validated permanent files
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import subprocess
+
+
+          required = {
+              ".github/workflows/pytest.yml",
+              ".github/workflows/queue-invariants.yml",
+              ".github/workflows/refresh-ml-profiles-lock.yml",
+              "pyproject.toml",
+              "tests/test_linux_cpu_torch.py",
+              "uv.lock",
+          }
+          status = subprocess.check_output(
+              ["git", "status", "--porcelain"], text=True
+          )
+          changed = set()
+          for line in status.splitlines():
+              path = line[3:]
+              if " -> " in path:
+                  path = path.split(" -> ", 1)[1]
+              changed.add(path)
+          unexpected = changed - required
+          missing = required - changed
+          if unexpected or missing:
+              raise SystemExit(
+                  f"unexpected paths={sorted(unexpected)}; "
+                  f"missing required paths={sorted(missing)}; status={status!r}"
+              )
+          PY
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- \
+            .github/workflows/pytest.yml \
+            .github/workflows/queue-invariants.yml \
+            .github/workflows/refresh-ml-profiles-lock.yml \
+            pyproject.toml \
+            tests/test_linux_cpu_torch.py \
+            uv.lock
+          git diff --cached --check
+          git commit -m "ci: isolate CPU ML wheels to hosted runners"
+          git push origin HEAD:fix/linux-cpu-torch-20260806
