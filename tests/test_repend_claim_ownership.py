@@ -42,6 +42,8 @@ def _load_script(name: str):
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
+    # Python 3.12 dataclasses may resolve postponed annotations through
+    # sys.modules while the dynamically loaded script is executing.
     previous = sys.modules.get(name)
     sys.modules[name] = module
     try:
