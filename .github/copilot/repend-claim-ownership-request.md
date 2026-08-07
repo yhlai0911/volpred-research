@@ -19,3 +19,5 @@ Repair:
 6. Run focused re-pend/compute queue tests, canonical-writer audit, py_compile and `git diff --check`.
 7. Do not alter soak timestamps, cutover criteria, workflows, storage, config, paper, research data or model behavior.
 8. Delete this temporary request file before marking Ready.
+
+Trigger note: semantic no-op update to launch the already-registered one-shot repair workflow. This note must disappear with the sentinel before merge.
