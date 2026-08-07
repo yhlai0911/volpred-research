@@ -56,6 +56,8 @@ jobs:
       VOLPRED_NO_EMAIL: "1"
       VOLPRED_NO_CANONICAL_WRITE: "1"
       VOLPRED_NO_REMOTE_READ: "1"
+      # This job explicitly promises the CPU-only ML runtime.
+      VOLPRED_EXPECT_CPU_ML: "1"
     steps:
       - uses: actions/checkout@v7
       - name: Install uv
@@ -66,8 +68,12 @@ jobs:
           prune-cache: true
       - name: Set up Python
         run: uv python install 3.12
+      - name: Sync explicit Linux CPU CI profile
+        run: >-
+          uv sync --frozen --no-default-groups
+          --group dev --group ci-ml --extra dev
       - name: Run the live-queue ratchets
-        run: uv run --extra dev python -m pytest -q -p no:cacheprovider -m real_queue
+        run: uv run --no-sync python -m pytest -q -p no:cacheprovider -m real_queue
       - name: Assert the ratchets mutated no repo state
         # Same rule as Test Suite: reading the live queue is the point, writing
         # to it is the bug. Tracked files only — this job touches no ignored

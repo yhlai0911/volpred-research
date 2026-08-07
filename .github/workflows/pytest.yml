@@ -168,6 +168,8 @@ jobs:
       VOLPRED_POSTGRES_TEST_DSN: >-
         postgresql://postgres:postgres@127.0.0.1:5432/volpred_ops_test
       VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST: "1"
+      # Only hosted CI promises the CPU-only ML environment.
+      VOLPRED_EXPECT_CPU_ML: "1"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -210,6 +212,10 @@ jobs:
           prune-cache: true
       - name: Set up Python
         run: uv python install 3.12
+      - name: Sync explicit Linux CPU CI profile
+        run: >-
+          uv sync --frozen --no-default-groups
+          --group dev --group ci-ml --extra dev
       - name: Stamp a sentinel before the suite runs
         # Kept outside the checkout so the sentinel itself never dirties the tree.
         run: touch "$RUNNER_TEMP/pre-suite"
@@ -217,7 +223,7 @@ jobs:
         # Replay the same inference used by Publisher against the canonical
         # feed.  This is a corpus invariant, not just a unit test: a new
         # hand-written/general row must not silently bypass the publish gate.
-        run: uv run python scripts/validate_feed_audience.py
+        run: uv run --no-sync python scripts/validate_feed_audience.py
       - name: Run test suite
         # testpaths = ["tests", "scripts/tests"] (pyproject.toml). No credentials
         # are provided on purpose: a reintroduced import-time raise must fail here,
@@ -229,7 +235,7 @@ jobs:
         # supervisor state commit — landing every few minutes — starts a
         # 15-minute run that the next one cancels; over one recent stretch only
         # 8 of 60 runs on main reached a conclusion at all.
-        run: uv run --extra dev python -m pytest -q -p no:cacheprovider -m "not real_queue"
+        run: uv run --no-sync python -m pytest -q -p no:cacheprovider -m "not real_queue"
       - name: Assert the suite mutated no repo state
         # One gate for a whole bug class: "a test wrote live repo state". Four
         # instances surfaced on 2026-07-10 alone — the pregate decision log, the

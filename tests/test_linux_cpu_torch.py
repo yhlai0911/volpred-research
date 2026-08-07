@@ -17,7 +17,6 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
-ONE_SHOT_WORKFLOW = "refresh-ml-profiles-lock.yml"
 CPU_INDEX = "https://download.pytorch.org/whl/cpu"
 PYPI_INDEX = "https://pypi.org/simple"
 EXPECTED_TORCH_VERSION = "2.10.0"
@@ -184,23 +183,34 @@ def test_pyproject_separates_research_and_ci_ml_profiles() -> None:
 def test_lock_keeps_cpu_and_accelerator_profiles_version_aligned() -> None:
     lock = _read_toml(ROOT / "uv.lock")
     torch_packages = _lock_packages(lock, "torch")
-    cpu = [
-        package
+    source_versions = {
+        (
+            package["version"],
+            package.get("source", {}).get("registry"),
+        )
         for package in torch_packages
-        if package.get("source", {}).get("registry") == CPU_INDEX
-    ]
-    accelerator_capable = [
-        package
-        for package in torch_packages
-        if package.get("source", {}).get("registry") == PYPI_INDEX
-    ]
+    }
 
-    assert [package["version"] for package in cpu] == [
-        f"{EXPECTED_TORCH_VERSION}+cpu"
-    ]
-    assert [package["version"] for package in accelerator_capable] == [
-        EXPECTED_TORCH_VERSION
-    ]
+    # The explicit CPU index uses `+cpu` for Linux wheels but may
+    # expose the same public version without a local suffix on other
+    # platforms. A universal lock can legitimately contain both.
+    assert (
+        f"{EXPECTED_TORCH_VERSION}+cpu",
+        CPU_INDEX,
+    ) in source_versions
+    assert (
+        EXPECTED_TORCH_VERSION,
+        PYPI_INDEX,
+    ) in source_versions
+    assert all(
+        version in {EXPECTED_TORCH_VERSION, f"{EXPECTED_TORCH_VERSION}+cpu"}
+        for version, _ in source_versions
+    )
+    assert all(
+        registry == CPU_INDEX
+        for version, registry in source_versions
+        if version == f"{EXPECTED_TORCH_VERSION}+cpu"
+    )
     assert [package["version"] for package in _lock_packages(lock, "xgboost-cpu")] == [
         EXPECTED_XGBOOST_VERSION
     ]
@@ -301,18 +311,15 @@ def test_linux_ci_profile_exports_no_accelerator_runtime() -> None:
     assert not accelerator_packages
 
 
-def test_every_permanent_uv_workflow_is_bound_to_the_cpu_profile() -> None:
+def test_every_uv_workflow_is_bound_to_the_cpu_profile() -> None:
     covered_uv_run_jobs: set[tuple[str, str]] = set()
 
     workflow_paths = sorted(WORKFLOWS.glob("*.yml")) + sorted(
         WORKFLOWS.glob("*.yaml")
     )
-    permanent_paths = [
-        path for path in workflow_paths if path.name != ONE_SHOT_WORKFLOW
-    ]
-    assert permanent_paths, "permanent workflow inventory unexpectedly empty"
+    assert workflow_paths, "workflow inventory unexpectedly empty"
 
-    for path in permanent_paths:
+    for path in workflow_paths:
         workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
         for job_name, job in workflow.get("jobs", {}).items():
             steps = job.get("steps", [])
