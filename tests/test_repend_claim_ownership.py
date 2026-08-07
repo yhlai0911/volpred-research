@@ -19,6 +19,7 @@ from __future__ import annotations
 import ast
 import importlib.util
 import json
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -41,7 +42,17 @@ def _load_script(name: str):
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
-    spec.loader.exec_module(module)
+    # Python 3.12 dataclasses may resolve postponed annotations through
+    # sys.modules while the dynamically loaded script is executing.
+    previous = sys.modules.get(name)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        if previous is None:
+            sys.modules.pop(name, None)
+        else:
+            sys.modules[name] = previous
     return module
 
 
@@ -181,6 +192,70 @@ def test_task_pool_claim_repend_still_leaves_no_claim_trace():
     assert _reconciliation_issues_for(task) == []
 
 
+def _compute_queue_tpc_stub():
+    class Stub:
+        TERMINAL_STATUSES = {"succeeded", "failed", "cancelled", "archived"}
+
+        @staticmethod
+        def _record_status_history(task, **kwargs):
+            task.setdefault("status_history", []).append(dict(kwargs))
+
+    return Stub()
+
+
+def _compute_owned_task(*, job_id: str, blocked_reason: str):
+    task = _claimed_blocked_task(
+        status="awaiting_agent_job",
+        blocked_reason=blocked_reason,
+        compute_job_id=job_id,
+    )
+    task.pop("blocked_at", None)
+    task.pop("blocked_until", None)
+    return task
+
+
+def test_compute_queue_collected_release_clears_claim_ownership():
+    module = _load_script("compute_queue")
+    task = _compute_owned_task(
+        job_id="compute-job-1",
+        blocked_reason="external_compute_receipt_pending_collection",
+    )
+    job = {
+        "id": "compute-job-1",
+        "source_task_id": "task_under_test",
+        "status": "completed",
+    }
+    settlement = module._release_collected_source_task(
+        task,
+        job,
+        next_task_id="followup-1",
+        tpc=_compute_queue_tpc_stub(),
+    )
+    assert settlement and settlement["state"] == "pending_queue_commit"
+    assert task["status"] == "pending"
+    assert _reconciliation_issues_for(task) == []
+
+
+def test_compute_queue_cancel_release_clears_claim_ownership():
+    module = _load_script("compute_queue")
+    task = _compute_owned_task(
+        job_id="compute-job-2",
+        blocked_reason="external_compute_job_active",
+    )
+    job = {
+        "id": "compute-job-2",
+        "source_task_id": "task_under_test",
+        "cancel_reason": "operator_cancelled_test",
+    }
+    assert module._release_cancelled_source_task(
+        task,
+        job,
+        tpc=_compute_queue_tpc_stub(),
+    ) is True
+    assert task["status"] == "pending"
+    assert _reconciliation_issues_for(task) == []
+
+
 # --------------------------------------------------------------------------
 # 3. Mechanical class gate — a new re-pend site cannot silently reintroduce this
 # --------------------------------------------------------------------------
@@ -189,15 +264,7 @@ def test_task_pool_claim_repend_still_leaves_no_claim_trace():
 #: Each entry must name a live owner and a tracking issue; the gate asserts the
 #: set is exactly this, so landing a fix forces the entry to be deleted rather
 #: than letting it rot as a permanent exemption.
-KNOWN_UNCONVERTED_REPEND_SITES = {
-    # scripts/compute_queue.py is owned by the concurrent Graphify /
-    # resource-aware-dispatch session (see
-    # docs/handoffs/2026-08-03_volpred_optimization_continuation.md sec.3).
-    # Its two awaiting_agent_job -> pending sites have the same defect and are
-    # reported on Issue #9; they must not be edited from this lane.
-    ("scripts/compute_queue.py", "_release_collected_source_task"),
-    ("scripts/compute_queue.py", "_release_cancelled_source_task"),
-}
+KNOWN_UNCONVERTED_REPEND_SITES: set[tuple[str, str]] = set()
 
 #: Files whose ``status = "pending"`` assignments are queue-task lifecycle
 #: transitions.  check_alerts.py is excluded on purpose: its ``notice["status"]``
