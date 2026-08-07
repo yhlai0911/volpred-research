@@ -168,6 +168,10 @@ jobs:
       VOLPRED_POSTGRES_TEST_DSN: >-
         postgresql://postgres:postgres@127.0.0.1:5432/volpred_ops_test
       VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST: "1"
+      # The suite intentionally launches nested `uv run` subprocesses. Freeze
+      # every inherited invocation so it cannot reselect runtime-ml and replace
+      # the explicitly synced CPU wheels while pytest is still running.
+      UV_NO_SYNC: "1"
       # Only hosted CI promises the CPU-only ML environment.
       VOLPRED_EXPECT_CPU_ML: "1"
     steps:

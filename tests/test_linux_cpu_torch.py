@@ -344,6 +344,10 @@ def test_every_uv_workflow_is_bound_to_the_cpu_profile() -> None:
                 f"{path.name}:{job_name} uses the project uv environment "
                 "without declaring the CPU-only CI runtime contract"
             )
+            assert job.get("env", {}).get("UV_NO_SYNC") == "1", (
+                f"{path.name}:{job_name} lets nested uv run commands resync "
+                "the project environment after the canonical CPU sync"
+            )
             canonical_sync_indexes = [
                 index
                 for index, step in enumerate(steps)

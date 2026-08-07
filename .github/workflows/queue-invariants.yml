@@ -56,6 +56,9 @@ jobs:
       VOLPRED_NO_EMAIL: "1"
       VOLPRED_NO_CANONICAL_WRITE: "1"
       VOLPRED_NO_REMOTE_READ: "1"
+      # Nested subprocesses inherit this and cannot reselect runtime-ml after
+      # the explicit CPU profile has been synced.
+      UV_NO_SYNC: "1"
       # This job explicitly promises the CPU-only ML runtime.
       VOLPRED_EXPECT_CPU_ML: "1"
     steps:
