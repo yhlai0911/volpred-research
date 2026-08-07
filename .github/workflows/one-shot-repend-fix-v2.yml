@@ -11,18 +11,34 @@ permissions:
 jobs:
   repair:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
+    env:
+      UV_NO_SYNC: "1"
+      VOLPRED_EXPECT_CPU_ML: "1"
     steps:
       - uses: actions/checkout@v7
         with:
           ref: fix/repend-claim-ownership-20260807
           fetch-depth: 1
 
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+          cache-python: true
+          prune-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Sync explicit Linux CPU CI profile
+        run: uv sync --frozen --no-default-groups --group dev --group ci-ml --extra dev
+
       - name: Apply fail-closed lifecycle repair
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           compute_path = Path("scripts/compute_queue.py")
           compute = compute_path.read_text(encoding="utf-8")
@@ -39,50 +55,26 @@ jobs:
               assert compute.count(import_anchor) == 1, "next_tasks import anchor drifted"
               compute = compute.replace(import_anchor, import_anchor + import_line, 1)
 
-          collected_old = '''    if (
-              task_status == "awaiting_agent_job"
-              and bound_job_id == job_id
-              and task.get("blocked_reason")
-              in {
-                  "external_compute_receipt_pending_collection",
-                  "external_compute_job_running",
-              }
-          ):
-              task["status"] = "pending"
-              followup_id = str(next_task_id or "(unspecified)")
-          '''
-          collected_new = '''    if (
-              task_status == "awaiting_agent_job"
-              and bound_job_id == job_id
-              and task.get("blocked_reason")
-              in {
-                  "external_compute_receipt_pending_collection",
-                  "external_compute_job_running",
-              }
-          ):
-              clear_claim_ownership(task)
-              task["status"] = "pending"
-              followup_id = str(next_task_id or "(unspecified)")
-          '''
-          assert compute.count(collected_old) == 1, "collected release anchor drifted"
-          compute = compute.replace(collected_old, collected_new, 1)
+          def patch_function(text: str, name: str, status_indent: int) -> str:
+              match = re.search(rf"^def {re.escape(name)}\(", text, re.MULTILINE)
+              assert match is not None, f"missing function: {name}"
+              next_match = re.search(r"^def [A-Za-z_]\w*\(", text[match.end():], re.MULTILINE)
+              end = match.end() + next_match.start() if next_match else len(text)
+              block = text[match.start():end]
+              if "clear_claim_ownership(task)" in block:
+                  return text
+              anchor = " " * status_indent + 'task["status"] = "pending"\n'
+              assert block.count(anchor) == 1, f"{name}: pending transition anchor drifted"
+              replacement = " " * status_indent + "clear_claim_ownership(task)\n" + anchor
+              new_block = block.replace(anchor, replacement, 1)
+              return text[:match.start()] + new_block + text[end:]
 
-          cancelled_old = '''    released_at = utc_now()
-          task["status"] = "pending"
-          tpc._record_status_history(
-          '''
-          cancelled_new = '''    released_at = utc_now()
-          clear_claim_ownership(task)
-          task["status"] = "pending"
-          tpc._record_status_history(
-          '''
-          assert compute.count(cancelled_old) == 1, "cancelled release anchor drifted"
-          compute = compute.replace(cancelled_old, cancelled_new, 1)
+          compute = patch_function(compute, "_release_collected_source_task", 8)
+          compute = patch_function(compute, "_release_cancelled_source_task", 4)
           compute_path.write_text(compute, encoding="utf-8")
 
           test_path = Path("tests/test_repend_claim_ownership.py")
           tests = test_path.read_text(encoding="utf-8")
-
           exemptions = '''KNOWN_UNCONVERTED_REPEND_SITES = {
               # scripts/compute_queue.py is owned by the concurrent Graphify /
               # resource-aware-dispatch session (see
@@ -137,14 +129,12 @@ jobs:
                   "source_task_id": "task_under_test",
                   "status": "completed",
               }
-
               settlement = module._release_collected_source_task(
                   task,
                   job,
                   next_task_id="followup-1",
                   tpc=_compute_queue_tpc_stub(),
               )
-
               assert settlement and settlement["state"] == "pending_queue_commit"
               assert task["status"] == "pending"
               assert _reconciliation_issues_for(task) == []
@@ -161,7 +151,6 @@ jobs:
                   "source_task_id": "task_under_test",
                   "cancel_reason": "operator_cancelled_test",
               }
-
               assert module._release_cancelled_source_task(
                   task,
                   job,
@@ -173,15 +162,15 @@ jobs:
 
           '''
           assert tests.count(insertion_anchor) == 1, "test insertion anchor drifted"
-          tests = tests.replace(
-              insertion_anchor,
-              behavioral_tests + insertion_anchor,
-              1,
-          )
+          tests = tests.replace(insertion_anchor, behavioral_tests + insertion_anchor, 1)
           test_path.write_text(tests, encoding="utf-8")
           PY
 
-          python3 -m py_compile scripts/compute_queue.py tests/test_repend_claim_ownership.py
+      - name: Run focused regression
+        run: |
+          uv run --no-sync pytest -q tests/test_repend_claim_ownership.py
+          uv run --no-sync python scripts/audit_canonical_writers.py
+          uv run --no-sync python -m py_compile scripts/compute_queue.py tests/test_repend_claim_ownership.py
           git diff --check
 
       - name: Commit only permanent repair files
@@ -192,7 +181,8 @@ jobs:
           git rm .github/workflows/one-shot-repend-fix-v2.yml
           git rm .github/copilot/repend-claim-ownership-request.md
           git add scripts/compute_queue.py tests/test_repend_claim_ownership.py
-          git diff --cached --name-only
-          test "$(git diff --cached --name-only | sort | tr '\n' ' ')" = ".github/copilot/repend-claim-ownership-request.md .github/workflows/one-shot-repend-fix-v2.yml scripts/compute_queue.py tests/test_repend_claim_ownership.py "
+          actual="$(git diff --cached --name-only | sort | tr '\n' ' ')"
+          expected=".github/copilot/repend-claim-ownership-request.md .github/workflows/one-shot-repend-fix-v2.yml scripts/compute_queue.py tests/test_repend_claim_ownership.py "
+          test "$actual" = "$expected"
           git commit -m "fix(ops): clear claim ownership on compute re-pend"
           git push origin HEAD:fix/repend-claim-ownership-20260807
