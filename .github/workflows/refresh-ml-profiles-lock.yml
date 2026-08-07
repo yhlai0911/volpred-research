@@ -1,5 +1,6 @@
 # TEMPORARY SELF-DELETING FINALIZER.
 # This workflow must remove itself before committing the permanent result.
+# Retry includes the universal-lock source/version assertion learned from run 11.
 name: Finalize isolated ML profiles (self-deleting)
 
 on:
@@ -147,6 +148,57 @@ jobs:
           )
           queue_path.write_text(queue_text, encoding="utf-8")
 
+          contract_path = ROOT / "tests" / "test_linux_cpu_torch.py"
+          contract_text = contract_path.read_text(encoding="utf-8")
+          contract_text = replace_once(
+              contract_text,
+              '    cpu = [\n'
+              '        package\n'
+              '        for package in torch_packages\n'
+              '        if package.get("source", {}).get("registry") == CPU_INDEX\n'
+              '    ]\n'
+              '    accelerator_capable = [\n'
+              '        package\n'
+              '        for package in torch_packages\n'
+              '        if package.get("source", {}).get("registry") == PYPI_INDEX\n'
+              '    ]\n\n'
+              '    assert [package["version"] for package in cpu] == [\n'
+              '        f"{EXPECTED_TORCH_VERSION}+cpu"\n'
+              '    ]\n'
+              '    assert [package["version"] for package in accelerator_capable] == [\n'
+              '        EXPECTED_TORCH_VERSION\n'
+              '    ]\n',
+              '    source_versions = {\n'
+              '        (\n'
+              '            package["version"],\n'
+              '            package.get("source", {}).get("registry"),\n'
+              '        )\n'
+              '        for package in torch_packages\n'
+              '    }\n\n'
+              '    # The explicit CPU index uses `+cpu` for Linux wheels but may\n'
+              '    # expose the same public version without a local suffix on other\n'
+              '    # platforms. A universal lock can legitimately contain both.\n'
+              '    assert (\n'
+              '        f"{EXPECTED_TORCH_VERSION}+cpu",\n'
+              '        CPU_INDEX,\n'
+              '    ) in source_versions\n'
+              '    assert (\n'
+              '        EXPECTED_TORCH_VERSION,\n'
+              '        PYPI_INDEX,\n'
+              '    ) in source_versions\n'
+              '    assert all(\n'
+              '        version in {EXPECTED_TORCH_VERSION, f"{EXPECTED_TORCH_VERSION}+cpu"}\n'
+              '        for version, _ in source_versions\n'
+              '    )\n'
+              '    assert all(\n'
+              '        registry == CPU_INDEX\n'
+              '        for version, registry in source_versions\n'
+              '        if version == f"{EXPECTED_TORCH_VERSION}+cpu"\n'
+              '    )\n',
+              "classify universal Torch packages by source and version",
+          )
+          contract_path.write_text(contract_text, encoding="utf-8")
+
           project = tomllib.loads(pyproject_text)
           assert project["tool"]["uv"]["default-groups"] == [
               "dev",
@@ -177,6 +229,7 @@ jobs:
               "-m real_queue"
               in queue_text
           )
+          assert "source_versions" in contract_text
           print("Permanent files patched and statically validated.")
           PY
       - name: Regenerate the mutually exclusive universal lock
