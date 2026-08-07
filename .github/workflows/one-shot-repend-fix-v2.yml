@@ -75,6 +75,39 @@ jobs:
 
           test_path = Path("tests/test_repend_claim_ownership.py")
           tests = test_path.read_text(encoding="utf-8")
+
+          if "import sys\n" not in tests:
+              anchor = "import json\n"
+              assert tests.count(anchor) == 1, "test import anchor drifted"
+              tests = tests.replace(anchor, anchor + "import sys\n", 1)
+
+          loader_old = '''def _load_script(name: str):
+              path = REPO_ROOT / "scripts" / f"{name}.py"
+              spec = importlib.util.spec_from_file_location(name, path)
+              module = importlib.util.module_from_spec(spec)
+              assert spec and spec.loader
+              spec.loader.exec_module(module)
+              return module
+          '''
+          loader_new = '''def _load_script(name: str):
+              path = REPO_ROOT / "scripts" / f"{name}.py"
+              spec = importlib.util.spec_from_file_location(name, path)
+              module = importlib.util.module_from_spec(spec)
+              assert spec and spec.loader
+              previous = sys.modules.get(name)
+              sys.modules[name] = module
+              try:
+                  spec.loader.exec_module(module)
+              finally:
+                  if previous is None:
+                      sys.modules.pop(name, None)
+                  else:
+                      sys.modules[name] = previous
+              return module
+          '''
+          assert tests.count(loader_old) == 1, "dynamic script loader anchor drifted"
+          tests = tests.replace(loader_old, loader_new, 1)
+
           exemptions = '''KNOWN_UNCONVERTED_REPEND_SITES = {
               # scripts/compute_queue.py is owned by the concurrent Graphify /
               # resource-aware-dispatch session (see
