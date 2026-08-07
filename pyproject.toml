@@ -17,8 +17,6 @@ dependencies = [
     "fastapi>=0.135.1",
     "uvicorn>=0.41.0",
     "scikit-learn>=1.8.0",
-    "xgboost>=3.2.0",
-    "torch>=2.10.0",
     "emd>=0.8.1",
     "mgarch>=0.3.0",
     "python-multipart>=0.0.22",
@@ -38,14 +36,29 @@ dependencies = [
     "tiktoken>=0.12.0",
     "croniter>=6.2",
     "exchange_calendars>=4.0",
-    "stable-baselines3>=2.9.0",
     "gymnasium>=1.3.0",
     "cryptography>=46.0",
 ]
 
 [project.optional-dependencies]
 dev = [
+    "packaging>=24.0",
     "pytest>=8.0",
+]
+# The normal research profile keeps Linux accelerator support. The CI profile
+# selects distribution-equivalent CPU wheels at the same public versions.
+# Keeping the profiles explicit avoids silently turning a Linux GPU research
+# host into a CPU-only host merely because GitHub's runner has no accelerator.
+research-ml = [
+    "stable-baselines3==2.9.0",
+    "torch==2.10.0",
+    "xgboost==3.2.0",
+]
+ci-ml-cpu = [
+    "stable-baselines3==2.9.0",
+    "torch==2.10.0",
+    "xgboost-cpu==3.2.0; sys_platform == 'linux'",
+    "xgboost==3.2.0; sys_platform != 'linux'",
 ]
 
 [project.scripts]
@@ -57,6 +70,41 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/volpred"]
+
+[tool.uv]
+# Existing `uv sync` / `uv run` behavior remains accelerator-capable by default.
+# CI must opt out of defaults and select `ci-ml` explicitly.
+default-groups = ["dev", "runtime-ml"]
+conflicts = [
+    [
+        { extra = "research-ml" },
+        { extra = "ci-ml-cpu" },
+    ],
+    [
+        { group = "runtime-ml" },
+        { group = "ci-ml" },
+    ],
+    [
+        { group = "runtime-ml" },
+        { extra = "ci-ml-cpu" },
+    ],
+    [
+        { group = "ci-ml" },
+        { extra = "research-ml" },
+    ],
+]
+
+# Only the explicitly selected CI extra uses PyTorch's CPU index. The default
+# research extra falls back to PyPI, preserving CUDA-capable Linux wheels.
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", extra = "ci-ml-cpu" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [tool.pytest.ini_options]
 # `scripts/tests` 加入 2026-07-10：原本只有 ["tests"]，導致 scripts/tests/ 底下
@@ -80,4 +128,13 @@ markers = [
 [dependency-groups]
 dev = [
     "playwright>=1.60.0",
+]
+# Self-referencing the published extras makes the intended profile selectable
+# as a local uv group while preserving a standards-compliant `volpred[... ]`
+# installation path for non-uv consumers.
+runtime-ml = [
+    "volpred[research-ml]",
+]
+ci-ml = [
+    "volpred[ci-ml-cpu]",
 ]
