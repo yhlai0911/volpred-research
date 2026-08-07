@@ -1,0 +1,155 @@
+name: One-shot re-pend claim ownership repair
+
+on:
+  push:
+    branches:
+      - fix/repend-claim-ownership-20260807
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: ${{ !contains(github.event.head_commit.message, '[repend-finalized]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      UV_NO_SYNC: "1"
+      VOLPRED_EXPECT_CPU_ML: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/repend-claim-ownership-20260807
+          fetch-depth: 1
+
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+          cache-python: true
+          prune-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Sync explicit Linux CPU CI profile
+        run: uv sync --frozen --no-default-groups --group dev --group ci-ml --extra dev
+
+      - name: Apply fail-closed re-pend ownership patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          compute = Path("scripts/compute_queue.py")
+          text = compute.read_text(encoding="utf-8")
+
+          import_anchor = "from volpred.ops.diagnostics import warn  # noqa: E402\n"
+          import_line = "from volpred.ops.next_tasks import clear_claim_ownership  # noqa: E402\n"
+          if import_line not in text:
+              assert text.count(import_anchor) == 1, "diagnostics import anchor drifted"
+              text = text.replace(import_anchor, import_anchor + import_line, 1)
+
+          collected_old = '''    if (\n        task_status == "awaiting_agent_job"\n        and bound_job_id == job_id\n        and task.get("blocked_reason")\n        in {\n            "external_compute_receipt_pending_collection",\n            "external_compute_job_running",\n        }\n    ):\n        task["status"] = "pending"\n        followup_id = str(next_task_id or "(unspecified)")\n'''
+          collected_new = '''    if (\n        task_status == "awaiting_agent_job"\n        and bound_job_id == job_id\n        and task.get("blocked_reason")\n        in {\n            "external_compute_receipt_pending_collection",\n            "external_compute_job_running",\n        }\n    ):\n        clear_claim_ownership(task)\n        task["status"] = "pending"\n        followup_id = str(next_task_id or "(unspecified)")\n'''
+          assert text.count(collected_old) == 1, "collected release anchor drifted"
+          text = text.replace(collected_old, collected_new, 1)
+
+          cancelled_old = '''    released_at = utc_now()\n    task["status"] = "pending"\n    tpc._record_status_history(\n'''
+          cancelled_new = '''    released_at = utc_now()\n    clear_claim_ownership(task)\n    task["status"] = "pending"\n    tpc._record_status_history(\n'''
+          assert text.count(cancelled_old) == 1, "cancelled release anchor drifted"
+          text = text.replace(cancelled_old, cancelled_new, 1)
+          compute.write_text(text, encoding="utf-8")
+
+          test_path = Path("tests/test_repend_claim_ownership.py")
+          tests = test_path.read_text(encoding="utf-8")
+          old_exemptions = '''KNOWN_UNCONVERTED_REPEND_SITES = {\n    # scripts/compute_queue.py is owned by the concurrent Graphify /\n    # resource-aware-dispatch session (see\n    # docs/handoffs/2026-08-03_volpred_optimization_continuation.md sec.3).\n    # Its two awaiting_agent_job -> pending sites have the same defect and are\n    # reported on Issue #9; they must not be edited from this lane.\n    ("scripts/compute_queue.py", "_release_collected_source_task"),\n    ("scripts/compute_queue.py", "_release_cancelled_source_task"),\n}\n'''
+          assert tests.count(old_exemptions) == 1, "known exemption block drifted"
+          tests = tests.replace(
+              old_exemptions,
+              'KNOWN_UNCONVERTED_REPEND_SITES: set[tuple[str, str]] = set()\n',
+              1,
+          )
+
+          insert_anchor = '''# --------------------------------------------------------------------------\n# 3. Mechanical class gate — a new re-pend site cannot silently reintroduce this\n# --------------------------------------------------------------------------\n'''
+          behavioral = r'''
+
+def _compute_queue_tpc_stub():
+    class Stub:
+        TERMINAL_STATUSES = {"succeeded", "failed", "cancelled", "archived"}
+
+        @staticmethod
+        def _record_status_history(task, **kwargs):
+            task.setdefault("status_history", []).append(dict(kwargs))
+
+    return Stub()
+
+
+def test_compute_queue_collected_release_clears_claim_ownership():
+    """Terminal compute collection must not re-pend a task with a stale claim."""
+    module = _load_script("compute_queue")
+    task = _claimed_blocked_task(
+        status="awaiting_agent_job",
+        blocked_reason="external_compute_receipt_pending_collection",
+        compute_job_id="compute-job-1",
+    )
+    job = {
+        "id": "compute-job-1",
+        "source_task_id": "task_under_test",
+        "status": "completed",
+    }
+
+    settlement = module._release_collected_source_task(
+        task,
+        job,
+        next_task_id="followup-1",
+        tpc=_compute_queue_tpc_stub(),
+    )
+
+    assert settlement and settlement["state"] == "pending_queue_commit"
+    assert task["status"] == "pending"
+    assert _reconciliation_issues_for(task) == []
+
+
+def test_compute_queue_cancel_release_clears_claim_ownership():
+    """Cancelling an owned compute job must produce the same clean pending state."""
+    module = _load_script("compute_queue")
+    task = _claimed_blocked_task(
+        status="awaiting_agent_job",
+        blocked_reason="external_compute_job_active",
+        compute_job_id="compute-job-2",
+    )
+    job = {
+        "id": "compute-job-2",
+        "source_task_id": "task_under_test",
+        "cancel_reason": "operator_cancelled_test",
+    }
+
+    assert module._release_cancelled_source_task(
+        task,
+        job,
+        tpc=_compute_queue_tpc_stub(),
+    ) is True
+    assert task["status"] == "pending"
+    assert _reconciliation_issues_for(task) == []
+
+
+'''
+          assert tests.count(insert_anchor) == 1, "behavioral insertion anchor drifted"
+          tests = tests.replace(insert_anchor, behavioral + insert_anchor, 1)
+          test_path.write_text(tests, encoding="utf-8")
+          PY
+
+      - name: Run focused regression
+        run: |
+          uv run --no-sync pytest -q tests/test_repend_claim_ownership.py
+          uv run --no-sync python scripts/audit_canonical_writers.py
+          uv run --no-sync python -m py_compile scripts/compute_queue.py src/volpred/ops/next_tasks.py
+          git diff --check
+
+      - name: Commit validated permanent changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/compute_queue.py tests/test_repend_claim_ownership.py
+          git diff --cached --quiet && { echo "No permanent changes produced"; exit 1; }
+          git commit -m "fix(ops): clear claim ownership on compute re-pend [repend-finalized]"
+          git push origin HEAD:fix/repend-claim-ownership-20260807
