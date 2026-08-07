@@ -85,6 +85,7 @@ from scripts.dispatch_supervisor.failure_class import classify_output  # noqa: E
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
+from volpred.ops.next_tasks import clear_claim_ownership  # noqa: E402
 from volpred.ops.task_dispatch_collision import (  # noqa: E402
     find_task_dispatch_collision,
 )
@@ -3282,6 +3283,7 @@ def _release_collected_source_task(
             "external_compute_job_running",
         }
     ):
+        clear_claim_ownership(task)
         task["status"] = "pending"
         followup_id = str(next_task_id or "(unspecified)")
         tpc._record_status_history(
@@ -3698,6 +3700,7 @@ def _release_cancelled_source_task(
     ):
         return False
     released_at = utc_now()
+    clear_claim_ownership(task)
     task["status"] = "pending"
     tpc._record_status_history(
         task,
